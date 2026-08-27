@@ -3,7 +3,7 @@
 ## Belgelenmiş duruş
 Hogan Lovells'da küresel gizlilik ve siber güvenlik pratiğinin eş başkanı;
 *European Data Protection: Law and Practice* yazarı ve editörü. Duruşu, veri
-korumannın bir uyum kalemi değil bir işlem kısıtı olduğudur.
+korumann bir uyum kalemi değil bir işlem kısıtı olduğudur.
 
 ## Getirdiği mercek
 Verinin inceleme ve bütünleşme kısıtı olarak yeri.
