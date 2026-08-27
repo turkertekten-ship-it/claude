@@ -170,19 +170,26 @@ class BM25Index:
             if not postings:
                 continue
             df = len(postings)
-            idf = math.log((n - df + 0.5) / (df + 0.5))
-            if idf <= 0.0:
-                # Smoothed IDF goes negative once a term is in more than half
-                # the corpus, which would let a common word actively push a
-                # matching document *down* the ranking. Clamping at zero is the
-                # fix; the `ln(x + 1)` variant that can never go negative was
-                # rejected because it quietly keeps paying for a term that
-                # carries no information. Skipping the walk is the same
-                # arithmetic as adding 0.0 to each posting, minus the O(df)
-                # scan. The trap: on a corpus of one or two documents *every*
-                # term is in more than half of it, so search legitimately
-                # returns nothing - two chunks contain no lexical evidence.
-                continue
+            # Lucene/Robertson smoothed IDF. The `1 +` inside the log is what
+            # keeps it positive: the bare `ln((n - df + 0.5) / (df + 0.5))`
+            # goes negative once a term is in more than half the corpus, and
+            # clamping that at zero drops the term entirely.
+            #
+            # Clamping was tried first and is wrong here, for a reason a large
+            # corpus hides: on a small one *every* term sits in more than half
+            # the documents, so every IDF clamps to zero, `search()` returns
+            # nothing, and hybrid retrieval silently degenerates to dense-only.
+            # It fails quietly - the dense arm still answers, the eval still
+            # produces numbers, and nothing reports that an entire arm
+            # contributed zero. That is exactly the unfalsifiable retrieval
+            # this package is built to avoid.
+            #
+            # Keeping a common term at a small positive weight is also simply
+            # better ranking: tf saturation and length normalization still
+            # separate documents on it, which is the whole point of the tf
+            # component. A term carrying little information earns little
+            # weight; it should not earn none.
+            idf = math.log(1.0 + (n - df + 0.5) / (df + 0.5))
             weight = idf * qtf
             for doc_index, tf in postings:
                 # Okapi BM25: idf * tf(k1 + 1) / (tf + k1(1 - b + b|d|/avgdl)).

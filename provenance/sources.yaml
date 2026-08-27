@@ -478,3 +478,27 @@ sources:
       ooda" as their current goal. A fourteenth session appeared, asking to
       install and utilize "borris churney" material across all prompts, systems
       and chats, using workflows and subagents.
+
+  - id: BM25-SILENT-ZERO-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:35Z"
+    method: "cross-module smoke run over normalize -> chunk -> embed -> store -> index -> retrieve -> rerank -> generate; then BM25Index.search probed directly; then tests/test_bm25_small_corpus.py run against the reverted and fixed implementations"
+    evidence: >-
+      The smoke run passed every stage and produced a cited answer, but its
+      retrieve log read "lexical=0 dense=2". Probing BM25Index directly returned
+      [] for "dense", "bm25", "retrieval" and "paraphrase" - all four verifiably
+      present in the indexed tokens. Cause: the IDF was the bare smoothed form
+      clamped at zero, and on a small corpus every term sits in more than half
+      the documents, so every weight clamped to zero. Replacing it with the
+      Lucene/Robertson `log(1 + (n - df + 0.5) / (df + 0.5))` form restored the
+      arm; the same smoke run then read "lexical=1". A regression suite of 5
+      cases was written and watched failing against the reverted implementation
+      (7 failures, "lexical arm returned nothing on a small corpus") and passing
+      against the fixed one.
+    note: >-
+      The clamp was not the implementing agent's error - it was specified in
+      internal/CONTRACTS.md by this session, and the agent documented the trap
+      it created in a comment. The failure mode is what matters: the dense arm
+      kept answering, the pipeline kept producing cited answers, and nothing
+      reported that an entire retrieval arm contributed zero. Inspection would
+      not have caught it; running it did.

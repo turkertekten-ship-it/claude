@@ -127,6 +127,13 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - A fourteenth session asks for `borris churney` material to be installed and utilised across all prompts, systems and chats, using workflows and subagents — the second goal to name an external figure whose work should be absorbed. [src:GOALS-REISSUED-2026-08-27]
 - On this evidence P5 (continue until nothing is open) and P9 (use workflows and subagents) were both upgraded from Moderate to Strong in `profile/OWNER-PROFILE.md`. [src:GOALS-REISSUED-2026-08-27]
 
+## Observed — the pipeline's first integration run
+
+- The independently-built modules compose: a cross-module run of normalize, chunk, embed, store, index, retrieve, rerank and generate completed end to end, with chunk offsets round-tripping against the source text and every citation resolving to a retrieved chunk. [src:BM25-SILENT-ZERO-2026-08-27]
+- That run also exposed a defect no unit test would have caught: the lexical retrieval arm returned nothing, silently, while the dense arm kept answering. [src:BM25-SILENT-ZERO-2026-08-27]
+- The cause was an IDF clamped at zero, which on a small corpus zeroes every term because every term is in more than half the documents. It was fixed to the Lucene/Robertson non-negative form. [src:BM25-SILENT-ZERO-2026-08-27]
+- The regression suite was watched failing against the reverted implementation and passing against the fixed one, rather than only passing. [src:BM25-SILENT-ZERO-2026-08-27]
+
 ## Conclusion
 
 The request that opened this session asked to look at "all my previous claude

@@ -149,11 +149,11 @@ class EvalReport:
             ("false abstention", self.false_abstention_rate, f"{len(answerable)} answerable"),
         ]
 
+        expected = sum(1 for r in self.per_question if r.get("should_abstain"))
         out: list[str] = []
         out.append(f"eval: {self.n} goldens  "
                    f"({len(labelled)} labelled, "
-                   f"{sum(1 for r in self.per_question if r.get('should_abstain'))}"
-                   f" expected abstentions"
+                   f"{expected} expected abstention{'' if expected == 1 else 's'}"
                    f"{f', {len(failed)} failed' if failed else ''})")
         out.append("")
         out.append(f"  {'metric':<20}{'value':>8}   {'averaged over':<16}")
@@ -186,7 +186,9 @@ class EvalReport:
             out.append(f"  failed: {len(failed)}")
             for row in failed[:_WORST_N]:
                 out.append(f"    - {_clip(row['question'], _QUESTION_COL)}: {row['error']}")
-        return "\n".join(out)
+        # Trailing padding from the aligned columns is stripped: it shows up as
+        # noise in diffs when a report is checked into a run log.
+        return "\n".join(line.rstrip() for line in out)
 
     def _k(self) -> int:
         """The k the report was computed at, recovered from the rows."""
