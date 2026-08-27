@@ -654,3 +654,48 @@ sources:
       non-zero before the comparison, because an ingest that silently did
       nothing would otherwise make every assertion in it trivially true - the
       exact shape of test that passes while proving nothing.
+
+  - id: AUDITS-RUN-BY-HAND-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T16:40Z"
+    method: "AST walk over every import in src/ compared against sys.stdlib_module_names; tomllib read of pyproject dependencies; reflection over 35 objects named in internal/CONTRACTS.md"
+    evidence: >-
+      Zero-dependency audit: 0 non-stdlib, non-first-party imports across src/.
+      The only two numpy import sites, src/oodarag/access/probe.py:350 and
+      src/oodarag/index/dense.py:44, are both inside try/except ImportError.
+      pyproject declares `dependencies = []`. Contract audit: all 35 objects
+      named in CONTRACTS.md exist with every specified attribute; the two
+      initially flagged on HashingEmbedder (`name`, `dim`) are instance
+      attributes, confirmed present on an instance as 'hash-256-n4' and 256,
+      with an L2 norm of 1.0 and identical output across two separate
+      constructions.
+    note: >-
+      Both audits were assigned to workflow agents that were killed by a session
+      limit before running, so they were run by hand instead. One claim remains
+      UNTESTED on this container: dense.py's numpy fast path cannot be compared
+      against its stdlib fallback because numpy is not installed here. The
+      design makes divergence unlikely - both paths feed one shared
+      `sorted(key=lambda pair: (-pair[1], pair[0]))`, so the tie-break cannot
+      differ between them - and an OODARAG_NO_NUMPY escape hatch exists so the
+      comparison can be run on a machine that has numpy. It has not been run.
+
+  - id: EVAL-BASELINE-26-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T16:45Z"
+    method: "make demo, offline, over evals/corpus with the 26-golden set"
+    evidence: >-
+      26 goldens (23 labelled, 3 expected abstentions): recall@8 0.957,
+      MRR 0.848, nDCG@8 0.785, citation coverage 1.000 over 21 answered,
+      abstention rate 0.192, false abstention 0.087. The worst-three table names
+      real failures, led by "How can you tell whether a change made finding
+      things better or worse?" at rr 0.00. Against the previous 18-golden
+      baseline (recall 1.000, MRR 1.000, nDCG 0.885, false abstention 0.000)
+      every metric fell.
+    note: >-
+      The metrics falling is the improvement. The old set was saturated by the
+      lexical arm alone and could not detect a regression in the embedder or in
+      fusion; this one has headroom in every metric and two answerable questions
+      it currently gets wrong. false_abstention rising from 0.000 to 0.087 is
+      the honest trade appearing: the paraphrase questions are harder, and the
+      generator refuses two of them rather than guessing. This is the number to
+      compare future changes against, and it is a baseline rather than a score.

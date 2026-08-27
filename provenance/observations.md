@@ -182,6 +182,19 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - Three suites cover the invariants CLAUDE.md actually names — citation verification and abstention, `decide()` purity and dry-run side-effect freedom, and chunk offsets and fence atomicity — rather than aiming at coverage. [src:INVARIANT-SUITES-2026-08-27]
 - The dry-run case was strengthened after passing suspiciously fast: it now asserts the pipeline is non-empty before comparing, so an ingest that silently did nothing cannot make it trivially true. [src:INVARIANT-SUITES-2026-08-27]
 
+## Observed — the closing audits
+
+- Zero third-party imports across `src/`: an AST walk against `sys.stdlib_module_names` found 0 offenders, both numpy import sites are inside `try/except ImportError`, and `pyproject` declares no runtime dependencies. [src:AUDITS-RUN-BY-HAND-2026-08-27]
+- All 35 objects named in `internal/CONTRACTS.md` exist with every specified attribute; ten modules written independently against that spec did not drift at the seams. [src:AUDITS-RUN-BY-HAND-2026-08-27]
+- Both audits were assigned to workflow agents killed by a session limit and were run by hand instead. [src:AUDITS-RUN-BY-HAND-2026-08-27]
+- One claim is untested here: the numpy fast path cannot be compared against the stdlib fallback because numpy is not installed on this container. Both paths share one sort, so divergence is unlikely, but unlikely is not tested. [src:AUDITS-RUN-BY-HAND-2026-08-27]
+
+## Observed — the eval baseline, now with headroom
+
+- On the 26-golden set the pipeline scores recall@8 0.957, MRR 0.848, nDCG@8 0.785, citation coverage 1.000, abstention 0.192, false abstention 0.087. [src:EVAL-BASELINE-26-2026-08-27]
+- Every metric fell against the 18-golden baseline, which is the improvement: the old set was saturated and could not detect a regression, and this one has headroom and two answerable questions it currently gets wrong. [src:EVAL-BASELINE-26-2026-08-27]
+- `false_abstention` rising from 0.000 to 0.087 is the trade becoming visible: on harder questions the generator refuses rather than guessing. [src:EVAL-BASELINE-26-2026-08-27]
+
 ## Conclusion
 
 The request that opened this session asked to look at "all my previous claude
