@@ -99,6 +99,13 @@ contents were not reconstructed, summarised, or guessed at.
 - Of the 12 branches, only this session's vendors skills from outside the account, so the find-install-route overlap between sessions is in mandate rather than in output. [src:FLEET-SKILLS-2026-08-27]
 - A trial merge of one sibling branch conflicted on 7 files and produced two different questions sharing the id `U-7`, because unknown ids are allocated per branch with no shared counter; the merge was aborted rather than resolved. [src:LEDGER-ID-COLLISION-2026-08-27]
 
+## Observed — scope of the skill install
+
+- A sibling branch carries a 206-line owner profile derived from 11 goal strings, whose Strong-graded P4 is "all prompts, all chats, all terminals" and which states that configuration meant to change behaviour generally belongs at user scope rather than in one repository. [src:OWNER-PROFILE-SIBLING-2026-08-27]
+- Acting on that, the four vendored skills were installed into `~/.claude/skills/` and confirmed indexed: all four appeared as invocable skills in this session's own listing, not merely as files on disk. [src:USER-SCOPE-INSTALL-2026-08-27]
+- The installer refuses to overwrite a user-scope skill it did not install, removes only manifest-listed directories on uninstall, and treats a corrupt manifest as authorising no deletion; all three are asserted as refusals in the test suite. [src:USER-SCOPE-INSTALL-2026-08-27]
+- That install reaches Claude Code sessions on this machine only. It does not reach claude.ai web conversations, and `~/.claude` does not survive the container. [src:USER-SCOPE-INSTALL-2026-08-27]
+
 ## Observed — the owner's own files
 
 > Framing, not a claim: titles and metadata only. No file content was opened.

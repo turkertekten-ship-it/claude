@@ -96,6 +96,38 @@ same candidate being re-evaluated from its name every time someone sees it.
 | design and artifact skills (`canvas-design`, `theme-factory`, `brand-guidelines`, `frontend-design`, `algorithmic-art`, `slack-gif-creator`, `web-artifacts-builder`) | No visual surface in either repository. [src:SKILLS-ANTHROPIC-2026-08-27] |
 | `docx`, `pdf`, `pptx`, `xlsx`, `skill-creator`, `claude-api` | Already available in this environment; vendoring a second copy creates two versions to keep in step. |
 
+## Where these are installed, and what that reaches
+
+Committing a skill to `.claude/skills/` here reaches sessions opened **in this
+repository** and nothing else. The owner's most-repeated request is the
+opposite of that — a sibling session derived it from the goal corpus as P4,
+"all prompts, all chats, all terminals", graded Strong from four independent
+goals [src:OWNER-PROFILE-SIBLING-2026-08-27].
+
+So the four vendored skills are also installed at user scope:
+
+```bash
+python3 tools/install_skills_user_scope.py            # show the plan
+python3 tools/install_skills_user_scope.py --apply    # install into ~/.claude/skills/
+```
+
+They were installed and confirmed indexed — all four appeared as invocable
+skills in the session's own listing, not merely as files on disk.
+[src:USER-SCOPE-INSTALL-2026-08-27] `ooda` is deliberately excluded: it belongs
+to the doctrine, which `tools/install_user_scope.py` on
+`reverse-engineer-chat-setup-husv9h` installs instead. The two installers are
+complementary and neither replaces the other.
+
+**What that does not reach**, stated rather than implied
+[src:USER-SCOPE-INSTALL-2026-08-27]:
+
+- **claude.ai web conversations.** They do not read `~/.claude/`. No script
+  changes that; a skill needed there has to be pasted into a Project's custom
+  instructions by hand.
+- **The next container.** `~/.claude` is not persistent, so a fresh session
+  starts without these. That is why this ships as a committed script rather
+  than as a one-time action — running it is a step, not a memory.
+
 ## Adding one
 
 Vendor it, do not link it — a skill that changes upstream underneath you is a

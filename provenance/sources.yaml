@@ -483,3 +483,54 @@ sources:
       aborted rather than resolved: silently merging two ledgers that disagree
       about what an id means is the failure CLAUDE.md names - two copies of a
       rule set become two different rule sets.
+
+  - id: OWNER-PROFILE-SIBLING-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T16:05Z"
+    method: "git show origin/claude/reverse-engineer-chat-setup-husv9h:profile/OWNER-PROFILE.md; git show --stat bbbabef abed75a e392678 0c590de"
+    evidence: >-
+      Branch reverse-engineer-chat-setup-husv9h@abed75a carries
+      profile/OWNER-PROFILE.md (206 lines) and profile/GOAL-CORPUS.md, derived
+      from 11 goal strings across 11 sessions. It grades each inferred
+      preference Strong/Moderate/Single and states that no transcript or
+      conversation export was available to it either. P4, graded Strong from
+      four goals, reads "Apply it everywhere - all prompts, all chats, all
+      terminals", with the caveat that "Configuration intended to change
+      behaviour generally belongs at user scope (~/.claude/), not only in one
+      repository. A rule that lives in one project's CLAUDE.md does not reach
+      the other twelve sessions." P8, also Strong, reads "Route to and
+      actually use installed skills and repos". The same branch adds
+      tools/install_user_scope.py, which installs the OODA skill, the
+      subagents and five commands at user scope.
+    note: >-
+      SECOND-HAND. This is another session's inference from the owner's goal
+      strings, and that session labels it an inference itself. It is used here
+      as a lead about scope, not as a verified statement of the owner's
+      preferences. Its own evidence base - the goal strings - overlaps the
+      strings this session read directly in
+      provenance/raw/sessions-2026-08-27T15-11Z.json, which is why the scope
+      point was acted on rather than merely recorded.
+
+  - id: USER-SCOPE-INSTALL-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T16:10Z"
+    method: "python3 tools/install_skills_user_scope.py --apply; ls ~/.claude/skills/; grep -m1 '^name:' on each installed SKILL.md; python3 tests/test_install_skills_user_scope.py"
+    evidence: >-
+      Installed chunking-advisor, doc-coauthoring, mcp-builder and rag-audit
+      into /root/.claude/skills/, alongside the pre-existing session-start-hook
+      and synced/ directories. Each installed SKILL.md carries a `name:` field
+      matching its directory. The `ooda` skill was excluded by design, being
+      installed by the sibling doctrine installer instead. The session's own
+      available-skills listing subsequently showed all four as invocable, which
+      is the live confirmation that the install was indexed rather than merely
+      written to disk. The test suite passes 11 cases, including that a
+      hand-written user-scope skill of the same name is refused rather than
+      overwritten, that uninstall removes only manifest-listed directories, and
+      that a corrupt manifest authorises no deletion.
+    note: >-
+      Scope limits, stated rather than implied: this reaches Claude Code
+      sessions on this machine only. It does not reach claude.ai web
+      conversations, which do not read ~/.claude/. And ~/.claude is not
+      persistent storage, so a new container starts without these and must run
+      the installer again - which is why it is a committed script and not a
+      one-time action.
