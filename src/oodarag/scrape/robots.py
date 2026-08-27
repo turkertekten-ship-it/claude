@@ -12,6 +12,20 @@ module caches one policy per host and applies RFC 9309 semantics:
 Crawl-Delay is honoured when present; otherwise the caller's own rate limit
 applies. Sitemap directives are surfaced because they are the cheapest way to
 discover a site's real page inventory without recursive crawling.
+
+**Rule precedence is longest-match, not first-match.** RFC 9309 resolves a path
+against the most *specific* matching rule, with `Allow` winning a tie. Python's
+`urllib.robotparser` instead takes the first matching line in file order, so for
+
+    Disallow: /private/
+    Allow: /private/public-bit
+
+it refuses `/private/public-bit`, which the site explicitly permits. The error
+is in the safe direction — nothing forbidden gets fetched — but it silently
+shrinks a crawl, and a thin crawl with no stated reason is the failure this
+module's `explain()` exists to prevent. `RuleSet` below implements the RFC
+precedence; the stdlib parser is retained only for Crawl-Delay and Sitemap,
+where it is correct.
 """
 
 from __future__ import annotations
@@ -28,6 +42,130 @@ log = get_logger("robots")
 
 
 @dataclass(slots=True)
+class Rule:
+    """One Allow or Disallow line, kept with its specificity."""
+
+    allow: bool
+    pattern: str
+
+    @property
+    def specificity(self) -> int:
+        """Path length, per RFC 9309. Wildcards count as the characters given."""
+        return len(self.pattern)
+
+
+class RuleSet:
+    """The Allow/Disallow rules of the group that applies to one user agent.
+
+    Matching follows RFC 9309: the rule with the longest pattern wins, and
+    `Allow` wins a tie. An empty `Disallow:` is a no-op permitting everything,
+    which is how sites express "no restrictions" without an empty file.
+    """
+
+    def __init__(self, rules: list[Rule] | None = None) -> None:
+        self.rules = rules or []
+
+    def __len__(self) -> int:
+        return len(self.rules)
+
+    @classmethod
+    def parse(cls, text: str, user_agent: str) -> RuleSet:
+        """Select the group for `user_agent`, falling back to the `*` group.
+
+        A specific match beats `*`, which is what lets a site give this crawler
+        different rules from everyone else.
+        """
+        groups: dict[str, list[Rule]] = {}
+        current: list[str] = []
+        starting_group = False
+
+        for raw in text.splitlines():
+            line = raw.split("#", 1)[0].strip()
+            if not line or ":" not in line:
+                continue
+            field_name, _, value = line.partition(":")
+            field_name = field_name.strip().lower()
+            value = value.strip()
+
+            if field_name == "user-agent":
+                # Consecutive User-agent lines share one group of rules.
+                if not starting_group:
+                    current = []
+                    starting_group = True
+                current.append(value.lower())
+                groups.setdefault(value.lower(), [])
+            elif field_name in ("allow", "disallow"):
+                starting_group = False
+                if not current:
+                    continue  # a rule before any User-agent line belongs to nobody
+                if field_name == "disallow" and not value:
+                    continue  # "Disallow:" with no path restricts nothing
+                if not value:
+                    continue
+                for agent in current:
+                    groups.setdefault(agent, []).append(
+                        Rule(allow=field_name == "allow", pattern=value)
+                    )
+
+        ua = user_agent.lower()
+        for agent, rules in groups.items():
+            if agent != "*" and agent and agent in ua:
+                return cls(rules)
+        return cls(groups.get("*", []))
+
+    def allows(self, path: str) -> bool:
+        """Longest matching rule decides; Allow wins a tie; no match allows."""
+        best: Rule | None = None
+        for rule in self.rules:
+            if not _pattern_matches(rule.pattern, path):
+                continue
+            if best is None or rule.specificity > best.specificity:
+                best = rule
+            elif rule.specificity == best.specificity and rule.allow:
+                best = rule  # Allow wins an equal-length tie
+        return True if best is None else best.allow
+
+    def matched(self, path: str) -> Rule | None:
+        """The rule that decided, for `explain()`."""
+        best: Rule | None = None
+        for rule in self.rules:
+            if not _pattern_matches(rule.pattern, path):
+                continue
+            if best is None or rule.specificity > best.specificity:
+                best = rule
+            elif rule.specificity == best.specificity and rule.allow:
+                best = rule
+        return best
+
+
+def _pattern_matches(pattern: str, path: str) -> bool:
+    """RFC 9309 path matching: `*` is any sequence, `$` anchors the end."""
+    anchored = pattern.endswith("$")
+    if anchored:
+        pattern = pattern[:-1]
+    if "*" not in pattern:
+        return path == pattern if anchored else path.startswith(pattern)
+
+    segments = pattern.split("*")
+    if not path.startswith(segments[0]):
+        return False
+    cursor = len(segments[0])
+    for segment in segments[1:-1]:
+        if not segment:
+            continue
+        found = path.find(segment, cursor)
+        if found < 0:
+            return False
+        cursor = found + len(segment)
+    tail = segments[-1]
+    if not tail:
+        return not anchored or cursor == len(path)
+    if anchored:
+        return path.endswith(tail) and len(path) - len(tail) >= cursor
+    return path.find(tail, cursor) >= 0
+
+
+@dataclass(slots=True)
 class HostRules:
     host: str
     parser: RobotFileParser | None
@@ -37,6 +175,7 @@ class HostRules:
     sitemaps: list[str] = field(default_factory=list)
     fetched_at: float = 0.0
     status: int = 0
+    ruleset: RuleSet | None = None
 
 
 @dataclass
@@ -98,7 +237,8 @@ class RobotsPolicy:
             delay = None
         sitemaps = list(parser.site_maps() or [])
         return HostRules(host, parser, False, False, float(delay) if delay else None,
-                         sitemaps, time.time(), resp.status)
+                         sitemaps, time.time(), resp.status,
+                         ruleset=RuleSet.parse(resp.text, self.user_agent))
 
     def allows(self, url: str) -> bool:
         if not self.obey:
@@ -106,7 +246,14 @@ class RobotsPolicy:
         rules = self.rules_for(url)
         if rules.disallow_all:
             return False
-        if rules.allow_all or rules.parser is None:
+        if rules.allow_all:
+            return True
+        if rules.ruleset is not None:
+            path = urllib.parse.urlsplit(url).path or "/"
+            if query := urllib.parse.urlsplit(url).query:
+                path = f"{path}?{query}"
+            return rules.ruleset.allows(path)
+        if rules.parser is None:
             return True
         try:
             return bool(rules.parser.can_fetch(self.user_agent, url))
@@ -123,6 +270,8 @@ class RobotsPolicy:
         """Why a URL was allowed or blocked - surfaced in the crawl report so a
         thin crawl is diagnosable instead of mysterious."""
         rules = self.rules_for(url)
+        path = urllib.parse.urlsplit(url).path or "/"
+        decided = rules.ruleset.matched(path) if rules.ruleset else None
         return {
             "url": url,
             "host": rules.host,
@@ -132,4 +281,11 @@ class RobotsPolicy:
             "disallow_all": rules.disallow_all,
             "crawl_delay": rules.crawl_delay,
             "sitemaps": rules.sitemaps[:5],
+            # The specific line that decided, so "why was this skipped?" has an
+            # answer that is not "robots.txt, somehow".
+            "matched_rule": (
+                f"{'Allow' if decided.allow else 'Disallow'}: {decided.pattern}"
+                if decided else None
+            ),
+            "rules_in_group": len(rules.ruleset) if rules.ruleset else 0,
         }

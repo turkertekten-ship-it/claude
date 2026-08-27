@@ -300,3 +300,31 @@ sources:
       The failure was visible only because an abstention case existed. The
       seven positive cases all still passed, and their scores improved, which
       is the direction contamination always moves them.
+
+  - id: ROBOTS-FIRST-MATCH-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T16:02Z"
+    method: "python3 -c 'urllib.robotparser.RobotFileParser().parse(...); can_fetch(...)'"
+    evidence: >-
+      For the rules "User-agent: *\nDisallow: /private/\nAllow:
+      /private/public-bit", the standard library reported
+      can_fetch('*', 'https://e.com/private/public-bit') == False. Reversing the
+      two lines so Allow appears first changed the same call to True, which
+      establishes first-match-in-file-order rather than longest-match
+      precedence.
+    note: >-
+      RFC 9309 resolves a path against the most specific matching rule, with
+      Allow winning a tie, so the standard library refuses paths a site
+      explicitly permits. The error is in the safe direction but silently
+      shrinks a crawl.
+
+  - id: REDACTION-COMPOUND-KEY-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:58Z"
+    method: "python3 -m unittest tests.test_scrape_http (before the fix)"
+    evidence: >-
+      "AssertionError: 'redacted' not found in
+      'aws_secret_access_key=wjalrxutnfemik7mdengbpxrficyexamplekey'".
+      The generic key=value pattern required a word boundary before the key
+      name; underscores are word characters, so no boundary exists inside
+      AWS_SECRET_ACCESS_KEY and the credential passed through unredacted.

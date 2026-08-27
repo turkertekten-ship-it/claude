@@ -159,10 +159,21 @@ def redact_secrets(text: str) -> str:
         (r"\b(sk-ant-[A-Za-z0-9_\-]{16,})", "<redacted:anthropic-key>"),
         (r"\b(sk-[A-Za-z0-9]{32,})", "<redacted:api-key>"),
         (r"\b(AKIA[0-9A-Z]{16})\b", "<redacted:aws-key-id>"),
+        # AWS secret access keys are 40 chars of base64 alphabet with no
+        # distinguishing prefix, so they are only findable by their key name.
+        (r"(?i)\b(aws[_\-]?secret[_\-]?access[_\-]?key)\b(\s*[:=]\s*)[\"']?[A-Za-z0-9/+=]{40}[\"']?",
+         r"\1\2<redacted:aws-secret>"),
         (r"\b(xox[abposr]-[A-Za-z0-9\-]{10,})", "<redacted:slack-token>"),
         (r"(?i)\b(bearer)\s+[A-Za-z0-9._\-]{20,}", r"\1 <redacted>"),
+        # The key name is matched as part of a larger identifier, not as a
+        # standalone word. `AWS_SECRET_ACCESS_KEY` contains "secret", but
+        # underscores are word characters, so a `\b`-anchored pattern never
+        # sees a boundary before it and the credential passes through intact.
+        # Compound names are the common case, so they are the case matched.
         (
-            r"(?i)\b(api[_-]?key|secret|password|passwd|token)\b(\s*[:=]\s*)[\"']?[A-Za-z0-9._\-]{12,}[\"']?",
+            r"(?i)(?<![A-Za-z0-9])([A-Za-z0-9_.\-]*"
+            r"(?:api[_-]?key|secret|password|passwd|token|credential|access[_-]?key)"
+            r"[A-Za-z0-9_.\-]*)(\s*[:=]\s*)[\"']?[A-Za-z0-9/+=._\-]{12,}[\"']?",
             r"\1\2<redacted>",
         ),
         (r"-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----",

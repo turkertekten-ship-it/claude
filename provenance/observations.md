@@ -84,7 +84,9 @@ verified lives in [unknowns.md](unknowns.md), not here.
 
 - The two unrelated histories on this repository were merged onto one root. The only conflicts were the two files FLEET.md predicted, `.gitignore` and `README.md`; both sides were read before resolving, and the verifier reported 0 violations afterwards. [src:UNIFIED-ROOT-2026-08-27]
 - SQLite's FTS5 `bm25()` returns a negative score where a better match is numerically smaller, so ascending order is best-first; on a 3-document corpus every score collapsed to -0.00000 because the IDF term vanishes when a term appears in most documents. [src:FTS5-BM25-SIGN-2026-08-27]
-- The full suite — unit tests plus the two doctrine suites and the provenance verifier — passed: 125 tests, all checks green. [src:OODARAG-VERIFIED-2026-08-27]
+- The full suite — unit tests plus the two doctrine suites and the provenance verifier — passed: 167 tests, all checks green. [src:OODARAG-VERIFIED-2026-08-27]
+- Python's `urllib.robotparser` applies robots.txt rules in file order rather than by specificity: with `Disallow: /private/` before `Allow: /private/public-bit` it refused the explicitly-allowed path, and reversing the two lines reversed the verdict. [src:ROBOTS-FIRST-MATCH-2026-08-27]
+- The secret redactor did not redact `AWS_SECRET_ACCESS_KEY=...`, because its generic key=value pattern required a word boundary before the key name and underscores are word characters. [src:REDACTION-COMPOUND-KEY-2026-08-27]
 - The retrieval evaluation over 8 golden cases passed all 8, at recall@8 0.9286, MRR 0.9286 and nDCG@8 0.892, with zero citation problems, zero contaminated cases, and the one abstention case abstaining as required. [src:OODARAG-VERIFIED-2026-08-27]
 - Evaluating against the whole repository instead of the documentation corpus contaminated the run: `evals/goldens.jsonl` and a captured report from a previous run both contain the golden questions verbatim, the abstention case retrieved its own question and stopped abstaining, and it failed. Excluding the eval material restored it. [src:EVAL-CONTAMINATION-2026-08-27]
 

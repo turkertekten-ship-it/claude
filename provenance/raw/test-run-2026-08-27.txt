@@ -1,14 +1,14 @@
-=== make test — 2026-08-27T15:29Z ===
+=== make test — 2026-08-27T15:35Z ===
 python3 -m unittest discover -s tests
-...........................................x [ingest] connector failed key=files:nope err=ingest root does not exist: /tmp/tmpbxc5qm0f/nope
+...........................................x [ingest] connector failed key=files:nope err=ingest root does not exist: /tmp/tmpo6l942el/nope
 ..............x [ingest] connector failed key=exploding err=Tunnel connection failed: 403 Forbidden
-....................................................................
+..............................................................................................................
 ----------------------------------------------------------------------
-Ran 125 tests in 0.305s
+Ran 167 tests in 0.291s
 
 OK
 == python3 tools/verify_provenance.py ==
-verify_provenance: OK — 22 file(s), 25 source(s), 0 violations
+verify_provenance: OK — 22 file(s), 26 source(s), 0 violations
 
 == python3 tests/test_verify_provenance.py ==
 verifier unit cases
@@ -33,7 +33,7 @@ all cases passed
 
 == python3 tests/test_ingest_chat_archive.py ==
 empty-archive cases
-No archive files found under /tmp/tmprfpt2yab/archive/.
+No archive files found under /tmp/tmpyeqbhn95/archive/.
 
 This is not an error — it means no conversation export has been
 placed there yet. Nothing was indexed, and nothing was invented
@@ -61,23 +61,23 @@ claude.ai export cases
   ok   conversation title is kept
   ok   idless and non-object records are skipped
 index and search cases
-Indexed 5 message(s) across 3 conversation(s) from 2 file(s) -> /tmp/tmprfpt2yab/index.db
+Indexed 5 message(s) across 3 conversation(s) from 2 file(s) -> /tmp/tmpyeqbhn95/index.db
 
 Skipped 3 record(s) that could not be parsed. They were not repaired or guessed at:
-  - /tmp/tmprfpt2yab/archive/conversations.json[1]: no id field among ('uuid', 'id', 'conversation_id')
-  - /tmp/tmprfpt2yab/archive/conversations.json[2]: conversation is not an object
-  - /tmp/tmprfpt2yab/archive/t.jsonl:5: unparseable JSON (Expecting property name enclosed in double quotes)
+  - /tmp/tmpyeqbhn95/archive/conversations.json[1]: no id field among ('uuid', 'id', 'conversation_id')
+  - /tmp/tmpyeqbhn95/archive/conversations.json[2]: conversation is not an object
+  - /tmp/tmpyeqbhn95/archive/t.jsonl:5: unparseable JSON (Expecting property name enclosed in double quotes)
   ok   parse failures make ingest exit 1
   ok   all readable messages are indexed
   ok   full-text search finds a message
   ok   search returns the verbatim stored text
 idempotence cases
-Indexed 5 message(s) across 3 conversation(s) from 2 file(s) -> /tmp/tmprfpt2yab/index.db
+Indexed 5 message(s) across 3 conversation(s) from 2 file(s) -> /tmp/tmpyeqbhn95/index.db
 
 Skipped 3 record(s) that could not be parsed. They were not repaired or guessed at:
-  - /tmp/tmprfpt2yab/archive/conversations.json[1]: no id field among ('uuid', 'id', 'conversation_id')
-  - /tmp/tmprfpt2yab/archive/conversations.json[2]: conversation is not an object
-  - /tmp/tmprfpt2yab/archive/t.jsonl:5: unparseable JSON (Expecting property name enclosed in double quotes)
+  - /tmp/tmpyeqbhn95/archive/conversations.json[1]: no id field among ('uuid', 'id', 'conversation_id')
+  - /tmp/tmpyeqbhn95/archive/conversations.json[2]: conversation is not an object
+  - /tmp/tmpyeqbhn95/archive/t.jsonl:5: unparseable JSON (Expecting property name enclosed in double quotes)
   ok   re-ingesting does not duplicate messages
   ok   re-ingesting does not duplicate the search index
 
@@ -105,4 +105,4 @@ pass     0.000  0.000  0.000  what is the airspeed velocity of an unladen
         contaminated: 0
          abstentions: 1
          load_errors: 0
-      mean_latency_s: 0.0334
+      mean_latency_s: 0.0358
