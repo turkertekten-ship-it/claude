@@ -242,6 +242,10 @@ def produce(suite: Suite, backend: Backend, report: Reporter,
             stop_sequences=variant.stop_sequences,
             temperature=variant.temperature, top_p=variant.top_p,
             top_k=variant.top_k,
+            tool_defs=variant.tool_defs,
+            tool_choice=variant.tool_choice,
+            cache_system=variant.cache_system,
+            attachments=variant.attachments,
             repeat=repeat,
         ))
 

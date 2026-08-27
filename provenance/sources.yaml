@@ -728,3 +728,24 @@ sources:
       endpoint accepts a credential this container does not have. The
       difference between "we have not tested it" and "we cannot authenticate to
       it" is the same distinction this repository keeps having to draw.
+
+  - id: API-TOOLS-CACHE-ATTACH-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T23:50Z"
+    method: >-
+      build_body and the local HTTP wire test in tests/test_workbench.py, for
+      custom tool definitions, prompt caching and image/document input
+    evidence: >-
+      A tool definition with its own input_schema and a tool_choice reach the
+      request body and cross the wire; a tool_use block in the response is
+      surfaced as structured output with its name and input, alongside any text.
+      cache_control lands on the system prompt specifically, not the whole
+      request. An attachment leads the first user turn before the text, which is
+      the documented order.
+    note: >-
+      Three capabilities that had been glossed rather than assessed. The parity
+      matrix counted `--tools` as covering tool definitions; it does not — the
+      CLI toggles its own built-ins on and off and cannot define a tool with
+      your schema, which is a thing a playground exists to do. Prompt caching
+      and image input were not in the matrix at all. All three are now built and
+      wire-tested; the gap on each is a credential.

@@ -940,6 +940,41 @@ def test_api_backend_over_the_wire() -> None:
         check("and each carries a full params block",
               all("model" in r["params"] for r in body["requests"]))
 
+        print("\n  custom tool definitions, caching and attachments")
+        weather = {"name": "get_weather", "description": "Look up weather",
+                   "input_schema": {"type": "object",
+                                    "properties": {"city": {"type": "string"}},
+                                    "required": ["city"]}}
+        backend.complete(Request(
+            prompt="weather in Paris", model="claude-haiku-4-5", system="be terse",
+            tool_defs=(weather,), tool_choice={"type": "auto"}, cache_system=True,
+            attachments=({"type": "image",
+                          "source": {"type": "base64", "media_type": "image/png",
+                                     "data": "iVBOR"}},)))
+        body = seen[-1]["body"]
+        check("a custom tool definition with its own schema crosses the wire",
+              body["tools"][0]["name"] == "get_weather"
+              and body["tools"][0]["input_schema"]["required"] == ["city"])
+        check("tool_choice crosses with it", body["tool_choice"] == {"type": "auto"})
+        check("caching marks the system prompt, not the whole request",
+              body["system"][0]["cache_control"] == {"type": "ephemeral"})
+        check("an attachment leads the first user turn, before the text",
+              [c["type"] for c in body["messages"][0]["content"]] == ["image", "text"])
+
+        print("\n  a tool call in the response is surfaced, not dropped")
+        parsed = AnthropicAPIBackend.parse({
+            "content": [{"type": "text", "text": "let me look"},
+                        {"type": "tool_use", "id": "tu_1", "name": "get_weather",
+                         "input": {"city": "Paris"}}],
+            "usage": {"input_tokens": 5, "output_tokens": 2},
+            "model": "claude-haiku-4-5", "stop_reason": "tool_use",
+        })
+        check("the tool call reaches structured output",
+              parsed.structured[0]["name"] == "get_weather"
+              and parsed.structured[0]["input"] == {"city": "Paris"})
+        check("and the text alongside it is kept", parsed.text == "let me look")
+        check("stop_reason says why it stopped", parsed.stop_reason == "tool_use")
+
         print("\n  an HTTP error is surfaced, not swallowed")
         broken = AnthropicAPIBackend(api_key="k", base_url=f"http://127.0.0.1:{server.server_port + 1}")
         rejects("an unreachable endpoint raises rather than returning empty text",

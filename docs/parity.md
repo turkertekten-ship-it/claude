@@ -102,7 +102,9 @@ Legend: **CC** = stock Claude Code; **WB** = this repository's `workbench/`.
 | `max_tokens` | yes | `CLAUDE_CODE_MAX_OUTPUT_TOKENS` | per variant, exercised; exact via `anthropic-api` |
 | `stop_sequences` | yes | no flag | built on `anthropic-api`, uncredentialed here |
 | Structured output schema | yes | `--json-schema` | per variant |
-| Tool definitions | yes | `--tools`, MCP | per variant, on/off |
+| Prompt caching | yes | not exposed | `cache_system:` via `anthropic-api` |
+| Image / document input | yes | not exposed | `attachments:` via `anthropic-api` |
+| Tool definitions | yes | `--tools` toggles built-ins only | custom schemas via `anthropic-api`, wire-tested |
 | Budget ceiling | no | `--max-budget-usd` | per variant, exercised |
 
 ### Inspection

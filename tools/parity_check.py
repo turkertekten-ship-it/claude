@@ -252,6 +252,56 @@ def c_budget(backend) -> Result:
                   spent)
 
 
+@check("Custom tool definitions", live=False)
+def c_tool_defs(backend) -> Result:
+    """Defining a tool with your own schema — a playground staple the CLI lacks."""
+    from workbench.api_backend import AnthropicAPIBackend
+    b = AnthropicAPIBackend(api_key="offline-probe")
+    tool = {"name": "get_weather", "description": "d",
+            "input_schema": {"type": "object", "properties": {}}}
+    body = b.build_body(Request(prompt="x", model="claude-haiku-4-5",
+                                tool_defs=(tool,), tool_choice={"type": "any"}))
+    ok = body.get("tools", [{}])[0].get("name") == "get_weather" \
+        and body.get("tool_choice") == {"type": "any"}
+    return Result("Custom tool definitions", UNREACHABLE if ok else FAIL,
+                  "the CLI can switch its own built-in tools on and off but cannot "
+                  "define one with your schema. Built on the anthropic-api backend "
+                  "and driven over real HTTP in the test suite, including surfacing "
+                  "the resulting tool_use block. Missing: a credential."
+                  if ok else "tool definitions did not reach the request body")
+
+
+@check("Prompt caching", live=False)
+def c_caching(backend) -> Result:
+    from workbench.api_backend import AnthropicAPIBackend
+    b = AnthropicAPIBackend(api_key="offline-probe")
+    body = b.build_body(Request(prompt="x", model="claude-haiku-4-5",
+                                system="stable prefix", cache_system=True))
+    ok = body["system"][0].get("cache_control") == {"type": "ephemeral"}
+    return Result("Prompt caching", UNREACHABLE if ok else FAIL,
+                  "cache_control on the system prompt — the largest cost lever for a "
+                  "suite that re-sends the same prefix on every case. Built and "
+                  "wire-tested; the response's cache_read_input_tokens is already "
+                  "parsed. Missing: a credential."
+                  if ok else "cache_control did not reach the request body")
+
+
+@check("Image and document input", live=False)
+def c_attachments(backend) -> Result:
+    from workbench.api_backend import AnthropicAPIBackend
+    b = AnthropicAPIBackend(api_key="offline-probe")
+    body = b.build_body(Request(
+        prompt="describe it", model="claude-haiku-4-5",
+        attachments=({"type": "image", "source": {"type": "base64",
+                      "media_type": "image/png", "data": "iVBOR"}},)))
+    kinds = [c["type"] for c in body["messages"][0]["content"]]
+    ok = kinds == ["image", "text"]
+    return Result("Image and document input", UNREACHABLE if ok else FAIL,
+                  f"attachments lead the first user turn before the text, which is "
+                  f"the documented order ({kinds}). Built and wire-tested. Missing: "
+                  f"a credential." if ok else f"wrong block order: {kinds}")
+
+
 @check("Direct Messages API access", live=False)
 def c_api_access(backend) -> Result:
     """Checked positively, not inferred from an unset variable."""

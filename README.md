@@ -55,7 +55,7 @@ python3 tools/parity_check.py                   # execute the parity matrix
 `parity_check.py` is the part worth pointing at. `docs/parity.md` is a table of
 claims, and a table is not evidence — so this exercises each capability against
 the live backend and reports PASS, FAIL, or UNREACHABLE with the reason. It
-currently records **20 passed, 0 failed, 5 unreachable**.
+currently records **20 passed, 0 failed, 8 unreachable**.
 
 Its most useful result so far was a wrong one it later caught. For several
 commits it recorded `CLAUDE_CODE_MAX_OUTPUT_TOKENS` as a broken platform

@@ -106,7 +106,29 @@ class AnthropicAPIBackend(Backend):
                          for turn in (request.turns or (request.prompt,))],
         }
         if request.system:
-            body["system"] = request.system
+            if request.cache_system:
+                # A suite sends the same system prompt on every case. Marking it
+                # cacheable is the largest cost lever the API offers, and the
+                # response reports whether it worked -- cache_read_input_tokens
+                # staying at zero across repeated calls means something in the
+                # prefix is changing.
+                body["system"] = [{"type": "text", "text": request.system,
+                                   "cache_control": {"type": "ephemeral"}}]
+            else:
+                body["system"] = request.system
+
+        if request.tool_defs:
+            body["tools"] = [dict(t) for t in request.tool_defs]
+            if request.tool_choice:
+                body["tool_choice"] = dict(request.tool_choice)
+
+        if request.attachments:
+            # Images and documents ride in the first user turn, before the text,
+            # which is the order the docs specify.
+            first = body["messages"][0]
+            first["content"] = [dict(a) for a in request.attachments] + [
+                {"type": "text", "text": first["content"]}
+            ]
         if request.stop_sequences:
             body["stop_sequences"] = list(request.stop_sequences)
         if request.effort:
@@ -168,12 +190,14 @@ class AnthropicAPIBackend(Backend):
         table in this repository, because a hard-coded price goes stale without
         anyone noticing.
         """
-        text = "".join(block.get("text", "") for block in envelope.get("content", [])
-                       if block.get("type") == "text")
+        blocks = envelope.get("content", [])
+        text = "".join(b.get("text", "") for b in blocks if b.get("type") == "text")
+        tool_calls = [{"name": b.get("name"), "input": b.get("input"), "id": b.get("id")}
+                      for b in blocks if b.get("type") == "tool_use"]
         usage = envelope.get("usage") or {}
         return Completion(
             text=text,
-            structured=envelope.get("parsed"),
+            structured=envelope.get("parsed") or (tool_calls or None),
             cost_usd=None,
             input_tokens=int(usage.get("input_tokens") or 0),
             output_tokens=int(usage.get("output_tokens") or 0),

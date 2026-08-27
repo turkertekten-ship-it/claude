@@ -119,6 +119,17 @@ class Request:
     temperature: float | None = None
     top_p: float | None = None
     top_k: int | None = None
+    #: Custom tool definitions, each {name, description, input_schema}. The CLI
+    #: can only switch its own built-in tools on and off; defining a tool with
+    #: your own schema and watching the model call it is a Messages API thing,
+    #: and it is one of the things a playground is actually for.
+    tool_defs: tuple[dict[str, Any], ...] = ()
+    tool_choice: dict[str, Any] | None = None
+    #: Cache the system prompt. A suite re-sends the same system prompt on
+    #: every case; caching it is the single largest cost lever available.
+    cache_system: bool = False
+    #: Base64 image and document blocks, prepended to the first user turn.
+    attachments: tuple[dict[str, Any], ...] = ()
     cwd: str | None = None
     max_budget_usd: float | None = None
     timeout_s: int = DEFAULT_TIMEOUT_S
@@ -141,6 +152,10 @@ class Request:
             "max_thinking_tokens": self.max_thinking_tokens,
             "max_output_tokens": self.max_output_tokens,
             "stop_sequences": list(self.stop_sequences),
+            "tool_defs": list(self.tool_defs),
+            "tool_choice": self.tool_choice,
+            "cache_system": self.cache_system,
+            "attachments": list(self.attachments),
             "temperature": self.temperature,
             "top_p": self.top_p,
             "top_k": self.top_k,

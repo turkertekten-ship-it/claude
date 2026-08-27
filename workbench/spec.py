@@ -68,6 +68,7 @@ _VARIANT_KEYS = {
     "max_budget_usd", "fixture", "setup", "note", "thinking",
     "max_thinking_tokens", "max_output_tokens",
     "stop_sequences", "temperature", "top_p", "top_k",
+    "tool_defs", "tool_choice", "cache_system", "attachments",
 }
 _CASE_KEYS = {
     "id", "prompt", "prompt_file", "turns", "vars", "graders", "weight", "note",
@@ -82,6 +83,7 @@ _DEFAULT_KEYS = {
     "append_system", "json_schema", "max_budget_usd", "fixture",
     "thinking", "max_thinking_tokens", "max_output_tokens",
     "stop_sequences", "temperature", "top_p", "top_k",
+    "tool_defs", "tool_choice", "cache_system", "attachments",
 }
 
 
@@ -137,6 +139,10 @@ class Variant:
     temperature: float | None = None
     top_p: float | None = None
     top_k: int | None = None
+    tool_defs: tuple[dict[str, Any], ...] = ()
+    tool_choice: dict[str, Any] | None = None
+    cache_system: bool = False
+    attachments: tuple[dict[str, Any], ...] = ()
     fixture: str | None = None
     setup: list[str] = field(default_factory=list)
     note: str = ""
@@ -292,6 +298,10 @@ def load_suite(path: str | Path) -> Suite:
                 temperature=merged.get("temperature"),
                 top_p=merged.get("top_p"),
                 top_k=merged.get("top_k"),
+                tool_defs=tuple(merged.get("tool_defs") or ()),
+                tool_choice=merged.get("tool_choice"),
+                cache_system=bool(merged.get("cache_system", False)),
+                attachments=tuple(merged.get("attachments") or ()),
                 fixture=merged.get("fixture"),
                 setup=list(merged.get("setup") or []),
                 note=str(merged.get("note", "")),

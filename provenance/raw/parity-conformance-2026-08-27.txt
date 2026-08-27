@@ -9,13 +9,19 @@ Parity conformance — executed, not asserted
 [PASS] Model selection
        requested claude-haiku-4-5, backend reported canonicalModel='claude-haiku-4-5'
 [PASS] Effort control changes work done
-       thinking tokens: low=228, high=89
+       thinking tokens: low=213, high=195
 [PASS] Thinking budget (undocumented flag)
        --thinking/--max-thinking-tokens accepted and the call succeeded
 [PASS] Max output tokens
        a 64-token ceiling on a long task was enforced by refusal ("API Error: Claude's response exceeded the 64 output token maximum. To "), and an 8000-token ceiling let the same shape of task through. Enforced by erroring, not by truncating — which is why an earlier version of this check wrongly called it broken.
 [PASS] Budget ceiling is enforced
        --max-budget-usd 0.0001 on a deliberately long task -> stop_reason='', error='error_max_budget_usd', spent=$0.000964
+[----] Custom tool definitions
+       the CLI can switch its own built-in tools on and off but cannot define one with your schema. Built on the anthropic-api backend and driven over real HTTP in the test suite, including surfacing the resulting tool_use block. Missing: a credential.
+[----] Prompt caching
+       cache_control on the system prompt — the largest cost lever for a suite that re-sends the same prefix on every case. Built and wire-tested; the response's cache_read_input_tokens is already parsed. Missing: a credential.
+[----] Image and document input
+       attachments lead the first user turn before the text, which is the documented order (['image', 'text']). Built and wire-tested. Missing: a credential.
 [----] Direct Messages API access
        no credential source found: ANTHROPIC_API_KEY unset, the `ant` CLI is not installed, and neither ~/.config/anthropic nor ~/.claude/.credentials.json exists. The OAuth token file descriptor the environment names resolves to pipe:[847] — a one-shot stream already consumed by the CLI, not a credential store. This is why count_tokens, the Batch API and stop_sequences are unreachable: established by looking for each source, including that one, not inferred from an absent variable. All three are implemented on the anthropic-api backend and would run against a credential.
 [----] temperature / top_p / top_k
@@ -51,7 +57,7 @@ Parity conformance — executed, not asserted
 [PASS] skill-creator is available
        first-party blind comparator at /mnt/skills/examples/skill-creator: withholds which skill produced which output, and its protocol describes a single fixed-order judgement — use it for skills; use this workbench when the comparison needs the swap, more than two variants, or a p-value
 ========================================================================
-20 passed, 0 failed, 5 unreachable — $0.0231, 71s
+20 passed, 0 failed, 8 unreachable — $0.0232, 72s
 
 Unreachable is not a softer failure. Those capabilities either need
 an API key this container does not have, or were removed from the
