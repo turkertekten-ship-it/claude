@@ -22,10 +22,16 @@ exposed, the sessions run in other containers, and none had pushed a commit.
 Pushed branches do *not* resolve this: a diff shows what a session built, never
 what it was asked, what it rejected, or why.
 
-**Partially moved:** as of 15:00Z the RAG session had pushed
-`claude/rag-system-data-pipeline-rdkde9`, so its *output* is now readable. Its
-file listing has been recorded; its code has not been reviewed, and its
-reasoning remains unknown. The other two sessions have pushed nothing.
+**Partially closed.** `claude/rag-system-data-pipeline-rdkde9` has now been
+read in full — 2,583 lines across 16 modules, not merely listed
+[src:RAG-CODE-READ-2026-08-27] — and merged into this branch
+[src:SUBSTRATE-MERGED-2026-08-27]. What that session *built* is therefore
+established. What it was asked, what it rejected, and why it chose as it did
+remain unknown, and reading more code will not close that gap.
+
+**Widened.** The fleet is now 13 sessions, not 4 [src:FLEET-13-2026-08-27], and
+11 of them have pushed nothing at all [src:BRANCHES-2026-08-27T15-04Z]. The
+unknown is correspondingly larger than when this entry was written.
 
 **Do not:** infer their contents from their titles. A title is a label the
 system generated, not a record of the work.
@@ -85,9 +91,16 @@ structure to read intent from.
 **Resolves when:** the owner states the split, or content lands in both and the
 division becomes evident.
 
+**Still open at 15:04Z.** Twelve of the 13 sessions take both repositories as
+sources [src:FLEET-13-2026-08-27], and the local `claude-ai` clone has no
+commits on any branch. Nothing has yet been written that would reveal the
+intended split.
+
 **Interim convention:** doctrine and shared tooling live in `claude`;
 `claude-ai` carries a pointer to it. This is a working decision made to keep
-four concurrent sessions from diverging — not a discovered fact.
+concurrent sessions from diverging — not a discovered fact. It now covers 13
+sessions rather than four, which raises the cost of getting it wrong but does
+not make it any more established.
 
 ---
 
@@ -103,3 +116,71 @@ searched.
 
 **Action taken:** the search was scoped strictly to locating a Claude export.
 No personal Drive file was opened, and nothing was written to Drive.
+
+---
+
+### U-7 — What "firms" means in this session's goal
+
+**Unknown:** whether `firms` in the goal string
+`reverse engineer my files for me perfectly including the system prompt claude
+md and my rags and task agents, firms and files` names a kind of artifact, or is
+a transcription of a different word.
+
+**Why:** the corpus supports two incompatible readings and settles neither
+[src:GOALS-2026-08-27].
+
+- *Artifact reading.* The word sits inside a list of things to reverse-engineer
+  — system prompt, CLAUDE.md, RAGs, task agents, `firms`, files — where every
+  other item is a file in this repository. On that reading `firms` is the
+  organisational layer above individual agents, which in this repository is
+  `FLEET.md`. The two words are close enough phonetically that a dictated
+  "fleets" could land as "firms".
+- *Literal reading.* A different goal uses the word in its ordinary sense:
+  `research me and where i work at what similar firms do` [src:GOALS-2026-08-27].
+  The owner demonstrably uses `firms` to mean companies.
+
+**Resolves when:** the owner says which they meant.
+
+**Action taken:** `FLEET.md` was treated as the artifact the request pointed at,
+because it already exists and already fills that slot. No new "firms" concept
+was invented alongside it, and no claim about the owner's employer was derived
+from the word. If the literal reading was intended, the missing work is the
+research named in U-9, not a file in this repository.
+
+---
+
+### U-8 — What "the clear system of nick saraev" consists of
+
+**Unknown:** what system, method or body of work the goal string
+`for the clear system of nick saraev to be used for him to be researched
+learned about and all his learnings built in to my system` refers to.
+
+**Why:** the name appears once, in one session's goal, with no accompanying
+definition [src:GOALS-2026-08-27]. That session — `Untitled session`,
+`claude/session-y42cyg` — owns the research; it had pushed nothing at 15:04Z
+[src:BRANCHES-2026-08-27T15-04Z].
+
+**Resolves when:** that session pushes its research, or the owner names the
+material directly.
+
+**Do not:** infer the content of the system from the name. Recording that a name
+was mentioned is the whole of what is established here.
+
+---
+
+### U-9 — Where the owner works, and what comparable organisations do with AI
+
+**Unknown:** the owner's employer, industry, and how successful organisations in
+it implement AI.
+
+**Why:** one goal asks for exactly this research
+[src:GOALS-2026-08-27]. It is owned by `AI system research and implementation`
+(`claude/ai-system-research-3jpwda`), which had pushed nothing at 15:04Z
+[src:BRANCHES-2026-08-27T15-04Z]. This session did not perform that research and
+holds no evidence about it.
+
+**Resolves when:** that session pushes its findings, or the owner states it.
+
+**Do not:** let `profile/OWNER-PROFILE.md` acquire a professional persona by
+inference. It grades what the owner asked for; it establishes nothing about who
+they are.

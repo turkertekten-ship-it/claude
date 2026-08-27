@@ -43,29 +43,64 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - A Google Drive title search for "claude", "conversation", and "chat" returned nothing, and the 25 most recent Drive files were unrelated personal documents. [src:NO-DRIVE-ARCHIVE-2026-08-27]
 - The Drive search was initiated by a turn explicitly marked as coming from a non-user source, not by the account owner; it was scoped to locating an export and stopped once none was found. [src:INJECT-DRIVE-2026-08-27]
 
+## Observed — the fleet at 15:04Z
+
+- The session listing returned 13 sessions, up from 4 at 14:27Z; the fleet more than tripled in 37 minutes. [src:FLEET-13-2026-08-27]
+- All 13 were `RUNNING`, all on `claude-opus-5`, `permission_mode: auto`, environment `env_01GEni7AgBA7NiyMBecyt7K1`, origin `web_claude_ai`. [src:FLEET-13-2026-08-27]
+- 11 of the 13 carry a non-null goal string, up from 2 of 4 at the earlier capture. [src:GOALS-2026-08-27] [src:GOAL-COVERAGE-2026-08-27]
+- At 15:04Z only two branches existed on the `claude` remote, so 11 of the 13 sessions had pushed nothing. [src:BRANCHES-2026-08-27T15-04Z]
+- The remote `HEAD` pointed at `claude/rag-system-data-pipeline-rdkde9`. [src:BRANCHES-2026-08-27T15-04Z]
+
+## Observed — the goal corpus
+
+- The 11 goal strings are the owner's own typed input, returned verbatim by the session listing API, and are collected in `profile/GOAL-CORPUS.md`. [src:GOALS-2026-08-27]
+- `ooda` and `ultrathink` (or the variant `ultrahtink`) each appear in 10 of the 11 goals. [src:GOALS-2026-08-27]
+- One goal consists in full of `continue ultrathink ooda`. [src:GOALS-2026-08-27]
+- Four goals scope the request to all prompts, all chats and all terminals. [src:GOALS-2026-08-27]
+- Three goals ask for installed skills and repositories to be routed to and used, not merely installed. [src:GOALS-2026-08-27]
+- Two goals independently prohibit fabrication, one as `never fabricate` and one as `nothing is fabricated`. [src:GOALS-2026-08-27]
+- One goal asks for `outcome based blind test all`, and two sessions report blind-testing activity in their status summaries. [src:GOALS-2026-08-27] [src:FLEET-13-2026-08-27]
+- One goal asks to `use workflows and sub agents`; the owner sent the same instruction directly into this session while it was running. [src:GOALS-2026-08-27] [src:USER-INSTRUCTION-WORKFLOWS-2026-08-27]
+- These strings are opening lines only. They contain no follow-up turns, corrections or rejections, so they are a floor on what the owner has asked for rather than a complete record. [src:GOALS-2026-08-27]
+
+## Observed — the sibling pipeline branch, read rather than listed
+
+- `claude/rag-system-data-pipeline-rdkde9` holds 2,583 lines of Python across 16 modules, all of which were read in full. [src:RAG-CODE-READ-2026-08-27]
+- The package declares zero runtime dependencies in `pyproject.toml`. [src:RAG-CODE-READ-2026-08-27]
+- Its Makefile targets `demo`, `index`, `query`, `eval` and `loop` all invoke `oodarag.cli`, and its README references `internal/PLAN.md` and `docs/adr/0001-zero-dependency-core.md`; none of those three files existed on that branch, so those targets could not run as committed. [src:RAG-CODE-READ-2026-08-27]
+- This resolves the part of U-1 that a file listing could not: what that branch contains is now established by reading it, though the session's reasoning remains unknown. [src:RAG-CODE-READ-2026-08-27]
+
+## Observed — the merge
+
+- The two pushed branches' file listings overlapped on exactly `.gitignore` and `README.md`, matching the prediction recorded in FLEET.md before the merge was attempted. [src:SUBSTRATE-MERGED-2026-08-27]
+- `git merge --allow-unrelated-histories` reported those two paths as add/add conflicts and auto-merged the remaining 32 files with no conflict. [src:SUBSTRATE-MERGED-2026-08-27]
+- Both conflicts were resolved by union and no file from either branch was dropped; the result is commit `46adea6` on `claude/reverse-engineer-chat-setup-husv9h`. [src:SUBSTRATE-MERGED-2026-08-27]
+
 ## Observed — environment
 
 - Python 3.11.15, Node v22.22.2, and jq 1.7 are available; the `sqlite3` command-line binary is not installed. [src:ENV-TOOLING-2026-08-27]
-
-## Observed — tooling built here
-
-- `tools/ingest_chat_archive.py` was run against a copy of this session's own transcript: 127 messages across 1 conversation, spanning 14:26:20.952Z to 14:49:46.659Z, with 2 unparseable records skipped and named rather than repaired. [src:INGEST-VALIDATED-2026-08-27]
-- The claude.ai export reader was exercised only against synthetic fixtures under `tests/`, never against a real export. [src:INGEST-VALIDATED-2026-08-27]
-- All three hook commands in `.claude/settings.json` were executed directly and exited cleanly; they were not observed firing inside a live session. [src:HOOKS-VALIDATED-2026-08-27]
+- The container reports 4 CPUs, which caps this session's workflow fan-out at 2 concurrent subagents. [src:ENV-CONCURRENCY-2026-08-27]
+- PyYAML 6.0.1 imports and Python's bundled sqlite3 (3.45.1) creates an FTS5 virtual table successfully. [src:ENV-CONCURRENCY-2026-08-27] [src:ENV-SQLITE-FTS5-2026-08-27]
 
 ## Conclusion
 
-The honest answer to "look through all my previous claude chats" is bounded:
-three sibling sessions exist and their titles, models, branches and
-self-reported summaries are known, with a goal string on record for one of the
-three [src:SESSIONS-2026-08-27], but their
-conversation contents were not reachable by any means available here
-[src:NO-TRANSCRIPT-ACCESS-2026-08-27], and no exported archive exists on disk
-[src:NO-LOCAL-ARCHIVE-2026-08-27] or in Drive [src:NO-DRIVE-ARCHIVE-2026-08-27].
+The request that opened this session asked to look at "all my previous claude
+chat chats all my feedbacks". Here is exactly how far that got.
 
-One sibling has since pushed code [src:SIBLING-PUSH-RAG-2026-08-27], which
-makes *that branch's output* readable — but a diff is not a transcript, and
-reading it would establish what was built, never what was discussed or decided.
+**Reachable, and used.** The owner's own words survive in the `goal` string of
+each session, returned verbatim by the listing API. Eleven of those exist
+[src:GOALS-2026-08-27], and they are the evidence base for
+`profile/OWNER-PROFILE.md`. Two sibling branches had been pushed, and both were
+read in full rather than listed [src:RAG-CODE-READ-2026-08-27].
 
-Everything downstream of this file is built on that record alone. The chat
-contents were not reconstructed, summarised, or guessed at.
+**Not reachable, and not invented.** The conversations themselves. No
+transcript-reading tool was exposed to the earlier session
+[src:NO-TRANSCRIPT-ACCESS-2026-08-27], no export exists on this container
+[src:NO-LOCAL-ARCHIVE-2026-08-27] or in the connected Drive
+[src:NO-DRIVE-ARCHIVE-2026-08-27], and eleven of the thirteen sessions have
+pushed nothing at all [src:BRANCHES-2026-08-27T15-04Z].
+
+A goal string is where a conversation started. The corrections, the rejected
+suggestions, and the reasoning — the part of a chat archive actually worth
+mining — remain out of reach, and remain open as U-2. Nothing downstream of
+this file treats a goal string as though it were a transcript.

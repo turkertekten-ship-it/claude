@@ -177,3 +177,88 @@ sources:
       null for "Blind testing and OODA analysis" and "Go page review and
       ultrathink OODA". Of the three sibling sessions, only one has a goal on
       record.
+
+  # --- captured by session_01FQvAGnEvu2XY7hGtWRkMG3 (reverse-engineer chat setup) ---
+
+  - id: FLEET-13-2026-08-27
+    kind: api
+    collected_at: "2026-08-27T15:04Z"
+    method: "mcp__Claude_Code_Remote__list_sessions(limit=50, mine=true)"
+    evidence: provenance/raw/sessions-2026-08-27T15-04Z.json
+    note: >-
+      Returned 13 sessions, up from the 4 returned at 14:27Z. All RUNNING, all
+      claude-opus-5, all permission_mode auto, all origin web_claude_ai, all on
+      environment env_01GEni7AgBA7NiyMBecyt7K1. The raw file is an EXTRACT: ids,
+      titles, timestamps, branches, effort levels, goal strings and task
+      summaries are verbatim; usage counters, rate-limit info and flag settings
+      were present in the response and are omitted.
+
+  - id: GOALS-2026-08-27
+    kind: user_statement
+    collected_at: "2026-08-27T15:04Z"
+    method: "goal.condition field per session, from mcp__Claude_Code_Remote__list_sessions(limit=50, mine=true)"
+    evidence: provenance/raw/sessions-2026-08-27T15-04Z.json
+    note: >-
+      11 of the 13 sessions carry a non-null goal string; it is null for
+      "Blind testing and OODA analysis" and "Go page review and ultrathink
+      OODA". These strings are the owner's typed input, returned verbatim by the
+      API. They are opening lines only - they contain no follow-up turns,
+      corrections or rejections, so they are a floor on the owner's stated
+      preferences and not a complete record. Term counts cited against this id
+      were produced by literal substring match over the strings as captured,
+      misspellings included.
+
+  - id: BRANCHES-2026-08-27T15-04Z
+    kind: repo_state
+    collected_at: "2026-08-27T15:04Z"
+    method: "git ls-remote --heads origin; git ls-remote --symref origin HEAD; git fetch origin <branch>"
+    evidence: >-
+      The `claude` remote carried exactly two branches:
+      claude/rag-system-data-pipeline-rdkde9 at 1d7ce8f (also the remote HEAD)
+      and claude/review-chat-archive-zrynr4 at b11a6fa. The branch named in this
+      session's own record, claude/reverse-engineer-chat-setup-husv9h, did not
+      exist on the remote; `git fetch` for it returned "couldn't find remote
+      ref". Of the 13 sessions listed at the same time, 11 had pushed nothing.
+
+  - id: RAG-CODE-READ-2026-08-27
+    kind: filesystem
+    collected_at: "2026-08-27T15:02Z"
+    method: "cat over every file in src/oodarag/ on claude/rag-system-data-pipeline-rdkde9; wc -l; git log -1"
+    evidence: >-
+      2,583 lines of Python across 16 modules were read in full, not listed:
+      models.py (204), util/{http 315, text 173, hashing 41, logging 55,
+      ratelimit 31}, scrape/{html 510, crawler 335, robots 135},
+      ingest/{github 498, base 170, web 90}. The package declares zero runtime
+      dependencies in pyproject.toml. Its Makefile targets demo, index, query,
+      eval and loop all invoke `oodarag.cli`, and its README points at
+      internal/PLAN.md and docs/adr/0001-zero-dependency-core.md - none of which
+      existed on that branch, so those targets could not run as committed.
+
+  - id: USER-INSTRUCTION-WORKFLOWS-2026-08-27
+    kind: user_statement
+    collected_at: "2026-08-27T15:01Z"
+    method: "message sent by the account owner into this session mid-turn"
+    evidence: >-
+      "use workflows and sub agents as well add this to your current goal and
+      then continue"
+
+  - id: SUBSTRATE-MERGED-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:12Z"
+    method: "comm -12 over the two branches' file listings; git merge --allow-unrelated-histories"
+    evidence: >-
+      The file listings of claude/rag-system-data-pipeline-rdkde9 and
+      claude/review-chat-archive-zrynr4 overlapped on exactly two paths,
+      .gitignore and README.md, matching the prediction recorded in FLEET.md.
+      The merge reported those two as add/add conflicts and auto-merged the
+      remaining 32 files with no conflict. Both were resolved by union; no file
+      from either branch was dropped. Merge commit 46adea6.
+
+  - id: ENV-CONCURRENCY-2026-08-27
+    kind: filesystem
+    collected_at: "2026-08-27T15:08Z"
+    method: "nproc; python3 -c 'import yaml, sqlite3'"
+    evidence: >-
+      The container reports 4 CPUs, which caps this session's workflow fan-out
+      at 2 concurrent subagents. PyYAML 6.0.1 imports, and Python's bundled
+      sqlite3 reports 3.45.1 and creates an FTS5 virtual table successfully.

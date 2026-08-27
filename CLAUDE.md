@@ -2,11 +2,14 @@
 
 This repository is the shared substrate for a fleet of Claude sessions working
 for one owner. It holds the rules they run under, the prompts that carry those
-rules, the record of what has actually been established, and the tooling that
-stops any of it drifting into invention.
+rules, the record of what has actually been established, the tooling that stops
+any of it drifting into invention, and `oodarag` — the retrieval pipeline those
+sessions build against.
 
 Read this file first. Read `provenance/observations.md` second — it is the only
-thing in here that counts as established fact.
+thing in here that counts as established fact. Read
+`profile/OWNER-PROFILE.md` third — it is what the owner has actually asked for,
+graded by how strongly the evidence supports each item.
 
 ---
 
@@ -46,10 +49,15 @@ or `you previously said` — phrases that assert a shared history this repositor
 has no record of. Quoting such a phrase in `inline code`, as here, is allowed;
 asserting it in prose is not.
 
-**The specific trap here.** Session titles and goal strings are suggestive and
-almost entirely uninformative. A session called "RAG system and data pipeline"
-tells you a label was generated, not what was decided. Never expand a title
-into content.
+**The specific trap here.** A session *title* is a generated label. A session
+called "RAG system and data pipeline" tells you a label exists, not what was
+decided. Never expand a title into content.
+
+A session *goal string* is different in kind: it is text the owner typed,
+returned verbatim by the listing API [src:GOALS-2026-08-27]. It can be quoted as
+what the owner asked for. It is still only how a conversation began — it holds
+no follow-ups, corrections or rejections — so it is a floor on the owner's
+preferences, never a transcript.
 
 ---
 
@@ -76,7 +84,41 @@ The full procedure is in `.claude/skills/ooda/SKILL.md`.
 
 ---
 
-## 3. Fleet conventions
+## 3. What the owner asks for
+
+Derived from the owner's own goal strings and graded by how many independently
+support each one. The full derivation, with the verbatim evidence, is in
+`profile/OWNER-PROFILE.md`; the raw corpus is `profile/GOAL-CORPUS.md`.
+
+| | Preference | Grade |
+|---|---|---|
+| P1 | Run an explicit OODA loop, and think hard before acting | Strong |
+| P2 | Never fabricate; everything rests on evidence and data | Moderate |
+| P3 | Verify by outcome-based blind testing, not by inspection | Moderate |
+| P4 | Apply it everywhere — all prompts, all chats, all terminals | Strong |
+| P5 | Continue until nothing is open | Moderate |
+| P6 | Divide every prompt into tasks | Single |
+| P7 | Research before building, from web, YouTube and GitHub | Strong |
+| P8 | Route to and actually use installed skills and repos | Strong |
+| P9 | Use workflows and subagents | Moderate |
+| P10 | Build from the owner's own material, tailored to them | Strong |
+| P11 | Improve the files continuously, on a daily cycle | Single |
+| P12 | Finish with a review gate that checks the data | Single |
+
+Two things to keep straight when acting on these:
+
+- **A grade is not a licence.** `Single` means one goal said it once. It is a
+  real request; it is not a general law, and it does not justify reshaping
+  unrelated work around it.
+- **P4 is the one this repository cannot satisfy on its own.** A rule committed
+  here governs work in this repository. Making it reach every chat and terminal
+  needs it installed at user scope (`~/.claude/`), which is a separate act from
+  committing a file. Say what still has to be installed rather than reporting a
+  commit as delivery.
+
+---
+
+## 4. Fleet conventions
 
 Several sessions run against these repositories at once. See `FLEET.md` for the
 current roster and the branch each one owns.
@@ -93,11 +135,14 @@ current roster and the branch each one owns.
 
 ---
 
-## 4. Layout
+## 5. Layout
 
 ```
 CLAUDE.md                     this file — doctrine, read first
 FLEET.md                      the concurrent sessions and their branches
+profile/
+  OWNER-PROFILE.md            standing preferences, graded by evidence
+  GOAL-CORPUS.md              the owner's goal strings, verbatim
 provenance/
   sources.yaml                the ledger — every id that a [src:] tag may cite
   observations.md             established fact, fully sourced
@@ -111,16 +156,22 @@ tests/                        tests for the above
   run_all.sh                  every check, one command
 archive/                      drop conversation exports here (git-ignored)
 docs/workflows.md             how the workflows and subagents fit together
+docs/adr/                     pipeline decisions, with their costs stated
 .claude/
   settings.json               hooks
   skills/ooda/SKILL.md        the loop procedure
   commands/                   the workflows, as slash commands
   agents/                     subagent definitions
+
+src/oodarag/                  the retrieval pipeline (see section 7)
+internal/CONTRACTS.md         the frozen module spec the pipeline is built to
+internal/PLAN.md              per-stage status and known gaps
+evals/                        golden set and the offline seed corpus
 ```
 
 ---
 
-## 5. Workflows and delegation
+## 6. Workflows and delegation
 
 Rules that live only in prose get skipped under pressure. Each workflow in
 `.claude/commands/` pins one phase of the loop to a command that ends by
@@ -134,6 +185,7 @@ running the verifier, so it cannot report success over an unsourced claim.
 | `/source <finding>` | a ledger entry a claim can cite |
 | `/fleet-sync` | what other sessions actually pushed, read from diffs |
 | `/ingest-chats [query]` | the real contents of the chat index, or that it is empty |
+| `/ultrareview [scope]` | the closing gate: every checker run, every claim re-audited |
 
 Two subagents exist to keep phases from collapsing into each other:
 `observer` enumerates and is given nowhere to put a conclusion; `fact-checker`
@@ -146,7 +198,55 @@ evidence.
 
 ---
 
-## 6. House rules
+## 7. oodarag — the retrieval pipeline
+
+`src/oodarag/` is a zero-dependency RAG pipeline. Its stages map onto the same
+loop this repository runs on: ingest and normalize are Observe, chunk and embed
+and index are Orient, the policy engine is Decide, and reindex/backfill/alert
+are Act.
+
+```bash
+make test     # stdlib unittest, offline, no dependencies
+make demo     # end-to-end offline: ingest -> index -> query -> eval
+make eval     # retrieval quality as a number
+make loop     # one OODA cycle over the corpus
+```
+
+Its invariants, each with the failure it prevents:
+
+- **Zero third-party imports in `src/`.** numpy only behind a `try/except
+  ImportError` with an equivalent stdlib fallback. Prevents: the pipeline
+  stops working in CI and in an egress-filtered container, which is the entire
+  reason it is built this way.
+- **Secrets are redacted at the connector boundary and again at normalization.**
+  Prevents: an index file is a thing people copy and attach; a credential that
+  reaches one is leaked.
+- **Every chunk carries its `doc_id` and real character offsets.** Prevents: an
+  answer that cannot be traced to its source is indistinguishable from an
+  invented one — the same rule as section 1, enforced in code.
+- **Citations are verified by substring containment, never trusted.** Same
+  reason. An abstention is a correct answer; a confident fabrication carrying a
+  real-looking URL is the worst output this pipeline can produce.
+- **Every network stage is bounded** — requests, bytes, depth, wall-clock.
+  Prevents: a crawl on a calendar-generating site that never terminates.
+- **Ids come from `util.hashing`, never builtin `hash()`.** It is salted per
+  process, so incremental ingest would see every document as changed on every
+  run.
+- **`decide()` in the OODA loop stays pure.** Prevents: a policy that cannot be
+  tested without a network and an index.
+
+Retrieval changes are settled by `make eval` numbers before and after, one knob
+at a time — not by argument. A change that moves no metric does not ship,
+however principled it sounds. Any chunker or embedder change invalidates every
+`chunk_id`, so it is always followed by a full reindex before the comparison
+means anything.
+
+The interface spec in `internal/CONTRACTS.md` is frozen: modules are written
+independently against it, so changing a signature there breaks its callers.
+
+---
+
+## 8. House rules
 
 - **Python 3.11, standard library first.** PyYAML is available. The `sqlite3`
   CLI is *not* installed — go through Python's `sqlite3` module, which does
