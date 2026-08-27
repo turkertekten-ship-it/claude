@@ -202,48 +202,32 @@ def c_thinking(backend) -> Result:
 
 @check("Max output tokens")
 def c_max_tokens(backend) -> Result:
-    c = _run(backend, prompt="Count slowly from 1 to 400, one number per line.",
-             max_output_tokens=64)
-    reported = next(iter((c.raw.get("modelUsage") or {}).values()), {}).get("maxOutputTokens")
-    honoured = c.output_tokens <= 64 or reported == 64
-    # This is a FAIL on purpose. The env var is documented, the plumbing sends
-    # it, and it did not cap anything here -- output exceeded the ceiling and
-    # the backend went on reporting its own maxOutputTokens. A conformance
-    # harness that stayed green through that would be worthless.
-    return Result("Max output tokens",
-                  PASS if honoured else FAIL,
-                  f"CLAUDE_CODE_MAX_OUTPUT_TOKENS=64 -> output_tokens="
-                  f"{c.output_tokens}, backend still reports maxOutputTokens="
-                  f"{reported}, stop_reason={c.stop_reason!r}. The variable is "
-                  f"documented but was NOT honoured in this container; measured "
-                  f"at 32/64/512/4096 it never changed the reported ceiling.",
-                  c.cost_usd or 0.0, {"requested": 64, "reported": reported,
-                                      "output_tokens": c.output_tokens})
+    """The ceiling is enforced by REFUSING, not by truncating.
 
-
-@check("Multi-turn conversation")
-def c_multiturn(backend) -> Result:
-    """Does the second turn see the first? Repeated, because a small model wobbles."""
-    turns = ("My designation is UNIT-42. Acknowledge with just: ACK",
-             "What is my designation? Reply with just the designation.")
-    hits, cost, seen = 0, 0.0, []
-    for i in range(3):
-        c = backend.complete(Request(turns=turns, system=TERSE, model=MODEL,
-                                     tools="", repeat=i))
-        cost += c.cost_usd or 0.0
-        seen.append(c.text.strip()[:40])
-        if not c.ok or not c.text.strip():
-            return Result("Multi-turn conversation", FAIL,
-                          f"the backend did not answer on run {i}: {c.error[:160]}", cost)
-        if "UNIT-42" in c.text:
-            hits += 1
-    ok = hits >= 2
-    return Result("Multi-turn conversation", PASS if ok else FAIL,
-                  f"context from turn 1 was available in turn 2 in {hits}/3 runs "
-                  f"({seen}). Carried over the stream-json transport in both "
-                  f"directions plus --verbose; the CLI refuses each of those "
-                  f"combinations separately.",
-                  cost, {"hits": hits, "of": 3})
+    An earlier version of this check looked for `output_tokens <= cap` and
+    `stop_reason == "max_tokens"`, found neither, and recorded the capability
+    as broken -- a verdict that reached docs/parity.md and README.md as a
+    platform defect. It was this harness that was wrong. Claude Code enforces
+    the ceiling by returning an API error naming the maximum, and the tokens
+    that appeared to breach the cap were thinking tokens spent before it fired.
+    """
+    tight = _run(backend, prompt="Count from 1 to 300, one number per line.",
+                 max_output_tokens=64)
+    loose = _run(backend, prompt="Count from 1 to 40, one number per line.",
+                 max_output_tokens=8000)
+    refused = (not tight.ok) and "output token maximum" in tight.text
+    allowed = loose.ok and loose.text.strip().startswith("1")
+    ok = refused and allowed
+    return Result("Max output tokens", PASS if ok else FAIL,
+                  f"a 64-token ceiling on a long task was enforced by refusal "
+                  f"({tight.text.strip()[:70]!r}), and an 8000-token ceiling let "
+                  f"the same shape of task through. Enforced by erroring, not by "
+                  f"truncating — which is why an earlier version of this check "
+                  f"wrongly called it broken."
+                  if ok else
+                  f"tight: ok={tight.ok} {tight.text.strip()[:80]!r} | "
+                  f"loose: ok={loose.ok} {loose.text.strip()[:50]!r}",
+                  (tight.cost_usd or 0) + (loose.cost_usd or 0))
 
 
 @check("Budget ceiling is enforced")

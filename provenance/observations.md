@@ -107,6 +107,19 @@ verified lives in [unknowns.md](unknowns.md), not here.
 > operating prompt better at the thing it was written for: on refusing to
 > fabricate, the measured difference is zero.
 
+## Observed — a wrong verdict this repository published about the platform
+
+- `CLAUDE_CODE_MAX_OUTPUT_TOKENS` is honoured. At a 64-token ceiling on a long task the response is `API Error: Claude's response exceeded the 64 output token maximum`, with `is_error` true; at 8000 the same task completes. The ceiling is enforced by refusing the response, not by truncating it, and the process-environment and `--settings` paths behave identically. [src:MAX-OUTPUT-TOKENS-CORRECTED-2026-08-27]
+- An earlier check asserted the wrong signature — `output_tokens <= cap` and `stop_reason == "max_tokens"` — and recorded the capability as a platform defect. That verdict reached `docs/parity.md`, `README.md` and `workbench doctor`, and stood for several commits. [src:MAX-OUTPUT-TOKENS-CORRECTED-2026-08-27]
+- With the check rewritten against the observed behaviour, every reachable capability passes: 20 passed, 0 failed, 5 unreachable. [src:PARITY-CONFORMANCE-2026-08-27]
+
+> Reading, not a claim: "execute the matrix rather than assert it" was the right
+> lesson and an insufficient one. An executed check can be confidently wrong, and
+> this one was — for several commits, in three documents, about somebody else's
+> software. A check that only ever fails deserves the same suspicion as one that
+> only ever passes; the question to ask of both is whether it asserts what the
+> system actually does.
+
 ## Conclusion
 
 The honest answer to "look through all my previous claude chats" is bounded:

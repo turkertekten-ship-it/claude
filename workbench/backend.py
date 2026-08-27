@@ -359,7 +359,11 @@ class ClaudeCLIBackend(Backend):
         model_name = next(iter(model_usage), request.model or "")
         error = ""
         if envelope.get("is_error"):
-            error = str(envelope.get("subtype") or envelope.get("api_error_status")
+            # `subtype` is often the useless string "success" even on an error
+            # envelope, so prefer anything that actually describes the failure.
+            error = str(envelope.get("api_error_status")
+                        or str(envelope.get("result", ""))[:300]
+                        or envelope.get("subtype")
                         or "backend reported is_error")
 
         return Completion(

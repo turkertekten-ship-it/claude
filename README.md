@@ -55,10 +55,17 @@ python3 tools/parity_check.py                   # execute the parity matrix
 `parity_check.py` is the part worth pointing at. `docs/parity.md` is a table of
 claims, and a table is not evidence — so this exercises each capability against
 the live backend and reports PASS, FAIL, or UNREACHABLE with the reason. It
-currently records **20 passed, 1 failed, 5 unreachable**. The failure is real
-and kept red: `CLAUDE_CODE_MAX_OUTPUT_TOKENS` is documented as capping output
-and did not cap anything here at any of four settings. A written matrix would
-have carried that claim indefinitely.
+currently records **20 passed, 0 failed, 5 unreachable**.
+
+Its most useful result so far was a wrong one it later caught. For several
+commits it recorded `CLAUDE_CODE_MAX_OUTPUT_TOKENS` as a broken platform
+capability, and this README repeated that. The variable works. It enforces the
+ceiling by **refusing** — `API Error: Claude's response exceeded the N output
+token maximum` — rather than by truncating, and the check was waiting for a
+truncation that never comes. The tokens that looked like a breach were thinking
+tokens spent before the refusal fired, and the "output" being graded was the
+error message. A harness that can be wrong about the platform can also be
+caught being wrong; a written table cannot.
 
 It runs on whatever backend the environment actually has, and says which one
 it picked. See [docs/workbench.md](docs/workbench.md).

@@ -389,11 +389,13 @@ sources:
       the ceiling at every setting -- and the backend reported
       modelUsage.maxOutputTokens = 32000 unchanged in all four runs.
     note: >-
-      The variable is documented as controlling output length; it did not do so
-      in this container. The workbench still sends it, because it may work
-      elsewhere, and tools/parity_check.py records it as a FAIL, because here it
-      does not. This is the one row in docs/parity.md that an executed matrix
-      caught and a written one would not have.
+      SUPERSEDED AND WRONG — see MAX-OUTPUT-TOKENS-CORRECTED-2026-08-27. The
+      measurement above is real but was misread. The variable IS honoured; it
+      enforces the ceiling by refusing the response rather than truncating it,
+      so `output_tokens` never falls below the cap and `stop_reason` is never
+      `max_tokens`. The figures recorded here are thinking tokens spent before
+      the refusal fired. Kept unedited because a wrong reading that reached
+      three documents should stay legible.
 
   - id: MULTITURN-2026-08-27
     kind: tool_output
@@ -517,3 +519,29 @@ sources:
       preference survives it. Length is not what the judge was reading. The
       stratum is small -- eleven pairs, ten decided -- and the report says so
       next to the p-value.
+
+  - id: MAX-OUTPUT-TOKENS-CORRECTED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T21:55Z"
+    method: >-
+      CLAUDE_CODE_MAX_OUTPUT_TOKENS set to 16, 32, 64, 128 and 8000, via both
+      the process environment and --settings '{"env":{...}}', reading the
+      response text rather than only the token counts
+    evidence: >-
+      At 64 on a long task the response is
+      "API Error: Claude's response exceeded the 64 output token maximum. To
+      configure this behavior, set the CLAUDE_CODE_MAX_OUTPUT_TOKENS
+      environment variable.", with is_error true. At 8000 the same shape of
+      task completes normally. At 128 the visible text was truncated mid-count
+      at 89. Both the process-environment and the --settings paths behave
+      identically.
+    note: >-
+      This corrects MAX-OUTPUT-TOKENS-NOT-HONOURED-2026-08-27. The capability
+      works; the harness was testing for the wrong signature — `output_tokens
+      <= cap` and `stop_reason == "max_tokens"` — and Claude Code enforces the
+      ceiling by refusing rather than truncating. The wrong verdict reached
+      docs/parity.md, README.md and `workbench doctor` and stood for several
+      commits before a check written against the observed behaviour caught it.
+      The lesson is narrower than "execute your matrix": a check must assert
+      what the system actually does, and one that only ever fails is as
+      suspect as one that only ever passes.

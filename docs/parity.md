@@ -99,7 +99,7 @@ Legend: **CC** = stock Claude Code; **WB** = this repository's `workbench/`.
 | Effort | yes | `--effort` | per variant |
 | Extended thinking | yes | `--effort`, plus undocumented `--thinking` / `--max-thinking-tokens` | per variant |
 | `temperature` / `top_p` / `top_k` | rejected by current models | no flag | deliberately not built |
-| `max_tokens` | yes | `CLAUDE_CODE_MAX_OUTPUT_TOKENS` — **not honoured here** | sent, no observed effect |
+| `max_tokens` | yes | `CLAUDE_CODE_MAX_OUTPUT_TOKENS` | per variant, exercised |
 | `stop_sequences` | yes | no flag | not reachable without an API key |
 | Structured output schema | yes | `--json-schema` | per variant |
 | Tool definitions | yes | `--tools`, MCP | per variant, on/off |
@@ -221,25 +221,16 @@ Two further findings from the same paper shape the implementation:
   Thinking control is wired through per variant and verified working. The
   lesson is worth keeping: absence from `--help` is not absence from the parser.
 
-- **An output-token cap.** `CLAUDE_CODE_MAX_OUTPUT_TOKENS` is plumbed through
-  per variant, and `tools/parity_check.py` records it as **FAIL**: measured at
-  32, 64, 512 and 4096 it never changed the ceiling the backend reported
-  (`maxOutputTokens` stayed 32000) and the output exceeded the cap every time.
-  The variable is documented; it did not work in this container. The plumbing
-  stays because it may work elsewhere, the conformance harness stays red
-  because here it does not, and this row is the reason a matrix should be
-  executed rather than believed.
-- **The Batch API's 50% discount.** ([pricing](https://platform.claude.com/docs/en/about-claude/pricing))
-  Real money for a large sweep, and unreachable without an API key.
-- **`count_tokens` before sending.** The endpoint exists
-  ([count_tokens](https://platform.claude.com/docs/en/api/messages-count-tokens));
-  again, no API key. `workbench plan` shows character counts instead and says so.
-- **Human grading rows.** The retired Workbench had a per-row human score
-  column. Nothing here collects one.
-- **A price table.** Deliberately absent. Costs come from the backend's own
-  `total_cost_usd`. A hard-coded price is a fact that goes stale without anyone
-  noticing, and this repository's whole premise is not writing down facts it
-  cannot source at the moment of reading.
+- ~~**An output-token cap.**~~ Works, and an earlier version of this file said
+  it did not. `CLAUDE_CODE_MAX_OUTPUT_TOKENS` enforces the ceiling by returning
+  `API Error: Claude's response exceeded the N output token maximum` — it
+  **refuses rather than truncating**. The check that called it broken looked for
+  `output_tokens <= N` and `stop_reason == "max_tokens"`, found neither, and
+  recorded a platform defect. The tokens that appeared to breach the ceiling
+  were thinking tokens spent before it fired, and the "output" being graded was
+  the error message itself. The harness was wrong, not the platform, and the
+  wrong verdict reached this document and the README before a check written
+  against the real behaviour caught it.
 
 ## The gap that was actually open — corrected
 
