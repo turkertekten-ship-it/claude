@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+mafirm/cikti/
+mafirm/dosyalar/*/veri/
+.DS_Store

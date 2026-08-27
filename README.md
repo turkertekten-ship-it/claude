@@ -1,0 +1,38 @@
+# Kör sınama · Uluslararası M&A Hukuku Kurulum Kitabı
+
+Bu depo, "RePie Arel M&A Avukat Claude Kurulum Kitabı" (Sürüm 1.0,
+27 Ağustos 2026) adlı kurulum kitabının **kelimesi kelimesine kurulmuş** hâlini
+ve o kuruluma karşı yapılmış **kör sınamayı** içerir.
+
+## Kör sınama nedir
+Her sınama vakası kitabın **düzyazısından** türetildi, kodundan değil. Kitabın
+kendi öz-sınamaları (esik.py'de 6 vaka, kapi.py'de 16) desenleri yazan kişinin
+aklındaki vakalardır ve hepsi geçer. Kör sınama o aklın dışında kalanı arar.
+
+## Sonuç
+- Kitaba sadık, eksiksiz kurulum: **85 vaka, 56 başarısız.**
+- Kitabın kendi §16 denetimi, kitap harfiyen izlendiğinde **yeşile dönmüyor.**
+- Denetim, on beş bozmadan **on birini fark etmiyor** — sıfır beceri, kancasız
+  ayarlar ve **tamamen boş bir `esik.py`** taşıyan bir sistemde "DENETİM OK".
+- İşletim sözleşmesinin on bir kuralından **yedisinin** çalışan bir mekanizması
+  yok; hiçbirinin tam mekanizması yok.
+- Yamadan sonra: **96 vaka, 11 başarısız**; mutasyon yakalama 4/15 → **15/15**.
+
+## Okuma sırası
+1. `mafirm/RAPOR.md` — bulguların tamamı, kanıtlarıyla
+2. `mafirm/yamalar/DEGISIKLIKLER.md` — her yama, kapattığı vaka kimliğiyle
+3. `mafirm/sinama/` — sınama takımları ve ham çıktılar
+4. `mafirm/yamalar/kitaba-sadik/` — kitaba sadık özgün sürümler
+
+## Koşum
+```
+mafirm/sinama/hepsi.sh          # dokuz takım, 96 vaka
+mafirm/denetim.sh --yapisal     # mühendislik katmanı  -> DENETİM OK
+mafirm/denetim.sh               # mevzuat bulguları dâhil -> BAŞARISIZ: 3
+```
+
+## Açık kalanlar
+Üç mevzuat bulgusu (`mafirm/hafiza/dogrulama-bulgulari.md`) **bilerek
+yamalanmadı**: bir eşik değişikliği insan kararıdır ve bu ortamda hiçbir
+birincil kaynağa (mevzuat.gov.tr, resmigazete.gov.tr, rekabet.gov.tr,
+spk.gov.tr) erişilemedi. İkisi bildirime tabilik sonucunu değiştirir.

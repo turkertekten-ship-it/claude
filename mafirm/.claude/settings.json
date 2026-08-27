@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      { "matcher": "WebSearch|WebFetch|Write|Edit|MultiEdit|NotebookEdit|Bash",
+        "hooks": [{ "type": "command",
+                    "command": "python3 ~/mafirm/.claude/hooks/kapi.py" }] }
+    ]
+  },
+  "permissions": {
+    "deny": [
+      "Bash(agent-reach * post *)",
+      "Bash(agent-reach * comment *)",
+      "Bash(agent-reach * follow *)",
+      "Bash(agent-reach * delete *)"
+    ]
+  }
+}

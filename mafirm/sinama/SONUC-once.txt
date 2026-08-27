@@ -1,0 +1,252 @@
+###############################################################
+#  KÖR SINAMA TAKIMI — 2026-08-27T14:56:13Z
+###############################################################
+
+==============================================================================
+KÖR SINAMA A — rekabet eşiği (şartnameden türetilmiş, koddan değil)
+==============================================================================
+GEÇTİ  A-01  A eşiği: toplam tam 3 milyar (aşmıyor) -> tabi değil
+GEÇTİ  A-02  A eşiği: iki taraf tam 1 milyar (aşmıyor) -> A yok
+GEÇTİ  A-03  A eşiği: üç taraf, ikisi tabanı aşıyor, toplam aşıyor -> A var
+GEÇTİ  A-04  B eşiği: teknoloji hedefi tam 250 milyon (aşmıyor) -> B yok
+GEÇTİ  A-05  B eşiği: diğer tarafın dünya cirosu tam 9 milyar -> B yok
+GEÇTİ  A-06  teknoloji bayrağı A eşiğini DEĞİŞTİRMEMELİ
+KALDI  A-07  §19 pilotu: 2,4 milyar AVRO çevrilmeden verilirse
+        beklenen : bildirime tabi (B)
+        gerçek   : TABİ DEĞİL — sessiz yanlış cevap
+        şartname : §19: 'avro rakamı TL'ye çevrilir'; kodda para birimi modeli yok
+GEÇTİ  A-08  §19 pilotu: aynı olgular, TL'ye çevrilmiş
+KALDI  A-09  hedef cirosu tr_cirolar'a yazılmazsa A ayağı kaybolur
+        beklenen : True
+        gerçek   : False
+        şartname : aynı işlem, iki bağlantısız girdi biçimi; tutarlılık kontrolü yok
+KALDI  A-10  bilinmeyen ciro 0 olarak girilirse cevap ne olur
+        beklenen : belirlenemiyor
+        gerçek   : hayır (hiçbir eşik)
+        şartname : skills/rekabet-esigi: 'evet / hayır / belirlenemiyor'
+KALDI  A-11  bilinmeyen ciro None olarak verilirse
+        beklenen : belirlenemiyor sonucu ya da açık hata iletisi
+        gerçek   : TypeError: unsupported operand type(s) for +: 'int'
+        şartname : kanıt kuralı: bilinmeyen, sıfırdan farklıdır
+KALDI  A-12  negatif ciro reddediliyor mu
+        beklenen : reddedilmeli
+        gerçek   : kabul edildi -> (False, 'hiçbir eşik')
+        şartname : girdi doğrulaması yok
+KALDI  A-13  hedef kendi dünya cirosuyla B ayağını karşılayabiliyor mu
+        beklenen : karşılayamamalı
+        gerçek   : karşıladı
+        şartname : tr-esikler.md: 'DİĞER işlem taraflarından en az birinin' — koruma yok
+KALDI  A-14  gerçek rakamlarla komut satırından hesap yapılabiliyor mu
+        beklenen : hesap çıktısı
+        gerçek   : Türkiye'de birleşme denetimi bildirim eşiği testi.
+        şartname : §8: 'esik.py gerçek ciro rakamlarıyla çalıştırılır'
+KALDI  A-15  birleşme vakası modelleniyor mu (devralma/birleşme ayrımı)
+        beklenen : ayrım var
+        gerçek   : ayrım yok — tek 'hedef_tr' parametresi
+        şartname : tr-esikler.md: 'birleşme işlemlerinde ise taraflardan en az birinin'
+------------------------------------------------------------------------------
+15 vaka, 7 geçti, 8 KALDI
+
+====================================================================================================
+KÖR SINAMA B — beş kapı, on bir doktrin kuralına karşı
+====================================================================================================
+GEÇTİ B-01   [kural 5 kapsam   ] Kurul'a bildirimde bulunmanız gerekir.
+KALDI B-02   [kural 5 kapsam   ] Kurul'a bildirim yapmalısınız.
+       ateşlemeli: True   ateşledi: False  ateşleyen kapılar: hiçbiri
+       aynı tavsiye, -malı kipi; TAVSIYE listesinde yok
+KALDI B-03   [kural 5 kapsam   ] Bu işlem bildirime tabidir.
+       ateşlemeli: True   ateşledi: False  ateşleyen kapılar: hiçbiri
+       hukuki nitelendirme — en sık yazılan görüş cümlesi
+KALDI B-04   [kural 5 kapsam   ] Bildirim zorunludur ve kapanış izne bağlıdır.
+       ateşlemeli: True   ateşledi: False  ateşleyen kapılar: hiçbiri
+       'zorunludur' TAVSIYE listesinde yok
+KALDI B-05   [kural 5 kapsam   ] Rekabet Kurulu'na başvurmanız gerekir.
+       ateşlemeli: True   ateşledi: False  ateşleyen kapılar: hiçbiri
+       'başvurmanız gerek' listede yok; 'bildirimde bulunmanız' var
+KALDI B-06   [kural 5 kapsam   ] Devri noterde yapmanız şarttır.
+       ateşlemeli: True   ateşledi: False  ateşleyen kapılar: hiçbiri
+       Türk şekil şartı tavsiyesi — hiç kapsanmıyor
+KALDI B-07   [kural 2 olumsuz  ] Bu işlem için bildirim gerekmez.
+       ateşlemeli: True   ateşledi: False  ateşleyen kapılar: hiçbiri
+       CLAUDE.md §2'nin birebir yasakladığı cümle
+KALDI B-08   [kural 2 olumsuz  ] Hedef bu düzenlemeye tabi değildir.
+       ateşlemeli: True   ateşledi: False  ateşleyen kapılar: hiçbiri
+       CLAUDE.md §2'nin birebir yasakladığı cümle
+KALDI B-09   [kural 2 olumsuz  ] Böyle bir yükümlülük yoktur.
+       ateşlemeli: True   ateşledi: False  ateşleyen kapılar: hiçbiri
+       CLAUDE.md §2'nin birebir yasakladığı cümle
+KALDI B-10   [kural 5 kapsam   ] Kurul'a bildirimde bulunmanız gerekir.\n## YETKİLİ AVUKAT GÖRÜ
+       ateşlemeli: False  ateşledi: True   ateşleyen kapılar: ['kapsam']
+       başlık YERİNDE ama büyük harfle; Python .lower() 'İ' -> 'i'+U+0307
+GEÇTİ B-11   [kural 5 kapsam   ] Kurul'a bildirimde bulunmanız gerekir.\n## Yetkili avukat görü
+GEÇTİ B-12   [kural 1 kanıt    ] Eşik, birleşik ciro için 3.000.000.000 TL'dir.
+KALDI B-13   [kural 1 kanıt    ] Harç tutarı 250.000 TL olarak uygulanır.
+       ateşlemeli: True   ateşledi: False  ateşleyen kapılar: hiçbiri
+       1.000.000 altındaki rakam: ESIK deseni {2,} grup istiyor
+KALDI B-14   [kural 1 kanıt    ] Eşik 3 milyar TL'dir.
+       ateşlemeli: True   ateşledi: False  ateşleyen kapılar: hiçbiri
+       rakam sözle yazılmış — desen yalnızca basamak görür
+KALDI B-15   [kural 1 kanıt    ] Eşik 3.000.000.000 TRY olarak belirlenmiştir.
+       ateşlemeli: True   ateşledi: False  ateşleyen kapılar: hiçbiri
+       TRY para birimi listesinde yok (TL, ₺, EUR, USD, avro, dolar)
+KALDI B-16   [kural 1 kanıt    ] Ceza oranı yıllık gayrisafi gelirin binde biridir.
+       ateşlemeli: True   ateşledi: False  ateşleyen kapılar: hiçbiri
+       oran biçimindeki eşik — hiç kapsanmıyor
+KALDI B-17   [kural 1 kanıt    ] Bir tebliğ söz konusu olabilir. Eşik 3.000.000.000 TL'dir.
+       ateşlemeli: True   ateşledi: False  ateşleyen kapılar: ['arastirma']
+       DAYANAK 'Tebliğ' kelimesini görüyor; gerçek bir atıf yok
+KALDI B-18   [kural 1 kanıt    ] TTK madde 490 pay devrini düzenler.\nAra metin. Ara metin. Ara
+       ateşlemeli: True   ateşledi: False  ateşleyen kapılar: ['arastirma']
+       belge düzeyinde kontrol: 40 satır önceki atıf, ilgisiz rakamı aklıyor
+GEÇTİ B-19   [kural 1 kanıt    ] 2010/4 sayılı Tebliğ eşiği 3.000.000.000 TL olarak belirler.
+GEÇTİ B-20   [kural 3 güncellik] Madde 7 uyarınca. Doğrulama: 2020-01-01
+KALDI B-21   [kural 3 güncellik] Madde 7 uyarınca. Doğrulama: 01.01.2020
+       ateşlemeli: True   ateşledi: False  ateşleyen kapılar: hiçbiri
+       TÜRKÇE TARİH BİÇİMİ — desen yalnızca YYYY-MM-DD görür
+KALDI B-22   [kural 3 güncellik] Eşik 3.000.000.000 TL'dir. 2010/4 sayılı Tebliğ. (tarih yok)
+       ateşlemeli: True   ateşledi: False  ateşleyen kapılar: ['arastirma']
+       hiç doğrulama tarihi taşımayan eşik: kural 3 ihlali, kapı sessiz
+KALDI B-23   [kural 3 güncellik] Madde 7 uyarınca. Doğrulama: 2027-12-31
+       ateşlemeli: True   ateşledi: False  ateşleyen kapılar: hiçbiri
+       GELECEK tarihli doğrulama — yaş negatif, kapı sessiz
+GEÇTİ B-24   [kural 6 sır      ] Proje Şahin işlemin kod adıdır.
+KALDI B-25   [kural 6 sır      ] Proje ŞAHİN işlemin kod adıdır.
+       ateşlemeli: True   ateşledi: False  ateşleyen kapılar: hiçbiri
+       kod adı BÜYÜK HARFLE: desen [a-zçğıöşü]+ istiyor
+KALDI B-26   [kural 6 sır      ] Project Falcon is the deal code name.
+       ateşlemeli: True   ateşledi: False  ateşleyen kapılar: hiçbiri
+       İngilizce kod adı — desen yalnızca 'Proje' arıyor
+KALDI B-27   [kural 6 sır      ] Hedef, Acme Gıda Sanayi ve Ticaret Anonim Şirketi'dir.
+       ateşlemeli: True   ateşledi: False  ateşleyen kapılar: hiçbiri
+       unvan KISALTMASIZ yazılmış — desen A.Ş./Ltd. Şti. arıyor
+KALDI B-28   [kural 6 sır      ] Müvekkilimiz Ayşe Yılmaz'ın payları devredilecek.
+       ateşlemeli: True   ateşledi: False  ateşleyen kapılar: hiçbiri
+       gerçek kişi müvekkil adı — hiç kapsanmıyor
+KALDI B-29   [kural 6 sır      ] İşlem bedeli 4.250.000.000 TL olarak mutabık kalındı.
+       ateşlemeli: True   ateşledi: False  ateşleyen kapılar: ['arastirma', 'kanit']
+       fiyat: CLAUDE.md §6 'fiyat' diyor, kapıda karşılığı yok
+GEÇTİ B-30   [kural 6 sır      ] Hedef Acme Gıda A.Ş. şirketidir.
+GEÇTİ B-31   [kural 11 araştır ] github.com/opensanctions/nomenklatura adresine bak
+GEÇTİ B-32   [kural 11 araştır ] github.com/opensanctions/nomenklatura\nKontrol edildi: API (20
+KALDI B-33   [kural 11 araştır ] github.com/opensanctions/nomenklatura\n    Kontrol edildi: API
+       ateşlemeli: False  ateşledi: True   ateşleyen kapılar: ['arastirma']
+       once-arastir BECERİSİNİN belgelediği GİRİNTİLİ biçim; ^ sütun 0 istiyor
+----------------------------------------------------------------------------------------------------
+33 vaka, 9 geçti, 24 KALDI
+
+========================================================================================================
+KÖR SINAMA C — üretim yolu (gerçek kanca JSON'u, gerçek çıkış kodu)
+========================================================================================================
+KALDI C-01  §5.1'in kendi tr-esikler.md dosyasını Write ile yazmak
+       beklenen: 0                      gerçek: 2
+       kapı iletisi: BLOKLANDI [arastirma] rakam ya da depo anıldı, Kontrol edildi satırı yok
+       kitabın ürettiği, dayanağı ve tarihi tam olan dosya — geçmeli
+KALDI C-02  kitabın istediği TAM biçimde bir çıktıyı dosyaya yazmak
+       beklenen: 0                      gerçek: 2
+       kapı iletisi: BLOKLANDI [arastirma] rakam ya da depo anıldı, Kontrol edildi satırı yok
+       beş kuralın hepsine uyan çıktı: dayanak, tarih, iki başlık, Kontrol edildi
+KALDI C-03  §13 depo tablosunu bir dosyaya yazmak
+       beklenen: 0                      gerçek: 2
+       kapı iletisi: BLOKLANDI [arastirma] rakam ya da depo anıldı, Kontrol edildi satırı yok
+       §13'ün kendi içeriği + Kontrol edildi satırı — geçmeli
+GEÇTİ C-04  kod adıyla WebSearch — bloklanmalı
+KALDI C-05  kod adını curl ile dışarı taşımak
+       beklenen: 2                      gerçek: 0
+       Bash disari listesinde YOK: ('WebSearch','WebFetch') veya mcp__*
+KALDI C-06  hedef unvanını dış API'ye göndermek
+       beklenen: 2                      gerçek: 0
+       aynı içerik WebSearch'te bloklanır, Bash'te geçer
+KALDI C-07  müvekkil belgesini uzak depoya itmek
+       beklenen: 2                      gerçek: 0
+       dışarı giden en sonuçlu Bash fiili
+KALDI C-08  bozuk JSON geldiğinde kapı ne yapar
+       beklenen: 2                      gerçek: 0
+       except -> return 0: kapı AÇIK biçimde başarısız oluyor
+KALDI C-09  settings.json matcher'ı Bash'i kapsıyor mu
+       beklenen: Bash içermeli          gerçek: WebSearch|WebFetch|Write|Edit
+       kapı Bash'i görse bile kanca Bash'te hiç ÇALIŞMIYOR
+KALDI C-10  AYNI metin: öz-sınama yolu vs üretim yolu
+       beklenen: iki yol aynı sonucu vermeli gerçek: öz-sınama=temiz (temiz), üretim=çıkış 2
+       json.dumps satır sonunu \n'e çevirir; re.M ^ artık eşleşmez
+--------------------------------------------------------------------------------------------------------
+10 vaka, 1 geçti, 9 KALDI
+
+=======================================================================
+KÖR SINAMA D — denetim.sh mutasyon sınaması (kontrollü taban çizgisi)
+=======================================================================
+
+--- taban çizgisi doğrulaması ---
+DENETİM OK
+  taban çizgisi yeşil (çıkış 0) — mutasyonlar artık ölçülebilir
+
+--- mutasyonlar: her biri denetimi KIRMIZIYA çevirmeli ---
+  KAÇIRDI   bütün becerileri sil                        << DENETİM OK — bozuk sistemde
+  KAÇIRDI   bütün alt ajanları sil                     << DENETİM OK — bozuk sistemde
+  KAÇIRDI   bütün komutları sil                        << DENETİM OK — bozuk sistemde
+  KAÇIRDI   komut kütüphanesini sil                     << DENETİM OK — bozuk sistemde
+  KAÇIRDI   iki boş koltuğu da sil                      << DENETİM OK — bozuk sistemde
+  KAÇIRDI   CLAUDE.md'yi tek kurala indir                 << DENETİM OK — bozuk sistemde
+  KAÇIRDI   bütün yöntem dosyalarını sil             << DENETİM OK — bozuk sistemde
+  YAKALADI  eşik dosyasından tarihi sil               
+  YAKALADI  bir komuttan avukat başlığını sil      
+  YAKALADI  esik.py eşiğini 10 kat büyüt            
+  YAKALADI  sır kapısını sessizce kapat             
+  KAÇIRDI   çıkar çatışması dosyasını sil         << DENETİM OK — bozuk sistemde
+  KAÇIRDI   settings.json kancasını kaldır             << DENETİM OK — bozuk sistemde
+  KAÇIRDI   koltuk dosyalarının 13'ünü sil            << DENETİM OK — bozuk sistemde
+  KAÇIRDI   esik.py'yi tamamen boşalt                    << DENETİM OK — bozuk sistemde
+
+-----------------------------------------------------------------------
+15 mutasyon · 4 yakalandı · 11 KAÇIRILDI
+
+=======================================================================
+KÖR SINAMA E — kitabın doğrulama komutları vs kitabın beklenen değerleri
+=======================================================================
+
+  GEÇTİ  §3      beklenen=11             gerçek=11            
+  KALDI  §4      beklenen=8              gerçek=9               §7 _koltuklar/ ekliyor; §4'ün beklenen değeri bayatlıyor
+  GEÇTİ  §5.1    beklenen=SELFTEST OK    gerçek=SELFTEST OK   
+  GEÇTİ  §7      beklenen=2              gerçek=2             
+  GEÇTİ  §8      beklenen=2              gerçek=2             
+  KALDI  §9      beklenen=10             gerçek=11              §14 once-arastir becerisini ekliyor; §9'un beklenen değeri bayatlıyor
+  GEÇTİ  §10     beklenen=1              gerçek=1             
+  GEÇTİ  §11     beklenen=9              gerçek=9             
+  KALDI  §12/§14 beklenen=SELFTEST OK    gerçek=SELFTEST HATA   §14 beşinci kapıyı ekliyor ama §12'nin dokuz beklenen kümesini güncellemiyor
+  GEÇTİ  §14b    beklenen=1              gerçek=1             
+  GEÇTİ  §15     beklenen=boş           gerçek=boş          
+  KALDI  §16     beklenen=DENETİM OK    gerçek=BAŞARISIZ      kitaba sadık, eksiksiz kurulum yeşile dönmüyor
+
+--- §13 katalog import kontrolü (kitabın kendi komutu) ---
+  docling        KURULU DEĞİL
+  pdfplumber     KURULU DEĞİL
+  pandera        KURULU DEĞİL
+  nomenklatura   KURULU DEĞİL
+  docx           KURULU DEĞİL
+
+-----------------------------------------------------------------------
+12 doğrulama · 8 geçti · 4 KALDI
+
+  tam mekanizmalı : 0
+  kısmi           : 4  (kanıtlanmış boşluklarla)
+  bozuk           : 1  (üretimde çalışmıyor)
+  hiç kapsanmayan : 6
+
+§12'nin iddiası: 'doktrin baskı altında uyulmayan şeydir; kapılar
+uyulan şeydir.' Ölçüm: on bir kuralın 7 tanesi baskı altında
+çalışan bir mekanizmaya sahip DEĞİL; kalan 4 tanesi kısmi.
+
+###############################################################
+#  ÖZET
+###############################################################
+  A · rekabet eşiği mantığı        8 kaldı
+  B · beş kapı / on bir kural         24 kaldı
+  C · üretim yolu (kanca JSON)         9 kaldı
+  D · denetim mutasyon sınaması       11 kaldı
+  E · kitabın kendi beklenen değerleri 4 kaldı
+  F · doktrin kapsama matrisi           temiz
+  ------------------------------------------------------------
+  toplam başarısız vaka               56
+
+  G · §13 depo kataloğu       -> sinama/ks_g_depolar.md
+  H · §17 kaynak doğrulaması  -> sinama/ks_h_kaynaklar.md
+  I · §5 mevzuat doğrulaması  -> sinama/ks_i_mevzuat.md
