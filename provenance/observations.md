@@ -76,3 +76,22 @@ reading it would establish what was built, never what was discussed or decided.
 
 Everything downstream of this file is built on that record alone. The chat
 contents were not reconstructed, summarised, or guessed at.
+
+## Observed — the prompt system built here
+
+- `tools/prompt_forge.py` scores this repository's own prompts: `base-operator.md` 94, `builder.md` 94, `researcher.md` 92, `archive-ingest.md` 90, `portable-preamble.md` 98, `prompt-smith.md` 100, all at the `system` profile. [src:PROMPT-SCORES-2026-08-27]
+- Two command prompts were edited after the linter found real gaps in them, and re-measured with the same build of the linter: `fleet-sync.md` 78 to 90, `ingest-chats.md` 82 to 100. [src:PROMPT-SCORES-2026-08-27]
+- `bash tests/run_all.sh` passes with the prompt suite added: the verifier, both existing suites, and `tests/test_prompt_forge.py`. [src:PROMPT-SCORES-2026-08-27]
+- Turning the linter on this repository's own prompts is what surfaced its detector bugs: a role written as "You process exports", an escape clause worded "if no export is present, say exactly that and stop", a generic "demonstrate the failure" read as a false premise, a "Constraints:" heading missed by a singular-only cue, and a contradiction rule firing on two words a hundred lines apart. [src:PROMPT-SCORES-2026-08-27]
+
+## Observed — the CLEAR and Saraev research
+
+> Framing, not a claim: the detail, the grading of each source, and what does
+> not follow from it are in [../docs/prompting.md](../docs/prompting.md). Only
+> the load-bearing findings are repeated here.
+
+- The CLEAR prompt-engineering framework — Concise, Logical, Explicit, Adaptive, Reflective — is attributed by search results to Dr. Leo Lo, and no result indicates Nick Saraev created it. [src:WEBSEARCH-CLEAR-2026-08-27]
+- Three third-party repositories, read first-hand, document a DOE framework (Directive, Orchestration, Execution) and two attribute it to Nick Saraev by name; its directive layer specifies "goal, inputs, process steps, tools, edge cases, success criteria, and guardrails". [src:DOE-FETCHES-2026-08-27]
+- Nothing written by Saraev himself was read: the egress gateway refused every host except `raw.githubusercontent.com` and the search API. [src:EGRESS-BLOCKED-2026-08-27]
+- The 200-call web-search budget was exhausted by the research workflow, ending verification for this session. [src:WEBSEARCH-BUDGET-2026-08-27]
+- The research workflow's own findings are recorded verbatim and marked second-hand; one of its agents demonstrated the search summariser attributing other authors' work to Saraev, which is why none of its claims were promoted. [src:SARAEV-WORKFLOW-2026-08-27]

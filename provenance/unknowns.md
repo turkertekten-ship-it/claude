@@ -109,3 +109,61 @@ searched.
 
 **Action taken:** the search was scoped strictly to locating a Claude export.
 No personal Drive file was opened, and nothing was written to Drive.
+
+---
+
+### U-6 — What Nick Saraev actually teaches about prompting
+
+**Unknown:** his method in his own words. Not one sentence he wrote or said was
+read.
+
+**Why:** the egress gateway answered 403 to CONNECT for nicksaraev.com,
+youtube.com, leftclick.ai and every other host outside `raw.githubusercontent.com`
+and the search API [src:EGRESS-BLOCKED-2026-08-27], and the session's 200-call
+search budget was then exhausted [src:WEBSEARCH-BUDGET-2026-08-27]. What exists
+here instead is third-party documentation of a framework attributed to him
+[src:DOE-FETCHES-2026-08-27] and a set of subagent leads
+[src:SARAEV-WORKFLOW-2026-08-27].
+
+**Resolves when:** the same research runs from a network that permits those
+hosts, or the owner drops a transcript or export into `archive/`. The single
+highest-value artifact named by the leads is the video "$2.4M of Prompt
+Engineering Hacks in 53 Mins (GPT, Claude)"
+(`youtube.com/watch?v=CxbHw93oWP0`) — a title, unwatched. For the DOE material
+the leads name `youtube.com/watch?v=bA-WmidVSGo` and
+`youtube.com/watch?v=MxyRjL7NG18`.
+
+**Do not:** write his name against a technique on the strength of a search
+summary. One subagent watched that summariser attribute other authors' work to
+him.
+
+---
+
+### U-7 — What "the clear system of nick saraev" refers to
+
+**Unknown:** whether the owner means Lo's CLEAR framework as taught or used by
+Saraev, something he calls CLEAR that no search surfaced, the DOE framework
+under a remembered name, or two sources conflated.
+
+**Why:** the phrase appears only in the goal string
+[src:SESSION-Y42CYG-2026-08-27]. Searches connect CLEAR to Lo and not to
+Saraev [src:WEBSEARCH-CLEAR-2026-08-27], while the framework third parties do
+attribute to him is named DOE [src:DOE-FETCHES-2026-08-27].
+
+**Resolves when:** the owner names the artifact — a video, a course module, a
+post — where they encountered it.
+
+---
+
+### U-8 — Whether the seven slots are the right seven
+
+**Unknown:** whether this repository's slot set and severities match what the
+owner wants graded. They were derived here, not taken from a published
+framework, and the profile severities are judgement calls.
+
+**Why:** no prior prompt corpus of the owner's was available to calibrate
+against — the chat index holds nothing yet.
+
+**Resolves when:** a body of the owner's real prompts is indexed and scored, and
+the rules that misfire on them are corrected. `prompt_forge.py score` over an
+ingested archive is the measurement.

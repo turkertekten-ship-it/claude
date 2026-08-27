@@ -112,13 +112,17 @@ SLOTS: tuple[Slot, ...] = (
     ),
     Slot(
         "OUTPUT", "OUTPUT CONTRACT",
-        _c(r"\bformat\b|\bjson\b|\byaml\b|\bcsv\b|\bmarkdown\b|\btable\b|\bbullet\b|\bnumbered\b|\bsections?\b|\bschema\b|\btemplate\b|\brespond with\b|\breturn (a|an|the|only|just)\b|\boutput (a|an|the|only|just)\b|\bplain text\b|\bone line\b|\bheadings?\b|\b\d+ (words|sentences|bullets|paragraphs|lines|items)\b|\bdiff\b|\bpatch\b"),
+        _c(r"\bformat\b|\bjson\b|\byaml\b|\bcsv\b|\bmarkdown\b|\btable\b|\bbullet\b|\bnumbered\b|\bsections?\b|\bschema\b|\btemplate\b|\brespond with\b|\breturn (a|an|the|only|just)\b|\boutput (a|an|the|only|just)\b|\bplain text\b|\bone line\b|\bheadings?\b|\b\d+ (words|sentences|bullets|paragraphs|lines|items)\b|\bdiff\b|\bpatch\b"
+           r"|\b(as|in) an? [\w-]{0,12} ?(list|table|block|paragraph|sentence|line|file)\b"
+           r"|\bone line per\b|\ba list of\b|\bno (commentary|preamble|prose)\b"),
         "the exact shape of the reply — format, length, and sections",
         "If the shape is unstated you get prose, and prose has to be re-read by a human before it is usable.",
     ),
     Slot(
         "ACCEPTANCE", "ACCEPTANCE TEST",
-        _c(r"\bdone when\b|\bsuccess (is|means|criteria)\b|\bacceptance\b|\bcriteri(a|on)\b|\bmust pass\b|\bpasses?\b|\bverif(y|ied|ication)\b|\bcheck that\b|\bprove\b|\bfalsif\w*\b|\bdefinition of done\b|\bcorrect (if|when)\b|\bit works when\b|\bso that i can\b|\bjudged? (by|on)\b"),
+        _c(r"\bdone when\b|\bsuccess (is|means|criteria)\b|\bacceptance\b|\bcriteri(a|on)\b|\bmust pass\b|\bpasses?\b|\bverif(y|ied|ication)\b|\bcheck that\b|\bprove\b|\bfalsif\w*\b|\bdefinition of done\b|\bcorrect (if|when)\b|\bit works when\b|\bso that i can\b|\bjudged? (by|on)\b"
+           r"|\b(right|correct|valid|accepted|complete|done) only (if|when)\b|\bonly if\b"
+           r"|\bexits? (0|zero|non-?zero)\b|\bgreen\b"),
         "the check that decides whether the answer is right, written before the answer exists",
         "A prompt with no acceptance test cannot be failed, so it cannot be improved either.",
     ),
@@ -128,7 +132,9 @@ SLOTS: tuple[Slot, ...] = (
            r"|\bif (no|none|nothing|neither|nobody)\b|\b(say|state|report) (so|exactly that|that plainly)\b"
            r"|\btell me\b|\bflag (it|them|that)\b|\bdo(n'?t| not) (guess|invent|fabricate|make up|assume)\b"
            r"|\bunknown\b|\bask (me|first|before)\b|\bstop and\b|\band stop\b|\bthen stop\b"
-           r"|\brather than guess\b|\bno source\b|\bleave (it )?blank\b|\breturn nothing\b|\bexit clean\b"),
+           r"|\brather than guess\b|\bno source\b|\bleave (it )?blank\b|\breturn nothing\b|\bexit clean\b"
+           r"|\babsence is a finding\b|\breport(ing)? (presence and )?absence\b"
+           r"|\b(could|can) ?not reach\b|\bwhat you (could|can) ?not\b"),
         "what to do when the request rests on something that is not there — say so, ask, or stop",
         "Absent this line the model treats producing something as mandatory, and it will.",
     ),
@@ -164,6 +170,16 @@ PROFILES: dict[str, dict[str, str]] = {
     "chat": {
         "ROLE": "off", "CONTEXT": "info", "TASK": "error", "CONSTRAINTS": "info",
         "OUTPUT": "warn", "ACCEPTANCE": "info", "ESCAPE": "warn",
+    },
+    # A standing instruction file for an agent to execute, rather than a
+    # message to a chat. The field list is the one third-party repositories
+    # document for the "directive" layer of the DOE framework they attribute to
+    # Nick Saraev - goal, inputs, process steps, tools, edge cases, success
+    # criteria, guardrails - which is why every one of them is an error here.
+    # See docs/prompting.md for what that attribution does and does not rest on.
+    "directive": {
+        "ROLE": "off", "CONTEXT": "error", "TASK": "error", "CONSTRAINTS": "error",
+        "OUTPUT": "warn", "ACCEPTANCE": "error", "ESCAPE": "error",
     },
 }
 DEFAULT_PROFILE = "task"
@@ -243,27 +259,54 @@ def _detect_contradiction(lines: list[str], text: str) -> list[tuple[int, str]]:
 
 
 def _detect_unbounded(lines: list[str], text: str) -> list[tuple[int, str]]:
-    """`all`, `every`, `everything` with nothing that says how far that reaches."""
-    wide = re.compile(r"\b(all|every|everything|entire|whole|any and all|each and every)\b", re.I)
-    bound = re.compile(
-        r"\b(top|first|up to|at most|no more than|max(imum)?|limit(ed)?|only|within|budget)\b"
-        r"|\b\d+\s*(items?|files?|words?|minutes?|hours?|sources?|results?|examples?|rows?)\b"
-        r"|\bstop (when|after|once)\b",
+    """`all`, `every`, `everything` where nothing says how far that reaches.
+
+    The word alone is not the problem - "for every branch that has commits"
+    names a set precisely. The finding is a sweeping quantifier that is the
+    object of an instruction and carries no qualifier, because that is the one
+    the model has to size for you: "refactor all the modules", "review all my
+    prompts". Four things take a hit back out:
+
+      a qualifier      every file *changed on this branch*
+      a count          all *four* artifacts
+      a recurring event on every *push*
+      an idiom         that changes *everything*
+    """
+    wide = re.compile(r"\b(all|every|everything)\b", re.I)
+    qualifier = re.compile(
+        r"^\s*(?:\w+[\s,]+){0,3}(that|which|who|whose|where|changed|modified|listed|"
+        r"named|matching|created|mentioned|described|defined|marked|flagged|failing|"
+        r"under|below|above|since|before|after|between)\b",
         re.I,
     )
-    # "on every push" names a recurring event, not an open-ended set. The rule
-    # is about unstated extent, and a repeating trigger states its own.
-    idiom = re.compile(r"\b(changes?|changed|means?|meant|is|was|are|were|explains?)\s+everything\b", re.I)
+    counted = re.compile(
+        r"^\s+(one|two|three|four|five|six|seven|eight|nine|ten|\d+)\b", re.I)
+    possessive = re.compile(r"\b(all|every)\s+(my|your|our|their|his|her|its)\b", re.I)
     recurring = re.compile(
         r"\b(every|each)\s+(push|commit|run|release|request|time|day|week|month|hour|"
-        r"minute|session|turn|iteration|cycle|build|deploy|merge|call|request)\b",
+        r"minute|session|turn|iteration|cycle|build|deploy|merge|call)\b",
         re.I,
     )
+    idiom = re.compile(
+        r"\b(changes?|changed|means?|meant|is|was|are|were|explains?|poisons?|costs?)"
+        r"\s+everything\b", re.I)
+    task_verb = SLOT_BY_KEY["TASK"].cue
+
     out = []
     for i, raw in enumerate(lines, start=1):
         bare = INLINE_CODE.sub("", raw)
         m = wide.search(bare)
-        if m and not bound.search(bare) and not recurring.search(bare) and not idiom.search(bare):
+        if not m:
+            continue
+        if recurring.search(bare) or idiom.search(bare):
+            continue
+        tail = bare[m.end():]
+        if qualifier.match(tail) or counted.match(tail):
+            continue
+        # An unsized scope is only expensive when something is being done to it.
+        # "all my prompts" is an instruction's object even without a verb on the
+        # line; "every downstream claim" inside a rationale is not.
+        if task_verb.search(bare) or possessive.search(bare):
             out.append((i, m.group(0)))
     return out
 
@@ -398,7 +441,7 @@ HAZARDS: tuple[Hazard, ...] = (
         "VAGUE_QUANT", "quantity the model has to pick for you", "warn", "precision",
         "'Some examples' is answered with however many the model feels like producing.",
         "Give a number, or a rule that yields one.",
-        pattern=re.compile(r"\b(some|several|a few|many|various|a couple|a bunch of|numerous|multiple)\b", re.I),
+        pattern=re.compile(r"(?<!how )\b(some|several|a few|many|various|a couple|a bunch of|numerous|multiple)\b", re.I),
     ),
     Hazard(
         "HEDGE", "the prompt hedges its own instruction", "warn", "precision",
@@ -443,6 +486,41 @@ HAZARD_BY_ID = {h.id: h for h in HAZARDS}
 # Rules whose words are legitimate when what they name is being forbidden.
 NEGATABLE = {"VAGUE_QUALITY", "VAGUE_QUANT", "FILLER", "ROLE_INFLATION", "HEDGE"}
 NEGATION = re.compile(r"\b(do not|don'?t|never|avoid|without|rather than|instead of|no more)\b[^.]*$", re.I)
+
+
+# --------------------------------------------------------------------------
+# Frameworks
+# --------------------------------------------------------------------------
+
+# Lo's CLEAR framework, used here as a reporting lens over rules this
+# repository defined independently. The letters are his; the rules are not, and
+# the mapping is this repository's reading of where each rule lands. Two of his
+# five describe how you work over time rather than what a prompt contains, so a
+# static check cannot see them - that is stated rather than papered over.
+CLEAR = {
+    "letters": {
+        "C": "Concise — eliminate what does not narrow the task",
+        "L": "Logical — structure it so the relationships are visible",
+        "E": "Explicit — say the format, the scope, the bounds",
+        "A": "Adaptive — vary the formulation and adjust to what comes back",
+        "R": "Reflective — evaluate the output and feed that back into the prompt",
+    },
+    "map": {
+        "FILLER": "C", "ROLE_INFLATION": "C", "WALL": "C",
+        "NO_ROLE": "L", "NO_CONTEXT": "L", "NO_TASK": "L",
+        "CONTRADICTION": "L", "MULTI_ASK": "L", "PRONOUN_START": "L",
+        "NO_OUTPUT": "E", "NO_CONSTRAINTS": "E", "UNBOUNDED": "E", "NO_STOP": "E",
+        "VAGUE_QUALITY": "E", "VAGUE_QUANT": "E", "HEDGE": "E",
+        "PLACEHOLDER": "E", "NO_EXAMPLE": "E",
+        "NO_ACCEPTANCE": "R",
+    },
+    # Rules with no CLEAR equivalent. They are the house's own additions, and
+    # they are the ones that exist because a model that cannot say "no" invents.
+    "unmapped": ["NO_ESCAPE", "FALSE_MEMORY", "FALSE_PREMISE"],
+    # Letters a static reading of one prompt cannot check.
+    "unchecked": ["A"],
+    "attribution": "CLEAR: Lo, The Journal of Academic Librarianship 49(4), 2023 — see docs/prompting.md",
+}
 
 
 # --------------------------------------------------------------------------
@@ -699,6 +777,26 @@ def cmd_lint(args) -> int:
     return worst
 
 
+def _by_clear(report: Report) -> dict[str, int | None]:
+    """Per-component scores. A component with no static check scores None, not
+    100 — reporting a perfect score for something never examined is the same
+    move as reporting a plan as a result."""
+    out: dict[str, int | None] = {
+        letter: (None if letter in CLEAR["unchecked"] else 100)
+        for letter in CLEAR["letters"]
+    }
+    seen = set()
+    for f in report.findings:
+        letter = CLEAR["map"].get(f.rule)
+        if letter is None or f.rule in seen:
+            continue
+        seen.add(f.rule)
+        current = out[letter]
+        if current is not None:
+            out[letter] = max(0, current - WEIGHTS[f.severity] * 2)
+    return out
+
+
 def cmd_score(args) -> int:
     rows, worst = [], 0
     for name in args.files:
@@ -707,10 +805,27 @@ def cmd_score(args) -> int:
         rows.append((label, report))
         if report.score < args.min_score:
             worst = 1
+
+    if args.framework == "clear" and not args.json:
+        for label, r in rows:
+            print(f"{label}  [{r.profile}]  {r.score}/100 ({r.grade})")
+            for letter, score in _by_clear(r).items():
+                shown = "n/a    " if score is None else f"{score:>3}/100"
+                mark = "  (not statically checkable)" if score is None else ""
+                print(f"  {letter}  {shown}  {CLEAR['letters'][letter]}{mark}")
+            unmapped = sorted({f.rule for f in r.findings} & set(CLEAR["unmapped"]))
+            if unmapped:
+                print(f"  outside CLEAR: {', '.join(unmapped)}")
+            print(f"  {CLEAR['attribution']}")
+            print()
+        return worst
+
     if args.json:
         print(json.dumps([
             {"source": l, "score": r.score, "grade": r.grade, "profile": r.profile,
-             "dimensions": _by_dimension(r)}
+             "dimensions": _by_dimension(r),
+             **({"clear": _by_clear(r), "clear_attribution": CLEAR["attribution"]}
+                if args.framework == "clear" else {})}
             for l, r in rows
         ], indent=2))
     else:
@@ -766,6 +881,17 @@ def cmd_rules(args) -> int:
             ],
         }, indent=2))
         return 0
+    if args.framework == "clear":
+        print(f"CLEAR components, and the rules this repository maps to each")
+        print(f"{CLEAR['attribution']}\n")
+        for letter, meaning in CLEAR["letters"].items():
+            mapped = sorted(r for r, l in CLEAR["map"].items() if l == letter)
+            note = "  — no static check; this is a property of how you iterate" \
+                if letter in CLEAR["unchecked"] else ""
+            print(f"  {letter}  {meaning}{note}")
+            print(f"     {', '.join(mapped) if mapped else 'no rule maps here'}")
+        print(f"\n  outside CLEAR (this repository's own): {', '.join(CLEAR['unmapped'])}")
+        return 0
     print(f"profile: {args.profile}\n")
     print("slots (a finding when absent)")
     for s in SLOTS:
@@ -800,6 +926,8 @@ def build_parser() -> argparse.ArgumentParser:
     score.add_argument("files", nargs="+")
     score.add_argument("--json", action="store_true")
     score.add_argument("--min-score", type=int, default=0, help="fail below this score")
+    score.add_argument("--framework", choices=("clear",), default=None,
+                       help="also report per-component scores under a named framework")
     score.set_defaults(func=cmd_score)
 
     comp = sub.add_parser("compile", help="restructure a prompt into the seven slots")
@@ -811,6 +939,8 @@ def build_parser() -> argparse.ArgumentParser:
     rules = sub.add_parser("rules", help="list the rules in force")
     add_profile(rules)
     rules.add_argument("--json", action="store_true")
+    rules.add_argument("--framework", choices=("clear",), default=None,
+                       help="show the mapping to a named framework's components")
     rules.set_defaults(func=cmd_rules)
     return parser
 

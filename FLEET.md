@@ -18,6 +18,7 @@ is the roster and the rules that keep them from overwriting each other.
 | `session_019vCLpJgDUv8BYDRetyqzNq` | RAG system and data pipeline | `claude/rag-system-data-pipeline-rdkde9` | xhigh | both |
 | `session_016cRrEmB1ZKGLpEzUQpSqhC` | Blind testing and OODA analysis | `claude/blind-testing-ooda-5o3s67` | xhigh | both |
 | `session_01WhTTExHdT83QPAKDFZm4fZ` | Go page review and ultrathink OODA | `claude/go-page-ultrathink-ooda-kqxvnc` | xhigh | `claude` only |
+| `session_01Vp6Nnb1YQ9xzppSDMSBEQD` | (untitled) — prompt engineering | `claude/session-y42cyg` | xhigh | both |
 
 ## Observed — fleet state
 
@@ -61,6 +62,11 @@ comm -12 <(git ls-tree -r --name-only origin/<theirs> | sort) \
 Any path in that output is a file two sessions wrote independently. Read both
 versions before resolving; at this concurrency, silent clobbering is the
 likeliest way work disappears.
+
+## Observed — this session
+
+- A fifth session, `session_01Vp6Nnb1YQ9xzppSDMSBEQD`, was created at 2026-08-27T15:00:10Z on `claude-opus-5` at effort `xhigh`, taking both repositories as sources and writing to `claude/session-y42cyg` in each. [src:SESSION-Y42CYG-2026-08-27]
+- Its branch is based on `claude/review-chat-archive-zrynr4` at commit `e392678`, not on the default branch, because the doctrine it extends lives there. [src:PROMPT-SCORES-2026-08-27]
 
 ## Rules
 

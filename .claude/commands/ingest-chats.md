@@ -22,7 +22,7 @@ If a query was given (**$ARGUMENTS**), also run:
 python3 tools/ingest_chat_archive.py search "$ARGUMENTS"
 ```
 
-Then report, using only numbers the tool actually printed:
+Then report, as a short list, using only numbers the tool actually printed:
 
 - conversations, messages, and the real date range
 - how many records were skipped and why — name them; they were not repaired
@@ -35,3 +35,6 @@ correct output for absent input; anything else poisons every downstream claim
 because it will be read as real history.
 
 When quoting a result, carry its message id and source file with it.
+
+The report is right only if every number in it can be pointed at in the
+tool's own output. If you cannot point at it, do not print it.

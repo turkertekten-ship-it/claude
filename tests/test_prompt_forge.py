@@ -128,6 +128,28 @@ def test_narrowings_are_proven() -> None:
           "UNBOUNDED" in rules_for("Refactor everything."))
     check("'on every push' is a recurring trigger, not an open set",
           "UNBOUNDED" not in rules_for("Run the suite on every push."))
+    check("a qualified set is bounded",
+          "UNBOUNDED" not in rules_for("Review every file changed on this branch."))
+    check("a relative clause bounds it too",
+          "UNBOUNDED" not in rules_for("Read the diff for every branch that has commits."))
+    check("a count bounds it",
+          "UNBOUNDED" not in rules_for("Produce all four artifacts."))
+    check("a rationale is not an instruction",
+          "UNBOUNDED" not in rules_for("Anything else poisons every downstream claim."))
+    check("a possessive sweep is a finding even with no verb",
+          "UNBOUNDED" in rules_for("prompt perfection for all my prompts in all my chats"))
+    check("an unqualified object of an instruction is a finding",
+          "UNBOUNDED" in rules_for("Refactor all the modules."))
+    check("'as a short list' states a shape",
+          "NO_OUTPUT" not in rules_for("Report it as a short list."))
+    check("'right only if' states an acceptance test",
+          "NO_ACCEPTANCE" not in rules_for("The report is right only if every number came from the tool."))
+    check("'how many' asks for a number rather than dodging one",
+          "VAGUE_QUANT" not in rules_for("Report how many records were skipped."))
+    check("'some records' still is",
+          "VAGUE_QUANT" in rules_for("Report some records."))
+    check("'absence is a finding' is an escape clause",
+          "NO_ESCAPE" not in rules_for("List the files. Absence is a finding of equal weight. Output: a table."))
     check("a distant contradiction is a warning, a near one an error",
           _contradiction_severity(near=True) == "error"
           and _contradiction_severity(near=False) == "warn",
@@ -251,6 +273,38 @@ def _content(text: str) -> list[str]:
 # --------------------------------------------------------------------------
 
 
+def test_frameworks() -> None:
+    """The CLEAR lens reports honestly, including where it cannot see."""
+    print("\nthe CLEAR lens and the directive profile")
+    clean = pf.analyse((FIXTURES / "clean_task.md").read_text())
+    scores = pf._by_clear(clean)
+    check("every CLEAR letter is reported", set(scores) == set(pf.CLEAR["letters"]), scores)
+    check("an unchecked component scores n/a rather than 100",
+          scores["A"] is None, scores["A"])
+    hazards = pf.analyse((FIXTURES / "hazards.md").read_text())
+    hz = pf._by_clear(hazards)
+    check("a vague prompt loses points on Explicit", (hz["E"] or 100) < 60, hz["E"])
+    check("the house-only rules are declared outside CLEAR",
+          set(pf.CLEAR["unmapped"]) == {"NO_ESCAPE", "FALSE_MEMORY", "FALSE_PREMISE"},
+          pf.CLEAR["unmapped"])
+    mapped = set(pf.CLEAR["map"]) | set(pf.CLEAR["unmapped"])
+    all_rules = {h.id for h in pf.HAZARDS} | {f"NO_{s.key}" for s in pf.SLOTS}
+    check("every rule is either mapped or declared unmapped",
+          all_rules <= mapped, sorted(all_rules - mapped))
+
+    directive = pf.PROFILES["directive"]
+    for slot in ("TASK", "CONTEXT", "CONSTRAINTS", "ACCEPTANCE", "ESCAPE"):
+        check(f"the directive profile requires {slot}",
+              directive[slot] == "error", directive[slot])
+    bare = pf.analyse("Summarise the inbox.", "directive")
+    check("a bare directive fails hard", bare.score < 50, bare.score)
+    proc = run("score", "--profile", "directive", "--framework", "clear",
+               str(FIXTURES / "clean_task.md"))
+    check("score --framework clear runs", proc.returncode == 0, proc.stderr[:80])
+    check("it names its attribution", "Lo" in proc.stdout, proc.stdout[:80])
+    check("it marks the unchecked component", "n/a" in proc.stdout, proc.stdout[:200])
+
+
 def test_exit_codes() -> None:
     print("\nexit codes mean what the house rules say they mean")
     clean = run("lint", str(FIXTURES / "clean_task.md"))
@@ -335,6 +389,7 @@ def main() -> int:
     test_compile_preserves_every_line()
     test_compile_adds_nothing_else()
     test_compile_marks_gaps_rather_than_filling_them()
+    test_frameworks()
     test_exit_codes()
     test_json_is_machine_readable()
     test_scoring_discriminates()

@@ -23,4 +23,11 @@ Two rules for the write-up:
 - A session's own status summary is its claim about itself. Record it as
   second-hand with the reporter named, or verify it from the diff.
 
-Finish with `python3 tools/verify_provenance.py`.
+If a repository holds no branch but your own, or the roster tool is not
+available in this session, say exactly that and stop. An empty fleet is a
+finding, and a roster reconstructed from memory is the failure this command
+exists to prevent.
+
+Finish with `python3 tools/verify_provenance.py`. The sync is done when the
+verifier exits 0 and every session line in `FLEET.md` carries a tag that
+resolves.

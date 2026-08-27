@@ -213,3 +213,79 @@ sources:
       source files. Before the id fix, the same run reported 3 conversations
       ingested but stored only 1 with 44 messages, because the shared
       sessionId caused each file to overwrite the previous one.
+
+  - id: SESSION-Y42CYG-2026-08-27
+    kind: api
+    collected_at: "2026-08-27T15:05Z"
+    method: "mcp__Claude_Code_Remote__get_session(session_id omitted)"
+    evidence: provenance/raw/session-y42cyg-2026-08-27.md
+    note: >-
+      This session's own record: id session_01Vp6Nnb1YQ9xzppSDMSBEQD, branch
+      claude/session-y42cyg in both repositories, model claude-opus-5 at
+      effort xhigh, created 15:00:10Z. Includes the owner's goal string
+      verbatim.
+
+  - id: WEBSEARCH-CLEAR-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:05Z"
+    method: 'WebSearch(query="Nick Saraev CLEAR prompting framework")'
+    evidence: provenance/raw/websearch-clear-2026-08-27T15-05Z.md
+    note: >-
+      Search-index output plus a model-written summary over snippets. The link
+      list is evidence that those results exist and how they are titled. The
+      summary is not a quotation from any page and no page was fetched, so
+      anything resting on it is secondary.
+
+  - id: EGRESS-BLOCKED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:20Z"
+    method: "curl $HTTPS_PROXY/__agentproxy/status; WebFetch(https://nicksaraev.com/)"
+    evidence: provenance/raw/egress-2026-08-27T15-20Z.md
+    note: >-
+      The egress gateway answered 403 to CONNECT for every external host tried,
+      nicksaraev.com, youtube.com, en.wikipedia.org, sciencedirect-adjacent
+      library guides and two transcript mirrors among them. WebFetch returned
+      EGRESS_BLOCKED. Primary sources were therefore unreachable from this
+      container; the proxy README forbids working around a policy denial.
+
+  - id: WEBSEARCH-BUDGET-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:45Z"
+    method: "WebSearch (two further queries, refused)"
+    evidence: provenance/raw/websearch-budget-2026-08-27.md
+    note: >-
+      The session's 200-call web search budget was exhausted by the research
+      workflow, so the CLEAR component list could not be re-confirmed by an
+      independent second query from the main session.
+
+  - id: PROMPT-SCORES-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:55Z"
+    method: "python3 tools/prompt_forge.py score; bash tests/run_all.sh"
+    evidence: provenance/raw/prompt-scores-2026-08-27.md
+    note: >-
+      Before and after columns were produced with the same build of the linter,
+      so the difference reflects the file edits rather than a rule change.
+
+  - id: DOE-FETCHES-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T16:05Z"
+    method: "WebFetch of three raw.githubusercontent.com files (Pvragon/ai-workspace-reference, Vibe-Marketer/Agentic-Workflows-Template, datacraftdevelopment/ClaudeAgent_v3)"
+    evidence: provenance/raw/doe-fetches-2026-08-27.md
+    note: >-
+      Read first-hand by this session. Establishes what those third-party
+      repositories say, not what Nick Saraev said: none is his property, and
+      his own domains were refused by the egress gateway. Two of the three
+      attribute the framework to him by name.
+
+  - id: SARAEV-WORKFLOW-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:02Z-16:00Z"
+    method: "Workflow saraev-clear-research (run wf_6fda65f2-c1d): six search agents, three adversarial verifiers, journal captured verbatim"
+    evidence: provenance/raw/saraev-workflow-2026-08-27.md
+    also: provenance/raw/saraev-dossier-2026-08-27.md
+    note: >-
+      SECOND-HAND. Each line is a subagent's claim about what it saw. No agent
+      could fetch a page outside github.com, so even its `primary`-labelled
+      claims arrived through a search summariser - which one agent demonstrated
+      confabulating, attributing other authors' work to Saraev. Treat as leads.
