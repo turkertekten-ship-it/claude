@@ -64,6 +64,9 @@ class KindPolicy:
     target_tokens: int
     max_tokens: int
     overlap_sentences: int
+    """Minimum sentences of overlap. The effective count is whichever is
+    larger, this or `overlap_ratio` of the target — so a bigger chunk gets
+    proportionally more overlap rather than the same single sentence."""
     atomic: bool = False
     split_on_definitions: bool = False
     label: str = ""
@@ -91,19 +94,54 @@ KIND_POLICIES: dict[str, KindPolicy] = {
 DEFAULT_POLICY = KindPolicy(320, 512, 1, label="default")
 
 
+#: Suffixes whose content is prose even though the connector calls them files.
+PROSE_SUFFIXES = frozenset({
+    ".md", ".markdown", ".rst", ".txt", ".adoc", ".org",
+})
+
+#: Caption files. Prose, but with turn structure rather than headings, so they
+#: take the transcript policy rather than the markdown one.
+TRANSCRIPT_SUFFIXES = frozenset({".vtt", ".srt"})
+
+
 def policy_for(doc: Document) -> KindPolicy:
-    """Choose a policy from the document's kind, then its source system."""
+    """Choose a policy from the document's kind, refined by its file type.
+
+    `kind` alone is not enough. Both file connectors label every local or
+    repository file `file`, markdown included, so routing on `kind` sends a
+    README through the code strategy — no overlap, split on definitions it
+    does not have. The suffix is the thing that actually distinguishes prose
+    from source, so it is consulted first for anything file-shaped.
+    """
     kind = str(doc.metadata.get("kind", "")).lower()
+
+    if kind == "file" or (not kind and doc.source_system in ("file", "github")):
+        suffix = _suffix_of(doc)
+        if suffix in TRANSCRIPT_SUFFIXES:
+            return KIND_POLICIES["video"]
+        if suffix in PROSE_SUFFIXES:
+            return KIND_POLICIES["readme"]
+        return KIND_POLICIES["file"]
+
     if kind in KIND_POLICIES:
         return KIND_POLICIES[kind]
     source = (doc.source_system or "").lower()
     if source in KIND_POLICIES:
         return KIND_POLICIES[source]
-    if source == "github":
-        return KIND_POLICIES["file"]
     if source == "youtube":
         return KIND_POLICIES["video"]
     return DEFAULT_POLICY
+
+
+def _suffix_of(doc: Document) -> str:
+    """The document's file suffix, from metadata or failing that its identifiers."""
+    if suffix := str(doc.metadata.get("suffix", "")).lower():
+        return suffix
+    for candidate in (str(doc.metadata.get("path", "")), doc.external_id, doc.uri, doc.title):
+        base = candidate.rsplit("/", 1)[-1]
+        if "." in base:
+            return "." + base.rsplit(".", 1)[-1].lower()
+    return ""
 
 
 @dataclass(slots=True)
@@ -121,24 +159,45 @@ class ChunkConfig:
     max_tokens: int = 512
     min_tokens: int = 40
     overlap_sentences: int = 1
+    overlap_ratio: float = 0.15
+    """Overlap as a fraction of `target_tokens`. Fixed-count overlap does not
+    scale: one sentence is a reasonable cushion for a 60-token chunk and a
+    token gesture at 320, which measured out at 6.9% — below the 10-20% band
+    where overlap actually protects a claim split across a boundary. The
+    sentence count is derived from this at pack time. Set to 0 to fall back to
+    `overlap_sentences` alone."""
     include_header_in_text: bool = False
     per_kind: bool = True
     """Branch on document kind. Turn off to force one strategy over everything,
     which is useful for an A/B eval run and wrong the rest of the time."""
 
     def resolved(self, policy: KindPolicy) -> ChunkConfig:
-        """This config with the policy's sizing applied.
+        """This config with the policy's sizing applied where the caller was silent.
 
-        Explicit caller settings are not overridden — only the fields the
-        policy exists to vary. A caller who asked for 800-token chunks meant it.
+        A field the caller left at its default is the caller expressing no
+        opinion, and the policy fills it. A field the caller changed is an
+        instruction, and it wins: someone who passes `target_tokens=800` has
+        said what they want, and quietly substituting 320 makes the parameter a
+        lie. This is what lets an eval sweep vary one dimension while per-kind
+        routing still handles the rest.
         """
         if not self.per_kind:
             return self
+        defaults = ChunkConfig()
+        chosen = lambda name, from_policy: (  # noqa: E731
+            getattr(self, name)
+            if getattr(self, name) != getattr(defaults, name)
+            else from_policy
+        )
+        overlap_sentences = chosen("overlap_sentences", policy.overlap_sentences)
         return ChunkConfig(
-            target_tokens=policy.target_tokens,
-            max_tokens=policy.max_tokens,
+            target_tokens=chosen("target_tokens", policy.target_tokens),
+            max_tokens=chosen("max_tokens", policy.max_tokens),
             min_tokens=self.min_tokens,
-            overlap_sentences=policy.overlap_sentences,
+            overlap_sentences=overlap_sentences,
+            # An atomic kind takes no overlap even when a ratio is configured:
+            # between one commit and the next there is no thought to cut.
+            overlap_ratio=0.0 if policy.overlap_sentences == 0 else self.overlap_ratio,
             include_header_in_text=self.include_header_in_text,
             per_kind=True,
         )
@@ -379,6 +438,7 @@ def _pack_prose(body: str, cfg: ChunkConfig) -> list[tuple[str, int, int]]:
     if not sentences:
         return [(body, 0, len(body))]
 
+    overlap_n = _overlap_sentences(sentences, cfg)
     spans = _locate(body, sentences)
     out: list[tuple[str, int, int]] = []
     window: list[int] = []
@@ -388,7 +448,7 @@ def _pack_prose(body: str, cfg: ChunkConfig) -> list[tuple[str, int, int]]:
         cost = estimate_tokens(sentence)
         if window and tokens + cost > cfg.target_tokens:
             out.append(_emit(body, spans, window))
-            keep = window[-cfg.overlap_sentences :] if cfg.overlap_sentences else []
+            keep = window[-overlap_n:] if overlap_n else []
             window = list(keep)
             tokens = sum(estimate_tokens(sentences[j]) for j in window)
         window.append(i)
@@ -402,6 +462,24 @@ def _pack_prose(body: str, cfg: ChunkConfig) -> list[tuple[str, int, int]]:
     if window:
         out.append(_emit(body, spans, window))
     return out
+
+
+def _overlap_sentences(sentences: list[str], cfg: ChunkConfig) -> int:
+    """How many trailing sentences to carry into the next window.
+
+    Derived from `overlap_ratio` rather than fixed, because a fixed count does
+    not scale with chunk size: one average sentence is a real cushion at 60
+    tokens and a gesture at 320. Capped at a third of the target so overlap can
+    never dominate the window it is protecting.
+    """
+    if cfg.overlap_ratio <= 0:
+        return max(0, cfg.overlap_sentences)
+    sample = sentences[: min(len(sentences), 24)]
+    avg = max(1.0, sum(estimate_tokens(s) for s in sample) / len(sample))
+    budget = cfg.target_tokens * cfg.overlap_ratio
+    derived = int(round(budget / avg))
+    ceiling = max(1, int(cfg.target_tokens / (3 * avg)))
+    return max(cfg.overlap_sentences, min(derived, ceiling))
 
 
 def _locate(body: str, sentences: list[str]) -> list[tuple[int, int]]:

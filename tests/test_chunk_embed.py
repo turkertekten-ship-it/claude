@@ -18,6 +18,7 @@ from oodarag.chunk import (  # noqa: E402
 )
 from oodarag.embed import HashingEmbedder, cosine, pack, unpack  # noqa: E402
 from oodarag.models import Document, RawDocument  # noqa: E402
+from oodarag.util.text import estimate_tokens, split_sentences  # noqa: E402
 
 MARKDOWN = """# Budgets
 
@@ -54,6 +55,50 @@ class TestChunking(unittest.TestCase):
         )
         chunks = chunk_document(make_doc(big))
         self.assertGreaterEqual(len(chunks), 3)
+
+    def test_overlap_lands_inside_the_recommended_band(self) -> None:
+        # Fixed one-sentence overlap measured 6.9% of a 320-token chunk, below
+        # the 10-20% where overlap actually protects a claim split across a
+        # boundary. It is derived from the target size now.
+        prose = " ".join(
+            f"Sentence {i} of a long prose document about retrieval systems "
+            "and the ways they fail." for i in range(120)
+        )
+        chunks = chunk_document(make_doc(prose))
+        sizes = [estimate_tokens(c.text) for c in chunks]
+        shared = [
+            sum(estimate_tokens(x) for x in split_sentences(a.text)
+                if x in split_sentences(b.text))
+            for a, b in zip(chunks, chunks[1:], strict=False)
+        ]
+        self.assertTrue(shared, "expected more than one chunk")
+        ratio = (sum(shared) / len(shared)) / (sum(sizes) / len(sizes))
+        self.assertGreater(ratio, 0.10, f"overlap {ratio:.1%} is below the band")
+        self.assertLess(ratio, 0.25, f"overlap {ratio:.1%} is above the band")
+
+    def test_overlap_scales_with_chunk_size(self) -> None:
+        prose = " ".join(f"Sentence {i} with a handful of words in it." for i in range(200))
+        small = chunk_document(make_doc(prose), ChunkConfig(target_tokens=80, max_tokens=120))
+        large = chunk_document(make_doc(prose), ChunkConfig(target_tokens=400, max_tokens=600))
+
+        def overlap_tokens(chunks: list) -> float:
+            pairs = [
+                sum(estimate_tokens(x) for x in split_sentences(a.text)
+                    if x in split_sentences(b.text))
+                for a, b in zip(chunks, chunks[1:], strict=False)
+            ]
+            return sum(pairs) / len(pairs) if pairs else 0.0
+
+        self.assertGreater(overlap_tokens(large), overlap_tokens(small))
+
+    def test_atomic_kinds_still_take_no_overlap(self) -> None:
+        # The ratio must not reintroduce overlap where there is no thought to
+        # cut between one unit and the next.
+        long_commit = " ".join(f"Line {i} of a very long commit body." for i in range(400))
+        chunks = chunk_document(kinded_doc(long_commit, "commit"))
+        for a, b in zip(chunks, chunks[1:], strict=False):
+            common = [x for x in split_sentences(a.text) if x in split_sentences(b.text)]
+            self.assertEqual(common, [], "atomic kinds must not overlap")
 
     def test_a_merged_chunk_never_claims_a_heading_only_part_of_it_belongs_to(self) -> None:
         # The trap this guards: folding a runt from "Bytes" into a chunk from
@@ -298,6 +343,42 @@ class TestEmbedding(unittest.TestCase):
         self.assertEqual(len(restored), len(vec))
         for original, back in zip(vec, restored, strict=True):
             self.assertAlmostEqual(original, back, places=6)
+
+    def test_a_repeated_text_is_embedded_once(self) -> None:
+        # Boilerplate — a licence header, a copied README section — appears
+        # verbatim across many documents. Re-embedding it each time is the
+        # normal case, not an edge case.
+        embedder = HashingEmbedder()
+        embedder.embed_batch(["identical boilerplate line"] * 50)
+        self.assertEqual(embedder.stats["misses"], 1)
+        self.assertEqual(embedder.stats["hits"], 49)
+
+    def test_a_cached_vector_equals_a_freshly_computed_one(self) -> None:
+        # The cache must be invisible in the output, or it is a correctness bug
+        # rather than an optimisation.
+        cached = HashingEmbedder()
+        fresh = HashingEmbedder(cache_size=0)
+        text = "hybrid retrieval fuses lexical and dense arms"
+        cached.embed(text)
+        self.assertEqual(cached.embed(text), fresh.embed(text))
+
+    def test_the_cache_evicts_rather_than_growing_without_bound(self) -> None:
+        embedder = HashingEmbedder(cache_size=8)
+        embedder.embed_batch([f"text number {i}" for i in range(50)])
+        self.assertLessEqual(len(embedder._cache), 8)
+
+    def test_a_mutated_returned_vector_does_not_corrupt_the_cache(self) -> None:
+        # The cache hands out copies; without that, one caller normalising in
+        # place would poison every later hit.
+        embedder = HashingEmbedder()
+        first = embedder.embed("shared text")
+        first[0] = 999.0
+        self.assertNotEqual(embedder.embed("shared text")[0], 999.0)
+
+    def test_the_cache_can_be_switched_off(self) -> None:
+        embedder = HashingEmbedder(cache_size=0)
+        embedder.embed_batch(["same"] * 5)
+        self.assertEqual(embedder.stats, {"hits": 0, "misses": 0})
 
     def test_embeddings_are_identical_in_a_separate_process(self) -> None:
         # The reason `hash()` is never used: string hashing is salted per

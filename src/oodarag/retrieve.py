@@ -71,6 +71,15 @@ class RetrievalConfig:
     authority_weight: float = 0.15
     phrase_bonus: float = 0.10
     min_score: float = 0.0
+    """Absolute floor on the fused score. Off by default, deliberately.
+
+    A fused RRF score is not a similarity: with k=60 a top-ranked hit in both
+    arms scores about 0.033, and the value has no meaning outside the query
+    that produced it. A fixed threshold on it would be a magic number that
+    silently drops results on one corpus and nothing on another. Abstention is
+    handled where it can be judged — in the generator, against the retrieved
+    text — rather than here against an uncalibrated number.
+    """
     source_authority: dict[str, float] = field(default_factory=dict)
 
 
@@ -83,6 +92,7 @@ class RetrievalReport:
     dense_hits: int = 0
     fused: int = 0
     returned: int = 0
+    filtered_out: int = 0
     arms_used: list[str] = field(default_factory=list)
 
     def as_dict(self) -> dict[str, object]:
@@ -92,6 +102,7 @@ class RetrievalReport:
             "dense_hits": self.dense_hits,
             "fused": self.fused,
             "returned": self.returned,
+            "filtered_out": self.filtered_out,
             "arms_used": self.arms_used,
         }
 
@@ -125,13 +136,33 @@ class Retriever:
         self.embedder = embedder or HashingEmbedder()
         self.config = config or RetrievalConfig()
 
-    def search(self, query: str, k: int | None = None) -> list[ScoredChunk]:
-        results, _ = self.search_with_report(query, k)
+    def search(
+        self,
+        query: str,
+        k: int | None = None,
+        filters: dict[str, object] | None = None,
+    ) -> list[ScoredChunk]:
+        results, _ = self.search_with_report(query, k, filters)
         return results
 
     def search_with_report(
-        self, query: str, k: int | None = None
+        self,
+        query: str,
+        k: int | None = None,
+        filters: dict[str, object] | None = None,
     ) -> tuple[list[ScoredChunk], RetrievalReport]:
+        """Search, optionally restricted to chunks whose metadata matches.
+
+        Filtering happens *after* fusion rather than inside each arm, so the
+        arms still see the whole corpus and their ranks stay comparable. The
+        cost is that a narrow filter over a large corpus can return fewer than
+        `k`; the report says how many were dropped, so a thin result set is
+        diagnosable rather than mysterious.
+
+        A list or set value matches any member, so
+        `filters={"source_system": ["github", "file"]}` is one call rather than
+        two searches merged by hand.
+        """
         cfg = self.config
         top_k = k or cfg.top_k
         report = RetrievalReport(query=query)
@@ -177,6 +208,10 @@ class Retriever:
             for arm, scores in raw.items():
                 if chunk_id in scores:
                     components[f"{arm}_raw"] = scores[chunk_id]
+
+            if filters and not _matches(chunk, filters):
+                report.filtered_out += 1
+                continue
 
             adjust = self._rerank_bonus(chunk, query, query_terms, components)
             total = base * (1.0 + adjust)
@@ -268,6 +303,25 @@ class Retriever:
             bonus += 0.05
 
         return bonus
+
+
+def _matches(chunk: Chunk, filters: dict[str, object]) -> bool:
+    """Does this chunk's metadata satisfy every filter?
+
+    A chunk missing the key fails rather than passing. Absent metadata is not
+    evidence of a match, and treating it as one is how a filtered search
+    quietly returns the thing it was told to exclude.
+    """
+    for key, wanted in filters.items():
+        if key not in chunk.metadata:
+            return False
+        actual = chunk.metadata[key]
+        if isinstance(wanted, (list, tuple, set, frozenset)):
+            if actual not in wanted:
+                return False
+        elif actual != wanted:
+            return False
+    return True
 
 
 _WORD_RE = re.compile(r"\w+")

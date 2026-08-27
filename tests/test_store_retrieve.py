@@ -151,6 +151,35 @@ class TestRetriever(unittest.TestCase):
     def test_empty_query_returns_nothing(self) -> None:
         self.assertEqual(self.retriever.search("  "), [])
 
+    def test_a_metadata_filter_restricts_the_result_set(self) -> None:
+        results = self.retriever.search("budget bytes fusion caption",
+                                        filters={"source_system": "file"})
+        self.assertTrue(results)
+        for hit in results:
+            self.assertEqual(hit.chunk.metadata["source_system"], "file")
+
+    def test_a_filter_matching_nothing_returns_nothing(self) -> None:
+        self.assertEqual(
+            self.retriever.search("budget", filters={"source_system": "nonexistent"}), []
+        )
+
+    def test_a_list_filter_matches_any_member(self) -> None:
+        both = self.retriever.search("budget bytes",
+                                     filters={"source_system": ["file", "github"]})
+        self.assertTrue(both)
+
+    def test_a_chunk_missing_the_key_does_not_pass_the_filter(self) -> None:
+        # Absent metadata is not evidence of a match; treating it as one is how
+        # a filtered search returns the thing it was told to exclude.
+        self.assertEqual(self.retriever.search("budget", filters={"absent_key": "x"}), [])
+
+    def test_the_report_says_how_many_were_filtered_out(self) -> None:
+        _results, report = self.retriever.search_with_report(
+            "budget bytes fusion", filters={"source_system": "nonexistent"}
+        )
+        self.assertGreater(report.filtered_out, 0)
+        self.assertEqual(report.returned, 0)
+
     def test_top_k_is_respected(self) -> None:
         self.assertLessEqual(len(self.retriever.search("budget fusion caption", 2)), 2)
 

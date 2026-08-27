@@ -84,7 +84,7 @@ verified lives in [unknowns.md](unknowns.md), not here.
 
 - The two unrelated histories on this repository were merged onto one root. The only conflicts were the two files FLEET.md predicted, `.gitignore` and `README.md`; both sides were read before resolving, and the verifier reported 0 violations afterwards. [src:UNIFIED-ROOT-2026-08-27]
 - SQLite's FTS5 `bm25()` returns a negative score where a better match is numerically smaller, so ascending order is best-first; on a 3-document corpus every score collapsed to -0.00000 because the IDF term vanishes when a term appears in most documents. [src:FTS5-BM25-SIGN-2026-08-27]
-- The full suite — unit tests plus the two doctrine suites and the provenance verifier — passed: 207 tests, all checks green. [src:OODARAG-VERIFIED-2026-08-27]
+- The full suite — unit tests plus the two doctrine suites and the provenance verifier — passed: 236 tests, all checks green. [src:OODARAG-VERIFIED-2026-08-27]
 - Python's `urllib.robotparser` applies robots.txt rules in file order rather than by specificity: with `Disallow: /private/` before `Allow: /private/public-bit` it refused the explicitly-allowed path, and reversing the two lines reversed the verdict. [src:ROBOTS-FIRST-MATCH-2026-08-27]
 - The secret redactor did not redact `AWS_SECRET_ACCESS_KEY=...`, because its generic key=value pattern required a word boundary before the key name and underscores are word characters. [src:REDACTION-COMPOUND-KEY-2026-08-27]
 - The retrieval evaluation over 8 golden cases passed all 8, at recall@8 0.9286, MRR 0.9286 and nDCG@8 0.892, with zero citation problems, zero contaminated cases, and the one abstention case abstaining as required. [src:OODARAG-VERIFIED-2026-08-27]
@@ -105,6 +105,8 @@ verified lives in [unknowns.md](unknowns.md), not here.
 
 - The audit raised five findings against `src/oodarag/`: a console script with no `cli.py`, a README table presenting planned work as delivered, four Makefile targets that could not succeed, a chunking contract with no implementation, and the `estimate_tokens` heuristic that the eval harness would inherit. [src:SIBLING-AUDIT-2026-08-27]
 - All five are now closed on this branch, four of them by work done independently before the audit was read. [src:AUDIT-CLOSED-2026-08-27]
+- The audit was re-run against the completed pipeline, as its closing line asked. The four categories it could not previously assess were assessed, and three further defects were found by measuring: overlap at 6.9% against a 10-20% recommendation, prose routed through the code chunking strategy, and caller-supplied chunk sizing silently overridden by the policy. All three are fixed, and overlap now measures 18.0%. [src:AUDIT-RERUN-2026-08-27]
+- A documented embedding cache did not exist and now does: 49.5% hit rate on a half-duplicate batch, 1.9x faster than uncached. [src:AUDIT-RERUN-2026-08-27]
 - The audit also passed three of the README's claims — redaction at the connector boundary, bounded crawls on four axes, and provenance carried through the data model — and noted that its remaining categories could not be assessed because those stages did not exist. [src:SIBLING-AUDIT-2026-08-27]
 
 ## Second-hand — the owner's own documents

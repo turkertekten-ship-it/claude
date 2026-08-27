@@ -383,3 +383,14 @@ sources:
       captions.download publish only youtube.force-ssl and youtubepartner —
       both write-grade. Captions therefore have no read-only surface at all,
       which is a property of the API's design rather than of any key.
+
+  - id: AUDIT-RERUN-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T16:45Z"
+    method: "chunk/embed measurement script; make test; make demo; reading src/oodarag/ against the six rag-audit categories"
+    evidence: provenance/raw/audit-rerun-2026-08-27.txt
+    note: >-
+      Overlap measured 18.0% of a 319-token average chunk after the fix, from
+      6.9% before it. Embedding cache hit rate 49.5% on a half-duplicate batch.
+      Four chunking policies active: markdown, code, atomic, transcript.
+      236 tests pass; eval recall@8 0.9286, MRR 0.9286, nDCG@8 0.892.

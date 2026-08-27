@@ -27,10 +27,10 @@ a query vector computed in the next.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Protocol
 
-from oodarag.util.hashing import blake_bucket, blake_sign
+from oodarag.util.hashing import blake_bucket, blake_sign, content_hash
 from oodarag.util.text import char_ngrams, tokenize
 
 Vector = list[float]
@@ -70,8 +70,54 @@ class HashingEmbedder:
     ngram_size: int = 4
     ngram_weight: float = 0.35
     sublinear_tf: bool = True
+    cache_size: int = 4096
+    """Entries kept in the content-hash cache. Set to 0 to disable.
+
+    Duplicate text is the normal case, not an edge case: a licence header, a
+    boilerplate paragraph or a copied README section appears verbatim across
+    many documents, and a re-ingest re-embeds every unchanged chunk that
+    survived a sibling's change. Keying on the content hash rather than on
+    identity means those all collapse to one computation.
+    """
+
+    _cache: dict[str, Vector] = field(default_factory=dict, init=False, repr=False)
+    _order: list[str] = field(default_factory=list, init=False, repr=False)
+    stats: dict[str, int] = field(
+        default_factory=lambda: {"hits": 0, "misses": 0}, repr=False
+    )
 
     def embed(self, text: str) -> Vector:
+        if self.cache_size > 0:
+            key = content_hash(text)
+            hit = self._cache.get(key)
+            if hit is not None:
+                self.stats["hits"] += 1
+                return list(hit)
+            self.stats["misses"] += 1
+            vec = self._compute(text)
+            self._remember(key, vec)
+            return list(vec)
+        return self._compute(text)
+
+    def _remember(self, key: str, vec: Vector) -> None:
+        """Insert, evicting the oldest entry when full.
+
+        Plain FIFO rather than LRU: ingestion walks a corpus once in order, so
+        recency and insertion order coincide and the bookkeeping LRU would add
+        buys nothing here.
+        """
+        self._cache[key] = vec
+        self._order.append(key)
+        while len(self._order) > self.cache_size:
+            oldest = self._order.pop(0)
+            self._cache.pop(oldest, None)
+
+    @property
+    def hit_rate(self) -> float:
+        total = self.stats["hits"] + self.stats["misses"]
+        return self.stats["hits"] / total if total else 0.0
+
+    def _compute(self, text: str) -> Vector:
         vec = [0.0] * self.dim
         tokens = tokenize(text)
         if not tokens:
@@ -96,6 +142,7 @@ class HashingEmbedder:
         return l2_normalize(vec)
 
     def embed_batch(self, texts: list[str]) -> list[Vector]:
+        """Embed many texts. Duplicates within the batch cost one computation."""
         return [self.embed(t) for t in texts]
 
 
