@@ -177,6 +177,25 @@ def main() -> int:
         check("the collision fixtures are in this count", first >= 7, first)
         conn.close()
 
+    print("selfcheck cases")
+    import subprocess as sp
+    good = sp.run([sys.executable, str(REPO / "tools" / "ingest_chat_archive.py"), "selfcheck"],
+                  capture_output=True, text=True)
+    check("selfcheck passes on this copy", good.returncode == 0, good.stdout[-200:])
+
+    # Revert only the fix and confirm the detector catches it. A detector that
+    # cannot fail proves nothing about the copies it is meant to screen.
+    with tempfile.TemporaryDirectory() as tmp2:
+        src = (REPO / "tools" / "ingest_chat_archive.py").read_text()
+        marker = 'key = session if path.stem == session else f"{session}:{path.stem}"'
+        broken = src.replace("        " + marker, "        key = session", 1)
+        check("the fix line is present to revert", broken != src)
+        target = Path(tmp2) / "ingest_chat_archive.py"
+        target.write_text(broken)
+        bad = sp.run([sys.executable, str(target), "selfcheck"], capture_output=True, text=True)
+        check("selfcheck fails when the fix is reverted", bad.returncode == 1, bad.returncode)
+        check("failure names the data loss", "SILENTLY DISCARDS" in bad.stdout)
+
     print()
     if FAILURES:
         print(f"FAILED: {len(FAILURES)} case(s): {', '.join(FAILURES)}")

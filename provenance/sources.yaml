@@ -213,3 +213,36 @@ sources:
       source files. Before the id fix, the same run reported 3 conversations
       ingested but stored only 1 with 44 messages, because the shared
       sessionId caused each file to overwrite the previous one.
+
+  - id: PARITY-MERGE-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:12Z"
+    method: "git log --graph origin/claude/code-playground-parity-xw0snj; git merge-base --is-ancestor per commit; git show <branch>:tools/ingest_chat_archive.py | grep"
+    evidence: >-
+      Merge commit e7ab452, subject "Merge fleet doctrine substrate into the
+      parity branch", has parents 1d7ce8f (the RAG branch root) and e37b4c2
+      (this branch's first commit). merge-base --is-ancestor reports e37b4c2 IN
+      parity, and f304fce, b11a6fa, e392678 NOT in parity. The branch's copy of
+      tools/ingest_chat_archive.py contains "session = record.get(...)" keyed
+      directly into Conversation(id=f"cc:{session}") with zero occurrences of
+      the "path.stem == session" fix.
+
+  - id: FLEET-14-2026-08-27
+    kind: api
+    collected_at: "2026-08-27T15:10Z"
+    method: "mcp__Claude_Code_Remote__list_sessions(limit=20, mine=true)"
+    evidence: >-
+      The listing returned 14 sessions, all SESSION_STATUS_RUNNING on
+      env_01GEni7AgBA7NiyMBecyt7K1, created between 14:07:19Z and 15:00:53Z.
+      Ten did not exist at the 14:27Z capture. All but one take both
+      repositories as sources; each declares its own outcome branch.
+
+  - id: SELFCHECK-VALIDATED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:14Z"
+    method: "python3 tools/ingest_chat_archive.py selfcheck on this copy, and on a copy with only the fix line reverted"
+    evidence: >-
+      On this copy: 2 conversations and 2 messages stored, "OK — this copy
+      keeps both transcripts", exit 0. On the copy with the fix reverted and
+      nothing else changed: 1 conversation and 1 message stored, "FAIL — this
+      copy SILENTLY DISCARDS transcripts", exit 1.
