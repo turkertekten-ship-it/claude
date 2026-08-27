@@ -24,6 +24,7 @@ anything else.
 - Each session writes to its own outcome branch; 12 of 13 take both repositories as sources, and `Go page review and ultrathink OODA` takes only `turkertekten-ship-it/claude`. [src:FLEET-13-2026-08-27]
 - Nine of the 13 run at `effort_level: xhigh`; the remaining four run at `high`. [src:FLEET-13-2026-08-27]
 - The goal strings are the owner's typed input, not generated labels: they carry consistent personal voice, first-person framing, and recurring spelling variants such as `ultrahtink`, `conitnue`, `chechers`, `usefull` and `capaiblities`. [src:GOALS-2026-08-27]
+- The field is **mutable**. Re-issuing `/goal` replaces the string, and only the latest survives, so any single capture is a snapshot rather than a complete record. [src:GOALS-REISSUED-2026-08-27]
 - Session titles, by contrast, are generated labels and none of the analysis below rests on them. [src:GOALS-2026-08-27]
 
 ## The 11 goal strings, verbatim
@@ -45,6 +46,40 @@ Ordered oldest session first. Spelling and punctuation are exactly as captured.
 | G11 | Untitled session | `i need prompt engineering and prompt perfection for all my prompts in all my chats and all my terminals, for the clear system of nick saraev to be used for him to be researched learned about and all his learnings built in to my system ultrahtink ooda use workflows and sub agents` |
 
 G4 is this session's own goal.
+
+## Observed — a second capture, 26 minutes later
+
+> Framing, not a claim: a re-read at 15:30Z found the corpus had changed
+> underneath the first one. That is the single most important thing in this
+> file — the goal field is not a static record.
+
+- A fourteenth session had appeared, carrying a twelfth distinct goal: `install use and utilize all of the borris churney material you can find and use it for all my prompts systems and chats ooda use workflows and subagents`. [src:GOALS-REISSUED-2026-08-27]
+- Four of the fourteen sessions carried a *different* goal at 15:30Z than at 15:04Z, and two of those had been null at the first capture. [src:GOALS-REISSUED-2026-08-27]
+- Three of those four re-issues were `continue ultrathink ooda`, bringing the number of sessions currently carrying that exact string to four. [src:GOALS-REISSUED-2026-08-27]
+- The fourth re-issue was not a new task but a **correction**, and it is quoted in full below. [src:GOALS-REISSUED-2026-08-27]
+- One session's goal was marked `met: true` — the only one so far. [src:GOALS-REISSUED-2026-08-27]
+
+## G13 — the correction
+
+Issued to `Goal prompt task division`, replacing G8:
+
+> `ultrathink continue ooda this is not even close to being enough dont stop do
+> all and research more from web and git hub install add to files route and
+> utilize your research more and run at least 20 of these cycles ultrathink ooda`
+
+This is follow-up feedback of exactly the kind the first capture concluded was
+unreachable — the owner reading a result, judging it insufficient, and saying
+so. It is worth more per word than any opening line in the table above, because
+it is the only line in the corpus that reacts to delivered work rather than
+requesting it.
+
+Three things it establishes that no opening goal did:
+`this is not even close to being enough` and `dont stop do all` — the first
+deliverable is not the finish line. `research more from web and git hub install
+add to files route and utilize your research more` — research is expected to
+land in files and be routed to, not merely reported. `run at least 20 of these
+cycles` — the owner counts iterations, and treats a single pass as a starting
+point.
 
 ## Observed — term frequencies across the 11 goals
 
@@ -78,10 +113,15 @@ G4 is this session's own goal.
 
 ## What this corpus is not
 
-It is not the conversation history. A goal string is one line the owner typed
-to open a session. It does not contain the follow-up turns, the corrections,
-the rejected suggestions, or the reasoning — which is exactly where most of the
-useful signal in a real chat archive lives.
+It is not the conversation history. A goal string is one line the owner typed,
+and the field holds only the most recent one. It does not contain the ordinary
+follow-up turns, the rejected suggestions, or the reasoning — which is where
+most of the useful signal in a real chat archive lives.
+
+The one exception is a re-issued goal, and G13 shows why it matters: when the
+owner replaces a goal, the replacement is feedback on what was delivered. That
+makes repeated capture worth doing. Sampling this field once gives opening
+lines; sampling it repeatedly catches corrections. Neither is a transcript.
 
 The register for that material remains open as U-2 in
 [../provenance/unknowns.md](../provenance/unknowns.md), and it resolves the same

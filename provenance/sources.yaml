@@ -459,3 +459,22 @@ sources:
       histories hazard therefore does NOT apply in this repository: the fleet
       converged on one root. This session branched from it rather than adding a
       sixth.
+
+  - id: GOALS-REISSUED-2026-08-27
+    kind: user_statement
+    collected_at: "2026-08-27T15:30Z"
+    method: "mcp__Claude_Code_Remote__list_sessions(limit=60, mine=true), compared field-by-field against the 15:04Z capture"
+    evidence: provenance/raw/sessions-2026-08-27T15-30Z.json
+    note: >-
+      goal.condition is MUTABLE: re-issuing /goal in a session replaces the
+      string, and only the latest survives in the field. Four of the fourteen
+      sessions had a different goal at 15:30Z than at 15:04Z, and two of those
+      had been null before. One is a correction rather than a new task -
+      "ultrathink continue ooda this is not even close to being enough dont stop
+      do all and research more from web and git hub install add to files route
+      and utilize your research more and run at least 20 of these cycles
+      ultrathink ooda" - which is follow-up feedback of exactly the kind the
+      first capture could not reach. Four sessions now carry "continue ultrathink
+      ooda" as their current goal. A fourteenth session appeared, asking to
+      install and utilize "borris churney" material across all prompts, systems
+      and chats, using workflows and subagents.

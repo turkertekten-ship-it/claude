@@ -118,6 +118,15 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - After both merges the inherited blind-test suites pass in this tree: 72 tests, OK, 1 skipped. [src:SIBLING-MERGES-2026-08-27T1525Z]
 - All five branches on the `claude-ai` remote share one root commit, `a21b4f48`, so the unrelated-histories hazard does not apply there — the fleet converged. This session branched from that root rather than adding a sixth. [src:CLAUDE-AI-SHARED-ROOT-2026-08-27]
 
+## Observed — the goal corpus is mutable
+
+- A second capture at 15:30Z found 14 sessions, and four of them carried a different goal than at 15:04Z; two of those four had been null before. [src:GOALS-REISSUED-2026-08-27]
+- Re-issuing `/goal` replaces the string in place, so only the latest survives and any single reading of the field is a snapshot. [src:GOALS-REISSUED-2026-08-27]
+- Three of the four re-issues were `continue ultrathink ooda`; four sessions now carry that exact string. [src:GOALS-REISSUED-2026-08-27]
+- The fourth was a correction rather than a new task: `this is not even close to being enough dont stop do all ... run at least 20 of these cycles`. It is the only line in the corpus that reacts to delivered work instead of requesting it. [src:GOALS-REISSUED-2026-08-27]
+- A fourteenth session asks for `borris churney` material to be installed and utilised across all prompts, systems and chats, using workflows and subagents — the second goal to name an external figure whose work should be absorbed. [src:GOALS-REISSUED-2026-08-27]
+- On this evidence P5 (continue until nothing is open) and P9 (use workflows and subagents) were both upgraded from Moderate to Strong in `profile/OWNER-PROFILE.md`. [src:GOALS-REISSUED-2026-08-27]
+
 ## Conclusion
 
 The request that opened this session asked to look at "all my previous claude

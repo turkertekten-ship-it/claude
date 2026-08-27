@@ -13,6 +13,6 @@
 {"question": "Why does redaction run at the connector boundary and again during normalization?", "relevant_uris": ["evals/corpus/secret-redaction.md"], "relevant_doc_ids": [], "must_include": ["normalization"], "should_abstain": false}
 {"question": "What are the four phases of the OODA loop?", "relevant_uris": ["evals/corpus/ooda-loop.md"], "relevant_doc_ids": [], "must_include": ["Observe"], "should_abstain": false}
 {"question": "Why are citations verified by substring containment rather than trusted?", "relevant_uris": ["evals/corpus/citations-and-abstention.md"], "relevant_doc_ids": [], "must_include": ["substring"], "should_abstain": false}
-{"question": "How much does the OpenAI GPT-4 API charge per million input tokens?", "relevant_uris": [], "relevant_doc_ids": [], "must_include": [], "should_abstain": true}
-{"question": "What memory limit should I set on the Kubernetes indexer pods?", "relevant_uris": [], "relevant_doc_ids": [], "must_include": [], "should_abstain": true}
+{"question": "What is our support SLA for enterprise customers?", "relevant_uris": [], "relevant_doc_ids": [], "must_include": [], "should_abstain": true}
+{"question": "Which GPU do I need to fine-tune a cross-encoder?", "relevant_uris": [], "relevant_doc_ids": [], "must_include": [], "should_abstain": true}
 {"question": "Who won the 2024 Formula One world championship?", "relevant_uris": [], "relevant_doc_ids": [], "must_include": [], "should_abstain": true}

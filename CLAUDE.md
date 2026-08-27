@@ -87,7 +87,9 @@ The full procedure is in `.claude/skills/ooda/SKILL.md`.
 ## 3. What the owner asks for
 
 Derived from the owner's own goal strings and graded by how many independently
-support each one. The full derivation, with the verbatim evidence, is in
+support each one. The goal field is mutable — re-issuing `/goal` overwrites it —
+so the corpus is sampled repeatedly rather than read once, and a re-issued goal
+is feedback on delivered work. The full derivation, with the verbatim evidence, is in
 `profile/OWNER-PROFILE.md`; the raw corpus is `profile/GOAL-CORPUS.md`.
 
 | | Preference | Grade |
@@ -96,11 +98,11 @@ support each one. The full derivation, with the verbatim evidence, is in
 | P2 | Never fabricate; everything rests on evidence and data | Moderate |
 | P3 | Verify by outcome-based blind testing, not by inspection | Moderate |
 | P4 | Apply it everywhere — all prompts, all chats, all terminals | Strong |
-| P5 | Continue until nothing is open | Moderate |
+| P5 | Continue until nothing is open | Strong |
 | P6 | Divide every prompt into tasks | Single |
 | P7 | Research before building, from web, YouTube and GitHub | Strong |
 | P8 | Route to and actually use installed skills and repos | Strong |
-| P9 | Use workflows and subagents | Moderate |
+| P9 | Use workflows and subagents | Strong |
 | P10 | Build from the owner's own material, tailored to them | Strong |
 | P11 | Improve the files continuously, on a daily cycle | Single |
 | P12 | Finish with a review gate that checks the data | Single |

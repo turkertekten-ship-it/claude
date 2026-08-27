@@ -16,7 +16,9 @@ came from and how strongly they support it.
 
 ## Observed — the derivation basis
 
-- The profile is derived from 11 goal strings issued by the owner across 11 distinct sessions on 2026-08-27. [src:GOALS-2026-08-27]
+- The profile is derived from 13 distinct goal strings issued by the owner across 14 sessions on 2026-08-27, captured twice 26 minutes apart. [src:GOALS-2026-08-27] [src:GOALS-REISSUED-2026-08-27]
+- The goal field is mutable: four sessions carried a different goal at the second capture, so a single reading of it is a snapshot rather than a complete record. [src:GOALS-REISSUED-2026-08-27]
+- One of those replacements is a correction rather than a new task, and is the only line in the corpus that reacts to delivered work instead of requesting it. [src:GOALS-REISSUED-2026-08-27]
 - No session transcript, conversation export, or follow-up turn was available to this session; the goal strings are the entire evidence base. [src:GOALS-2026-08-27]
 - The two sessions with a null goal contribute only behavioural corroboration through their status summaries, which are second-hand. [src:FLEET-13-2026-08-27]
 - Two prior sessions independently pushed work to `turkertekten-ship-it/claude`, and both branches were read directly rather than inferred from their titles. [src:BRANCHES-2026-08-27T15-04Z]
@@ -37,11 +39,11 @@ came from and how strongly they support it.
 | P2 | Never fabricate; everything rests on evidence and data | **Moderate** | G2, G7 |
 | P3 | Verify by outcome-based blind testing, not by inspection | **Moderate** | G6, plus behaviour in two sessions |
 | P4 | Apply it everywhere — all prompts, all chats, all terminals | **Strong** | G3, G8, G9, G11 |
-| P5 | Continue until nothing is open | **Moderate** | G9, G7, G4 |
+| P5 | Continue until nothing is open | **Strong** | G9, G7, G4, G13 |
 | P6 | Divide every prompt into tasks | **Single** | G8 |
 | P7 | Research before building, from web, YouTube and GitHub | **Strong** | G6, G9, G10 |
-| P8 | Route to and actually use installed skills and repos | **Strong** | G6, G9, G10 |
-| P9 | Use workflows and subagents | **Moderate** | G11, plus a direct instruction to this session |
+| P8 | Route to and actually use installed skills and repos | **Strong** | G6, G9, G10, G12, G13 |
+| P9 | Use workflows and subagents | **Strong** | G11, G12, plus a direct instruction to this session |
 | P10 | Build from the owner's own material, tailored to them | **Strong** | G4, G5, G10 |
 | P11 | Improve the files continuously, on a daily cycle | **Single** | G3 |
 | P12 | Finish with a review gate that checks the data | **Single** | G7 |
@@ -95,16 +97,25 @@ on, because a repository is the convenient place to put things.
 rule apply across every chat and terminal needs it installed into user-scope
 config, and that install is a separate act from committing a file here.
 
-## P5 — Continue until nothing is open · Moderate
+## P5 — Continue until nothing is open · Strong
 
 G9: `make sure to conitnue until there is nothing open and that you continue
 until all is done perfected utilized and figured out`. G7 scopes its review to
 `when all we built is finished`. G4 asks for files reverse-engineered
 `perfectly`. [src:GOALS-2026-08-27]
 
-**Standing directive.** Do not stop at the first deliverable. Before finishing,
-enumerate what is still open and either close it or say plainly that it is open
-and why. An honest list of remaining gaps satisfies this; silence does not.
+Upgraded from Moderate on the strength of G13, which is the owner reading a
+result and rejecting it as insufficient: `this is not even close to being enough
+dont stop do all ... run at least 20 of these cycles`.
+[src:GOALS-REISSUED-2026-08-27] That is the only feedback in the corpus about
+delivered work rather than requested work, and it says the first deliverable was
+treated as a starting point.
+
+**Standing directive.** Do not stop at the first deliverable. Iterate, and
+expect the count of iterations to matter. Before finishing, enumerate what is
+still open and either close it or say plainly that it is open and why. An honest
+list of remaining gaps satisfies this; silence does not, and neither does one
+clean pass.
 
 ## P6 — Divide every prompt into tasks · Single
 
@@ -128,10 +139,15 @@ started, not as a justification produced afterwards.
 
 ## P8 — Route to what is installed · Strong
 
-The word `route` recurs in three goals: `utilize and route to and utilize all
+The word `route` recurs in five goals: `utilize and route to and utilize all
 the skills and repos` (G6), `perfectly used utilized and routed to` (G9),
-`route to and utilize all git hub skills and repos` (G10).
-[src:GOALS-2026-08-27]
+`route to and utilize all git hub skills and repos` (G10)
+[src:GOALS-2026-08-27], `install use and utilize` (G12), and — in the one piece
+of corrective feedback in the corpus — `install add to files route and utilize
+your research more` (G13). [src:GOALS-REISSUED-2026-08-27]
+
+G13 sharpens this from a preference into a complaint: `add to files` says the
+research is expected to land in the repository, not merely be reported back.
 
 **Standing directive.** Installing a capability is not using it. When a skill,
 command or tool exists for a job, dispatch to it rather than re-implementing the
@@ -139,11 +155,13 @@ job inline. The repeated pairing of "install" with "use", "utilize" and "route
 to" reads as a complaint about capabilities that were installed and then sat
 unused.
 
-## P9 — Workflows and subagents · Moderate
+## P9 — Workflows and subagents · Strong
 
-G11: `use workflows and sub agents`. The owner also sent this instruction
-directly into this session while it was running, in the same words.
-[src:GOALS-2026-08-27] [src:USER-INSTRUCTION-WORKFLOWS-2026-08-27]
+G11: `use workflows and sub agents`. G12, from a session created later, repeats
+it: `ooda use workflows and subagents`. [src:GOALS-2026-08-27]
+[src:GOALS-REISSUED-2026-08-27] The owner also sent this instruction directly
+into this session while it was running, in the same words.
+[src:USER-INSTRUCTION-WORKFLOWS-2026-08-27]
 
 **Standing directive.** Fan work out across parallel agents where the work
 genuinely decomposes, rather than doing everything in one context. Note the
@@ -200,7 +218,15 @@ Things the corpus touches but does not establish. They belong in
   assumes an answer.
 - **What "the clear system of nick saraev" consists of.** Named once, in G11, as
   material to research. Not researched here; the name is recorded, not expanded.
-- **Whether these 11 goals represent the owner's full preferences.** They are
-  opening lines. The corrections, rejections and follow-ups that make up most of
-  a real conversation were not reachable. A preference absent from this file may
-  simply never have been typed into a goal box.
+- **What "borris churney" material consists of.** Named once, in G12, the same
+  way. [src:GOALS-REISSUED-2026-08-27] Not researched here. Two goals now name an
+  external figure whose work the owner wants absorbed, which is a pattern worth
+  noticing — but noticing a pattern is not knowing what either body of work says,
+  and neither name is expanded anywhere in this repository.
+- **Whether these goals represent the owner's full preferences.** They are
+  mostly opening lines, and the field holds only the latest one per session
+  [src:GOALS-REISSUED-2026-08-27], so earlier goals are overwritten and lost
+  unless someone captured them. The ordinary turn-by-turn corrections that make
+  up most of a real conversation were not reachable at all. A preference absent
+  from this file may simply never have been typed into a goal box — or may have
+  been typed into one and then replaced before anyone read it.
