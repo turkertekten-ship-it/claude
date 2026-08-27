@@ -1,3 +1,8 @@
+# Conversation exports are the owner's data, not repository content.
+# Drop them in archive/ and index them locally; never commit them.
+archive/
+!archive/.gitkeep
+
 __pycache__/
 *.py[cod]
 *.egg-info/
@@ -5,11 +10,15 @@ __pycache__/
 venv/
 build/
 dist/
+
+# Generated indexes. Both the chat archive and the oodarag corpus rebuild
+# from source, so neither belongs in git.
 .data/
+.oodarag/
 *.db
 *.db-wal
 *.db-shm
-.oodarag/
+
 .pytest_cache/
 .coverage
 htmlcov/
