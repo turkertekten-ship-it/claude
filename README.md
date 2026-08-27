@@ -108,31 +108,29 @@ in `prompts/` actually stop a model inventing things? Sixty fabrication traps,
 two arms, judged blind in both presentation orders, 50 decided pairs against
 the ~47 that 80% power needs. The answer has two halves and both are honest:
 
-- **On easy traps, nothing separates them.** Both variants passed 60 of 60 —
-  a ceiling, with no headroom to detect a difference either way.
-- **On hard traps, still nothing separates them, and now the suite could tell.**
-  A second suite of 26 traps that do *not* announce themselves — false premises
-  stated confidently, claims misattributed to documentation, specifics no one
-  could know — broke the ceiling: 20/26 and 21/26. It found no difference.
-  McNemar 3–2 discordant, p = 1.0. The blind judge agreed: 7–5 with 14 ties,
-  p = 0.77.
-- **The easy-trap judge preference did not survive the harder set.** There the
-  judge preferred the doctrine prompt 42–8 at p < 0.001; here 7–5 at p = 0.77.
-  The measurable benefit appeared where refusing was already easy — it made the
-  refusal more useful — and vanished where inventing was actually tempting.
-- **Both arms fabricated on roughly a fifth of the hard traps.**
+- **On easy traps, nothing separates them.** Both passed 60 of 60 — a ceiling,
+  with no headroom to detect a difference either way.
+- **On hard traps, still nothing separates them, and now the suite can tell.**
+  26 traps that do *not* announce themselves — false premises stated
+  confidently, claims misattributed to documentation, specifics no one could
+  know. Both arms fail some: 24/26 and 23/26. One discordant case, McNemar
+  p = 1.0. The blind judge agrees: 7–5 with 14 ties, p = 0.77.
+- **Counting only hand-audited fabrications: one for the operating prompt,
+  three for the plain assistant.** The direction the prompt was written to
+  produce, and nowhere near significant at 26 cases — ~47 decided pairs would
+  be needed.
+- **The easy-trap judge preference did not survive.** There it was 42–8 at
+  p < 0.001; here 7–5 at p = 0.77. The measurable benefit appeared where
+  refusing was already easy — it made the refusal more useful — and vanished
+  where inventing was tempting.
 
-Note what that does and does not license. On the thing the operating prompt was
-written for — refusing to fabricate — **no advantage was found**, on either the
-easy set or the hard one. Twelve decided pairs cannot exclude a small effect,
-and the traps are this repository's own construction rather than a published
-benchmark. But the honest headline is not "the prompt works": it is that this
-repository can now tell the difference between a prompt that works and one that
-only reads as though it does, and applied that to its own.
-
-Getting there cost two of this repository's own bugs, both kept on the record:
+Getting there cost three broken graders and a cache bug, all kept on the record:
 36 cached completions written by an **offline echo backend and served to a live
-run as real model output**, and a keyword grader that made the plain assistant
-win at p = 0.039 by **scoring vocabulary as honesty**. Reports:
+run as real model output**; a keyword grader that made the plain assistant win
+at p = 0.039 by **scoring vocabulary as honesty**; and per-case regex detectors
+that flagged 8 honest refusals out of 9 hits, because **a refusal quotes the
+thing it is refusing** and a pattern cannot tell that from asserting it. Each
+was validated before use — against outputs written by the same session that
+wrote the grader. That is not validation. Reports:Reports:
 [`blind-run-3-powered`](provenance/raw/blind-run-3-powered-2026-08-27.md), and
 the two earlier, worse runs are kept beside it.

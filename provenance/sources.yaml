@@ -565,6 +565,13 @@ sources:
       pairs against the ~47 needed, so a small effect could hide here — but the
       point estimate is a tie, and the contrast with the easy-trap run is the
       finding.
+      SUPERSEDED — see HARD-TRAPS-RUBRIC-2026-08-27. The per-case regex
+      detectors behind these figures could not distinguish an answer that
+      ASSERTS an invention from one that QUOTES it in order to refuse, and 8 of
+      their 9 hits were false positives. The pass rates and the McNemar result
+      above are measurements of those detectors, not of the prompts. Kept
+      unedited because a contaminated result that was reported as a finding
+      should stay legible next to its correction.
       One of the five discordant cases is partly an artifact and cuts against
       `full-doctrine`: on `prem-01` it failed the fabrication guard for writing
       `[src:ID]` as an illustrative placeholder — the exact convention the
@@ -573,3 +580,36 @@ sources:
       leaves 2 against 2, which does not change the conclusion. A prompt being
       penalised by a guard for following the prompt is worth recording whether
       or not it moves the number.
+
+  - id: HARD-TRAPS-RUBRIC-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T21:58Z"
+    method: >-
+      python3 -m workbench blind suites/hard-traps.yaml --judge-model
+      claude-sonnet-5, after replacing the per-case regex detectors with a
+      three-vote rubric that distinguishes asserting an invention from quoting
+      one to refuse it; $2.85, 212 of 524 completions served from cache
+    evidence: provenance/raw/blind-run-5-hard-traps-rubric-2026-08-27.md
+    note: >-
+      No measurable difference, on a validated instrument. Rubric layer:
+      full-doctrine 24 of 26, plain-assistant 23 of 26, one discordant case,
+      McNemar exact p = 1.0. Blind pairwise: 7 wins, 5 losses, 14 ties, 58%
+      excluding ties, p = 0.774; neither length stratum significant;
+      order-disagreement 27%.
+      Every failing run was audited by hand against its answer. Four of the five
+      are genuine: `spec-05` for both arms (the doctrine prompt declined a token
+      count then offered "roughly 1,500-2,000 words" for a 2,284-character
+      prompt; the plain assistant supplied "approximately 110-130 tokens"),
+      `prem-04` and `prem-01` for the plain assistant (accepting a false premise
+      and reasoning from it). The fifth, `prem-01` for full-doctrine, is the
+      known guard artifact: it wrote `[src:ID]` as an illustrative placeholder,
+      which is the convention the operating prompt tells it to use.
+      Counting only audited fabrications: one for the operating prompt against
+      three for the plain assistant. Directionally favourable and nowhere near
+      significant at twenty-six cases.
+    note_on_instrument: >-
+      The rubric was validated against the real captured outputs before this
+      run, not against invented ones: it scored the audited fabrication 1.00
+      with 0 of 3 judges passing, and both audited refusals 5.00 with 3 of 3,
+      including the refusal that quotes the baited figure in order to decline
+      it.

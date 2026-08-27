@@ -120,23 +120,21 @@ verified lives in [unknowns.md](unknowns.md), not here.
 > only ever passes; the question to ask of both is whether it asserts what the
 > system actually does.
 
-## Observed — the hard traps
+## Observed — the hard traps, on a validated instrument
 
-- With traps that do not announce themselves, the ceiling broke: `full-doctrine` passed 20 of 26 and `plain-assistant` 21 of 26, so the suite could discriminate. [src:HARD-TRAPS-2026-08-27]
-- It found no difference. Three cases were passed only by `full-doctrine` and two only by `plain-assistant`; McNemar exact p = 1.0. [src:HARD-TRAPS-2026-08-27]
-- The blind judge also found no difference: 7 wins, 5 losses, 14 ties, 58% excluding ties, p = 0.774, with neither length stratum significant. [src:HARD-TRAPS-2026-08-27]
-- Order-disagreement rose to 27% from the 17% seen on the easy traps, so the judge found these harder to call as well. [src:HARD-TRAPS-2026-08-27]
-- Both arms fabricated on roughly a fifth of the hard traps. [src:HARD-TRAPS-2026-08-27]
-- One discordant case is partly an artifact cutting against the operating prompt: it failed the fabrication guard for writing `[src:ID]` as an illustrative placeholder, which is the convention that prompt tells it to use. Removing that case leaves two against two. [src:HARD-TRAPS-2026-08-27]
+- With traps that do not announce themselves, both arms fail sometimes, so the suite can discriminate: `full-doctrine` passed 24 of 26 and `plain-assistant` 23 of 26. [src:HARD-TRAPS-RUBRIC-2026-08-27]
+- It found no measurable difference. One discordant case, McNemar exact p = 1.0; blind pairwise 7 wins to 5 with 14 ties, p = 0.774, and neither length stratum significant. [src:HARD-TRAPS-RUBRIC-2026-08-27]
+- Every failing run was audited by hand. Four of five are genuine fabrications: one by the operating prompt, three by the plain assistant. The fifth penalises the operating prompt for writing `[src:ID]` illustratively, which is the convention it is instructed to use. [src:HARD-TRAPS-RUBRIC-2026-08-27]
+- The first version of this suite reported the opposite direction. Its per-case regex detectors could not tell an answer that asserts an invention from one that quotes it to refuse, and eight of their nine hits were false positives — including an answer flagged while saying it would be fabrication to continue, and one flagged because the question's own timestamp contains the digits it matched. [src:HARD-TRAPS-2026-08-27]
 
-> Reading, not a claim: this reverses the impression the easy traps gave. There
-> the judge preferred the operating prompt 42 to 8 at p < 0.001; here the same
-> comparison is 7 to 5 at p = 0.774. The measurable benefit appeared on cases
-> where refusing was already easy — it made the refusal more useful — and
-> disappeared where inventing was actually tempting. On the thing the prompt was
-> written for, no advantage was found. Twelve decided pairs cannot exclude a
-> small one, and the traps are this session's own construction rather than a
-> published benchmark.
+> Reading, not a claim: counting only audited fabrications, one for the
+> operating prompt against three for the plain assistant. That is the direction
+> the prompt was written to produce and it is nowhere near significant at
+> twenty-six cases — roughly forty-seven decided pairs would be needed. The
+> honest summary of every run in this repository is the same: no measurable
+> advantage has been demonstrated for the operating prompt on the thing it
+> exists to do, and three separate graders had to be caught being wrong before
+> that sentence could be trusted.
 
 ## Conclusion
 
