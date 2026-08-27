@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>9 takım · 96 vaka</span>
+    <span>11 takım · 122 vaka</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -296,6 +296,24 @@ footer p + p{margin-top:12px}
         <div class="db-dot a" tabindex="0" data-tip="yamalı: 0 — 15/15 yakalandı" style="left:3%"></div>
       </div>
       <div class="db-val">11 → 0</div>
+    </div>
+    <div class="db-row">
+      <div class="db-label"><b>J</b>§19 kabul sınaması</div>
+      <div class="db-track">
+        <div class="db-bar" style="left:8%;width:24%"></div>
+        <div class="db-dot b" tabindex="0" data-tip="kitaba sadık: doğru cevap da yanlış cevap da bloklu" style="left:32%"></div>
+        <div class="db-dot a" tabindex="0" data-tip="yamalı: 2 — kitaba sadık karşılaştırma vakaları, bilerek" style="left:8%"></div>
+      </div>
+      <div class="db-val">8 → 2</div>
+    </div>
+    <div class="db-row">
+      <div class="db-label"><b>K</b>yönlendirme + koltuk</div>
+      <div class="db-track">
+        <div class="db-bar" style="left:3%;width:9%"></div>
+        <div class="db-dot b" tabindex="0" data-tip="kitaba sadık: 3 başarısız" style="left:12%"></div>
+        <div class="db-dot a" tabindex="0" data-tip="yamalı: 0 — altıncı kapı eklendi" style="left:3%"></div>
+      </div>
+      <div class="db-val">3 → 0</div>
     </div>
     <div class="db-row">
       <div class="db-label"><b>E</b>beklenen değerler</div>
@@ -429,6 +447,47 @@ KALDI A-07  §19 pilotu, avro çevrilmeden
 </section>
 
 <section>
+  <span class="sec-tag">Kabul sınaması</span>
+  <h2>§19: kitabın kendi son kapısı</h2>
+  <p>§19 şunu söylüyor: <em>"Doğru cevap neye benzer: esik.py çalıştırılır, avro
+  rakamı TL'ye çevrilir… Yanlış cevap neye benzer: kod çıktısı ve tarih olmadan
+  kendinden emin bir 'evet'. <strong>Bu iki cevabın arasındaki fark, kurulumun
+  tamamının sebebidir.</strong>"</em></p>
+  <p>Bu ölçülebilir bir iddia. İki cevap da üretildi ve kapılardan geçirildi.</p>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th></th><th>§19'un DOĞRU cevabı</th><th>§19'un YANLIŞ cevabı</th></tr></thead>
+    <tbody>
+      <tr><td class="rule-no">kitaba sadık kapılar</td>
+        <td class="st"><span class="pill f">Bloklandı</span><br><span class="ev" style="font-family:var(--mono);font-size:12px">[arastirma]</span></td>
+        <td class="st"><span class="pill p">Bloklandı</span><br><span class="ev" style="font-family:var(--mono);font-size:12px">[arastirma, kanit, kapsam]</span></td></tr>
+      <tr><td class="rule-no">yamalı kapılar</td>
+        <td class="st"><span class="pill p">Geçer</span></td>
+        <td class="st"><span class="pill p">Bloklandı</span><br><span class="ev" style="font-family:var(--mono);font-size:12px">[arastirma, guncellik, kanit, kapsam]</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p style="margin-top:20px">Kitaba sadık sistemde <strong>her ikisi de
+  bloklanıyor.</strong> Kapı sistemi, §19'un "kurulumun tamamının sebebi" dediği
+  farkı ifade edemiyor — eşik rakamı içeren her şeyi durduruyor. Duyarlılık %100,
+  isabet %0.</p>
+  <p>Pilot ayrıca <strong>hiç hesaplanamıyor</strong>: komut satırı arayüzü yok,
+  avro çevirisi modellenmemiş, ve §14 sonrası öz-sınama kırmızı olduğu için §0'ın
+  kuralına göre buraya zaten hiç gelinmiyor.</p>
+
+  <div class="note">
+    <b>Ve kapıların göremediği şey.</b> Töreni eksiksiz ama <b>rakamı yanlış</b>
+    bir cevap — dayanağı, tarihi, iki başlığı ve "Kontrol edildi" satırı olan, ama
+    eşiği ters okuyan — <b>altı kapıdan da geçiyor.</b> Bu bir kusur değil bir
+    sınırdır: kapılar biçimi denetler, muhakemeyi değil. Kitabın kendi §17.1
+    bulgusu tam olarak budur — kazanç açıklıkta ve düzende, <b>doğrulukta
+    değil.</b>
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Kapsama</span>
   <h2>Doktrinin dörtte üçünün mekanizması yok</h2>
   <p>§12 şunu iddia ediyor: <em>"Yukarıdaki her şey doktrindir ve doktrin, sistemin
@@ -462,6 +521,8 @@ KALDI A-07  §19 pilotu, avro çevrilmeden
         <td class="ev">—</td></tr>
       <tr><td class="rule-no">11 · Önce araştır</td><td class="st"><span class="pill f">Bozuk</span></td>
         <td class="ev">üretimde çalışmıyor — bkz. C-10</td></tr>
+      <tr><td class="rule-no">§7 · Koltuk sağlaması</td><td class="st"><span class="pill f">Yok</span></td>
+        <td class="ev">sistemin en yüksek itibar riski — yaşayan, adı belli bir hukukçunun ağzına söz koymak — ve onu uygulayan tek şey iyi niyet. <strong>Altıncı kapı eklendi:</strong> beyansız koltuk dosyası artık bloklanıyor</td></tr>
     </tbody>
   </table>
   </div>
@@ -510,6 +571,7 @@ KALDI A-07  §19 pilotu, avro çevrilmeden
         <li><strong>Teknoloji istisnası</strong> (a) ve (b) bentlerine birden uygulanıyor olabilir → az bildirim, izinsiz kapanış riski.</li>
         <li><strong>Bağlantı ölçütü bayat:</strong> "Türkiye'de yerleşik", kitaptaki 2022/2 ölçütü değil → fazla bildirim.</li>
         <li><strong>Bekletici etki m.10'da</strong>, m.11'de değil; yanlış atıf dört dosyaya yayılmış.</li>
+      <li>Üçü de <strong>yamalanmadı</strong> — eşik değişikliği insan kararıdır.</li>
       </ul>
     </article>
   </div>
@@ -539,6 +601,11 @@ KALDI A-07  §19 pilotu, avro çevrilmeden
     <li><strong>Kum havuzu yönlendirmesi sessizce koptu.</strong> Mutasyonlar kum
     havuzuna uygulanırken denetim asıl kurulumu ölçüyordu. Yönlendirmenin tuttuğunu
     doğrulayan bir kontrol eklendi.</li>
+    <li><strong>Uydurma alıntı dedektörünü iki kez yanlış yazdım.</strong> Birinci
+    sürüm anılan <em>eser adlarını</em> uydurma söz saydı — oysa bir eser adını
+    anmak §7'nin istediği dayanağın kendisidir. İkinci sürüm hâlâ "<em>kitabında
+    … yazdı</em>" cümlesine takıldı; ayrıca tırnaklar eşleştirilmediği için
+    hayalet aralıklar üretiyordu. Üçüncü sürüm doğru.</li>
     <li><strong>İki şüphem yanlış çıktı</strong> ve kitap haklıydı:
     <em class="term">fivetran/great_expectations</em> ile
     <em class="term">Open-Source-Legal/OpenContracts</em> kanonik yollardır; ve
@@ -596,9 +663,12 @@ KALDI A-07  §19 pilotu, avro çevrilmeden
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>sinama/hepsi.sh          <span class="dim"># dokuz takım, 96 vaka</span>
+<pre><span class="dim">~/mafirm/</span>sinama/hepsi.sh          <span class="dim"># on bir takım, 122 vaka</span>
 <span class="dim">~/mafirm/</span>denetim.sh --yapisal     <span class="dim"># mühendislik katmanı</span>
 <span class="dim">~/mafirm/</span>denetim.sh               <span class="dim"># mevzuat bulguları dâhil</span></pre>
+  <p>Kitabın metni için bölüm bölüm düzeltme listesi:
+  <em class="term">mafirm/KITAP-ERRATA.md</em> — 42 madde, ağırlık işaretli,
+  her biri onu bulan sınama vakasıyla.</p>
   <p>Ham çıktılar <em class="term">sinama/SONUC-once.txt</em> ve
   <em class="term">SONUC-sonra.txt</em>; dış doğrulamalar
   <em class="term">ks_g_depolar.md</em>, <em class="term">ks_h_kaynaklar.md</em>,

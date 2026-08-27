@@ -11,22 +11,31 @@ aklındaki vakalardır ve hepsi geçer. Kör sınama o aklın dışında kalanı
 
 ## Sonuç
 - Kitaba sadık, eksiksiz kurulum: **85 vaka, 56 başarısız.**
+- Kitabın kendi **§19 kabul sınamasında** doğru cevap DA yanlış cevap DA
+  bloklanıyor: kapı sistemi, §19'un "kurulumun tamamının sebebi" dediği farkı
+  ifade edemiyor.
 - Kitabın kendi §16 denetimi, kitap harfiyen izlendiğinde **yeşile dönmüyor.**
 - Denetim, on beş bozmadan **on birini fark etmiyor** — sıfır beceri, kancasız
   ayarlar ve **tamamen boş bir `esik.py`** taşıyan bir sistemde "DENETİM OK".
 - İşletim sözleşmesinin on bir kuralından **yedisinin** çalışan bir mekanizması
   yok; hiçbirinin tam mekanizması yok.
-- Yamadan sonra: **96 vaka, 11 başarısız**; mutasyon yakalama 4/15 → **15/15**.
+- Yamadan sonra: **122 vaka, 13 başarısız** — on üçü de ya kitabın davranışının
+  bilerek bırakılmış kaydı ya da belgelenmiş bir öntanımlı boşluk. Mutasyon
+  yakalama 4/15 → **15/15**.
+- Kitapta hiç bulunmayan **altıncı kapı** eklendi: §7'nin koltuk sağlaması
+  kuralı (sistemin en yüksek itibar riski) artık mekanizmayla uygulanıyor.
 
 ## Okuma sırası
 1. `mafirm/RAPOR.md` — bulguların tamamı, kanıtlarıyla
-2. `mafirm/yamalar/DEGISIKLIKLER.md` — her yama, kapattığı vaka kimliğiyle
-3. `mafirm/sinama/` — sınama takımları ve ham çıktılar
-4. `mafirm/yamalar/kitaba-sadik/` — kitaba sadık özgün sürümler
+2. `mafirm/KITAP-ERRATA.md` — **kitabın metni için** bölüm bölüm düzeltme
+   listesi, 42 madde, ağırlık işaretli
+3. `mafirm/yamalar/DEGISIKLIKLER.md` — her yama, kapattığı vaka kimliğiyle
+4. `mafirm/sinama/` — sınama takımları ve ham çıktılar
+5. `mafirm/yamalar/kitaba-sadik/` — kitaba sadık özgün sürümler
 
 ## Koşum
 ```
-mafirm/sinama/hepsi.sh          # dokuz takım, 96 vaka
+mafirm/sinama/hepsi.sh          # on bir takım, 122 vaka
 mafirm/denetim.sh --yapisal     # mühendislik katmanı  -> DENETİM OK
 mafirm/denetim.sh               # mevzuat bulguları dâhil -> BAŞARISIZ: 3
 ```
