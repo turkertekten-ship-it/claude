@@ -105,7 +105,11 @@ question is "did it do the job", not "did it say the right thing".
   and calling it a win is the single most common way this kind of report
   misleads.
 - If the intervals overlap, say "no separation at this sample size" and quote
-  how many pairs would be needed. The report computes it.
+  how many pairs would be needed. The report computes it — and then **go run it
+  at that size** if the question matters. Reporting an underpowered result
+  honestly is the minimum, not the finish. See "Sizing a suite" in
+  `docs/workbench.md`: more cases rather than more repeats, fewer arms, and
+  budget for the ties the swap protocol deliberately creates.
 - Say what the suite could not test.
 
 ## When to use something else instead

@@ -150,6 +150,37 @@ The report also prints what the run did **not** establish. That section is not
 boilerplate; it is the part that stops a directional result being quoted as a
 settled one.
 
+## Sizing a suite so it can answer its question
+
+The first run of `suites/doctrine-adherence.yaml` produced a clean, blinded,
+position-swapped comparison that could not settle anything: three variants over
+six cases decided **ten** pairs, and detecting a genuine 70/30 preference at 80%
+power needs roughly **forty-seven**. The report said so, which is the minimum;
+the fix is to run it at a size that can answer.
+
+Three rules, in the order they matter:
+
+**More cases, not more repeats.** Repeats of one case are correlated
+observations — the same question, the same trap, the same failure mode. The
+comparison pass deliberately uses only the first repeat of each case for
+exactly this reason. `repeats:` is for measuring a variant's *consistency*, not
+for buying statistical power.
+
+**Fewer arms.** Pairwise comparisons grow quadratically: three variants over
+six cases is eighteen pairs, but they are eighteen pairs spread across three
+different questions. Two arms over sixty cases is sixty pairs all answering
+one. If you have a question worth settling, spend the budget on it.
+
+**Budget for ties.** A tie carries no directional information and is excluded
+from the significance test, and the position swap manufactures ties on purpose
+whenever the two orders disagree. At a 25–35% tie rate, sixty judged pairs
+yields around forty decided ones. Plan for the decided count, not the judged
+count — `workbench plan` gives you the call count, and the report gives you the
+decided count and the number needed side by side.
+
+`suites/doctrine-adherence-powered.yaml` is the same experiment sized to
+answer: sixty traps across six families, two arms, 242 calls.
+
 ## Costs
 
 Every figure comes from the backend's own `total_cost_usd`. There is no price
