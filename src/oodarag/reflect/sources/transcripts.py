@@ -73,6 +73,13 @@ MAX_FILES = 5_000
 
 _TRANSCRIPT_GLOBS = ("*.jsonl", "*.ndjson", "*.json")
 
+#: Directory names holding agent-to-agent traffic rather than a person talking.
+#: A subagent's prompt was written by an orchestrator; counting it as an
+#: instruction is how the loop ends up quoting its own words back at you as a
+#: standing convention. Observed in the wild: a nightly run that "learned" four
+#: identical 900-word task briefs were a preference the user kept repeating.
+SKIP_DIR_NAMES = frozenset({"subagents", "worktrees", "backups", ".trash"})
+
 _USER_ROLES = frozenset({"user", "human"})
 _ASSISTANT_ROLES = frozenset({"assistant", "model", "ai", "bot"})
 
@@ -92,6 +99,9 @@ _ENVELOPE_PREFIXES = ("<command-name>", "<local-command", "<system-reminder>")
 # itself. Pasted HTML gets caught by this too, which is a trade worth making:
 # a lost paste is one missing signal, a kept envelope skews every phrase count.
 _TAG_ONLY_RE = re.compile(r"^<[^>\s]+(?:\s[^>]*)?>.*</[^>]+>$", re.DOTALL)
+
+_COMMAND_NAME_RE = re.compile(r"<command-name>\s*(.*?)\s*</command-name>", re.DOTALL)
+_COMMAND_ARGS_RE = re.compile(r"<command-args>\s*(.*?)\s*</command-args>", re.DOTALL)
 
 _NUMERIC_RE = re.compile(r"^\d+(?:\.\d+)?$")
 _ISO_HEAD_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2}:\d{2})")
@@ -178,7 +188,10 @@ class ChatTranscriptSource(SignalSource):
                 yield root
                 return
             for pattern in _TRANSCRIPT_GLOBS:
-                yield from sorted(root.rglob(pattern))
+                for path in sorted(root.rglob(pattern)):
+                    if SKIP_DIR_NAMES.intersection(path.parts):
+                        continue
+                    yield path
         except OSError as e:
             log.warn("transcript root unreadable", root=str(root), err=str(e)[:200])
 
@@ -222,6 +235,9 @@ class ChatTranscriptSource(SignalSource):
         message = message if isinstance(message, dict) else None
         role, content = _role_and_content(rec, message)
         if role in _USER_ROLES:
+            if _is_agent_traffic(rec):
+                self.skipped += 1
+                return None
             kind, actor = KIND_PROMPT, ACTOR_HUMAN
         elif role in _ASSISTANT_ROLES:
             kind, actor = KIND_REPLY, ACTOR_ASSISTANT
@@ -230,6 +246,19 @@ class ChatTranscriptSource(SignalSource):
 
         text, tools = _extract_text(content)
         text = text.strip()
+        command = ""
+        if kind == KIND_PROMPT:
+            command, arguments = _unwrap_slash_command(text)
+            if command:
+                # A slash command with arguments *is* the user speaking, even
+                # though the harness flags the expanded envelope as injected.
+                if not arguments:
+                    self.skipped += 1
+                    return None
+                text = arguments
+            elif _is_injected(rec):
+                self.skipped += 1
+                return None
         if not text or _is_envelope(text):
             self.skipped += 1
             return None
@@ -241,6 +270,7 @@ class ChatTranscriptSource(SignalSource):
             file=str(path),
             project=project,
             tools=tools,
+            command=command,
         )
         meta["turn"] = index
         return Signal(
@@ -350,6 +380,50 @@ def _extract_text(content: Any) -> tuple[str, list[str]]:
         if isinstance(value, str):
             parts.append(value)
     return "\n".join(p for p in parts if p.strip()), sorted(tools)
+
+
+def _is_agent_traffic(rec: dict[str, Any]) -> bool:
+    """Whether this turn was written by another agent rather than by a person.
+
+    Claude Code marks agent-to-agent turns with ``isSidechain`` and stamps
+    genuine input with ``userType: "external"``. This is about *who spoke*, and
+    nothing recovers a turn that fails it: an orchestrator's brief to a subagent
+    is not an instruction from the user, however much it reads like one.
+    """
+    if rec.get("isSidechain"):
+        return True
+    user_type = rec.get("userType")
+    return user_type is not None and user_type != "external"
+
+
+def _is_injected(rec: dict[str, Any]) -> bool:
+    """Whether the harness put this text in the user's mouth (``isMeta``).
+
+    Weaker than `_is_agent_traffic`: a slash command the user typed arrives
+    flagged this way too, so this is checked only after the envelope has had a
+    chance to yield up real arguments.
+    """
+    return bool(rec.get("isMeta"))
+
+
+def _unwrap_slash_command(text: str) -> tuple[str, str]:
+    """Recover the instruction inside a slash-command envelope.
+
+    Typing ``/goal ship the nightly loop`` reaches the transcript as a
+    ``<command-name>/goal</command-name> ... <command-args>ship the nightly
+    loop</command-args>`` block. The wrapper is the client talking to itself,
+    but the arguments are the user's own words - and often the most deliberate
+    words in the whole session, because a slash command is something a person
+    sat down and chose to type. Dropping the envelope wholesale throws away
+    exactly the instructions most worth learning from.
+
+    Returns (command, arguments); both empty when this is not a slash command.
+    """
+    name = _COMMAND_NAME_RE.search(text)
+    if not name:
+        return "", ""
+    args = _COMMAND_ARGS_RE.search(text)
+    return name.group(1).strip(), (args.group(1).strip() if args else "")
 
 
 def _is_envelope(text: str) -> bool:

@@ -16,7 +16,13 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import mock
 
-from oodarag.reflect.models import ACTOR_ASSISTANT, ACTOR_HUMAN, KIND_PROMPT, KIND_REPLY
+from oodarag.reflect.models import (
+    ACTOR_ASSISTANT,
+    ACTOR_HUMAN,
+    KIND_PROMPT,
+    KIND_REPLY,
+    Signal,
+)
 from oodarag.reflect.sources.base import Budget
 from oodarag.reflect.sources.transcripts import ChatTranscriptSource, default_roots
 
@@ -372,3 +378,91 @@ class RootsTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestProvenanceFiltering(unittest.TestCase):
+    """Only the user's own words may become a `prompt` signal.
+
+    This is the asymmetry the whole feature rests on. A dropped turn costs one
+    observation out of thousands. A synthetic turn treated as an instruction
+    gets written into the user's conventions file as something they never said -
+    and the loop then defends it, because it is evidence.
+    """
+
+    def setUp(self) -> None:
+        self.tmp = TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+
+    def tearDown(self) -> None:
+        self.tmp.cleanup()
+
+    def write(self, relative: str, records: list[dict]) -> None:
+        path = self.root / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("\n".join(json.dumps(r) for r in records), encoding="utf-8")
+
+    def turn(self, text: str, **extra) -> dict:
+        record = {
+            "type": "user", "userType": "external", "isSidechain": False,
+            "timestamp": "2026-08-27T10:00:00Z", "sessionId": "s1",
+            "message": {"role": "user", "content": text},
+        }
+        record.update(extra)
+        return record
+
+    def prompts(self) -> list[Signal]:
+        source = ChatTranscriptSource(roots=[self.root])
+        result = source.run(since=0, budget=Budget())
+        return [s for s in result.signals if s.kind == KIND_PROMPT]
+
+    def test_subagent_directories_are_not_walked(self) -> None:
+        self.write("proj/real.jsonl", [self.turn("please always use tabs")])
+        self.write("proj/subagents/workflows/wf1/agent-a.jsonl",
+                   [self.turn("You are implementing part of the subsystem")])
+        texts = [s.text for s in self.prompts()]
+        self.assertEqual(texts, ["please always use tabs"])
+
+    def test_sidechain_turns_are_dropped(self) -> None:
+        self.write("proj/s.jsonl", [
+            self.turn("a real instruction"),
+            self.turn("an orchestrator brief", isSidechain=True),
+        ])
+        self.assertEqual([s.text for s in self.prompts()], ["a real instruction"])
+
+    def test_non_external_user_type_is_dropped(self) -> None:
+        self.write("proj/s.jsonl", [
+            self.turn("a real instruction"),
+            self.turn("injected", userType="internal"),
+        ])
+        self.assertEqual([s.text for s in self.prompts()], ["a real instruction"])
+
+    def test_meta_turns_are_dropped(self) -> None:
+        self.write("proj/s.jsonl", [
+            self.turn("a real instruction"),
+            self.turn("A session-scoped hook is now active", isMeta=True),
+        ])
+        self.assertEqual([s.text for s in self.prompts()], ["a real instruction"])
+
+    def test_slash_command_arguments_survive_the_envelope(self) -> None:
+        """A slash command is the most deliberate input in a session."""
+        envelope = (
+            "<command-name>/goal</command-name>\n"
+            "<command-message>goal</command-message>\n"
+            "<command-args>always run the linter before pushing</command-args>"
+        )
+        self.write("proj/s.jsonl", [self.turn(envelope, isMeta=True)])
+        found = self.prompts()
+        self.assertEqual(len(found), 1)
+        self.assertEqual(found[0].text, "always run the linter before pushing")
+        self.assertEqual(found[0].metadata.get("command"), "/goal")
+
+    def test_slash_command_without_arguments_is_dropped(self) -> None:
+        envelope = "<command-name>/clear</command-name>\n<command-args></command-args>"
+        self.write("proj/s.jsonl", [self.turn(envelope)])
+        self.assertEqual(self.prompts(), [])
+
+    def test_a_sidechain_slash_command_is_still_agent_traffic(self) -> None:
+        """Who spoke outranks what the envelope contains."""
+        envelope = "<command-name>/goal</command-name><command-args>do a thing</command-args>"
+        self.write("proj/s.jsonl", [self.turn(envelope, isSidechain=True)])
+        self.assertEqual(self.prompts(), [])
