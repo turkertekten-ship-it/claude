@@ -842,6 +842,112 @@ def test_api_backend() -> None:
           "ANTHROPIC_API_KEY" in reason and "ant" in reason, reason)
 
 
+def test_api_backend_over_the_wire() -> None:
+    """Exercise the API backend over real HTTP, against a conforming server.
+
+    The backend cannot reach api.anthropic.com here: no credential exists, and
+    every documented path for one was checked. That is a missing credential,
+    not untested code -- but until now the difference was asserted rather than
+    demonstrated, because nothing had ever driven the transport.
+
+    So this stands up a server that speaks the Messages API shape and points
+    the backend at it. It exercises the whole path: request construction, the
+    HTTP round trip, the auth header, response parsing into a Completion, and
+    the two endpoints the CLI has no flag for at all. What remains untested
+    afterwards is precisely one thing -- whether Anthropic's endpoint accepts
+    this session's credential, which it does not have.
+    """
+    print("\napi backend over HTTP -- against a conforming local server")
+    import http.server
+    import threading
+    from workbench.api_backend import AnthropicAPIBackend
+
+    seen: list[dict] = []
+
+    class Handler(http.server.BaseHTTPRequestHandler):
+        def log_message(self, *a):  # keep the test output clean
+            pass
+
+        def do_POST(self):
+            body = json.loads(self.rfile.read(int(self.headers["content-length"])))
+            seen.append({"path": self.path, "body": body,
+                         "auth": self.headers.get("x-api-key"),
+                         "version": self.headers.get("anthropic-version")})
+            if self.path.endswith("/count_tokens"):
+                payload = {"input_tokens": 4242}
+            elif self.path.endswith("/batches"):
+                payload = {"id": "msgbatch_test", "processing_status": "in_progress"}
+            else:
+                payload = {
+                    "content": [{"type": "thinking", "thinking": "hmm"},
+                                {"type": "text", "text": "wire answer"}],
+                    "usage": {"input_tokens": 9, "output_tokens": 3},
+                    "model": body["model"], "stop_reason": "end_turn",
+                }
+            data = json.dumps(payload).encode()
+            self.send_response(200)
+            self.send_header("content-type", "application/json")
+            self.send_header("content-length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+
+    server = http.server.HTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        url = f"http://127.0.0.1:{server.server_port}"
+        backend = AnthropicAPIBackend(api_key="test-key", base_url=url)
+
+        usable, _ = backend.available()
+        check("a credentialed backend reports itself usable", usable)
+
+        completion = backend.complete(Request(
+            prompt="hello", model="claude-opus-4-6", max_output_tokens=128,
+            stop_sequences=("STOP",), temperature=0.3, system="be terse"))
+        check("a completion comes back over HTTP", completion.text == "wire answer")
+        check("thinking blocks are skipped in the text", "hmm" not in completion.text)
+        check("token counts survive the round trip",
+              completion.input_tokens == 9 and completion.output_tokens == 3)
+        check("cost stays None rather than being invented", completion.cost_usd is None)
+        check("the backend is named on the completion",
+              completion.backend == "anthropic-api")
+
+        sent = seen[-1]
+        check("the auth header is set", sent["auth"] == "test-key")
+        check("the api version header is set", sent["version"] == "2023-06-01")
+        check("stop_sequences crossed the wire — no CLI flag can do this",
+              sent["body"]["stop_sequences"] == ["STOP"])
+        check("an exact max_tokens crossed the wire", sent["body"]["max_tokens"] == 128)
+        check("temperature crossed the wire on a model that accepts it",
+              sent["body"]["temperature"] == 0.3)
+
+        print("\n  the two endpoints the CLI has no flag for at all")
+        count = backend.count_tokens(Request(prompt="how long is this",
+                                             model="claude-haiku-4-5"))
+        check("count_tokens returns a count", count == 4242)
+        check("and it does not send max_tokens, which that endpoint rejects",
+              "max_tokens" not in seen[-1]["body"])
+        check("it hit the right path", seen[-1]["path"].endswith("/v1/messages/count_tokens"))
+
+        batch = backend.submit_batch([
+            ("case-a", Request(prompt="one", model="claude-haiku-4-5")),
+            ("case-b", Request(prompt="two", model="claude-haiku-4-5")),
+        ])
+        check("submit_batch returns a batch id", batch == "msgbatch_test")
+        body = seen[-1]["body"]
+        check("each request carries a custom_id, since results return out of order",
+              [r["custom_id"] for r in body["requests"]] == ["case-a", "case-b"])
+        check("and each carries a full params block",
+              all("model" in r["params"] for r in body["requests"]))
+
+        print("\n  an HTTP error is surfaced, not swallowed")
+        broken = AnthropicAPIBackend(api_key="k", base_url=f"http://127.0.0.1:{server.server_port + 1}")
+        rejects("an unreachable endpoint raises rather than returning empty text",
+                lambda: broken.complete(Request(prompt="x", model="claude-haiku-4-5")))
+    finally:
+        server.shutdown()
+
+
 def test_registry_kinds() -> None:
     print("\ngrader taxonomy")
     kinds = dict(describe_registry())
@@ -870,6 +976,7 @@ def main() -> int:
     test_length_stratification()
     test_errored_runs_are_not_graded()
     test_api_backend()
+    test_api_backend_over_the_wire()
     test_registry_kinds()
 
     print()

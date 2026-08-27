@@ -211,8 +211,17 @@ Two further findings from the same paper shape the implementation:
   flag. Assistant turns are deliberately not settable: prefill is rejected on
   current models, so a multi-turn case controls what the *user* says and
   measures what the model does with the accumulating conversation.
-- **`stop_sequences`.** No CLI flag under any spelling probed, and no
-  `ANTHROPIC_API_KEY` in this environment to reach the Messages API directly.
+- ~~**`stop_sequences`.**~~ Built on the `anthropic-api` backend and exercised
+  over real HTTP against a conforming server. No CLI flag exists under any
+  spelling probed; what is missing now is a credential for Anthropic's
+  endpoint, not code and not a tested transport. The same is true of
+  `count_tokens`, batch submission, an exact `max_tokens`, and `temperature` on
+  models old enough to accept it.
+
+  Every documented credential path was checked and all are closed:
+  `ANTHROPIC_API_KEY` unset, no `ant` CLI, no `~/.config/anthropic`, no
+  `~/.claude/.credentials.json`, and the OAuth token file descriptor the
+  environment advertises resolves to a pipe the CLI consumed at startup.
   `max_tokens` *was* on this list until a fact-checker pointed out that
   `claude --help` is not a complete inventory of accepted flags: probing the
   parser directly turned up `--thinking`, `--max-thinking-tokens` and

@@ -705,3 +705,26 @@ sources:
       is therefore not "no key was found" but "every documented source was
       checked, including the descriptor the environment advertises". All three
       are implemented and would run against a credential.
+
+  - id: API-BACKEND-WIRE-TESTED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T23:35Z"
+    method: >-
+      tests/test_workbench.py stands up an http.server that speaks the Messages
+      API shape, points AnthropicAPIBackend at it, and drives the full path
+    evidence: >-
+      Over real HTTP: a completion returns with thinking blocks skipped and
+      token counts intact; the x-api-key and anthropic-version headers arrive;
+      stop_sequences, an exact max_tokens of 128, and temperature 0.3 all reach
+      the request body on claude-opus-4-6. count_tokens returns a count and
+      correctly omits max_tokens, which that endpoint rejects. submit_batch
+      keys each request by custom_id. An unreachable endpoint raises rather
+      than returning empty text.
+    note: >-
+      This closes the testing half of the gap. Before it, "implemented,
+      uncredentialed" was an assertion about untested code; now the transport,
+      the headers, the parameter mapping and the response parsing are all
+      exercised, and exactly one thing remains untested — whether Anthropic's
+      endpoint accepts a credential this container does not have. The
+      difference between "we have not tested it" and "we cannot authenticate to
+      it" is the same distinction this repository keeps having to draw.

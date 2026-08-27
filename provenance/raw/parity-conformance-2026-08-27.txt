@@ -9,7 +9,7 @@ Parity conformance — executed, not asserted
 [PASS] Model selection
        requested claude-haiku-4-5, backend reported canonicalModel='claude-haiku-4-5'
 [PASS] Effort control changes work done
-       thinking tokens: low=111, high=92
+       thinking tokens: low=228, high=89
 [PASS] Thinking budget (undocumented flag)
        --thinking/--max-thinking-tokens accepted and the call succeeded
 [PASS] Max output tokens
@@ -21,7 +21,7 @@ Parity conformance — executed, not asserted
 [----] temperature / top_p / top_k
        no CLI flag (--temperature rejected, --top-p rejected, --top-k rejected) and on models after Opus 4.6 the API rejects them with a 400 — removed from the platform, not missing from this tool. On models that predate that, the anthropic-api backend sends them and refuses to send them to a model that would 400; verified offline, uncredentialed here.
 [----] stop_sequences
-       no CLI flag. BUILT on the anthropic-api backend and verified offline (request body carries ['STOP']), but this container has no credential to send it with. Implemented, uncredentialed — not absent.
+       no CLI flag. BUILT on the anthropic-api backend and exercised over real HTTP against a conforming server, which received ['STOP'] in the request body. What is missing is a credential for Anthropic's endpoint, not code and not a tested transport.
 [PASS] Structured output against a schema
        structured_output={"city": "Paris", "population": 2161000}; schema errors: none
 [PASS] Tool availability is controllable
@@ -29,11 +29,11 @@ Parity conformance — executed, not asserted
 [PASS] Request is inspectable before sending
        `workbench plan` resolved every request without sending: 18 model call(s) would be made.
 [PASS] Token counts and cost are reported
-       in=248 out=117 cost=$0.00179 — provider-reported, not estimated from a price table
+       in=248 out=55 cost=$0.00146 — provider-reported, not estimated from a price table
 [----] count_tokens before sending
-       /v1/messages/count_tokens is implemented on the anthropic-api backend and needs a credential this container does not have. Implemented, uncredentialed.
+       /v1/messages/count_tokens is implemented and driven over real HTTP in the test suite: it returns a count and omits max_tokens, which that endpoint rejects. Missing: a credential, not code.
 [----] Batch API 50% discount
-       /v1/messages/batches is implemented on the anthropic-api backend (custom_id keyed, since results return out of order) and needs a credential this container does not have. Implemented, uncredentialed.
+       /v1/messages/batches is implemented and driven over real HTTP in the test suite, keyed by custom_id since results return out of order. Missing: a credential, not code.
 [PASS] Eval grid over test cases
        3 variants x 6 cases graded offline on the echo backend
 [PASS] Blind comparison with position swap
@@ -51,7 +51,7 @@ Parity conformance — executed, not asserted
 [PASS] skill-creator is available
        first-party blind comparator at /mnt/skills/examples/skill-creator: withholds which skill produced which output, and its protocol describes a single fixed-order judgement — use it for skills; use this workbench when the comparison needs the swap, more than two variants, or a p-value
 ========================================================================
-20 passed, 0 failed, 5 unreachable — $0.0219, 68s
+20 passed, 0 failed, 5 unreachable — $0.0231, 71s
 
 Unreachable is not a softer failure. Those capabilities either need
 an API key this container does not have, or were removed from the

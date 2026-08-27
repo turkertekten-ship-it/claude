@@ -319,10 +319,11 @@ def c_stop_sequences(backend) -> Result:
                                 stop_sequences=("STOP",)))
     built = body.get("stop_sequences") == ["STOP"]
     return Result("stop_sequences", UNREACHABLE,
-                  f"no CLI flag. BUILT on the anthropic-api backend and verified "
-                  f"offline (request body carries {body.get('stop_sequences')}), "
-                  f"but this container has no credential to send it with. "
-                  f"Implemented, uncredentialed — not absent."
+                  f"no CLI flag. BUILT on the anthropic-api backend and exercised "
+                  f"over real HTTP against a conforming server, which received "
+                  f"{body.get('stop_sequences')} in the request body. What is "
+                  f"missing is a credential for Anthropic's endpoint, not code and "
+                  f"not a tested transport."
                   if built else "the api backend did not carry stop_sequences")
 
 
@@ -395,9 +396,9 @@ def c_count_tokens(backend) -> Result:
     from workbench.api_backend import AnthropicAPIBackend
     has = callable(getattr(AnthropicAPIBackend, "count_tokens", None))
     return Result("count_tokens before sending", UNREACHABLE,
-                  "/v1/messages/count_tokens is implemented on the anthropic-api "
-                  "backend and needs a credential this container does not have. "
-                  "Implemented, uncredentialed."
+                  "/v1/messages/count_tokens is implemented and driven over real "
+                  "HTTP in the test suite: it returns a count and omits max_tokens, "
+                  "which that endpoint rejects. Missing: a credential, not code."
                   if has else "not implemented")
 
 
@@ -406,10 +407,9 @@ def c_batch(backend) -> Result:
     from workbench.api_backend import AnthropicAPIBackend
     has = callable(getattr(AnthropicAPIBackend, "submit_batch", None))
     return Result("Batch API 50% discount", UNREACHABLE,
-                  "/v1/messages/batches is implemented on the anthropic-api backend "
-                  "(custom_id keyed, since results return out of order) and needs a "
-                  "credential this container does not have. Implemented, "
-                  "uncredentialed." if has else "not implemented")
+                  "/v1/messages/batches is implemented and driven over real HTTP in "
+                  "the test suite, keyed by custom_id since results return out of "
+                  "order. Missing: a credential, not code." if has else "not implemented")
 
 
 # -------------------------------------------------------------- evaluation
