@@ -47,6 +47,37 @@ is the roster and the rules that keep them from overwriting each other.
 - That branch also contains an audit of `src/oodarag/`, run before the retrieval spine existed, whose blocking findings were a console script with no `cli.py`, a README presenting planned work as delivered, four Makefile targets that could not succeed, and a chunking contract with no implementation. [src:SIBLING-AUDIT-2026-08-27]
 - All twelve sibling branches were searched for the strings behind U-3 and U-4; neither "the book" nor "imb" appears in any Markdown, text or YAML file on any of them. [src:FLEET-SYNC-2026-08-27]
 
+## Observed — the same pipeline built twice
+
+- `claude/rag-system-data-pipeline-rdkde9`, the branch this session's code descends from, has independently completed the same pipeline: chunking, embedding, storage, retrieval, generation, evaluation and an OODA loop, plus a YouTube connector, an egress prober and a contamination check. [src:PIPELINE-DIVERGENCE-2026-08-27]
+- The two implementations do not share a module layout. Where this branch has `retrieve.py`, `evaluate.py` and `net/reachability.py`, that branch has `retrieve/fusion.py`, `eval/metrics.py` and `access/probe.py`; twenty-six files exist on both branches with divergent content, including `cli.py`, `pipeline.py`, `models.py`, `README.md` and `docs/adr/0001-zero-dependency-core.md`. [src:PIPELINE-DIVERGENCE-2026-08-27]
+- Both branches independently found and fixed the same defect in the standard library's robots.txt parser, and both independently built contamination detection for their eval harness. [src:PIPELINE-DIVERGENCE-2026-08-27]
+
+## Duplication is a separate failure from clobbering
+
+> This section is a reading of the observations above, not a finding. It is
+> kept out of an `## Observed` heading for that reason.
+
+The rules in this file — one branch per session, push early, read before you
+build on it — are aimed at *clobbering*: two sessions overwriting one file.
+They worked. Nothing was overwritten.
+
+What happened instead was *duplication*, which those rules do not address at
+all. Two sessions each spent a session building the same seven stages, neither
+aware of the other, and both were following the convention correctly the whole
+time.
+
+The gap is timing rather than rules. "Read before you build on it" is
+satisfied by one sync at the start of a session — and at that moment the
+sibling branch either does not exist or holds nothing worth reading. The
+branches that would have changed the plan appear *during* the work. A fleet
+sync at each phase boundary, rather than once at the beginning, would have
+surfaced this after the first stage instead of after the seventh.
+
+**Suggested convention, not yet agreed by anyone else:** re-run `/fleet-sync`
+when a phase completes, not only when a session starts. It costs one fetch and
+a file listing.
+
 ## The merge hazard
 
 Because both repositories started empty, each session's first commit became its

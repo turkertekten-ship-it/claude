@@ -394,3 +394,76 @@ sources:
       6.9% before it. Embedding cache hit rate 49.5% on a half-duplicate batch.
       Four chunking policies active: markdown, code, atomic, transcript.
       236 tests pass; eval recall@8 0.9286, MRR 0.9286, nDCG@8 0.892.
+
+  - id: GITHUB-SESSION-SCOPE-2026-08-27
+    kind: api
+    collected_at: "2026-08-27T20:04Z"
+    method: "GET https://api.github.com/repos/<owner>/<repo> for five repositories; GET raw.githubusercontent.com for three of them; GET /rate_limit"
+    evidence: provenance/raw/github-scope-probe-2026-08-27.txt
+    note: >-
+      The REST API answered 200 for both of the owner's repositories and 403
+      for python/peps, anthropics/skills and torvalds/linux, while the token
+      reported 15000/15000 remaining. The 403 body states: "GitHub access to
+      this repository is not enabled for this session. Use add_repo to request
+      access." raw.githubusercontent.com returned 200 for all three of the
+      same repositories. So API authorization is scoped per repository per
+      session, raw content is not, and the two are separate surfaces.
+
+  - id: SEARCH-IS-A-SEPARATE-PATH-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T20:04Z"
+    method: "WebSearch for an IBM Technology YouTube video, in the same session where WebFetch on www.youtube.com and www.ibm.com returns EGRESS_BLOCKED"
+    evidence: >-
+      The search returned ibm.com and linkedin.com result URLs plus a third-party
+      page whose URL embeds the YouTube video id T-D1OfcDW1M, and summarised the
+      video's content — while a direct fetch of www.youtube.com returns
+      EGRESS_BLOCKED and a direct fetch of www.ibm.com does the same.
+    note: >-
+      Search and fetch are different egress paths. "Blocked" is a property of a
+      (source, path) pair, not of a source alone. Metadata about an unfetchable
+      source can still be gathered; its content cannot.
+
+  - id: GITHUB-403-RATE-LIMIT-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T19:55Z"
+    method: "python3 -c 'HttpError(403, ..., {x-ratelimit-remaining: 0, x-ratelimit-reset: ...}).retryable'"
+    evidence: >-
+      Before the fix: retryable=False for a 403 carrying
+      x-ratelimit-remaining: 0, while _retry_after() on the same headers
+      returned a wait. The wait was computed and never used, so a rate-limited
+      call raised instead of waiting.
+    note: >-
+      Found by reading a sibling branch's learnings file, then reproduced here
+      rather than taken on trust. The dead _retry_after branch is evidence the
+      original author intended the behaviour that was missing.
+
+  - id: IBM-TECHNOLOGY-CORPUS-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T19:50Z"
+    method: "git show origin/claude/rag-system-data-pipeline-rdkde9:corpus/ibm-technology/manifest.json"
+    evidence: >-
+      A committed manifest titled "IBM Technology video manifest for the YouTube
+      connector", listing videos attributed to the IBM Technology channel with
+      per-entry `verification` of search_confirmed or search_listed, and stating
+      that captions could not be fetched because youtube.com is unreachable, so
+      entries ingest as metadata_only.
+    note: >-
+      Second-hand. This is the session whose own goal string named "imb
+      youtube" acting on that string; it is that session's interpretation of
+      its own instruction, not a statement by the owner.
+
+  - id: PIPELINE-DIVERGENCE-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T20:10Z"
+    method: "git log 1d7ce8f..origin/claude/rag-system-data-pipeline-rdkde9; comm over the two branches' src/oodarag file listings"
+    evidence: provenance/raw/pipeline-divergence-2026-08-27.txt
+    note: >-
+      Their commit "Complete the pipeline: chunking, embedding, storage,
+      retrieval, generation, eval, OODA" covers the same seven stages this
+      branch built, under a different module layout: retrieve/fusion.py,
+      eval/metrics.py, eval/contamination.py, access/probe.py and
+      generate/extractive.py against this branch's retrieve.py, evaluate.py and
+      net/reachability.py. Twenty-six paths exist on both branches with
+      divergent content. Their internal/LEARNINGS.md L4 records the same
+      stdlib robots.txt precedence defect this branch found and fixed
+      independently.

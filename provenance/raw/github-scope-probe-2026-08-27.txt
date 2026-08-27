@@ -1,0 +1,15 @@
+=== GitHub authorization scope probe 2026-08-27T20:04Z ===
+--- api.github.com/repos/<repo> ---
+  turkertekten-ship-it/claude                -> 200
+  turkertekten-ship-it/claude-ai             -> 200
+  python/peps                                -> 403
+  anthropics/skills                          -> 403
+  torvalds/linux                             -> 403
+--- raw.githubusercontent.com (same repos) ---
+  python/peps/main/README.rst                    -> 200
+  anthropics/skills/main/README.md               -> 200
+  torvalds/linux/master/README                   -> 200
+--- token quota at time of the 403s ---
+  core: {'limit': 15000, 'used': 0, 'remaining': 15000, 'reset': 1787864691}
+--- body of a scoped-out 403 ---
+{"message":"GitHub access to this repository is not enabled for this session. Use add_repo to request access. If add_repo answers that read access is already available and you need GitHub API or write access, call add_repo again with access:\"push\" to attach the repository with credentials.","documentation_url":"https://docs.anthropic.com/en/docs/claude-code/github-actions"}

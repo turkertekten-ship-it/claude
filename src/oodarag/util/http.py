@@ -44,9 +44,34 @@ class HttpError(Exception):
         self.headers = headers or {}
 
     @property
+    def rate_limited(self) -> bool:
+        """Is this a quota refusal wearing another status code?
+
+        GitHub signals both primary quota exhaustion and secondary rate limits
+        with **403**, not 429, and marks them with `x-ratelimit-remaining: 0`
+        plus an `x-ratelimit-reset` timestamp. A 403 is otherwise a permission
+        error that must fail fast, so the headers — not the status — are what
+        separate the two.
+        """
+        if self.headers.get("x-ratelimit-remaining") == "0":
+            return True
+        if self.headers.get("retry-after"):
+            return True
+        body = (self.body or "").lower()
+        return "rate limit" in body or "secondary rate limit" in body
+
+    @property
     def retryable(self) -> bool:
-        # 429 and 5xx are worth retrying; 408 is a server-side timeout.
-        return self.status in (408, 425, 429) or 500 <= self.status < 600
+        """Is waiting and trying again ever worth a request?
+
+        429 and 5xx always are; 408 is a server-side timeout. 403 is retryable
+        *only* when it is a disguised rate limit — otherwise a genuine
+        permission error would be retried four times with backoff, turning a
+        clear failure into a slow one.
+        """
+        if self.status in (408, 425, 429) or 500 <= self.status < 600:
+            return True
+        return self.status == 403 and self.rate_limited
 
 
 class TransportError(Exception):
@@ -261,7 +286,12 @@ def _safe_read(e: Any) -> str:
 
 
 def _retry_after(headers: dict[str, str]) -> float | None:
-    """Honour Retry-After, and GitHub's x-ratelimit-reset when the quota is spent."""
+    """How long to wait, from whichever header the server actually sent.
+
+    `Retry-After` is the standard and is preferred. GitHub frequently omits it
+    on a rate-limited 403 and sends `x-ratelimit-reset` instead, as a Unix
+    timestamp rather than a duration, so that is converted rather than ignored.
+    """
     if (ra := headers.get("retry-after")) and ra.strip().isdigit():
         return float(ra.strip())
     if headers.get("x-ratelimit-remaining") == "0" and (reset := headers.get("x-ratelimit-reset")):

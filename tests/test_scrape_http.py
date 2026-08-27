@@ -16,7 +16,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 from oodarag.scrape.crawler import CrawlConfig  # noqa: E402
 from oodarag.scrape.html import extract  # noqa: E402
 from oodarag.scrape.robots import RobotsPolicy, RuleSet  # noqa: E402
-from oodarag.util.http import RetryPolicy, normalize_url, same_site, urljoin  # noqa: E402
+from oodarag.util.http import (  # noqa: E402
+    HttpError,
+    RetryPolicy,
+    normalize_url,
+    same_site,
+    urljoin,
+)
 from oodarag.util.text import (  # noqa: E402
     estimate_tokens,
     heading_path,
@@ -88,6 +94,70 @@ class TestRetryPolicy(unittest.TestCase):
     def test_retry_after_is_honoured_over_the_computed_backoff(self) -> None:
         policy = RetryPolicy(base_delay=1.0, max_delay=30.0)
         self.assertAlmostEqual(policy.delay_for(1, retry_after=17.0), 17.0)
+
+
+class TestRateLimitDiscrimination(unittest.TestCase):
+    """A 403 is a permission error unless the headers say it is a quota refusal.
+
+    GitHub signals both primary quota exhaustion and secondary rate limits with
+    403 rather than 429. Treating every 403 as permanent means a long ingest
+    dies at the quota boundary instead of waiting for the reset; treating every
+    403 as retryable means a genuine permission error is retried four times
+    with backoff before failing.
+    """
+
+    def error(self, status: int, body: str = "", **headers: str) -> HttpError:
+        return HttpError(status, "https://api.github.com/x", body, headers)
+
+    def test_a_quota_403_is_retryable(self) -> None:
+        err = self.error(403, "API rate limit exceeded",
+                         **{"x-ratelimit-remaining": "0",
+                            "x-ratelimit-reset": "9999999999"})
+        self.assertTrue(err.rate_limited)
+        self.assertTrue(err.retryable)
+
+    def test_a_secondary_rate_limit_is_recognised_from_the_body(self) -> None:
+        # Secondary limits do not always set the ratelimit headers.
+        err = self.error(403, "You have exceeded a secondary rate limit")
+        self.assertTrue(err.retryable)
+
+    def test_a_genuine_permission_403_fails_fast(self) -> None:
+        # The case this discrimination protects: retrying it four times with
+        # backoff turns a clear failure into a slow one.
+        err = self.error(403, "Resource not accessible by integration")
+        self.assertFalse(err.rate_limited)
+        self.assertFalse(err.retryable)
+
+    def test_a_missing_credential_403_fails_fast(self) -> None:
+        err = self.error(403, "Method doesn't allow unregistered callers")
+        self.assertFalse(err.retryable)
+
+    def test_the_standard_statuses_are_unaffected(self) -> None:
+        self.assertTrue(self.error(429, "slow down").retryable)
+        self.assertTrue(self.error(503).retryable)
+        self.assertTrue(self.error(408).retryable)
+        self.assertFalse(self.error(404).retryable)
+        self.assertFalse(self.error(401).retryable)
+
+    def test_the_wait_comes_from_the_reset_timestamp_when_retry_after_is_absent(self) -> None:
+        # GitHub sends a Unix timestamp in x-ratelimit-reset rather than a
+        # duration in Retry-After, so it must be converted, not ignored.
+        import time as _time
+        from oodarag.util.http import _retry_after
+        reset = _time.time() + 42
+        wait = _retry_after({"x-ratelimit-remaining": "0",
+                             "x-ratelimit-reset": str(reset)})
+        self.assertIsNotNone(wait)
+        self.assertGreater(wait, 40)
+        self.assertLess(wait, 46)
+
+    def test_retry_after_wins_when_both_are_present(self) -> None:
+        from oodarag.util.http import _retry_after
+        self.assertAlmostEqual(
+            _retry_after({"retry-after": "7", "x-ratelimit-remaining": "0",
+                          "x-ratelimit-reset": "9999999999"}),
+            7.0,
+        )
 
 
 class TestHtmlExtraction(unittest.TestCase):

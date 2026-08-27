@@ -57,6 +57,9 @@ verified lives in [unknowns.md](unknowns.md), not here.
 
 - Egress is an **allowlist**, not a blocklist: 11 of 18 probed hosts were refused at the proxy's CONNECT with no HTTP response at all, and a sweep of 24 further candidate mirrors and reader-proxies returned zero successes. [src:EGRESS-ALLOWLIST-2026-08-27]
 - The reachable set is GitHub (`api`, `raw`, `codeload`, `objects`), the package registries (`pypi`, `files.pythonhosted`, `registry.npmjs`, `proxy.golang`, `crates`), `*.googleapis.com`, and the Anthropic documentation hosts. [src:EGRESS-ALLOWLIST-2026-08-27]
+- That reachability is at the *host* level and does not imply access to what the host serves. `api.github.com` answered 200 for both of the owner's repositories and 403 for `python/peps`, `anthropics/skills` and `torvalds/linux` — with the token reporting 15000/15000 remaining, and a body naming the cause: access to those repositories is not enabled for this session. [src:GITHUB-SESSION-SCOPE-2026-08-27]
+- `raw.githubusercontent.com` returned 200 for those same three repositories, so raw content and the REST API are separately scoped: blocked on one does not mean blocked on the other. [src:GITHUB-SESSION-SCOPE-2026-08-27]
+- Search and fetch are different egress paths within one session. A web search returned an IBM Technology video's id and a summary of its content while a direct fetch of both `www.youtube.com` and `www.ibm.com` returned EGRESS_BLOCKED. [src:SEARCH-IS-A-SEPARATE-PATH-2026-08-27]
 - `www.anthropic.com`, `en.wikipedia.org`, `arxiv.org` and `stackoverflow.com` are among the hosts refused at CONNECT. [src:EGRESS-ALLOWLIST-2026-08-27]
 
 ## Observed — YouTube, at the level of which barrier applies
@@ -84,9 +87,10 @@ verified lives in [unknowns.md](unknowns.md), not here.
 
 - The two unrelated histories on this repository were merged onto one root. The only conflicts were the two files FLEET.md predicted, `.gitignore` and `README.md`; both sides were read before resolving, and the verifier reported 0 violations afterwards. [src:UNIFIED-ROOT-2026-08-27]
 - SQLite's FTS5 `bm25()` returns a negative score where a better match is numerically smaller, so ascending order is best-first; on a 3-document corpus every score collapsed to -0.00000 because the IDF term vanishes when a term appears in most documents. [src:FTS5-BM25-SIGN-2026-08-27]
-- The full suite — unit tests plus the two doctrine suites and the provenance verifier — passed: 236 tests, all checks green. [src:OODARAG-VERIFIED-2026-08-27]
+- The full suite — unit tests plus the two doctrine suites and the provenance verifier — passed: 243 tests, all checks green. [src:OODARAG-VERIFIED-2026-08-27]
 - Python's `urllib.robotparser` applies robots.txt rules in file order rather than by specificity: with `Disallow: /private/` before `Allow: /private/public-bit` it refused the explicitly-allowed path, and reversing the two lines reversed the verdict. [src:ROBOTS-FIRST-MATCH-2026-08-27]
 - The secret redactor did not redact `AWS_SECRET_ACCESS_KEY=...`, because its generic key=value pattern required a word boundary before the key name and underscores are word characters. [src:REDACTION-COMPOUND-KEY-2026-08-27]
+- The HTTP client treated every 403 as non-retryable while separately computing a wait from GitHub's `x-ratelimit-reset`, so the wait was dead code and a rate-limited call failed permanently instead of pausing. GitHub signals both primary and secondary rate limits with 403 rather than 429. [src:GITHUB-403-RATE-LIMIT-2026-08-27]
 - The retrieval evaluation over 8 golden cases passed all 8, at recall@8 0.9286, MRR 0.9286 and nDCG@8 0.892, with zero citation problems, zero contaminated cases, and the one abstention case abstaining as required. [src:OODARAG-VERIFIED-2026-08-27]
 - Evaluating against the whole repository instead of the documentation corpus contaminated the run: `evals/goldens.jsonl` and a captured report from a previous run both contain the golden questions verbatim, the abstention case retrieved its own question and stopped abstaining, and it failed. Excluding the eval material restored it. [src:EVAL-CONTAMINATION-2026-08-27]
 

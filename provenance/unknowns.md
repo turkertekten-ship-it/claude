@@ -74,7 +74,7 @@ book, and is not treated as an answer.
 
 ---
 
-### U-4 — What "imb youtube" designates
+### U-4 — What "imb youtube" designates — ANSWERED SECOND-HAND
 
 **Unknown:** the `RAG system and data pipeline` goal names "imb youtube" as a
 data source. The expansion of "imb" is not established.
@@ -85,10 +85,25 @@ definition, and this session did not reach the source.
 **Resolves when:** the owner expands the term, or that session commits a
 resolved source list.
 
-**Narrowed:** whatever "imb youtube" designates, reaching YouTube from this
-container is credential-gated rather than impossible — the consumer site is
-refused at CONNECT while the Data API host answers and asks for a key. See
-U-7 and U-8.
+**Answered, second-hand.** The session whose goal string contains "imb youtube"
+has committed `corpus/ibm-technology/manifest.json` — a manifest of videos
+attributed to the **IBM Technology** YouTube channel, built for its YouTube
+connector. [src:IBM-TECHNOLOGY-CORPUS-2026-08-27] Read as a transposition,
+"imb" is "ibm", and that session acted on the string that way.
+
+**Why this is not promoted to established.** It is that session's
+interpretation of its own instruction, not a statement by the owner, and the
+owner has not confirmed it. It is recorded here rather than in
+`observations.md` for that reason. One corroborating detail: a web search run
+independently here returned the same video id, `T-D1OfcDW1M`, that the manifest
+lists for the RAG explainer. [src:SEARCH-IS-A-SEPARATE-PATH-2026-08-27]
+
+**Resolves fully when:** the owner confirms the expansion, or corrects it.
+
+**Narrowed separately:** whatever it designates, reaching YouTube from this
+container is credential-gated rather than impossible for metadata — the
+consumer site is refused at CONNECT while the Data API host answers and asks
+for a key, and search reaches metadata that fetch cannot. See U-7 and U-8.
 
 ---
 
