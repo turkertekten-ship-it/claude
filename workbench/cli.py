@@ -91,10 +91,22 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     print("  notice. Verified working here: setting a budget changed the")
     print("  reported thinking_tokens on an otherwise identical call.")
     print()
+    from .api_backend import AnthropicAPIBackend, find_credential
+    api_ok, api_why = AnthropicAPIBackend().available()
+    print()
+    print(f"direct Messages API    : {'available' if api_ok else 'IMPLEMENTED, uncredentialed'}")
+    print(f"                        {api_why[:150]}")
+    print("                        Built and offline-tested: stop_sequences, exact")
+    print("                        max_tokens, count_tokens before sending, batch")
+    print("                        submission, and temperature/top_p/top_k on models")
+    print("                        old enough to accept them. Run with --backend")
+    print("                        anthropic-api once a credential exists.")
+    print()
     print("Not controllable:")
     print("  temperature, top_p, top_k, stop_sequences — no CLI flag under any")
-    print("  spelling probed, and on models after Opus 4.6 the first three are")
-    print("  rejected by the API with a 400 regardless.")
+    print("  spelling probed. On models after Opus 4.6 the first three are")
+    print("  rejected by the API with a 400 regardless; on older models the")
+    print("  anthropic-api backend sends them, once credentialed.")
     return EXIT_OK if ok else EXIT_CANNOT_RUN
 
 
@@ -141,6 +153,9 @@ def cmd_plan(args: argparse.Namespace) -> int:
                 thinking=variant.thinking,
                 max_thinking_tokens=variant.max_thinking_tokens,
                 max_output_tokens=variant.max_output_tokens,
+                stop_sequences=variant.stop_sequences,
+                temperature=variant.temperature, top_p=variant.top_p,
+                top_k=variant.top_k,
             )
             print("\n" + "=" * 70)
             print(f"{variant.id} / {case.id}   [{variant.mode} mode]")

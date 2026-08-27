@@ -67,6 +67,7 @@ _VARIANT_KEYS = {
     "append_system", "json_schema", "vars", "prompt_prefix", "prompt_suffix",
     "max_budget_usd", "fixture", "setup", "note", "thinking",
     "max_thinking_tokens", "max_output_tokens",
+    "stop_sequences", "temperature", "top_p", "top_k",
 }
 _CASE_KEYS = {
     "id", "prompt", "prompt_file", "turns", "vars", "graders", "weight", "note",
@@ -80,6 +81,7 @@ _DEFAULT_KEYS = {
     "model", "effort", "mode", "tools", "system", "system_file",
     "append_system", "json_schema", "max_budget_usd", "fixture",
     "thinking", "max_thinking_tokens", "max_output_tokens",
+    "stop_sequences", "temperature", "top_p", "top_k",
 }
 
 
@@ -131,6 +133,10 @@ class Variant:
     thinking: str | None = None
     max_thinking_tokens: int | None = None
     max_output_tokens: int | None = None
+    stop_sequences: tuple[str, ...] = ()
+    temperature: float | None = None
+    top_p: float | None = None
+    top_k: int | None = None
     fixture: str | None = None
     setup: list[str] = field(default_factory=list)
     note: str = ""
@@ -282,6 +288,10 @@ def load_suite(path: str | Path) -> Suite:
                 thinking=merged.get("thinking"),
                 max_thinking_tokens=merged.get("max_thinking_tokens"),
                 max_output_tokens=merged.get("max_output_tokens"),
+                stop_sequences=tuple(merged.get("stop_sequences") or ()),
+                temperature=merged.get("temperature"),
+                top_p=merged.get("top_p"),
+                top_k=merged.get("top_k"),
                 fixture=merged.get("fixture"),
                 setup=list(merged.get("setup") or []),
                 note=str(merged.get("note", "")),

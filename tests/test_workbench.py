@@ -779,6 +779,69 @@ def test_errored_runs_are_not_graded() -> None:
           "paired table should find nothing to compare")
 
 
+def test_api_backend() -> None:
+    """The capabilities the CLI has no flag for: built, and untestable on the wire.
+
+    Everything here runs offline. Request construction, the deprecation rules
+    and response parsing are checkable without a credential; the wire is not,
+    and that is stated rather than glossed.
+    """
+    print("\ndirect Messages API backend -- implemented, uncredentialed here")
+    from workbench.api_backend import AnthropicAPIBackend, sampling_allowed
+
+    backend = AnthropicAPIBackend(api_key="test-key-not-real")
+
+    body = backend.build_body(Request(
+        prompt="hello", model="claude-opus-4-6", max_output_tokens=256,
+        stop_sequences=("STOP", "END"), temperature=0.2, system="be terse",
+    ))
+    check("stop_sequences reaches the body, which no CLI flag can do",
+          body["stop_sequences"] == ["STOP", "END"])
+    check("max_tokens is exact, not an env-var approximation", body["max_tokens"] == 256)
+    check("the system prompt is carried", body["system"] == "be terse")
+    check("temperature is sent to a model that still accepts it",
+          body["temperature"] == 0.2)
+
+    print("\n  a parameter the target model rejects is refused here, not by a 400")
+    for param in ("temperature", "top_p", "top_k"):
+        rejects(f"{param} on a post-4.6 model is refused before sending",
+                lambda p=param: backend.build_body(
+                    Request(prompt="x", model="claude-opus-5", **{p: 0.5})))
+    check("the deprecation rule matches the models",
+          sampling_allowed("claude-opus-4-6") and sampling_allowed("claude-sonnet-4-5")
+          and not sampling_allowed("claude-opus-5") and not sampling_allowed("claude-sonnet-5"))
+
+    print("\n  multi-turn and structured output map onto the API shape")
+    turns = backend.build_body(Request(turns=("first", "second"), model="claude-haiku-4-5"))
+    check("each turn becomes a user message", len(turns["messages"]) == 2)
+    check("in order", turns["messages"][0]["content"] == "first")
+    schema = backend.build_body(Request(prompt="x", model="claude-haiku-4-5",
+                                        json_schema={"type": "object"}, effort="high"))
+    check("a schema goes in output_config.format",
+          schema["output_config"]["format"]["type"] == "json_schema")
+    check("effort rides in the same place", schema["output_config"]["effort"] == "high")
+
+    print("\n  response parsing, and the cost it refuses to invent")
+    parsed = AnthropicAPIBackend.parse({
+        "content": [{"type": "thinking", "thinking": "..."},
+                    {"type": "text", "text": "the answer"}],
+        "usage": {"input_tokens": 11, "output_tokens": 7},
+        "model": "claude-haiku-4-5", "stop_reason": "end_turn",
+    })
+    check("text blocks are concatenated, thinking blocks skipped",
+          parsed.text == "the answer")
+    check("token counts are carried",
+          parsed.input_tokens == 11 and parsed.output_tokens == 7)
+    check("cost is None, not a number invented from a price table",
+          parsed.cost_usd is None)
+
+    print("\n  and it refuses to pretend it can run here")
+    usable, reason = AnthropicAPIBackend(api_key=None).available()
+    check("no credential means unavailable", not usable)
+    check("and the reason names what was checked, not just what was unset",
+          "ANTHROPIC_API_KEY" in reason and "ant" in reason, reason)
+
+
 def test_registry_kinds() -> None:
     print("\ngrader taxonomy")
     kinds = dict(describe_registry())
@@ -806,6 +869,7 @@ def main() -> int:
     test_cache_is_per_backend()
     test_length_stratification()
     test_errored_runs_are_not_graded()
+    test_api_backend()
     test_registry_kinds()
 
     print()

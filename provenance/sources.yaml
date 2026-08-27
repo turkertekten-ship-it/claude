@@ -656,3 +656,29 @@ sources:
       from both sides so it cannot appear as the other variant winning. A
       regression test covers it. Without this, the held-out comparison would
       have reported v2 ahead on the strength of a TLS error.
+
+  - id: API-BACKEND-BUILT-2026-08-27
+    kind: filesystem
+    collected_at: "2026-08-27T23:10Z"
+    method: >-
+      workbench/api_backend.py, exercised offline by tests/test_workbench.py —
+      request construction, the sampling deprecation rules, multi-turn mapping,
+      structured output, and response parsing, all without a credential
+    evidence: >-
+      build_body carries stop_sequences as a list, an exact max_tokens, the
+      system prompt, and temperature on claude-opus-4-6; it raises rather than
+      sending temperature, top_p or top_k to claude-opus-5, which would 400.
+      Multi-turn maps one user message per turn in order; a JSON schema goes to
+      output_config.format and effort to output_config.effort. parse()
+      concatenates text blocks, skips thinking blocks, carries token counts, and
+      leaves cost_usd None because this endpoint reports tokens and turning them
+      into money would need a price table.
+    note: >-
+      This converts three rows of the parity matrix from "unreachable" to
+      "implemented, uncredentialed": stop_sequences, count_tokens before
+      sending, and Batch submission — plus temperature on models old enough to
+      accept it. The distinction matters: "we did not build it" and "this
+      machine cannot run it" read the same in a summary and only one is a gap in
+      the tool. The wire is untested and that is stated rather than glossed —
+      no ANTHROPIC_API_KEY, no `ant` CLI, no ~/.config/anthropic, no
+      ~/.claude/.credentials.json, each checked.

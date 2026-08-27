@@ -111,6 +111,14 @@ class Request:
     max_thinking_tokens: int | None = None
     #: There is no --max-tokens flag; the documented control is an env var.
     max_output_tokens: int | None = None
+    #: Messages API only -- the CLI has no flag for any of these. Sampling
+    #: parameters additionally 400 on models released after Claude Opus 4.6,
+    #: which AnthropicAPIBackend refuses to send rather than letting the API
+    #: reject them.
+    stop_sequences: tuple[str, ...] = ()
+    temperature: float | None = None
+    top_p: float | None = None
+    top_k: int | None = None
     cwd: str | None = None
     max_budget_usd: float | None = None
     timeout_s: int = DEFAULT_TIMEOUT_S
@@ -132,6 +140,10 @@ class Request:
             "thinking": self.thinking,
             "max_thinking_tokens": self.max_thinking_tokens,
             "max_output_tokens": self.max_output_tokens,
+            "stop_sequences": list(self.stop_sequences),
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "top_k": self.top_k,
             "repeat": self.repeat,
         }
         blob = json.dumps(payload, sort_keys=True, ensure_ascii=False)
@@ -482,8 +494,11 @@ class CachingBackend(Backend):
 def resolve_backend(name: str, cache_dir: str | Path | None = None,
                     transcript: str | Path | None = None) -> Backend:
     """Build a backend by name, wrapping it in the disk cache when asked."""
-    if name in ("claude", "claude-cli", "cli"):
-        backend: Backend = ClaudeCLIBackend()
+    if name in ("api", "anthropic-api", "messages"):
+        from .api_backend import AnthropicAPIBackend
+        backend: Backend = AnthropicAPIBackend()
+    elif name in ("claude", "claude-cli", "cli"):
+        backend = ClaudeCLIBackend()
     elif name == "echo":
         backend = EchoBackend()
     elif name == "replay":
@@ -492,7 +507,8 @@ def resolve_backend(name: str, cache_dir: str | Path | None = None,
         backend = ReplayBackend(transcript)
     else:
         raise BackendUnavailable(
-            f"unknown backend {name!r}; expected one of: claude-cli, echo, replay"
+            f"unknown backend {name!r}; expected one of: claude-cli, "
+            f"anthropic-api, echo, replay"
         )
     if cache_dir and name != "replay":
         backend = CachingBackend(backend, cache_dir)

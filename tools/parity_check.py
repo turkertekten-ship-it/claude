@@ -286,16 +286,27 @@ def c_sampling(backend) -> Result:
     all_rejected = all(probes.values())
     return Result("temperature / top_p / top_k", UNREACHABLE,
                   "no CLI flag (" + ", ".join(f"{k} rejected" for k in probes if probes[k])
-                  + ") and on models after Opus 4.6 the API rejects them with a 400. "
-                  "Removed from the platform, not missing from this tool."
+                  + ") and on models after Opus 4.6 the API rejects them with a 400 — "
+                  "removed from the platform, not missing from this tool. On models "
+                  "that predate that, the anthropic-api backend sends them and "
+                  "refuses to send them to a model that would 400; verified offline, "
+                  "uncredentialed here."
                   if all_rejected else f"unexpected: {probes}")
 
 
 @check("stop_sequences", live=False)
 def c_stop_sequences(backend) -> Result:
+    from workbench.api_backend import AnthropicAPIBackend
+    b = AnthropicAPIBackend(api_key="offline-probe")
+    body = b.build_body(Request(prompt="x", model="claude-haiku-4-5",
+                                stop_sequences=("STOP",)))
+    built = body.get("stop_sequences") == ["STOP"]
     return Result("stop_sequences", UNREACHABLE,
-                  "supported by the Messages API but exposed by no CLI flag, and "
-                  "this container has no ANTHROPIC_API_KEY to call the API directly")
+                  f"no CLI flag. BUILT on the anthropic-api backend and verified "
+                  f"offline (request body carries {body.get('stop_sequences')}), "
+                  f"but this container has no credential to send it with. "
+                  f"Implemented, uncredentialed — not absent."
+                  if built else "the api backend did not carry stop_sequences")
 
 
 # --------------------------------------------------------------- structure
@@ -364,16 +375,24 @@ def c_accounting(backend) -> Result:
 
 @check("count_tokens before sending", live=False)
 def c_count_tokens(backend) -> Result:
+    from workbench.api_backend import AnthropicAPIBackend
+    has = callable(getattr(AnthropicAPIBackend, "count_tokens", None))
     return Result("count_tokens before sending", UNREACHABLE,
-                  "/v1/messages/count_tokens exists but needs an ANTHROPIC_API_KEY, "
-                  "which this container does not have")
+                  "/v1/messages/count_tokens is implemented on the anthropic-api "
+                  "backend and needs a credential this container does not have. "
+                  "Implemented, uncredentialed."
+                  if has else "not implemented")
 
 
 @check("Batch API 50% discount", live=False)
 def c_batch(backend) -> Result:
+    from workbench.api_backend import AnthropicAPIBackend
+    has = callable(getattr(AnthropicAPIBackend, "submit_batch", None))
     return Result("Batch API 50% discount", UNREACHABLE,
-                  "/v1/messages/batches needs an ANTHROPIC_API_KEY; real money for a "
-                  "large sweep and genuinely absent here")
+                  "/v1/messages/batches is implemented on the anthropic-api backend "
+                  "(custom_id keyed, since results return out of order) and needs a "
+                  "credential this container does not have. Implemented, "
+                  "uncredentialed." if has else "not implemented")
 
 
 # -------------------------------------------------------------- evaluation

@@ -239,6 +239,9 @@ def produce(suite: Suite, backend: Backend, report: Reporter,
             thinking=variant.thinking,
             max_thinking_tokens=variant.max_thinking_tokens,
             max_output_tokens=variant.max_output_tokens,
+            stop_sequences=variant.stop_sequences,
+            temperature=variant.temperature, top_p=variant.top_p,
+            top_k=variant.top_k,
             repeat=repeat,
         ))
 

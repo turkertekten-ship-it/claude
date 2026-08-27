@@ -98,9 +98,9 @@ Legend: **CC** = stock Claude Code; **WB** = this repository's `workbench/`.
 | Model selection | yes | `--model` | per variant |
 | Effort | yes | `--effort` | per variant |
 | Extended thinking | yes | `--effort`, plus undocumented `--thinking` / `--max-thinking-tokens` | per variant |
-| `temperature` / `top_p` / `top_k` | rejected by current models | no flag | deliberately not built |
-| `max_tokens` | yes | `CLAUDE_CODE_MAX_OUTPUT_TOKENS` | per variant, exercised |
-| `stop_sequences` | yes | no flag | not reachable without an API key |
+| `temperature` / `top_p` / `top_k` | rejected by current models | no flag | built for pre-4.6 models, refused for later ones |
+| `max_tokens` | yes | `CLAUDE_CODE_MAX_OUTPUT_TOKENS` | per variant, exercised; exact via `anthropic-api` |
+| `stop_sequences` | yes | no flag | built on `anthropic-api`, uncredentialed here |
 | Structured output schema | yes | `--json-schema` | per variant |
 | Tool definitions | yes | `--tools`, MCP | per variant, on/off |
 | Budget ceiling | no | `--max-budget-usd` | per variant, exercised |
