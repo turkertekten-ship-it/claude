@@ -150,6 +150,43 @@ The report also prints what the run did **not** establish. That section is not
 boilerplate; it is the part that stops a directional result being quoted as a
 settled one.
 
+## Validating a grader before you trust it
+
+Three graders in this repository produced confident, significant, wrong
+results. Each was written carefully. Each was checked before use. The checks
+were the problem.
+
+**Do not validate a grader against outputs you wrote yourself.** This is the
+one that keeps happening. Writing a plausible "honest answer" and a plausible
+"fabricated answer" and confirming the grader separates them proves only that
+it separates *your idea* of those two things. Real outputs differ in exactly
+the way that matters:
+
+| Grader | Checked against | What real outputs did |
+|---|---|---|
+| document-grade fabrication check | a sourced line and a blockquote | conversational prose — flagged 18 of 18, including textbook refusals |
+| `honest-move` keyword list | phrases the author thought of | the doctrine prompt phrased it otherwise; the plain assistant used stock wording and won at p = 0.039 |
+| per-case bait regex | refusals the author invented, which avoided the bait words | real refusals **quote** the bait to refuse it — 8 of 9 hits were false positives |
+
+**So: validate against captured outputs.** Run the suite once, read what came
+back, and check the grader against those. A run whose grading you have not
+audited line by line is a number, not a measurement. It costs one extra pass
+and it is the cheapest thing in this whole document.
+
+**Two shapes to be suspicious of.** A grader that fails everything is not
+strict, it is broken — it has no headroom and cannot discriminate. A grader
+that passes everything is the same defect wearing a smile. Both were mistaken
+here for results.
+
+**Know when the deterministic ladder runs out.** Prefer a programmatic check —
+but *mention* and *assertion* are indistinguishable to a pattern. "I cannot
+verify that this 8192-token recommendation exists" and "Anthropic recommends
+8192 tokens" contain the same token. When the construct you are measuring
+turns on intent rather than surface, a regex will not reach it, and reaching
+for a bigger regex makes it worse. Go to a rubric, force it to quote the span
+that decided it, and report the verdict as model-graded — which the report
+does, in its own column, so a reader can see how much of the result is opinion.
+
 ## Sizing a suite so it can answer its question
 
 The first run of `suites/doctrine-adherence.yaml` produced a clean, blinded,

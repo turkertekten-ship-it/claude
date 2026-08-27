@@ -86,6 +86,14 @@ Reach for them in this order, and stop at the first that settles the case:
 
 `python3 -m workbench graders` lists them all with their kinds.
 
+**Validate a grader against real outputs before you trust its verdict.** Not
+against an honest answer and a fabricated one that you wrote — those prove only
+that it separates your idea of them. Run the suite, read what actually came
+back, and audit the grader's hits one by one. Three graders here produced
+significant, confident, wrong results because that step was skipped; the worst
+of them penalised a refusal for quoting the thing it was refusing. A grader
+that fails everything and a grader that passes everything are the same defect.
+
 **Before running a suite you did not write:** read it. The `command` grader
 executes shell, and `mode: agent` runs the model with permissions bypassed in a
 scratch directory. A suite is executable code, not configuration.
