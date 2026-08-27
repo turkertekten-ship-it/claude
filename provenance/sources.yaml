@@ -350,3 +350,21 @@ sources:
       summaries, both second-hand. It is strong enough to act on and not
       strong enough to state as fact about what that session has actually
       built; no branch of theirs had been pushed at capture time.
+
+  - id: CORPUS-KINDS-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:30Z"
+    method: "grep -nE 'source_system|RawDocument\\(' src/oodarag/ingest/*.py; grep -nE '_base_meta\\(\"' src/oodarag/ingest/github.py; read of src/oodarag/models.py and src/oodarag/util/text.py"
+    evidence: >-
+      Two connectors construct RawDocument. github.py sets
+      source_system="github" at six call sites, tagged via _base_meta as
+      "readme", "file", "issue", "pull_request", "commit" and "release";
+      the readme path sets metadata "language": "markdown". web.py sets
+      source_system="web" and passes page.markdown or page.text. models.py
+      documents external_id as "a GitHub path + sha, a YouTube video id, a
+      chat session uuid", and defines Chunk.context_header as a contextual
+      prefix embedded and indexed with the body. util/text.py provides
+      split_markdown_sections (returning heading path, body and offset),
+      heading_path (offset -> heading stack), split_sentences, and
+      estimate_tokens, whose docstring states it approximates ~4 chars/token
+      for English and ~3 for code and is deliberately an estimate.
