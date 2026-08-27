@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>11 takım · 122 vaka</span>
+    <span>12 takım · 128 vaka</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -314,6 +314,15 @@ footer p + p{margin-top:12px}
         <div class="db-dot a" tabindex="0" data-tip="yamalı: 0 — altıncı kapı eklendi" style="left:3%"></div>
       </div>
       <div class="db-val">3 → 0</div>
+    </div>
+    <div class="db-row">
+      <div class="db-label"><b>L</b>referans bütünlüğü</div>
+      <div class="db-track">
+        <div class="db-bar" style="left:3%;width:3%"></div>
+        <div class="db-dot b" tabindex="0" data-tip="1 kaldı — taşınabilirlik regresyonu, benim bıraktığım" style="left:6%"></div>
+        <div class="db-dot a" tabindex="0" data-tip="temiz" style="left:3%"></div>
+      </div>
+      <div class="db-val">1 → 0</div>
     </div>
     <div class="db-row">
       <div class="db-label"><b>E</b>beklenen değerler</div>
@@ -590,6 +599,49 @@ KALDI A-07  §19 pilotu, avro çevrilmeden
 </section>
 
 <section>
+  <span class="sec-tag">Üçüncü tur</span>
+  <h2>Kapatıldı sanılan iki kusur canlıydı</h2>
+  <p><strong>Taşınabilirlik düzeltmem bir regresyon bıraktı.</strong> Betikleri
+  taşınabilir yaptım, ama iki belge — <em class="term">rekabet-esigi</em>
+  becerisi ve <em class="term">denetim</em> komutu — hâlâ
+  <em class="term">~/mafirm</em> yolunu sabitliyordu. Bir klonun becerisi,
+  modele KENDİ ağacını değil makinedeki kurulumu çalıştırmasını söylüyordu.
+  Betikleri taşınabilir yapmak yetmiyor; onlara işaret eden belgeler de
+  taşınabilir olmalı.</p>
+  <p><strong>Eski API'nin sessizliği belgelenmişti ama kapatılmamıştı.</strong>
+  <em class="term">bildirilmeli()</em> hâlâ çağrılabiliyordu ve §19 pilotunda
+  hiçbir uyarı olmadan <em class="term">(False, 'hiçbir eşik')</em>
+  döndürüyordu. Bir kusuru belgelemek onu kaldırmaz — kod canlı kaldığı sürece
+  biri onu çağırır.</p>
+<pre><span class="dim">$ python3 -W always -c "esik.bildirilmeli([], 1_400_000_000, [2_400_000_000])"</span>
+<span class="bad">DeprecationWarning: bildirilmeli() birim taşımaz…</span>
+<span class="bad">RuntimeWarning: OLASI BİRİM HATASI: devre konu taraf eşiği aşıyor ama
+  'diğer dünya cirosu' (2400000000) 9000000000 eşiğinin altında.
+  Bu rakam TL mi?</span>
+<span class="dim">sonuç: (False, 'hiçbir eşik')</span></pre>
+  <p style="margin-top:16px">Uyarı iki yönde sınandı: §19 pilotunda ateşliyor,
+  meşru bir TL işleminde susuyor.</p>
+
+  <h2 style="margin-top:42px">I-03'ün kanıt katmanı yükseldi</h2>
+  <p>Alt ajan birincil kaynağa ulaşamamıştı; kendim düzenleyicinin alan adında
+  iki bağımsız arama yaptım. <strong>Madde 10</strong> ön inceleme, on beş
+  günlük süre, askıya alma ve otuz günde zımni geçerlilik mekanizmasını
+  taşıyor; <strong>madde 11</strong> bildirilmeme hâlini düzenliyor. Kitabın
+  atfı yanlış.</p>
+  <p>Yine de statü <strong>ENGELLEYİCİ kalıyor</strong>: kanunun birebir metni
+  egress ile engelli. Karar kitabın kendi §11 kuralına uygun — <strong>atıf
+  değiştirilmedi</strong>, ama CLAUDE.md §1'in emrettiği gibi dört dosyanın
+  dördünde de yerinde <em class="term">DOĞRULANAMADI</em> işareti duruyor.</p>
+  <div class="note">
+    <b>Ve bulgu kaydı bir mekanizmaya dönüştü.</b> Denetime yeni bir kontrol
+    eklendi: her ENGELLEYİCİ bulgunun adı geçen dosyalarda, <b>bulguyu adıyla
+    anan</b> bir işaret bulunmak zorunda. İlk sürümü fazla gevşekti — aynı
+    dosyadaki başka bir bulgunun işareti hepsini aklıyordu; bulguya özgü hâle
+    getirildi ve iki yönde sınandı.
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -606,6 +658,15 @@ KALDI A-07  §19 pilotu, avro çevrilmeden
     anmak §7'nin istediği dayanağın kendisidir. İkinci sürüm hâlâ "<em>kitabında
     … yazdı</em>" cümlesine takıldı; ayrıca tırnaklar eşleştirilmediği için
     hayalet aralıklar üretiyordu. Üçüncü sürüm doğru.</li>
+    <li><strong>Referans dedektörünü iki kez yanlış yazdım.</strong> Birinci
+    sürüm düzyazıdaki çıplak dosya adlarını bağlantı saydı (32 sahte kırık);
+    ikincisi göreli atıfları köke göre çözdü (12 sahte kırık daha). Üçüncüsü
+    doğru — gerçek kırık sayısı sıfır.</li>
+    <li><strong>Bir mutasyon sınamam sessizce hiçbir şeyi bozmadı.</strong>
+    <em class="term">sed</em> deseni hedefi tutturamadı ve dosya hiç değişmediği
+    hâlde "kontrol ateşlemedi" sonucuna varıyordum. Artık mutasyonun gerçekten
+    tuttuğu doğrulanıyor: <strong>bir mutasyon sınaması, mutasyonun olduğunu
+    kanıtlamadan geçerli değildir.</strong></li>
     <li><strong>İki şüphem yanlış çıktı</strong> ve kitap haklıydı:
     <em class="term">fivetran/great_expectations</em> ile
     <em class="term">Open-Source-Legal/OpenContracts</em> kanonik yollardır; ve
@@ -663,9 +724,9 @@ KALDI A-07  §19 pilotu, avro çevrilmeden
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>sinama/hepsi.sh          <span class="dim"># on bir takım, 122 vaka</span>
-<span class="dim">~/mafirm/</span>denetim.sh --yapisal     <span class="dim"># mühendislik katmanı</span>
-<span class="dim">~/mafirm/</span>denetim.sh               <span class="dim"># mevzuat bulguları dâhil</span></pre>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># on iki takım, 128 vaka</span>
+./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
+./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
   <em class="term">mafirm/KITAP-ERRATA.md</em> — 42 madde, ağırlık işaretli,
   her biri onu bulan sınama vakasıyla.</p>
