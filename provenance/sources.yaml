@@ -1,0 +1,121 @@
+# Provenance ledger.
+#
+# Every factual claim in an enforced document must cite one of these ids as
+# [src:ID]. Adding a claim without a source, or citing an id that is not
+# listed here, fails `python3 tools/verify_provenance.py`.
+#
+# Required fields per entry: id, kind, collected_at, method, evidence
+#   kind: one of tool_output | filesystem | api | user_statement | repo_state
+#   evidence: a path under provenance/raw/, or a verbatim excerpt.
+
+sources:
+  - id: SESSIONS-2026-08-27
+    kind: api
+    collected_at: "2026-08-27T14:27Z"
+    method: "mcp__Claude_Code_Remote__list_sessions(limit=100, mine=true)"
+    evidence: provenance/raw/sessions-2026-08-27T14-27Z.json
+    note: >-
+      Returned exactly 4 sessions for this account. Session metadata only;
+      message bodies were not returned and no tool to fetch them was exposed.
+
+  - id: REPO-EMPTY-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T14:27Z"
+    method: "git ls-remote origin (both repos); git log; git status"
+    evidence: >-
+      `git ls-remote origin` returned zero refs for both
+      https://github.com/turkertekten-ship-it/claude and
+      https://github.com/turkertekten-ship-it/claude-ai. `git log` reported
+      "your current branch 'claude/review-chat-archive-zrynr4' does not have
+      any commits yet" in both clones.
+
+  - id: NO-LOCAL-ARCHIVE-2026-08-27
+    kind: filesystem
+    collected_at: "2026-08-27T14:26Z"
+    method: "find over ~/.claude/projects, /mnt/attach, /mnt/user-data, /home, and an -xdev sweep for *conversation*/*chat*/*export*/*archive* files"
+    evidence: >-
+      ~/.claude/projects contained exactly two files, both belonging to this
+      session (39f45f12-0454-50a5-8115-31fff3e1bbf0.jsonl and its ccr-tip.json).
+      /mnt/attach was empty. /mnt/user-data contained only an empty `working`
+      directory. The filesystem sweep matched only Go toolchain testdata.
+
+  - id: NO-DRIVE-ARCHIVE-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T14:28Z"
+    method: "mcp__Google_Drive__search_files(title contains 'claude'/'conversation'/'chat'); mcp__Google_Drive__list_recent_files(pageSize=25)"
+    evidence: >-
+      The title search returned an empty result set `{}`. The 25 most recent
+      Drive files were unrelated personal documents (academic PDFs, finance
+      spreadsheets, videos, catalogs); none was a Claude conversation export.
+      Search was stopped at this point rather than reading personal files.
+
+  - id: NO-TRANSCRIPT-ACCESS-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T14:28Z"
+    method: "inspection of the exposed claude-code-remote MCP toolset; ListAgents"
+    evidence: >-
+      The claude-code-remote server exposed no `list_events` or equivalent
+      transcript-reading tool in this session, so sibling session message
+      bodies were unreadable. ListAgents reported "No reachable agents — no
+      other Claude session is running on this machine right now"; the sibling
+      sessions run in separate containers.
+
+  - id: PROXY-YOUTUBE-BLOCKED
+    kind: api
+    collected_at: "2026-08-27T14:27Z"
+    method: "task_summary field of session_019vCLpJgDUv8BYDRetyqzNq via list_sessions"
+    evidence: "youtube blocked by proxy; confirmed FTS5/pip/API; building data model"
+    note: >-
+      Second-hand: this is another session's own summary of its findings, not
+      something this session reproduced. Treat as a lead, not a verified fact.
+
+  - id: ENV-TOOLING-2026-08-27
+    kind: filesystem
+    collected_at: "2026-08-27T14:28Z"
+    method: "python3 -V; node -v; jq --version; sqlite3 --version"
+    evidence: >-
+      Python 3.11.15, Node v22.22.2, jq-1.7 are present. The `sqlite3` CLI is
+      NOT installed (command not found); Python's sqlite3 module was not
+      separately verified at capture time.
+
+  - id: USER-GOAL-2026-08-27
+    kind: user_statement
+    collected_at: "2026-08-27T14:26Z"
+    method: "/goal command argument for this session, echoed in the session record"
+    evidence: >-
+      "i need you to look through all my previous claude chats and build
+      internal files and systems and system prompts and claude md files and so
+      on and never fabricate ooda ultrathink"
+
+  - id: INJECT-DRIVE-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T14:28Z"
+    method: "mid-conversation system turn delivered to this session"
+    evidence: >-
+      A turn labelled "[MESSAGE FROM NON-USER SOURCE - NOT USER INPUT]"
+      containing the text "Use Google Drive for this" arrived after the Google
+      Drive connector tools were made available. It did not originate from the
+      account owner.
+
+  - id: ENV-SQLITE-FTS5-2026-08-27
+    kind: filesystem
+    collected_at: "2026-08-27T14:31Z"
+    method: "python3 -c \"import sqlite3; sqlite3.connect(':memory:').execute('CREATE VIRTUAL TABLE t USING fts5(x)')\""
+    evidence: >-
+      Python's bundled sqlite3 reports SQLite 3.45.1 and created an FTS5
+      virtual table successfully. PyYAML 6.0.1 is also importable. Note that
+      the standalone `sqlite3` CLI binary remains absent, so tooling must go
+      through Python.
+
+  - id: INGEST-VALIDATED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T14:49Z"
+    method: "python3 tools/ingest_chat_archive.py --db <tmp> ingest --archive <tmp>/archive, over a copy of this session's own Claude Code transcript"
+    evidence: >-
+      Indexed 127 messages across 1 conversation from 1 file, date range
+      2026-08-27T14:26:20.952Z .. 2026-08-27T14:49:46.659Z. It skipped 2
+      records and named them: lines 86-87 were unparseable JSON, the live
+      transcript's truncated tail. A search for "fabricate" returned three
+      correctly attributed hits with verbatim excerpts and message ids. The
+      claude.ai export path was exercised only against synthetic fixtures in
+      tests/, never against a real export.

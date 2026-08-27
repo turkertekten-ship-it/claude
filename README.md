@@ -1,56 +1,87 @@
-# oodarag
+# claude — fleet substrate
 
-An OODA-driven, end-to-end RAG pipeline that runs on the Python standard library alone.
+Operating rules, prompts, provenance, and tooling for a fleet of Claude
+sessions working on one owner's behalf.
 
+Start with **[CLAUDE.md](CLAUDE.md)**. Then read
+**[provenance/observations.md](provenance/observations.md)** — it is the only
+file here that states established fact, and everything else is built on it.
+
+## The one rule
+
+A factual claim is either sourced or it is not written down.
+
+Claims carry a `[src:ID]` tag resolving to `provenance/sources.yaml`. Anything
+unsourced belongs in `provenance/unknowns.md` as an open question. This is
+enforced, not trusted:
+
+```bash
+bash tests/run_all.sh        # verifier + every test suite
 ```
-Observe  ->  Orient   ->  Decide   ->  Act
-ingest       normalize    policy       reindex / backfill
-             chunk        engine       / alert / answer
-             embed
-             index
-```
 
-## Why this exists
+## What is here
 
-Most RAG code is a demo: load a folder, call an embedding API, cosine-similarity
-top-5, stuff it in a prompt. That works until it meets a real corpus, at which
-point the failure modes are always the same - the index is stale, the chunks lost
-their context, the retriever returns the site footer, and nobody can tell you
-whether last week's change made retrieval better or worse.
-
-`oodarag` is built around those failure modes rather than around the happy path:
-
-| Failure mode | What this does about it |
+| Path | Purpose |
 |---|---|
-| Index goes stale | Content-hash incremental ingest + an OODA loop that decides when to re-fetch |
-| Chunks lose context | Contextual headers embedded with every chunk |
-| Retriever returns boilerplate | Structural + link-density boilerplate removal in the scraper |
-| Same page indexed 5 times | Canonical-URL and content-hash dedupe |
-| Semantic search misses exact terms | Hybrid dense + BM25 retrieval fused with RRF |
-| "Is retrieval any good?" | An eval harness with recall@k, MRR, nDCG and citation coverage |
-| Secrets leak into the index | Redaction at the connector boundary, before anything is written |
-| A crawl runs forever | Budgets on pages, fetches, bytes, depth and wall-clock |
+| `CLAUDE.md` | The doctrine. Read first. |
+| `FLEET.md` | Which sessions run concurrently, and on which branches. |
+| `provenance/` | The ledger, the observations, the unknowns, the raw captures. |
+| `prompts/` | System prompts carrying the doctrine into a session. |
+| `tools/verify_provenance.py` | The fabrication guard. |
+| `tools/ingest_chat_archive.py` | Conversation-archive ingestion and search. |
+| `workbench/` | The prompt workbench: variants, sweeps, graders, blind A/B. |
+| `docs/parity.md` | Console Workbench → Claude Code parity matrix, sourced. |
+| `src/oodarag/` | An OODA-driven RAG pipeline on the standard library alone. |
+| `tests/` | Tests for all of the above, including their failure cases. |
+| `.claude/` | Hooks, skills, slash commands, subagent definitions. |
+
+## The workbench
+
+`workbench/` closes the gap between a terminal coding agent and the Console
+Workbench: prompt variants with `{{variables}}`, parameter sweeps, a grader
+stack that tries deterministic checks before it asks a model anything, and
+**blind outcome-based A/B testing** — candidates are stripped of identity and
+shown to a judge in both orders, and a win only counts when both orders agree.
+
+```bash
+python3 -m workbench doctor                     # what this environment can do
+python3 -m workbench run    suites/example.yaml # run a suite, grade it
+python3 -m workbench blind  suites/example.yaml # blind pairwise A/B
+python3 -m workbench report .workbench/<run-id> # markdown + JSON report
+```
+
+It runs on whatever backend the environment actually has, and says which one
+it picked. See [docs/workbench.md](docs/workbench.md).
+
+## Searching your conversations
+
+The archive ships empty, because no conversation export existed when this was
+built. To populate it:
+
+```bash
+# claude.ai: Settings -> Privacy -> Export data, unzip into archive/
+# Claude Code: cp ~/.claude/projects/**/*.jsonl archive/
+
+python3 tools/ingest_chat_archive.py ingest
+python3 tools/ingest_chat_archive.py search "retrieval pipeline"
+python3 tools/ingest_chat_archive.py stats
+```
+
+Messages are stored verbatim and every hit carries its conversation id,
+message id, timestamp, and source file, so a result can be quoted as evidence.
+Records that cannot be parsed are skipped and counted, never repaired by
+guesswork. `archive/` is git-ignored — the exports are the owner's data, not
+repository content.
+
+## oodarag
+
+`src/oodarag/` is a zero-dependency ingest and scraping core (HTTP client with
+retry and rate limiting, robots-aware crawler, boilerplate-stripping HTML
+extraction, GitHub connector). It arrived on a sibling session's branch and is
+carried here unchanged; its own design notes are in its module docstrings.
 
 ## Status
 
-Under active construction. See `internal/PLAN.md` for what is built and what is next.
-
-## Quick start
-
-```bash
-make test          # stdlib unittest, no dependencies required
-make demo          # end-to-end: ingest -> index -> query -> eval
-```
-
-## Design principles
-
-1. **Zero required dependencies.** The whole pipeline runs on the stdlib, so it
-   works in CI, in an air-gapped container, and on a laptop. Accelerators
-   (numpy) and hosted models (Voyage, Anthropic) plug in behind interfaces.
-2. **Provenance is load-bearing.** Every chunk carries the URI and commit sha it
-   came from. Citations are verified against retrieved chunks, not generated.
-3. **Everything is bounded.** Every network stage has a budget on requests,
-   bytes and time.
-4. **Degrade, don't die.** Blocked egress, a missing API key or a truncated API
-   response reduce what the pipeline can do; they never make it crash.
-5. **Measure, don't assert.** Retrieval quality is a number in an eval report.
+The tooling runs and is tested. The provenance ledger holds what was actually
+established on 2026-08-27. The chat index holds nothing yet, and says so
+rather than pretending otherwise.

@@ -1,0 +1,74 @@
+{
+  "_capture": {
+    "method": "mcp__Claude_Code_Remote__list_sessions(limit=100, mine=true)",
+    "captured_at": "2026-08-27T14:27Z",
+    "captured_by": "session_01Ya1zvvkNDwhHKm2QtA4A5f",
+    "note": "Fields transcribed verbatim from the tool response. Only fields actually present in the response are recorded. Session bodies/transcripts were NOT accessible: no list_events tool is exposed in this session."
+  },
+  "sessions": [
+    {
+      "id": "session_01Ya1zvvkNDwhHKm2QtA4A5f",
+      "title": "Claude chat archive review",
+      "session_status": "SESSION_STATUS_RUNNING",
+      "created_at": "2026-08-27T14:26:10.295633Z",
+      "updated_at": "2026-08-27T14:27:20.437958Z",
+      "environment_id": "env_01GEni7AgBA7NiyMBecyt7K1",
+      "configured_model": "claude-opus-5",
+      "effort_level": "high",
+      "permission_mode": "auto",
+      "origin": "web_claude_ai",
+      "sources": ["turkertekten-ship-it/claude", "turkertekten-ship-it/claude-ai"],
+      "outcome_branches": ["claude/review-chat-archive-zrynr4"],
+      "goal_condition": "i need you to look through all my previous claude chats and build internal files and systems and system prompts and claude md files and so on and never fabricate ooda ultrathink",
+      "task_summary": ""
+    },
+    {
+      "id": "session_019vCLpJgDUv8BYDRetyqzNq",
+      "title": "RAG system and data pipeline",
+      "session_status": "SESSION_STATUS_RUNNING",
+      "created_at": "2026-08-27T14:18:35.078228Z",
+      "updated_at": "2026-08-27T14:26:20.904811Z",
+      "environment_id": "env_01GEni7AgBA7NiyMBecyt7K1",
+      "configured_model": "claude-opus-5",
+      "effort_level": "xhigh",
+      "permission_mode": "auto",
+      "origin": "web_claude_ai",
+      "sources": ["turkertekten-ship-it/claude", "turkertekten-ship-it/claude-ai"],
+      "outcome_branches": ["claude/rag-system-data-pipeline-rdkde9"],
+      "goal_condition": "use all our chats and build internal files, a rag system, the perfect end to end pipeline, look at imb youtube and use git hubs to be able to derive data do all ooda ultrathink",
+      "task_summary": "youtube blocked by proxy; confirmed FTS5/pip/API; building data model"
+    },
+    {
+      "id": "session_016cRrEmB1ZKGLpEzUQpSqhC",
+      "title": "Blind testing and OODA analysis",
+      "session_status": "SESSION_STATUS_RUNNING",
+      "created_at": "2026-08-27T14:11:32.527913Z",
+      "updated_at": "2026-08-27T14:26:37.756570Z",
+      "environment_id": "env_01GEni7AgBA7NiyMBecyt7K1",
+      "configured_model": "claude-opus-5",
+      "effort_level": "xhigh",
+      "permission_mode": "auto",
+      "origin": "web_claude_ai",
+      "sources": ["turkertekten-ship-it/claude", "turkertekten-ship-it/claude-ai"],
+      "outcome_branches": ["claude/blind-testing-ooda-5o3s67"],
+      "goal_condition": null,
+      "task_summary": "building M&A installation guide per book §2–§7; currently verifying §7 provenance"
+    },
+    {
+      "id": "session_01WhTTExHdT83QPAKDFZm4fZ",
+      "title": "Go page review and ultrathink OODA",
+      "session_status": "SESSION_STATUS_RUNNING",
+      "created_at": "2026-08-27T14:07:19.182Z",
+      "updated_at": "2026-08-27T14:27:06.996039Z",
+      "environment_id": "env_01GEni7AgBA7NiyMBecyt7K1",
+      "configured_model": "claude-opus-5",
+      "effort_level": "xhigh",
+      "permission_mode": "auto",
+      "origin": "web_claude_ai",
+      "sources": ["turkertekten-ship-it/claude"],
+      "outcome_branches": ["claude/go-page-ultrathink-ooda-kqxvnc"],
+      "goal_condition": null,
+      "task_summary": "installing G stack + token libs; docling building; encoding book corrections"
+    }
+  ]
+}
