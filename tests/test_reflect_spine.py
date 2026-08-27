@@ -340,6 +340,22 @@ class TestSourceBoundary(unittest.TestCase):
         self.assertNotIn("ghp_abcdefghijklmnopqrstuvwxyz0123", result.signals[0].text)
         self.assertIn("redacted", result.signals[0].text)
 
+    def test_redaction_is_recorded_as_metadata(self) -> None:
+        """Whether redaction fired is the observer's to know, not a rule's to guess.
+
+        A rule that infers it by matching the marker text cannot tell a redacted
+        secret from a file that *defines* the markers, and reports a critical
+        finding against the redaction module itself.
+        """
+        secret = "export GITHUB_TOKEN=ghp_abcdefghijklmnopqrstuvwxyz0123"
+        fired = self.Fake([sig(secret, kind=KIND_COMMAND)]).run(budget=Budget())
+        self.assertIs(fired.signals[0].metadata["redacted"], True)
+
+        # Text that merely *contains* a marker was not redacted, and must say so.
+        quoting = self.Fake([sig("we replace it with <redacted:github-token>")]).run(
+            budget=Budget())
+        self.assertIs(quoting.signals[0].metadata["redacted"], False)
+
     def test_source_key_is_stamped(self) -> None:
         s = Signal(kind=KIND_COMMAND, source="", text="ls")
         result = self.Fake([s]).run(budget=Budget())

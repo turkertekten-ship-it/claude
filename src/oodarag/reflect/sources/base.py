@@ -126,7 +126,15 @@ class SignalSource(ABC):
                 text = sig.text or ""
                 if len(text) > budget.max_chars_per_signal:
                     text = text[: budget.max_chars_per_signal] + "\n...[truncated]"
-                sig.text = redact_secrets(text)
+                redacted = redact_secrets(text)
+                # Whether redaction actually fired is the authoritative answer to
+                # "did this file hold a credential", and only the observer can
+                # know it. A rule that infers it later by matching the marker
+                # text cannot tell a redacted secret from a file that *defines*
+                # the markers - the redaction module itself, its tests, a README
+                # quoting one - and reports a critical finding against each.
+                sig.metadata["redacted"] = redacted != text
+                sig.text = redacted
                 if not sig.source:
                     sig.source = self.key
                 bytes_seen += len(sig.text)
