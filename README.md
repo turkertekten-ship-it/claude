@@ -85,3 +85,13 @@ carried here unchanged; its own design notes are in its module docstrings.
 The tooling runs and is tested. The provenance ledger holds what was actually
 established on 2026-08-27. The chat index holds nothing yet, and says so
 rather than pretending otherwise.
+
+The workbench has been run against a real question — does the operating prompt
+in `prompts/` actually stop a model inventing things? — and the honest answer
+is **not shown**. Three variants passed the deterministic layer identically;
+the blind comparison favoured the doctrine prompt directionally but at
+p = 0.375 over ten decided pairs, with the winning variant also writing the
+longest answers. The full report is in
+[`provenance/raw/blind-run-2-recalibrated-2026-08-27.md`](provenance/raw/blind-run-2-recalibrated-2026-08-27.md),
+and the run that came before it — the one where a miscalibrated grader failed
+every variant including the correct answers — is kept beside it.
