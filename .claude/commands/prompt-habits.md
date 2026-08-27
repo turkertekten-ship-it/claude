@@ -6,6 +6,12 @@ allowed-tools: Bash, Read
 
 Audit the owner's own prompt history: **$ARGUMENTS**
 
+The corpus is the SQLite index under `archive/`, built by
+`tools/ingest_chat_archive.py` from Claude Code transcripts in
+`~/.claude/projects` and from any claude.ai export dropped into `archive/`. It
+holds messages verbatim with their role, timestamp and source file, and it is
+git-ignored, because it is the owner's data rather than repository content.
+
 1. Make sure there is a corpus. `python3 tools/ingest_chat_archive.py stats`.
    If it is empty, run
    `python3 tools/ingest_chat_archive.py ingest --include-projects` first — and
@@ -24,6 +30,10 @@ Audit the owner's own prompt history: **$ARGUMENTS**
    the single lowest scorer — their words, restructured, nothing invented.
 5. Recommend exactly one habit to change. Not five. A list of five is a list
    nobody acts on.
+
+The report is right only if the scored count plus the exclusion counts equal
+the total user turns the tool says it read. If those do not add up, the filter
+has dropped something silently — report that instead of the habits.
 
 The scores are only as meaningful as the corpus. On a fresh container the index
 holds that session's own traffic, not the owner's history — the real history is
