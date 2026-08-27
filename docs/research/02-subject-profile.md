@@ -38,6 +38,30 @@ provenance: enforced
 > system built on this branch is a worked example over seeded data. Nothing may
 > present it as a reading of the real book.
 
+## Observed — the ownership structure, and what it changes
+
+- WAM Portföy's paid-in capital is **30,000,000 TRY** against a registered ceiling of **75,000,000 TRY**. [src:WAM-OWNERSHIP-2026-08-27]
+- The shareholders are **Mehmet İlhan Gülay 49% (14,700,000 TRY), İhsan Gülay 24.5% and Mehmet Gülay 24.5% (7,350,000 TRY each), Can İkinci 1% and Türker Tekten 1% (300,000 TRY each)**. [src:WAM-OWNERSHIP-2026-08-27]
+- The firm discloses to KAP under company code **VPG**, and manages at least four funds: **VBR** (Birinci Girişim Sermayesi Yatırım Fonu, GSYF), **VBI** (Birinci Proje Gayrimenkul Yatırım Fonu, GYF), **VIK** (İkinci Gayrimenkul Yatırım Fonu, GYF) and **WQQ**, whose full name was not recovered. [src:WAM-FUND-CODES-2026-08-27]
+
+> Reading, and the second surprise of this research. He is **not a salaried
+> CFO**. He holds equity — a small, deliberate management-participation stake,
+> matched exactly by the General Manager's, inside a firm 98% owned by one
+> family. His principal is not a board he reports to in the abstract; it is the
+> Gülay family, and he sits on the board himself.
+>
+> That changes what the system is for. A salaried CFO needs a system that
+> proves he did his job. An owner-operator with 1% and a board seat needs a
+> system that protects the licence and the family's capital, and that lets two
+> professional managers run four regulated funds without a back office. Those
+> are different products. The design targets the second.
+>
+> The fund codes matter for a duller reason: they turn a generic regulatory
+> monitor into a specific one. VPG, VBR, VBI, VIK and WQQ are a real KAP
+> watchlist, not a placeholder, and they are what the Observe phase is pointed
+> at. Fund sizes and holdings stay unestablished (U-7) — qualified-investor
+> vehicles do not publish them, and KAP is blocked here.
+
 ## Observed — what the working files show
 
 - Four spreadsheets tracking **HCP Quant, HCP Focus, HCP Black and HCP Bricks** monthly returns, allocation and return history — Finnish-titled (*Kuukausituotot, Allokaatio ja Tuottohistoria*) — three of them modified within a day of capture. [src:DRIVE-WORKFILES-2026-08-27]
@@ -46,6 +70,15 @@ provenance: enforced
 - Its collaborator list names **Alesta Elektronik Teknoloji Yatırım A.Ş., APY Ventures, Girişim'23, Gdz Elektrik, Karşıyaka Belediyesi Kolektif Girişimcilik Merkezi, TEB, Moka and İş Bankası**. [src:DRIVE-WORKFILES-2026-08-27]
 - An investor pipeline sheet, `To-Do Potential investors_Master_080521`, tracking named contacts at **Yıldız Holding, Anadolu Holding, Eko Group, Tekfen and Arçelik** with an owner, an action and a status per row. [src:DRIVE-WORKFILES-2026-08-27]
 - Course materials from 2023–24 in **Bilişim Sistemleri (information systems), Karar Teorisi (decision theory) and Bilgisayar Ağları (computer networks)**. [src:DRIVE-WORKFILES-2026-08-27]
+
+> Correction, recorded rather than quietly fixed. An earlier framing in this
+> session described him as running or co-running the Pitch Challenge series.
+> What is established is only that he keeps a detailed tracker of it. The
+> series is reported to be run by Geometry Venture Development, founded by
+> Melih Efeoğlu in July 2019, and four targeted searches pairing the series
+> with his name returned nothing. [src:PITCH-CHALLENGE-ORGANISER-2026-08-27]
+> His role, if any, is invisible in indexed public sources — which is itself
+> consistent with the pattern below.
 
 > Reading, and the surprise. Two things here were not expected walking in.
 > First, the pipeline sheet is from **May 2021** and still sits among the

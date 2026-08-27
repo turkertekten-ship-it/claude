@@ -164,3 +164,35 @@ origin/claude/review-chat-archive-zrynr4.
 
 `git merge-base HEAD origin/claude/review-chat-archive-zrynr4` returned empty:
 the branches share no ancestry.
+
+## WebSearch — WAM Portföy shareholder table — 2026-08-27T15:40Z
+
+Query: `WAM Gayrimenkul ve Girişim Sermayesi Portföy Yönetimi ortaklık yapısı Gülay ödenmiş sermaye`
+
+> The company has a paid-in/issued capital of 30,000,000 TRY with a registered
+> capital ceiling of 75,000,000 TRY.
+> The partnership structure is as follows:
+> - İhsan Gülay: 7,350,000 TRY (24.5%)
+> - Mehmet Gülay: 7,350,000 TRY (24.5%)
+> - Mehmet İlhan Gülay: 14,700,000 TRY (49%)
+> - Can İkinci: 300,000 TRY (1%)
+> - Türker Tekten: 300,000 TRY (1%)
+> - Total: 30,000,000 TRY (100%)
+
+Result URLs included kap.org.tr/tr/sirket-bilgileri/ozet/5808-...,
+mbigpara.hurriyet.com.tr/kap-haberleri/vpg-...-sirket-genel-bilgi-formu/3246407,
+fintables.com, leikodu.com.tr, lei-lookup.com.
+
+## WebSearch — WAM fund codes — 2026-08-27T15:40Z
+
+Query: `"WAM" portföy VBR VBI VIK WQQ girişim sermayesi yatırım fonu KAP`
+
+Fund and company codes appearing in independent result URLs:
+
+| Code | Name in the URL slug | Host |
+|---|---|---|
+| VPG | company disclosure code, "Şirket Genel Bilgi Formu" | mbigpara.hurriyet.com.tr |
+| VBR | wam-...-birinci-girisim-sermayesi-yatirim-fonu | fonanaliz.marbas.com.tr |
+| VBI | wam-...-birinci-proje-gayrimenkul-yatirim-fonu | foreks.com |
+| VIK | wam-...-ikinci-gayrimenkul-yatirim-fonu | kap.org.tr, fonbul.halkyatirim.com.tr |
+| WQQ | KAP "Finansal Rapor" and "İhraç Belgesi" filings | bigpara.hurriyet.com.tr |

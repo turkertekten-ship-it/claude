@@ -410,3 +410,73 @@ sources:
       this session, including the Google Drive read recorded under
       DRIVE-WORKFILES-2026-08-27. It is a request to research him; it is not a
       statement of what his working week actually contains — see U-9.
+
+  - id: WAM-OWNERSHIP-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:40Z"
+    method: 'WebSearch(query="WAM Gayrimenkul ve Girişim Sermayesi Portföy Yönetimi ortaklık yapısı Gülay ödenmiş sermaye")'
+    evidence: provenance/raw/subject-research-2026-08-27.md
+    note: >-
+      Paid-in capital 30,000,000 TRY against a 75,000,000 TRY registered
+      ceiling. Shareholders: Mehmet İlhan Gülay 49% (14,700,000 TRY), İhsan
+      Gülay 24.5% and Mehmet Gülay 24.5% (7,350,000 TRY each), Can İkinci 1%
+      and Türker Tekten 1% (300,000 TRY each). Run first-hand by this session
+      to check a subagent's report of the same table; the independent search
+      returned the same split WITH the underlying lira amounts, which the
+      subagent's version did not carry. Still a search summary over a KAP
+      record rather than the KAP record itself, and undated — a later capital
+      increase would move these figures.
+
+  - id: WAM-FUND-CODES-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:40Z"
+    method: 'WebSearch(query="\"WAM\" portföy VBR VBI VIK WQQ girişim sermayesi yatırım fonu KAP")'
+    evidence: provenance/raw/subject-research-2026-08-27.md
+    note: >-
+      Company disclosure code VPG. Four funds whose names are embedded in
+      independent result URLs: VBR (Birinci Girişim Sermayesi Yatırım Fonu,
+      GSYF), VBI (Birinci Proje Gayrimenkul Yatırım Fonu, GYF), VIK (İkinci
+      Gayrimenkul Yatırım Fonu, GYF) and WQQ (KAP Finansal Rapor and İhraç
+      Belgesi filings; full name not recovered). URL slugs are reliable for
+      names because the host builds them from the fund's registered title.
+      Fund SIZES and HOLDINGS remain unestablished — see U-7.
+
+  - id: SUBAGENT-PROFILE-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:39Z"
+    method: "Agent(general-purpose) tasked with deepening the subject and firm profile; 63 tool calls, 9m10s"
+    evidence: >-
+      The agent reported that WebFetch and curl were blocked for every domain
+      it tried, so its entire report rests on search-result snippets; it
+      labelled findings [SNIPPET]/[CORROBORATED]/[INFERRED]/[NOT FOUND]
+      accordingly. It reported the WAM shareholder table, the four fund codes,
+      Can İkinci as Genel Müdür and ex-Actera partner, board appointments
+      dated 12 June 2023, auditor CNS Bağımsız Denetim, Actera fund sizes of
+      $475M / $1.1B / $649M, and the Mars→CJ CGV ($800M) and U.N. Ro-Ro→DFDS
+      (EUR 950M) exits. It issued two corrections against its own brief.
+    note: >-
+      SECOND-HAND. This is another process's claim about what it saw. The two
+      load-bearing items — the ownership split and the fund codes — were
+      re-run first-hand by this session and are cited to
+      WAM-OWNERSHIP-2026-08-27 and WAM-FUND-CODES-2026-08-27 instead. Nothing
+      else from this report is promoted to a first-hand claim, and anything
+      cited to this id should be read as the agent's report, not as verified.
+
+  - id: PITCH-CHALLENGE-ORGANISER-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:39Z"
+    method: "reported by the profile subagent from egirisim.com, crunchbase.com/organization/geometry-venture-development, biletino.com event pages and karsiyaka.bel.tr"
+    evidence: >-
+      The agent reported that the Pitch Challenge series is run by Geometri
+      Melek Yatırım Ağı / Geometry Venture Development, founded July 2019 by
+      Melih Efeoğlu, and that four targeted searches pairing "Pitch Challenge"
+      with "Tekten" and with "WAM", in Turkish and English, returned zero
+      hits. Event dates and cumulative pitch counts it reported (314 by Oct
+      2023, 368 by ~2024) sit on the same curve as the 498 figure in the
+      owner's own tracker.
+    note: >-
+      SECOND-HAND, and recorded as a CORRECTION. This session's earlier
+      framing described the owner as running or co-running the series. What is
+      actually established is only that he keeps a detailed tracker of it
+      [src:DRIVE-WORKFILES-2026-08-27]. His role, if any, is not visible in
+      any indexed public source.
