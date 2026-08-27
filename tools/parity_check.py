@@ -261,6 +261,19 @@ def c_api_access(backend) -> Result:
     has_ant = shutil.which("ant") is not None
     profiles = _P.home() / ".config" / "anthropic"
     creds = _P.home() / ".claude" / ".credentials.json"
+    # The environment names an OAuth token file descriptor. It is a pipe: a
+    # one-shot stream the CLI consumed at startup, not a credential store.
+    # Reading it now would block, or take bytes out of the running session's
+    # own stream. Checked rather than assumed, because asserting a thing is
+    # unreachable without looking is the failure this repository is about.
+    fd_num = os.environ.get("CLAUDE_CODE_OAUTH_TOKEN_FILE_DESCRIPTOR")
+    fd_kind = ""
+    if fd_num:
+        pid = os.environ.get("CLAUDE_PID", "")
+        try:
+            fd_kind = os.readlink(f"/proc/{pid}/fd/{fd_num}")
+        except OSError:
+            fd_kind = "not inspectable"
     found = [n for n, present in (
         ("ANTHROPIC_API_KEY", has_key), ("ant CLI", has_ant),
         ("~/.config/anthropic", profiles.exists()),
@@ -269,10 +282,14 @@ def c_api_access(backend) -> Result:
     return Result("Direct Messages API access", UNREACHABLE,
                   "no credential source found: ANTHROPIC_API_KEY unset, the `ant` "
                   "CLI is not installed, and neither ~/.config/anthropic nor "
-                  "~/.claude/.credentials.json exists. This is why count_tokens, "
-                  "the Batch API and stop_sequences are unreachable — established "
-                  "by looking for each source, not inferred from one absent "
-                  "variable."
+                  "~/.claude/.credentials.json exists. The OAuth token file "
+                  f"descriptor the environment names resolves to {fd_kind or 'nothing'}"
+                  " — a one-shot stream already consumed by the CLI, not a "
+                  "credential store. This is why count_tokens, the Batch API and "
+                  "stop_sequences are unreachable: established by looking for each "
+                  "source, including that one, not inferred from an absent variable. "
+                  "All three are implemented on the anthropic-api backend and would "
+                  "run against a credential."
                   if not found else f"credential source(s) present: {found}")
 
 

@@ -682,3 +682,26 @@ sources:
       the tool. The wire is untested and that is stated rather than glossed —
       no ANTHROPIC_API_KEY, no `ant` CLI, no ~/.config/anthropic, no
       ~/.claude/.credentials.json, each checked.
+
+  - id: NO-CREDENTIAL-PATH-2026-08-27
+    kind: filesystem
+    collected_at: "2026-08-27T23:20Z"
+    method: >-
+      exhaustive check of every credential path the SDKs and CLI document:
+      ANTHROPIC_API_KEY, the `ant` CLI, ~/.config/anthropic,
+      ~/.claude/.credentials.json, and the OAuth token file descriptor the
+      environment names
+    evidence: >-
+      ANTHROPIC_API_KEY unset. `ant` not on PATH. Neither ~/.config/anthropic
+      nor ~/.claude/.credentials.json exists. CLAUDE_CODE_OAUTH_TOKEN_FILE_DESCRIPTOR
+      is 4, and /proc/501/fd/4 resolves to pipe:[847] — a read-only pipe, not
+      inherited by this shell (which has no fd 4 at all).
+    note: >-
+      A pipe is a one-shot stream. Whatever was written to it was consumed by
+      the CLI at startup; reading it now would block or take bytes out of the
+      running session's own stream, which would break the session rather than
+      authenticate anything. This is the last documented credential path and it
+      is closed. The verdict on stop_sequences, count_tokens and the Batch API
+      is therefore not "no key was found" but "every documented source was
+      checked, including the descriptor the environment advertises". All three
+      are implemented and would run against a credential.
