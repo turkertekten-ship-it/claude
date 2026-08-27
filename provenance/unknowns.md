@@ -158,3 +158,24 @@ label, and this repository does not expand labels into content.
 **Note:** it is recorded because it may sit in tension with the corpus's
 emphasis on detailed specs and plan quality. That tension is unresolved, not
 decided.
+
+---
+
+### U-10 — Cherny material published after 2026-04-16
+
+**Unknown:** what he has said since the last collection in the compilation.
+Two specific leads surfaced and neither could be opened: an X post dated
+2026-05-24 referenced as covering auto mode and "multi-clauding", and a
+Threads post of 2025-12-27 cited second-hand as claiming "259 PRs in 30 days".
+
+**Why:** `x.com` and `threads.com` are both refused by the egress proxy
+[src:EGRESS-BLOCKED-2026-08-27], and the sweep confirmed the same for every
+mirror it tried [src:SWEEP-COVERAGE-2026-08-27]. His own About page lists
+Threads and X as two of his four channels [src:CHERNY-BLOG-REPO-2026-08-27],
+so the material most likely to be current is exactly the material out of reach.
+
+**Resolves when:** those hosts become reachable, or an export of the posts is
+placed in `archive/`.
+
+**Do not:** treat the corpus as current. It ends on 2026-04-16, which is over
+four months before it was assembled.

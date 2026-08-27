@@ -118,6 +118,14 @@ The screenshot loop is the same shape: give Claude a way to screenshot, give it 
 
 On specificity he gives a number: generic instructions land "in the first shot 30% of the time", and more specific instructions can improve that "2-3x". [src:CHERNY-OWN-DRAFT-2025-04-13]
 
+The draft documents an escalation ladder for extended thinking during planning, verbatim: `"think" < "think hard" < "megathink" < "think harder" < "ultrathink"`. [src:CHERNY-OWN-DRAFT-2025-04-13]
+
+His habit for maintaining `CLAUDE.md` is mechanical rather than periodic: press `#` mid-session to have an instruction folded into the right file, "frequently as I code, to document commands, files, and style guidelines as I go", then include those changes in the commit "so that others on my team can benefit". [src:CHERNY-OWN-DRAFT-2025-04-13]
+
+He treats the file as a prompt to be tuned, not a config to be filled: he runs it through a prompt improver and adds emphasis such as "IMPORTANT" or "YOU MUST" to improve adherence. [src:CHERNY-OWN-DRAFT-2025-04-13]
+
+Two scope figures he gives for delegation: he drives git "90%+ of the time" through Claude, and "90%+ of my Github interactions" as well. [src:CHERNY-OWN-DRAFT-2025-04-13]
+
 The draft names three course-correction tools — interrupt with Escape (which "retains everything in context"), double-tap Escape to edit an earlier prompt and re-run, and asking Claude to undo its changes. [src:CHERNY-OWN-DRAFT-2025-04-13]
 
 It recommends `/clear` often, on the grounds that irrelevant accumulated context "can hurt performance, and occasionally distract and side track Claude". [src:CHERNY-OWN-DRAFT-2025-04-13]

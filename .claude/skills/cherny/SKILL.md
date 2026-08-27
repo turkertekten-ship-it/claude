@@ -44,6 +44,11 @@ command and its output. "Tests pass" without the output is an assertion.
   pushing a plan that has already failed once.
 - Be specific. Name the file, the scenario, the constraint, and what "fixed"
   looks like. Point at an existing pattern to follow rather than describing one.
+  Generic instructions land maybe a third of the time; specific ones are worth
+  a multiple of that, and cost less than the course-correction they avoid.
+- Ask for more thinking when the trade-offs are genuinely hard. The documented
+  escalation is `think` → `think hard` → `megathink` → `think harder` →
+  `ultrathink`.
 
 ## Use separate context windows to check work
 
@@ -109,7 +114,18 @@ Two forces pull against each other, and both are right:
 Resolve the tension by routing, not by compromising: facts stay, procedures
 become skills, file-specific rules become path-scoped rules. Target under 200
 lines. If one instruction keeps getting skipped, emphasise *that line only* —
-emphasising everything emphasises nothing.
+`IMPORTANT` or `YOU MUST` on the one line that needs it. Emphasising everything
+emphasises nothing.
+
+Two habits that make this cheap rather than a chore:
+
+- Capture in the moment, not in a review pass. Press `#` mid-session to fold an
+  instruction into the right file as you hit it, and include the change in the
+  same commit so the team gets it too.
+- Treat the file as a prompt, not a config. It goes into every request, so it
+  deserves the same tuning any frequently-used prompt would get — iterate on
+  the wording until the mistake rate actually drops, rather than appending and
+  hoping.
 
 ## Shipping
 

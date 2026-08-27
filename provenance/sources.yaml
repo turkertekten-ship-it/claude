@@ -562,3 +562,25 @@ sources:
       result was acceptable; both nonetheless found real defects, and the
       document auditor also correctly cleared the counts it was asked to attack
       hardest. All findings acted on in commit 7018b08.
+
+  - id: SWEEP-COVERAGE-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:50Z"
+    method: >-
+      Workflow(cherny-corpus-sweep) — six research angles, each paired with an
+      adversarial verifier that re-fetched the URLs its angle claimed
+    evidence: >-
+      12 agents: 9 completed, 3 errored. The three failures were all verifier
+      stages (interviews-b, setup-specifics, tips-compilations), each reporting
+      "You've hit your session limit". The sweep independently located the same
+      primary source this session had already read
+      (bcherny/bcherny.github.io _drafts/Tips-for-Using-Claude-Code.md) and
+      confirmed it fetched. Its could_not_reach list adds, beyond the domains
+      already recorded: threads.com, news.ycombinator.com, hn.algolia.com,
+      reddit.com, threadreaderapp.com, xcancel.com and borischerny.com itself,
+      all returning "CONNECT tunnel failed, response 403".
+    note: >-
+      Recorded because it bounds what the sweep established. Three of six angles
+      had their verification stage die, so the claims from those angles were
+      never adversarially re-checked and none of them was used in the corpus.
+      No claim here rests on an unverified sweep angle.
