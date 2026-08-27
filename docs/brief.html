@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WAM Control Loop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+  :root{
+    --paper:#EFF1F2; --surface:#FFFFFF; --surface-2:#E4E8EA;
+    --ink:#14181C; --ink-soft:#3C464E; --muted:#66717A;
+    --rule:#C7CFD4; --rule-soft:#DDE3E6;
+    --stamp:#A6321E; --stamp-soft:#F0DDD8;
+    --verified:#2A6552; --verified-soft:#DCE9E4;
+    --unverified:#8A5F10; --unverified-soft:#F2E6CC;
+    --shadow:0 1px 2px rgba(20,24,28,.06), 0 8px 24px -12px rgba(20,24,28,.18);
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --paper:#101417; --surface:#171C20; --surface-2:#1F262B;
+      --ink:#E4E8EA; --ink-soft:#B8C1C7; --muted:#8B959C;
+      --rule:#2C353B; --rule-soft:#232B30;
+      --stamp:#E0654B; --stamp-soft:#3A211B;
+      --verified:#6FB89D; --verified-soft:#1B2E28;
+      --unverified:#D2A44C; --unverified-soft:#2E2617;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#101417; --surface:#171C20; --surface-2:#1F262B;
+    --ink:#E4E8EA; --ink-soft:#B8C1C7; --muted:#8B959C;
+    --rule:#2C353B; --rule-soft:#232B30;
+    --stamp:#E0654B; --stamp-soft:#3A211B;
+    --verified:#6FB89D; --verified-soft:#1B2E28;
+    --unverified:#D2A44C; --unverified-soft:#2E2617;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:"Source Sans 3",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    font-size:17px; line-height:1.62;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px; margin:0 auto; padding:0 24px 96px}
+
+  /* ---------- masthead ---------- */
+  header.mast{
+    border-bottom:2px solid var(--ink);
+    padding:56px 0 24px; margin-bottom:8px;
+  }
+  .kicker{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:11.5px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--stamp); margin:0 0 18px;
+  }
+  h1{
+    font-family:Newsreader,Georgia,serif; font-weight:500;
+    font-size:clamp(40px,7vw,68px); line-height:1.02; letter-spacing:-.015em;
+    margin:0 0 20px; text-wrap:balance;
+  }
+  .standfirst{
+    font-family:Newsreader,Georgia,serif; font-size:clamp(19px,2.4vw,23px);
+    line-height:1.48; color:var(--ink-soft); max-width:62ch; margin:0 0 28px;
+  }
+  .meta{
+    display:flex; flex-wrap:wrap; gap:8px 28px;
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:12px; color:var(--muted);
+  }
+  .meta b{color:var(--ink-soft); font-weight:500}
+
+  /* ---------- sections with provenance gutter ---------- */
+  section{
+    display:grid; grid-template-columns:140px minmax(0,1fr);
+    gap:0 32px; padding:52px 0 8px;
+    border-top:1px solid var(--rule-soft);
+  }
+  section:first-of-type{border-top:none}
+  .gutter{
+    position:sticky; top:20px; align-self:start;
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:11px; line-height:1.6; color:var(--muted);
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .sec-no{
+    font-size:11.5px; letter-spacing:.12em; color:var(--stamp);
+  }
+  .col{min-width:0; max-width:66ch}
+  h2{
+    font-family:Newsreader,Georgia,serif; font-weight:500;
+    font-size:clamp(27px,3.6vw,36px); line-height:1.14; letter-spacing:-.01em;
+    margin:0 0 18px; text-wrap:balance;
+  }
+  h3{
+    font-family:"Source Sans 3",sans-serif; font-weight:600;
+    font-size:15px; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--muted); margin:34px 0 10px;
+  }
+  p{margin:0 0 17px}
+  .col > p:last-child{margin-bottom:0}
+  a{color:var(--stamp); text-underline-offset:2px}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--stamp); outline-offset:3px}
+  strong{font-weight:600}
+  em{font-style:italic}
+
+  /* provenance marks */
+  .src{
+    display:inline-flex; align-items:center; gap:5px;
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11px;
+    padding:2px 7px; border-radius:2px; white-space:nowrap;
+  }
+  .src.v{background:var(--verified-soft); color:var(--verified); border:1px solid transparent}
+  .src.u{background:var(--unverified-soft); color:var(--unverified); border:1px dashed currentColor}
+  .legend{display:flex; flex-direction:column; gap:7px; margin-top:2px}
+
+  /* ---------- finding bands ---------- */
+  .finding{
+    grid-column:1/-1; margin:26px 0 30px;
+    background:var(--surface); border:1px solid var(--rule);
+    border-left:3px solid var(--stamp);
+    border-radius:3px; padding:26px 28px; box-shadow:var(--shadow);
+  }
+  .finding .lede{
+    font-family:Newsreader,Georgia,serif; font-size:clamp(20px,2.6vw,25px);
+    line-height:1.35; margin:0 0 12px; text-wrap:balance;
+  }
+  .finding p{margin:0; color:var(--ink-soft); max-width:72ch}
+
+  /* stat rows */
+  .stats{
+    grid-column:1/-1; display:grid; gap:1px; margin:26px 0 30px;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    background:var(--rule); border:1px solid var(--rule); border-radius:3px;
+    overflow:hidden;
+  }
+  .stat{background:var(--surface); padding:20px 22px}
+  .stat .n{
+    font-family:Newsreader,Georgia,serif; font-size:clamp(30px,4.4vw,42px);
+    line-height:1; font-variant-numeric:tabular-nums; letter-spacing:-.02em;
+    display:block; margin-bottom:8px;
+  }
+  .stat .n.bad{color:var(--stamp)}
+  .stat .l{font-size:14px; color:var(--muted); line-height:1.42; display:block}
+
+  /* ---------- lists ---------- */
+  ul.clean{list-style:none; padding:0; margin:0 0 18px}
+  ul.clean li{
+    position:relative; padding-left:20px; margin-bottom:11px;
+  }
+  ul.clean li::before{
+    content:""; position:absolute; left:0; top:.68em;
+    width:8px; height:1px; background:var(--stamp);
+  }
+  ul.clean li.no::before{background:var(--muted)}
+
+  /* ---------- tables ---------- */
+  .tablewrap{
+    grid-column:1/-1; overflow-x:auto; margin:22px 0 30px;
+    border:1px solid var(--rule); border-radius:3px; background:var(--surface);
+  }
+  table{border-collapse:collapse; width:100%; min-width:660px; font-size:14.5px}
+  th,td{text-align:left; padding:11px 16px; border-bottom:1px solid var(--rule-soft); vertical-align:top}
+  thead th{
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11px;
+    letter-spacing:.1em; text-transform:uppercase; color:var(--muted);
+    background:var(--surface-2); border-bottom:1px solid var(--rule);
+    position:sticky; top:0;
+  }
+  tbody tr:last-child td{border-bottom:none}
+  td.id{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12.5px; white-space:nowrap}
+  .sev{
+    display:inline-block; font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+    padding:2px 7px; border-radius:2px; white-space:nowrap;
+  }
+  .sev.crit{background:var(--stamp-soft); color:var(--stamp)}
+  .sev.high{background:var(--unverified-soft); color:var(--unverified)}
+  .sev.dig{background:var(--surface-2); color:var(--muted)}
+
+  /* ---------- terminal sample ---------- */
+  .term{
+    grid-column:1/-1; margin:22px 0 30px; border-radius:3px; overflow:hidden;
+    border:1px solid var(--rule); background:var(--surface);
+  }
+  .term-bar{
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11px;
+    letter-spacing:.08em; text-transform:uppercase; color:var(--muted);
+    padding:9px 16px; background:var(--surface-2); border-bottom:1px solid var(--rule);
+  }
+  pre{
+    margin:0; padding:20px 18px; overflow-x:auto;
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:12.5px; line-height:1.72; color:var(--ink-soft);
+  }
+  pre b{color:var(--ink); font-weight:500}
+  pre .r{color:var(--stamp)}
+  pre .a{color:var(--unverified)}
+  pre .g{color:var(--verified)}
+  pre .m{color:var(--muted)}
+
+  /* ---------- built / not built ---------- */
+  .ledger{grid-column:1/-1; margin:22px 0 30px; display:grid; gap:1px;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    background:var(--rule); border:1px solid var(--rule); border-radius:3px; overflow:hidden}
+  .lcol{background:var(--surface); padding:22px}
+  .lcol h4{
+    margin:0 0 14px; font-size:13px; letter-spacing:.1em; text-transform:uppercase;
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+  }
+  .lcol.yes h4{color:var(--verified)}
+  .lcol.no h4{color:var(--stamp)}
+  .lcol ul{list-style:none; margin:0; padding:0; font-size:15px}
+  .lcol li{padding:6px 0; border-bottom:1px solid var(--rule-soft); display:flex; justify-content:space-between; gap:14px}
+  .lcol li:last-child{border-bottom:none}
+  .lcol code{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12.5px}
+  .lcol .cnt{color:var(--muted); font-size:13px; font-variant-numeric:tabular-nums; white-space:nowrap}
+
+  /* ---------- questions ---------- */
+  .q{
+    grid-column:1/-1; margin:24px 0 8px; padding:26px 28px;
+    border:1px dashed var(--unverified); border-radius:3px;
+    background:var(--unverified-soft);
+  }
+  .q h3{margin-top:0; color:var(--unverified)}
+  .q ol{margin:0; padding-left:22px}
+  .q li{margin-bottom:12px}
+  .q li:last-child{margin-bottom:0}
+
+  footer{
+    border-top:2px solid var(--ink); margin-top:56px; padding:22px 0 0;
+    font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12px;
+    color:var(--muted); display:flex; flex-wrap:wrap; gap:6px 24px;
+  }
+
+  @media (max-width:880px){
+    section{grid-template-columns:1fr; gap:0}
+    .gutter{
+      position:static; flex-direction:row; flex-wrap:wrap; align-items:center;
+      gap:8px; margin-bottom:16px; padding-bottom:14px;
+      border-bottom:1px solid var(--rule-soft);
+    }
+    .legend{flex-direction:row; flex-wrap:wrap}
+    .col{max-width:none}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="mast">
+  <p class="kicker">Commissioned research &amp; system brief · 27 August 2026</p>
+  <h1>Four funds,<br>one control loop.</h1>
+  <p class="standfirst">What the record says about you and WAM Portföy, what the evidence says about AI in fund management, and the system those two findings actually justify building.</p>
+  <div class="meta">
+    <span><b>Subject</b> Türker Tekten · CFO &amp; Board Member</span>
+    <span><b>Firm</b> WAM Gayrimenkul ve Girişim Sermayesi Portföy Yönetimi A.Ş.</span>
+    <span><b>Repo</b> claude/ai-system-research-3jpwda</span>
+  </div>
+</header>
+
+<section>
+  <div class="gutter">
+    <span class="sec-no">01 / FINDING</span>
+    <div class="legend">
+      <span class="src v">verified first-hand</span>
+      <span class="src u">unverified</span>
+    </div>
+  </div>
+  <div class="col">
+    <h2>You are an owner, not a salaried CFO</h2>
+    <p>This changed the brief. The working assumption was the ordinary one — a hired finance chief who needs a system proving he did his job. The shareholder record says otherwise.</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><span class="n">98%</span><span class="l">Held by the Gülay family — İlhan 49%, İhsan 24.5%, Mehmet 24.5%</span></div>
+    <div class="stat"><span class="n">1%</span><span class="l">Your stake, 300.000 TRY — matched exactly by the General Manager's</span></div>
+    <div class="stat"><span class="n">30m</span><span class="l">Paid-in capital in TRY, against a 75m registered ceiling</span></div>
+    <div class="stat"><span class="n">4</span><span class="l">Funds under management: VBR, VBI, VIK, WQQ — plus VPG, the firm itself</span></div>
+  </div>
+
+  <div class="gutter"></div>
+  <div class="col">
+    <p>An owner-operator with a board seat needs a different product from a salaried officer. Not a system that demonstrates diligence — one that <strong>protects the licence and the family's capital</strong>, and lets two professional managers run four regulated funds without a back office.</p>
+    <p>The fund codes matter for a duller reason: <span class="src v">VPG · VBR · VBI · VIK · WQQ</span> is a real KAP watchlist, not a placeholder. It is what the system points at.</p>
+    <p>One more thing the file listing showed, and it is the most concrete evidence available about where your time goes: your fund return trackers are <strong>hand-maintained to the current day</strong>. Someone is typing monthly series into a grid in 2026.</p>
+  </div>
+</section>
+
+<section>
+  <div class="gutter">
+    <span class="sec-no">02 / EVIDENCE</span>
+    <span class="src v">S&amp;P 2026 · MIT 2026</span>
+  </div>
+  <div class="col">
+    <h2>The industry rates AI ineffective at exactly what it is sold for</h2>
+    <p>This is not a hedge. Managers were asked, and the two use cases most heavily marketed to a firm like yours are the two they rank lowest.</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><span class="n bad">64%</span><span class="l">Rate AI <strong>ineffective for deal sourcing</strong></span></div>
+    <div class="stat"><span class="n bad">75%</span><span class="l">Rate it <strong>ineffective for portfolio monitoring</strong></span></div>
+    <div class="stat"><span class="n">31%</span><span class="l">Due diligence — the highest integration of any function</span></div>
+    <div class="stat"><span class="n bad">95%</span><span class="l">Of enterprise GenAI pilots show no measurable P&amp;L impact</span></div>
+  </div>
+
+  <div class="gutter"></div>
+  <div class="col">
+    <p>The arithmetic from the canonical success is worse than the survey. EQT's Motherbrain — the case every vendor cites — took <strong>ten years and roughly twenty engineers</strong> to attribute about fifteen investments. At your scale that is a rounding error against one partner's phone.</p>
+    <p>What does work is narrow and unglamorous: document-heavy extraction, and a deterministic numerical core that a model never touches. That is the whole design.</p>
+  </div>
+
+  <div class="finding">
+    <p class="lede">The strongest evidence available argues against building anything at all.</p>
+    <p>External vendor tools succeed roughly <strong>twice as often as internal builds</strong>. That finding is recorded rather than buried, and it wins nearly everywhere — fund accounting, custody, document storage and audit should all be bought. It loses in exactly one place, for a reason specific to Turkey.</p>
+  </div>
+</section>
+
+<section>
+  <div class="gutter">
+    <span class="sec-no">03 / THE PIVOT</span>
+    <span class="src u">U-10 · unconfirmed</span>
+  </div>
+  <div class="col">
+    <h2>A residency rule flips build-versus-buy</h2>
+    <p>Tebliğ VII-128.10 requires a capital-markets institution to keep <strong>both its primary and its secondary information systems inside Turkey</strong>. If that binds a portföy yönetim şirketi, the US-hosted fund-ops stack — Carta, Juniper Square, Affinity — cannot be your system of record, and the vendor evidence does not transfer, because the vendors are not deployable.</p>
+    <p>Add that no vendor sells SPK obligation tracking with TÜFE restatement in Turkish, and the buildable surface narrows to something one numerate person can own.</p>
+    <p><strong>This is the load-bearing assumption of the entire design, and it is not settled.</strong> It rests on legal commentary, not the SPK's own text — the regulator's site was unreachable from where this ran. If counsel reads VII-128.10 and says it binds narrowly or not at all, a meaningful part of this should be replaced by a purchase order. It is the first question to resolve.</p>
+  </div>
+</section>
+
+<section>
+  <div class="gutter">
+    <span class="sec-no">04 / SYSTEM</span>
+    <span class="src v">SPK 11/255</span>
+  </div>
+  <div class="col">
+    <h2>What it is, and what it refuses</h2>
+    <p>It watches the obligations and the numbers that keep four fund licences clean, and makes every figure it emits traceable to its source and honest about inflation. A control system, not an investment system.</p>
+    <h3>It deliberately does not</h3>
+    <ul class="clean">
+      <li class="no">Source deals. The evidence and the EQT arithmetic agree from opposite ends of the resource spectrum.</li>
+      <li class="no">Render a monitoring dashboard — the thing that gets demoed and stops being opened in week three.</li>
+      <li class="no">Let a language model near a number. Models read documents and draft prose; deterministic code owns money, dates, obligations and NAV.</li>
+      <li class="no">Send anything. Every executor writes to disk. Drafting is what a system can be trusted with; filing is a decision with your name on it.</li>
+    </ul>
+  </div>
+
+  <div class="finding">
+    <p class="lede">Fund figures are nominal. Management-company figures are TMS 29 restated. They may never be added.</p>
+    <p>SPK decision 16.02.2024 no. 11/255 exempts investment funds from inflation accounting while the manager itself applies it — so the two are denominated in different money. At 31.75% CPI, a consolidated view that mixes them is wrong by roughly a third per year of divergence, in the flattering direction. The <code>Money</code> type refuses the addition rather than trusting anyone to remember.</p>
+  </div>
+
+  <div class="gutter"></div>
+  <div class="col">
+    <h3>The second invariant</h3>
+    <p>A nominal return is not a return. At 32% inflation a 40% nominal IRR is about <strong>6% real</strong> — <code>(1.40 / 1.32) − 1</code>. The naive subtraction gives 8%, overstating by a third of the answer, and the error grows precisely as inflation rises. Every metric has a <code>real_</code> twin, and the brief always prints both.</p>
+  </div>
+</section>
+
+<section>
+  <div class="gutter">
+    <span class="sec-no">05 / DECIDE</span>
+    <span class="src v">17 rules · no model</span>
+  </div>
+  <div class="col">
+    <h2>Rules decide, not a model</h2>
+    <p>Every rule is a Python predicate over typed state, so an auditor can read one and say whether it is right. Each carries a stated reason for its threshold, because after a month the question is never <em>what does this rule do</em> but <em>why does it keep firing</em>. Most are demoted to digest: an alerting system fails by firing until nobody reads it, and then it misses everything.</p>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Rule</th><th>Fires when</th><th>Severity</th><th>Sign-off</th></tr></thead>
+      <tbody>
+        <tr><td class="id">OBL-OVERDUE</td><td>An applicable obligation is past due and unsatisfied</td><td><span class="sev crit">critical</span></td><td>named owner</td></tr>
+        <tr><td class="id">REG-DEADLINE-SHORT</td><td>A detected regulatory change carries a compliance date inside 30 days</td><td><span class="sev crit">critical</span></td><td>compliance</td></tr>
+        <tr><td class="id">NAV-BASIS-MIX</td><td>Nominal and restated amounts reach one computation</td><td><span class="sev crit">critical</span></td><td>—</td></tr>
+        <tr><td class="id">OBL-ESCALATE</td><td>Unsatisfied and inside 5 business days</td><td><span class="sev high">high</span></td><td>named owner</td></tr>
+        <tr><td class="id">NAV-DRIFT-NOMINAL</td><td>Unit value moves &gt;25% nominally — usually a data error, not a valuation</td><td><span class="sev high">high</span></td><td>fon müdürü</td></tr>
+        <tr><td class="id">CPI-STALE</td><td>TÜFE has no point for the closed month — every real figure is silently stale</td><td><span class="sev high">high</span></td><td>—</td></tr>
+        <tr><td class="id">MODEL-CHANGED</td><td>The model changed without the eval set being re-run</td><td><span class="sev high">high</span></td><td>someone who did not build it</td></tr>
+        <tr><td class="id">CITE-COVERAGE-LOW</td><td>Verified-citation coverage falls below 0.6 — abstain rather than hedge</td><td><span class="sev high">high</span></td><td>—</td></tr>
+        <tr><td class="id">NAV-DRIFT-REAL</td><td>Unit value moves &gt;5% in <em>real</em> terms period-on-period</td><td><span class="sev dig">medium</span></td><td>—</td></tr>
+        <tr><td class="id">REAL-RETURN-NEGATIVE</td><td>A fund is up nominally and down in real terms</td><td><span class="sev dig">digest</span></td><td>—</td></tr>
+        <tr><td class="id">OBL-UNVERIFIED</td><td>The calendar still contains researched, unconfirmed obligations</td><td><span class="sev high">high</span></td><td>counsel</td></tr>
+        <tr><td class="id">FX-MOVE</td><td>TRY/USD moves &gt;3% in a day — 1% would be an alarm clock</td><td><span class="sev dig">digest</span></td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="gutter"></div>
+  <div class="col">
+    <p><code>MODEL-CHANGED</code> is not decoration. Two Sigma settled with the SEC for roughly $90m in January 2025 over a failure of model <em>change control</em>, not model quality. A model inventory, a frozen eval set re-run on every change, and validation by someone who did not build it is a minimum viable SR 11-7 — and it costs a spreadsheet and a test file. With your audit background it is the part you can do better than a firm ten times your size.</p>
+    <p><code>REG-DEADLINE-SHORT</code> is calibrated on a live example: the SPK's 23 July 2026 valuation decision gave portfolio managers until 31 July to comply. <strong>Eight days.</strong> No quarterly review catches that.</p>
+  </div>
+</section>
+
+<section>
+  <div class="gutter">
+    <span class="sec-no">06 / MONDAY</span>
+    <span class="src v">runs offline</span>
+  </div>
+  <div class="col">
+    <h2>What it prints</h2>
+    <p>One command, one page. This is real output from the working system — running with no network and no API key. The fund figures are labelled fixtures, because your actual filings were unreachable.</p>
+  </div>
+
+  <div class="term">
+    <div class="term-bar">$ ooda brief</div>
+<pre><b># WAM Portföy — 2026-08-27</b>
+
+<b>## Needs a decision today</b>
+- <span class="r">OBL-OVERDUE</span> · gyf-year-end-appraisal  <span class="a">⚠ UNVERIFIED BASIS</span>
+  GYF year-end real estate appraisals was due 2026-08-22 and is unsatisfied
+  <span class="m">sign-off: named owner · business_days_left: -4</span>
+- <span class="r">REG-DEADLINE-SHORT</span> · spk-bulletin
+  a regulatory change carries a compliance date <b>8 days</b> out
+  <span class="m">sign-off: compliance</span>
+
+<b>## Wrong, or about to be</b>
+- <span class="r">NAV-DRIFT-REAL</span> · VIK
+  <b>VIK unit value moved -21.06% in real terms (nominal 4.00%)</b>
+  <span class="m">· nominal_move: 4.00%   · real_move: -21.06%   · inflation: 31.75%</span>
+- <span class="r">CONNECTOR-DOWN</span> · kap
+  kap has failed 3 consecutive runs; treat it as broken, not flaky
+
+<b>## For the week</b>
+- <span class="a">OBL-UNVERIFIED</span> · calendar  <span class="a">⚠ UNVERIFIED BASIS</span>
+  30 of 30 obligations come from research that could not reach a primary
+  source; they are a starting calendar, not legal deadlines
+- <span class="g">REAL-RETURN-NEGATIVE</span> · VIK
+  VIK is up 4.00% nominally but down -21.06% in real terms — reporting
+  only the nominal figure would flatter
+
+<span class="m">Drafted, not sent. Nothing here has been filed with anyone.</span></pre>
+  </div>
+
+  <div class="gutter"></div>
+  <div class="col">
+    <p>That fourth line is the entire point of the system. A fund up 4% on the page and down 21% in purchasing power is not a presentational nuance — it is the difference between a report that flatters and one that is true.</p>
+  </div>
+</section>
+
+<section>
+  <div class="gutter">
+    <span class="sec-no">07 / STATE</span>
+    <span class="src v">283 tests pass</span>
+  </div>
+  <div class="col">
+    <h2>Built, and not built</h2>
+    <p>The build ran as a thirteen-agent workflow that hit a session limit with seven agents unrun. What exists is what exists, and the gaps are named rather than left to be inferred.</p>
+  </div>
+
+  <div class="ledger">
+    <div class="lcol yes">
+      <h4>Built · 283 tests</h4>
+      <ul>
+        <li><code>domain/</code> money, inflation, obligations, valuation <span class="cnt">57</span></li>
+        <li><code>ooda/</code> signals, policy, 17 rules, act <span class="cnt">29</span></li>
+        <li><code>index/ retrieve/</code> hybrid BM25 + dense, RRF <span class="cnt">169</span></li>
+        <li><code>config.py</code> the firm as graded data <span class="cnt">28</span></li>
+        <li><code>cli.py</code> demo · loop · brief · rules · provenance</li>
+      </ul>
+    </div>
+    <div class="lcol no">
+      <h4>Not built — and the consequence</h4>
+      <ul>
+        <li>Regulatory connectors <span class="cnt">no live feed</span></li>
+        <li>Redaction layer <span class="cnt">no personal data yet</span></li>
+        <li>Answering + citation check <span class="cnt">passages only</span></li>
+        <li>Eval harness <span class="cnt">quality unmeasured</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="gutter"></div>
+  <div class="col">
+    <p><code>ooda eval</code> exits 2 and says retrieval quality is unmeasured, rather than printing a placeholder. Every claim in the repository carries a source tag resolving to a ledger, and a guard fails the build over an unsourced one — it rejected three of my own drafts on the way here.</p>
+  </div>
+</section>
+
+<section>
+  <div class="gutter">
+    <span class="sec-no">08 / OPEN</span>
+    <span class="src u">U-7 · U-9 · U-10</span>
+  </div>
+  <div class="col">
+    <h2>What I could not establish</h2>
+    <p>Both <code>wamportfoy.com</code> and <code>kap.org.tr</code> are blocked by this environment's egress proxy, so your own filings were never read. Fund sizes, holdings and AUM are unknown; every fund-level figure above is a labelled fixture. The thirty seeded obligations all load <span class="src u">UNVERIFIED</span> — a useful starting calendar and unsafe legal deadlines, until someone reads the tebliğ text.</p>
+  </div>
+
+  <div class="q">
+    <h3>Four questions that change the build</h3>
+    <ol>
+      <li><strong>Does VII-128.10 actually bind you?</strong> Counsel reading the tebliğ either confirms the design or replaces part of it with a purchase order. Nothing else is worth doing first.</li>
+      <li><strong>What are the four funds?</strong> Codes, registered names, sizes, base currency. <code>config/firm.example.toml</code> is where they go; anything you set there outranks anything I found.</li>
+      <li><strong>Does the fund TMS 29 exemption still hold for 2026?</strong> The central invariant inverts if it lapsed.</li>
+      <li><strong>What does your week actually contain?</strong> This was designed from a public career record, a shareholder table and a file listing. Nobody asked you what you already run, or what you have tried and abandoned — and the research is unambiguous that the systems which fail are the ones designed for a workflow nobody checked.</li>
+    </ol>
+  </div>
+</section>
+
+<footer>
+  <span>Every claim tagged to <b>provenance/sources.yaml</b></span>
+  <span>43 sources · 3 open unknowns</span>
+  <span>python3 tools/verify_provenance.py → 0</span>
+</footer>
+
+</div>
+
+</body>
+</html>
