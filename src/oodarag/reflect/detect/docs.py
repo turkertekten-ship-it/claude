@@ -414,12 +414,18 @@ class DocsBrokenReference(Detector):
 
     def _scan(self, sig: Signal, ctx: DetectContext) -> Iterable[Finding]:
         doc = sig.uri
-        seen: set[str] = set()
+        seen_raw: set[str] = set()
+        # The second deduplication is on the *resolved* path rather than on what
+        # was written: "setup.md" in a link and "docs/setup.md" in a code span
+        # are one missing file, and two findings for it would share a
+        # fingerprint - which the journal reads as one finding, reported twice,
+        # half of it silently unaccounted for.
+        seen_target: set[str] = set()
         emitted = 0
         for ref in _references(sig.text, self.scan_code_spans):
-            if ref.target in seen:
+            if ref.target in seen_raw:
                 continue
-            seen.add(ref.target)
+            seen_raw.add(ref.target)
             candidates = _resolutions(doc, ref.target, ref.kind)
             if not candidates:
                 # Resolves outside the workspace. Not ours to check, and never
@@ -428,6 +434,9 @@ class DocsBrokenReference(Detector):
                 continue
             if any(ctx.exists(rel) for rel in candidates):
                 continue
+            if candidates[0] in seen_target:
+                continue
+            seen_target.add(candidates[0])
             yield self._finding(sig, ref, candidates[0], ctx)
             emitted += 1
             if emitted >= self.max_per_doc:
