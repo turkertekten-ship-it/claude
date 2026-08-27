@@ -107,6 +107,19 @@ Bu makinede şunlar **doğrulanamadı** ve hiçbiri doğrulanmış gibi yazılma
 - tiktoken sözlüğü — `token-butce.py` bu yüzden TAHMİN kipine düşer ve bunu
   çıktısının başına yazar.
 
+## Depoya yükleme: çalıştırma biti
+
+Bu oturumda `git push` için kimlik bilgisi yok; yükleme GitHub API'si üzerinden
+yapıldı. API'nin dosya yükleme ucu **çalıştırma bitini taşımaz**: yereldeki
+`100755` betikler depoda `100644` görünür. İçerik birebir aynıdır.
+
+Bu sistemde hiçbir çağrı çalıştırma bitine bağlı değildir — her betik
+`python3 <dosya>` ya da `bash <dosya>` olarak çağrılır ve öyle belgelenmiştir.
+Depoyu klonlayıp `./denetim.sh` yazmak isteyen biri için:
+
+    chmod +x ~/mafirm/denetim.sh ~/mafirm/kur-genel.sh \
+             ~/mafirm/birimler/*/kod/*.py ~/mafirm/.claude/hooks/kapi.py
+
 ## Kurulum sırasında yakalanan üç gerçek kusur
 
 1. **`pdfplumber` kuruluydu ama import edilemiyordu** — Debian'ın
