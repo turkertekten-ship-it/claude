@@ -82,6 +82,14 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - The container reports 4 CPUs, which caps this session's workflow fan-out at 2 concurrent subagents. [src:ENV-CONCURRENCY-2026-08-27]
 - PyYAML 6.0.1 imports and Python's bundled sqlite3 (3.45.1) creates an FTS5 virtual table successfully. [src:ENV-CONCURRENCY-2026-08-27] [src:ENV-SQLITE-FTS5-2026-08-27]
 
+## Observed — the chat archive, populated
+
+- The chat index now holds real data rather than shipping empty: 144 messages across 1 conversation, spanning 14:50:16.588Z to 15:13:44.637Z, with 0 records skipped. [src:ARCHIVE-INGESTED-2026-08-27]
+- That one conversation is this session's own transcript. No other session's transcript exists on this container, so the index covers one of 13 sessions. [src:ARCHIVE-INGESTED-2026-08-27]
+- Subagent and workflow-journal transcripts were deliberately excluded after a first pass indexed them as 9 further "conversations"; machine-to-machine traffic is not one of the owner's chats. [src:ARCHIVE-INGESTED-2026-08-27]
+- Searching the populated index exposed a defect that only real data could reveal: Claude Code files tool *results* as `type: "user"` records, so command output was being indexed as the owner speaking. Two of the first three hits for "reverse engineer" were Bash output. [src:ROLE-ATTRIBUTION-BUG-2026-08-27]
+- The ingester now derives the role from the content blocks and search takes a `--role` filter; after the fix, `search "ooda" --role user` returns only the owner's own goal text, and a regression case covering it passes. [src:ROLE-ATTRIBUTION-BUG-2026-08-27]
+
 ## Conclusion
 
 The request that opened this session asked to look at "all my previous claude

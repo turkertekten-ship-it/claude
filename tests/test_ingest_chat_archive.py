@@ -47,6 +47,14 @@ def write_cc_transcript(path: Path) -> str:
              {"type": "text", "text": "answer about vector databases"},
              {"type": "tool_use", "name": "Bash"},
          ]}},
+        # Claude Code files tool OUTPUT as a user-typed record. Taken at face
+        # value this lands command output in the index as something the owner
+        # said, which is exactly what the index must not do.
+        {"type": "user", "uuid": "u_tool", "sessionId": "S1",
+         "timestamp": "2026-01-01T00:00:04Z",
+         "message": {"role": "user", "content": [
+             {"type": "tool_result", "content": "rebuilt in 3.2s; tabs preserved exactly"},
+         ]}},
         # Sidecar record types carry no message and must be ignored, not skipped.
         {"type": "attachment", "uuid": "x1", "sessionId": "S1"},
         {"type": "user", "uuid": "u2", "sessionId": "S2", "timestamp": "2026-01-02T00:00:00Z",
@@ -78,10 +86,18 @@ def main() -> int:
 
         by_id = {c.id: c for c in convs}
         s1 = by_id["cc:S1"]
-        check("sidecar records are not indexed as messages", len(s1.messages) == 2, len(s1.messages))
+        check("sidecar records are not indexed as messages", len(s1.messages) == 3, len(s1.messages))
         check("text is stored verbatim", s1.messages[0].text == verbatim, repr(s1.messages[0].text))
         check("block types are recorded",
               s1.messages[1].block_types == "thinking,text,tool_use", s1.messages[1].block_types)
+
+        by_role = {m.id: m.role for m in s1.messages}
+        check("tool output is not filed as the owner speaking",
+              by_role["cc:u_tool"] == "tool_result", by_role["cc:u_tool"])
+        check("a genuine user message keeps the user role",
+              by_role["cc:u1"] == "user", by_role["cc:u1"])
+        check("tool output is still stored verbatim and searchable",
+              "rebuilt in 3.2s" in s1.messages[2].text, s1.messages[2].text)
         check("thinking and text are both captured",
               "internal reasoning" in s1.messages[1].text
               and "vector databases" in s1.messages[1].text)
@@ -112,7 +128,7 @@ def main() -> int:
         check("parse failures make ingest exit 1", rc == 1, rc)
         conn = ica.connect(db)
         total = conn.execute("SELECT COUNT(*) n FROM messages").fetchone()["n"]
-        check("all readable messages are indexed", total == 5, total)
+        check("all readable messages are indexed", total == 6, total)
 
         hits = conn.execute(
             "SELECT m.text FROM messages_fts f JOIN messages m ON m.id = f.message_id"
@@ -127,9 +143,27 @@ def main() -> int:
         conn = ica.connect(db)
         again = conn.execute("SELECT COUNT(*) n FROM messages").fetchone()["n"]
         fts = conn.execute("SELECT COUNT(*) n FROM messages_fts").fetchone()["n"]
-        check("re-ingesting does not duplicate messages", again == 5, again)
-        check("re-ingesting does not duplicate the search index", fts == 5, fts)
+        check("re-ingesting does not duplicate messages", again == 6, again)
+        check("re-ingesting does not duplicate the search index", fts == 6, fts)
         conn.close()
+
+        print("role-filter cases")
+        # 'tabs' appears in the owner's real message AND in the tool output, so
+        # the filter has to keep one and drop the other rather than match nothing.
+        conn = ica.connect(db)
+        unfiltered = conn.execute(
+            "SELECT COUNT(*) n FROM messages_fts f JOIN messages m ON m.id = f.message_id"
+            " WHERE messages_fts MATCH 'tabs'").fetchone()["n"]
+        as_user = conn.execute(
+            "SELECT m.id FROM messages_fts f JOIN messages m ON m.id = f.message_id"
+            " WHERE messages_fts MATCH 'tabs' AND m.role = 'user'").fetchall()
+        conn.close()
+        check("the term matches both the owner and the tool output",
+              unfiltered == 2, unfiltered)
+        check("filtering to the owner keeps exactly the real message",
+              [r["id"] for r in as_user] == ["cc:u1"], [r["id"] for r in as_user])
+        rc = ica.cmd_search(Args(db=str(db), query="tabs", limit=10, role="user"))
+        check("search accepts a role filter and exits clean", rc == 0, rc)
 
     print()
     if FAILURES:

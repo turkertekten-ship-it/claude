@@ -262,3 +262,37 @@ sources:
       The container reports 4 CPUs, which caps this session's workflow fan-out
       at 2 concurrent subagents. PyYAML 6.0.1 imports, and Python's bundled
       sqlite3 reports 3.45.1 and creates an FTS5 virtual table successfully.
+
+  - id: ARCHIVE-INGESTED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:16Z"
+    method: "cp ~/.claude/projects/-home-user/*.jsonl archive/; python3 tools/ingest_chat_archive.py ingest; ... stats"
+    evidence: >-
+      "Indexed 144 message(s) across 1 conversation(s) from 1 file(s)". Stats
+      reported 1 conversation, 144 messages, date range 2026-08-27T14:50:16.588Z
+      .. 2026-08-27T15:13:44.637Z, 0 skipped. The only transcript on this
+      container is this session's own; no other session's transcript was
+      present. A first pass had also copied in 9 subagent and workflow-journal
+      JSONL files, which indexed as 429 messages across 9 "conversations"; they
+      were removed and the index rebuilt, because a subagent transcript is not
+      one of the owner's conversations and counting it as one inflates the index
+      with machine-to-machine traffic.
+
+  - id: ROLE-ATTRIBUTION-BUG-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:17Z"
+    method: "python3 tools/ingest_chat_archive.py search 'reverse engineer' over the real transcript; then reading parse_claude_code_jsonl"
+    evidence: >-
+      A search for "reverse engineer" returned three hits all labelled
+      `user`, of which two were Bash tool output ("Exit code 128 ... fatal: your
+      current branch ... does not have any commits yet") and none was typed by
+      the owner. Cause: Claude Code writes tool results as records with
+      `type: "user"` and `message.role: "user"`, and the ingester took that
+      field at face value. Fixed by deriving the role from the content blocks -
+      a record whose blocks are exclusively `tool_result` is filed as
+      `tool_result` - and by adding a `--role` filter to search. After the fix,
+      `search "ooda" --role user` returned 2 hits, both the owner's own goal
+      text. A regression case was added to tests/test_ingest_chat_archive.py in
+      which the same term appears in both the owner's message and the tool
+      output, and the filter must keep the former and drop the latter;
+      `bash tests/run_all.sh` prints "ALL CHECKS PASSED".

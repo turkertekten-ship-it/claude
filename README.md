@@ -90,11 +90,17 @@ The archive ships empty of claude.ai exports. To populate it:
 
 python3 tools/ingest_chat_archive.py ingest
 python3 tools/ingest_chat_archive.py search "retrieval pipeline"
+python3 tools/ingest_chat_archive.py search "ooda" --role user   # your words only
 python3 tools/ingest_chat_archive.py stats
 ```
 
 Messages are stored verbatim and every hit carries its conversation id,
 message id, timestamp, and source file, so a result can be quoted as evidence.
+
+`--role user` matters more than it looks. Claude Code files tool *output* as
+user-typed records, so without the distinction a search for what you asked for
+returns mostly command output. Tool results are indexed under `tool_result` and
+stay searchable; they are just no longer attributed to you.
 Records that cannot be parsed are skipped and counted, never repaired by
 guesswork. `archive/` is git-ignored — the exports are the owner's data, not
 repository content.

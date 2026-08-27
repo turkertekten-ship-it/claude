@@ -175,6 +175,24 @@ def flatten_content(content) -> tuple[str, list[str]]:
     return "\n".join(p for p in parts if p), kinds
 
 
+def effective_role(declared: str, kinds: list[str]) -> str:
+    """Separate the owner's own words from tool output.
+
+    Claude Code writes tool *results* as records with `type: "user"` and
+    `message.role: "user"` - the transcript format has no other slot for them.
+    Taking that at face value files every command's output in the index as
+    something the owner said, which makes the index useless for the one question
+    it exists to answer: what did the owner actually ask for.
+
+    A record whose content blocks are exclusively `tool_result` is tool output,
+    and is filed as such. The text is still stored verbatim and still searchable;
+    only the attribution changes.
+    """
+    if declared == "user" and kinds and all(k == "tool_result" for k in kinds):
+        return "tool_result"
+    return declared
+
+
 def parse_claude_code_jsonl(path: Path, report: Report) -> list[Conversation]:
     """One transcript file may hold more than one sessionId; group by it."""
     grouped: dict[str, Conversation] = {}
@@ -207,7 +225,7 @@ def parse_claude_code_jsonl(path: Path, report: Report) -> list[Conversation]:
             Message(
                 id=f"cc:{uuid}",
                 seq=len(conv.messages),
-                role=message.get("role") or record["type"],
+                role=effective_role(message.get("role") or record["type"], kinds),
                 text=text,
                 timestamp=record.get("timestamp"),
                 block_types=",".join(kinds),
@@ -380,16 +398,21 @@ def cmd_search(args) -> int:
         return 2
     conn = connect(db_path)
     try:
-        rows = conn.execute(
+        sql = (
             "SELECT m.id, m.role, m.timestamp, m.source_file, c.id AS conv, c.title,"
             "       snippet(messages_fts, 0, '>>>', '<<<', ' ... ', 24) AS excerpt"
             "  FROM messages_fts f"
             "  JOIN messages m ON m.id = f.message_id"
             "  JOIN conversations c ON c.id = m.conversation_id"
             " WHERE messages_fts MATCH ?"
-            " ORDER BY bm25(messages_fts) LIMIT ?",
-            (args.query, args.limit),
-        ).fetchall()
+        )
+        params: list = [args.query]
+        if getattr(args, "role", None):
+            sql += " AND m.role = ?"
+            params.append(args.role)
+        sql += " ORDER BY bm25(messages_fts) LIMIT ?"
+        params.append(args.limit)
+        rows = conn.execute(sql, params).fetchall()
     except sqlite3.OperationalError as exc:
         print(f"Bad FTS query {args.query!r}: {exc}", file=sys.stderr)
         return 2
@@ -460,6 +483,12 @@ def main(argv: list[str]) -> int:
     p_search = sub.add_parser("search", help="full-text search the index")
     p_search.add_argument("query")
     p_search.add_argument("--limit", type=int, default=10)
+    p_search.add_argument(
+        "--role",
+        choices=("user", "assistant", "tool_result"),
+        help="restrict to one role; `user` is the owner's own words, with tool "
+             "output filed separately under `tool_result`",
+    )
     p_search.set_defaults(func=cmd_search)
 
     sub.add_parser("stats", help="index summary").set_defaults(func=cmd_stats)
