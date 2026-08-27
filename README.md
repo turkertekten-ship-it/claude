@@ -1,56 +1,92 @@
-# oodarag
+# mafirm — sınır ötesi birleşme ve devralma pratiği
 
-An OODA-driven, end-to-end RAG pipeline that runs on the Python standard library alone.
+Bu depo, *Uluslararası M&A Hukuku · Kurulum Kitabı* (Arel Barzilay, Sürüm 1.0)
+uygulanarak kurulmuş çalışan bir sistemdir. Bir okuma listesi değil, çalıştırılan
+bir kurulum programıdır: kitabın §0–§19'unun her bölümü ya bir dosya üretti ya
+bir dosyayı doğruladı.
 
-```
-Observe  ->  Orient   ->  Decide   ->  Act
-ingest       normalize    policy       reindex / backfill
-             chunk        engine       / alert / answer
-             embed
-             index
-```
+**Bu sistemin ürettiği hiçbir çıktı hukuki görüş değildir.** Her esaslı çıktı iki
+başlıkla biter: *Şimdi ne yapılmalı* ve *Yetkili avukat görüşü gereken konular*.
+Türkiye'de bir tescil, imzalanmış bir sözleşme, bir kurum başvurusu ve gerçek bir
+müvekkile verilen her tavsiye baroya kayıtlı bir avukat gerektirir.
 
-## Why this exists
-
-Most RAG code is a demo: load a folder, call an embedding API, cosine-similarity
-top-5, stuff it in a prompt. That works until it meets a real corpus, at which
-point the failure modes are always the same - the index is stale, the chunks lost
-their context, the retriever returns the site footer, and nobody can tell you
-whether last week's change made retrieval better or worse.
-
-`oodarag` is built around those failure modes rather than around the happy path:
-
-| Failure mode | What this does about it |
-|---|---|
-| Index goes stale | Content-hash incremental ingest + an OODA loop that decides when to re-fetch |
-| Chunks lose context | Contextual headers embedded with every chunk |
-| Retriever returns boilerplate | Structural + link-density boilerplate removal in the scraper |
-| Same page indexed 5 times | Canonical-URL and content-hash dedupe |
-| Semantic search misses exact terms | Hybrid dense + BM25 retrieval fused with RRF |
-| "Is retrieval any good?" | An eval harness with recall@k, MRR, nDCG and citation coverage |
-| Secrets leak into the index | Redaction at the connector boundary, before anything is written |
-| A crawl runs forever | Budgets on pages, fetches, bytes, depth and wall-clock |
-
-## Status
-
-Under active construction. See `internal/PLAN.md` for what is built and what is next.
-
-## Quick start
+## Hızlı başlangıç
 
 ```bash
-make test          # stdlib unittest, no dependencies required
-make demo          # end-to-end: ingest -> index -> query -> eval
+bash ~/mafirm/denetim.sh                                  # her sınama ve kapı
+python3 ~/mafirm/birimler/_araclar/kod/dogrula.py         # araç katmanı
+python3 ~/mafirm/birimler/rekabet/kod/esik.py --self-test # eşik kodu
+python3 ~/mafirm/.claude/hooks/kapi.py --self-test        # beş kapı
 ```
 
-## Design principles
+`~/mafirm`, bu depodaki `mafirm/` klasörüne bir sembolik bağdır; kitaptaki her
+doğrulama komutu birebir çalışır.
 
-1. **Zero required dependencies.** The whole pipeline runs on the stdlib, so it
-   works in CI, in an air-gapped container, and on a laptop. Accelerators
-   (numpy) and hosted models (Voyage, Anthropic) plug in behind interfaces.
-2. **Provenance is load-bearing.** Every chunk carries the URI and commit sha it
-   came from. Citations are verified against retrieved chunks, not generated.
-3. **Everything is bounded.** Every network stage has a budget on requests,
-   bytes and time.
-4. **Degrade, don't die.** Blocked egress, a missing API key or a truncated API
-   response reduce what the pipeline can do; they never make it crash.
-5. **Measure, don't assert.** Retrieval quality is a number in an eval report.
+## Düzen
+
+| Yol | Ne |
+|---|---|
+| `mafirm/CLAUDE.md` | İşletim sözleşmesi — 11 kural, her oturumda okunur |
+| `mafirm/birimler/` | Sekiz uzmanlık birimi: yöntem, kod, emsal |
+| `mafirm/birimler/_koltuklar/` | On üç ortak koltuğu + **iki bilerek boş** koltuk |
+| `mafirm/birimler/_araclar/` | Araç kataloğu ve çalışan sarmalayıcılar |
+| `mafirm/isakislari/` | Uçtan uca iş akışları |
+| `mafirm/komutlar/` | İstem şablonları (§15) |
+| `mafirm/.claude/` | Beceriler, alt ajanlar, komutlar, kapılar |
+| `mafirm/denetim.sh` | Tam denetim — sesli biçimde başarısız olur |
+| `mafirm/KURULUM.md` | **Kurulum kaydı ve kitaptan ayrılan yerler** |
+
+## Katmanlar ve maliyeti
+
+| Katman | Ne zaman okunur |
+|---|---|
+| İşletim sözleşmesi | Her oturumda, kendiliğinden |
+| Uzmanlık birimleri | Dosya oraya yönlendiğinde |
+| Ortak koltukları | Ağır bir kararda |
+| Otomatik kontroller | Tetikleyen olayda |
+| Beceriler, alt ajanlar, iş akışları | Talebe göre |
+
+Yalnızca birinci katmanın bedeli her oturumda ödenir; gerisi çağrıldığında
+yüklenir.
+
+## Beş kapı
+
+`mafirm/.claude/hooks/kapi.py` — 2 çıkış koduyla işlemi durdurur.
+
+| Kapı | Neyi yakalar |
+|---|---|
+| `kapsam` | Görüş gibi okunan ama avukat başlığı taşımayan çıktı |
+| `kanit` | Dayanağı yanında olmayan mevzuat eşiği |
+| `sir` | Müvekkili tanıtan bilginin dışarı giden çağrıya girmesi |
+| `guncellik` | Doğrulama tarihi bayatlamış bir eşiğe dayanılması |
+| `arastirma` | Rakam ya da depo anıldığı hâlde "Kontrol edildi:" satırı yok |
+
+Kip: pratiğin içinde **block**, makine genelinde Write/Edit için **warn**;
+dışarı giden çağrıda sır kapısı her kipte bloklar. Kapatma: `MAFIRM_KAPI=off`.
+
+Her kapı iki yönde sınanır — kusurlu vakada ateşlemeli, doğru vakada susmalı.
+Yalnızca geçen bir kapı, kapı değildir.
+
+## Makine geneline kurulum
+
+```bash
+bash ~/mafirm/kur-genel.sh
+```
+
+Beceriler, alt ajanlar, komutlar ve kapılar `~/.claude` altına kurulur; her
+oturum ve her terminal aynı doktrini okur.
+
+## Bilerek yapılmayanlar
+
+1. Hukuki görüş vermez, hukuk bürosu değildir.
+2. **Türk uygulamacı koltuğu yoktur** ve bu bilerek boştur.
+3. **Vergi koltuğu yoktur** ve işlem yapısı vergi kaynaklıdır.
+4. Türkiye rakamlarının raf ömrü vardır; altı aydan eskisi bayattır.
+5. `eyecite` ve `courtlistener` yalnızca ABD'dir — Türk içtihadı YOKTUR.
+6. AGPL lisanslı bileşenler kurulmadı.
+7. İşlemsel belge kaleme almada ölçülmüş kazanç yoktur.
+8. Doğruluğu artırdığına dair kanıt yoktur; kazanç açıklık ve düzendedir.
+9. Kendisine söylenmemiş bir çıkar çatışmasını tespit edemez.
+
+`mafirm/KURULUM.md`, bu kurulumda **doğrulanamayan** her şeyi ve kitaptan
+ayrılan altı yeri açıkça listeler.
