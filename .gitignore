@@ -15,3 +15,6 @@ dist/
 htmlcov/
 *.log
 .DS_Store
+
+# task-division installer backups
+.claude/backups/

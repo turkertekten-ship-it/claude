@@ -60,14 +60,20 @@ make demo          # end-to-end: ingest -> index -> query -> eval
 Beyond the pipeline, this repository carries tooling for the Claude Code
 sessions that work on it.
 
-**Task division.** Every submitted prompt is divided into an explicit numbered
-task list before any work begins, enforced by a `UserPromptSubmit` hook rather
-than by remembering to do it:
+**Task division.** Every prompt is restated as a numbered task list with
+checkable done-conditions before any work begins, and a reply that skipped the
+division gets challenged. Two mechanisms, because neither is sufficient alone:
+a `UserPromptSubmit` hook injects the directive, and a `Stop` hook refuses a
+substantial reply that contains none.
 
 ```bash
-python3 tools/install_task_division.py          # every project on this machine
+python3 tools/install_task_division.py          # user, project, skills-dir, plugin
 python3 tools/install_task_division.py --check  # 0 installed, 1 not installed
+make e2e                                        # prove it against the real binary
 ```
 
-See `docs/task-division.md` for the mechanism, the scope it covers, and how to
-switch it off.
+`docs/task-division.md` records what was verified and how, and states the limits
+plainly — including the one case where the refusal is accepted but cannot act.
+`docs/ooda-log.md` is the working log: twenty cycles, each naming where reality
+diverged from the previous cycle's assumption, including a conclusion that was
+wrong and is corrected in place rather than deleted.

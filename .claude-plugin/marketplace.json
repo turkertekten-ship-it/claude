@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "turkertekten-tools",
+  "owner": {
+    "name": "Turker Tekten"
+  },
+  "description": "Session tooling for the sessions working on these repositories.",
+  "plugins": [
+    {
+      "name": "task-division",
+      "source": "./plugins/task-division",
+      "description": "Divide every prompt into tasks, and enforce that it happened.",
+      "category": "workflow",
+      "keywords": [
+        "tasks",
+        "planning",
+        "hooks"
+      ]
+    }
+  ]
+}

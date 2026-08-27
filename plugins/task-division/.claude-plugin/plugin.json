@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin.json",
+  "name": "task-division",
+  "displayName": "Task Division",
+  "description": "Divides every prompt into a numbered task list with checkable done-conditions, and refuses to finish a reply that skipped it.",
+  "version": "2.0.0",
+  "author": {
+    "name": "Turker Tekten"
+  },
+  "repository": "https://github.com/turkertekten-ship-it/claude",
+  "license": "MIT",
+  "keywords": [
+    "tasks",
+    "planning",
+    "hooks",
+    "workflow",
+    "decomposition"
+  ]
+}

@@ -1,12 +1,11 @@
 {
-  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "hooks": {
     "UserPromptSubmit": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/task_division.py\" hook",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/task_division.py\" hook",
             "timeout": 15
           }
         ]
@@ -17,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/task_division.py\" hook",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/task_division.py\" hook",
             "timeout": 15
           }
         ]
@@ -28,7 +27,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/task_division.py\" hook",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/task_division.py\" hook",
             "timeout": 15
           }
         ]
@@ -39,7 +38,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/task_division.py\" hook",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/task_division.py\" hook",
             "timeout": 15
           }
         ]
@@ -50,7 +49,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/task_division.py\" hook",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/task_division.py\" hook",
             "timeout": 15
           }
         ]
@@ -61,7 +60,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/task_division.py\" hook",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/task_division.py\" hook",
             "timeout": 15
           }
         ]
@@ -72,7 +71,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/task_division.py\" hook",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/task_division.py\" hook",
             "timeout": 15
           }
         ]
@@ -83,19 +82,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/task_division.py\" hook",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/task_division.py\" hook",
             "timeout": 15
           }
         ]
       }
     ]
-  },
-  "extraKnownMarketplaces": {
-    "turkertekten-tools": {
-      "source": {
-        "source": "github",
-        "repo": "turkertekten-ship-it/claude"
-      }
-    }
   }
 }
