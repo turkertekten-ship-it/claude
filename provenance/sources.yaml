@@ -295,3 +295,20 @@ sources:
       decided pairs against roughly 47 needed for 80% power at a 70/30 effect.
       Mean output length 872 / 520 / 590 characters, so the directional winner
       is also the longest and a length confound cannot be excluded.
+
+  - id: MODEL-ID-CANONICAL-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:40Z"
+    method: "the bundled claude-api skill's current-models table, read in this session"
+    evidence: >-
+      "Use only the exact model ID strings from the table -- they are complete
+      as-is; never append date suffixes". The table lists claude-haiku-4-5,
+      claude-sonnet-5, claude-opus-5, claude-fable-5.
+    note: >-
+      The recorded blind run used `claude-haiku-4-5-20251001`, the dated alias,
+      which the CLI resolved to canonicalModel `claude-haiku-4-5` in its own
+      usage output -- so the evidence describes the same model. The suite now
+      carries the canonical id. The run was NOT repeated to match: the cache key
+      includes the model string, so re-running would have cost the full $0.95
+      again to produce a result about the same model. That is a deliberate
+      choice, recorded rather than hidden.

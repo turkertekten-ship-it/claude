@@ -22,7 +22,7 @@ One YAML file holds the variants, the cases and the graders.
 name: doctrine-adherence
 
 defaults:
-  model: claude-haiku-4-5-20251001
+  model: claude-haiku-4-5
   effort: medium
   mode: text
 

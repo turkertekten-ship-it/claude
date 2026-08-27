@@ -12,7 +12,7 @@ Shape::
     description: Does the operator prompt actually stop unsourced claims?
 
     defaults:
-      model: claude-haiku-4-5-20251001
+      model: claude-haiku-4-5
       effort: medium
       mode: text
 
