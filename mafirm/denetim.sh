@@ -21,6 +21,7 @@ kontrol "boş koltuklar işaretli" "grep -l 'KOLTUK BOŞ' ~/mafirm/birimler/_kol
 
 echo "=== kod sınamaları ==="
 kontrol "rekabet eşiği" "python3 ~/mafirm/birimler/rekabet/kod/esik.py --self-test"
+kontrol "eşik özellik sınaması" "python3 ~/mafirm/birimler/rekabet/kod/esik-ozellik.py"
 kontrol "beş kapı"      "python3 ~/mafirm/.claude/hooks/kapi.py --self-test"
 kontrol "araç katmanı"  "python3 ~/mafirm/birimler/_araclar/kod/dogrula.py | tail -1"
 kontrol "iç yönlendirme" "python3 ~/mafirm/birimler/_araclar/kod/yonlendirme.py"
