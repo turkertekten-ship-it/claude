@@ -480,3 +480,51 @@ sources:
       actually established is only that he keeps a detailed tracker of it
       [src:DRIVE-WORKFILES-2026-08-27]. His role, if any, is not visible in
       any indexed public source.
+
+  - id: SPK-DATA-RESIDENCY-VII-128-10
+    kind: tool_output
+    collected_at: "2026-08-27T19:55Z"
+    method: 'WebSearch(query="SPK VII-128.10 bilgi sistemleri yönetimi tebliği birincil ikincil sistemler Türkiye''de bulunma zorunluluğu")'
+    evidence: provenance/raw/subject-research-2026-08-27.md
+    note: >-
+      Tebliğ VII-128.10 requires that a capital-markets institution keep BOTH
+      its primary and its secondary information systems inside Turkey, with the
+      secondary site chosen so it does not share the primary's natural and
+      environmental risks. Re-run first-hand after a delegated agent reported
+      it, because it is the single finding that reverses build-versus-buy for
+      this firm. Still a search summary over secondary legal commentary and a
+      third-party PDF of the tebliğ; the SPK's own published text was not
+      opened. The applicability of the residency clause to a portföy yönetim
+      şirketi specifically, and any exception regime, are NOT established —
+      see U-10.
+
+  - id: SPK-FUND-TMS29-EXEMPTION
+    kind: tool_output
+    collected_at: "2026-08-27T19:55Z"
+    method: 'WebSearch(query="SPK yatırım fonları enflasyon muhasebesi TMS 29 uygulanmayacak karar 11/255 istisna")'
+    evidence: provenance/raw/subject-research-2026-08-27.md
+    note: >-
+      SPK decision 16.02.2024 no. 11/255: investment funds do NOT apply
+      inflation accounting in TMS/TFRS financial statements, added to the
+      Yatırım Fonlarına İlişkin Rehber as principle 13 under Sorumlu Yönetim
+      İlkeleri; other SPK-regulated entities applied TMS 29 from the period
+      ending 31.12.2023. Re-run first-hand after a delegated agent reported it.
+      Whether the exemption still stands for 2026 was NOT established — the
+      2024 decision is what is sourced. See U-11.
+
+  - id: DELEGATED-RECON-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T19:50Z"
+    method: "Workflow(tekten-ooda-system) — 13 agents, 6 completed, 7 failed on a session limit; four research lanes returned 18/18/18/17 findings with structured data"
+    evidence: >-
+      Reports written verbatim to docs/research/03-turkish-regulatory-surface.md,
+      04-peer-landscape.md, 05-global-implementation-record.md and
+      06-cfo-office-stack.md, each carrying the agent's own confidence grades.
+      The cfo_stack lane reported its collection had FAILED — search budget
+      exhausted and egress blocked — and instead reported first-hand testing of
+      this repository's own code.
+    note: >-
+      SECOND-HAND throughout. Two load-bearing claims were re-run first-hand
+      and are cited to SPK-DATA-RESIDENCY-VII-128-10 and
+      SPK-FUND-TMS29-EXEMPTION instead. Everything else in those four documents
+      remains a delegated report and is not promoted to established fact.

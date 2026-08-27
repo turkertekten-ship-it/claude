@@ -196,3 +196,37 @@ Fund and company codes appearing in independent result URLs:
 | VBI | wam-...-birinci-proje-gayrimenkul-yatirim-fonu | foreks.com |
 | VIK | wam-...-ikinci-gayrimenkul-yatirim-fonu | kap.org.tr, fonbul.halkyatirim.com.tr |
 | WQQ | KAP "Finansal Rapor" and "İhraç Belgesi" filings | bigpara.hurriyet.com.tr |
+
+## WebSearch — SPK VII-128.10 data residency — 2026-08-27T19:5xZ
+
+Query: `SPK VII-128.10 bilgi sistemleri yönetimi tebliği birincil ikincil sistemler Türkiye'de bulunma zorunluluğu`
+
+> Kurum, Kuruluş ve Ortaklıkların birincil ve ikincil sistemlerini yurt içinde
+> bulundurmaları zorunludur.
+> Ek olarak, ikincil sistemin yeri, doğal ve çevresel felaketlere karşı birincil
+> sistemle aynı risklere maruz kalmayacak şekilde seçilir.
+> İkincil sistemde, Kurum, Kuruluş ve Ortaklıkların kritik veri ve sistem
+> yedekleri kullanıma hazır bulundurulur.
+
+Tebliğ VII-128.10, "Bilgi Sistemleri Yönetimine İlişkin Usul ve Esaslar
+Tebliği", reported as published in Resmî Gazete 13.03.2025 no. 32840, superseding
+VII-128.9. Result URLs: spl.com.tr PDF of the tebliğ, alomaliye.com,
+lexpera.com.tr consolidated text, srp-legal.com, spk.gov.tr (VII-128.9 PDF).
+
+## WebSearch — TMS 29 fund exemption — 2026-08-27T19:5xZ
+
+Query: `SPK yatırım fonları enflasyon muhasebesi TMS 29 uygulanmayacak karar 11/255 istisna`
+
+> The Capital Markets Board (SPK) decision dated 16.02.2024 with number 11/255
+> determined that investment funds will not apply inflation accounting in their
+> financial statements prepared in accordance with TMS/TFRS, taking into account
+> the provisions of the General Communiqué No. 165 of the Tax Procedure Law
+> dated 20.02.2024.
+> This decision was added to the Investment Funds Guide as principle 13 on
+> Responsible Management Principles.
+> This represents an important exception for investment funds from the general
+> requirement that other SPK-regulated entities implement TMS 29 ... starting
+> from financial reports ending on December 31, 2023.
+
+Result URLs: erdem-erdem.av.tr, nazaligundem.com, vizyongrubu.com,
+spk.gov.tr/data/65b2beba8f95db1f44c2b15a/2024-6.pdf, prmfinans.com.

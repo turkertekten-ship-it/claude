@@ -178,3 +178,50 @@ what he already has, or what he has already tried and abandoned.
 whose answers would change the build.
 
 **Do not:** treat the adoption sequence as agreed. It is a proposal.
+
+---
+
+### U-10 — Whether the VII-128.10 residency rule binds a portföy yönetim şirketi, and how
+
+**Unknown:** whether the requirement that primary and secondary information
+systems sit inside Turkey applies to a PYŞ of WAM's size, what counts as an
+"information system" for the purpose, whether a cloud region inside Turkey
+satisfies it, and whether any exception or transition regime exists.
+
+**Why:** the tebliğ text is established here only through legal commentary and a
+third-party PDF; the SPK's own published text was not opened.
+[src:SPK-DATA-RESIDENCY-VII-128-10]
+
+**Why it matters here:** this is the single finding that reverses build-versus-buy.
+The strongest general evidence available says vendor tools succeed about twice as
+often as internal builds [src:MIT-PILOT-FAILURE-2026]. If the residency rule binds,
+the major Western fund-ops vendors cannot be the system of record and the general
+finding does not transfer. If it does not bind, or binds more narrowly than read
+here, the honest recommendation changes and part of this design should be replaced
+by a purchase.
+
+**Resolves when:** counsel or the compliance officer reads VII-128.10 and states
+which of the firm's systems are in scope.
+
+---
+
+### U-11 — Whether the fund TMS 29 exemption still holds for 2026
+
+**Unknown:** whether SPK decision 16.02.2024 no. 11/255, exempting investment
+funds from inflation accounting, is still in force for the 2026 reporting
+period.
+
+**Why:** the 2024 decision is what is sourced. No later decision reversing or
+extending it was found, and absence of a search result is not evidence of
+absence. [src:SPK-FUND-TMS29-EXEMPTION]
+
+**Why it matters here:** the design's central correctness invariant is that fund
+figures are nominal and management-company figures are TMS 29 restated, so the
+two may never be added together without a flag. If the exemption lapsed, that
+invariant inverts and every consolidated view built on it is wrong.
+
+**Resolves when:** the current Yatırım Fonlarına İlişkin Rehber is read directly,
+or the auditor confirms the 2026 treatment.
+
+**Built accordingly:** the restatement basis is an explicit per-entity field with
+no default, so a lapse is a configuration change rather than a rewrite.
