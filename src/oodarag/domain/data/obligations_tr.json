@@ -1,0 +1,310 @@
+{
+  "_meta": {
+    "source": "DELEGATED-RECON-2026-08-27",
+    "collected": "2026-08-27",
+    "status": "UNVERIFIED",
+    "warning": "Every entry here is SECOND-HAND: produced by a delegated research agent that could not open a primary source, and read through legal commentary rather than the tebligs themselves. Article numbers, day counts, and every 'is gunu' (business day) versus 'gun' (calendar day) distinction must be confirmed by counsel or the compliance officer before any of this drives an alert. The loader marks all of them verified=false for exactly this reason."
+  },
+  "obligations": [
+    {
+      "id": "pys-capital-adequacy-monthly",
+      "authority": "SPK",
+      "title_tr": "Sermaye yeterliligi tablolari ve yonetilen portfoy buyuklugu bildirimi",
+      "title_en": "Capital adequacy tables and managed-portfolio size report",
+      "cadence": "monthly",
+      "due_rule": "within 5 business days of month end, by SPK-approved channel",
+      "evidence_url": "https://www.resmigazete.gov.tr/eskiler/2013/07/20130702-12.htm",
+      "severity": "high"
+    },
+    {
+      "id": "pys-min-equity-test",
+      "authority": "SPK",
+      "title_tr": "Yonetilen portfoy buyuklugune gore asgari ozsermaye yukumlulugu",
+      "title_en": "Minimum equity requirement scaled to AUM (TRY 2m / 3m / 5m / 10m tiers)",
+      "cadence": "monthly",
+      "due_rule": "continuously satisfied; tested at each monthly capital adequacy filing",
+      "evidence_url": "https://www.resmigazete.gov.tr/eskiler/2013/07/20130702-12.htm",
+      "severity": "high"
+    },
+    {
+      "id": "pys-condition-loss-notice",
+      "authority": "SPK",
+      "title_tr": "Aranan sartlarin kaybedilmesi halinde Kurula bildirim",
+      "title_en": "Notify SPK if any licensing/eligibility condition ceases to be met",
+      "cadence": "event_driven",
+      "due_rule": "within 3 business days of the condition being lost",
+      "evidence_url": "https://www.resmigazete.gov.tr/eskiler/2013/07/20130702-12.htm",
+      "severity": "high"
+    },
+    {
+      "id": "pys-fund-manager-vacancy",
+      "authority": "SPK",
+      "title_tr": "Fon mudurunun ayrilmasi halinde yeni fon muduru atanmasi ve bildirimi",
+      "title_en": "Appoint replacement fund manager and notify SPK on vacancy",
+      "cadence": "event_driven",
+      "due_rule": "within 6 business days of the vacancy",
+      "evidence_url": "https://www.resmigazete.gov.tr/eskiler/2013/07/20130702-12.htm",
+      "severity": "high"
+    },
+    {
+      "id": "pys-mgmt-contract-filing",
+      "authority": "SPK",
+      "title_tr": "Portfoy yonetim sozlesmesi orneginin Kurula gonderilmesi",
+      "title_en": "File executed portfolio management contract with SPK",
+      "cadence": "event_driven",
+      "due_rule": "within 6 business days of signature",
+      "evidence_url": "https://www.resmigazete.gov.tr/eskiler/2013/07/20130702-12.htm",
+      "severity": "medium"
+    },
+    {
+      "id": "pys-interim-financials",
+      "authority": "SPK / KAP",
+      "title_tr": "Sirketin 3-6-9 aylik ara donem finansal tablo ve faaliyet raporlari",
+      "title_en": "Management company 3/6/9-month interim financial statements and activity report",
+      "cadence": "quarterly",
+      "due_rule": "per II-14.1 deadlines; disclosed via KAP, +15 days where the interim period is independently audited",
+      "evidence_url": "https://spk.gov.tr/kurumlar/portfoy-yonetim-sirketleri/tanitim-rehberi",
+      "severity": "medium"
+    },
+    {
+      "id": "pys-annual-audited-financials",
+      "authority": "SPK / KAP",
+      "title_tr": "Sirketin yillik bagimsiz denetimden gecmis finansal tablolari",
+      "title_en": "Management company annual audited financial statements",
+      "cadence": "annual",
+      "due_rule": "within SPK II-14.1 deadlines after 31 December year end; disclosed via KAP",
+      "evidence_url": "https://spk.gov.tr/kurumlar/portfoy-yonetim-sirketleri/tanitim-rehberi",
+      "severity": "high"
+    },
+    {
+      "id": "pys-tms29-inflation-accounting",
+      "authority": "SPK / KGK",
+      "title_tr": "Sirket finansal tablolarinda TMS 29 enflasyon muhasebesi uygulamasi",
+      "title_en": "Apply TMS 29 hyperinflation restatement to the management company's own TFRS financial statements",
+      "cadence": "annual",
+      "due_rule": "at each reporting date while Turkiye meets TMS 29 hyperinflation criteria; funds are exempt, the PYS is not",
+      "evidence_url": "https://www.erdem-erdem.av.tr/bilgi-bankasi/spknin-ihraccilar-ve-sermaye-piyasasi-kurumlari-icin-verdigi-tms-29-ve-enflasyon-muhasebesi-uygulamasina-iliskin-karari",
+      "severity": "high"
+    },
+    {
+      "id": "pys-is-independent-audit",
+      "authority": "SPK",
+      "title_tr": "Bilgi sistemleri bagimsiz denetimi (III-62.2)",
+      "title_en": "Independent information systems audit",
+      "cadence": "event_driven",
+      "due_rule": "every 2 years if equity exceeds TRY 5m; every 3 years if equity is TRY 5m or less",
+      "evidence_url": "https://spk.gov.tr/data/636df0c51b41c61a944eb99a/III-62.pdf",
+      "severity": "medium"
+    },
+    {
+      "id": "pys-internal-control-risk-inspection",
+      "authority": "SPK",
+      "title_tr": "Ic kontrol, risk yonetim sistemi, teftis birimi ve fon hizmet birimi kurulmasi",
+      "title_en": "Internal control, risk management system, inspection unit and fund service unit",
+      "cadence": "annual",
+      "due_rule": "continuous; small PYS may outsource inspection, internal control, research, risk management and IT to authorised institutions with SPK permission",
+      "evidence_url": "https://www.prmfinans.com/iii-55-1-portfoy-yonetimi",
+      "severity": "high"
+    },
+    {
+      "id": "masak-suspicious-transaction-report",
+      "authority": "MASAK",
+      "title_tr": "Supheli islem bildirimi (SIB)",
+      "title_en": "Suspicious transaction report to MASAK",
+      "cadence": "event_driven",
+      "due_rule": "within 10 business days of the suspicion arising; immediately where delay is prejudicial",
+      "evidence_url": "https://masak.hmb.gov.tr/suc-gelirlerinin-aklanmasinin-ve-terorun-finansmaninin-onlenmesine-iliskin-yukumluluklere-uyum-programi-hakkinda-yonetmelik/",
+      "severity": "high"
+    },
+    {
+      "id": "masak-compliance-programme",
+      "authority": "MASAK",
+      "title_tr": "Uyum programi, uyum gorevlisi, risk yonetimi, egitim ve ic denetim",
+      "title_en": "AML compliance programme: compliance officer, risk policy, training and internal audit",
+      "cadence": "annual",
+      "due_rule": "programme maintained continuously; annual training and internal audit cycle",
+      "evidence_url": "https://masak.hmb.gov.tr/suc-gelirlerinin-aklanmasinin-ve-terorun-finansmaninin-onlenmesine-iliskin-yukumluluklere-uyum-programi-hakkinda-yonetmelik/",
+      "severity": "high"
+    },
+    {
+      "id": "qualified-investor-status-test",
+      "authority": "SPK",
+      "title_tr": "Nitelikli yatirimci / talebe dayali profesyonel musteri statu tespiti ve belgelendirilmesi",
+      "title_en": "Qualified investor / opt-up professional client eligibility test and evidencing",
+      "cadence": "event_driven",
+      "due_rule": "before each participation-unit sale; since i-SPK.37.7 (18/12/2025, 65/2354) opt-up thresholds are TRY 10m financial assets and TRY 5m trading volume; pre-existing statuses grandfathered",
+      "evidence_url": "https://spk.gov.tr/data/694586788f95db1cf852440a/2025-64.pdf",
+      "severity": "high"
+    },
+    {
+      "id": "fund-spk-fee-quarterly",
+      "authority": "SPK",
+      "title_tr": "Kurul ucreti: fon toplam degerinin yuz binde besi",
+      "title_en": "SPK fee of 0.005% of fund total value",
+      "cadence": "quarterly",
+      "due_rule": "computed by the founder on the last business day of each calendar quarter, approved by the portfolio custodian, paid to the SPK account within the following 10 business days",
+      "evidence_url": "https://spk.gov.tr/data/61e4a3a01b41c60d1404d7d2/Yat%C4%B1r%C4%B1m%20Fonlar%C4%B1na%20%C4%B0li%C5%9Fkin%20Rehber.pdf",
+      "severity": "high"
+    },
+    {
+      "id": "fund-annual-financial-report",
+      "authority": "SPK / KAP",
+      "title_tr": "Fon yillik finansal raporu ve bagimsiz denetim raporu",
+      "title_en": "Fund annual financial report with independent audit report",
+      "cadence": "annual",
+      "due_rule": "filed with SPK within 60 days of accounting period end; publicly disclosed with the audit report within 90 days (GYF/GSYF, per II-14.2.c of 24/01/2025)",
+      "evidence_url": "https://www.alomaliye.com/2025/01/24/yatirim-fonlarinin-finansal-raporlama-esaslarina-iliskin-teblig-ii-14-2-c/",
+      "severity": "high"
+    },
+    {
+      "id": "fund-interim-financial-report",
+      "authority": "SPK / KAP",
+      "title_tr": "Fon alti aylik ara donem finansal raporu",
+      "title_en": "Fund six-month interim financial report",
+      "cadence": "annual",
+      "due_rule": "six-month interim (30 June for calendar-year funds): filed with SPK within 30 days of period end; publicly disclosed within 45 days together with the limited review report where review applies",
+      "evidence_url": "https://www.alomaliye.com/2025/01/24/yatirim-fonlarinin-finansal-raporlama-esaslarina-iliskin-teblig-ii-14-2-c/",
+      "severity": "high"
+    },
+    {
+      "id": "fund-kap-disclosure-window",
+      "authority": "KAP",
+      "title_tr": "Finansal raporlarin KAP'ta aciklanmasi",
+      "title_en": "Publish fund financial reports on KAP",
+      "cadence": "event_driven",
+      "due_rule": "by close of business on the 6th business day following the date the founder's board resolves to publicly disclose the reports",
+      "evidence_url": "https://www.alomaliye.com/2025/01/24/yatirim-fonlarinin-finansal-raporlama-esaslarina-iliskin-teblig-ii-14-2-c/",
+      "severity": "high"
+    },
+    {
+      "id": "gyf-year-end-appraisal",
+      "authority": "SPK",
+      "title_tr": "GYF yil sonu gayrimenkul degerleme raporlari",
+      "title_en": "GYF year-end real estate appraisals",
+      "cadence": "annual",
+      "due_rule": "appraisal work completed by 31 December for any asset not appraised in the last 3 months of the accounting period; at most 5 business days between fieldwork end and report date; report delivered to the founder within 2 business days of the report date",
+      "evidence_url": "https://www.mevzuat.gov.tr/mevzuat?MevzuatNo=19227&MevzuatTur=9&MevzuatTertip=5",
+      "severity": "high"
+    },
+    {
+      "id": "gyf-pre-transaction-appraisal",
+      "authority": "SPK",
+      "title_tr": "GYF alim, satim ve kiralama oncesi rayic deger tespiti",
+      "title_en": "GYF appraisal before any purchase, sale or lease",
+      "cadence": "event_driven",
+      "due_rule": "appraisal by an SPK-listed real estate appraisal firm must precede every portfolio purchase, sale and lease; transaction prices must reference the appraised value",
+      "evidence_url": "https://www.mevzuat.gov.tr/mevzuat?MevzuatNo=19227&MevzuatTur=9&MevzuatTertip=5",
+      "severity": "high"
+    },
+    {
+      "id": "gsyf-venture-valuation",
+      "authority": "SPK",
+      "title_tr": "GSYF girisim sermayesi yatirimlarinin degerlemesi",
+      "title_en": "GSYF valuation of venture capital investments",
+      "cadence": "annual",
+      "due_rule": "valuation at each calendar year end; SPK-approved valuation firm report required every accounting period where the investment exceeds TRY 50m, every 2nd period for TRY 25-50m, every 3rd period below TRY 25m; a firm report dated within 3 months before period end may be used as the year-end value on an investment committee resolution",
+      "evidence_url": "https://www.alomaliye.com/2024/09/21/girisim-sermayesi-yatirim-fonlarina-iliskin-esaslar-tebligi-iii-52-4-c/",
+      "severity": "high"
+    },
+    {
+      "id": "fund-unit-value-announcement",
+      "authority": "SPK",
+      "title_tr": "Fon birim pay degerinin hesaplanmasi ve nitelikli yatirimcilara bildirilmesi",
+      "title_en": "Calculate fund unit value and notify qualified investors",
+      "cadence": "annual",
+      "due_rule": "at least once per accounting period; announcing a price more than once in an accounting period triggers limited independent review of the six-month interim financial statements",
+      "evidence_url": "https://spk.gov.tr/kurumlar/fonlar/yatirim-fonlari/girisim-sermayesi-yatirim-fonlari/tanitim-rehberi",
+      "severity": "high"
+    },
+    {
+      "id": "listed-fund-unit-nav-valuation",
+      "authority": "SPK",
+      "title_tr": "Borsada islem goren GYF/GSYF katilma paylarinin kurucunun son acikladigi birim pay degeri ile degerlenmesi",
+      "title_en": "Value exchange-traded GYF/GSYF units at the founder's last announced unit value",
+      "cadence": "daily",
+      "due_rule": "mandatory from 31 July 2026 under SPK decision 23/07/2026 no. 45/1359: use the founder's last announced unit value, not the exchange price, at every valuation of a fund portfolio holding such units",
+      "evidence_url": "https://www.aa.com.tr/tr/ekonomi/spkden-gayrimenkul-ve-girisim-sermayesi-yatirim-fonlarinda-saglikli-fiyatlama-adimi/4008891",
+      "severity": "high"
+    },
+    {
+      "id": "fund-portfolio-limit-check",
+      "authority": "SPK",
+      "title_tr": "Portfoy sinirlamalarina uyumun portfoy saklayicisi tarafindan kontrolu",
+      "title_en": "Portfolio custodian check of portfolio limit compliance",
+      "cadence": "annual",
+      "due_rule": "checked against the fund total value table at accounting period end; on breach, SPK may grant up to 1 year from that period end to restore limits",
+      "evidence_url": "https://www.alomaliye.com/2024/09/21/girisim-sermayesi-yatirim-fonlarina-iliskin-esaslar-tebligi-iii-52-4-c/",
+      "severity": "high"
+    },
+    {
+      "id": "fund-minimum-size-milestone",
+      "authority": "SPK",
+      "title_tr": "Katilma payi satisindan itibaren 1 yil icinde asgari fon portfoy degerine ulasilmasi",
+      "title_en": "Reach minimum fund portfolio value within one year of first unit sale",
+      "cadence": "event_driven",
+      "due_rule": "fund portfolio value must reach at least TRY 10,000,000 within one year of the start of participation-unit sales to qualified investors, invested within the teblig portfolio limits",
+      "evidence_url": "https://mevzuat.gov.tr/File/GeneratePdf?mevzuatNo=19220&mevzuatTur=Teblig&mevzuatTertip=5",
+      "severity": "high"
+    },
+    {
+      "id": "fund-document-change-notice",
+      "authority": "SPK / KAP",
+      "title_tr": "Ictuzuk / ihrac belgesi degisikliginin onceden bildirimi",
+      "title_en": "Advance notice of fund rulebook or issuance document changes",
+      "cadence": "event_driven",
+      "due_rule": "SPK approval first; changes capable of affecting investment decisions notified to unit holders at least 30 days before effect and announced on KAP; effect deferred to the first redemption date if a holder wishes to exit",
+      "evidence_url": "https://www.alomaliye.com/2024/07/17/gayrimenkul-yatirim-fonlarina-iliskin-esaslar-teblig-iii-52-3-f/",
+      "severity": "medium"
+    },
+    {
+      "id": "gyf-50pct-profit-distribution",
+      "authority": "GIB",
+      "title_tr": "GYF tasinmaz kazanclarinin en az %50'sinin kar payi olarak dagitilmasi",
+      "title_en": "Distribute at least 50% of GYF immovable-derived income as dividend",
+      "cadence": "annual",
+      "due_rule": "by the end of the second month following the month in which the corporate tax return is due, i.e. 30 June for calendar-year funds; failure retroactively voids the KVK 5/1-d exemption for that year",
+      "evidence_url": "https://www.resmigazete.gov.tr/eskiler/2026/05/20260524-3.htm",
+      "severity": "high"
+    },
+    {
+      "id": "fund-corporate-tax-return",
+      "authority": "GIB",
+      "title_tr": "Fon kurumlar vergisi beyannamesi",
+      "title_en": "Fund corporate tax return",
+      "cadence": "annual",
+      "due_rule": "filed by 30 April for calendar-year taxpayers, even though portfolio management income is exempt under KVK 5/1-d",
+      "evidence_url": "https://www.gib.gov.tr/duyuru-arsivi/guncel/17489_kurumlar_vergisi_beyan_rehberi_yayimlandi",
+      "severity": "high"
+    },
+    {
+      "id": "corporate-advance-tax",
+      "authority": "GIB",
+      "title_tr": "Gecici vergi beyannamesi",
+      "title_en": "Advance corporate tax return",
+      "cadence": "quarterly",
+      "due_rule": "by the 17th of the second month following each quarter (17 Feb / 17 May / 17 Aug / 17 Nov, shifted for weekends)",
+      "evidence_url": "https://www.gib.gov.tr/duyuru-arsivi/guncel/17489_kurumlar_vergisi_beyan_rehberi_yayimlandi",
+      "severity": "high"
+    },
+    {
+      "id": "ymm-exemption-certification-report",
+      "authority": "GIB",
+      "title_tr": "KVK 5/1 istisnalari icin YMM tasdik raporu",
+      "title_en": "YMM certification report for corporate tax exemptions",
+      "cadence": "annual",
+      "due_rule": "required from the 2025 accounting year where exemptions/deductions exceed TRY 1,000,000 thresholds, per YMM Genel Tebligi Seri No 49 of 30/12/2025",
+      "evidence_url": "https://vergimerkezi.com.tr/ymm-calisma-zorunlulugu-istisna-indirim-2026/",
+      "severity": "medium"
+    },
+    {
+      "id": "withholding-regime-monitoring",
+      "authority": "GIB",
+      "title_tr": "Katilma payi stopaj rejiminin izlenmesi (2 yil elde tutma)",
+      "title_en": "Monitor participation-unit withholding regime and the 2-year holding test",
+      "cadence": "event_driven",
+      "due_rule": "0% withholding on GSYF/GYF units held more than 2 years; 17.5% otherwise, per Presidential Decree 11107 of 26/03/2026 (RG 27/03/2026 no. 33206)",
+      "evidence_url": "https://www.isportfoy.com.tr/medya-ve-blog/yatirim-fonlarina-uygulanan-stopaj-duzenlemesi-hakkinda-mart-2026",
+      "severity": "high"
+    }
+  ]
+}
