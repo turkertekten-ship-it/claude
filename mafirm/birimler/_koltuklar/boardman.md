@@ -11,7 +11,7 @@ Takeover Code disiplini; duyuru rejimi ve zamanlama katılığı.
 - Bu bilgi kime, ne zaman açıklanmak zorunda?
 - Kim "birlikte hareket eden kişi" sayılır ve bunun sonucu ne?
 - Takvim kaydırılabilir mi, yoksa rejim mi belirliyor?
-- Sızıntı olursa hangi zorunluluk anda doğar?
+- Sızıntı olursa hangi zorunluluk anında doğar?
 
 ## Bu koltuğun bilmediği
 Türk hukuku. **Özellikle dikkat:** Takeover Code Türkiye'de uygulanmaz. Türk
