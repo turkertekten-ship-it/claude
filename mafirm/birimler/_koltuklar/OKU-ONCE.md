@@ -31,7 +31,7 @@ kurulumda birincil metinlerden **yeniden teyit edilememiştir** (ağ çıkışı
 kısıtlı). Bir koltuğa ağır bir kararda dayanılacaksa, dayanak metin okunmalıdır.
 
 Kontrol edildi: kurulum kitabı §7 (2026-08-27) · bulunamayan: koltuk
-durunuşlarının birincil kaynakları.
+duruşlarının birincil kaynakları.
 
 ## İki koltuk bilerek boş
 
