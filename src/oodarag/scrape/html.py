@@ -69,7 +69,12 @@ class ExtractedPage:
     title: str
     text: str
     markdown: str
+    #: Every link in the document, including the navigation that was stripped
+    #: from the text. This is the crawl frontier: a site's nav is how you find
+    #: its pages, so discarding it for *text* must not discard it for *discovery*.
     links: list[Link] = field(default_factory=list)
+    #: Links inside the extracted main content only. Used for link density.
+    content_links: list[Link] = field(default_factory=list)
     headings: list[tuple[int, str]] = field(default_factory=list)
     meta: dict[str, Any] = field(default_factory=dict)
     lang: str = ""
@@ -83,11 +88,14 @@ class ExtractedPage:
 
     @property
     def link_density(self) -> float:
-        """Fraction of the extracted text that sits inside links. A high value on
-        the *final* extraction means boilerplate removal failed."""
+        """Fraction of the extracted body text that sits inside links.
+
+        Measured over content links only. Counting navigation links here would
+        make every page look like boilerplate and the signal would be useless.
+        """
         if not self.text:
             return 0.0
-        link_chars = sum(len(link.text) for link in self.links)
+        link_chars = sum(len(link.text) for link in self.content_links)
         return min(1.0, link_chars / max(1, len(self.text)))
 
     def outgoing(self, *, follow_only: bool = True) -> list[str]:
@@ -449,12 +457,22 @@ def _collect_meta(root: Node, raw_scripts: list[tuple[dict[str, str], str]],
 
 
 def extract(html: str, url: str = "", *, aggressive: bool = True,
-            min_words: int = 25) -> ExtractedPage:
+            min_words: int = 25, max_fallback_link_density: float = 0.35) -> ExtractedPage:
     """Extract clean markdown, links and metadata from an HTML document.
 
-    If aggressive boilerplate removal leaves too little text (a page that *is*
-    a nav list, or one whose article is wrapped in a `class="sidebar"` div),
-    we retry conservatively rather than return an empty page.
+    If aggressive boilerplate removal leaves too little text - a page whose
+    article is wrapped in a `class="sidebar"` div, say - we retry conservatively
+    rather than return an empty page.
+
+    That retry needs a guard. A genuinely near-empty page ("Redirecting...", a
+    stub, a 404 body) *also* trips the retry, and the conservative pass then
+    happily returns the navigation bar, the cookie banner and the footer as if
+    they were the article. The page now looks substantial, sails past every
+    downstream length filter, and poisons the index with chrome that is
+    identical on every page of the site.
+
+    So the fallback is only accepted if it is both longer *and* not mostly
+    links. Boilerplate is overwhelmingly link text; real prose is not.
     """
     parser = _TreeBuilder()
     try:
@@ -472,16 +490,18 @@ def extract(html: str, url: str = "", *, aggressive: bool = True,
         tree = copy.deepcopy(root)
         _prune(tree, aggr)
         main = _find_main(tree)
-        links: list[Link] = []
+        content_links: list[Link] = []
         headings: list[tuple[int, str]] = []
-        markdown = _render(main, url or canonical, links, headings)
+        markdown = _render(main, url or canonical, content_links, headings)
         markdown = _tidy(markdown)
         text = clean(re.sub(r"^#{1,6}\s+", "", markdown, flags=re.MULTILINE))
-        # Links from the whole document, not just the main region: a crawler
-        # needs the nav it just discarded in order to find the next page.
+        # Walk the ORIGINAL tree, not the pruned one: the nav and footer we just
+        # removed from the text are exactly where a site publishes its page
+        # inventory. Pruning them out of the frontier would strand the crawler
+        # on the seed page.
         all_links: list[Link] = []
         seen: set[str] = set()
-        for node in tree.iter_nodes():
+        for node in root.iter_nodes():
             if node.tag != "a":
                 continue
             href = node.attrs.get("href", "").strip()
@@ -498,13 +518,15 @@ def extract(html: str, url: str = "", *, aggressive: bool = True,
             all_links.append(Link(absolute, clean(_inline_text(node)), rel, "nofollow" in rel))
         return ExtractedPage(
             url=url, title=title, text=text, markdown=markdown, links=all_links,
-            headings=headings, meta=meta, lang=lang, canonical=canonical,
-            published=published, jsonld=jsonld,
+            content_links=content_links, headings=headings, meta=meta, lang=lang,
+            canonical=canonical, published=published, jsonld=jsonld,
         )
 
     page = build(aggressive)
     if aggressive and len(page.text.split()) < min_words:
         fallback = build(False)
-        if len(fallback.text.split()) > len(page.text.split()):
+        richer = len(fallback.text.split()) > len(page.text.split())
+        mostly_chrome = fallback.link_density > max_fallback_link_density
+        if richer and not mostly_chrome:
             return fallback
     return page

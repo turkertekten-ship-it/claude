@@ -1,0 +1,132 @@
+{
+  "started_at": 1787842988.772413,
+  "duration_s": 2.965,
+  "environment": {
+    "https_proxy": "http://127.0.0.1:37597",
+    "proxy_enabled": true,
+    "github_token": "present",
+    "anthropic_key": "absent",
+    "voyage_key": "absent",
+    "hostname": "vm",
+    "numpy": "absent (pure-python scoring)"
+  },
+  "summary": {
+    "ok": 5,
+    "degraded": 1,
+    "blocked": 4
+  },
+  "degradations": [
+    "Some web hosts are blocked (en.wikipedia.org, www.youtube.com, www.ibm.com, arxiv.org). Seed the crawler only with reachable hosts; a blocked seed is a silent empty crawl otherwise."
+  ],
+  "results": [
+    {
+      "name": "github_api",
+      "kind": "github",
+      "target": "api.github.com",
+      "status": "ok",
+      "latency_ms": 578.8155359998655,
+      "detail": "15000/15000 requests remaining",
+      "evidence": {
+        "token_present": true,
+        "limit": 15000,
+        "remaining": 15000
+      }
+    },
+    {
+      "name": "github_raw",
+      "kind": "github",
+      "target": "raw.githubusercontent.com",
+      "status": "ok",
+      "latency_ms": 429.928622000034,
+      "detail": "8912 bytes",
+      "evidence": {
+        "status": 200
+      }
+    },
+    {
+      "name": "pypi",
+      "kind": "packages",
+      "target": "pypi.org",
+      "status": "ok",
+      "latency_ms": 48.088753000001816,
+      "detail": "pip 26.2.1 visible",
+      "evidence": {}
+    },
+    {
+      "name": "filesystem_write",
+      "kind": "local",
+      "target": ".oodarag",
+      "status": "ok",
+      "latency_ms": 5.030289999922388,
+      "detail": "writable, 30625 MB free",
+      "evidence": {
+        "free_mb": 30625
+      }
+    },
+    {
+      "name": "github_repo_scope",
+      "kind": "github",
+      "target": "turkertekten-ship-it/claude,turkertekten-ship-it/claude-ai,python/cpython",
+      "status": "degraded",
+      "latency_ms": 2956.1387790001845,
+      "detail": "2 readable, 1 denied",
+      "evidence": {
+        "allowed": [
+          "turkertekten-ship-it/claude",
+          "turkertekten-ship-it/claude-ai"
+        ],
+        "denied": [
+          "python/cpython (blocked)"
+        ]
+      }
+    },
+    {
+      "name": "web_pypi",
+      "kind": "web",
+      "target": "pypi.org",
+      "status": "ok",
+      "latency_ms": 37.03565199998593,
+      "detail": "HTTP 200, 246270 bytes",
+      "evidence": {
+        "status": 200,
+        "content_type": "text/html"
+      }
+    },
+    {
+      "name": "web_wikipedia",
+      "kind": "web",
+      "target": "en.wikipedia.org",
+      "status": "blocked",
+      "latency_ms": 486.4723519999643,
+      "detail": "proxy refused CONNECT (403)",
+      "evidence": {}
+    },
+    {
+      "name": "web_youtube",
+      "kind": "web",
+      "target": "www.youtube.com",
+      "status": "blocked",
+      "latency_ms": 335.4855529998986,
+      "detail": "proxy refused CONNECT (403)",
+      "evidence": {}
+    },
+    {
+      "name": "web_ibm",
+      "kind": "web",
+      "target": "www.ibm.com",
+      "status": "blocked",
+      "latency_ms": 371.31352599999445,
+      "detail": "proxy refused CONNECT (403)",
+      "evidence": {}
+    },
+    {
+      "name": "web_arxiv",
+      "kind": "web",
+      "target": "arxiv.org",
+      "status": "blocked",
+      "latency_ms": 539.0938619998451,
+      "detail": "proxy refused CONNECT (403)",
+      "evidence": {}
+    }
+  ]
+}

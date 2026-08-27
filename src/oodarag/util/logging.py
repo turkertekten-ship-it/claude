@@ -26,7 +26,7 @@ class Logger:
             else os.environ.get("OODARAG_LOG_FORMAT", "").lower() == "json"
         )
 
-    def _emit(self, level: str, msg: str, **fields: Any) -> None:
+    def _emit(self, level: str, msg: str, /, **fields: Any) -> None:
         if _LEVELS[level] < self.level:
             return
         if self.json_mode:
@@ -38,16 +38,16 @@ class Logger:
             prefix = {"debug": "  ", "info": "  ", "warn": "! ", "error": "x "}[level]
             print(f"{prefix}[{self.name}] {msg}{' ' + extra if extra else ''}", file=sys.stderr, flush=True)
 
-    def debug(self, msg: str, **f: Any) -> None:
+    def debug(self, msg: str, /, **f: Any) -> None:
         self._emit("debug", msg, **f)
 
-    def info(self, msg: str, **f: Any) -> None:
+    def info(self, msg: str, /, **f: Any) -> None:
         self._emit("info", msg, **f)
 
-    def warn(self, msg: str, **f: Any) -> None:
+    def warn(self, msg: str, /, **f: Any) -> None:
         self._emit("warn", msg, **f)
 
-    def error(self, msg: str, **f: Any) -> None:
+    def error(self, msg: str, /, **f: Any) -> None:
         self._emit("error", msg, **f)
 
 

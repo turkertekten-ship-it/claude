@@ -246,19 +246,19 @@ class Crawler:
                 self._enqueue(frontier, page, depth)
                 continue
 
-            # A declared canonical URL is the site telling us two URLs are the
-            # same document. Version-pinned doc pages are the common case: they
-            # differ by a few words but are one page for retrieval purposes.
-            if self.config.dedupe_canonical and page.canonical:
-                canonical = normalize_url(page.canonical)
-                if canonical == final:
-                    self._seen_canonical.setdefault(canonical, final)
-                else:
-                    if (first := self._seen_canonical.get(canonical)) is not None:
-                        self.report.skipped["duplicate_canonical"] += 1
-                        log.debug("duplicate canonical", url=final, same_as=first)
-                        continue
-                    self._seen_canonical[canonical] = final
+            # Canonical identity. A declared <link rel="canonical"> is the site
+            # telling us two URLs are one document; a page that declares nothing
+            # is its own canonical. Both cases must register, because the
+            # duplicate can arrive in either order - and a page with no canonical
+            # tag that never registered itself could never be matched against by
+            # a later page pointing at it.
+            if self.config.dedupe_canonical:
+                identity = normalize_url(page.canonical) if page.canonical else final
+                owner = self._seen_canonical.setdefault(identity, final)
+                if owner != final:
+                    self.report.skipped["duplicate_canonical"] += 1
+                    log.debug("duplicate canonical", url=final, identity=identity, same_as=owner)
+                    continue
 
             digest = content_hash(page.text)
             if (first := self._seen_content.get(digest)) is not None:
