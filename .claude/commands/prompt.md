@@ -6,23 +6,34 @@ allowed-tools: Bash, Read, Write, Edit, Grep, Glob, Agent
 
 Forge this into a prompt that can be checked: **$ARGUMENTS**
 
+If `$ARGUMENTS` is empty, ask what to forge and stop. There is nothing here to
+work on, and an empty imperative is exactly the input this command teaches
+sessions to refuse.
+
+**If the argument is a path, never write to it.** Output the forged prompt and
+let the owner apply it. A committed system prompt rewritten in place by a
+command they ran to *inspect* it is the one outcome here that destroys
+something.
+
 Read `.claude/skills/prompt-forge/SKILL.md` first and work its four phases.
 
-1. **Observe.** Write the raw ask to a scratch file verbatim — do not tidy it
-   on the way in, since the untidiness is the data. Run
-   `python3 tools/prompt_forge.py lint --profile <task|build|research|system|chat> <file>`
+1. **Observe.** If `$ARGUMENTS` is a path, lint that file directly. Otherwise
+   write the ask verbatim to a scratch file outside the repository — do not
+   tidy it on the way in, since the untidiness is the data. Then
+   `python3 tools/prompt_forge.py lint --profile <task|build|research|system|chat|directive> <file>`
    and record which slots are absent and which hazards fired. No interpreting
    yet.
 2. **Orient.** Send the raw ask to the `prompt-critic` subagent and ask for the
    readings under which the resulting work would differ. Its report is
    second-hand — keep only the divergences you can point at in the text.
-3. **Decide.** For each gap take exactly one of three moves: get the evidence
-   (read the file, run the command), ask the user one question with the options
-   named, or write an escape clause into the prompt. Inventing a plausible
-   requirement is not one of the three.
+3. **Decide.** For each absent slot take exactly one of three moves: get the
+   evidence (read the file, run the command), ask the owner one question with
+   the options named, or write an escape clause into the prompt. Inventing a
+   plausible requirement is not one of the three. Hazard findings are not gaps
+   — rewrite the offending phrase.
 4. **Act.** `python3 tools/prompt_forge.py compile --profile <P> <file>`, fill
    the `<<MISSING:` markers with what you established, and re-lint until it
-   exits 0.
+   exits 0 — meaning no error and no warn findings. Info findings are advisory.
 
 Deliver, in this order: the forged prompt in a single fenced block ready to
 paste; the before and after scores; one line per gap saying how you closed it;

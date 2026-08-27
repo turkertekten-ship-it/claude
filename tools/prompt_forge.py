@@ -100,7 +100,7 @@ SLOTS: tuple[Slot, ...] = (
     ),
     Slot(
         "TASK", "TASK",
-        _c(r"(?:^|[.;:!?]\s*|,\s*|\band\s+|\bthen\s+|\balso\s+|\bplease\s+|\bto\s+|\bmust\s+|\bshould\s+|\bneed (?:you )?to\s+|\bwant (?:you )?to\s+|\bcan you\s+)\s*(?:\d+[.)]\s*|[-*]\s*)?(write|create|build|add|fix|refactor|implement|generate|draft|list|find|search|analy[sz]e|review|audit|summari[sz]e|explain|compare|design|plan|test|debug|convert|translate|extract|rewrite|update|remove|delete|install|configure|research|investigate|check|verify|compile|document|answer|classify|rank|score|evaluate|migrate|optimi[sz]e|port|deploy|produce|give|show|make|turn|map|trace|reproduce)\b", ),
+        _c(r"(?:^|[.;:!?][\s*_)\]]*|,\s*|\band\s+|\bthen\s+|\balso\s+|\bplease\s+|\bto\s+|\bmust\s+|\bshould\s+|\bneed (?:you )?to\s+|\bwant (?:you )?to\s+|\bcan you\s+)[\s*_#>]*(?:\d+[.)]\s*|[-]\s*)?[\s*_#>]*(write|create|build|add|fix|refactor|implement|generate|draft|list|find|search|analy[sz]e|review|audit|summari[sz]e|explain|compare|design|plan|test|debug|convert|translate|extract|rewrite|update|remove|delete|install|configure|research|investigate|check|verify|compile|document|answer|classify|rank|score|evaluate|migrate|optimi[sz]e|port|deploy|produce|give|show|make|turn|map|trace|reproduce)\b", ),
         "one imperative verb and the artifact it produces",
         "A topic is not a task. 'Docker' is a subject; 'write the Dockerfile' is an instruction.",
     ),
@@ -217,12 +217,22 @@ def _detect_false_premise(lines: list[str], text: str) -> list[tuple[int, str]]:
         r"the (bug|error|issue|crash|regression|failure)\b",
         re.I,
     )
-    anchor = re.compile(r"[/\\]|\.\w{1,5}\b|#\d+|\bline \d+|['\"`]|\bnamed\b|\bcalled\b|::")
+    # An anchor is a path, an extension, a number, a quoted name, or anything in
+    # backticks. Deliberately not a bare apostrophe: "while you're at it" is a
+    # contraction, not an identifier, and reading it as one silently retired
+    # this rule on the most common phrasing there is.
+    anchor = re.compile(
+        r"[/\\]|\.\w{1,5}\b|#\d+|\bline \d+|`[^`]+`|\"[^\"]+\"|'[\w./:-]{2,}'"
+        r"|\bnamed\b|\bcalled\b|::"
+    )
     out = []
     for i, raw in enumerate(lines, start=1):
-        bare = INLINE_CODE.sub("", raw)
-        m = noun.search(bare)
-        if m and not anchor.search(bare):
+        # The noun phrase is read with inline code stripped, so a quoted example
+        # is not an assertion - but the anchor is looked for in the whole line,
+        # because `tests/test_x.py` in backticks is exactly the identifier that
+        # makes the reference concrete.
+        m = noun.search(INLINE_CODE.sub("", raw))
+        if m and not anchor.search(raw):
             out.append((i, m.group(0)))
     return out
 
@@ -447,7 +457,11 @@ HAZARDS: tuple[Hazard, ...] = (
         "HEDGE", "the prompt hedges its own instruction", "warn", "precision",
         "A hedged instruction is optional, and optional instructions are the first to be dropped.",
         "Decide. If you genuinely do not know, ask for options instead of hedging the ask.",
-        pattern=re.compile(r"\b(maybe|perhaps|i think|i guess|sort of|kind of|probably|might want to|if possible|ideally)\b", re.I),
+        pattern=re.compile(
+            r"\b(maybe|perhaps|i think|i guess|probably|might want to|if possible|ideally)\b"
+            r"|(?<!\ba )(?<!\bthe )(?<!\bthis )(?<!\bthat )(?<!\bwhat )(?<!\bwhich )"
+            r"(?<!\bany )(?<!\bsame )(?<!\bonly )(?<!\bother )(?<!\bevery )\b(sort of|kind of)\b",
+            re.I),
     ),
     Hazard(
         "NO_EXAMPLE", "a shape is demanded but never shown", "info", "precision",
@@ -582,15 +596,25 @@ class Report:
         return out
 
 
+BLOCKQUOTE = re.compile(r"^\s*>")
+
+
 def strip_fences(text: str) -> str:
-    """Drop fenced blocks: an example of bad output is not an instruction."""
+    """Drop what the prompt is displaying rather than saying.
+
+    A fenced block is an example, and a markdown blockquote is a quotation - a
+    document that teaches prompting has to be able to show a bad prompt without
+    being graded as one. `verify_provenance.py` skips blockquotes for the same
+    reason. Line numbers are preserved so findings still point at the right
+    line.
+    """
     out, in_fence = [], False
     for line in text.splitlines():
         if FENCE.match(line):
             in_fence = not in_fence
             out.append("")
             continue
-        out.append("" if in_fence else line)
+        out.append("" if in_fence or BLOCKQUOTE.match(line) else line)
     return "\n".join(out)
 
 

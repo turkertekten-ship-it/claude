@@ -80,6 +80,49 @@ video that would close the rest".
 - Two of the repository's own command prompts were improved against the standard and re-measured with the same build: 78 to 90, and 82 to 100. [src:PROMPT-SCORES-2026-08-27]
 - The system installs into `~/.claude` for every terminal, and the installer refuses to install a build whose tests fail. [src:PROMPT-SCORES-2026-08-27]
 
+## Second loop — the critic pass
+
+The `prompt-critic` subagent was pointed at the three artifacts the owner would
+actually rely on. It is the fifth surprise, and the sharpest:
+
+**The skill's worked example quoted two scores nobody had measured.** It
+claimed 34/100 for the raw ask and 96/100 for the forged one. The tool prints
+38 and 100. Two invented numbers had been sitting inside the procedure that
+teaches the rule against inventing numbers — in a repository whose first line
+is that a claim is either sourced or not written down. They are now pinned to
+fixtures by a test, so the document cannot drift from the tool again.
+
+Chasing that number also found three real bugs in the linter, all of which had
+been silently retiring rules:
+
+- A contraction counted as an identifier. `while you're at it` anchored the
+  reference in `fix the failing test`, so `FALSE_PREMISE` did not fire on the
+  single most common phrasing of the thing it exists to catch.
+- The anchor was looked for in the inline-code-stripped line, which removes
+  exactly the path that would make a reference concrete.
+- A markdown label hid the imperative: `**Task.** Write the parser` reported
+  `NO_TASK`.
+
+And two rules were too coarse: a markdown blockquote is a quotation rather than
+an instruction, and "the only kind of" is a noun phrase rather than a hedge.
+
+The critic's other findings were about the documents, and the two worth naming
+are both failures of the same kind — an instruction with no branch for the case
+where nobody is there. The travelling preamble told a model to ask a question
+when a gap changes the output, with no branch for a scheduled run or a pipeline
+where there is nobody to answer; it resolved to *ask and stop*, which returns
+nothing. The document forbidding a model to return nothing had an unguarded
+path to returning nothing in its own escape clause. The skill had the same hole
+one layer down, in the procedure most likely to be run by a subagent with no
+user. Both now have the non-interactive branch: take the reading cheapest to
+correct, label it, deliver.
+
+> The surprise worth keeping: every one of these was in an artifact that had
+> already passed its own linter. A mechanical check catches the absence of a
+> slot. It cannot catch a slot filled with something that does not survive
+> being read adversarially, which is the whole reason the critic is a separate
+> agent rather than another rule.
+
 ## Still open
 
 `U-6`, `U-7` and `U-8` in [unknowns.md](unknowns.md): what Saraev actually

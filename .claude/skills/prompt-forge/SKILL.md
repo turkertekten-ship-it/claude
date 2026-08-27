@@ -52,7 +52,9 @@ it belongs there.
 
 Profiles: `task` (default) · `build` (an acceptance test is mandatory) ·
 `research` (bounds are mandatory) · `system` (a role is mandatory) · `chat`
-(lightest). `rules --profile P` prints the grading in force.
+(lightest) · `directive` (a standing instruction file an agent executes:
+context, constraints and acceptance all mandatory). `rules --profile P` prints
+the grading in force.
 
 ### 2. Orient — find the readings, name the surprise
 
@@ -69,16 +71,21 @@ collapses each. Its report is second-hand: keep the readings you can see in the
 text yourself.
 
 Name the surprise. If the critic found nothing you had not already seen, the
-prompt was probably read charitably rather than adversarially.
+prompt was read charitably rather than adversarially.
 
 ### 3. Decide — one reading, and what would falsify it
 
-Fill each gap with exactly one of three moves, and never a fourth:
+A **gap** is an absent slot. Fill each with exactly one of three moves, and
+never a fourth. (Hazard findings — a vague word, a filler phrase — are not gaps;
+they are edits. Rewrite the phrase.)
 
 1. **Get the evidence.** The gap is a fact you can check — read the file, run
    the command, list the directory. Most CONTEXT gaps close this way.
 2. **Ask.** The readings diverge and the wrong one wastes the work. One
-   question, with the options named, beats a paragraph of hedging.
+   question, with the options named, beats a paragraph of hedging. If nobody is
+   there to answer — a scheduled run, a subagent, a pipeline — this move is
+   unavailable: take the reading cheapest to correct, label it in the prompt as
+   an assumption, and go on. A question into an empty room returns nothing.
 3. **Write an escape clause.** The gap cannot be closed now: say in the prompt
    what to do when the assumption fails. This is what converts an unknown into
    an instruction instead of into an invention.
@@ -97,15 +104,15 @@ python3 tools/prompt_forge.py compile --profile build raw.txt > forged.md
 `<<MISSING: ...>>`. It cannot write content, by construction — the tests prove
 every line of its output is either a line you wrote, a heading, or a marker.
 Fill the markers yourself, using the three moves above, then re-lint until it
-comes back clean:
+exits 0:
 
 ```bash
 python3 tools/prompt_forge.py lint --profile build forged.md   # 0 = clean
 ```
 
-A prompt that still carries an error-level finding is not finished. A prompt
-carrying only info-level findings usually is — `--strict` is for prompts that
-will be reused rather than sent once.
+**`clean` means exit 0: no error and no warn findings.** Info findings are
+advisory, and the tool ignores them unless you pass `--strict` — which is worth
+doing for a prompt that will be reused rather than sent once.
 
 ## Worked example
 
@@ -113,10 +120,11 @@ Raw, as it arrived:
 
 > fix the failing test and clean up the module while you're at it
 
-Linted: `FALSE_PREMISE` (which failing test?), `VAGUE_QUALITY` ("clean up"),
-`NO_OUTPUT`, `NO_ACCEPTANCE`, `NO_ESCAPE`. Score 34/100.
+Linted: `FALSE_PREMISE` (which failing test?), `VAGUE_QUALITY` (`clean up`),
+`NO_OUTPUT`, `NO_ACCEPTANCE`, `NO_ESCAPE`, and three more for the context,
+constraints and role it never states. **Score 38/100.**
 
-The divergent readings: "clean up" could mean reformat, restructure, or delete
+The divergent readings: `clean up` could mean reformat, restructure, or delete
 dead code — three different diffs, and two of them are not what anyone wanted.
 
 Forged:
@@ -133,8 +141,14 @@ Forged:
 > **If you cannot.** If the failure does not reproduce, stop and report what
 > you actually saw rather than changing code to fit the description.
 
-Score 96/100. The second prompt is longer, and it is the one that gets a usable
-answer on the first turn.
+**Score 100/100.** The second prompt is longer, and it is the one that gets a
+usable answer on the first turn.
+
+Both numbers are pinned in `tests/test_prompt_forge.py` against the fixtures in
+`tests/fixtures/prompts/`, because they were wrong once: this section quoted 34
+and 96, which nobody had measured. A document in this repository asserting an
+unmeasured number is the failure the provenance guard exists to catch, and it
+does not become acceptable for being a small one.
 
 ## Anti-patterns
 

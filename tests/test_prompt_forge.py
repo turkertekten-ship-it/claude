@@ -160,6 +160,24 @@ def test_narrowings_are_proven() -> None:
           "FALSE_PREMISE" in rules_for("Fix the bug."))
     check("a 'Constraints:' heading satisfies the constraints slot",
           "NO_CONSTRAINTS" not in rules_for("Constraints: no dependencies."))
+    check("a contraction is not an identifier anchor",
+          "FALSE_PREMISE" in rules_for("fix the failing test and clean up the module while you're at it"))
+    check("a backticked path is one",
+          "FALSE_PREMISE" not in rules_for("Fix the failing test in `tests/test_x.py`."))
+    check("so is a quoted name",
+          "FALSE_PREMISE" not in rules_for('Fix the failing test named "test_dedupe".'))
+    for label in ("**Task.** Write the parser.", "## TASK\nWrite the parser.",
+                  "- Write the parser.", "1. Write the parser."):
+        check(f"an imperative behind a label is seen: {label.splitlines()[0][:18]!r}",
+              "NO_TASK" not in rules_for(label), rules_for(label))
+    check("a blockquote is a quotation, not an instruction",
+          "FALSE_PREMISE" not in rules_for("Write the guide.\n\n> fix the failing test\n"))
+    check("the same line unquoted is an instruction",
+          "FALSE_PREMISE" in rules_for("Write the guide.\n\nfix the failing test\n"))
+    check("'the only kind of' is a noun phrase",
+          "HEDGE" not in rules_for("That is the only kind of ambiguity worth a turn."))
+    check("'kind of works' is a hedge",
+          "HEDGE" in rules_for("It kind of works, so ship it."))
     check("a second-person job description counts as a role",
           not [f for f in pf.analyse("You process exports. Write it.", "system").findings
                if f.rule == "NO_ROLE"])
@@ -367,6 +385,53 @@ def test_scoring_discriminates() -> None:
 # --------------------------------------------------------------------------
 
 
+def test_worked_example_matches_the_documented_scores() -> None:
+    """The scores quoted in the skill are the scores the tool prints.
+
+    They were not, once: the skill quoted 34 and 96 from nobody's measurement.
+    A document in this repository asserting an unmeasured number is the same
+    failure the provenance guard exists to catch, so the numbers are pinned
+    here instead of retyped there.
+    """
+    print("\nthe worked example in the skill reproduces")
+    skill = (REPO / ".claude" / "skills" / "prompt-forge" / "SKILL.md").read_text()
+    raw = (FIXTURES / "worked_raw.md").read_text()
+    forged = (FIXTURES / "worked_forged.md").read_text()
+
+    raw_score = pf.analyse(raw, "task").score
+    forged_report = pf.analyse(forged, "build")
+    check(f"the raw ask scores {raw_score}", f"Score {raw_score}/100" in skill,
+          f"skill does not quote {raw_score}")
+    check(f"the forged prompt scores {forged_report.score}",
+          f"Score {forged_report.score}/100" in skill, f"skill does not quote {forged_report.score}")
+    check("the forged prompt carries no error-level finding",
+          not [f for f in forged_report.findings if f.severity == "error"],
+          [f.rule for f in forged_report.findings if f.severity == "error"])
+    fired = set(rules_for(raw))
+    for rule in ("FALSE_PREMISE", "VAGUE_QUALITY", "NO_OUTPUT", "NO_ACCEPTANCE", "NO_ESCAPE"):
+        check(f"the skill's claimed finding {rule} actually fires", rule in fired, sorted(fired))
+
+
+def test_the_preamble_is_the_length_it_claims() -> None:
+    """The travelling block states its own size, so the size is checked.
+
+    It claimed "one screen" and was three. A prompt standard whose own artifact
+    makes an unmeasured claim about itself is not a standard.
+    """
+    print("\nthe portable preamble is the length it says it is")
+    import re
+    text = (REPO / "prompts" / "portable-preamble.md").read_text()
+    lines = text.splitlines()
+    start, end = lines.index("## Paste from here"), lines.index("## Paste to here")
+    actual = sum(1 for line in lines[start + 1:end] if line.strip())
+    claimed = re.search(r"The block is (\d+) lines of instruction", text)
+    check("the file states its own block length", claimed is not None)
+    if claimed:
+        check(f"and it is right: {actual} lines", int(claimed.group(1)) == actual,
+              f"claims {claimed.group(1)}, is {actual}")
+    check("the block fits a terminal screen", actual <= 40, actual)
+
+
 def test_repo_prompts_pass_their_own_standard() -> None:
     print("\nthe repository's own system prompts pass at the system profile")
     for path in sorted((REPO / "prompts").glob("*.md")):
@@ -393,6 +458,8 @@ def main() -> int:
     test_exit_codes()
     test_json_is_machine_readable()
     test_scoring_discriminates()
+    test_worked_example_matches_the_documented_scores()
+    test_the_preamble_is_the_length_it_claims()
     test_repo_prompts_pass_their_own_standard()
 
     print()
