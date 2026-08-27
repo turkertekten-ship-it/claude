@@ -428,16 +428,13 @@ class ReflectLoop:
             report.suppressed = [p.fingerprint for p in decision.suppressed]
 
             applied = self.act(decision, cycle_id)
+            # Keyed by proposal, not by path: a deferred proposal shares its
+            # path with the one that displaced it, and a path-keyed check would
+            # credit it with that proposal's success.
             report.applied = [
-                p.fingerprint
-                for p in decision.apply
-                # An all() over an empty sequence is True, which would report a
-                # proposal that changed nothing as applied.
-                if p.paths
-                and all(
-                    any(r.path == path and r.applied for r in applied.results)
-                    for path in p.paths
-                )
+                fingerprint
+                for fingerprint, result in self._results.items()
+                if verdict_for(result.results) == "applied"
             ]
             # Deferred proposals went to the review queue too, so they belong in
             # this list. Without them the report finds them in neither the
