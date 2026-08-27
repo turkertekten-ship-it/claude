@@ -615,8 +615,10 @@ class TestCorrectionMeaningIsPreserved(unittest.TestCase):
     def test_discourse_markers_are_still_stripped(self) -> None:
         """The split must not cost us the trimming it was there to do."""
         got = self.instruction("no, that's wrong. Use ruff for linting.")
-        self.assertEqual(got, "Use ruff for linting.")
+        # instruction_from returns the bare clause; _bullet is what punctuates it.
+        self.assertEqual(got, "Use ruff for linting")
         self.assertNotIn("wrong", got.lower())
+        self.assertEqual(_bullet(got), "- Use ruff for linting.")
 
     def test_a_correction_is_still_recognised_by_a_non_strippable_marker(self) -> None:
         self.assertIsNotNone(self.rule.marker_in("don't force push to main"))
