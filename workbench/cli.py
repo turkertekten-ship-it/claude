@@ -28,7 +28,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from .backend import ClaudeCLIBackend, EchoBackend, Request, resolve_backend
+from .backend import ClaudeCLIBackend, Request, resolve_backend
 from .errors import WorkbenchError
 from .graders import describe_registry
 from .report import markdown, to_json
@@ -140,8 +140,13 @@ def cmd_plan(args: argparse.Namespace) -> int:
             print("  " + prompt.strip()[:600].replace("\n", "\n  "))
             print(f"graders: {', '.join(g.label for g in case.graders) or 'none'}")
     print("\n" + "=" * 70)
-    print(f"{total} model call(s) would be made. Blind comparison, if run, adds "
-          f"2 judge calls per variant pair per case.")
+    variants, cases = len(suite.variants), len([c for c in suite.cases if not c.skip])
+    pairs = variants * (variants - 1) // 2 * cases
+    print(f"{total} model call(s) would be made.")
+    if variants > 1:
+        print(f"`blind` would add {2 * pairs} judge call(s) — {pairs} variant "
+              f"pair(s) x 2 presentation orders — plus 2 for the identical-pair "
+              f"blinding control. Total with blind: {total + 2 * pairs + 2}.")
     return EXIT_OK
 
 

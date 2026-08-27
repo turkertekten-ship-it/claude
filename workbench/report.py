@@ -14,7 +14,7 @@ from typing import Any, Sequence
 
 from .blind import PairJudgement, position_bias_rate
 from .graders import DETERMINISTIC, ENVIRONMENTAL, MODEL
-from .runner import CaseRun, RunResult
+from .runner import RunResult
 from .stats import bradley_terry, paired_table, summarise_pairwise, wilson_interval
 
 

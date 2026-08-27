@@ -31,7 +31,7 @@ from typing import Any, Callable, Sequence
 from .backend import Backend, Completion, Request
 from .blind import (
     Candidate, PairJudgement, identical_pair_control, identity_tokens,
-    judge_pair, length_summary, position_bias_rate, same_family,
+    judge_pair, position_bias_rate, same_family,
 )
 from .errors import SpecError
 from .graders import GradingContext, Verdict, grade
