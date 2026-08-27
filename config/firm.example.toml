@@ -1,0 +1,88 @@
+# Firm configuration override.
+#
+# Copy to config/firm.toml and fill in what this codebase could not establish.
+# Everything set here is graded OWNER, which outranks both SOURCED (a search
+# result) and ASSUMED (a placeholder this codebase chose). The person who signs
+# the accounts is a better authority on his own fund list than a search engine.
+#
+#   PYTHONPATH=src python3 -c "from oodarag.config import load; \
+#       print(load('config/firm.toml').provenance_report())"
+#
+# Run that after editing. Every line it still marks ASSUMED is a placeholder
+# nobody has confirmed.
+
+# ---------------------------------------------------------------------------
+# Identity. The defaults are SOURCED from search results over KAP records, not
+# from KAP itself — that host is blocked from this container. Correct them.
+# ---------------------------------------------------------------------------
+
+# legal_name       = "WAM Gayrimenkul ve Girişim Sermayesi Portföy Yönetimi A.Ş."
+# short_name       = "WAM Portföy"
+# kap_company_code = "VPG"
+# city             = "İstanbul (Teşvikiye)"
+# auditor          = "CNS Bağımsız Denetim A.Ş."
+
+# The functional currency of the funds. Defaulted to TRY and marked ASSUMED,
+# because a GYF holding hard-currency leases or a GSYF with USD commitments may
+# report differently — and a wrong answer here silently corrupts every
+# conversion downstream.
+# base_currency = "TRY"
+
+# ---------------------------------------------------------------------------
+# Funds. Four codes were recovered from KAP-derived URLs; three carried their
+# registered names, one did not. Nothing about their size or holdings was
+# obtainable — qualified-investor vehicles do not publish it. See U-7.
+#
+# Add a [[funds]] block per fund. Blocks match existing funds on `code`, so you
+# can correct one without restating the others.
+# ---------------------------------------------------------------------------
+
+# [[funds]]
+# code    = "WQQ"
+# name_tr = "WAM ... Girişim Sermayesi Yatırım Fonu"   # registered title
+# kind    = "GSYF"                                      # GSYF | GYF
+
+# [[funds]]
+# code    = "VBR"
+# name_tr = "WAM Gayrimenkul ve Girişim Sermayesi Portföy Yönetimi A.Ş. Birinci Girişim Sermayesi Yatırım Fonu"
+# kind    = "GSYF"
+
+# ---------------------------------------------------------------------------
+# Thresholds. All of these were chosen by this codebase and confirmed by
+# nobody. They are set deliberately loose: an alerting system does not fail by
+# missing an event, it fails by firing so often that you stop reading it, and
+# then it misses every event.
+#
+# Tighten them after a month of watching what actually fires. Write decimals as
+# STRINGS — TOML floats would round a number that gets compared against money.
+# ---------------------------------------------------------------------------
+
+# [thresholds]
+# valuation_drift_real     = "0.05"  # real-terms unit value move worth a look
+# valuation_drift_nominal  = "0.25"  # nominal jump this large is usually a data error
+# deadline_horizon_days    = 21      # how far ahead the brief looks
+# deadline_escalate_days   = 5       # inside this, an obligation escalates
+# fx_daily_move            = "0.03"  # TRY/USD daily move worth remarking on
+# appraisal_max_age_days   = 365     # older than this and a valuation is stale
+# index_stale_days         = 7       # beyond this, retrieval answers from a stale world
+# citation_coverage_floor  = 0.6     # below this, abstain rather than hedge
+# connector_failure_streak = 3       # failures before a source is "broken" not "flaky"
+
+# ---------------------------------------------------------------------------
+# What the Observe phase treats as relevant in the Official Gazette and the SPK
+# bulletins. Keep this narrow. A keyword list that matches everything is a
+# crawler, not a filter, and a human pays the reading cost of every false
+# positive.
+# ---------------------------------------------------------------------------
+
+# watch_keywords = [
+#   "portföy yönetim şirketi",
+#   "girişim sermayesi yatırım fonu",
+#   "gayrimenkul yatırım fonu",
+#   "nitelikli yatırımcı",
+#   "enflasyon muhasebesi",
+#   "değerleme esasları",
+#   "kurumlar vergisi istisnası",
+#   "III-52",
+#   "TMS 29",
+# ]
