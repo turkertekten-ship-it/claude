@@ -55,12 +55,32 @@ class CaseRun:
     workdir: str = ""
 
     @property
+    def errored(self) -> bool:
+        """Did the backend fail to answer at all?
+
+        A transport failure is not a wrong answer, and grading one produces a
+        verdict about an error message. This happened: a TLS failure on one
+        arm was scored 1.33/5 by a judge and surfaced as the single discordant
+        case in a held-out comparison, which is to say as evidence that the
+        other arm was better.
+        """
+        if self.completion is None:
+            return False
+        return (not self.completion.ok) or not self.completion.text.strip()
+
+    @property
     def blocking(self) -> list[Verdict]:
         return [v for v in self.verdicts if not v.advisory]
 
     @property
     def passed(self) -> bool:
-        """A run passes when every blocking grader passed. Advisory ones report only."""
+        """A run passes when every blocking grader passed. Advisory ones report only.
+
+        An errored run is neither a pass nor a fail; it is excluded from the
+        statistics entirely. See :attr:`errored`.
+        """
+        if self.errored:
+            return False
         blocking = self.blocking
         return bool(blocking) and all(v.passed for v in blocking)
 
@@ -228,7 +248,14 @@ def produce(suite: Suite, backend: Backend, report: Reporter,
             workdir=workdir, judge_backend=judge_backend, judge_model=judge_model,
             suite_dir=str(suite.path.parent) if suite.path else "",
         )
-        verdicts = grade(case.graders, ctx)
+        if not completion.ok or not completion.text.strip():
+            # Nothing to grade. Recording a verdict here would be a judgement
+            # about an error message.
+            verdicts = []
+            report(f"  !    {label}: backend did not answer "
+                   f"({completion.error[:80]}) — excluded, not scored")
+        else:
+            verdicts = grade(case.graders, ctx)
         results.append(CaseRun(
             case_id=case.id, variant_id=variant.id, repeat=repeat,
             prompt=prompt or "\n---\n".join(turns),

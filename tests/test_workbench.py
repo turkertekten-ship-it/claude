@@ -33,7 +33,7 @@ from workbench.blind import (  # noqa: E402
 )
 from workbench.errors import RenderError, SpecError  # noqa: E402
 from workbench.graders import (  # noqa: E402
-    DETERMINISTIC, MODEL, GradingContext, describe_registry, run_grader,
+    DETERMINISTIC, MODEL, GradingContext, Verdict, describe_registry, run_grader,
     unsupported_schema_keys, validate_schema,
 )
 from workbench.render import render, variables_in  # noqa: E402
@@ -730,6 +730,55 @@ def test_length_stratification() -> None:
           rows["A was longer"]["wins_a"] > rows["B was longer or equal"]["wins_a"])
 
 
+def test_errored_runs_are_not_graded() -> None:
+    """A transport failure is not a wrong answer.
+
+    A TLS error on one arm of a held-out comparison was graded 1.33/5 by a
+    judge and surfaced as the single discordant case -- that is, as evidence
+    that the other arm was better. The backend never answered.
+    """
+    print("\nerrored runs -- excluded, not scored")
+    from workbench.runner import CaseRun
+    from workbench.report import variant_rollup, markdown
+    from workbench.runner import RunResult
+
+    broken = Completion(text="API Error: Unable to connect to API", error="tls failure")
+    run = CaseRun(case_id="c", variant_id="v", repeat=0, prompt="p",
+                  output=broken.text, completion=broken)
+    check("a completion the backend rejected is marked errored", run.errored)
+    check("and it does not count as a pass", not run.passed)
+
+    empty = CaseRun(case_id="c", variant_id="v", repeat=0, prompt="p", output="",
+                    completion=Completion(text="   "))
+    check("an empty response is errored too", empty.errored)
+
+    good = CaseRun(case_id="c", variant_id="v", repeat=0, prompt="p", output="fine",
+                   completion=Completion(text="fine"),
+                   verdicts=[Verdict(grader="g", kind=DETERMINISTIC, passed=True, score=1.0)])
+    check("a real answer is not errored", not good.errored and good.passed)
+
+    print("\n  an errored run must not make the other variant look better")
+    result = RunResult(suite="s", run_id="r", backend="b", started_at="now")
+    result.runs = [
+        CaseRun(case_id="c1", variant_id="A", repeat=0, prompt="p", output="ok",
+                completion=Completion(text="ok"),
+                verdicts=[Verdict(grader="g", kind=DETERMINISTIC, passed=True, score=1.0)]),
+        CaseRun(case_id="c1", variant_id="B", repeat=0, prompt="p",
+                output="API Error", completion=broken),
+    ]
+    rows = {r["variant"]: r for r in variant_rollup(result)}
+    check("the errored variant reports zero scored runs", rows["B"]["runs"] == 0)
+    check("and its error is counted separately", rows["B"]["errored"] == 1)
+    check("the healthy variant is unaffected", rows["A"]["runs"] == 1 and rows["A"]["passed"] == 1)
+
+    rendered = markdown(result)
+    check("the report says errored runs were excluded",
+          "excluded" in rendered.lower())
+    check("the paired table does not score the errored case",
+          "Discordant cases: **0**" in rendered or "cannot separate" in rendered,
+          "paired table should find nothing to compare")
+
+
 def test_registry_kinds() -> None:
     print("\ngrader taxonomy")
     kinds = dict(describe_registry())
@@ -756,6 +805,7 @@ def main() -> int:
     test_multi_turn()
     test_cache_is_per_backend()
     test_length_stratification()
+    test_errored_runs_are_not_graded()
     test_registry_kinds()
 
     print()

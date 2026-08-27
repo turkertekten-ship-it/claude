@@ -613,3 +613,46 @@ sources:
       with 0 of 3 judges passing, and both audited refusals 5.00 with 3 of 3,
       including the refusal that quotes the baited figure in order to decline
       it.
+
+  - id: V2-OVERFIT-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T22:50Z"
+    method: >-
+      python3 -m workbench blind on suites/hard-traps-v2.yaml (26 cases, the set
+      v2's rules were derived from) and suites/hard-traps-heldout.yaml (14 cases
+      in the same six families, written after v2 and not consulted while writing
+      it), doctrine-v1 against doctrine-v2, judge claude-sonnet-5
+    evidence: provenance/raw/blind-run-7-v2-heldout-2026-08-27.md
+    note: >-
+      The tuned-set report is alongside it at
+      provenance/raw/blind-run-6-v2-tuned-2026-08-27.md; the held-out one is
+      cited as the evidence because it is the one that decides.
+      v2 is NOT shown to generalise. On the tuned set it passed 26 of 26 against
+      v1's 24 of 26 — two discordant cases, exact p = 0.5, and both are cases
+      its rules were written against: the hedged estimate after a refusal, and
+      the bare `[src:ID]` placeholder. On the held-out set, after excluding a
+      run the backend never answered, there are ZERO genuine discordant cases.
+      Blind pairwise on held-out favoured v2 4 to 1 with 9 ties, p = 0.375, not
+      significant; on the tuned set the pairwise comparison refused to report at
+      all, with 42% order-disagreement.
+      Two fixes, both inside the set the rules came from, none outside it, is
+      the shape of overfitting. Reported as overfitting because that is what was
+      committed to before the run.
+
+  - id: ERRORED-RUN-GRADED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T22:52Z"
+    method: "audit of the single discordant case in the held-out comparison"
+    evidence: >-
+      doctrine-v1 on `h-prem-03` returned "API Error: Unable to connect to API:
+      Self-signed certificate detected. Check your proxy or corporate SSL
+      certificates". The judge graded that error message 1.33/5, 0 of 3 passing,
+      and it surfaced as the one case where v2 beat v1.
+    note: >-
+      A transport failure is not a wrong answer, and grading one produces a
+      verdict about an error message. The runner now excludes a run the backend
+      never answered rather than scoring it: it is neither a pass nor a fail,
+      the rollup reports it in its own column, and the paired table drops it
+      from both sides so it cannot appear as the other variant winning. A
+      regression test covers it. Without this, the held-out comparison would
+      have reported v2 ahead on the strength of a TLS error.

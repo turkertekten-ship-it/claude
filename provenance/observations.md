@@ -136,6 +136,18 @@ verified lives in [unknowns.md](unknowns.md), not here.
 > exists to do, and three separate graders had to be caught being wrong before
 > that sentence could be trusted.
 
+## Observed — the v2 prompt
+
+- A revised operating prompt, written against the failure modes an audit of v1's own run found, passed 26 of 26 on those same traps against v1's 24 of 26 — two discordant cases, exact p = 0.5. Both are cases its rules were written against. [src:V2-OVERFIT-2026-08-27]
+- On fourteen held-out traps of the same families, written after v2 and not consulted while writing it, there are zero genuine discordant cases once a run the backend never answered is excluded. [src:V2-OVERFIT-2026-08-27]
+- The one apparent held-out difference was a TLS failure on v1's side, graded 1.33 out of 5 by a judge reading the error message. [src:ERRORED-RUN-GRADED-2026-08-27]
+- Comparing v2 against v1 pairwise, order-disagreement reached 42% and the report refused to draw a conclusion; against a plain assistant the same judge and protocol ran 17%. [src:V2-OVERFIT-2026-08-27]
+
+> Reading, not a claim: two fixes inside the set the rules came from and none
+> outside it is the shape of overfitting, and it was committed to as such
+> before the run. The prompt may still help — fourteen held-out cases cannot
+> show a small effect either way — but nothing here demonstrates that it does.
+
 ## Conclusion
 
 The honest answer to "look through all my previous claude chats" is bounded:

@@ -25,7 +25,9 @@ def _pct(numerator: float, denominator: float) -> str:
 def variant_rollup(result: RunResult) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for vid in result.variant_ids:
-        runs = result.by_variant(vid)
+        every = result.by_variant(vid)
+        runs = [r for r in every if not r.errored]
+        errored = len(every) - len(runs)
         passed = sum(1 for r in runs if r.passed)
         interval = wilson_interval(passed, len(runs))
         kinds = {DETERMINISTIC: [0, 0], ENVIRONMENTAL: [0, 0], MODEL: [0, 0]}
@@ -39,6 +41,7 @@ def variant_rollup(result: RunResult) -> list[dict[str, Any]]:
         rows.append({
             "variant": vid,
             "runs": len(runs),
+            "errored": errored,
             "passed": passed,
             "pass_rate": passed / len(runs) if runs else 0.0,
             "ci95": str(interval),
@@ -128,14 +131,20 @@ def markdown(result: RunResult) -> str:
 
     add("## Pass rate by variant")
     add("")
-    add("| Variant | Runs | Passed | Rate | 95% CI | Mean score | Cost |")
-    add("|---|---:|---:|---:|---|---:|---:|")
+    add("| Variant | Runs | Passed | Rate | 95% CI | Mean score | Cost | Errored |")
+    add("|---|---:|---:|---:|---|---:|---:|---:|")
     rows = variant_rollup(result)
     for row in rows:
         add(f"| `{row['variant']}` | {row['runs']} | {row['passed']} | "
             f"{100 * row['pass_rate']:.0f}% | {row['ci95']} | "
-            f"{row['mean_score']:.2f} | ${row['cost_usd']:.4f} |")
+            f"{row['mean_score']:.2f} | ${row['cost_usd']:.4f} | "
+            f"{row['errored'] or '—'} |")
     add("")
+    if any(r["errored"] for r in rows):
+        add("")
+        add("Runs the backend never answered are **excluded**, not scored. A "
+            "transport failure is not a wrong answer, and grading one produces "
+            "a verdict about an error message.")
     add("The interval is a Wilson score interval. On a suite this small it is "
         "wide on purpose: it is the honest width, not a defect in the report.")
     add("")
@@ -173,8 +182,12 @@ def markdown(result: RunResult) -> str:
     variants = result.variant_ids
     if len(variants) == 2:
         a, b = variants
-        a_results = {r.case_id: r.passed for r in result.by_variant(a) if r.repeat == 0}
-        b_results = {r.case_id: r.passed for r in result.by_variant(b) if r.repeat == 0}
+        # Errored runs are excluded from both sides, so a transport failure
+        # cannot appear as the other variant winning a case.
+        a_results = {r.case_id: r.passed for r in result.by_variant(a)
+                     if r.repeat == 0 and not r.errored}
+        b_results = {r.case_id: r.passed for r in result.by_variant(b)
+                     if r.repeat == 0 and not r.errored}
         table = paired_table(a_results, b_results)
         add("## Paired outcome comparison (McNemar, exact)")
         add("")

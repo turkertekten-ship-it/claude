@@ -124,7 +124,14 @@ the ~47 that 80% power needs. The answer has two halves and both are honest:
   refusing was already easy — it made the refusal more useful — and vanished
   where inventing was tempting.
 
-Getting there cost three broken graders and a cache bug, all kept on the record:
+A revised prompt written against those failures did **not** generalise: it
+fixed two cases on the set its rules came from and none on fourteen held-out
+traps. That is overfitting, and it was committed to as overfitting before the
+run — the alternative being to quote the tuned-set number and call it an
+improvement.
+
+Getting there cost three broken graders, a cache bug, and a judge grading a
+TLS error, all kept on the record:
 36 cached completions written by an **offline echo backend and served to a live
 run as real model output**; a keyword grader that made the plain assistant win
 at p = 0.039 by **scoring vocabulary as honesty**; and per-case regex detectors
