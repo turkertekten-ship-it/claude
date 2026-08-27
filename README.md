@@ -28,7 +28,9 @@ bash tests/run_all.sh        # verifier + both test suites
 | `provenance/` | The ledger, the observations, the unknowns, the raw captures. |
 | `prompts/` | System prompts carrying the doctrine into a session. |
 | `tools/verify_provenance.py` | The fabrication guard. |
-| `tools/ingest_chat_archive.py` | Conversation-archive ingestion and search. |
+| `tools/ingest_chat_archive.py` | Conversation-archive ingestion, search, and `selfcheck`. |
+| `tools/fleet_snapshot.py` | Regenerates the `FLEET.md` roster from live git refs. |
+| `KNOWN_ISSUES.md` | Defects that may have spread to other branches. |
 | `tests/` | Tests for both tools, including their failure cases. |
 | `.claude/commands/` | The workflows, as slash commands. |
 | `.claude/agents/` | `observer` and `fact-checker` subagents. |
@@ -61,6 +63,17 @@ message id, timestamp, and source file, so a result can be quoted as evidence.
 Records that cannot be parsed are skipped and counted, never repaired by
 guesswork. `archive/` is git-ignored — the exports are the owner's data, not
 repository content.
+
+## If you inherited this code from another branch
+
+Merging a snapshot is not tracking it. Check the copy you got:
+
+```bash
+python3 tools/ingest_chat_archive.py selfcheck
+```
+
+Exit 1, or a missing `selfcheck` subcommand, means your copy carries KI-1 and
+silently discards transcripts. See `KNOWN_ISSUES.md`.
 
 ## Status
 

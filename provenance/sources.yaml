@@ -246,3 +246,9 @@ sources:
       keeps both transcripts", exit 0. On the copy with the fix reverted and
       nothing else changed: 1 conversation and 1 message stored, "FAIL — this
       copy SILENTLY DISCARDS transcripts", exit 1.
+
+  - id: FLEET-REFS-20260827T150640
+    kind: repo_state
+    collected_at: "2026-08-27T15:06:40+00:00"
+    method: "git fetch --all --prune; git for-each-ref refs/remotes/origin; git ls-tree -r --name-only per branch"
+    evidence: provenance/raw/fleet-refs-2026-08-27T150640+0000.txt
