@@ -1,7 +1,7 @@
 PY ?= python3
 export PYTHONPATH := src
 
-.PHONY: help install test lint demo index query eval loop clean
+.PHONY: help install test check lint demo index query eval loop clean
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -9,8 +9,15 @@ help:
 install: ## Install in editable mode with dev extras
 	$(PY) -m pip install -e ".[dev]"
 
-test: ## Run the full test suite (stdlib unittest, no deps needed)
-	$(PY) -m unittest discover -s tests -v
+# -t . makes the repo root the import root explicitly. The blind-test suites
+# import `tests.support.httpserver`, which only resolves if `tests` is a package
+# under the top-level dir; without -t . that works only by accident, because
+# `python -m` happens to put the cwd on sys.path.
+test: ## Run the oodarag test suite (stdlib unittest, no deps needed)
+	$(PY) -m unittest discover -s tests -t . -v
+
+check: ## Every gate in the repository: provenance, tool suites, pipeline suite
+	bash tests/run_all.sh
 
 lint: ## Compile-check every module
 	$(PY) -m compileall -q src
