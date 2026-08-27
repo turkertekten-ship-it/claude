@@ -271,7 +271,7 @@ sources:
     note: >-
       Establishes the firm's legal name, Istanbul/Teşvikiye location, 2022
       founding, and that it manages GSYF and GYF for qualified investors.
-      Fund names, fund sizes and AUM were NOT established — see U-6.
+      Fund names, fund sizes and AUM were NOT established — see U-7.
 
   - id: EGRESS-BLOCKED-WAM-KAP-2026-08-27
     kind: tool_output
@@ -312,7 +312,7 @@ sources:
       Reported by Turkish financial press (yatirimx.com.tr, paraajansi.com.tr)
       as an SPK decision dated 23 July 2026 with a 31 July 2026 compliance
       date. The SPK bulletin itself was not retrieved; treat the exact scope
-      and wording as unconfirmed — see U-7.
+      and wording as unconfirmed — see U-8.
 
   - id: TCMB-MACRO-2026-08
     kind: tool_output
@@ -395,3 +395,18 @@ sources:
       `demo`, `index`, `query`, `eval` and `loop` against `oodarag.cli`, and
       pyproject declared the `ooda` console script — all pointing at modules
       that did not yet exist.
+
+  - id: USER-GOAL-RESEARCH-2026-08-27
+    kind: user_statement
+    collected_at: "2026-08-27T15:00Z"
+    method: "the owner's own turn in session claude/ai-system-research-3jpwda, via /goal"
+    evidence: >-
+      "i need you to research me and where i work at what similar firms do how
+      the ones who are successfull use and implement ai and build me the
+      perfect system tailored for me ultrathink ooda", followed mid-turn by
+      "add to your goal use subagents and workflows".
+    note: >-
+      This is the authorisation for researching the owner and his employer in
+      this session, including the Google Drive read recorded under
+      DRIVE-WORKFILES-2026-08-27. It is a request to research him; it is not a
+      statement of what his working week actually contains — see U-9.

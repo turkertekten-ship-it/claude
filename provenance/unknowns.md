@@ -109,3 +109,72 @@ searched.
 
 **Action taken:** the search was scoped strictly to locating a Claude export.
 No personal Drive file was opened, and nothing was written to Drive.
+
+**Update, 2026-08-27T15:02Z, session `claude/ai-system-research-3jpwda`:** in
+this session the account owner asked, in his own turn, to be researched along
+with where he works. That authorises a Drive read for that purpose here. It
+says nothing about the earlier non-user turn, which remains unattributed; this
+entry stays open on that question. [src:USER-GOAL-RESEARCH-2026-08-27]
+
+---
+
+### U-7 — What WAM Portföy actually manages
+
+**Unknown:** the names, codes, sizes and portfolios of the GSYF and GYF funds
+WAM Gayrimenkul ve Girişim Sermayesi Portföy Yönetimi A.Ş. founds and manages;
+its AUM; its shareholders; and who else sits on its board.
+
+**Why:** `wamportfoy.com` and `kap.org.tr` are both blocked by this
+environment's egress proxy, so neither the firm's own site nor its primary
+regulatory filing record could be read. What is established comes from search
+summaries of third-party profile aggregators.
+[src:EGRESS-BLOCKED-WAM-KAP-2026-08-27]
+
+**Why it matters here:** every fund-level number in the system built on this
+branch is therefore a worked example against seeded data, not a reading of the
+firm's real book. Nothing downstream may present it as the latter.
+
+**Resolves when:** the egress policy permits kap.org.tr, or the owner supplies
+the fund list — a KAP export, a fund prospectus (izahname), or simply telling
+the system the fund codes.
+
+**Do not:** infer fund names from the firm's name, or fund sizes from the
+firm's founding date.
+
+---
+
+### U-8 — The exact text of the 23 July 2026 SPK valuation decision
+
+**Unknown:** the decision's bulletin number, its precise scope, and its
+operative wording.
+
+**Why:** it is established here only through Turkish financial press coverage
+(yatirimx.com.tr, paraajansi.com.tr), which reports that exchange-traded GYF
+and GSYF participation units held by investment funds must be valued at the
+founder's last announced unit value rather than the exchange price, with
+compliance required by 31 July 2026. The SPK bulletin itself was not retrieved.
+[src:SPK-VALUATION-2026-07-23]
+
+**Why it matters here:** this is the worked example the system uses to show
+regulatory-change detection. A rule that fires on a misread of the decision is
+worse than no rule, so the obligation seeded from it carries a `verify` flag
+rather than being presented as settled law.
+
+**Resolves when:** the SPK haftalık bülten for that week is read directly, or
+counsel confirms the scope.
+
+---
+
+### U-9 — Whether any of this is wanted
+
+**Unknown:** whether the owner wants a system of this shape at all, which of
+its parts he would actually use, and what his current manual routine really is.
+
+**Why:** the design rests on inference from a public career record, a firm
+profile, and a Drive file listing. Nobody asked him what his week looks like,
+what he already has, or what he has already tried and abandoned.
+
+**Resolves when:** he says so. The design document names the specific questions
+whose answers would change the build.
+
+**Do not:** treat the adoption sequence as agreed. It is a proposal.
