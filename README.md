@@ -29,11 +29,33 @@ bash tests/run_all.sh        # verifier + both test suites
 | `prompts/` | System prompts carrying the doctrine into a session. |
 | `tools/verify_provenance.py` | The fabrication guard. |
 | `tools/ingest_chat_archive.py` | Conversation-archive ingestion and search. |
-| `tests/` | Tests for both tools, including their failure cases. |
+| `tools/prompt_forge.py` | The prompt linter and compiler. |
+| `tools/install_prompt_system.sh` | Installs the prompt system into `~/.claude`, for every terminal. |
+| `tests/` | Tests for every tool here, including their failure cases. |
 | `.claude/commands/` | The workflows, as slash commands. |
-| `.claude/agents/` | `observer` and `fact-checker` subagents. |
+| `.claude/agents/` | `observer`, `fact-checker`, and `prompt-critic` subagents. |
 | `.claude/` | Hooks and the OODA skill. |
 | `docs/workflows.md` | How the workflows and subagents fit together. |
+| `docs/prompting.md` | The prompt standard, and where each rule came from. |
+
+## Prompts that can be checked
+
+A prompt is a specification, and most disappointing output is a specification
+failure. Three of those failures are mechanical — the artifact was never named,
+the acceptance test was never stated, and nothing said what to do when the
+request rests on something absent — so they are checked mechanically:
+
+```bash
+python3 tools/prompt_forge.py lint --profile task my-prompt.txt   # 0 clean, 1 findings
+python3 tools/prompt_forge.py compile my-prompt.txt               # into the seven slots
+bash tools/install_prompt_system.sh                               # /prompt in every terminal
+```
+
+`compile` cannot invent: every line of its output is a line you wrote, a
+heading, or an explicit `<<MISSING:` marker, and the tests prove it. Read
+[docs/prompting.md](docs/prompting.md) for the standard and
+`.claude/skills/prompt-forge/SKILL.md` for the procedure. For chats that cannot
+reach this machine, paste [prompts/portable-preamble.md](prompts/portable-preamble.md).
 
 ## Searching your conversations
 

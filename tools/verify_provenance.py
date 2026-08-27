@@ -49,21 +49,8 @@ FENCE = re.compile(r"^\s*(```|~~~)")
 INLINE_CODE = re.compile(r"`[^`]*`")
 
 # Phrases that assert a conversation history this repository cannot show.
-FALSE_MEMORY = [
-    "as we discussed",
-    "as discussed earlier",
-    "in our previous chat",
-    "in our last conversation",
-    "per our last conversation",
-    "you previously said",
-    "you told me earlier",
-    "as you mentioned earlier",
-    "as you said before",
-    "we agreed that",
-    "recall that you",
-    "from our earlier chats",
-    "based on our past conversations",
-]
+# Defined once in `_phrases.py` so the prompt linter enforces the same list.
+from _phrases import FALSE_MEMORY  # noqa: E402
 
 SKIP_DIRS = {".git", "node_modules", "__pycache__", ".venv", "archive", "fixtures"}
 
