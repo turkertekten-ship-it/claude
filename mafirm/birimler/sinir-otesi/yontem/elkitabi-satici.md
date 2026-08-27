@@ -56,7 +56,7 @@ sorumluluk bırakmamak.
 - Tahsil kaynağının sınırlandırılması: emanet ya da W&I ile satıcının kişisel
   sorumluluğunun sona erdirilmesi.
 - Satıcı bir fonsa, fonun ömrü ile beyan sürelerinin uyumu kontrol edilir; fon
-  dağılmışsa talep muhatlapsız kalır (`uyusmazlik`).
+  dağılmışsa talep muhatapsz kalır (`uyusmazlik`).
 
 ## Aşama 6 · Kapanış ve sonrası
 - Türk şekil şartlarının satıcı tarafındaki adımları: noter randevusu, genel
