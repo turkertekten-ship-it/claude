@@ -56,7 +56,8 @@ verified lives in [unknowns.md](unknowns.md), not here.
 ## Observed — what this container can reach
 
 - Egress is an **allowlist**, not a blocklist: 11 of 18 probed hosts were refused at the proxy's CONNECT with no HTTP response at all, and a sweep of 24 further candidate mirrors and reader-proxies returned zero successes. [src:EGRESS-ALLOWLIST-2026-08-27]
-- The reachable set is GitHub (`api`, `raw`, `codeload`, `objects`), the package registries (`pypi`, `files.pythonhosted`, `registry.npmjs`, `proxy.golang`, `crates`), `*.googleapis.com`, and the Anthropic documentation hosts. [src:EGRESS-ALLOWLIST-2026-08-27]
+- Probing each host the summary names rather than a sample of them: fifteen of sixteen answered at the application layer — GitHub (`api`, `raw`, `codeload`, `objects`), the package registries (`pypi`, `files.pythonhosted`, `registry.npmjs`, `proxy.golang`, `crates`), three `googleapis.com` hosts, and `platform`/`docs.claude.com`. [src:EGRESS-HOSTS-DETAILED-2026-08-27]
+- Reachability is not stable within a session: `code.claude.com` answered 302 in one probe and was refused at CONNECT in another the same day, so any single probe is a snapshot rather than the policy. [src:EGRESS-HOSTS-DETAILED-2026-08-27]
 - That reachability is at the *host* level and does not imply access to what the host serves. `api.github.com` answered 200 for both of the owner's repositories and 403 for `python/peps`, `anthropics/skills` and `torvalds/linux` — with the token reporting 15000/15000 remaining, and a body naming the cause: access to those repositories is not enabled for this session. [src:GITHUB-SESSION-SCOPE-2026-08-27]
 - `raw.githubusercontent.com` returned 200 for those same three repositories, so raw content and the REST API are separately scoped: blocked on one does not mean blocked on the other. [src:GITHUB-SESSION-SCOPE-2026-08-27]
 - Search and fetch are different egress paths within one session. A web search returned an IBM Technology video's id and a summary of its content while a direct fetch of both `www.youtube.com` and `www.ibm.com` returned EGRESS_BLOCKED. [src:SEARCH-IS-A-SEPARATE-PATH-2026-08-27]
@@ -87,16 +88,19 @@ verified lives in [unknowns.md](unknowns.md), not here.
 
 - The two unrelated histories on this repository were merged onto one root. The only conflicts were the two files FLEET.md predicted, `.gitignore` and `README.md`; both sides were read before resolving, and the verifier reported 0 violations afterwards. [src:UNIFIED-ROOT-2026-08-27]
 - SQLite's FTS5 `bm25()` returns a negative score where a better match is numerically smaller, so ascending order is best-first; on a 3-document corpus every score collapsed to -0.00000 because the IDF term vanishes when a term appears in most documents. [src:FTS5-BM25-SIGN-2026-08-27]
-- The full suite — unit tests plus the two doctrine suites and the provenance verifier — passed: 243 tests, all checks green. [src:OODARAG-VERIFIED-2026-08-27]
+- The full suite — unit tests plus the two doctrine suites and the provenance verifier — passed: 254 tests, all checks green. [src:OODARAG-VERIFIED-2026-08-27]
 - Python's `urllib.robotparser` applies robots.txt rules in file order rather than by specificity: with `Disallow: /private/` before `Allow: /private/public-bit` it refused the explicitly-allowed path, and reversing the two lines reversed the verdict. [src:ROBOTS-FIRST-MATCH-2026-08-27]
 - The secret redactor did not redact `AWS_SECRET_ACCESS_KEY=...`, because its generic key=value pattern required a word boundary before the key name and underscores are word characters. [src:REDACTION-COMPOUND-KEY-2026-08-27]
 - The HTTP client treated every 403 as non-retryable while separately computing a wait from GitHub's `x-ratelimit-reset`, so the wait was dead code and a rate-limited call failed permanently instead of pausing. GitHub signals both primary and secondary rate limits with 403 rather than 429. [src:GITHUB-403-RATE-LIMIT-2026-08-27]
-- The retrieval evaluation over 8 golden cases passed all 8, at recall@8 0.9286, MRR 0.9286 and nDCG@8 0.892, with zero citation problems, zero contaminated cases, and the one abstention case abstaining as required. [src:OODARAG-VERIFIED-2026-08-27]
+- The retrieval evaluation over 8 golden cases passed all 8, with zero citation problems, zero contaminated cases, and the one abstention case abstaining as required. [src:OODARAG-VERIFIED-2026-08-27]
+- Scored on the documentation corpus at the time of the audit re-run, retrieval reached recall@8 0.9286, MRR 0.9286 and nDCG@8 0.892. [src:AUDIT-RERUN-2026-08-27]
+- On the corpus as it now stands, recall@8 is unchanged at 0.9286 while MRR fell to 0.8571 and nDCG@8 to 0.8393. Two cases moved from rank 1 to rank 2, and both are questions the newly-added audit document discusses: fusion, and the difference between a blocked host and a missing credential. [src:OODARAG-VERIFIED-2026-08-27]
+- The cause is the corpus rather than the retriever: a document written *about* the pipeline competes with the pipeline's own source for questions about the pipeline, and recall holding at 0.9286 shows the right document is still retrieved, only lower. [src:OODARAG-VERIFIED-2026-08-27]
 - Evaluating against the whole repository instead of the documentation corpus contaminated the run: `evals/goldens.jsonl` and a captured report from a previous run both contain the golden questions verbatim, the abstention case retrieved its own question and stopped abstaining, and it failed. Excluding the eval material restored it. [src:EVAL-CONTAMINATION-2026-08-27]
 
 ## Observed — the fleet, re-checked at 16:10Z
 
-- The roster captured at 14:27Z listed 4 sessions; at 16:10Z there were 13 branches on `claude` and 7 on `claude-ai`, ten of them siblings holding between 25 and 118 files. [src:FLEET-SYNC-2026-08-27]
+- The roster captured at 14:27Z listed 4 sessions; at 16:10Z there were 13 branches on `claude` and 7 on `claude-ai`, twelve of them siblings holding between 25 and 118 files. [src:FLEET-SYNC-2026-08-27]
 - A sibling branch independently performed the same unrelated-histories merge this branch did, so the "whoever merges first should say so" convention did not coordinate anything: both sessions acted before either could announce it. [src:FLEET-SYNC-2026-08-27]
 - Every Markdown, text and YAML file on all twelve sibling branches was searched for the strings behind U-3 and U-4. Neither "the book" nor "imb" appears anywhere. Those unknowns stay open, now having been checked rather than assumed. [src:FLEET-SYNC-2026-08-27]
 
@@ -110,7 +114,7 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - The audit raised five findings against `src/oodarag/`: a console script with no `cli.py`, a README table presenting planned work as delivered, four Makefile targets that could not succeed, a chunking contract with no implementation, and the `estimate_tokens` heuristic that the eval harness would inherit. [src:SIBLING-AUDIT-2026-08-27]
 - All five are now closed on this branch, four of them by work done independently before the audit was read. [src:AUDIT-CLOSED-2026-08-27]
 - The audit was re-run against the completed pipeline, as its closing line asked. The four categories it could not previously assess were assessed, and three further defects were found by measuring: overlap at 6.9% against a 10-20% recommendation, prose routed through the code chunking strategy, and caller-supplied chunk sizing silently overridden by the policy. All three are fixed, and overlap now measures 18.0%. [src:AUDIT-RERUN-2026-08-27]
-- A documented embedding cache did not exist and now does: 49.5% hit rate on a half-duplicate batch, 1.9x faster than uncached. [src:AUDIT-RERUN-2026-08-27]
+- A documented embedding cache did not exist and now does. Timed over 1000 texts of which half are duplicates, it runs in 85.3 ms against 156.4 ms uncached — a 1.83x speedup at a 49.9% hit rate. [src:MEASURED-CLAIMS-2026-08-27]
 - The audit also passed three of the README's claims — redaction at the connector boundary, bounded crawls on four axes, and provenance carried through the data model — and noted that its remaining categories could not be assessed because those stages did not exist. [src:SIBLING-AUDIT-2026-08-27]
 
 ## Second-hand — the owner's own documents

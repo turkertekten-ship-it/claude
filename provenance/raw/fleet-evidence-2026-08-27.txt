@@ -1,0 +1,50 @@
+=== wider egress probe — 2026-08-27T20:08Z ===
+URL                                                                 BARRIER         CODE  REMEDY
+------------------------------------------------------------------  --------------- ----  ----------------------------------------
+https://api.github.com/rate_limit                                   open             200  nothing; the host is reachable
+https://raw.githubusercontent.com/anthropics/skills/main/README.md  open             200  nothing; the host is reachable
+https://codeload.github.com/                                        bad_request      400  the host answered; the request was malformed for this path
+https://objects.githubusercontent.com/                              not_found        404  check the path; the host itself answered
+https://pypi.org/simple/                                            open             200  nothing; the host is reachable
+https://files.pythonhosted.org/                                     open             200  nothing; the host is reachable
+https://registry.npmjs.org/                                         open             200  nothing; the host is reachable
+https://proxy.golang.org/                                           open             200  nothing; the host is reachable
+https://crates.io/                                                  not_found        404  check the path; the host itself answered
+https://www.googleapis.com/discovery/v1/apis                        open             200  nothing; the host is reachable
+https://youtube.googleapis.com/youtube/v3/videos                    auth_required    403  supply a credential for this host
+https://storage.googleapis.com/                                     bad_request      400  the host answered; the request was malformed for this path
+https://platform.claude.com/                                        open             200  nothing; the host is reachable
+https://docs.claude.com/                                            open             200  nothing; the host is reachable
+https://code.claude.com/                                            egress_blocked     -  add the host to the network egress allowlist; no code change can reach it from here
+https://api.anthropic.com/                                          not_found        404  check the path; the host itself answered
+
+1 of 16 host(s) refused at CONNECT. These cannot be reached by any code path from here.
+
+=== sibling skills listing (backs FLEET.md's skills claim) ===
+.claude/skills/chunking-advisor/LICENSE.txt
+.claude/skills/chunking-advisor/SKILL.md
+.claude/skills/doc-coauthoring/SKILL.md
+.claude/skills/mcp-builder/LICENSE.txt
+.claude/skills/mcp-builder/SKILL.md
+.claude/skills/mcp-builder/reference/evaluation.md
+.claude/skills/mcp-builder/reference/mcp_best_practices.md
+.claude/skills/mcp-builder/reference/node_mcp_server.md
+.claude/skills/mcp-builder/reference/python_mcp_server.md
+.claude/skills/mcp-builder/scripts/connections.py
+.claude/skills/mcp-builder/scripts/evaluation.py
+.claude/skills/mcp-builder/scripts/example_evaluation.xml
+.claude/skills/mcp-builder/scripts/requirements.txt
+.claude/skills/ooda/SKILL.md
+.claude/skills/rag-audit/LICENSE.txt
+.claude/skills/rag-audit/SKILL.md
+SKILLS.md
+
+=== sibling audit severities (backs the corrected wording) ===
+### F-1 — `pip install .` produces a console script that cannot run · blocking
+### F-2 — the README's failure-mode table presents planned work as delivered · high
+### F-3 — `make demo`, `query`, `eval` and `loop` cannot succeed · high
+### F-4 — chunking has a contract but no implementation · medium
+### F-5 — `estimate_tokens` is a heuristic that the eval harness will inherit · low
+
+=== root-unification commit on that branch ===
+c897524 Unify the fleet's two unrelated roots on this session's branch

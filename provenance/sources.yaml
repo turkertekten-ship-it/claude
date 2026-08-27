@@ -336,7 +336,7 @@ sources:
     evidence: provenance/raw/fleet-sync-2026-08-27T16-10Z.txt
     note: >-
       13 branches on `claude`, 7 on `claude-ai`, against the 4-session roster
-      captured at 14:27Z. Ten sibling branches hold 25-118 files each. A grep
+      captured at 14:27Z. Twelve sibling branches hold 25-118 files each. A grep
       across every Markdown, text and YAML file on all twelve sibling branches
       matched neither "imb" nor "the book" nor "kitap", so U-3 and U-4 remain
       open after being checked rather than assumed.
@@ -467,3 +467,45 @@ sources:
       divergent content. Their internal/LEARNINGS.md L4 records the same
       stdlib robots.txt precedence defect this branch found and fixed
       independently.
+
+  - id: MEASURED-CLAIMS-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T20:08Z"
+    method: "python3 timing script: embedding cache with and without, median of 5 runs; pure-Python cosine over 2000 vectors"
+    evidence: provenance/raw/measurements-2026-08-27.txt
+    note: >-
+      Embedding cache over 1000 texts of which 500 are duplicates: 85.3 ms
+      cached against 156.4 ms uncached, a 1.83x speedup at a 49.9% hit rate.
+      Dense scan of 2000 vectors of 512 dimensions in pure Python: 133.1 ms,
+      or 66.5 microseconds per vector. No vectorised comparison was run,
+      because numpy is not installed here.
+
+  - id: EGRESS-HOSTS-DETAILED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T20:08Z"
+    method: "python3 -m oodarag.cli reachability over the 16 hosts named in the allowlist claim"
+    evidence: provenance/raw/fleet-evidence-2026-08-27.txt
+    note: >-
+      Probes every host the earlier summary named rather than the five the
+      earlier capture actually contained. Fifteen of sixteen answered at the
+      application layer: api.github.com, raw.githubusercontent.com, pypi.org,
+      files.pythonhosted.org, registry.npmjs.org, proxy.golang.org,
+      www.googleapis.com, platform.claude.com and docs.claude.com returned 200;
+      codeload.github.com and storage.googleapis.com returned 400;
+      objects.githubusercontent.com, crates.io and api.anthropic.com returned
+      404; youtube.googleapis.com returned 403 asking for a key. Only
+      code.claude.com was refused at CONNECT — and it answered 302 in an
+      earlier probe the same day, so host reachability is not stable within a
+      session and a single probe is a snapshot rather than a policy.
+
+  - id: FLEET-EVIDENCE-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T20:08Z"
+    method: "git ls-tree -r origin/claude/personal-skills-repos-research-dxmflq; git show of its audit; git log grep unify"
+    evidence: provenance/raw/fleet-evidence-2026-08-27.txt
+    note: >-
+      Captures what the earlier fleet-sync summary asserted but did not
+      archive: the four vendored skills (chunking-advisor, doc-coauthoring,
+      mcp-builder, rag-audit) and SKILLS.md, the audit's own severity labels
+      (F-1 blocking, F-2 and F-3 high, F-4 medium, F-5 low), and the commit
+      c897524 "Unify the fleet's two unrelated roots on this session's branch".

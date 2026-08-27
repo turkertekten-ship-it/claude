@@ -33,9 +33,12 @@ Accelerators and hosted providers plug in behind interfaces (`Embedder`,
 - **Dense search is a brute-force scan.** No ANN index. Exact, no tuning
   parameters, and linear in corpus size — right at this scale, wrong at a much
   larger one.
-- **Scoring is pure Python.** Roughly an order of magnitude slower than a
-  vectorised equivalent. `pip install oodarag[fast]` adds numpy behind the same
-  interface.
+- **Scoring is pure Python.** Measured: a dense scan of 2,000 vectors of 512
+  dimensions takes 133 ms, about 66 microseconds per vector. No vectorised
+  comparison has been run here — numpy is not installed in this environment —
+  so the *size* of the gap is an expectation rather than a measurement, and is
+  deliberately not quantified. `pip install oodarag[fast]` adds numpy behind
+  the same interface for anyone who wants to find out.
 
 ## What it buys
 

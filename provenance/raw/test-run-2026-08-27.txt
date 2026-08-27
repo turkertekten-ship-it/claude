@@ -1,19 +1,29 @@
-=== make test — 2026-08-27T20:06Z ===
+=== make test — 2026-08-27T20:11Z ===
 python3 -m unittest discover -s tests
 .........................................usage: ooda [-h] [--db DB] [--state STATE] [--dim DIM]
             [--chunk-tokens CHUNK_TOKENS] [-k K] [--json] [-v]
             {index,query,eval,loop,reachability,skills,stats,demo} ...
 ooda: error: the following arguments are required: command
 ...no SKILL.md found under: /nonexistent/skills
-...............................................................x [ingest] connector failed key=files:nope err=ingest root does not exist: /tmp/tmpmtb4y4gu/nope
+...............................................................x [ingest] connector failed key=files:nope err=ingest root does not exist: /tmp/tmpid7m0634/nope
 ..............x [ingest] connector failed key=exploding err=Tunnel connection failed: 403 Forbidden
-..........................................................................................................................
+.....................................................................................................................! [ingest.youtube] manifest entry skipped err=/tmp/tmpv5pz1f4b/manifest.json[2]: no usable video_id
+! [ingest.youtube] manifest entry skipped err=/tmp/tmpv5pz1f4b/manifest.json[3]: no usable video_id
+..! [ingest.youtube] manifest entry skipped err=/tmp/tmppkn3o73u/manifest.json[2]: no usable video_id
+! [ingest.youtube] manifest entry skipped err=/tmp/tmppkn3o73u/manifest.json[3]: no usable video_id
+....! [ingest.youtube] manifest entry skipped err=/tmp/tmp4f85sq8w/manifest.json[2]: no usable video_id
+! [ingest.youtube] manifest entry skipped err=/tmp/tmp4f85sq8w/manifest.json[3]: no usable video_id
+.! [ingest.youtube] manifest entry skipped err=/tmp/tmp4o3x_c46/manifest.json[2]: no usable video_id
+! [ingest.youtube] manifest entry skipped err=/tmp/tmp4o3x_c46/manifest.json[3]: no usable video_id
+.! [ingest.youtube] manifest entry skipped err=/tmp/tmpcqa_7ry5/manifest.json[2]: no usable video_id
+! [ingest.youtube] manifest entry skipped err=/tmp/tmpcqa_7ry5/manifest.json[3]: no usable video_id
+........
 ----------------------------------------------------------------------
-Ran 243 tests in 1.061s
+Ran 254 tests in 1.177s
 
 OK
 == python3 tools/verify_provenance.py ==
-verify_provenance: OK — 23 file(s), 38 source(s), 0 violations
+verify_provenance: OK — 23 file(s), 41 source(s), 0 violations
 
 == python3 tests/test_verify_provenance.py ==
 verifier unit cases
@@ -38,7 +48,7 @@ all cases passed
 
 == python3 tests/test_ingest_chat_archive.py ==
 empty-archive cases
-No archive files found under /tmp/tmpg2un0l91/archive/.
+No archive files found under /tmp/tmpffnk36y9/archive/.
 
 This is not an error — it means no conversation export has been
 placed there yet. Nothing was indexed, and nothing was invented
@@ -66,23 +76,23 @@ claude.ai export cases
   ok   conversation title is kept
   ok   idless and non-object records are skipped
 index and search cases
-Indexed 5 message(s) across 3 conversation(s) from 2 file(s) -> /tmp/tmpg2un0l91/index.db
+Indexed 5 message(s) across 3 conversation(s) from 2 file(s) -> /tmp/tmpffnk36y9/index.db
 
 Skipped 3 record(s) that could not be parsed. They were not repaired or guessed at:
-  - /tmp/tmpg2un0l91/archive/conversations.json[1]: no id field among ('uuid', 'id', 'conversation_id')
-  - /tmp/tmpg2un0l91/archive/conversations.json[2]: conversation is not an object
-  - /tmp/tmpg2un0l91/archive/t.jsonl:5: unparseable JSON (Expecting property name enclosed in double quotes)
+  - /tmp/tmpffnk36y9/archive/conversations.json[1]: no id field among ('uuid', 'id', 'conversation_id')
+  - /tmp/tmpffnk36y9/archive/conversations.json[2]: conversation is not an object
+  - /tmp/tmpffnk36y9/archive/t.jsonl:5: unparseable JSON (Expecting property name enclosed in double quotes)
   ok   parse failures make ingest exit 1
   ok   all readable messages are indexed
   ok   full-text search finds a message
   ok   search returns the verbatim stored text
 idempotence cases
-Indexed 5 message(s) across 3 conversation(s) from 2 file(s) -> /tmp/tmpg2un0l91/index.db
+Indexed 5 message(s) across 3 conversation(s) from 2 file(s) -> /tmp/tmpffnk36y9/index.db
 
 Skipped 3 record(s) that could not be parsed. They were not repaired or guessed at:
-  - /tmp/tmpg2un0l91/archive/conversations.json[1]: no id field among ('uuid', 'id', 'conversation_id')
-  - /tmp/tmpg2un0l91/archive/conversations.json[2]: conversation is not an object
-  - /tmp/tmpg2un0l91/archive/t.jsonl:5: unparseable JSON (Expecting property name enclosed in double quotes)
+  - /tmp/tmpffnk36y9/archive/conversations.json[1]: no id field among ('uuid', 'id', 'conversation_id')
+  - /tmp/tmpffnk36y9/archive/conversations.json[2]: conversation is not an object
+  - /tmp/tmpffnk36y9/archive/t.jsonl:5: unparseable JSON (Expecting property name enclosed in double quotes)
   ok   re-ingesting does not duplicate messages
   ok   re-ingesting does not duplicate the search index
 
@@ -110,4 +120,4 @@ pass     0.000  0.000  0.000  what is the airspeed velocity of an unladen
         contaminated: 0
          abstentions: 1
          load_errors: 0
-      mean_latency_s: 0.0299
+      mean_latency_s: 0.0338

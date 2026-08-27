@@ -18,9 +18,24 @@ have different answers:
      directory instead, and the connector says which videos lack one rather
      than quietly indexing title-and-description as though it were a transcript.
 
-The connector therefore degrades in three named steps — metadata + transcript,
-metadata only, nothing-with-a-reason — and never fabricates the level above the
-one it actually reached.
+There are therefore three ways in, and every document records which one it came
+from in `transcript_source`:
+
+  - `captions`      — a real caption file was read; the text is the speech.
+  - `metadata_only` — title, description and channel; no transcript exists here.
+  - `api`           — metadata fetched live from the Data API.
+
+The connector never fabricates the level above the one it reached, and it will
+not promote a curated summary to `captions`. A paragraph *about* a video, stored
+next to it, reads exactly like a transcript once it has been chunked — and a
+citation pointing at it would look verbatim while being someone's paraphrase.
+That is the failure the citation contract exists to prevent, so the distinction
+is a stored field rather than a convention.
+
+The vocabulary above is deliberately the same as the one used by the sibling
+branch `claude/rag-system-data-pipeline-rdkde9`, which built a manifest format
+for the same problem. Two implementations of one pipeline are already one too
+many; they should at least agree on what their documents claim.
 """
 
 from __future__ import annotations
@@ -168,6 +183,79 @@ def parse_caption_file(path: Path) -> Transcript:
         buffer.append(stripped)
     flush()
     return Transcript(video_id=video_id, cues=cues, source_path=str(path))
+
+
+#: How the text of a video document was obtained. Ordered strongest first.
+TRANSCRIPT_SOURCES = ("captions", "api", "metadata_only", "failed")
+
+
+@dataclass(slots=True)
+class ManifestEntry:
+    """One video described in a committed manifest.
+
+    A manifest is how a video corpus survives an environment that cannot reach
+    YouTube: the ids and titles are gathered once, by whatever path works
+    (search reaches metadata that fetch cannot), and committed. The connector
+    then hydrates real captions wherever egress permits and degrades to
+    metadata elsewhere, rather than being written for the blocked case and
+    stuck there.
+    """
+
+    video_id: str
+    title: str = ""
+    channel: str = ""
+    presenter: str = ""
+    verification: str = ""
+    topics: list[str] = field(default_factory=list)
+    related: list[str] = field(default_factory=list)
+
+    @classmethod
+    def from_dict(cls, payload: dict[str, Any]) -> ManifestEntry | None:
+        raw_id = str(payload.get("video_id", "")).strip()
+        video_id = extract_video_id(raw_id)
+        if not video_id:
+            return None
+        return cls(
+            video_id=video_id,
+            title=str(payload.get("title", "")).strip(),
+            channel=str(payload.get("channel", "")).strip(),
+            presenter=str(payload.get("presenter", "")).strip(),
+            verification=str(payload.get("verification", "")).strip(),
+            topics=[str(t) for t in payload.get("topics", []) if str(t).strip()],
+            related=[str(r) for r in payload.get("related", []) if str(r).strip()],
+        )
+
+
+def load_manifest(path: str | Path) -> tuple[list[ManifestEntry], list[str]]:
+    """Read a video manifest. Returns the entries and the entries that failed.
+
+    Keys beginning with an underscore are documentation for a human reader and
+    are ignored. A malformed entry is reported rather than skipped silently: a
+    corpus that quietly shrank is worse than one that failed loudly, because
+    every downstream number improves either way.
+    """
+    p = Path(path)
+    errors: list[str] = []
+    try:
+        payload = json.loads(p.read_text("utf-8"))
+    except (OSError, ValueError) as e:
+        return [], [f"{p}: {type(e).__name__}: {e}"]
+
+    raw = payload.get("videos") if isinstance(payload, dict) else payload
+    if not isinstance(raw, list):
+        return [], [f"{p}: no 'videos' list found"]
+
+    entries: list[ManifestEntry] = []
+    for i, item in enumerate(raw):
+        if not isinstance(item, dict):
+            errors.append(f"{p}[{i}]: entry is not an object")
+            continue
+        entry = ManifestEntry.from_dict(item)
+        if entry is None:
+            errors.append(f"{p}[{i}]: no usable video_id")
+            continue
+        entries.append(entry)
+    return entries, errors
 
 
 class TranscriptStore:
@@ -408,6 +496,7 @@ class YouTubeConnector(Connector):
         *,
         video_ids: list[str] | None = None,
         playlist_ids: list[str] | None = None,
+        manifest: str | Path | None = None,
         api_key: str = "",
         transcript_dir: str | Path | None = None,
         client: YouTubeClient | None = None,
@@ -416,13 +505,29 @@ class YouTubeConnector(Connector):
     ) -> None:
         self.video_ids = [v for v in (extract_video_id(x) or "" for x in (video_ids or [])) if v]
         self.playlist_ids = list(playlist_ids or [])
+        self.manifest_path = Path(manifest) if manifest else None
+        self.manifest: dict[str, ManifestEntry] = {}
+        self.manifest_errors: list[str] = []
+        if self.manifest_path:
+            entries, self.manifest_errors = load_manifest(self.manifest_path)
+            self.manifest = {e.video_id: e for e in entries}
         self.api = client or YouTubeClient(api_key=api_key)
+        # A manifest usually sits beside its captions, so that directory is the
+        # default place to look when none was given.
+        if transcript_dir is None and self.manifest_path:
+            transcript_dir = self.manifest_path.parent
         self.transcripts = TranscriptStore(transcript_dir)
         self.include_timestamps = include_timestamps
-        self.key = key or f"youtube:{','.join(self.video_ids[:3]) or 'playlists'}"
+        self.key = key or (
+            f"youtube:{self.manifest_path}" if self.manifest_path
+            else f"youtube:{','.join(self.video_ids[:3]) or 'playlists'}"
+        )
 
     def fetch(self, cursor: dict[str, Any]) -> Iterator[RawDocument]:
-        ids = list(self.video_ids)
+        for err in self.manifest_errors:
+            log.warn("manifest entry skipped", err=err)
+
+        ids = list(self.manifest) + list(self.video_ids)
         for pl in self.playlist_ids:
             ids.extend(self.api.playlist_video_ids(pl))
         seen: set[str] = set()
@@ -430,10 +535,77 @@ class YouTubeConnector(Connector):
         if not ids:
             return
 
-        for item in self.api.videos(ids):
-            doc = self._video_document(item)
+        # The API is used only when it can be: with no key, a manifest still
+        # produces a corpus, which is the whole point of committing one.
+        items: dict[str, dict[str, Any]] = {}
+        if self.api.configured:
+            try:
+                items = {v["id"]: v for v in self.api.videos(ids) if isinstance(v.get("id"), str)}
+            except YouTubeUnavailable as e:
+                log.warn("Data API unavailable, falling back to the manifest",
+                         barrier=e.barrier.value, detail=e.detail[:160])
+
+        for video_id in ids:
+            doc = (
+                self._video_document(items[video_id])
+                if video_id in items
+                else self._manifest_document(video_id)
+            )
             if doc is not None:
                 yield doc
+
+    def _manifest_document(self, video_id: str) -> RawDocument | None:
+        """Build a document from the manifest alone, with no API call.
+
+        Only the fields a human actually recorded are written. Nothing is
+        invented to fill a gap, and no prose is attributed to the video unless
+        a caption file was genuinely read.
+        """
+        entry = self.manifest.get(video_id)
+        if entry is None:
+            return None
+        transcript = self.transcripts.get(video_id)
+
+        body = [f"# {entry.title or video_id}"]
+        if entry.channel:
+            body.append(f"Channel: {entry.channel}")
+        if entry.presenter:
+            body.append(f"Presenter: {entry.presenter}")
+        if entry.topics:
+            body.append("Topics: " + ", ".join(entry.topics))
+        if entry.related:
+            body.append("\nRelated:\n" + "\n".join(f"- {r}" for r in entry.related))
+        if transcript is not None:
+            body.append("\n## Transcript\n")
+            body.append(
+                transcript.with_timestamps() if self.include_timestamps else transcript.text
+            )
+
+        source = "captions" if transcript is not None else "metadata_only"
+        return RawDocument(
+            source_system="youtube",
+            external_id=video_id,
+            uri=f"https://www.youtube.com/watch?v={video_id}",
+            title=entry.title or video_id,
+            text=redact_secrets("\n".join(body)),
+            metadata={
+                "kind": "video",
+                "channel": entry.channel,
+                "presenter": entry.presenter,
+                "topics": entry.topics,
+                "related": entry.related,
+                # How strongly the manifest's own author vouched for the
+                # channel attribution. Carried through rather than dropped,
+                # because a search-listed attribution is weaker evidence than a
+                # confirmed one and a reader should be able to tell.
+                "verification": entry.verification,
+                "transcript_source": source,
+                "transcript_available": transcript is not None,
+                "transcript_cues": len(transcript.cues) if transcript else 0,
+                "transcript_source_path": transcript.source_path if transcript else "",
+                "from_manifest": True,
+            },
+        )
 
     def _video_document(self, item: dict[str, Any]) -> RawDocument | None:
         video_id = item.get("id")
@@ -472,9 +644,15 @@ class YouTubeConnector(Connector):
                 "duration": item.get("contentDetails", {}).get("duration", ""),
                 "tags": snippet.get("tags", [])[:20],
                 "view_count": item.get("statistics", {}).get("viewCount"),
+                "transcript_source": "captions" if transcript is not None else "api",
                 "transcript_available": transcript is not None,
                 "transcript_cues": len(transcript.cues) if transcript else 0,
-                "transcript_source": transcript.source_path if transcript else "",
+                "transcript_source_path": transcript.source_path if transcript else "",
+                "verification": (
+                    self.manifest[video_id].verification
+                    if video_id in self.manifest else "api"
+                ),
+                "from_manifest": video_id in self.manifest,
                 "quota_spent": self.api.quota_spent,
             },
         )

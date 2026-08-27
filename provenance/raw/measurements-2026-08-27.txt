@@ -1,0 +1,7 @@
+=== measured claims — 2026-08-27T20:08Z ===
+embedding cache, 1000 texts of which 500 are duplicates (median of 5):
+  cached   :    85.3 ms   hit_rate=49.9%
+  uncached :   156.4 ms
+  speedup  : 1.83x
+
+dense scan, 2000 vectors x 512 dims, pure Python: 133.1 ms (66.5 us per vector)

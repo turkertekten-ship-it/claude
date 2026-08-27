@@ -7,6 +7,7 @@ retrying.
 
 from __future__ import annotations
 
+import os
 import sys
 import tempfile
 import unittest
@@ -16,11 +17,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from oodarag.ingest.youtube import (  # noqa: E402
     QUOTA_COST,
+    ManifestEntry,
     TranscriptStore,
     YouTubeClient,
+    YouTubeConnector,
     YouTubeUnavailable,
     classify_api_error,
     extract_video_id,
+    load_manifest,
     parse_caption_file,
 )
 from oodarag.net.reachability import Barrier  # noqa: E402
@@ -183,6 +187,116 @@ class TestCaptionParsing(unittest.TestCase):
         # store, not a crash on a path that does not exist.
         self.assertFalse(TranscriptStore("/nonexistent/path").available)
         self.assertFalse(TranscriptStore(None).available)
+
+
+MANIFEST = """{
+  "_about": "documentation for a human reader, ignored by the loader",
+  "videos": [
+    {"video_id": "T-D1OfcDW1M", "title": "What is RAG?", "channel": "IBM Technology",
+     "presenter": "Marina Danilevsky", "verification": "search_confirmed",
+     "topics": ["rag", "grounding"],
+     "related": ["https://www.ibm.com/think/videos/rag"]},
+    {"video_id": "https://www.youtube.com/watch?v=LpKGm1jJXv4", "title": "Setting up RAG",
+     "channel": "IBM Technology", "verification": "search_listed"},
+    {"video_id": "not-an-id", "title": "malformed"},
+    {"title": "no id at all"}
+  ]
+}"""
+
+
+class TestManifest(unittest.TestCase):
+    """A manifest is how a video corpus survives an environment with no egress."""
+
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.dir = Path(self.tmp.name)
+        self.path = self.dir / "manifest.json"
+        self.path.write_text(MANIFEST, "utf-8")
+        # Defeat any ambient key so the offline path is what is exercised.
+        self._saved = os.environ.pop("YOUTUBE_API_KEY", None)
+        if self._saved is not None:
+            self.addCleanup(lambda: os.environ.__setitem__("YOUTUBE_API_KEY", self._saved))
+
+    def test_valid_entries_load_and_malformed_ones_are_reported(self) -> None:
+        # A corpus that quietly shrank is worse than one that failed loudly:
+        # every downstream number improves either way.
+        entries, errors = load_manifest(self.path)
+        self.assertEqual(len(entries), 2)
+        self.assertEqual(len(errors), 2)
+
+    def test_a_watch_url_is_accepted_as_an_id(self) -> None:
+        entries, _ = load_manifest(self.path)
+        self.assertIn("LpKGm1jJXv4", [e.video_id for e in entries])
+
+    def test_underscore_keys_are_documentation_not_data(self) -> None:
+        entries, errors = load_manifest(self.path)
+        self.assertEqual(len(entries), 2)
+        self.assertFalse(any("_about" in e for e in errors))
+
+    def test_a_missing_manifest_is_an_error_not_an_empty_success(self) -> None:
+        entries, errors = load_manifest(self.dir / "absent.json")
+        self.assertEqual(entries, [])
+        self.assertTrue(errors)
+
+    def test_malformed_json_is_reported(self) -> None:
+        bad = self.dir / "bad.json"
+        bad.write_text("{not json", "utf-8")
+        entries, errors = load_manifest(bad)
+        self.assertEqual(entries, [])
+        self.assertTrue(errors)
+
+    def test_the_connector_produces_documents_with_no_key_and_no_network(self) -> None:
+        class ExplodingClient:
+            def get(self, *a: object, **k: object) -> object:
+                raise AssertionError("a request was made on the manifest path")
+
+        connector = YouTubeConnector(
+            manifest=self.path,
+            client=YouTubeClient(api_key="", client=ExplodingClient()),  # type: ignore[arg-type]
+        )
+        connector.api.api_key = ""
+        docs = list(connector.fetch({}))
+        self.assertEqual(len(docs), 2)
+
+    def test_a_video_with_no_captions_is_labelled_metadata_only(self) -> None:
+        # The distinction that stops a description being cited as speech.
+        connector = YouTubeConnector(manifest=self.path)
+        connector.api.api_key = ""
+        docs = list(connector.fetch({}))
+        for doc in docs:
+            self.assertEqual(doc.metadata["transcript_source"], "metadata_only")
+            self.assertFalse(doc.metadata["transcript_available"])
+
+    def test_a_caption_file_beside_the_manifest_upgrades_the_source(self) -> None:
+        (self.dir / "T-D1OfcDW1M.en.vtt").write_text(VTT, "utf-8")
+        connector = YouTubeConnector(manifest=self.path)
+        connector.api.api_key = ""
+        docs = {d.external_id: d for d in connector.fetch({})}
+        self.assertEqual(docs["T-D1OfcDW1M"].metadata["transcript_source"], "captions")
+        self.assertEqual(docs["LpKGm1jJXv4"].metadata["transcript_source"], "metadata_only")
+
+    def test_the_verification_grade_is_carried_through(self) -> None:
+        # search_listed is weaker evidence than search_confirmed, and a reader
+        # should be able to tell which they are looking at.
+        connector = YouTubeConnector(manifest=self.path)
+        connector.api.api_key = ""
+        grades = {d.external_id: d.metadata["verification"] for d in connector.fetch({})}
+        self.assertEqual(grades["T-D1OfcDW1M"], "search_confirmed")
+        self.assertEqual(grades["LpKGm1jJXv4"], "search_listed")
+
+    def test_no_prose_is_attributed_to_a_video_without_captions(self) -> None:
+        # The failure this guards: a summary stored next to a video reads
+        # exactly like a transcript once chunked, and a citation pointing at it
+        # would look verbatim while being someone's paraphrase.
+        connector = YouTubeConnector(manifest=self.path)
+        connector.api.api_key = ""
+        for doc in connector.fetch({}):
+            self.assertNotIn("## Transcript", doc.text)
+
+    def test_manifest_entry_rejects_an_unusable_id(self) -> None:
+        self.assertIsNone(ManifestEntry.from_dict({"video_id": "nope"}))
+        self.assertIsNone(ManifestEntry.from_dict({}))
 
 
 if __name__ == "__main__":

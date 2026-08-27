@@ -42,9 +42,9 @@ is the roster and the rules that keep them from overwriting each other.
 
 ## Observed — the fleet at 16:10Z
 
-- `claude` carries 13 branches and `claude-ai` carries 7, against a roster of 4 sessions. Ten sibling branches hold between 25 and 118 files each. [src:FLEET-SYNC-2026-08-27]
-- `claude/personal-skills-repos-research-dxmflq` vendored four skills into `.claude/skills/` — `chunking-advisor`, `doc-coauthoring`, `mcp-builder` and `rag-audit` — and wrote a `SKILLS.md` routing table. [src:FLEET-SYNC-2026-08-27]
-- That branch also contains an audit of `src/oodarag/`, run before the retrieval spine existed, whose blocking findings were a console script with no `cli.py`, a README presenting planned work as delivered, four Makefile targets that could not succeed, and a chunking contract with no implementation. [src:SIBLING-AUDIT-2026-08-27]
+- `claude` carries 13 branches and `claude-ai` carries 7, against a roster of 4 sessions. Twelve sibling branches hold between 25 and 118 files each. [src:FLEET-SYNC-2026-08-27]
+- `claude/personal-skills-repos-research-dxmflq` vendored four skills into `.claude/skills/` — `chunking-advisor`, `doc-coauthoring`, `mcp-builder` and `rag-audit` — and wrote a `SKILLS.md` routing table. [src:FLEET-EVIDENCE-2026-08-27]
+- That branch also contains an audit of `src/oodarag/`, run before the retrieval spine existed, whose findings were a console script with no `cli.py` (its only blocking-severity one), a README presenting planned work as delivered and four Makefile targets that could not succeed (both high), a chunking contract with no implementation (medium), and an inherited token-estimation bias (low). [src:FLEET-EVIDENCE-2026-08-27]
 - All twelve sibling branches were searched for the strings behind U-3 and U-4; neither "the book" nor "imb" appears in any Markdown, text or YAML file on any of them. [src:FLEET-SYNC-2026-08-27]
 
 ## Observed — the same pipeline built twice

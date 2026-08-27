@@ -30,7 +30,7 @@ reasoning remains unknown. The other two sessions have pushed nothing.
 **Do not:** infer their contents from their titles. A title is a label the
 system generated, not a record of the work.
 
-**Narrowed at 16:10Z.** Ten sibling branches have now pushed, holding 25-118
+**Narrowed at 16:10Z.** Twelve sibling branches have now pushed, holding 25-118
 files each, and their *output* is readable. [src:FLEET-SYNC-2026-08-27] One
 of them was read in full and its audit of this pipeline acted on.
 [src:SIBLING-AUDIT-2026-08-27] Their reasoning remains unavailable: a diff
