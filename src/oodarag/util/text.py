@@ -49,13 +49,23 @@ def clean(text: str) -> str:
     return normalize_whitespace(normalize_unicode(text))
 
 
-def tokenize(text: str) -> list[str]:
-    """Lowercased content tokens, stopwords removed, single characters dropped."""
-    return [
+def tokenize(text: str, stem_words: bool = False) -> list[str]:
+    """Lowercased content tokens, stopwords removed, single characters dropped.
+
+    `stem_words=True` applies Porter stemming, matching what the FTS5 index
+    does. Any stage that compares text against the lexical index must use it -
+    see util/stemming.py for what happens when two stages disagree.
+    """
+    tokens = [
         t
         for t in (m.group(0).lower() for m in _TOKEN_RE.finditer(text))
         if len(t) > 1 and t not in STOPWORDS
     ]
+    if not stem_words:
+        return tokens
+    from oodarag.util.stemming import stem
+
+    return [stem(t) for t in tokens]
 
 
 def tokenize_all(text: str) -> list[str]:

@@ -1,0 +1,192 @@
+"""The retriever: hybrid search end to end.
+
+    query
+      -> dense arm (embedding, cosine over the flat index)
+      -> lexical arm (BM25 over FTS5)
+      -> reciprocal rank fusion
+      -> rerank (transparent heuristics)
+      -> MMR diversification
+      -> ScoredChunks with full provenance and score breakdown
+
+Both arms are pre-filtered by the same metadata predicate, so a filtered search
+still returns k results rather than however many survived a post-filter.
+
+Why hybrid at all: dense retrieval finds paraphrase ("how do I split documents"
+matches a passage about chunking that never uses the word "split"); lexical
+retrieval finds exact tokens (an error code, a function name, a version string)
+that an embedder blurs away. Each fails where the other works, and the failures
+are not correlated, which is precisely the condition under which fusion helps.
+"""
+
+from __future__ import annotations
+
+import time
+from dataclasses import dataclass, field
+from typing import Any
+
+from oodarag.embedding.base import Embedder
+from oodarag.models import ScoredChunk
+from oodarag.retrieve.fusion import RankedList, reciprocal_rank_fusion
+from oodarag.retrieve.mmr import jaccard, mmr_select
+from oodarag.retrieve.rerank import HeuristicReranker, Reranker
+from oodarag.store.sqlite_store import SqliteStore
+from oodarag.util.logging import get_logger
+from oodarag.util.text import tokenize
+
+log = get_logger("retrieve")
+
+
+@dataclass
+class RetrievalConfig:
+    top_k: int = 8
+    #: How deep each arm searches before fusion. Wider than top_k on purpose:
+    #: fusion and reranking can only promote what they were given.
+    candidate_k: int = 40
+    dense_weight: float = 1.0
+    lexical_weight: float = 1.0
+    rrf_k: int = 60
+    use_mmr: bool = True
+    mmr_lambda: float = 0.7
+    use_rerank: bool = True
+    #: Results below this fused-and-reranked score are dropped. Returning weak
+    #: matches is how a RAG system ends up confidently citing an irrelevant page.
+    min_score: float = 0.0
+
+
+@dataclass
+class RetrievalTrace:
+    """Everything that happened during one retrieval. Answers 'why this result?'"""
+
+    query: str = ""
+    dense_hits: int = 0
+    lexical_hits: int = 0
+    fused_hits: int = 0
+    filtered_to: int | None = None
+    returned: int = 0
+    latency_ms: float = 0.0
+    stages: dict[str, float] = field(default_factory=dict)
+    notes: list[str] = field(default_factory=list)
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "query": self.query, "dense_hits": self.dense_hits,
+            "lexical_hits": self.lexical_hits, "fused_hits": self.fused_hits,
+            "filtered_to": self.filtered_to, "returned": self.returned,
+            "latency_ms": round(self.latency_ms, 2),
+            "stages": {k: round(v, 2) for k, v in self.stages.items()},
+            "notes": self.notes,
+        }
+
+
+class HybridRetriever:
+    def __init__(self, store: SqliteStore, embedder: Embedder,
+                 config: RetrievalConfig | None = None,
+                 reranker: Reranker | None = None) -> None:
+        self.store = store
+        self.embedder = embedder
+        self.config = config or RetrievalConfig()
+        self.reranker = reranker or HeuristicReranker(idf=store.idf_lookup())
+
+    def retrieve(self, query: str, *, top_k: int | None = None,
+                 filters: dict[str, Any] | None = None) -> tuple[list[ScoredChunk], RetrievalTrace]:
+        config = self.config
+        k = top_k or config.top_k
+        trace = RetrievalTrace(query=query)
+        started = time.monotonic()
+
+        allowed = self.store.filter_chunk_ids(filters)
+        if allowed is not None:
+            trace.filtered_to = len(allowed)
+            if not allowed:
+                trace.notes.append("filter matched no chunks")
+                trace.latency_ms = (time.monotonic() - started) * 1000
+                return [], trace
+
+        # --- dense arm
+        mark = time.monotonic()
+        dense: list[tuple[str, float]] = []
+        index = self.store.vector_index(self.embedder.fingerprint)
+        if len(index):
+            query_vector = self.embedder.embed_query(query)
+            dense = index.search(query_vector, k=config.candidate_k, allowed=allowed)
+        else:
+            trace.notes.append(
+                f"no vectors for fingerprint {self.embedder.fingerprint!r}; lexical only"
+            )
+        trace.dense_hits = len(dense)
+        trace.stages["dense_ms"] = (time.monotonic() - mark) * 1000
+
+        # --- lexical arm
+        mark = time.monotonic()
+        lexical = self.store.search_lexical(query, k=config.candidate_k, allowed=allowed)
+        trace.lexical_hits = len(lexical)
+        trace.stages["lexical_ms"] = (time.monotonic() - mark) * 1000
+
+        if not dense and not lexical:
+            trace.latency_ms = (time.monotonic() - started) * 1000
+            trace.notes.append("both arms returned nothing")
+            return [], trace
+
+        # --- fusion
+        mark = time.monotonic()
+        fused = reciprocal_rank_fusion(
+            [
+                RankedList("dense", dense, config.dense_weight),
+                RankedList("lexical", lexical, config.lexical_weight),
+            ],
+            k=config.rrf_k,
+            top_k=config.candidate_k,
+        )
+        trace.fused_hits = len(fused)
+        trace.stages["fusion_ms"] = (time.monotonic() - mark) * 1000
+
+        chunk_map = self.store.get_chunks([item_id for item_id, _, _ in fused])
+        doc_map = self.store.get_documents(
+            list({c.doc_id for c in chunk_map.values()})
+        )
+        results: list[ScoredChunk] = []
+        for chunk_id, score, components in fused:
+            chunk = chunk_map.get(chunk_id)
+            if chunk is None:
+                continue  # index and store disagree; skip rather than crash
+            document = doc_map.get(chunk.doc_id)
+            if document is not None:
+                chunk.metadata.setdefault("updated_at", document.updated_at)
+                chunk.metadata.setdefault("authority", document.metadata.get("authority", 1.0))
+            results.append(ScoredChunk(chunk=chunk, score=score,
+                                       components=dict(components), document=document))
+
+        # --- rerank
+        if config.use_rerank and results:
+            mark = time.monotonic()
+            results = self.reranker.rerank(query, results)
+            trace.stages["rerank_ms"] = (time.monotonic() - mark) * 1000
+
+        if config.min_score > 0:
+            before = len(results)
+            results = [r for r in results if r.score >= config.min_score]
+            if before != len(results):
+                trace.notes.append(f"dropped {before - len(results)} below min_score")
+
+        # --- diversify
+        if config.use_mmr and len(results) > k:
+            mark = time.monotonic()
+            token_cache = {r.chunk.chunk_id: tokenize(r.chunk.indexed_text) for r in results}
+
+            def similarity(a: str, b: str) -> float:
+                return jaccard(token_cache.get(a, []), token_cache.get(b, []))
+
+            keep = mmr_select([(r.chunk.chunk_id, r.score) for r in results],
+                              similarity, k=k, lambda_=config.mmr_lambda)
+            order = {chunk_id: i for i, chunk_id in enumerate(keep)}
+            results = sorted((r for r in results if r.chunk.chunk_id in order),
+                             key=lambda r: order[r.chunk.chunk_id])
+            trace.stages["mmr_ms"] = (time.monotonic() - mark) * 1000
+        else:
+            results = results[:k]
+
+        trace.returned = len(results)
+        trace.latency_ms = (time.monotonic() - started) * 1000
+        log.debug("retrieved", query=query[:60], returned=len(results),
+                  ms=round(trace.latency_ms, 1))
+        return results, trace

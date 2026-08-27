@@ -1,0 +1,48 @@
+# oodarag configuration.
+# Everything here has a working default; this file exists to declare sources.
+
+[oodarag]
+index_path    = ".oodarag/index.db"
+state_path    = ".oodarag/state.json"
+goldens_path  = "evals/goldens.jsonl"
+embedder      = "hashing"          # deterministic, offline, zero-dependency
+generator     = "auto"             # Claude when available, extractive otherwise
+top_k         = 8
+repo_slugs    = ["turkertekten-ship-it/claude", "turkertekten-ship-it/claude-ai"]
+
+[oodarag.embedder_options]
+dim = 768
+
+# --- This repository: the code and the internal docs are the primary corpus.
+[[source]]
+type     = "filesystem"
+root     = "."
+patterns = ["src/**/*.py", "tests/**/*.py", "docs/**/*.md", "internal/**/*.md", "*.md"]
+authority = 1.2
+
+# --- Session transcripts: decisions and reasoning that exist nowhere else.
+# Tool output and reasoning blocks are excluded by default - see ingest/chat.py.
+[[source]]
+type = "chat"
+authority = 0.9
+
+# --- The remote repository, for issues, PRs and releases that are not on disk.
+# Disabled by default: it costs API quota and duplicates the filesystem source
+# for files. Enable it when you want the discussion, not just the code.
+[[source]]
+type    = "github"
+enabled = false
+owner   = "turkertekten-ship-it"
+repo    = "claude"
+resources = ["repo", "issues", "pulls", "releases"]
+
+# --- Web sources. Seeds must be reachable from wherever this runs:
+# run `ooda preflight` first, and see internal/CAPABILITY-PROTOCOL.md.
+[[source]]
+type    = "web"
+enabled = false
+seeds   = ["https://pypi.org/project/requests/"]
+max_pages = 20
+max_fetches = 60
+max_depth = 2
+authority = 0.8
