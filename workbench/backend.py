@@ -431,7 +431,13 @@ class CachingBackend(Backend):
 
     def __init__(self, inner: Backend, cache_dir: str | Path):
         self.inner = inner
-        self.cache_dir = Path(cache_dir)
+        # Per-backend directory, not a shared one. The request hash covers the
+        # prompt and the configuration but says nothing about WHO answered, so
+        # a single flat cache will happily serve an EchoBackend fixture to a
+        # live run. That is not hypothetical: it happened here, and 36 echo
+        # fixtures were served into a $3 measurement before the outputs were
+        # read closely enough to notice.
+        self.cache_dir = Path(cache_dir) / inner.name
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.hits = 0
         self.misses = 0
@@ -454,9 +460,12 @@ class CachingBackend(Backend):
             return self.inner.complete(request)
         path = self.cache_dir / f"{request.cache_key()}.json"
         if path.exists():
-            self.hits += 1
             data = json.loads(path.read_text(encoding="utf-8"))
-            return Completion(**data)
+            if data.get("backend") == self.inner.name:
+                self.hits += 1
+                return Completion(**data)
+            # Someone else's answer. Ignore it rather than reporting it as ours.
+            path.unlink(missing_ok=True)
         self.misses += 1
         completion = self.inner.complete(request)
         if completion.ok:

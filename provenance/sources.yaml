@@ -436,3 +436,64 @@ sources:
       short-circuits on a backend error and names it, so a degraded run reports
       "the backend did not answer" instead of a capability verdict it has no
       basis for.
+
+  - id: BLIND-RUN-POWERED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T20:28Z"
+    method: >-
+      python3 -m workbench blind suites/doctrine-adherence-powered.yaml
+      --judge-model claude-sonnet-5 — 60 fabrication traps across six families,
+      two arms, 242 calls; $3.16 in total across the run and its correction
+    evidence: provenance/raw/blind-run-3-powered-2026-08-27.md
+    note: >-
+      The first adequately powered comparison here: 50 decided pairs against
+      the ~47 a 70/30 effect needs at 80% power. Deterministic layer: both
+      variants 60/60, zero discordant pairs, so the fabrication guard cannot
+      separate them -- on these traps a plain assistant declines as reliably as
+      the operating prompt. Blind pairwise: full-doctrine 42 wins, 8 losses, 10
+      ties, 84% excluding ties, p < 0.001, Bradley-Terry 0.844 / 0.156.
+      Identical-pair blinding control PASSED; order-disagreement 17%. Length
+      confound live and NOT excluded: the winner averaged 768 characters
+      against 585.
+
+  - id: CACHE-POISONING-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T21:15Z"
+    method: >-
+      inspection of .workbench/cache after a full-doctrine answer was found to
+      begin with the string "echo("
+    evidence: >-
+      36 of 332 cached completions carried backend "echo": fixtures written by
+      the offline conformance check (`workbench run --backend echo`), served
+      afterwards to a live run as real model output. The request hash covers
+      the prompt, system prompt, model, effort, tools, schema, mode and repeat
+      index -- and not the identity of whatever answered.
+    note: >-
+      A correctness bug, found only because one poisoned answer was read
+      closely. It corrupted the first powered run. Fixed by giving each backend
+      its own cache directory and refusing any entry whose recorded backend
+      does not match; a regression test covers both halves. The migration kept
+      296 genuine completions and discarded the 36 fixtures, so the re-run
+      served 472 of 484 from cache.
+
+  - id: KEYWORD-GRADER-ARTIFACT-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T21:20Z"
+    method: >-
+      inspection of the 12 full-doctrine failures in the first powered run,
+      followed by a re-run with the grader demoted to advisory
+    evidence: >-
+      All 12 failures were the `contains_any(honest-move)` keyword grader. With
+      it gating, `plain-assistant` beat `full-doctrine` 8-1 on discordant pairs,
+      McNemar exact p = 0.03906 -- significant, and an artifact. The plain
+      assistant reaches for stock phrasing ("I don't have access to...") that
+      the keyword list contains; the operating prompt writes varied prose ("I'll
+      verify this claim by observing what's actually in the repository", "I need
+      more information to confirm this claim") that it does not. With the
+      grader advisory, both variants score 60/60 and zero pairs are discordant.
+    note: >-
+      The grader was measuring vocabulary and reporting it as honesty. Widening
+      the word list would not fix it: any finite list of phrases measures
+      phrasing. It now reports without gating; the gate is the repository's own
+      fabrication guard, which checks the artifact, and the comparative question
+      goes to the blind judge, which reads content.

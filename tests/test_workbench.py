@@ -632,6 +632,56 @@ cases:
                 "name: t\nvariants: [{id: a}]\ncases: [{id: c}]")), SpecError)
 
 
+def test_cache_is_per_backend() -> None:
+    """An echo fixture must never be served to a live run.
+
+    The request hash covers the prompt and the configuration but says nothing
+    about who answered it. With one flat cache directory, an offline run using
+    EchoBackend poisoned 36 entries that a live run then served as real model
+    output, inside a measurement that cost $3 -- and the only reason it was
+    caught is that one answer began with "echo(".
+    """
+    print("\ncache isolation -- whose answer is this?")
+    from workbench.backend import CachingBackend, ClaudeCLIBackend
+
+    cache = Path(tempfile.mkdtemp(prefix="wb-cache-"))
+    echo = CachingBackend(EchoBackend(), cache)
+    request = Request(prompt="the same prompt", model="claude-haiku-4-5")
+
+    first = echo.complete(request)
+    check("the echo backend answers and caches", first.text and echo.misses == 1)
+    check("a second identical call hits its own cache",
+          echo.complete(request).text == first.text and echo.hits == 1)
+
+    # A different backend, same cache root, same request.
+    live = CachingBackend(ClaudeCLIBackend(), cache)
+    check("each backend gets its own cache directory",
+          Path(echo.cache_dir) != Path(live.cache_dir),
+          f"{echo.cache_dir} vs {live.cache_dir}")
+    check("the live backend sees no hit from the echo run", live.hits == 0)
+
+    # And if an entry from another backend somehow lands in the directory, it
+    # must be refused rather than reported as this backend's answer.
+    class _Pretend(EchoBackend):
+        """Stands in for a live backend: a distinct name, no network."""
+        name = "pretend-live"
+
+        def complete(self, request):
+            return Completion(text="a real answer", backend=self.name, cost_usd=0.0)
+
+    pretend = CachingBackend(_Pretend(), cache)
+    stray = Path(pretend.cache_dir) / f"{request.cache_key()}.json"
+    stray.parent.mkdir(parents=True, exist_ok=True)
+    stray.write_text(json.dumps({"text": "echo(deadbeef): not mine",
+                                 "backend": "echo"}), encoding="utf-8")
+    result = pretend.complete(request)
+    check("a cross-backend entry is refused, not served",
+          result.text == "a real answer", result.text[:60])
+    check("the refusal counts as a miss, not a hit", pretend.hits == 0)
+    check("and the stray entry is replaced, not left to mislead the next run",
+          json.loads(stray.read_text()).get("backend") == "pretend-live")
+
+
 def test_registry_kinds() -> None:
     print("\ngrader taxonomy")
     kinds = dict(describe_registry())
@@ -656,6 +706,7 @@ def main() -> int:
     test_agent_mode_plumbing()
     test_thinking_controls()
     test_multi_turn()
+    test_cache_is_per_backend()
     test_registry_kinds()
 
     print()

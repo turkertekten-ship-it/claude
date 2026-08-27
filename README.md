@@ -97,11 +97,22 @@ established on 2026-08-27. The chat index holds nothing yet, and says so
 rather than pretending otherwise.
 
 The workbench has been run against a real question — does the operating prompt
-in `prompts/` actually stop a model inventing things? — and the honest answer
-is **not shown**. Three variants passed the deterministic layer identically;
-the blind comparison favoured the doctrine prompt directionally but at
-p = 0.375 over ten decided pairs, with the winning variant also writing the
-longest answers. The full report is in
-[`provenance/raw/blind-run-2-recalibrated-2026-08-27.md`](provenance/raw/blind-run-2-recalibrated-2026-08-27.md),
-and the run that came before it — the one where a miscalibrated grader failed
-every variant including the correct answers — is kept beside it.
+in `prompts/` actually stop a model inventing things? Sixty fabrication traps,
+two arms, judged blind in both presentation orders, 50 decided pairs against
+the ~47 that 80% power needs. The answer has two halves and both are honest:
+
+- **Nothing separates them on refusing to invent.** Both variants passed 60 of
+  60 on the deterministic fabrication guard, with zero discordant pairs. On
+  these traps a plain assistant declines as reliably as the operating prompt.
+- **Something separates them on how useful the refusal is.** The blind judge
+  preferred the doctrine prompt 42–8 with 10 ties, p < 0.001. But it also wrote
+  the longer answers, 768 characters against 585, and judges are measured to
+  prefer length — so that preference is confounded and the suite did not
+  control for it.
+
+Getting there cost two of this repository's own bugs, both kept on the record:
+36 cached completions written by an **offline echo backend and served to a live
+run as real model output**, and a keyword grader that made the plain assistant
+win at p = 0.039 by **scoring vocabulary as honesty**. Reports:
+[`blind-run-3-powered`](provenance/raw/blind-run-3-powered-2026-08-27.md), and
+the two earlier, worse runs are kept beside it.

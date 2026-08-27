@@ -89,6 +89,20 @@ verified lives in [unknowns.md](unknowns.md), not here.
 > when an agent was told to disprove it. Enumerating the local environment is
 > cheaper than any of the searches that missed it.
 
+## Observed — the powered blind test
+
+- Run at sixty traps across six families with two arms, the comparison decided 50 pairs against the roughly 47 needed for 80% power at a 70/30 effect — the first adequately powered comparison in this repository. [src:BLIND-RUN-POWERED-2026-08-27]
+- On the deterministic layer the suite separated nothing: both variants passed 60 of 60 and no pair was discordant. On these traps a plain assistant declines to invent as reliably as the operating prompt does. [src:BLIND-RUN-POWERED-2026-08-27]
+- Judged blind in both presentation orders, `full-doctrine` beat `plain-assistant` 42 to 8 with 10 ties — 84% excluding ties, p < 0.001, Bradley-Terry 0.844 against 0.156. The identical-pair control passed and order-disagreement was 17%. [src:BLIND-RUN-POWERED-2026-08-27]
+- The winning variant also wrote the longer answers, 768 characters against 585, so length bias cannot be excluded as a cause of the judged preference. [src:BLIND-RUN-POWERED-2026-08-27]
+- An earlier version of the same run reported the opposite deterministic result — `plain-assistant` ahead 8 to 1 on discordant pairs at p = 0.039 — which was an artifact of a keyword grader scoring vocabulary as honesty. [src:KEYWORD-GRADER-ARTIFACT-2026-08-27]
+- That run was also corrupted by 36 cached completions written by an offline echo backend and served to a live run as real model output, because the request hash did not include which backend answered. [src:CACHE-POISONING-2026-08-27]
+
+> Reading, not a claim: the two layers now answer different questions and both
+> answers are honest. Nothing separates the prompts on whether they refuse to
+> invent. Something separates them on how useful the refusal is — and that
+> something is confounded with length, which this suite did not control.
+
 ## Conclusion
 
 The honest answer to "look through all my previous claude chats" is bounded:
