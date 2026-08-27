@@ -44,7 +44,7 @@ bulunduğu yerde tenfiz edilebilir mi?
 ## Talep gerçeği: beyan paketi fiilen ne ediyor
 
 Bir beyan talebinin değeri dört şeyin çarpımıdır:
-1. Beyanın kapsamı (açıklama mektubuyla ne kadar daraldı),
+1. Beyanın kapsamı (açıklama mektubuyla ne kadar daraltıldı),
 2. Sınırlamalar (tavan, alt sınır, asgari tutar, süre),
 3. İspat yükü ve bildirim usulü (süresinde ve usulüne uygun bildirim
    yapılmaması tek başına talebi düşürebilir),
