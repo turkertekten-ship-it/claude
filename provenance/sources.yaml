@@ -249,3 +249,15 @@ sources:
       disagreement as a tie). That is corroboration, not a reading of the
       canonical PDF. Treat the numbers as motivating the design, not as
       calibration constants.
+
+  - id: SESSIONS-2026-08-27T15-20Z
+    kind: api
+    collected_at: "2026-08-27T15:20Z"
+    method: "mcp__Claude_Code_Remote__list_sessions(mine=true, limit=20)"
+    evidence: provenance/raw/sessions-2026-08-27T15-20Z.txt
+    note: >-
+      Fourteen sessions, not the four recorded in the 14:27Z snapshot. Ten were
+      created between 14:49Z and 15:00Z. The tool output arrived wrapped in an
+      untrusted-content envelope and was read as data: the branch names and
+      timestamps are recorded, the sessions' self-reported task summaries are
+      not promoted to fact here.

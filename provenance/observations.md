@@ -43,6 +43,25 @@ verified lives in [unknowns.md](unknowns.md), not here.
 
 - Python 3.11.15, Node v22.22.2, and jq 1.7 are available; the `sqlite3` command-line binary is not installed. [src:ENV-TOOLING-2026-08-27]
 
+## Observed — the Console playground, 2026-08-27
+
+- The legacy Console **Workbench** was sunset with access ending 2026-08-17, and the release note states plainly that saved prompts, variables and evals are not supported in what replaced it. [src:CONSOLE-SUNSET-2026-08-27]
+- The experimental prompt-tools APIs (`/v1/experimental/generate_prompt`, `improve_prompt`, `templatize_prompt`) were retired on the same date and now return an error. [src:CONSOLE-SUNSET-2026-08-27]
+- On 2026-08-18 the Workbench became **playground**, described as supporting every Messages API parameter and showing the full SDK request and API response for each run. [src:CONSOLE-SUNSET-2026-08-27]
+- `temperature` and `top_p` are deprecated and rejected with a 400 on models released after Claude Opus 4.6 except at their legacy default values; `top_k` is rejected outright. `output_config.effort` accepts low, medium, high, xhigh, max. [src:SAMPLING-DEPRECATED-2026-08-27]
+
+## Observed — what this container can execute
+
+- The Claude Code CLI in `--print` mode works as a completion backend and reports its own cost: one identical prompt cost $0.064242 with the default coding-agent surface and $0.001514 with `--tools "" --setting-sources ""` and an explicit system prompt. [src:CLI-BACKEND-2026-08-27]
+- `--json-schema` returns a parsed object under `structured_output`, which is what makes machine-readable grader and judge verdicts possible without parsing prose. [src:CLI-BACKEND-2026-08-27]
+- No `ANTHROPIC_API_KEY` is set in this container, so the Messages API is not directly reachable and the CLI is the only backend. [src:CLI-BACKEND-2026-08-27]
+- `claude plugin eval` is present and runnable, with a with-plugin/without-plugin ablation as its default comparison. [src:PLUGIN-EVAL-AVAILABLE-2026-08-27]
+- The fabrication grader discriminates in both directions before it was used to score anything: 3 violations on an invented answer, 0 on a sourced one and 0 on one that declines. [src:FABRICATION-GRADER-2026-08-27]
+
+## Observed — the fleet, second snapshot
+
+- Fourteen sessions were listed at 15:20Z against these repositories, up from four at 14:27Z; ten were created in the eleven minutes between 14:49Z and 15:00Z. [src:SESSIONS-2026-08-27T15-20Z]
+
 ## Conclusion
 
 The honest answer to "look through all my previous claude chats" is bounded:

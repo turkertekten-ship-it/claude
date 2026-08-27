@@ -97,3 +97,62 @@ searched.
 
 **Action taken:** the search was scoped strictly to locating a Claude export.
 No personal Drive file was opened, and nothing was written to Drive.
+
+---
+
+### U-7 — What the Console playground actually offers in its UI
+
+**Unknown:** which affordances the current playground exposes — whether it has
+a variables panel, saved prompts, a tool-definition editor, a batch submitter,
+or a token counter.
+
+**Why:** `platform.claude.com/playground` returns the Console login page when
+fetched unauthenticated, and the Help Center article the release note points at
+is on a domain this container's egress proxy blocks. The release note's claim
+that it "supports every Messages API parameter" is a statement about
+parameters, not about controls.
+
+**Resolves when:** someone signed in to the Console describes or screenshots it,
+or the Help Center becomes reachable.
+
+**Consequence:** the parity matrix in `docs/parity.md` marks the playground
+column from the release notes and the API reference, not from the UI. Rows
+about what the playground can do are therefore claims about the API it builds
+requests for.
+
+---
+
+### U-8 — Whether the MT-Bench figures match the canonical paper
+
+**Unknown:** whether the judge-consistency, verbosity and self-preference
+numbers used to justify the blind-comparison design match arXiv 2306.05685 as
+published.
+
+**Why:** `arxiv.org` is blocked by this container's egress proxy. Two
+independent GitHub full-text mirrors agreed exactly, and the behaviour they
+describe matches the FastChat implementation, which is corroboration but not a
+reading of the canonical PDF.
+
+**Resolves when:** the paper is fetched from an unblocked network.
+
+**Consequence:** the design does not depend on the exact values. It depends on
+the direction — that position bias is large enough to matter — and on the
+paper's stated prescription, which the implementation follows. Treat the
+numbers as motivation, not as calibration constants.
+
+---
+
+### U-9 — Whether the doctrine prompt's measured effect generalises
+
+**Unknown:** whether the result of `suites/doctrine-adherence.yaml` holds
+beyond its six cases, one model, and single sample per cell.
+
+**Why:** six cases is a small suite by construction. The report computes how
+many decided pairs would be needed to detect a genuine 70/30 preference at 80%
+power, and the suite does not have them.
+
+**Resolves when:** the suite is extended, `repeats` is raised above 1, or the
+same variants are run against a second model family.
+
+**Do not:** quote a win rate from that run as though the question were settled.
+The report says what it did not establish; that section is the result too.

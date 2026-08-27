@@ -1,0 +1,27 @@
+Excerpt of mcp__Claude_Code_Remote__list_sessions(mine=true, limit=20) at
+2026-08-27T15:20Z. Transcribed roster fields only; the full envelope also
+carried per-session usage, rate-limit and flag settings.
+
+All 14 are on environment env_01GEni7AgBA7NiyMBecyt7K1, model claude-opus-5,
+permission_mode auto, origin web_claude_ai. All take both repositories as
+sources except "Go page review and ultrathink OODA", which takes only `claude`.
+
+id                                  created(Z)  status  branch
+session_01FXG7QRcwJ7PiYoH5QU7QsR    15:00:53    RUNNING claude/great-euler-6tx6y6
+session_01Vp6Nnb1YQ9xzppSDMSBEQD    15:00:10    RUNNING claude/session-y42cyg
+session_01FKYZVu2ecPhHEcLJD2eWpF    14:58:31    RUNNING claude/personal-skills-repos-research-dxmflq
+session_01Rj2vRw3zymLrh5aPJEV6JP    14:57:09    RUNNING claude/research-skill-mastery-mwjs01
+session_01KaERecxQyogeT5Mde8cb1o    14:55:53    RUNNING claude/goal-prompt-task-division-0ghozd
+session_01DuBJPhHjftzVBGanSTQ9wo    14:54:39    RUNNING claude/ultrareview-data-checkers-98ad9p
+session_01QLk8iRamoDp6s1xEuTyd4P    14:53:32    RUNNING claude/code-playground-parity-xw0snj   <- this session
+session_01GPgcWeschoejAkMjXJyby7    14:52:09    RUNNING claude/ai-system-research-3jpwda
+session_01FQvAGnEvu2XY7hGtWRkMG3    14:50:07    RUNNING claude/reverse-engineer-chat-setup-husv9h
+session_01Y16zSaDWgURM68i51rfik2    14:49:16    RUNNING claude/daily-file-improvement-wgiluc
+session_01Ya1zvvkNDwhHKm2QtA4A5f    14:26:10    IDLE    claude/review-chat-archive-zrynr4
+session_019vCLpJgDUv8BYDRetyqzNq    14:18:35    RUNNING claude/rag-system-data-pipeline-rdkde9
+session_016cRrEmB1ZKGLpEzUQpSqhC    14:11:32    RUNNING claude/blind-testing-ooda-5o3s67
+session_01WhTTExHdT83QPAKDFZm4fZ    14:07:19    RUNNING claude/go-page-ultrathink-ooda-kqxvnc
+
+Effort level: xhigh on all except where the record omits it. Ten of the
+fourteen were created after 14:49Z, i.e. after the FLEET.md snapshot of
+14:27Z was taken.
