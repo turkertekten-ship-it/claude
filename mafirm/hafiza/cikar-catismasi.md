@@ -45,7 +45,7 @@ taramasında `birimler/_araclar/kod/tarama.py` mantığı burada da geçerlidir.
 
 | Taraf | Rol | Dosya | Tarih | Not |
 |---|---|---|---|---|
-| ÖRNEK SATIR — SİLİNECEK · Örnek Sanayi A.Ş. | karşı taraf (satıcı) | ÖRNEK-2026-000 | 2026-08-27 | Bu satır biçimi göstermek için konmuştur, gerçek bir taraf değildir. Kayda ilk gerçek satır yazılırken silinir. |
+| ÖRNEK SATIR — SİLenECEK · Örnek Sanayi A.Ş. | karşı taraf (satıcı) | ÖRNEK-2026-000 | 2026-08-27 | Bu satır biçimi göstermek için konmuştur, gerçek bir taraf değildir. Kayda ilk gerçek satır yazılırken silinir. |
 
 Sütunların anlamı: **Taraf** tam hukuki unvan (kısaltma değil) · **Rol** bu
 dosyadaki konumu (müvekkil / karşı taraf / hedef / gerçek lehtar / finansman /
