@@ -230,6 +230,23 @@ def main() -> int:
         check("selfcheck fails when the fix is reverted", bad.returncode == 1, bad.returncode)
         check("failure names the data loss", "SILENTLY DISCARDS" in bad.stdout)
 
+    # KI-2: the same detector must also catch tool output filed as the owner.
+    # Reverting only the role derivation leaves transcript keying intact, so
+    # this proves the two checks are independent rather than one masking the other.
+    with tempfile.TemporaryDirectory() as tmp3:
+        src = (REPO / "tools" / "ingest_chat_archive.py").read_text()
+        marker = 'role=effective_role(message.get("role") or record["type"], kinds),'
+        broken = src.replace(marker, 'role=message.get("role") or record["type"],', 1)
+        check("the role-derivation line is present to revert", broken != src)
+        target3 = Path(tmp3) / "ingest_chat_archive.py"
+        target3.write_text(broken)
+        bad2 = sp.run([sys.executable, str(target3), "selfcheck"], capture_output=True, text=True)
+        check("selfcheck fails when role derivation is reverted", bad2.returncode == 1, bad2.returncode)
+        check("failure names the misattribution",
+              "TOOL OUTPUT AS THE OWNER" in bad2.stdout, bad2.stdout[-200:])
+        check("it does not misreport this as data loss",
+              "SILENTLY DISCARDS" not in bad2.stdout)
+
     print()
     if FAILURES:
         print(f"FAILED: {len(FAILURES)} case(s): {', '.join(FAILURES)}")

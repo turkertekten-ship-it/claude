@@ -44,6 +44,51 @@ time. Take the fix, then rebuild the index from source transcripts.
 Treat any conclusion drawn from a search over an affected index as unsourced
 until the search is re-run.
 
+## KI-2 — Tool output indexed as the owner speaking (fixed on `claude/reverse-engineer-chat-setup-husv9h`)
+
+**Affects:** any copy of `tools/ingest_chat_archive.py` whose
+`parse_claude_code_jsonl` reads the role straight off the record, i.e. every
+copy taken before this fix — including copies that already carry the KI-1 fix.
+
+**Check your copy with the same command as KI-1:**
+
+```bash
+python3 tools/ingest_chat_archive.py selfcheck
+```
+
+The check now covers both defects. Exit 1 naming `TOOL OUTPUT AS THE OWNER`
+means you are affected by KI-2; exit 1 naming `SILENTLY DISCARDS` means KI-1.
+A copy whose selfcheck reports only two expected counts rather than three
+predates this fix.
+
+### What went wrong
+
+Claude Code has no separate record type for tool results. It writes them as
+`type: "user"` with `message.role: "user"`, and the ingester took that field at
+face value. Every command's output — every `git status`, every test run, every
+file listing — was therefore stored as something the owner said.
+
+The damage is subtler than KI-1's. Nothing is lost and no count is wrong. What
+breaks is the one question the index exists to answer: search it for what the
+owner asked for and you get mostly log lines back, with the few real messages
+buried among them.
+
+### Observed — the actual numbers
+
+- A search of the populated index for `reverse engineer` returned three hits all labelled `user`, of which two were Bash output and none was typed by the owner. [src:ROLE-ATTRIBUTION-BUG-2026-08-27]
+- After the fix, `search "ooda" --role user` returned 2 hits, both the owner's own goal text. [src:ROLE-ATTRIBUTION-BUG-2026-08-27]
+- The detector was watched failing against a copy with only the role derivation reverted, confirming it is independent of the KI-1 check rather than masked by it. [src:ROLE-ATTRIBUTION-BUG-2026-08-27]
+
+### If you are affected
+
+`effective_role` derives the role from the content blocks: a record whose blocks
+are exclusively `tool_result` is filed as `tool_result` rather than `user`. The
+text is still stored verbatim and still searchable — only the attribution
+changes — and `search` gains a `--role` filter so the owner's own words can be
+isolated.
+
+Re-ingest afterwards. Stored roles do not correct themselves.
+
 ## Observed — spread through the fleet
 
 - `claude/code-playground-parity-xw0snj` merged `e37b4c2` at merge commit `e7ab452`, combining it with the RAG branch's root `1d7ce8f`. [src:PARITY-MERGE-2026-08-27]

@@ -534,6 +534,12 @@ def cmd_selfcheck(args) -> int:
             {**line, "uuid": "p1", "message": {"role": "user", "content": "parent line"}}) + "\n")
         (root / "subagents" / "agent-selfcheck.jsonl").write_text(json.dumps(
             {**line, "uuid": "c1", "message": {"role": "user", "content": "subagent line"}}) + "\n")
+        # KI-2 fixture: a tool RESULT, which Claude Code also writes as a
+        # user-typed record. It must not be stored as the owner speaking.
+        (root / f"{session}.jsonl").write_text(
+            (root / f"{session}.jsonl").read_text() + json.dumps(
+                {**line, "uuid": "t1", "message": {"role": "user", "content": [
+                    {"type": "tool_result", "content": "selfcheck tool output"}]}}) + "\n")
 
         report = Report()
         conversations: list[Conversation] = []
@@ -544,15 +550,34 @@ def cmd_selfcheck(args) -> int:
         store(conn, conversations, Report())
         convs = conn.execute("SELECT COUNT(*) n FROM conversations").fetchone()["n"]
         msgs = conn.execute("SELECT COUNT(*) n FROM messages").fetchone()["n"]
+        as_user = conn.execute(
+            "SELECT COUNT(*) n FROM messages WHERE role = 'user'").fetchone()["n"]
         conn.close()
 
-    print(f"two transcripts sharing sessionId {session!r}:")
+    print(f"two transcripts sharing sessionId {session!r}, plus one tool result:")
     print(f"  conversations stored: {convs} (expected 2)")
-    print(f"  messages stored:      {msgs} (expected 2)")
+    print(f"  messages stored:      {msgs} (expected 3)")
+    print(f"  filed as the owner:   {as_user} (expected 2 — the tool result is not the owner)")
 
-    if convs == 2 and msgs == 2:
-        print("\nOK — this copy keeps both transcripts.")
+    if convs == 2 and msgs == 3 and as_user == 2:
+        print("\nOK — this copy keeps both transcripts and attributes tool output correctly.")
         return 0
+
+    if as_user > 2 and convs == 2 and msgs == 3:
+        print("\nFAIL — this copy files TOOL OUTPUT AS THE OWNER SPEAKING (KI-2).")
+        print()
+        print("Claude Code writes tool results as `type: \"user\"` records. Taken at")
+        print("face value, every command's output is indexed as something the owner")
+        print("said, and a search for what they asked for returns mostly log lines.")
+        print()
+        print("Fix: derive the role from the content blocks in parse_claude_code_jsonl:")
+        print()
+        print("    role=effective_role(message.get(\"role\") or record[\"type\"], kinds),")
+        print()
+        print("where effective_role returns \"tool_result\" when every content block")
+        print("is a tool_result. Re-ingest afterwards; stored roles do not correct")
+        print("themselves.")
+        return 1
 
     print("\nFAIL — this copy SILENTLY DISCARDS transcripts.")
     print()
