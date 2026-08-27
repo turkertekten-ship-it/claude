@@ -31,6 +31,82 @@ whether last week's change made retrieval better or worse.
 | Secrets leak into the index | Redaction at the connector boundary, before anything is written |
 | A crawl runs forever | Budgets on pages, fetches, bytes, depth and wall-clock |
 
+## The nightly loop
+
+Everything above describes a pipeline you point at a corpus. `oodarag reflect`
+points the same machinery at **you**: it runs at the end of each day, reads what
+you actually did, and improves your files from the evidence.
+
+```bash
+ooda reflect run                       # dry run - show me what you would change
+ooda reflect run --apply               # make the safe changes
+ooda reflect queue                     # what needs my call
+ooda reflect accept 3f9a1c22           # yes, do that one
+ooda reflect dismiss 8b2e0d41          # no, and stop suggesting it
+ooda reflect revert 20260827-223000    # undo an entire night
+ooda reflect schedule --kind systemd   # and do this every day at 22:30
+```
+
+### One abstraction: everything you produce is a Signal
+
+A prompt typed into a chat, a command typed into a shell, a file on disk, a
+commit in git - all normalize to the same five fields. Rules consume `Signal`s
+and never learn where one came from, which is why a rule written against chat
+prompts fires unchanged on terminal history, and why adding a source is one
+class rather than a pass through every rule.
+
+| Source | What it observes | Signal kinds |
+|---|---|---|
+| `chat:transcripts` | Chat sessions - what you *wanted* | `prompt`, `reply` |
+| `shell:history` | zsh / bash / fish - what you actually *ran* | `command` |
+| `workspace:files` | The file tree as it stands tonight | `file` |
+| `git:log` | What changed, and when | `commit` |
+
+### What it looks for
+
+The rules exist because retyping a standing instruction, fighting the same
+command four times, and linking to a file that was never written are the three
+ways a project quietly rots.
+
+| Rule family | Finds | Typical fix |
+|---|---|---|
+| `friction.*` | An instruction you have given in three separate sessions; a prompt you had to rephrase; a correction you have made twice | Write the convention down once, in your project memory file |
+| `terminal.*` | A command retried with different flags until it worked; the same incantation typed on five different days | A Makefile target, so it is never re-derived |
+| `docs.*` | A doc linking to a file that does not exist; Makefile targets the README never mentions; a doc older than the code it describes | Create the stub, document the entry point |
+| `hygiene.*` | Credential-shaped strings in tracked files; modules with no test; ageing TODO clusters | Flag it - loudly, and without touching the file |
+
+### Why it is safe to leave running
+
+An unattended process that edits your files has to earn that, so the autonomy is
+a property of the *edit*, not of how important the finding is:
+
+- **`safe`** - cannot destroy information (creating a file nothing has yet, adding
+  a delimited section the loop owns). The only tier applied without a human.
+- **`review`** - edits your prose or config. Queued, never applied on its own.
+- **`manual`** - source-code semantics, anything about secrets. Reported only.
+
+On top of the tiers: **dry run by default**; every write is **backed up and
+revertible by cycle id**; edits are **all-or-nothing per proposal** and
+**idempotent**, so a second run at 22:30 changes nothing; nothing outside the
+workspace root is ever written; and a run **refuses to touch a dirty working
+tree**, because an autonomous edit mixed into your uncommitted work makes "who
+changed this" unanswerable. Source files are never machine-edited at all.
+
+### Why it gets better
+
+Every verdict - applied, dismissed, reverted, failed - is appended to a journal,
+and tomorrow's Decide stage folds it into a per-rule confidence. A rule whose
+suggestions you keep taking gets more autonomy; one you keep declining fades;
+one whose *edits* you revert is penalised harder than one whose *ideas* you
+decline, because a bad edit is worse than a bad idea. Anything you dismiss is
+never proposed again.
+
+The journal is append-only and the learned behaviour is a pure fold over it, so
+"what did it do on the 14th, and why" always has an answer, and deleting the
+journal returns the loop to a naive but correct first night rather than to a
+state nobody can explain.
+
+
 ## Status
 
 Under active construction. See `internal/PLAN.md` for what is built and what is next.
@@ -38,9 +114,14 @@ Under active construction. See `internal/PLAN.md` for what is built and what is 
 ## Quick start
 
 ```bash
-make test          # stdlib unittest, no dependencies required
-make demo          # end-to-end: ingest -> index -> query -> eval
+make test              # stdlib unittest, no dependencies required
+make reflect           # tonight's review, as a dry run - changes nothing
+make reflect-apply     # let it make the safe-tier changes
+make schedule          # emit a systemd timer for 22:30 (KIND=launchd|cron|github)
 ```
+
+`make demo`, `make index` and `make query` are declared but not built yet - they
+exit with a message rather than a traceback. See `internal/PLAN.md`.
 
 ## Design principles
 
