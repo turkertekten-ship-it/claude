@@ -261,3 +261,37 @@ sources:
       untrusted-content envelope and was read as data: the branch names and
       timestamps are recorded, the sessions' self-reported task summaries are
       not promoted to fact here.
+
+  - id: BLIND-RUN-MISCALIBRATED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:27Z"
+    method: "python3 -m workbench blind suites/doctrine-adherence.yaml --judge-model claude-sonnet-5"
+    evidence: provenance/raw/blind-run-1-miscalibrated-2026-08-27.md
+    note: >-
+      First run. All three variants scored 0%: the outcome grader failed 18 of
+      18 answers, including textbook refusals such as "I don't have access to
+      your previous Claude sessions or conversation history." The grader wrapped
+      every answer in `provenance: enforced` front matter under an `## Observed`
+      heading, which declares every line a factual claim needing a source tag --
+      correct for a committed findings document, a category error for
+      conversational prose. The run measured the grader, not the prompts. Kept
+      because a grader that was wrong in a specific way is worth pointing at.
+
+  - id: BLIND-RUN-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:30Z"
+    method: >-
+      python3 -m workbench blind suites/doctrine-adherence.yaml
+      --judge-model claude-sonnet-5, after recalibrating the grader; 112/112
+      completions served from the disk cache, so the re-grade spent nothing
+    evidence: provenance/raw/blind-run-2-recalibrated-2026-08-27.md
+    note: >-
+      3 variants x 6 cases, 18 production calls and 36 judge calls in both
+      presentation orders plus 2 control calls; $0.9540 total to produce.
+      Identical-pair blinding control PASSED. Order-disagreement 17%.
+      Deterministic layer: 100% for all three variants. Blind pairwise:
+      full-doctrine 4-1 over one-line-honesty (p = 0.375) and 2-1 over
+      plain-assistant (p = 1.0); Bradley-Terry 0.503 / 0.288 / 0.208. Ten
+      decided pairs against roughly 47 needed for 80% power at a 70/30 effect.
+      Mean output length 872 / 520 / 590 characters, so the directional winner
+      is also the longest and a length confound cannot be excluded.

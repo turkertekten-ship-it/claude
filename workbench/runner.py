@@ -108,6 +108,10 @@ class RunResult:
     #: The judge model, recorded because a judge is a measuring instrument:
     #: changing it invalidates comparison against every earlier run.
     judge_model: str = ""
+    #: Disk-cache hits and misses. Without these, a re-grade of cached
+    #: completions reports the original spend as though it had just happened.
+    cache_hits: int = 0
+    cache_misses: int = 0
 
     @property
     def cost_usd(self) -> float:
@@ -136,6 +140,7 @@ class RunResult:
             "controls": self.controls,
             "mean_output_chars": self.lengths,
             "judge_model": self.judge_model or "(backend default)",
+            "cache_hits": self.cache_hits, "cache_misses": self.cache_misses,
             "notes": self.notes,
         }
 
@@ -329,6 +334,12 @@ def execute(suite: Suite, backend: Backend, report: Reporter,
     for run in result.runs:
         per_variant.setdefault(run.variant_id, []).append(len(run.output))
     result.lengths = {vid: round(sum(v) / len(v)) for vid, v in per_variant.items()}
+
+    for candidate in (backend, judge_backend):
+        hits = getattr(candidate, "hits", None)
+        if hits is not None:
+            result.cache_hits += hits
+            result.cache_misses += getattr(candidate, "misses", 0)
 
     result.duration_s = time.time() - started
     return result

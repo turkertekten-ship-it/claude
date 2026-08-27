@@ -108,18 +108,34 @@ Legend: **CC** = stock Claude Code; **WB** = this repository's `workbench/`.
 | Capability | playground | CC | WB |
 |---|---|---|---|
 | Eval grid over test cases | retired with Workbench | `claude plugin eval` | yes |
-| Deterministic graders | — | regex, `tool_used`, `tool_order`, `file_exists` | 11 deterministic + 6 environmental |
-| LLM judge | — | `llm` grader, 2-of-3 vote | yes, odd-panel majority |
-| Grade by shell command | — | no | `command` grader |
+| Deterministic graders | — | `tool_used` and others | 11 deterministic + 6 environmental |
+| LLM judge | — | `llm` grader, judge model defaults to haiku | yes, odd-panel majority |
+| Grade by shell command | — | not documented | `command` grader |
 | With/without ablation | — | `--ablation with-without` | — use `claude plugin eval` |
-| **N-way prompt variant comparison** | side-by-side, human-scored | no | yes |
-| **Blind identity stripping** | no | no | yes |
-| **Both-order position swap** | no | no | yes |
-| **Significance testing** | no | no | Wilson, exact McNemar, bootstrap, Bradley-Terry |
-| **Identical-pair blinding control** | no | no | yes |
+| **N-way prompt variant comparison** | not documented | no | yes |
+| **Blind identity stripping** | not documented | no | yes |
+| **Both-order position swap** | not documented | no | yes |
+| **Significance testing** | not documented | no | Wilson, exact McNemar, bootstrap, Bradley-Terry |
+| **Identical-pair blinding control** | not documented | no | yes |
 
 The last five rows are the point. Everything above them is catching up; those
 are the part that did not exist to copy.
+
+Two honesty notes on that table, because both were overstated in an earlier
+draft of this file:
+
+- The playground column reads **"not documented"**, not "no". Its UI is behind
+  authentication and the Help Center article describing it is on a domain this
+  container cannot reach, so what controls it exposes is genuinely unknown —
+  recorded as `U-7` in `provenance/unknowns.md`. The retired Workbench *did*
+  ship a side-by-side output comparison mode, in July 2024, with human scoring.
+  Whether anything equivalent survives is not established here.
+- The Claude Code column names `tool_used` because `claude plugin eval --help`
+  in this container names it. The fuller grader list reported by a delegated
+  research pass — `regex`, `tool_order`, `file_exists`, `baseline` — is
+  plausible and partly corroborated by that help text, which mentions `llm` and
+  `baseline` as the paid graders, but the complete list was not verified
+  first-hand and is not asserted as one.
 
 ## Why blind comparison had to be written rather than borrowed
 

@@ -84,6 +84,12 @@ def markdown(result: RunResult) -> str:
     add(f"- Backend: `{result.backend}`")
     add(f"- Started: {result.started_at} (took {result.duration_s:.1f}s)")
     add(f"- Total cost: **${result.cost_usd:.4f}** (backend-reported, not estimated)")
+    if result.cache_hits:
+        total = result.cache_hits + result.cache_misses
+        add(f"- Cache: **{result.cache_hits}/{total}** completions served from "
+            f"disk. The cost above is what producing these results cost in "
+            f"total, not what this run spent — a re-grade of cached "
+            f"completions spends nothing.")
     add("")
 
     add("## Pass rate by variant")

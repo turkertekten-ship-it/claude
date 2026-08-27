@@ -62,6 +62,20 @@ verified lives in [unknowns.md](unknowns.md), not here.
 
 - Fourteen sessions were listed at 15:20Z against these repositories, up from four at 14:27Z; ten were created in the eleven minutes between 14:49Z and 15:00Z. [src:SESSIONS-2026-08-27T15-20Z]
 
+## Observed — the blind test of the doctrine prompt
+
+- Run blind against six fabrication traps, the deterministic layer separated nothing: `full-doctrine`, `one-line-honesty` and `plain-assistant` each passed 6 of 6. On these cases a plain assistant declined or went to look just as reliably as the operating prompt did. [src:BLIND-RUN-2026-08-27]
+- The blind pairwise comparison put `full-doctrine` ahead directionally — 4-1 over `one-line-honesty` and 2-1 over `plain-assistant`, Bradley-Terry strengths 0.503 / 0.288 / 0.208 — but neither margin reached significance (p = 0.375 and p = 1.0). [src:BLIND-RUN-2026-08-27]
+- Ten pairs were decided; detecting a genuine 70/30 preference at 80% power needs roughly 47. [src:BLIND-RUN-2026-08-27]
+- `full-doctrine` also produced the longest answers by a wide margin (872 characters against 520 and 590), so the variant the judge preferred is also the one length bias would have favoured. The confound cannot be excluded from this run. [src:BLIND-RUN-2026-08-27]
+- The identical-pair blinding control passed and the order-disagreement rate was 17%, so the judge was reading content rather than position. No candidate leaked an identity string: 0 redactions were needed. [src:BLIND-RUN-2026-08-27]
+- The first run of the same suite scored every variant 0% because the outcome grader treated conversational prose as a findings document and flagged correct refusals as unsourced claims. It was recalibrated before the run above; the failed run is kept as evidence. [src:BLIND-RUN-MISCALIBRATED-2026-08-27]
+
+> Reading, not a claim: on this evidence the doctrine prompt is not shown to
+> beat a plain assistant at declining to invent. What is shown is that the
+> suite cannot tell, at this size, with this length imbalance. That is a
+> statement about the experiment, and the honest one to make.
+
 ## Conclusion
 
 The honest answer to "look through all my previous claude chats" is bounded:
