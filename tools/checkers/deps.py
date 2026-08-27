@@ -200,6 +200,15 @@ def _first_party(repo: RepoIndex, config: CheckConfig) -> frozenset[str]:
     """
     names: set[str] = set()
     bases = [repo.root]
+    # A workspace declares its members with their own manifests. Without this,
+    # `import core` inside `packages/api` resolves to nothing local and is
+    # reported as an undeclared third-party dependency - with a detail that is
+    # false, because `packages/api/pyproject.toml` declares it and
+    # `packages/core` provides it. Monorepos are the normal case this checker
+    # gets pointed at, so getting them wrong is not an edge case.
+    for member in _workspace_dirs(repo):
+        bases.append(member)
+        bases.append(member / "src")
     for rel in config.source_roots:
         candidate = (repo.root / rel).resolve()
         try:
@@ -221,8 +230,45 @@ def _first_party(repo: RepoIndex, config: CheckConfig) -> frozenset[str]:
     return frozenset(names)
 
 
+#: How deep to look for workspace members. Two levels covers `packages/x` and
+#: `libs/py/x`; deeper is a vendored checkout rather than a member.
+_WORKSPACE_DEPTH = 3
+
+
+def _workspace_dirs(repo: RepoIndex) -> list[Path]:
+    """Directories below the root that carry their own `pyproject.toml`."""
+    out: list[Path] = []
+    for rel in sorted(repo.all_paths):
+        if not rel.endswith(f"/{MANIFEST}"):
+            continue
+        parts = rel.split("/")
+        if len(parts) - 1 <= _WORKSPACE_DEPTH:
+            out.append(repo.root / "/".join(parts[:-1]))
+    return out
+
+
 def _is_stdlib(module: str) -> bool:
     return module in sys.stdlib_module_names or module in _RETIRED_STDLIB
+
+
+#: Directories holding code that ships with the repository but not in the
+#: wheel: examples, benchmarks, docs builds, one-off scripts. An eager import of
+#: an optional extra there is the normal way such a file is written - it says at
+#: the top which extra it needs - and reporting it claims the extra is mandatory
+#: for a package that never installs the file at all.
+#: Matched against the FIRST path component only. A package legitimately named
+#: `demo` or `scripts` under `src/` is shipped code, and matching any segment
+#: exempted it - which would quietly stop the check from ever firing on the
+#: package it is meant to protect.
+_ANCILLARY_DIRS = frozenset(
+    "example examples sample samples benchmark benchmarks bench demo demos "
+    "doc docs script scripts notebook notebooks contrib".split()
+)
+
+
+def _is_ancillary_file(rel: str) -> bool:
+    head = rel.replace("\\", "/").split("/")[0]
+    return head.lower() in _ANCILLARY_DIRS
 
 
 def _is_test_file(rel: str) -> bool:
@@ -275,13 +321,49 @@ def _strings(value: object) -> list[str]:
 
 
 def _load_manifest(repo: RepoIndex) -> _Manifest | None:
+    """The root manifest, widened by any workspace members' own manifests.
+
+    A member's declaration is a real declaration: `packages/api` depending on
+    `httpx` is not undeclared merely because the root table does not repeat it.
+    The root's own `has_project`/`dynamic` flags still decide whether the
+    headline zero-dependency claim can be confirmed, because that claim is about
+    the project as a whole.
+    """
+    root = _load_root_manifest(repo)
+    members = [m for m in (_read_manifest_text(repo, f"{d.relative_to(repo.root).as_posix()}/{MANIFEST}")
+                           for d in _workspace_dirs(repo)) if m is not None]
+    if root is None or not members:
+        return root
+    runtime = dict(root.runtime)
+    optional = dict(root.optional)
+    groups = set(root.groups)
+    for member in members:
+        for name, requirement in member.runtime.items():
+            runtime.setdefault(name, requirement)
+        for name, pair in member.optional.items():
+            optional.setdefault(name, pair)
+        groups.update(member.groups)
+    return _Manifest(runtime, optional, root.build, tuple(sorted(groups)),
+                     has_project=root.has_project, dynamic=root.dynamic, error=root.error)
+
+
+def _read_manifest_text(repo: RepoIndex, rel: str) -> _Manifest | None:
+    source = repo.get(rel)
+    return _parse_manifest(source.text) if source is not None else None
+
+
+def _load_root_manifest(repo: RepoIndex) -> _Manifest | None:
     source = repo.get(MANIFEST)
     if source is None:
         return None
+    return _parse_manifest(source.text)
+
+
+def _parse_manifest(text: str) -> _Manifest:
     try:
         # Parsed from the text RepoIndex already read, so the manifest a finding
         # quotes and the manifest it reasons about are the same bytes.
-        data = tomllib.loads(source.text)
+        data = tomllib.loads(text)
     except (tomllib.TOMLDecodeError, ValueError) as e:
         return _Manifest({}, {}, {}, (), has_project=False, error=f"{type(e).__name__}: {e}")
     project = data.get("project")
@@ -505,8 +587,8 @@ class DepsChecker:
     ) -> Iterator[Finding]:
         source = repo.get(MANIFEST)
         for (module, path), sites in sorted(_group(third_party, guarded=False).items()):
-            if _is_test_file(path):
-                continue  # a dev extra used by the test suite is the extra working
+            if _is_test_file(path) or _is_ancillary_file(path):
+                continue  # a dev extra used by the suite is the extra working
             where = _declared(module, manifest)
             if where is None or not where[0].startswith("optional-dependencies."):
                 continue
@@ -574,6 +656,9 @@ class DepsChecker:
             f"top-level modules: {totals['stdlib']} standard library, "
             f"{totals['first_party']} from this repository, {totals['third_party']} from elsewhere",
             value=totals,
+            # The counts are derived from the import graph of these files, and
+            # saying so is what lets a reader re-walk the same set.
+            derived_from=tuple(sorted(f.rel for f in repo.python)[:12]) or ("(no python files)",),
         )
 
         # A guarded third-party import is not an offender: see the module
@@ -672,7 +757,9 @@ class DepsChecker:
             evidence=[measured, declaration],
             detail=(
                 "the import graph agrees: every import in the tree is standard library or "
-                "first-party, and [project] dependencies is empty"
+                "first-party, and "
+                + (f"{MANIFEST} declares no dependencies" if declared_line
+                   else "no dependency manifest in the tree declares any")
             ),
         )
 

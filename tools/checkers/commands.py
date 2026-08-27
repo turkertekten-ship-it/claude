@@ -37,6 +37,8 @@ import re
 import shlex
 import shutil
 import sys
+import tempfile
+from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Iterator, Sequence
 
@@ -48,7 +50,11 @@ MAKEFILE_NAMES: tuple[str, ...] = ("Makefile", "makefile", "GNUmakefile")
 
 # The contract fixes this shape, so a reader can re-derive every target we
 # claim to have seen by grepping the same pattern.
-_TARGET_RE = re.compile(r"^([A-Za-z0-9_.-]+):")
+#: A rule head. GNU make lets one rule name several targets - `build dist:`,
+#: `test lint:` - and a pattern anchored to a single name matches neither of
+#: them, so the checker denied the existence of rules that work and silently
+#: never inspected their recipes.
+_TARGET_RE = re.compile(r"^([A-Za-z0-9_.\-/ \t]+?)\s*:(?!=)")
 _ASSIGN_RE = re.compile(r"^(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*(\?=|::=|:=|\+=|=)\s*(.*)$")
 _VAR_RE = re.compile(r"\$[({]([A-Za-z_][A-Za-z0-9_]*)[)}]")
 _RECIPE_PREFIX_RE = re.compile(r"^[@+-]+")
@@ -77,6 +83,42 @@ _MUTATING_WORDS = frozenset(
 # resolution gate cannot catch it because `make` really is on PATH. Refusing to
 # read a prose-shaped argument list as a goal is the only defence, and a missed
 # broken target costs far less than a checker that flags a sentence.
+#: An argument this review cannot supply: a value the reader is expected to
+#: substitute. `tool --config <your-settings>.toml` promises the tool works; it
+#: does not promise that *this repository* contains the file named in the
+#: example, and running it verbatim turns a usage example into a fabricated
+#: broken promise.
+_PLACEHOLDER_ARG_RE = re.compile(r"[<>{}$*]|\.\.\.|^[A-Z][A-Z0-9_]{2,}$")
+
+#: Argument words that are part of an invocation rather than a value.
+_STRUCTURAL_ARGS = frozenset({"discover", "unittest", "compileall", "-m", "install", "run"})
+
+
+def _unsuppliable_argument(tokens: Sequence[str], repo: "RepoIndex",
+                           mk: "_Makefile | None") -> str:
+    """The first argument that is a value rather than something resolvable."""
+    rest = list(tokens[1:])
+    idx = 0
+    while idx < len(rest):
+        tok = rest[idx]
+        idx += 1
+        if tok == "-m" and idx < len(rest):
+            idx += 1              # the module name; `_check_module` already resolved it
+            continue
+        if tok.startswith("-") or "=" in tok:
+            continue              # a flag, or an inline assignment
+        if tok in _STRUCTURAL_ARGS:
+            continue
+        if _PLACEHOLDER_ARG_RE.search(tok):
+            return tok
+        if repo.exists(tok) or repo.exists(tok.lstrip("./")):
+            continue              # a file that really is in this tree
+        if mk is not None and (tok in mk.targets or tok in mk.phony):
+            continue              # a make goal
+        return tok
+    return ""
+
+
 _PROSE_GOALS = frozenset(
     "sure a an the it this that these those them us you your our my me "
     "is are was were do does did and or not".split()
@@ -129,14 +171,14 @@ def _parse_makefile(source: SourceFile) -> _Makefile:
     order: list[str] = []
     lines: dict[str, int] = {}
     phony: set[str] = set()
-    current: str | None = None
+    current: list[str] = []
     pending: list[str] = []
     pending_line = 0
 
     for lineno, raw in enumerate(source.lines, start=1):
         if raw.startswith("\t"):
             body = _RECIPE_PREFIX_RE.sub("", raw[1:].strip()).strip()
-            if current is None:
+            if not current:
                 continue
             if not pending:
                 if not body or body.startswith("#"):
@@ -149,7 +191,8 @@ def _parse_makefile(source: SourceFile) -> _Makefile:
             joined = _expand(" ".join(p for p in pending if p).strip(), variables)
             pending = []
             if joined:
-                recipes[current].append((pending_line, joined))
+                for target in current:  # one recipe, every target the rule names
+                    recipes[target].append((pending_line, joined))
             continue
 
         stripped = raw.strip()
@@ -164,26 +207,29 @@ def _parse_makefile(source: SourceFile) -> _Makefile:
                 variables[name] = f"{variables.get(name, '')} {value}".strip()
             else:
                 variables[name] = value
-            current = None
+            current = []
             continue
 
-        if (t := _TARGET_RE.match(raw)) and not raw[t.end():].startswith("="):
-            name = t.group(1)
-            if name == ".PHONY":
+        if t := _TARGET_RE.match(raw):
+            names = t.group(1).split()
+            if ".PHONY" in names:
                 phony.update(raw.split(":", 1)[1].split())
-                current = None
+                current = []
                 continue
-            if name.startswith("."):  # .SUFFIXES and friends are directives, not goals
-                current = None
+            # .SUFFIXES and friends are directives, not goals.
+            names = [n for n in names if not n.startswith(".")]
+            if not names:
+                current = []
                 continue
-            if name not in recipes:
-                recipes[name] = []
-                order.append(name)
-                lines[name] = lineno
-            current = name
+            for name in names:
+                if name not in recipes:
+                    recipes[name] = []
+                    order.append(name)
+                    lines[name] = lineno
+            current = names
             continue
 
-        current = None
+        current = []
 
     for name in order:
         targets[name] = _MakeTarget(name, lines[name], tuple(recipes[name]))
@@ -354,6 +400,11 @@ def _run_env(repo: RepoIndex, config: CheckConfig) -> dict[str, str]:
     existing = env.get("PYTHONPATH", "")
     env["PYTHONPATH"] = os.pathsep.join([*roots, existing] if existing else roots)
     env["PYTHONDONTWRITEBYTECODE"] = "1"  # a review must not leave __pycache__ behind
+    # ...except that `compileall` exists to write bytecode and ignores that
+    # variable, and a repository's own `make check` legitimately runs it. Naming
+    # a cache prefix redirects those writes out of the tree instead of banning
+    # a command the repository is entitled to document.
+    env["PYTHONPYCACHEPREFIX"] = str(Path(tempfile.gettempdir()) / "ultrareview-pycache")
     return env
 
 
@@ -499,6 +550,14 @@ class CommandChecker:
                 verdict=Verdict.UNVERIFIABLE, severity=Severity.INFO, claim=claim,
                 detail=(f"`{command}` resolves statically but was not executed: run_commands is "
                         "off, so whether it exits zero is not known."),
+            )]
+        if stray := _unsuppliable_argument(tokens, repo, mk):
+            return [Finding(
+                checker=self.name, code="COMMAND_NOT_RUN",
+                verdict=Verdict.UNVERIFIABLE, severity=Severity.INFO, claim=claim,
+                detail=(f"`{command}` was not executed because {stray!r} is an argument this "
+                        "review cannot supply - a usage example promises the command works, "
+                        "not that its sample arguments exist in this tree."),
             )]
         if reason := _unsafe_reason(command, mk):
             return [Finding(

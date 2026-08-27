@@ -48,11 +48,27 @@ class TestRecursionGuard(unittest.TestCase):
         self.assertEqual(inner.command_timeout, 7.0)
         self.assertEqual(inner.only_checkers, ("paths",))
 
-    def test_run_marks_the_environment_for_children(self):
+    def test_run_restores_the_marker_so_a_second_run_is_not_nested(self):
+        # This test previously asserted the marker stays set after run(), which
+        # encoded the bug rather than the contract: the second run() in one
+        # process then saw nested() == True and silently stopped executing
+        # commands, so a caller looping over repositories got a real review of
+        # the first and a degraded one of every other.
+        with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / "README.md").write_text("# T\n")
+            first = run(tmp, CheckConfig(run_commands=False))
+            self.assertIsNone(os.environ.get(ENV_MARKER))
+            self.assertNotIn("(nested run)", first.skipped)
+            second = run(tmp, CheckConfig(run_commands=False))
+            self.assertNotIn("(nested run)", second.skipped,
+                             "a second run in the same process must not be treated as nested")
+
+    def test_an_outer_marker_is_preserved_not_clobbered(self):
+        os.environ[ENV_MARKER] = "outer"
         with tempfile.TemporaryDirectory() as tmp:
             (Path(tmp) / "README.md").write_text("# T\n")
             run(tmp, CheckConfig(run_commands=False))
-            self.assertEqual(os.environ.get(ENV_MARKER), "1")
+        self.assertEqual(os.environ.get(ENV_MARKER), "outer")
 
     def test_a_nested_run_says_so_in_the_report(self):
         os.environ[ENV_MARKER] = "1"

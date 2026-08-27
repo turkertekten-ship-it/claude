@@ -7,10 +7,14 @@ Three claims hide inside "run `make test`", and they fail independently:
    any test file existed, and `make test` exited 2.
 2. **It passes.** The only way to know is to run it, so this checker runs it and
    attaches the real output. A summary of a failure is the reviewer's opinion of
-   the failure; the traceback is the failure.
+   the failure; the traceback is the failure. It also has to be run the way the
+   repository says: driving a pytest suite through `unittest discover` produces
+   an ImportError that is a fact about the runner, not about the tests.
 3. **It asserts something.** This is the one nobody checks. `unittest discover`
-   over a directory containing no tests exits **zero**. So does pytest with
-   `--exitfirst` and no collected items. A green tick with an empty suite is
+   over a directory containing no tests exits **zero**. (pytest is better here -
+   it returns `ExitCode.NO_TESTS_COLLECTED`, 5 - but a `make test` wrapper that
+   ignores the code, or a `|| true`, restores the same trap.) A green tick with
+   an empty suite is
    worse than a red one, because it actively certifies that nothing is wrong -
    and it is easy to create by accident. It happened during the work that
    produced this file: creating `tests/` to hold a shell script turned a
@@ -23,6 +27,7 @@ reported however green it looked.
 
 from __future__ import annotations
 
+import importlib.util
 import os
 import re
 from dataclasses import dataclass
@@ -133,7 +138,21 @@ class TestsEvidenceChecker:
             )
             return
 
-        argv = ["python3", "-m", "unittest", "discover", "-s", dirs[0] if dirs else ".", "-t", "."]
+        wants_pytest = any("pytest" in cmd for _, cmd in documented)
+        if wants_pytest and importlib.util.find_spec("pytest") is None:
+            yield Finding(
+                checker=self.name, code="TESTS_NOT_RUN",
+                verdict=Verdict.UNVERIFIABLE, severity=Severity.INFO, claim=first_claim,
+                detail=("this repository documents pytest, which is not installed here. "
+                        "Driving a pytest suite through `unittest discover` would report an "
+                        "ImportError about the runner rather than anything about the tests, "
+                        "so the suite was not run."),
+            )
+            return
+
+        argv = (["python3", "-m", "pytest", "-q", dirs[0] if dirs else "."]
+                if wants_pytest else
+                ["python3", "-m", "unittest", "discover", "-s", dirs[0] if dirs else ".", "-t", "."])
         ran = Evidence.ran(argv, cwd=repo.root, timeout=max(config.command_timeout, 300.0),
                            env=self._env(repo, config))
 
@@ -151,6 +170,20 @@ class TestsEvidenceChecker:
             f"{len(files)} test file(s) found: " + ", ".join(files[:8])
             + (f" (+{len(files) - 8} more)" if len(files) > 8 else ""),
             value=len(files), path=str(repo.root))
+
+        # `unittest discover` needs the start directory to be an importable
+        # package. A pytest-style suite with no `__init__.py` is the standard
+        # layout, not a broken one, and reporting it as a failing suite blames
+        # the repository for this checker's choice of runner.
+        if ran.exit_code != 0 and "Start directory is not importable" in ran.output:
+            yield Finding(
+                checker=self.name, code="TESTS_NOT_RUN",
+                verdict=Verdict.UNVERIFIABLE, severity=Severity.INFO, claim=first_claim,
+                detail=(f"`{' '.join(argv)}` could not import the start directory, which is the "
+                        "normal layout for a pytest suite. That is a fact about the runner this "
+                        "checker chose, not about the tests, so the suite is not called failing."),
+            )
+            return
 
         if ran.exit_code != 0:
             yield Finding(

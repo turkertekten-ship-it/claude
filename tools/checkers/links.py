@@ -51,10 +51,16 @@ _URL_RE = re.compile(
 #: typo by construction.
 _GOOD_SCHEMES = frozenset({"http", "https"})
 #: Hosts that mean "fill this in later".
+#:
+#: `example.com`, `.org` and `.net` are deliberately absent: RFC 2606 reserves
+#: them precisely so documentation can use them, so a docstring naming
+#: `https://example.com/robots.txt` is following the standard, not leaking a
+#: template. `localhost` and loopback addresses are absent for the same reason -
+#: a README documenting a dev server at `http://localhost:8000` is describing
+#: something true.
 _PLACEHOLDER_HOSTS = frozenset({
-    "example.com", "example.org", "example.net", "www.example.com",
-    "localhost", "127.0.0.1", "0.0.0.0", "your-org.com", "yourname.com",
-    "changeme.com", "todo.com", "foo.com", "bar.com",
+    "your-org.com", "yourname.com", "changeme.com", "todo.com",
+    "my-org.com", "org-name.com", "acme-corp.example",
 })
 #: Placeholder path segments left in a copied template.
 _PLACEHOLDER_SEGMENTS = frozenset({
@@ -63,6 +69,26 @@ _PLACEHOLDER_SEGMENTS = frozenset({
 })
 _TRAILING = ".,;:!?)]}>'\""
 _GITHUB_HOSTS = frozenset({"github.com", "www.github.com", "raw.githubusercontent.com"})
+
+#: Contexts in which a GitHub URL is the project naming *itself*: a user-agent
+#: string, a packaging URL, a clone command, a badge. Outside these, a link to
+#: another repository is an ordinary outbound reference - a dependency, an
+#: upstream tool, a spec - and flagging it would make the rule fire on the
+#: normal case, which is how a checker earns the right to be switched off.
+_SELF_CONTEXT_RE = re.compile(
+    r"user[-_ ]?agent|homepage|repository\s*=|\burl\s*=|git\s+clone|"
+    r"img\.shields\.io|badge|Source\s*:|project_urls|\bclone\b|"
+    # A user-agent constant is conventionally spelled UA / DEFAULT_UA rather
+    # than "user agent", and that constant is the exact case this rule exists
+    # for: a copied UA string names another project to every server it hits.
+    r"\b[A-Z_]*UA\b\s*[:=]",
+    re.IGNORECASE,
+)
+
+
+def _asserts_self(line: str, url: str) -> bool:
+    """Does this line present the URL as this project's own address?"""
+    return bool(_SELF_CONTEXT_RE.search(line.replace(url, " ")))
 
 #: A file whose string literals are fixtures rather than published links. A
 #: test for this very checker has to contain a deliberately wrong URL in order
@@ -78,7 +104,20 @@ _TEMPLATE_RE = re.compile(r"[{}<>]|%s|%\(|\$\{|\$[A-Za-z_]")
 
 
 def _clean(url: str) -> str:
-    while url and url[-1] in _TRAILING:
+    """Trim the punctuation prose wraps a URL in, without truncating the URL.
+
+    A trailing `)` is only sentence punctuation when it is unbalanced. Wikipedia
+    disambiguation links end in a real one, and cutting it produces a different
+    URL - which offline merely misreports it, but with --network makes the tool
+    request an address that appears nowhere in the repository and then report
+    the 404 it earned against a link that was fine.
+    """
+    while url:
+        last = url[-1]
+        if last == ")" and url.count("(") >= url.count(")"):
+            break
+        if last not in _TRAILING:
+            break
         url = url[:-1]
     return url
 
@@ -158,16 +197,24 @@ class LinksChecker:
                        f"{url[len(scheme):len(scheme) + 3]!r}.",
                 remedy="Correct the scheme to http:// or https://.")
             return
-        parts = urllib.parse.urlsplit(url)
-        if not parts.hostname or "." not in parts.hostname:
+        try:
+            parts = urllib.parse.urlsplit(url)
+            hostname = parts.hostname
+        except ValueError:  # an invalid port or bracketed host
+            hostname = None
+        # A host with no dot is not malformed: `localhost`, a container name and
+        # an intranet single-label host all resolve. Only an empty host is
+        # structurally broken, and saying "has no resolvable host" about
+        # `http://localhost:8000` is the checker asserting something false.
+        if not hostname:
             yield Finding(
                 checker=self.name, code="LINK_MALFORMED",
                 verdict=Verdict.CONTRADICTED, severity=Severity.ERROR, claim=claim,
-                evidence=[here], detail=f"{url!r} has no resolvable host.",
+                evidence=[here], detail=f"{url!r} has no host at all.",
                 remedy="Correct the URL.")
             return
 
-        host = parts.hostname.lower()
+        host = hostname.lower()
         segments = {s.lower() for s in parts.path.split("/") if s}
         if host in _PLACEHOLDER_HOSTS or (segments & _PLACEHOLDER_SEGMENTS):
             # A line that is openly demonstrating a shape is not a mistake. The
@@ -187,15 +234,16 @@ class LinksChecker:
             return
 
         slug = _github_slug(url)
-        if own and slug and slug != own:
+        if own and slug and slug != own and _asserts_self(claim.text, url):
             yield Finding(
                 checker=self.name, code="LINK_WRONG_REPO",
                 verdict=Verdict.CONTRADICTED, severity=Severity.WARN, claim=claim,
                 evidence=[here, Evidence.measured(
                     f"git origin names {own!r}, this URL names {slug!r}",
                     value=own, path=".git/config")],
-                detail=(f"{url!r} points at {slug!r}, but this repository's origin remote is "
-                        f"{own!r}. A link that resolves to the wrong project is invisible in "
+                detail=(f"this line identifies the project itself, but {url!r} points at "
+                        f"{slug!r} while the origin remote is {own!r}. A self-reference to "
+                        "the wrong project resolves, returns 200, and is invisible in "
                         "rendered markdown."),
                 remedy=f"Point it at {own}, or say why another repository is meant.")
 

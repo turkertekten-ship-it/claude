@@ -2,8 +2,10 @@
 
 This is the deterministic half of `/ultrareview`. It makes no judgements a
 reader cannot reproduce: every line it prints is either a quoted claim, a file
-location, or the exit status of a command it actually ran. Run it twice on the
-same tree and you get the same bytes.
+location, or the exit status of a command it actually ran. Run it twice on an
+unchanged tree and you get the same findings, in the same order, with the same
+verdicts - the timings differ, because they are measurements of the run rather
+than of the repository.
 
 The model-driven half of the review (the part that reads for design, for
 altitude, for the claim a checker has no rule for) is described in

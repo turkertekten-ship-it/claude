@@ -102,6 +102,13 @@ class Evidence:
                 "ABSENCE evidence must state where it looked; "
                 "'not found' without a search space is a guess, not an observation"
             )
+        if self.kind is EvidenceKind.VALUE and not (self.path or self.searched):
+            raise ValueError(
+                "VALUE evidence must name what it was derived from. A computed "
+                "number with no source is the one shape of evidence that looks "
+                "rigorous and points at nothing, and Finding.__post_init__ would "
+                "accept it as the sole support for a CONTRADICTED verdict."
+            )
 
     @property
     def locator(self) -> str:
@@ -112,7 +119,12 @@ class Evidence:
             return " ".join(self.argv)
         if self.kind is EvidenceKind.ABSENCE:
             return f"searched {', '.join(self.searched[:6])}"
-        return self.path or "computed"
+        if self.path:
+            return self.path
+        # A VALUE always names a source (see __post_init__), so if there is no
+        # path there is a derived_from list; showing it beats printing
+        # "computed", which tells the reader nothing they can go and check.
+        return f"derived from {', '.join(self.searched[:6])}" if self.searched else "computed"
 
     def as_dict(self) -> dict[str, Any]:
         # `exit_code` is listed explicitly because a successful command's status
@@ -148,8 +160,11 @@ class Evidence:
         return cls(kind=EvidenceKind.ABSENCE, summary=summary, searched=tuple(searched))
 
     @classmethod
-    def measured(cls, summary: str, value: Any, path: str | Path = "") -> Evidence:
-        return cls(kind=EvidenceKind.VALUE, summary=summary, value=value, path=str(path))
+    def measured(cls, summary: str, value: Any, path: str | Path = "",
+                 derived_from: Sequence[str] = ()) -> Evidence:
+        """A computed value. `path` or `derived_from` must say where it came from."""
+        return cls(kind=EvidenceKind.VALUE, summary=summary, value=value,
+                   path=str(path), searched=tuple(derived_from))
 
     @classmethod
     def ran(cls, argv: Sequence[str], *, cwd: str | Path | None = None,

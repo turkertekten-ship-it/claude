@@ -122,3 +122,27 @@ class TestVerdicts(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestPolyglotRepositories(unittest.TestCase):
+    """A capability is not false because it is implemented in another language."""
+
+    def test_a_capability_backed_by_a_dockerfile_is_not_flagged(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = repo(tmp, "# P\n\nImages are built by the Dockerfile with BuildKit.\n")
+            (Path(tmp) / "Dockerfile").write_text("FROM python:3.11\n# syntax uses BuildKit\n")
+            self.assertEqual(codes(root), [])
+
+    def test_a_capability_backed_by_a_shell_script_is_not_flagged(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = repo(tmp, "# P\n\nReleases are cut by the RELEASE-1 pipeline script.\n")
+            (Path(tmp) / "release.sh").write_text("#!/bin/sh\n# RELEASE-1 pipeline\n")
+            self.assertEqual(codes(root), [])
+
+    def test_prose_repeating_prose_is_not_evidence(self):
+        # Markdown is excluded from the haystack on purpose: a second document
+        # restating the claim would otherwise satisfy it.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = repo(tmp, "# P\n\nResults are reranked with a HNSW graph index.\n")
+            (Path(tmp) / "DESIGN.md").write_text("# Design\n\nWe will use HNSW.\n")
+            self.assertIn("CAPABILITY_UNSUPPORTED", codes(root))

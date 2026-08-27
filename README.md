@@ -23,11 +23,11 @@ it, so the table is checkable rather than decorative:
 
 | Area | Module | What it does |
 |---|---|---|
-| HTTP | `util/http.py` | urllib client with per-host token-bucket rate limiting, retry honouring `Retry-After` and GitHub's `x-ratelimit-reset`, conditional GETs via ETag, hard response-size caps, and no silent POST replay on redirect |
+| HTTP | `util/http.py` | urllib client with token-bucket rate limiting (one bucket per client, not per host), retry honouring `Retry-After` and GitHub's `x-ratelimit-reset`, conditional GETs via ETag, an 8 MiB cap per response, and no silent POST replay on redirect |
 | Text | `util/text.py` | NFKC normalization, code-aware tokenization, markdown section splitting that never splits a fenced block, and secret redaction applied at the connector boundary |
 | HTML | `scrape/html.py` | a tolerant tree builder over `html.parser` with explicit recovery rules, structural plus link-density boilerplate removal, and markdown rendering that preserves headings, lists and code fences |
 | Robots | `scrape/robots.py` | RFC 9309 semantics with per-host caching; 5xx and unreachable are treated as disallow-all, not as permission |
-| Crawl | `scrape/crawler.py` | breadth-first, dedupes on content hash and declared canonical as well as URL, records why each URL was skipped, and bounds pages, fetches, bytes, depth and wall-clock |
+| Crawl | `scrape/crawler.py` | breadth-first, dedupes on content hash and declared canonical as well as URL, records why each URL was skipped, honours a per-host crawl delay, and bounds pages, fetches, depth and wall-clock. Bytes are counted and reported but not bounded — the only byte limit is the client's 8 MiB per response |
 | Ingest | `ingest/base.py` | the connector contract: content-hash incrementality, atomically persisted cursors, and per-document failures counted rather than raised |
 | GitHub | `ingest/github.py` | repo, README, files, issues, PRs, commits and releases; head-sha short circuit, one recursive tree call, and raw-over-API blob fetches to stay inside the REST quota |
 | Web | `ingest/web.py` | the crawler as a connector, with redaction and provenance stamping |

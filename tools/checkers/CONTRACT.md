@@ -67,15 +67,25 @@ register(MyChecker())
    no network unless `config.allow_network` is set. Sort anything you iterate
    from a set or dict.
 
-8. **Read-only.** A checker never writes to the repository under review.
+8. **Read-only.** A checker never writes to the repository under review. A
+   command it *executes* may want to — the repository's own `make check` is
+   entitled to run `compileall` — so the run environment sets
+   `PYTHONDONTWRITEBYTECODE` and points `PYTHONPYCACHEPREFIX` outside the tree
+   rather than banning commands the repository legitimately documents.
 
 ## Severity
 
+Severity and verdict are independent axes, and conflating them is a mistake this
+table used to invite. The **verdict** says what the evidence supports. The
+**severity** says how much the finding should block. A `CONTRADICTED` finding
+can be a `WARN` — a version that drifted between two files is provably wrong and
+still not worth failing a run over.
+
 | Severity | Use for |
 |---|---|
-| `ERROR` | A documented promise that is broken now: a command that fails, a path that does not exist, an entry point that cannot be imported. Fails the run. |
-| `WARN`  | A claim that is unbacked but not provably false: an unsourced number, a capability described in prose with no code behind it. |
-| `INFO`  | Confirmations worth stating, and drift that is cosmetic. |
+| `ERROR` | A promise that is broken now, where a reader following the documentation hits the failure: a command that exits non-zero, a path that does not exist, an entry point that cannot be imported. Fails the run. |
+| `WARN`  | Something a reader should fix but that does not break on contact: an unsourced number, a capability with no code behind it, two files disagreeing about a version. |
+| `INFO`  | Confirmations worth stating, and anything cosmetic. |
 
 ## Tests
 

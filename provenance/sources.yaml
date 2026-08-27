@@ -62,19 +62,43 @@ sources:
     cwd: working tree of this branch
     exit_code: 0
     observed: >-
-      10 checkers run, 0 skipped, 0 error, 0 warn, 2 unverifiable, in 9.1s.
-      ZERO_DEP_CONFIRMED from the import graph: 47 python files, 42 distinct
-      top-level imports, 40 standard library, 2 first-party, 0 third-party.
-      TESTS_PASS: 263 tests collected and passed.
+      10 checkers run, 0 skipped, 0 error, 0 warn, 3 unverifiable.
+      ZERO_DEP_CONFIRMED from the import graph, and TESTS_PASS with 292 tests
+      collected and passed.
     note: >-
       The two unverifiable items are stated rather than folded into the pass:
       `make lint` was not executed because its recipe runs compileall, which
       writes bytecode into the tree under review; and link reachability was not
       checked because the network is off by default.
 
+  - id: S-10
+    kind: report
+    reporter: the /ultrareview judgement layer (subagents, this session)
+    command: four review dimensions, then one refutation agent per finding
+    observed: >-
+      31 findings raised, 30 survived adversarial refutation, 1 refuted.
+      Each surviving finding was independently reproduced by its verifier
+      before being accepted.
+    note: >-
+      Second-hand by construction - it is agents reporting on their own reading.
+      It is recorded as kind:report rather than kind:measurement for that
+      reason. Every finding acted on was re-derived here against the tree
+      before the fix, and the fixes are covered by tests in the same commit.
+
+  - id: S-9
+    kind: measurement
+    command: python3 -m tools.ultrareview ../claude-ai --sibling ../claude
+    cwd: working tree of this branch
+    exit_code: 0
+    observed: "0 errors, 0 warnings over turkertekten-ship-it/claude-ai"
+    note: >-
+      The --sibling flag is required: claude-ai points at this repository on
+      purpose, and without the sibling those references are reported
+      unverifiable rather than guessed at in either direction.
+
   - id: S-8
     kind: measurement
     command: bash tests/run_all.sh
     cwd: working tree of this branch
     exit_code: 0
-    observed: "compile, 263 unit tests, and the ten data checkers - all checks passed"
+    observed: "compile, 292 unit tests, and the ten data checkers - all checks passed"

@@ -115,6 +115,13 @@ _MASKS: tuple[re.Pattern[str], ...] = (
         r"|figure|table|step|item|rule|part|no\.)|§)\s*#?\s*\d+",
         re.IGNORECASE,
     ),
+    # A standard's name, hyphenated. ISO-8601, SHA-256, RFC-7231, UTF-16, X-509
+    # all match the `top-5` admission rule below - a trailing number turning a
+    # word into a setting - and were read as tuned parameters whose value the
+    # source ought to contain. They are names, and the number is part of the
+    # name; requiring the code to contain 8601 for the word ISO-8601 is the
+    # checker demanding evidence for a spelling.
+    re.compile(r"\b(?:[A-Z]{2,}|[A-Z]-?[A-Z]*)\-\d+(?:-\d+)?\b"),
 )
 
 _HEADING_RE = re.compile(r"^(#{1,6})\s+(.*)$")

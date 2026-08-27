@@ -435,9 +435,21 @@ def _roots(repo: RepoIndex, config: CheckConfig) -> tuple[str, ...]:
 
 
 def _python_under(repo: RepoIndex, roots: Sequence[str]) -> list[SourceFile]:
+    """Every source file under the roots - not only the Python ones.
+
+    A capability is not made false by being implemented in another language. A
+    Dockerfile, a CI workflow, a shell script, a SQL migration or a JS bundle
+    can all be the real implementation of a sentence in the README, and every
+    one of those files is already in `repo.files`. Searching only `repo.python`
+    reported them as advertised-but-unimplemented, which in a polyglot
+    repository is most of what the README describes.
+
+    Markdown is excluded: prose repeating prose is not evidence of code.
+    """
     return [
-        source for source in repo.python
-        if any(root == "." or source.rel.startswith(f"{root}/") for root in roots)
+        source for source in repo.files
+        if not source.is_markdown
+        and any(root == "." or source.rel.startswith(f"{root}/") for root in roots)
     ]
 
 
@@ -538,14 +550,14 @@ class CoverageChecker:
                       f"{candidate.key!r}, and the Python source under {where} names "
                       f"{'none of them' if len(missing) == len(candidate.tokens) else 'only some of them'}.")
             summary = (f"{listed} required by {self.manifest_rel} but absent from "
-                       f"{haystack.file_count} Python file(s) under {where}")
+                       f"{haystack.file_count} source file(s) under {where}")
             remedy = (f"implement {missing[0]}, or correct the sentence, or update "
                       f"{self.manifest_rel} if the capability ships under another name.")
         else:
             detail = (f"this sentence advertises {listed}, and no identifier, string or comment "
-                      f"in the {haystack.file_count} Python file(s) under {where} mentions any of "
+                      f"in the {haystack.file_count} source file(s) under {where} mentions any of "
                       "them in any spelling.")
-            summary = (f"none of {listed} appear in {haystack.file_count} Python file(s) under "
+            summary = (f"none of {listed} appear in {haystack.file_count} source file(s) under "
                        f"{where}, searched case-insensitively and with punctuation stripped")
             remedy = (f"implement it, move the sentence under a roadmap heading, or map the claim "
                       f"to the symbols that do back it in {self.manifest_rel}.")

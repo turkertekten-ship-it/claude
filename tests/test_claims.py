@@ -159,3 +159,90 @@ class TestEmptyFenceDoesNotSwallowClaims(unittest.TestCase):
         texts = [c.text for c in f.prose_claims()]
         self.assertIn("this one too", texts)
         self.assertNotIn("make test", texts)
+
+
+class TestSkipDirsAreRepoRelative(unittest.TestCase):
+    """Regression: SKIP_DIRS was matched against the absolute path.
+
+    A repository checked out under `~/dev/build/repo`, a CI workspace at
+    `/var/lib/ci/build/job`, or anything vendored inside `node_modules/` had
+    every one of its own files filtered out. The tool then read zero bytes and
+    reported zero findings with exit 0 - a clean bill of health for a tree it
+    never opened, which is the worst failure available to it.
+    """
+
+    def _index(self, base: Path) -> RepoIndex:
+        base.mkdir(parents=True, exist_ok=True)
+        (base / "README.md").write_text("# Demo\n\nA claim.\n")
+        (base / "Makefile").write_text("help:\n\techo hi\n")
+        return RepoIndex(base)
+
+    def test_a_repo_under_a_skip_named_directory_is_still_read(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            plain = self._index(Path(tmp) / "demo")
+            buried = self._index(Path(tmp) / "build" / "demo")
+            self.assertEqual(sorted(f.rel for f in plain.files),
+                             sorted(f.rel for f in buried.files))
+            self.assertTrue(buried.files, "a repo under build/ must not read as empty")
+            self.assertEqual(len(buried.all_paths), len(plain.all_paths))
+
+    def test_every_skip_dir_name_is_survivable_as_a_parent(self):
+        from tools.claims import SKIP_DIRS
+
+        with tempfile.TemporaryDirectory() as tmp:
+            for name in sorted(SKIP_DIRS):
+                with self.subTest(parent=name):
+                    idx = self._index(Path(tmp) / name / "repo")
+                    self.assertTrue(idx.files, f"a repo under {name}/ read as empty")
+
+    def test_skip_dirs_inside_the_repo_are_still_skipped(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "demo"
+            idx = self._index(root)
+            (root / "build").mkdir()
+            (root / "build" / "generated.py").write_text("x = 1\n")
+            self.assertNotIn("build/generated.py", {f.rel for f in RepoIndex(root).files})
+
+
+class TestTildeFences(unittest.TestCase):
+    """Regression: `~~~` is a valid CommonMark fence and was read as prose."""
+
+    def test_a_tilde_fence_is_a_fence(self):
+        f = source("# T\n\n~~~sh\nmake test\n~~~\n")
+        fences = f.fences()
+        self.assertEqual(len(fences), 1)
+        self.assertEqual(fences[0].lang, "sh")
+        self.assertEqual(fences[0].commands, [(4, "make test")])
+
+    def test_tilde_fenced_content_is_not_prose(self):
+        f = source("# T\n\n~~~sh\npython3 -m demo.cli --config config/settings.toml\n~~~\n")
+        texts = [c.text for c in f.prose_claims()]
+        self.assertNotIn("python3 -m demo.cli --config config/settings.toml", texts)
+
+    def test_a_backtick_run_inside_a_tilde_fence_is_content(self):
+        # This is what tilde fences are for.
+        f = source("# T\n\n~~~\n```\nnot a fence\n```\n~~~\n\nafter\n")
+        self.assertEqual(len(f.fences()), 1)
+        self.assertIn("after", [c.text for c in f.prose_claims()])
+
+    def test_a_longer_backtick_fence_still_works(self):
+        f = source("# T\n\n````bash\nmake test\n````\n")
+        self.assertEqual(f.fences()[0].commands, [(4, "make test")])
+
+
+class TestDocstringLineAttribution(unittest.TestCase):
+    """Regression: module docstrings were attributed to line 1 unconditionally."""
+
+    def test_a_shebang_does_not_shift_docstring_claims(self):
+        src = '#!/usr/bin/env python3\n# a licence header\n\n"""The cache holds tokens.\n\nSecond line.\n"""\n'
+        f = SourceFile(Path("m.py"), "m.py", src)
+        by_text = {c.text: c.line for c in f.comment_claims()}
+        self.assertEqual(by_text["The cache holds tokens."], 4)
+        self.assertEqual(by_text["Second line."], 6)
+
+    def test_the_quoted_text_really_is_on_the_reported_line(self):
+        src = '#!/usr/bin/env python3\n\n"""Alpha.\n\nBeta.\n"""\n'
+        f = SourceFile(Path("m.py"), "m.py", src)
+        for claim in f.comment_claims():
+            self.assertIn(claim.text, f.line_text(claim.line),
+                          f"{claim.text!r} is not on line {claim.line}")

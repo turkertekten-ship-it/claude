@@ -35,7 +35,12 @@ TEXT_SUFFIXES = frozenset(
 NAMED_TEXT_FILES = frozenset({"Makefile", "makefile", "GNUmakefile", "Dockerfile", "CLAUDE.md"})
 
 _SENTENCE_RE = re.compile(r"(?<=[.!?:])\s+(?=[A-Z`*\[(])|\n")
-_FENCE_RE = re.compile(r"^(\s*)```([A-Za-z0-9_+-]*)\s*$")
+#: A fence opener or closer. CommonMark allows `~~~` as well as ```` ``` ````,
+#: and recommends it when the content itself contains backticks. Recognising
+#: only backticks does not merely miss those blocks - it feeds their contents to
+#: every prose-reading checker as if they were assertions, so a tilde-fenced
+#: example path becomes a PATH_MISSING error.
+_FENCE_RE = re.compile(r"^(\s*)(`{3,}|~{3,})([A-Za-z0-9_+-]*)\s*$")
 _BULLET_RE = re.compile(r"^\s*(?:[-*+]|\d+\.)\s+(.*)$")
 _TABLE_ROW_RE = re.compile(r"^\s*\|(.+)\|\s*$")
 _HEADING_RE = re.compile(r"^(#{1,6})\s+(.*)$")
@@ -120,15 +125,20 @@ class SourceFile:
     def fences(self) -> list[CodeFence]:
         out: list[CodeFence] = []
         open_at: int | None = None
+        marker = ""
         lang = ""
         buf: list[str] = []
         for idx, line in enumerate(self.lines, start=1):
             m = _FENCE_RE.match(line)
             if m and open_at is None:
-                open_at, lang, buf = idx, m.group(2).lower(), []
-            elif m and open_at is not None:
+                open_at, marker, lang, buf = idx, m.group(2), m.group(3).lower(), []
+            elif m and open_at is not None and m.group(2)[0] == marker[0] \
+                    and len(m.group(2)) >= len(marker) and not m.group(3):
+                # Same fence character, at least as long, no info string: only
+                # such a line closes a block. A ```` ``` ```` inside a `~~~`
+                # block is content, which is exactly why tilde fences exist.
                 out.append(CodeFence(lang, "\n".join(buf), open_at + 1, self.rel))
-                open_at, lang, buf = None, "", []
+                open_at, marker, lang, buf = None, "", "", []
             elif open_at is not None:
                 buf.append(line)
         if open_at is not None:  # unterminated fence: keep what we have
@@ -200,7 +210,14 @@ class SourceFile:
             doc = ast.get_docstring(node, clean=False)
             if not doc:
                 continue
-            base = 1 if isinstance(node, ast.Module) else node.body[0].lineno
+            if not node.body:
+                continue
+            # The docstring's own start line, never a guess. `1` is wrong for
+            # any module with a shebang, a coding cookie or a licence header
+            # above the docstring - and a locator that points at the wrong line
+            # makes the finding unreproducible, which is the one thing every
+            # finding in this tool has to be.
+            base = node.body[0].lineno
             for offset, row in enumerate(doc.split("\n")):
                 row = row.strip()
                 if len(row) > 1:
@@ -238,7 +255,14 @@ class RepoIndex:
         for path in sorted(self.root.rglob("*")):
             if not path.is_file():
                 continue
-            if any(part in SKIP_DIRS for part in path.parts):
+            # Relative parts, never absolute: `self.root` is resolved, so
+            # `path.parts` spans the whole host path. Matching SKIP_DIRS against
+            # that means a repository checked out under `~/dev/build/repo` or a
+            # CI workspace at `/var/lib/ci/build/job` filters out every one of
+            # its own files, and the tool then reports zero findings and exits 0
+            # on a tree it never read - a silent clean bill of health, which is
+            # the single worst thing this tool can do.
+            if any(part in SKIP_DIRS for part in path.relative_to(self.root).parts):
                 continue
             if path.suffix.lower() not in TEXT_SUFFIXES and path.name not in NAMED_TEXT_FILES:
                 continue
@@ -270,9 +294,10 @@ class RepoIndex:
         """Every path in the repo, relative and POSIX-style."""
         out: set[str] = set()
         for path in self.root.rglob("*"):
-            if any(part in SKIP_DIRS for part in path.parts):
+            rel = path.relative_to(self.root)
+            if any(part in SKIP_DIRS for part in rel.parts):  # relative, see `files`
                 continue
-            out.add(path.relative_to(self.root).as_posix())
+            out.add(rel.as_posix())
         return out
 
     def prose_claims(self) -> list[Claim]:

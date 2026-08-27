@@ -113,3 +113,26 @@ class TestCheckerBehaviour(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestSlugShapeIsNotEnough(unittest.TestCase):
+    """`packages/api` and `owner/repo` are the same shape.
+
+    Regression: shape alone scoped every path near a two-segment directory
+    reference to an imaginary other project, so a comment mentioning
+    `packages/api/pyproject.toml` reported it unverifiable instead of checking it.
+    """
+
+    def _findings(self, readme: str):
+        with tempfile.TemporaryDirectory() as tmp:
+            return list(PathsChecker().check(RepoIndex(build(tmp, readme)), CheckConfig()))
+
+    def test_a_directory_pair_does_not_scope_paths_elsewhere(self):
+        readme = "# T\n\nIn a workspace, `packages/api` declares it in `packages/api/pyproject.toml`.\n"
+        codes = [f.code for f in self._findings(readme)]
+        self.assertNotIn("PATH_IN_OTHER_REPO", codes)
+
+    def test_a_slug_with_a_repository_cue_still_scopes(self):
+        readme = "# T\n\nDoctrine is in the `acme/upstream` repository — its `provenance/`.\n"
+        codes = [f.code for f in self._findings(readme)]
+        self.assertIn("PATH_IN_OTHER_REPO", codes)

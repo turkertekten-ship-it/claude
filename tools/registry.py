@@ -138,7 +138,12 @@ def run(root: str | Path, config: CheckConfig | None = None,
     was_nested = nested()
     if was_nested and config.run_commands:
         config = config.for_subprocess()
-    # Set before any checker runs, so every subprocess inherits it.
+    # Set before any checker runs, so every subprocess inherits it - and
+    # restored in the `finally` below. Leaving it set would make the *second*
+    # run() in one process think it was nested and silently stop executing
+    # commands, so a caller looping over several repositories would get a real
+    # review of the first and a quietly degraded one of every other.
+    previous_marker = os.environ.get(ENV_MARKER)
     os.environ[ENV_MARKER] = "1"
     repo = RepoIndex(Path(root))
     report = Report(root=str(repo.root))
@@ -163,6 +168,11 @@ def run(root: str | Path, config: CheckConfig | None = None,
             continue
         report.checkers_run.append(name)
         report.extend(findings)
+
+    if previous_marker is None:
+        os.environ.pop(ENV_MARKER, None)
+    else:
+        os.environ[ENV_MARKER] = previous_marker
 
     report.duration_s = time.monotonic() - started
     if was_nested:

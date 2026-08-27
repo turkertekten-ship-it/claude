@@ -147,3 +147,27 @@ class TestExitCodeZeroSurvives(unittest.TestCase):
     def test_missing_binary_has_no_exit_code_key(self):
         e = Evidence.ran(["definitely-not-a-real-binary-xyz"])
         self.assertNotIn("exit_code", e.as_dict())
+
+
+class TestValueEvidenceNamesItsSource(unittest.TestCase):
+    """A computed number with no source looks rigorous and points at nothing."""
+
+    def test_measured_without_a_source_is_refused(self):
+        with self.assertRaises(ValueError):
+            Evidence.measured("47 files scanned", value=47)
+
+    def test_a_path_satisfies_it(self):
+        e = Evidence.measured("47 files", value=47, path="src/")
+        self.assertEqual(e.locator, "src/")
+
+    def test_derived_from_satisfies_it(self):
+        e = Evidence.measured("47 files", value=47, derived_from=["a.py", "b.py"])
+        self.assertIn("a.py", e.locator)
+
+    def test_a_sourceless_value_cannot_prop_up_a_verdict(self):
+        # Without the invariant this constructs cleanly, and a CONTRADICTED
+        # finding ends up resting on a number from nowhere.
+        with self.assertRaises(ValueError):
+            Finding(checker="t", code="C", verdict=Verdict.CONTRADICTED,
+                    severity=Severity.ERROR, claim=claim(),
+                    evidence=[Evidence.measured("it is 3x slower", value=3)])

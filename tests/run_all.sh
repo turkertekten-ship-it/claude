@@ -12,9 +12,13 @@ PY="${PY:-python3}"
 status=0
 
 step() {
-    printf '\n=== %s ===\n' "$1"
+    # The label has to be saved before the shift, or the failure line reports
+    # the command's first word instead of the step that failed - every step
+    # then announces itself as "python3", which is exactly no information.
+    local label="$1"
+    printf '\n=== %s ===\n' "$label"
     shift
-    "$@" || { printf '!! failed: %s\n' "$1"; status=1; }
+    "$@" || { printf '!! failed: %s\n' "$label"; status=1; }
 }
 
 step "compile all sources"        "$PY" -m compileall -q src tools tests

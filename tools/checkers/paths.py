@@ -94,6 +94,16 @@ _SLUG_RE = re.compile(r"`([A-Za-z0-9][\w.-]*/[A-Za-z0-9][\w.-]*)`")
 #: lines afterwards, so the window has to outlive the sentence.
 _SLUG_WINDOW = 8
 
+#: `owner/repo` and `packages/api` are the same shape, so shape alone cannot
+#: decide. The window must also say it is talking about a repository - otherwise
+#: any two-segment directory reference in a comment scopes the paths around it
+#: to an imaginary other project, and the reference is reported unverifiable
+#: instead of being checked.
+_REPO_CUE_RE = re.compile(
+    r"\brepositor(?:y|ies)\b|\brepos?\b|github\.com|\bupstream\b|\bsibling\b|\borigin\b",
+    re.IGNORECASE,
+)
+
 
 def _own_slug(repo: RepoIndex) -> str:
     """This repository's own `owner/repo`, from git's origin remote.
@@ -139,6 +149,8 @@ def _foreign_slug(source: SourceFile | None, line: int, own: str) -> str:
     rows = source.lines
     lo = max(0, line - 1 - _SLUG_WINDOW)
     window = "\n".join(rows[lo : line + _SLUG_WINDOW])
+    if not _REPO_CUE_RE.search(window):
+        return ""
     for candidate in _SLUG_RE.findall(window):
         if candidate == own or _SUFFIX_RE.search(candidate) or candidate.endswith("/"):
             continue
@@ -241,19 +253,41 @@ def _is_demonstration(token: str, from_link: bool, source: SourceFile | None) ->
 
 
 def _is_indented_code(source: SourceFile | None, claim: Claim) -> bool:
-    """An indented markdown block is an example, the way a fenced one is.
+    """An indented block is an example, the way a fenced one is.
 
     `prose_claims()` already drops fenced blocks; four-space blocks are the other
     way markdown marks something as illustrative, and paths inside them are
     routinely invented for the example. Indented *bullets* are exempt - nesting
     a list is not quoting code.
+
+    The same convention holds inside a Python docstring, which is why this is
+    not restricted to markdown any more: a docstring that draws a directory tree
+    indents it, and the identical block that is exempt in a README was an ERROR
+    one file over. For Python the baseline is the surrounding prose rather than
+    column zero, because a docstring inside a class is itself indented.
     """
-    if source is None or not source.is_markdown:
+    if source is None:
         return False
     raw = source.line_text(claim.line)
-    if not raw.startswith(("    ", "\t")):
+    indent = len(raw) - len(raw.lstrip())
+    if indent < 4 or _BULLET_RE.match(raw) is not None:
         return False
-    return _BULLET_RE.match(raw) is None
+    if source.is_markdown:
+        return True
+    return indent >= _prose_indent(source, claim.line) + 4
+
+
+def _prose_indent(source: SourceFile, line: int) -> int:
+    """The indentation the surrounding prose sits at.
+
+    Taken as the smallest indentation among the nearby non-blank lines, so a
+    docstring nested two levels deep is measured against its own left margin
+    rather than against column zero.
+    """
+    rows = source.lines
+    lo, hi = max(0, line - 1 - 6), min(len(rows), line + 6)
+    indents = [len(r) - len(r.lstrip()) for r in rows[lo:hi] if r.strip()]
+    return min(indents) if indents else 0
 
 
 def _asserts_absence(source: SourceFile | None, line: int) -> bool:

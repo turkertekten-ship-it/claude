@@ -42,8 +42,9 @@ Measured consequences, not inferred ones:
 * `python3 -m oodarag.cli` exits **1** with `ModuleNotFoundError` `[src:S-4]`.
   `pyproject.toml` declared `ooda = "oodarag.cli:main"` as a console script, so
   `pip install` followed by `ooda` produced that same error `[src:S-1]`.
-* Every Makefile target except `help`, `lint` and `clean` invoked that missing
-  module `[src:S-1]`.
+* Five Makefile targets — `demo`, `index`, `query`, `eval` and `loop` — invoked
+  that missing module, so each of them failed the same way `[src:S-1]`. The
+  other five (`help`, `install`, `test`, `lint`, `clean`) did not.
 * Four paths were referenced by name and did not exist: `internal/PLAN.md`
   (README), `docs/adr/0001-zero-dependency-core.md` (`pyproject.toml`,
   `util/http.py`, `util/text.py`), `evals/goldens.jsonl` (Makefile), and `tests/`
@@ -83,8 +84,9 @@ content.
 ## Where the branch ended
 
 `bash tests/run_all.sh` exits 0 `[src:S-8]`. The checkers report 0 errors and 0
-warnings over this repository and over `claude-ai`, with 2 unverifiable items
-named rather than folded into the pass `[src:S-7]`.
+warnings over this repository, with 2 unverifiable items named rather than
+folded into the pass `[src:S-7]`, and 0 errors and 0 warnings over `claude-ai`
+when it is given its sibling `[src:S-9]`.
 
 Two of the tool's own bugs were found by running it on itself, and both are
 recorded here because they are the kind a review tool is least likely to catch
@@ -100,7 +102,38 @@ by reading:
   that fixture as a published link made the checker loudest about the code
   proving it works. Files under `tests/` are now excluded from URL extraction.
 
-A third was found by measurement changing under the tool: creating `tests/` to
+Then the review's own judgement layer was pointed at the finished work: four
+dimensions of subagent review, each finding handed to a separate agent whose
+only job was to refute it. 31 findings were raised and **30 survived**
+`[src:S-10]`. All 30 are fixed in the same commit, each with a regression test.
+The three that mattered most were all in code written for this branch:
+
+* `RepoIndex` matched its skip-list against the *absolute* path, so a
+  repository checked out under `~/dev/build/repo`, a CI workspace at
+  `/var/lib/ci/build/job`, or anything vendored inside a `node_modules`
+  directory filtered out every one of its own files. The tool then read zero bytes and printed
+  "0 error, 0 warn", exit 0. A silent clean bill of health for a tree it never
+  opened is the worst output this tool can produce, and nothing in the suite
+  noticed because `tempfile` never generates a directory named `build`.
+* `os.environ[ENV_MARKER]` was set and never restored, so the *second* `run()`
+  in one process believed it was nested and stopped executing commands. A caller
+  looping over repositories got a real review of the first and a quietly
+  degraded one of every other.
+* The `links` checker read its own test fixtures as published claims. A test for
+  a wrong-URL rule has to contain a wrong URL; reading it as a claim made the
+  checker loudest about the code proving it works.
+
+The rest were false positives of the same family — a tilde-fenced code block
+read as prose, `localhost` reported as an unresolvable host, `example.com`
+flagged despite RFC 2606 reserving it for exactly that use, a multi-target
+Makefile rule (`build dist:`) reported as two missing targets, a monorepo's
+cross-package import reported as an undeclared dependency — plus four false
+claims in the documentation written for this branch, including a README row
+asserting per-host rate limiting that `HttpClient` does not do (it holds one
+bucket per client) and a crawler row claiming a byte bound that `CrawlConfig`
+has no field for.
+
+A third bug was found by measurement changing under the tool: creating `tests/` to
 hold a shell script turned a failing `make test` into a *passing* one that
 collected zero tests. `unittest discover` exits 0 on an empty suite. The
 `tests_evidence` checker now parses the collected count and reports
