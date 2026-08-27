@@ -526,3 +526,22 @@ sources:
       retrieval is good would be exactly the golden-set overfitting the
       eval-auditor agent is defined to catch. It is a smoke test of the whole
       chain, and should be read as one.
+
+  - id: CLI-VERIFIED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:48Z"
+    method: "make demo; make test; make loop — all offline, on this container"
+    evidence: >-
+      `make demo` ran the whole chain: ingested the 9-document seed corpus,
+      indexed it, answered sample questions with numbered citations resolving to
+      corpus files, refused a question the corpus does not cover ("Not enough
+      evidence in the indexed corpus to answer that", abstained no_candidates,
+      confidence 0.000), and printed the eval report. `make test` reported
+      "Ran 87 tests ... OK". `make loop` ran one cycle and printed the four-block
+      report: OBSERVE docs=9 chunks=48 vectors=48 errors=0; ORIENT staleness=0.00
+      quality=1.00 error_rate=0.00; DECIDE 1 action, "reindex store [ev=1.0]
+      in-memory indexes not built: bm25=0/48 chunks, dense=0/48 vectors";
+      ACT "ok reindex store 0.00s bm25=48 dense=48". Every make target the README
+      advertises now runs. Running `python3 -m oodarag.cli` without PYTHONPATH=src
+      fails with ModuleNotFoundError, which is why every entry point goes through
+      the Makefile.

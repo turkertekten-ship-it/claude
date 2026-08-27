@@ -142,6 +142,13 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - The harness reports recall@8=1.000, MRR=1.000, nDCG@8=0.885, citation coverage=1.000, abstention 0.167, false abstention 0.000. [src:PIPELINE-E2E-2026-08-27]
 - Those numbers measure self-consistency, not retrieval quality: the corpus and the golden set were written together by one agent, so perfect recall largely establishes that documents written to be retrievable are retrieved. [src:PIPELINE-E2E-2026-08-27]
 
+## Observed — every advertised entry point runs
+
+- `make demo`, `make test` and `make loop` all run offline on this container; the README's targets are no longer aspirational. [src:CLI-VERIFIED-2026-08-27]
+- The demo answers with citations that resolve to corpus files, and refuses a question the corpus does not cover rather than producing a plausible sentence. [src:CLI-VERIFIED-2026-08-27]
+- One OODA cycle produces the four-block report the design called for, and its single decision carries a stated reason and an expected value. [src:CLI-VERIFIED-2026-08-27]
+- `python3 -m oodarag.cli` fails without `PYTHONPATH=src`, which is why the Makefile is the documented entry point. [src:CLI-VERIFIED-2026-08-27]
+
 ## Conclusion
 
 The request that opened this session asked to look at "all my previous claude
