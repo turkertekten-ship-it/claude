@@ -299,6 +299,7 @@ class CycleReport:
     queued: list[str] = field(default_factory=list)
     suppressed: list[str] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
+    report_path: str = ""
 
     @property
     def duration_s(self) -> float:
@@ -326,6 +327,7 @@ class CycleReport:
             "queued": self.queued,
             "suppressed": self.suppressed,
             "errors": self.errors,
+            "report_path": self.report_path,
         }
         if include_detail:
             out["proposals"] = [p.as_dict() for p in self.proposals]
