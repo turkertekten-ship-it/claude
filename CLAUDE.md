@@ -107,6 +107,7 @@ prompts/                      system prompts carrying the doctrine
 tools/
   verify_provenance.py        the fabrication guard
   prompt_forge.py             the prompt guard — lint, score, compile
+  prompt_habits.py            scores the prompts already written
   ingest_chat_archive.py      chat-archive ingestion and search
   install_prompt_system.sh    installs the prompt system into ~/.claude
 tests/                        tests for the above
@@ -140,6 +141,7 @@ running the verifier, so it cannot report success over an unsourced claim.
 | `/ingest-chats [query]` | the real contents of the chat index, or that it is empty |
 | `/prompt <ask>` | a prompt whose gaps are closed or marked, linting clean |
 | `/prompt-audit [path]` | the prompts below standard, scored before and after |
+| `/prompt-habits` | the habit costing most across your own prompt history |
 
 Three subagents exist to keep phases from collapsing into each other:
 `observer` enumerates and is given nowhere to put a conclusion; `fact-checker`

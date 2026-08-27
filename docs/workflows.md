@@ -29,6 +29,7 @@ Invoke as slash commands. Definitions in `.claude/commands/`.
 | `/ingest-chats [query]` | Observe | the real contents of the chat index, or the fact that it is empty |
 | `/prompt <ask>` | all four | a prompt whose gaps are marked or closed, and a linter exit of 0 |
 | `/prompt-audit [path]` | audit | the prompts below standard, scored before and after |
+| `/prompt-habits` | audit | the recurring weakness across your own prompt history |
 
 ## Subagents
 

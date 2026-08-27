@@ -14,6 +14,7 @@ run python3 tools/verify_provenance.py
 run python3 tests/test_verify_provenance.py
 run python3 tests/test_ingest_chat_archive.py
 run python3 tests/test_prompt_forge.py
+run python3 tests/test_prompt_habits.py
 
 if [ "$status" -eq 0 ]; then
     echo "ALL CHECKS PASSED"

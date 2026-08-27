@@ -95,3 +95,9 @@ contents were not reconstructed, summarised, or guessed at.
 - Nothing written by Saraev himself was read: the egress gateway refused every host except `raw.githubusercontent.com` and the search API. [src:EGRESS-BLOCKED-2026-08-27]
 - The 200-call web-search budget was exhausted by the research workflow, ending verification for this session. [src:WEBSEARCH-BUDGET-2026-08-27]
 - The research workflow's own findings are recorded verbatim and marked second-hand; one of its agents demonstrated the search summariser attributing other authors' work to Saraev, which is why none of its claims were promoted. [src:SARAEV-WORKFLOW-2026-08-27]
+
+## Observed — the prompt corpus on this container
+
+- Indexing this container's transcripts yields 966 messages across 11 conversations; of 433 user-role turns, 421 are tool results rather than typed prompts. [src:PROMPT-HABITS-RUN-2026-08-27]
+- After excluding tool results, harness text and repeats, 10 prompts remained to score, and they are this session's own subagent briefs plus the owner's single goal message — not a sample of the owner's writing. [src:PROMPT-HABITS-RUN-2026-08-27]
+- The ratio matters for the tool's design: an auditor that did not filter on `block_types` would have reported 369 "prompts" and described the harness under the owner's name. [src:PROMPT-HABITS-RUN-2026-08-27]

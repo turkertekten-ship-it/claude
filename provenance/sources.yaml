@@ -289,3 +289,14 @@ sources:
       could fetch a page outside github.com, so even its `primary`-labelled
       claims arrived through a search summariser - which one agent demonstrated
       confabulating, attributing other authors' work to Saraev. Treat as leads.
+
+  - id: PROMPT-HABITS-RUN-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T16:30Z"
+    method: "python3 tools/ingest_chat_archive.py ingest --include-projects; python3 tools/prompt_habits.py --worst 4"
+    evidence: provenance/raw/prompt-habits-2026-08-27.md
+    note: >-
+      Run against this container's own transcripts. Of 433 user-role turns, 421
+      were tool results and were excluded; 10 were scored. The corpus is this
+      session's own traffic, so the ranking describes this session and not the
+      owner's writing.

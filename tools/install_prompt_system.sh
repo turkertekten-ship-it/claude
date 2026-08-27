@@ -4,10 +4,11 @@
 #
 # What it installs, and why each piece has to leave the repo:
 #   ~/.claude/skills/prompt-forge/   the procedure  (a repo-local skill is invisible elsewhere)
-#   ~/.claude/commands/prompt*.md    /prompt, /prompt-audit
+#   ~/.claude/commands/prompt*.md    /prompt, /prompt-audit, /prompt-habits
 #   ~/.claude/agents/prompt-critic.md the adversarial reader
 #   ~/.claude/tools/                 prompt_forge.py and its phrase list
 #   ~/.local/bin/prompt-forge        so the command files can call it by name
+#   ~/.local/bin/prompt-habits       the corpus auditor, likewise
 #
 # The installed copies of the markdown have `python3 tools/prompt_forge.py`
 # rewritten to `prompt-forge`, because outside this repository that relative
@@ -45,10 +46,13 @@ TARGETS=(
     "$PREFIX/skills/prompt-forge/SKILL.md"
     "$PREFIX/commands/prompt.md"
     "$PREFIX/commands/prompt-audit.md"
+    "$PREFIX/commands/prompt-habits.md"
     "$PREFIX/agents/prompt-critic.md"
     "$PREFIX/tools/prompt_forge.py"
+    "$PREFIX/tools/prompt_habits.py"
     "$PREFIX/tools/_phrases.py"
     "$BIN_DIR/prompt-forge"
+    "$BIN_DIR/prompt-habits"
 )
 
 if [ "$UNINSTALL" -eq 1 ]; then
@@ -94,24 +98,28 @@ install_rewritten() {
 install_rewritten "$REPO/.claude/skills/prompt-forge/SKILL.md" "$PREFIX/skills/prompt-forge/SKILL.md" || exit 2
 install_rewritten "$REPO/.claude/commands/prompt.md"           "$PREFIX/commands/prompt.md" || exit 2
 install_rewritten "$REPO/.claude/commands/prompt-audit.md"     "$PREFIX/commands/prompt-audit.md" || exit 2
+install_rewritten "$REPO/.claude/commands/prompt-habits.md"    "$PREFIX/commands/prompt-habits.md" || exit 2
 install_rewritten "$REPO/.claude/agents/prompt-critic.md"      "$PREFIX/agents/prompt-critic.md" || exit 2
 
-for tool in prompt_forge.py _phrases.py; do
+for tool in prompt_forge.py prompt_habits.py _phrases.py; do
     do_it cp "$REPO/tools/$tool" "$PREFIX/tools/$tool" || exit 2
     [ "$DRY" -eq 1 ] || say "  installed $PREFIX/tools/$tool"
 done
 
-if [ "$DRY" -eq 1 ]; then
-    say "  would: write $BIN_DIR/prompt-forge"
-else
-    cat > "$BIN_DIR/prompt-forge" <<SHIM
+for shim in prompt-forge:prompt_forge.py prompt-habits:prompt_habits.py; do
+    name="${shim%%:*}"; script="${shim#*:}"
+    if [ "$DRY" -eq 1 ]; then
+        say "  would: write $BIN_DIR/$name"
+        continue
+    fi
+    cat > "$BIN_DIR/$name" <<SHIM
 #!/usr/bin/env bash
 # Installed by tools/install_prompt_system.sh from $REPO
-exec python3 -B "$PREFIX/tools/prompt_forge.py" "\$@"
+exec python3 -B "$PREFIX/tools/$script" "\$@"
 SHIM
-    chmod +x "$BIN_DIR/prompt-forge" || exit 2
-    say "  installed $BIN_DIR/prompt-forge"
-fi
+    chmod +x "$BIN_DIR/$name" || exit 2
+    say "  installed $BIN_DIR/$name"
+done
 
 if [ "$DRY" -eq 1 ]; then
     say "dry run: nothing was written."
@@ -120,6 +128,18 @@ fi
 
 # Verify the thing that was just installed, from the installed path only.
 say "verifying the installed copy"
+
+# Every target exists. A silent write failure once shipped a command file that
+# was never created, and the install still reported success.
+missing=""
+for target in "${TARGETS[@]}"; do
+    [ -e "$target" ] || missing="$missing\n  $target"
+done
+if [ -n "$missing" ]; then
+    say "  FAILED: these files were not installed:$(printf "$missing")" >&2
+    exit 1
+fi
+say "  all ${#TARGETS[@]} files are in place"
 tmp="$(mktemp)"
 printf 'Fix the failing test and clean up all the modules.\n' > "$tmp"
 if "$BIN_DIR/prompt-forge" lint "$tmp" >/dev/null 2>&1; then
@@ -146,6 +166,7 @@ say ""
 say "installed. In any terminal on this machine:"
 say "  /prompt <a rough ask>        forge it into a checkable prompt"
 say "  /prompt-audit <path>         audit prompts you already have"
+say "  /prompt-habits              the habit costing most across your history"
 say "  prompt-forge lint FILE       the linter on its own"
 say ""
 say "For chats that cannot read this machine, paste prompts/portable-preamble.md."

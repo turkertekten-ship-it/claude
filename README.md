@@ -30,6 +30,7 @@ bash tests/run_all.sh        # verifier + both test suites
 | `tools/verify_provenance.py` | The fabrication guard. |
 | `tools/ingest_chat_archive.py` | Conversation-archive ingestion and search. |
 | `tools/prompt_forge.py` | The prompt linter and compiler. |
+| `tools/prompt_habits.py` | Scores the prompts you have already written. |
 | `tools/install_prompt_system.sh` | Installs the prompt system into `~/.claude`, for every terminal. |
 | `tests/` | Tests for every tool here, including their failure cases. |
 | `.claude/commands/` | The workflows, as slash commands. |
@@ -52,7 +53,20 @@ bash tools/install_prompt_system.sh                               # /prompt in e
 ```
 
 `compile` cannot invent: every line of its output is a line you wrote, a
-heading, or an explicit `<<MISSING:` marker, and the tests prove it. Read
+heading, or an explicit `<<MISSING:` marker, and the tests prove it.
+
+One prompt at a time is the small win. The larger one is the corpus:
+
+```bash
+python3 tools/ingest_chat_archive.py ingest --include-projects
+python3 tools/prompt_habits.py --worst 5
+```
+
+That scores the prompts you have actually written and names the habit that
+costs most — the same rule firing on most of what you write is worth more than
+polishing any single prompt. It counts what it excluded (in a Claude Code
+transcript, tool results outnumber real prompts by around forty to one) so the
+number it reports is about you rather than about the harness. Read
 [docs/prompting.md](docs/prompting.md) for the standard and
 `.claude/skills/prompt-forge/SKILL.md` for the procedure. For chats that cannot
 reach this machine, paste [prompts/portable-preamble.md](prompts/portable-preamble.md).
