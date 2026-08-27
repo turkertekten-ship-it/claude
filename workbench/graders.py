@@ -75,6 +75,9 @@ class GradingContext:
     variant_id: str
     vars: dict[str, Any] = field(default_factory=dict)
     workdir: str = ""
+    #: The suite file's own directory. Commands anchor to this rather than to
+    #: the process's cwd, so a suite stays runnable from anywhere.
+    suite_dir: str = ""
     #: Only supplied to model graders, and only when a judge is configured.
     judge_backend: Backend | None = None
     judge_model: str | None = None
@@ -416,6 +419,7 @@ def g_command(g: Grader, ctx: GradingContext) -> Verdict:
         output_file.write_text(ctx.output, encoding="utf-8")
         rendered = command.replace("{output_file}", str(output_file))
         rendered = rendered.replace("{workdir}", ctx.workdir or tmp)
+        rendered = rendered.replace("{suite_dir}", ctx.suite_dir)
         try:
             proc = subprocess.run(
                 rendered, shell=True, capture_output=True, text=True,

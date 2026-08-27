@@ -28,7 +28,8 @@ sys.path.insert(0, str(REPO))
 
 from workbench.backend import Completion, EchoBackend, Request  # noqa: E402
 from workbench.blind import (  # noqa: E402
-    Candidate, blind_text, identity_tokens, judge_pair, position_bias_rate, seal,
+    Candidate, blind_text, identical_pair_control, identity_tokens, judge_pair,
+    length_summary, position_bias_rate, same_family, seal,
 )
 from workbench.errors import RenderError, SpecError  # noqa: E402
 from workbench.graders import (  # noqa: E402
@@ -40,7 +41,8 @@ from workbench.report import markdown  # noqa: E402
 from workbench.runner import execute  # noqa: E402
 from workbench.spec import Grader, load_suite  # noqa: E402
 from workbench.stats import (  # noqa: E402
-    bradley_terry, required_pairs, sign_test, summarise_pairwise, wilson_interval,
+    bradley_terry, mcnemar, paired_table, required_pairs, sign_test,
+    summarise_pairwise, wilson_interval,
 )
 
 FAILURES: list[str] = []
@@ -310,6 +312,63 @@ def test_position_swap() -> None:
           abs(rate - 1 / 3) < 1e-9, str(rate))
 
 
+def test_controls_and_errors() -> None:
+    print("\nthe identical-pair control -- the cheapest test that blinding works")
+    judge = _ScriptedJudge(["TIE", "TIE"])
+    good = identical_pair_control(judge, "which is better", "the same answer")
+    check("a judge that ties two identical answers passes the control", good["passed"])
+
+    judge = _ScriptedJudge(["FIRST", "FIRST"])
+    leaky = identical_pair_control(judge, "which is better", "the same answer")
+    check("a judge that picks a winner between IDENTICAL answers FAILS the control",
+          not leaky["passed"], str(leaky["verdicts"]))
+    check("the control failure says the run cannot be trusted",
+          "Do not trust" in leaky["detail"], leaky["detail"])
+
+    print("\nunreadable verdicts must not become silent ties")
+
+    class _Garbage(EchoBackend):
+        def complete(self, request):
+            return Completion(text="I would say the vibes are good",
+                              structured=None, cost_usd=0.0)
+
+    broken = judge_pair(_Garbage(), "c", Candidate("a", "x"), Candidate("b", "y"),
+                        "c1", tokens=[])
+    check("an unparseable judge verdict is recorded as ERROR, not TIE",
+          broken.winner == "ERROR", broken.winner)
+    check("errors are excluded from the position-bias rate",
+          position_bias_rate([broken]) == 0.0)
+
+    print("\nself-judging is flagged, not silently permitted")
+    check("same family is detected",
+          same_family("claude-haiku-4-5-20251001", "claude-haiku-4-5"))
+    check("different families are not flagged",
+          not same_family("claude-haiku-4-5", "claude-opus-5"))
+
+    print("\nlength confound stays visible")
+    lengths = length_summary([Candidate("short", "ab"), Candidate("long", "abcd")])
+    check("length per variant is reported", lengths == {"short": 2, "long": 4})
+
+
+def test_paired_outcomes() -> None:
+    print("\npaired outcome comparison -- McNemar over shared cases")
+    table = mcnemar(both_pass=3, a_only=5, b_only=0, both_fail=1)
+    check("only the discordant cells count", table["discordant"] == 5)
+    check("5 to 0 discordant is still not significant at n=5",
+          not table["significant_at_0.05"], str(table["p_value_exact"]))
+    check("9 to 0 discordant IS significant",
+          mcnemar(0, 9, 0, 0)["significant_at_0.05"])
+
+    identical = mcnemar(4, 0, 0, 2)
+    check("no discordant pairs means the suite cannot separate the variants",
+          "cannot separate" in identical["note"], identical["note"])
+
+    paired = paired_table({"c1": True, "c2": True, "c3": False},
+                          {"c1": True, "c2": False, "c3": False})
+    check("the paired table is built from shared case ids", paired["cases"] == 3)
+    check("it finds the one discordant case", paired["a_only"] == 1 and paired["b_only"] == 0)
+
+
 def test_statistics() -> None:
     print("\nstatistics -- small samples must not be allowed to look decisive")
     check("4 wins to 2 losses is NOT significant", sign_test(4, 2) > 0.05,
@@ -413,6 +472,8 @@ def main() -> int:
     test_schema_validation()
     test_blinding()
     test_position_swap()
+    test_controls_and_errors()
+    test_paired_outcomes()
     test_statistics()
     test_end_to_end()
     test_registry_kinds()

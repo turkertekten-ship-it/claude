@@ -1,0 +1,15 @@
+Captured 2026-08-27 by WebFetch of https://platform.claude.com/docs/en/release-notes/overview
+Excerpted verbatim. Line numbers are from the fetched markdown.
+
+
+### August 18, 2026
+
+* Workbench is now [**playground**](https://platform.claude.com/playground) in the Claude Console. Playground supports every Messages API parameter and includes templates that demonstrate API features such as code execution and web search. It shows the full SDK request and the API response for each run, to help you understand the API and build with it. For more, see the [Claude Help Center](https://support.claude.com/en/articles/8606378-how-do-i-use-playground) or try it at [platform.claude.com/playground](https://platform.claude.com/playground).
+
+
+
+### July 17, 2026
+
+* The legacy **Workbench** ([platform.claude.com/workbench](https://platform.claude.com/workbench)) in the Claude Console is being sunset with access ending on August 17, 2026. Saved prompts, variables, and evals are not supported in the updated [Workbench](https://platform.claude.com/playground). You can export any data you want to keep from the banner and under your **Organizational Settings**. For more, see [How do I use the Workbench?](https://support.claude.com/en/articles/8606378-how-do-i-use-the-workbench) in the Claude Help Center.
+* The experimental prompt tools APIs for generating, improving, and templatizing prompts (`/v1/experimental/generate_prompt`, `/v1/experimental/improve_prompt`, and `/v1/experimental/templatize_prompt`) are being retired along with the Workbench on August 17, 2026. After removal, requests to these endpoints will return an error.
+

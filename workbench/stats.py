@@ -45,6 +45,12 @@ def wilson_interval(successes: int, trials: int, z: float = 1.96) -> Interval:
 def sign_test(wins: int, losses: int) -> float:
     """Two-sided exact binomial p-value for paired wins against losses.
 
+    This is exactly McNemar's exact test: both reduce to a binomial on the
+    discordant pairs, and the concordant ones carry no information about which
+    variant is better. :func:`mcnemar` below is the same arithmetic reached
+    from a 2x2 pass/fail table, kept separate because that is the shape a
+    grader run actually produces.
+
     Ties are excluded, which is the standard treatment: a tie carries no
     directional information. With ties dropped, the null hypothesis is that a
     non-tied pair is a coin flip.
@@ -163,3 +169,41 @@ def summarise_pairwise(outcomes: Sequence[str], a: str, b: str,
         "ci95_win_rate_a": str(bootstrap_win_rate(outcomes, a, seed=seed)),
         "pairs_needed_for_70pct_effect": required_pairs(),
     }
+
+
+def mcnemar(both_pass: int, a_only: int, b_only: int, both_fail: int) -> dict[str, object]:
+    """Exact McNemar test over a paired pass/fail table.
+
+    Every variant answers the same cases, so the right comparison is
+    case-by-case, not two independent pass rates. Cases where both variants
+    passed, or both failed, tell you nothing about which is better -- only the
+    discordant cells do.
+
+    The exact binomial form is used rather than the chi-square approximation
+    because a prompt suite has tens of cases, not thousands, and that is
+    precisely where the approximation misleads.
+    """
+    discordant = a_only + b_only
+    return {
+        "both_pass": both_pass, "a_only": a_only,
+        "b_only": b_only, "both_fail": both_fail,
+        "discordant": discordant,
+        "p_value_exact": round(sign_test(a_only, b_only), 5),
+        "significant_at_0.05": sign_test(a_only, b_only) < 0.05,
+        "note": ("no discordant pairs: the variants passed and failed the same "
+                 "cases, so this suite cannot separate them"
+                 if discordant == 0 else
+                 f"{discordant} case(s) separated the variants"),
+    }
+
+
+def paired_table(a_results: dict[str, bool], b_results: dict[str, bool]) -> dict[str, object]:
+    """Build and test the paired pass/fail table for two variants over shared cases."""
+    shared = sorted(set(a_results) & set(b_results))
+    both_pass = sum(1 for c in shared if a_results[c] and b_results[c])
+    a_only = sum(1 for c in shared if a_results[c] and not b_results[c])
+    b_only = sum(1 for c in shared if not a_results[c] and b_results[c])
+    both_fail = sum(1 for c in shared if not a_results[c] and not b_results[c])
+    result = mcnemar(both_pass, a_only, b_only, both_fail)
+    result["cases"] = len(shared)
+    return result

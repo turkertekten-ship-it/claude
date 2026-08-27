@@ -15,7 +15,7 @@ from typing import Any, Sequence
 from .blind import PairJudgement, position_bias_rate
 from .graders import DETERMINISTIC, ENVIRONMENTAL, MODEL
 from .runner import CaseRun, RunResult
-from .stats import bradley_terry, summarise_pairwise, wilson_interval
+from .stats import bradley_terry, paired_table, summarise_pairwise, wilson_interval
 
 
 def _pct(numerator: float, denominator: float) -> str:
@@ -128,10 +128,71 @@ def markdown(result: RunResult) -> str:
                 f"{f['kind']} | {detail} |")
         add("")
 
+    # Paired case-by-case comparison: every variant answered the same cases, so
+    # two independent pass rates is the wrong comparison to make.
+    variants = result.variant_ids
+    if len(variants) == 2:
+        a, b = variants
+        a_results = {r.case_id: r.passed for r in result.by_variant(a) if r.repeat == 0}
+        b_results = {r.case_id: r.passed for r in result.by_variant(b) if r.repeat == 0}
+        table = paired_table(a_results, b_results)
+        add("## Paired outcome comparison (McNemar, exact)")
+        add("")
+        add(f"| | `{b}` passed | `{b}` failed |")
+        add("|---|---:|---:|")
+        add(f"| **`{a}` passed** | {table['both_pass']} | {table['a_only']} |")
+        add(f"| **`{a}` failed** | {table['b_only']} | {table['both_fail']} |")
+        add("")
+        add(f"Discordant cases: **{table['discordant']}** of {table['cases']}. "
+            f"p = {table['p_value_exact']} "
+            f"({'significant' if table['significant_at_0.05'] else 'not significant'} "
+            f"at 0.05).")
+        add("")
+        add(f"{table['note'].capitalize()}. Cases both variants passed, or both "
+            f"failed, carry no information about which is better — only the "
+            f"off-diagonal cells do.")
+        add("")
+
+    if result.controls:
+        add("## Blinding control")
+        add("")
+        for control in result.controls:
+            mark = "PASS" if control["passed"] else "**FAIL**"
+            add(f"- {mark} — {control['control']}: {control['detail']}")
+        add("")
+        add("The control shows the judge one answer twice, as both candidates. "
+            "A judge with nothing to distinguish them must return a tie; if it "
+            "picks a winner, it is reading position or residual identity rather "
+            "than content.")
+        add("")
+        if any(not c["passed"] for c in result.controls):
+            add("> **The blinding control failed. Every comparison below is "
+                "unsafe to quote.** Fix the leak or change the judge before "
+                "reading anything into the win rates.")
+            add("")
+
+    if result.lengths:
+        add("## Output length by variant")
+        add("")
+        add("| Variant | Mean output characters |")
+        add("|---|---:|")
+        for vid, chars in result.lengths.items():
+            add(f"| `{vid}` | {chars} |")
+        add("")
+        add("Judges are measured to prefer longer answers regardless of "
+            "content, so a win rate should be read next to this table. If the "
+            "winner is also consistently the longest, length is a live "
+            "confound and the criterion needs to rule it out explicitly.")
+        add("")
+
     if result.judgements:
         bias = position_bias_rate(result.judgements)
+        errors = sum(1 for j in result.judgements if j.winner == "ERROR")
         add("## Blind pairwise comparison")
         add("")
+        if errors:
+            add(f"- Unreadable judge verdicts: **{errors}** — recorded as "
+                f"errors, not silently counted as ties.")
         add(f"- Pairs judged: **{len(result.judgements)}**, each in both "
             f"presentation orders ({2 * len(result.judgements)} judge calls).")
         add(f"- Order-disagreement rate: **{100 * bias:.0f}%** — pairs where "
@@ -197,6 +258,12 @@ def markdown(result: RunResult) -> str:
             "against each other; the pass rates are independent measurements.")
     add("- Pass rates measure the graders that were written, not correctness "
         "in general. A case with no grader for a failure mode cannot detect it.")
+    if result.judgements:
+        add("- The judge was not validated against human labels on this task. "
+            "Published agreement between a strong judge and human experts is "
+            "around 85% with ties excluded, against 81% between humans — so a "
+            "judge verdict is a second opinion of roughly human quality, not a "
+            "ground truth.")
     return "\n".join(out)
 
 

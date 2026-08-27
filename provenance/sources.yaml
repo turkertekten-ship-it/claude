@@ -119,3 +119,133 @@ sources:
       correctly attributed hits with verbatim excerpts and message ids. The
       claude.ai export path was exercised only against synthetic fixtures in
       tests/, never against a real export.
+
+  # ---- Session: Claude code to Playground parity, 2026-08-27 ----
+
+  - id: CONSOLE-SUNSET-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:04Z"
+    method: "WebFetch https://platform.claude.com/docs/en/release-notes/overview, read directly by this session"
+    evidence: provenance/raw/console-workbench-sunset-2026-08-27.txt
+    note: >-
+      Verbatim release-note entries. July 17 2026: "The legacy Workbench ... is
+      being sunset with access ending on August 17, 2026. Saved prompts,
+      variables, and evals are not supported in the updated Workbench." The same
+      entry retires /v1/experimental/generate_prompt, improve_prompt and
+      templatize_prompt on the same date. August 18 2026: "Workbench is now
+      playground in the Claude Console. Playground supports every Messages API
+      parameter ... It shows the full SDK request and the API response for each
+      run."
+
+  - id: SAMPLING-DEPRECATED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:04Z"
+    method: "WebFetch https://platform.claude.com/docs/en/api/messages, read directly by this session"
+    evidence: >-
+      temperature: "Deprecated. Models released after Claude Opus 4.6 do not
+      support setting temperature. A value of 1.0 of will be accepted for
+      backwards compatibility, all other values will be rejected with a 400
+      error." top_p: same, accepting only >= 0.99. top_k: "Models released
+      after Claude Opus 4.6 do not accept top_k; any value will be rejected
+      with a 400 error." output_config.effort accepts low | medium | high |
+      xhigh | max.
+    note: >-
+      This is why the workbench has no temperature sweep. The capability was
+      removed from the platform, not omitted from the tool.
+
+  - id: CLI-BACKEND-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T14:57Z"
+    method: >-
+      claude -p "Reply with exactly the word: PONG" --output-format json
+      --model claude-haiku-4-5-20251001, run twice: once with the default
+      surface, once with --system-prompt ... --tools "" --setting-sources ""
+    evidence: >-
+      Both calls returned result "PONG". The default invocation reported
+      total_cost_usd 0.064242 with cache_creation_input_tokens 31513 and
+      input_tokens 10. The stripped invocation reported total_cost_usd 0.001514
+      with input_tokens 250 and no cache creation. The JSON envelope carries
+      result, usage, total_cost_usd, modelUsage, session_id, num_turns,
+      stop_reason and duration_ms. A separate call with --json-schema returned
+      a parsed object under the key structured_output.
+    note: >-
+      Establishes that the Claude Code CLI is a usable completion backend with
+      its own cost accounting, and that stripping the coding-agent surface is
+      worth roughly 42x on a short prompt. No ANTHROPIC_API_KEY is present in
+      this container, so this is the only backend available.
+
+  - id: PLUGIN-EVAL-AVAILABLE-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:02Z"
+    method: "claude plugin eval --help; claude --help"
+    evidence: provenance/raw/claude-plugin-eval-help-2026-08-27.txt
+    note: >-
+      `claude plugin eval` is present and runnable in this container (CLI
+      2.1.247). It runs "<eval dir>/**/case.yaml or prompt.md + graders/*.md"
+      against a plugin, with --ablation defaulting to with-without, a
+      --judge-model defaulting to haiku, and --max-cost-usd. Its comparison is
+      with-plugin against without-plugin, not N prompt variants.
+
+  - id: FABRICATION-GRADER-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:20Z"
+    method: "python3 tools/grade_no_fabrication.py - over three hand-written inputs"
+    evidence: >-
+      An input asserting "The owner has four repositories and started using
+      Claude in 2024." plus a false-memory phrase produced 3 violations and
+      exit 1 (one FALSE_MEMORY, two UNSOURCED_CLAIM). An input carrying a
+      resolving [src:] tag produced 0 violations and exit 0. An input declining
+      to answer, in a blockquote, produced 0 violations and exit 0.
+    note: >-
+      Establishes that the outcome grader discriminates in both directions
+      before it was used to score anything. Known limitation, stated rather
+      than hidden: the verifier skips blockquotes, so an answer written
+      entirely as a blockquote passes trivially. The suite pairs it with a
+      word_count floor for that reason, which bounds but does not eliminate the
+      loophole.
+
+  - id: DELEGATED-RESEARCH-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:10Z"
+    method: >-
+      Four subagents spawned by this session, each instructed to return only
+      claims carrying the URL they were read on
+    evidence: >-
+      Reports covering: the Console playground feature set; the Claude Code and
+      Agent SDK surface; a GitHub prior-art sweep over anthropics/claude-cookbooks,
+      anthropics/courses, promptfoo/promptfoo, lm-sys/FastChat, openai/evals,
+      langchain-ai/openevals, hesreallyhim/awesome-claude-code,
+      anthropics/claude-code and anthropics/claude-plugins-official; and the
+      blind-evaluation methodology literature.
+    note: >-
+      SECOND-HAND. These are delegates' reports of pages this session did not
+      itself open. Reporter named: subagents of session
+      session_01QLk8iRamoDp6s1xEuTyd4P. The two load-bearing claims drawn from
+      them -- the Workbench sunset and the sampling-parameter deprecation --
+      were independently re-fetched and verified directly, and are recorded
+      under their own source ids above. Everything else taken from these
+      reports is cited by URL in docs/parity.md rather than asserted here.
+
+  - id: MT-BENCH-MIRRORS-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:10Z"
+    method: >-
+      Delegated read of two independent GitHub full-text mirrors of arXiv
+      2306.05685, plus the lm-sys/FastChat implementation the paper describes
+    evidence: >-
+      Judge consistency under swapped presentation order, default prompt:
+      GPT-4 65.0%, GPT-3.5 46.2%, Claude-v1 23.8%. Repetitive-list verbosity
+      attack failure rates: Claude-v1 91.3%, GPT-3.5 91.3%, GPT-4 8.7%
+      (n = 23). Self-preference: GPT-4 ~10 points of win rate, Claude-v1 ~25,
+      with the paper stating it "cannot determine whether the models exhibit a
+      self-enhancement bias". Prescription quoted verbatim: "A conservative
+      approach is to call a judge twice by swapping the order of two answers
+      and only declare a win when an answer is preferred in both orders."
+    note: >-
+      SECOND-HAND and mirror-verified, not read from arxiv.org, which is
+      blocked by this container's egress proxy. Two independent mirrors agreed
+      exactly, and the described behaviour matches the FastChat source
+      (play_a_match_pair runs both orders; show_result.py scores a
+      disagreement as a tie). That is corroboration, not a reading of the
+      canonical PDF. Treat the numbers as motivating the design, not as
+      calibration constants.

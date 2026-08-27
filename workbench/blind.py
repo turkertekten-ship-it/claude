@@ -50,17 +50,29 @@ PAIRWISE_SCHEMA = {
 }
 
 PAIRWISE_SYSTEM = (
-    "You are an impartial evaluator comparing two candidate responses to the "
+    "Please act as an impartial judge comparing two candidate responses to the "
     "same task. You do not know which system produced either candidate, and "
     "you must not guess. Judge only against the stated criterion.\n\n"
-    "Rules you must follow:\n"
-    "- Length is not quality. A longer answer is not better for being longer.\n"
+    "Avoid any position biases and ensure that the order in which the "
+    "responses were presented does not influence your decision. Do not allow "
+    "the length of the responses to influence your evaluation. Do not favor "
+    "certain names. Be as objective as possible.\n\n"
+    "Further rules:\n"
     "- Confidence is not correctness. An assertive wrong answer loses.\n"
-    "- Position is not a signal. FIRST and SECOND are presentation order only.\n"
     "- If the two are equally good, or differ only in style, answer TIE. TIE "
-    "is a real verdict, not a failure to decide.\n\n"
+    "is a real verdict, not a failure to decide.\n"
+    "- In `reason`, quote the specific span of the candidate that decided it. "
+    "A reason that could have been written without reading the candidates is "
+    "not a reason.\n\n"
     "Return only the requested JSON object."
 )
+
+#: The three bias-suppression sentences above are copied from the judge prompt
+#: shipped with FastChat's MT-Bench (`pair-v2`). They are worth including and
+#: worth not trusting: in the MT-Bench measurements, judges carrying that exact
+#: instruction still preferred a padded, information-free rewrite of an answer
+#: over the original in 91.3% of trials (Claude-v1 and GPT-3.5; GPT-4, 8.7%).
+#: The instruction is cheap. The position swap below is what actually works.
 
 
 @dataclass
@@ -171,11 +183,16 @@ def _ask(backend: Backend, criterion: str, first: str, second: str,
         try:
             payload = json.loads(completion.text)
         except (json.JSONDecodeError, ValueError):
-            payload = {"winner": "TIE",
+            # Not a tie -- a tie is a verdict, and manufacturing one here would
+            # bury a broken judge inside a plausible-looking null result.
+            payload = {"winner": "ERROR",
                        "reason": f"unparseable judge output: {completion.text[:200]}"}
-    winner = str(payload.get("winner", "TIE")).upper()
+    winner = str(payload.get("winner", "")).upper()
     if winner not in ("FIRST", "SECOND", "TIE"):
-        winner = "TIE"
+        # Never coerce an unreadable verdict into a tie: a tie is a judgement
+        # the judge made, and silently manufacturing them hides a broken judge
+        # behind a plausible-looking null result.
+        winner = "ERROR"
     return winner, str(payload.get("reason", "")), completion.cost_usd or 0.0
 
 
@@ -199,12 +216,18 @@ def judge_pair(backend: Backend, criterion: str, a: Candidate, b: Candidate,
     w1, r1, c1 = _ask(backend, criterion, a_text, b_text, model, repeat=0)
     w2, r2, c2 = _ask(backend, criterion, b_text, a_text, model, repeat=1)
 
-    # Translate positional verdicts back into variant ids.
-    pick1 = {"FIRST": a.variant_id, "SECOND": b.variant_id, "TIE": "TIE"}[w1]
-    pick2 = {"FIRST": b.variant_id, "SECOND": a.variant_id, "TIE": "TIE"}[w2]
+    # Translate positional verdicts back into variant ids. Each order gets its
+    # own map, because "FIRST" means a different variant in each presentation.
+    pick1 = {"FIRST": a.variant_id, "SECOND": b.variant_id,
+             "TIE": "TIE", "ERROR": "ERROR"}[w1]
+    pick2 = {"FIRST": b.variant_id, "SECOND": a.variant_id,
+             "TIE": "TIE", "ERROR": "ERROR"}[w2]
 
-    agreed = pick1 == pick2
-    winner = pick1 if agreed else "TIE"
+    if "ERROR" in (pick1, pick2):
+        winner, agreed = "ERROR", False
+    else:
+        agreed = pick1 == pick2
+        winner = pick1 if agreed else "TIE"
 
     return PairJudgement(
         case_id=case_id, left=a.variant_id, right=b.variant_id,
@@ -224,6 +247,63 @@ def position_bias_rate(judgements: Sequence[PairJudgement]) -> float:
     Zero means the judge was reading the answers. Approaching one means it was
     reading the layout, and the comparison should not be reported as a result.
     """
-    if not judgements:
+    scored = [j for j in judgements if j.winner != "ERROR"]
+    if not scored:
         return 0.0
-    return sum(1 for j in judgements if not j.agreed) / len(judgements)
+    return sum(1 for j in scored if not j.agreed) / len(scored)
+
+
+def identical_pair_control(backend: Backend, criterion: str, text: str,
+                           model: str | None = None) -> dict[str, Any]:
+    """Show the judge the same answer twice. It must call a tie.
+
+    This is the cheapest possible test of whether blinding actually works, and
+    it is a real check rather than a formality: a judge shown two byte-identical
+    candidates has nothing to go on except signals that should not be there.
+    If it picks a winner, something in the payload is still distinguishing the
+    two slots -- residual identity, or raw position preference -- and every
+    comparison in the run is suspect.
+
+    Runs before the real comparisons so a leak is caught before the budget is
+    spent, not after the numbers are written up.
+    """
+    w1, r1, c1 = _ask(backend, criterion, text, text, model, repeat=0)
+    w2, r2, c2 = _ask(backend, criterion, text, text, model, repeat=1)
+    passed = w1 == "TIE" and w2 == "TIE"
+    return {
+        "control": "identical-pair",
+        "passed": passed,
+        "verdicts": [w1, w2],
+        "reasons": [r1[:300], r2[:300]],
+        "cost_usd": c1 + c2,
+        "detail": (
+            "the judge tied two identical candidates, as it must"
+            if passed else
+            f"the judge picked a winner ({w1}/{w2}) between two IDENTICAL "
+            f"candidates. Blinding is leaking or the judge is reading position. "
+            f"Do not trust this run's comparisons."
+        ),
+    }
+
+
+def length_summary(candidates: Sequence[Candidate]) -> dict[str, int]:
+    """Character counts per variant, so a length confound is visible.
+
+    Judges have a measured preference for longer answers, so a win rate should
+    never be read without knowing whether the winner was also systematically
+    the wordier one.
+    """
+    return {c.variant_id: len(c.text) for c in candidates}
+
+
+def same_family(model_a: str, model_b: str) -> bool:
+    """Do two model ids come from the same family? Used to warn about self-judging.
+
+    A judge from the same family as a candidate is measured to favour it. The
+    workbench does not refuse the configuration -- sometimes it is the only
+    model available -- but it does say so in the report.
+    """
+    def family(model: str) -> str:
+        parts = (model or "").split("-")
+        return parts[1] if len(parts) >= 2 else (model or "")
+    return bool(model_a) and bool(model_b) and family(model_a) == family(model_b)

@@ -29,7 +29,10 @@ from pathlib import Path
 from typing import Any, Callable, Sequence
 
 from .backend import Backend, Completion, Request
-from .blind import Candidate, PairJudgement, identity_tokens, judge_pair, position_bias_rate
+from .blind import (
+    Candidate, PairJudgement, identical_pair_control, identity_tokens,
+    judge_pair, length_summary, position_bias_rate, same_family,
+)
 from .errors import SpecError
 from .graders import GradingContext, Verdict, grade
 from .render import render
@@ -98,6 +101,10 @@ class RunResult:
     judgements: list[PairJudgement] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)
     duration_s: float = 0.0
+    #: Result of the identical-pair blinding control, when a comparison ran.
+    controls: list[dict[str, Any]] = field(default_factory=list)
+    #: Characters of output per variant, so a length confound stays visible.
+    lengths: dict[str, int] = field(default_factory=dict)
 
     @property
     def cost_usd(self) -> float:
@@ -123,6 +130,8 @@ class RunResult:
             "runs": [r.to_dict() for r in self.runs],
             "judgements": [j.to_dict() for j in self.judgements],
             "position_bias_rate": round(position_bias_rate(self.judgements), 4),
+            "controls": self.controls,
+            "mean_output_chars": self.lengths,
             "notes": self.notes,
         }
 
@@ -196,6 +205,7 @@ def produce(suite: Suite, backend: Backend, report: Reporter,
             completion=completion, case_id=case.id, variant_id=variant.id,
             vars={**suite.vars, **variant.vars, **case.vars},
             workdir=workdir, judge_backend=judge_backend, judge_model=judge_model,
+            suite_dir=str(suite.path.parent) if suite.path else "",
         )
         verdicts = grade(case.graders, ctx)
         results.append(CaseRun(
@@ -210,8 +220,10 @@ def produce(suite: Suite, backend: Backend, report: Reporter,
 
 def compare(suite: Suite, runs: Sequence[CaseRun], judge_backend: Backend,
             report: Reporter, criterion: str, judge_model: str | None = None,
-            extra_redactions: Sequence[str] = ()) -> list[PairJudgement]:
+            extra_redactions: Sequence[str] = (),
+            controls: list[dict[str, Any]] | None = None) -> list[PairJudgement]:
     """Pass two: blind pairwise comparison of every variant pair, per case."""
+    controls = controls if controls is not None else []
     variant_ids = sorted({r.variant_id for r in runs})
     if len(variant_ids) < 2:
         report("  skip blind comparison: fewer than two variants")
@@ -220,6 +232,15 @@ def compare(suite: Suite, runs: Sequence[CaseRun], judge_backend: Backend,
     models = {r.completion.model for r in runs if r.completion}
     tokens = identity_tokens(variant_ids, models, list(extra_redactions))
     judgements: list[PairJudgement] = []
+
+    # Before spending anything on real comparisons, prove the judge cannot tell
+    # two identical candidates apart. If it can, nothing below means anything.
+    sample = next((r.output for r in runs if r.output.strip()), "")
+    if sample:
+        control = identical_pair_control(judge_backend, criterion, sample, judge_model)
+        controls.append(control)
+        report(f"  control identical-pair: {'PASS' if control['passed'] else 'FAIL'}"
+               f" — {control['detail'][:120]}")
 
     case_ids = sorted({r.case_id for r in runs})
     for case_id in case_ids:
@@ -276,7 +297,27 @@ def execute(suite: Suite, backend: Backend, report: Reporter,
                 suite, result.runs, judge_backend, report, chosen,
                 judge_model=judge_model,
                 extra_redactions=suite.blind.get("redact", []),
+                controls=result.controls,
             )
+            # A judge from the same family as a candidate is measured to
+            # favour it. Not refused -- sometimes it is the only model
+            # available -- but never left unsaid.
+            for variant in suite.variants:
+                if variant.model and judge_model and same_family(variant.model, judge_model):
+                    result.notes.append(
+                        f"judge model {judge_model!r} shares a family with variant "
+                        f"{variant.id!r} ({variant.model!r}); judges are measured to "
+                        f"favour their own family, so read this comparison with that "
+                        f"in mind"
+                    )
+                    break
+    # Output length per variant, so a length confound cannot hide behind a
+    # win rate.
+    per_variant: dict[str, list[int]] = {}
+    for run in result.runs:
+        per_variant.setdefault(run.variant_id, []).append(len(run.output))
+    result.lengths = {vid: round(sum(v) / len(v)) for vid, v in per_variant.items()}
+
     result.duration_s = time.time() - started
     return result
 
