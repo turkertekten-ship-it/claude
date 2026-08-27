@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "oodarag"
+version = "0.1.0"
+description = "An OODA-driven, end-to-end RAG pipeline that runs with zero required dependencies."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Turker Tekten" }]
+keywords = ["rag", "retrieval", "ooda", "pipeline", "embeddings", "sqlite"]
+classifiers = [
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+# Deliberately empty. The whole pipeline runs on the standard library.
+# See docs/adr/0001-zero-dependency-core.md
+dependencies = []
+
+[project.optional-dependencies]
+fast = ["numpy>=1.26"]          # vectorised scoring for large corpora
+providers = ["requests>=2.31"]  # only if you prefer requests over urllib
+dev = ["pytest>=8.0", "ruff>=0.5"]
+
+[project.scripts]
+ooda = "oodarag.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
