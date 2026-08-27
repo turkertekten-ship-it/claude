@@ -110,6 +110,14 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - The installer has not been run with `--apply` against this container's real `~/.claude`, so its effect on a live session is untested here; only its file handling is. [src:INSTALLER-VALIDATED-2026-08-27]
 - It reaches Claude Code sessions on one machine. It does not reach claude.ai web conversations, which do not read `~/.claude/`; that half of the request needs a manual paste into a Project's custom instructions. [src:INSTALLER-VALIDATED-2026-08-27]
 
+## Observed — the fleet moved while this branch was working
+
+- Between 15:04Z and 15:25Z the `claude` remote went from 2 branches to 11, and `claude-ai` from 0 to 5. [src:SIBLING-MERGES-2026-08-27T1525Z]
+- Both branches this one was built from had advanced in that window: the pipeline branch by one commit and the substrate branch by four. [src:SIBLING-MERGES-2026-08-27T1525Z]
+- Both were merged here. The substrate merge produced 8 conflicts, every one resolved by reading both sides rather than taking a side; the pipeline merge was clean. [src:SIBLING-MERGES-2026-08-27T1525Z]
+- After both merges the inherited blind-test suites pass in this tree: 72 tests, OK, 1 skipped. [src:SIBLING-MERGES-2026-08-27T1525Z]
+- All five branches on the `claude-ai` remote share one root commit, `a21b4f48`, so the unrelated-histories hazard does not apply there — the fleet converged. This session branched from that root rather than adding a sixth. [src:CLAUDE-AI-SHARED-ROOT-2026-08-27]
+
 ## Conclusion
 
 The request that opened this session asked to look at "all my previous claude

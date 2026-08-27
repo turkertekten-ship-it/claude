@@ -427,3 +427,35 @@ sources:
     collected_at: "2026-08-27T15:25:36+00:00"
     method: "git fetch --all --prune; git for-each-ref refs/remotes/origin; git ls-tree -r --name-only per branch"
     evidence: provenance/raw/fleet-refs-2026-08-27T152536+0000.txt
+
+  - id: SIBLING-MERGES-2026-08-27T1525Z
+    kind: repo_state
+    collected_at: "2026-08-27T15:26Z"
+    method: "git ls-remote --heads origin (both repos); git fetch; git merge; PYTHONPATH=src python3 -m unittest discover -s tests"
+    evidence: >-
+      Between 15:04Z and 15:25Z the `claude` remote went from 2 branches to 11
+      and `claude-ai` from 0 to 5. Both branches this one was built from had
+      advanced: claude/rag-system-data-pipeline-rdkde9 from 1d7ce8f to 177128a
+      ("Add access probing, blind test suites, and the capability protocol") and
+      claude/review-chat-archive-zrynr4 from b11a6fa to 4049525 (four commits,
+      including a transcript-overwriting fix and tools/fleet_snapshot.py). Both
+      were merged here. The substrate merge produced 8 conflicts, all resolved
+      by reading both sides; the pipeline merge was clean, no conflicts. After
+      both, `PYTHONPATH=src python3 -m unittest discover -s tests` reported
+      "Ran 72 tests ... OK (skipped=1)" and `bash tests/run_all.sh` printed
+      "ALL CHECKS PASSED".
+
+  - id: CLAUDE-AI-SHARED-ROOT-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:28Z"
+    method: "git rev-list --max-parents=0 over all 5 branches of turkertekten-ship-it/claude-ai; git merge-base"
+    evidence: >-
+      All five branches on the `claude-ai` remote
+      (review-chat-archive-zrynr4, goal-prompt-task-division-0ghozd,
+      personal-skills-repos-research-dxmflq, great-euler-6tx6y6,
+      code-playground-parity-xw0snj) return the same root commit a21b4f48, and
+      `git merge-base` between them exits 0 at that commit. Each carries exactly
+      one file, CLAUDE.md, pointing at the doctrine repository. The unrelated-
+      histories hazard therefore does NOT apply in this repository: the fleet
+      converged on one root. This session branched from it rather than adding a
+      sixth.
