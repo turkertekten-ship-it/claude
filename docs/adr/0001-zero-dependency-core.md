@@ -46,6 +46,29 @@ Accelerators and hosted providers plug in behind interfaces (`Embedder`,
 - A dependency cannot break the build by changing, being yanked, or being
   unreachable from behind a proxy.
 
+## Known bias: token counts are estimated, not measured
+
+`estimate_tokens` approximates roughly four characters per token for English
+and three for code, deliberately, so that no tokenizer dependency is needed.
+Chunk sizes are tuned against it and the eval harness inherits it.
+
+The drift this introduces is **systematic rather than random**, and worst on
+code, where identifiers and punctuation tokenise far more finely than the
+ratio assumes. Two consequences worth writing down before they cause a
+misdiagnosis:
+
+- A chunk targeted at 320 estimated tokens may be materially larger in a real
+  tokenizer's count. If chunks are later sized against a model's context
+  budget, size from the model's own counter, not from this.
+- A retrieval regression that appears after switching to a real tokenizer is
+  most likely this bias surfacing, not the retriever getting worse. Compare
+  chunk-size distributions before concluding anything about ranking.
+
+Recorded here rather than fixed, because the fix is a tokenizer dependency and
+that is the trade this ADR exists to refuse. `Embedder` and the chunker both
+take the counter as a seam, so a project that already has a tokenizer can
+supply it.
+
 ## Consequences
 
 Two rules follow, and both are load-bearing:

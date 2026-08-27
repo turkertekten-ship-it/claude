@@ -1,0 +1,32 @@
+{
+  "revision": "20260825",
+  "rootUrl": "https://youtube.googleapis.com/",
+  "scopes_by_method": {
+    "videos.list": [
+      "https://www.googleapis.com/auth/youtube",
+      "https://www.googleapis.com/auth/youtube.force-ssl",
+      "https://www.googleapis.com/auth/youtube.readonly",
+      "https://www.googleapis.com/auth/youtubepartner"
+    ],
+    "search.list": [
+      "https://www.googleapis.com/auth/youtube",
+      "https://www.googleapis.com/auth/youtube.force-ssl",
+      "https://www.googleapis.com/auth/youtube.readonly",
+      "https://www.googleapis.com/auth/youtubepartner"
+    ],
+    "playlistItems.list": [
+      "https://www.googleapis.com/auth/youtube",
+      "https://www.googleapis.com/auth/youtube.force-ssl",
+      "https://www.googleapis.com/auth/youtube.readonly",
+      "https://www.googleapis.com/auth/youtubepartner"
+    ],
+    "captions.download": [
+      "https://www.googleapis.com/auth/youtube.force-ssl",
+      "https://www.googleapis.com/auth/youtubepartner"
+    ],
+    "captions.list": [
+      "https://www.googleapis.com/auth/youtube.force-ssl",
+      "https://www.googleapis.com/auth/youtubepartner"
+    ]
+  }
+}

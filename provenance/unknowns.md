@@ -30,6 +30,12 @@ reasoning remains unknown. The other two sessions have pushed nothing.
 **Do not:** infer their contents from their titles. A title is a label the
 system generated, not a record of the work.
 
+**Narrowed at 16:10Z.** Ten sibling branches have now pushed, holding 25-118
+files each, and their *output* is readable. [src:FLEET-SYNC-2026-08-27] One
+of them was read in full and its audit of this pipeline acted on.
+[src:SIBLING-AUDIT-2026-08-27] Their reasoning remains unavailable: a diff
+still shows what a session built, never what it was asked or why it chose.
+
 ---
 
 ### U-2 — Any Claude conversation history predating 2026-08-27
@@ -58,6 +64,13 @@ The document itself was never in reach of this session.
 
 **Resolves when:** the source document is committed to a repository, or the
 owner names it.
+
+**Checked, not assumed.** Every Markdown, text and YAML file on all twelve
+sibling branches was searched for "the book", "kitap" and "imb". No match.
+[src:FLEET-SYNC-2026-08-27] A second-hand lead does exist — a sibling reports
+the owner's Drive holds an M&A transaction set [src:SIBLING-AUDIT-2026-08-27] —
+which is consistent with an "M&A installation guide" but does not identify a
+book, and is not treated as an answer.
 
 ---
 
@@ -111,21 +124,35 @@ No personal Drive file was opened, and nothing was written to Drive.
 
 ---
 
-### U-7 — Whether a valid API key reaches caption *metadata*
+### U-7 — Whether a valid API key reaches caption *metadata* — RESOLVED
 
-**Unknown:** whether `captions.list` returns track metadata for a video the
+**Was unknown:** whether `captions.list` returns track metadata for a video the
 caller does not own when given a *valid* API key.
 
-**Why:** it was probed only with a deliberately invalid key, which produced
-`API_KEY_INVALID` — proving the method evaluates a key, but not what a good one
-would get. No valid key exists in this environment.
+**Resolved from the API's own specification.** Google's discovery document
+(revision 20260825) lists the accepted OAuth scopes per method.
+`videos.list`, `search.list` and `playlistItems.list` each accept
+`youtube.readonly`. `captions.list` and `captions.download` accept only
+`youtube.force-ssl` and `youtubepartner` — both write-grade.
+[src:YOUTUBE-SCOPES-2026-08-27]
 
-**Settled and not unknown:** `captions.download` refuses API-key authentication
-outright, at any validity, so caption *text* for a video the caller does not own
-is not obtainable through the Data API. That part was established.
+So captions have **no read-only surface at all**. That is a property of the
+API's design, not of any particular key, and it settles the question without
+needing one: an API key is not a supported authentication path for either
+captions method. The earlier probe result — `captions.list` returning
+`API_KEY_INVALID` while `captions.download` returns "API keys are not
+supported" — is consistent with this: the former validates a key before
+rejecting the auth *class*, the latter rejects the class first.
+[src:YOUTUBE-CAPTIONS-KEYLESS-2026-08-27]
 
-**Resolves when:** a key is supplied and `captions.list` is called against a
-third-party video.
+**Still not established:** what a valid `youtube.force-ssl` OAuth token
+belonging to a non-owner would get from `captions.list`. That is a different
+question from the one asked here, needs an OAuth flow rather than a key, and
+nothing in this pipeline depends on the answer.
+
+**Consequence for the connector:** `caption_tracks()` is documented as
+key-unsupported rather than merely untested, and remains uncalled during
+ingest. Caption text comes from the export directory or not at all.
 
 ---
 

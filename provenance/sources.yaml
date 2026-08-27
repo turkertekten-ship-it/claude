@@ -328,3 +328,58 @@ sources:
       The generic key=value pattern required a word boundary before the key
       name; underscores are word characters, so no boundary exists inside
       AWS_SECRET_ACCESS_KEY and the credential passed through unredacted.
+
+  - id: FLEET-SYNC-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T16:10Z"
+    method: "git fetch --all --prune; git branch -r; git ls-tree -r per branch; git show <branch>:<path> grep sweep for 'imb' and 'the book'"
+    evidence: provenance/raw/fleet-sync-2026-08-27T16-10Z.txt
+    note: >-
+      13 branches on `claude`, 7 on `claude-ai`, against the 4-session roster
+      captured at 14:27Z. Ten sibling branches hold 25-118 files each. A grep
+      across every Markdown, text and YAML file on all twelve sibling branches
+      matched neither "imb" nor "the book" nor "kitap", so U-3 and U-4 remain
+      open after being checked rather than assumed.
+
+  - id: SIBLING-AUDIT-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T16:12Z"
+    method: "git show origin/claude/personal-skills-repos-research-dxmflq:docs/audits/2026-08-27-oodarag-rag-audit.md"
+    evidence: >-
+      Findings F-1 "pip install . produces a console script that cannot run",
+      F-2 "the README's failure-mode table presents planned work as delivered",
+      F-3 "make demo, query, eval and loop cannot succeed", F-4 "chunking has a
+      contract but no implementation", F-5 "estimate_tokens is a heuristic that
+      the eval harness will inherit". The document closes: "Re-run this audit
+      when the retrieval spine lands."
+    note: >-
+      Read from the sibling branch directly, not summarised from its commit
+      message. The audit was produced against the pre-spine tree.
+
+  - id: AUDIT-CLOSED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T16:25Z"
+    method: "make test; make demo; ls src/oodarag/cli.py; python3 -m oodarag.cli --help"
+    evidence: provenance/raw/test-run-2026-08-27.txt
+    note: >-
+      F-1 closed: src/oodarag/cli.py exists and `python3 -m oodarag.cli` runs
+      every declared subcommand. F-2 closed: all nine rows of the README table
+      are backed by a module. F-3 closed: demo, index, query, eval and loop all
+      succeed. F-4 closed: chunk.py implements contextual headers and per-kind
+      strategies. F-5 closed: the estimate_tokens bias is recorded in
+      docs/adr/0001-zero-dependency-core.md, which is what the finding asked
+      for once the eval harness landed. The audit itself has not been re-run by
+      its author.
+
+  - id: YOUTUBE-SCOPES-2026-08-27
+    kind: api
+    collected_at: "2026-08-27T16:08Z"
+    method: "GET https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest"
+    evidence: provenance/raw/youtube-v3-discovery-scopes-2026-08-27.json
+    note: >-
+      Google's own machine-readable API description, revision 20260825.
+      videos.list, search.list and playlistItems.list each publish
+      youtube.readonly among their accepted scopes. captions.list and
+      captions.download publish only youtube.force-ssl and youtubepartner —
+      both write-grade. Captions therefore have no read-only surface at all,
+      which is a property of the API's design rather than of any key.

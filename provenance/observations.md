@@ -90,6 +90,32 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - The retrieval evaluation over 8 golden cases passed all 8, at recall@8 0.9286, MRR 0.9286 and nDCG@8 0.892, with zero citation problems, zero contaminated cases, and the one abstention case abstaining as required. [src:OODARAG-VERIFIED-2026-08-27]
 - Evaluating against the whole repository instead of the documentation corpus contaminated the run: `evals/goldens.jsonl` and a captured report from a previous run both contain the golden questions verbatim, the abstention case retrieved its own question and stopped abstaining, and it failed. Excluding the eval material restored it. [src:EVAL-CONTAMINATION-2026-08-27]
 
+## Observed — the fleet, re-checked at 16:10Z
+
+- The roster captured at 14:27Z listed 4 sessions; at 16:10Z there were 13 branches on `claude` and 7 on `claude-ai`, ten of them siblings holding between 25 and 118 files. [src:FLEET-SYNC-2026-08-27]
+- A sibling branch independently performed the same unrelated-histories merge this branch did, so the "whoever merges first should say so" convention did not coordinate anything: both sessions acted before either could announce it. [src:FLEET-SYNC-2026-08-27]
+- Every Markdown, text and YAML file on all twelve sibling branches was searched for the strings behind U-3 and U-4. Neither "the book" nor "imb" appears anywhere. Those unknowns stay open, now having been checked rather than assumed. [src:FLEET-SYNC-2026-08-27]
+
+## Observed — an audit of this pipeline, by another session
+
+> Framing, not a claim: the audit below was written by
+> `claude/personal-skills-repos-research-dxmflq` against the tree as it stood
+> before the retrieval spine existed. It is read here from the branch itself,
+> not from a summary of it.
+
+- The audit raised five findings against `src/oodarag/`: a console script with no `cli.py`, a README table presenting planned work as delivered, four Makefile targets that could not succeed, a chunking contract with no implementation, and the `estimate_tokens` heuristic that the eval harness would inherit. [src:SIBLING-AUDIT-2026-08-27]
+- All five are now closed on this branch, four of them by work done independently before the audit was read. [src:AUDIT-CLOSED-2026-08-27]
+- The audit also passed three of the README's claims — redaction at the connector boundary, bounded crawls on four axes, and provenance carried through the data model — and noted that its remaining categories could not be assessed because those stages did not exist. [src:SIBLING-AUDIT-2026-08-27]
+
+## Second-hand — the owner's own documents
+
+> Framing, not a claim: this is another session's report of a Google Drive
+> listing this session never saw. It is recorded as a lead, with the reporter
+> named, and is not treated as established.
+
+- `claude/personal-skills-repos-research-dxmflq` reports that the owner's Drive holds a corporate-transaction set: an executed SHA, a numbered investment/master/employment agreement series indexed `1.g`, `3.a`, `4.a`, tax workstreams, D&O insurance and a KVKK consent form — read as titles only. [src:SIBLING-AUDIT-2026-08-27]
+- If that holds, the corpus this pipeline will actually serve is contract text, whose retrievable unit is the clause rather than the section. Nothing in this repository has been built for that yet, and no contract has been ingested. [src:SIBLING-AUDIT-2026-08-27]
+
 ## Conclusion
 
 The honest answer to "look through all my previous claude chats" is bounded:

@@ -9,6 +9,12 @@ is the roster and the rules that keep them from overwriting each other.
 
 > This is a snapshot taken at 2026-08-27T14:27Z, not a live view. Re-run
 > `mcp__Claude_Code_Remote__list_sessions` before trusting it.
+>
+> It is also **known stale**: a re-fetch at 16:10Z found 13 branches on
+> `claude` and 7 on `claude-ai`, against the 4 sessions listed below.
+> [src:FLEET-SYNC-2026-08-27] The roster below is kept as the original capture
+> rather than edited, so the gap between it and the branch list stays visible.
+> The branches are the authoritative list; the session table is not.
 
 ## Roster
 
@@ -34,6 +40,13 @@ is the roster and the rules that keep them from overwriting each other.
 - No tool for reading another session's transcript was available, so cross-session knowledge is limited to metadata and to whatever gets pushed. [src:NO-TRANSCRIPT-ACCESS-2026-08-27]
 - The file listing of the sibling branch was read; its code was not reviewed, so nothing here describes what that code does. [src:SIBLING-PUSH-RAG-2026-08-27]
 
+## Observed — the fleet at 16:10Z
+
+- `claude` carries 13 branches and `claude-ai` carries 7, against a roster of 4 sessions. Ten sibling branches hold between 25 and 118 files each. [src:FLEET-SYNC-2026-08-27]
+- `claude/personal-skills-repos-research-dxmflq` vendored four skills into `.claude/skills/` — `chunking-advisor`, `doc-coauthoring`, `mcp-builder` and `rag-audit` — and wrote a `SKILLS.md` routing table. [src:FLEET-SYNC-2026-08-27]
+- That branch also contains an audit of `src/oodarag/`, run before the retrieval spine existed, whose blocking findings were a console script with no `cli.py`, a README presenting planned work as delivered, four Makefile targets that could not succeed, and a chunking contract with no implementation. [src:SIBLING-AUDIT-2026-08-27]
+- All twelve sibling branches were searched for the strings behind U-3 and U-4; neither "the book" nor "imb" appears in any Markdown, text or YAML file on any of them. [src:FLEET-SYNC-2026-08-27]
+
 ## The merge hazard
 
 Because both repositories started empty, each session's first commit became its
@@ -55,17 +68,24 @@ shared root. Every later branch rebases onto that root before merging, rather
 than being merged with `--allow-unrelated-histories`. Whoever merges first
 should say so, since until then there is no root to rebase onto.
 
-**This is that first merge, and this says so.** Branch
+**Two sessions performed that merge independently, and neither knew.** Branch
 `claude/research-skill-mastery-mwjs01` merged
 `claude/review-chat-archive-zrynr4` into the pipeline history with
-`--allow-unrelated-histories`. Only the two predicted files conflicted,
-`.gitignore` and `README.md`, and both sides were read before resolving.
-[src:UNIFIED-ROOT-2026-08-27]
+`--allow-unrelated-histories`; only the two predicted files conflicted, and
+both sides were read before resolving. [src:UNIFIED-ROOT-2026-08-27] Branch
+`claude/personal-skills-repos-research-dxmflq` carries a commit titled "Unify
+the fleet's two unrelated roots on this session's branch" doing the same thing.
+[src:FLEET-SYNC-2026-08-27]
 
-That branch now carries **both** histories as ancestors, so it is the root every
-later branch should rebase onto. A branch that instead merges one of the two
-original roots again will reintroduce the problem this paragraph exists to
-close.
+So "whoever merges first should say so" did not work as a coordination rule: by
+the time either session could have said it, both had already acted. **The
+convention needs a claim made before the merge, not after it.** Until one of
+these branches lands on a default branch, there are now two candidate roots and
+a later branch can still pick the wrong one.
+
+Whichever is adopted, the branch that adopts it carries **both** original
+histories as ancestors, and every later branch should rebase onto that rather
+than merging an original root again.
 
 **Before merging anything**, diff the file lists first:
 

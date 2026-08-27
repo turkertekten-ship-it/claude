@@ -18,10 +18,29 @@ Two decisions here address that:
 
 Overlap is measured in sentences rather than characters so a window boundary
 never lands inside a sentence.
+
+**One strategy does not fit the corpus.** This pipeline ingests at least seven
+document kinds, and they differ in the property chunking is most sensitive to:
+whether the document has an internal structure worth respecting. A README has
+headings. A commit message has none and is usually shorter than one chunk. An
+issue comment has an author whose identity is the point. Splitting all of them
+on a fixed window destroys the first, pads the second, and anonymises the third.
+
+So chunking branches on kind, under three rules:
+
+1. **Never split below the atomic unit.** A commit message, a single comment
+   and a caption cue are atomic. Packing several together buries the small one;
+   splitting one in half destroys it.
+2. **Overlap only inside prose.** Overlap exists so a sentence is not cut
+   mid-thought. Between one commit and the next there is no thought to cut, and
+   overlap there is duplicated text inflating the index for nothing.
+3. **Every chunk carries a context header, including the ones never split.** A
+   whole-document chunk still has to say what document it is.
 """
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 
 from oodarag.models import Chunk, Document
@@ -31,6 +50,60 @@ from oodarag.util.text import (
     split_markdown_sections,
     split_sentences,
 )
+
+
+@dataclass(slots=True)
+class KindPolicy:
+    """How one document kind is split.
+
+    `atomic` means the document is one chunk unless it exceeds `max_tokens`,
+    at which point it is split rather than truncated — losing the tail of a
+    long issue comment is worse than splitting it.
+    """
+
+    target_tokens: int
+    max_tokens: int
+    overlap_sentences: int
+    atomic: bool = False
+    split_on_definitions: bool = False
+    label: str = ""
+
+
+#: Per-kind policies. `kind` comes from a document's metadata, falling back to
+#: its `source_system`. Targets differ because the natural unit differs: a
+#: markdown section is larger than a clause and smaller than a commit.
+KIND_POLICIES: dict[str, KindPolicy] = {
+    # Prose with real structure: split on headings, overlap between sentences.
+    "readme":     KindPolicy(320, 512, 1, label="markdown"),
+    "file":       KindPolicy(320, 640, 0, split_on_definitions=True, label="code"),
+    "web":        KindPolicy(320, 512, 1, label="markdown"),
+    "skill":      KindPolicy(320, 512, 1, label="markdown"),
+    # Atomic: one unit of meaning, no overlap, never packed with a neighbour.
+    "commit":     KindPolicy(400, 800, 0, atomic=True, label="atomic"),
+    "issue":      KindPolicy(400, 800, 0, atomic=True, label="atomic"),
+    "pull_request": KindPolicy(400, 800, 0, atomic=True, label="atomic"),
+    "release":    KindPolicy(400, 800, 0, atomic=True, label="atomic"),
+    # A transcript's turns are its structure; overlap by one turn, not one
+    # sentence, because a caption cue is already a fragment.
+    "video":      KindPolicy(500, 900, 1, label="transcript"),
+}
+
+DEFAULT_POLICY = KindPolicy(320, 512, 1, label="default")
+
+
+def policy_for(doc: Document) -> KindPolicy:
+    """Choose a policy from the document's kind, then its source system."""
+    kind = str(doc.metadata.get("kind", "")).lower()
+    if kind in KIND_POLICIES:
+        return KIND_POLICIES[kind]
+    source = (doc.source_system or "").lower()
+    if source in KIND_POLICIES:
+        return KIND_POLICIES[source]
+    if source == "github":
+        return KIND_POLICIES["file"]
+    if source == "youtube":
+        return KIND_POLICIES["video"]
+    return DEFAULT_POLICY
 
 
 @dataclass(slots=True)
@@ -49,14 +122,45 @@ class ChunkConfig:
     min_tokens: int = 40
     overlap_sentences: int = 1
     include_header_in_text: bool = False
+    per_kind: bool = True
+    """Branch on document kind. Turn off to force one strategy over everything,
+    which is useful for an A/B eval run and wrong the rest of the time."""
+
+    def resolved(self, policy: KindPolicy) -> ChunkConfig:
+        """This config with the policy's sizing applied.
+
+        Explicit caller settings are not overridden — only the fields the
+        policy exists to vary. A caller who asked for 800-token chunks meant it.
+        """
+        if not self.per_kind:
+            return self
+        return ChunkConfig(
+            target_tokens=policy.target_tokens,
+            max_tokens=policy.max_tokens,
+            min_tokens=self.min_tokens,
+            overlap_sentences=policy.overlap_sentences,
+            include_header_in_text=self.include_header_in_text,
+            per_kind=True,
+        )
 
 
 def chunk_document(doc: Document, config: ChunkConfig | None = None) -> list[Chunk]:
     """Split one document. Returns [] only for a document with no text."""
-    cfg = config or ChunkConfig()
+    base = config or ChunkConfig()
+    policy = policy_for(doc)
+    cfg = base.resolved(policy)
     text = doc.text.strip()
     if not text:
         return []
+
+    # An atomic document is one unit of meaning. It becomes one chunk unless it
+    # is genuinely too large, in which case splitting beats losing the tail.
+    # `per_kind=False` disables the branch entirely, so an A/B run really does
+    # compare one strategy against the other rather than a partial mix.
+    atomic = base.per_kind and policy.atomic
+    if atomic and estimate_tokens(text) <= policy.max_tokens:
+        header = _context_header(doc, [])
+        return [_make_chunk(doc, header, text, 0, len(text), 0, [], cfg)]
 
     sections = split_markdown_sections(text) or [([], text, 0)]
     chunks: list[Chunk] = []
@@ -66,7 +170,7 @@ def chunk_document(doc: Document, config: ChunkConfig | None = None) -> list[Chu
         if not body:
             continue
         header = _context_header(doc, headings)
-        for piece, start, end in _pack(body, cfg):
+        for piece, start, end in _pack(body, cfg, policy):
             chunks.append(_make_chunk(doc, header, piece, offset + start, offset + end,
                                       len(chunks), headings, cfg))
 
@@ -74,7 +178,9 @@ def chunk_document(doc: Document, config: ChunkConfig | None = None) -> list[Chu
         header = _context_header(doc, [])
         chunks.append(_make_chunk(doc, header, text, 0, len(text), 0, [], cfg))
 
-    merged = _merge_runts(chunks, cfg)
+    # Runts are folded only where packing is meaningful. For an atomic kind,
+    # two short units are two units, and merging them buries the smaller.
+    merged = chunks if atomic else _merge_runts(chunks, cfg)
     for i, c in enumerate(merged):
         c.ordinal = i
     return merged
@@ -114,12 +220,158 @@ def _context_header(doc: Document, headings: list[str]) -> str:
     return " — ".join(p for p in parts if p)
 
 
-def _pack(body: str, cfg: ChunkConfig) -> list[tuple[str, int, int]]:
+#: Lines that start a top-level definition, across the languages this corpus
+#: actually contains. Matched at zero indentation only: a nested `def` is part
+#: of its parent, and splitting there is the "mid-function" cut to avoid.
+_DEFINITION_RE = re.compile(
+    r"^(?:"
+    r"(?:async\s+)?def\s+\w+"                 # python
+    r"|class\s+\w+"                            # python, java, c++, ts
+    r"|(?:export\s+)?(?:async\s+)?function\s+\w+"   # javascript, typescript
+    r"|(?:export\s+)?(?:default\s+)?(?:const|let|var)\s+\w+\s*=\s*(?:async\s*)?\("
+    r"|func\s+(?:\([^)]*\)\s*)?\w+"          # go
+    r"|(?:pub\s+)?(?:async\s+)?fn\s+\w+"      # rust
+    r"|(?:public|private|protected|static|final|\s)*[\w<>\[\]]+\s+\w+\s*\([^)]*\)\s*\{"  # java
+    r"|type\s+\w+"                             # go, typescript
+    r"|interface\s+\w+"                        # typescript, java
+    r")",
+    re.MULTILINE,
+)
+
+
+#: A member of a class or object literal: an indented definition, optionally
+#: preceded by its decorators. Used only when a top-level definition is itself
+#: too large, so that an oversized class splits on its methods rather than on
+#: sentences — a sentence boundary inside a method body is the "mid-function"
+#: cut the whole strategy exists to avoid.
+_MEMBER_RE = re.compile(
+    r"^[ \t]+(?:@[\w.]+.*\n(?:[ \t]*@[\w.]+.*\n)*)?[ \t]*"
+    r"(?:(?:async\s+)?def\s+\w+|class\s+\w+|(?:pub\s+)?fn\s+\w+)",
+    re.MULTILINE,
+)
+
+
+def _split_members(body: str) -> list[tuple[str, int, int]]:
+    """Cut an oversized definition at its member boundaries.
+
+    Decorators stay with the member they decorate: a chunk that begins
+    `@property` and ends before the `def` it applies to describes nothing.
+    """
+    starts = []
+    for m in _MEMBER_RE.finditer(body):
+        # Rewind to the start of the decorator block, not the def line.
+        starts.append(m.start())
+    if len(starts) < 2:
+        return []
+    if starts[0] > 0:
+        starts.insert(0, 0)   # the class header and its attributes lead
+    bounds = starts + [len(body)]
+    out: list[tuple[str, int, int]] = []
+    for start, end in zip(bounds, bounds[1:], strict=False):
+        piece = body[start:end].strip()
+        if piece:
+            out.append((piece, start, end))
+    return out
+
+
+def _split_definitions(body: str) -> list[tuple[str, int, int]]:
+    """Cut a source file at top-level definition boundaries.
+
+    A function is the unit a reader cites and the unit an answer needs whole.
+    Cutting one in half produces two chunks that each describe nothing: the
+    first has a signature with no behaviour, the second behaviour with no name.
+
+    Everything before the first definition — imports, module docstring, module
+    constants — becomes its own leading chunk, because it is genuinely a
+    different kind of content from the definitions that follow.
+    """
+    starts = [m.start() for m in _DEFINITION_RE.finditer(body)]
+    if not starts:
+        return []
+    if starts[0] > 0:
+        starts.insert(0, 0)   # the module preamble is its own unit
+    bounds = starts + [len(body)]
+    out: list[tuple[str, int, int]] = []
+    for start, end in zip(bounds, bounds[1:], strict=False):
+        piece = body[start:end].strip()
+        if piece:
+            out.append((piece, start, end))
+    return out
+
+
+def _pack_definitions(body: str, cfg: ChunkConfig) -> list[tuple[str, int, int]]:
+    """Group definitions up to the target, never splitting one that fits.
+
+    Small helpers are packed together — twenty one-line functions as twenty
+    chunks is noise — but a definition is only ever split when it alone
+    exceeds the hard cap, and then by sentence so the cut lands at a comment
+    or statement boundary rather than mid-expression.
+    """
+    units = _split_definitions(body)
+    if not units:
+        return _pack_prose(body, cfg)
+
+    out: list[tuple[str, int, int]] = []
+    buffer: list[tuple[str, int, int]] = []
+    tokens = 0
+
+    def flush() -> None:
+        if not buffer:
+            return
+        start, end = buffer[0][1], buffer[-1][2]
+        out.append((body[start:end].strip(), start, end))
+        buffer.clear()
+
+    for piece, start, end in units:
+        cost = estimate_tokens(piece)
+        if cost > cfg.max_tokens:
+            flush()
+            tokens = 0
+            # A definition over the cap splits on its members first, and only
+            # falls back to sentences when it has none to split on.
+            members = _split_members(piece)
+            if members:
+                buffered: list[tuple[str, int, int]] = []
+                running = 0
+                for sub, s_off, e_off in members:
+                    sub_cost = estimate_tokens(sub)
+                    if buffered and running + sub_cost > cfg.target_tokens:
+                        first, last = buffered[0], buffered[-1]
+                        out.append((piece[first[1]:last[2]].strip(),
+                                    start + first[1], start + last[2]))
+                        buffered, running = [], 0
+                    buffered.append((sub, s_off, e_off))
+                    running += sub_cost
+                if buffered:
+                    first, last = buffered[0], buffered[-1]
+                    out.append((piece[first[1]:last[2]].strip(),
+                                start + first[1], start + last[2]))
+            else:
+                for sub, s_off, e_off in _pack_prose(piece, cfg):
+                    out.append((sub, start + s_off, start + e_off))
+            continue
+        if buffer and tokens + cost > cfg.target_tokens:
+            flush()
+            tokens = 0
+        buffer.append((piece, start, end))
+        tokens += cost
+    flush()
+    return out
+
+
+def _pack(body: str, cfg: ChunkConfig, policy: KindPolicy | None = None) -> list[tuple[str, int, int]]:
     """Pack a section into windows of about `target_tokens`, overlapping.
 
     A section that already fits is emitted whole: splitting something that fits
     only makes each half less interpretable.
     """
+    if policy is not None and policy.split_on_definitions and _DEFINITION_RE.search(body):
+        return _pack_definitions(body, cfg)
+    return _pack_prose(body, cfg)
+
+
+def _pack_prose(body: str, cfg: ChunkConfig) -> list[tuple[str, int, int]]:
+    """Pack prose into overlapping sentence windows."""
     if estimate_tokens(body) <= cfg.max_tokens:
         return [(body, 0, len(body))]
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import subprocess
 import sys
 import unittest
@@ -9,7 +10,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from oodarag.chunk import ChunkConfig, chunk_document  # noqa: E402
+from oodarag.chunk import (  # noqa: E402
+    KIND_POLICIES,
+    ChunkConfig,
+    chunk_document,
+    policy_for,
+)
 from oodarag.embed import HashingEmbedder, cosine, pack, unpack  # noqa: E402
 from oodarag.models import Document, RawDocument  # noqa: E402
 
@@ -110,6 +116,158 @@ class TestChunking(unittest.TestCase):
         doc = make_doc("# A\n\nx\n\n# B\n\nThis section has real content worth retrieving.")
         for chunk in chunk_document(doc):
             self.assertGreater(len(chunk.text.strip()), 1)
+
+
+def kinded_doc(text: str, kind: str, source: str = "github", title: str = "T") -> Document:
+    raw = RawDocument(source, "x", "https://e.com/x", title, text, {"kind": kind})
+    return Document.from_raw(raw, text, {"kind": kind})
+
+
+class TestPerKindChunking(unittest.TestCase):
+    COMMIT = ("Fix the retry loop so a 429 honours Retry-After\n\n"
+              "The previous code backed off exponentially and ignored the header, "
+              "which meant a rate-limited client waited either far too long or "
+              "not long enough.")
+
+    def test_a_commit_message_is_never_split(self) -> None:
+        # One commit is one unit of meaning. Splitting it in half leaves two
+        # halves that each describe nothing.
+        chunks = chunk_document(kinded_doc(self.COMMIT, "commit"))
+        self.assertEqual(len(chunks), 1)
+
+    def test_two_short_commits_are_not_packed_together(self) -> None:
+        # Merging would bury the shorter one behind the longer one's terms.
+        a = chunk_document(kinded_doc("Bump the lockfile", "commit"))
+        b = chunk_document(kinded_doc("Fix a typo in the README", "commit"))
+        self.assertEqual(len(a), 1)
+        self.assertEqual(len(b), 1)
+        self.assertNotEqual(a[0].chunk_id, b[0].chunk_id)
+
+    def test_an_unsplit_chunk_still_carries_a_context_header(self) -> None:
+        # A whole-document chunk still has to say what document it is.
+        chunk = chunk_document(kinded_doc(self.COMMIT, "commit", title="Repo"))[0]
+        self.assertIn("Repo", chunk.context_header)
+
+    def test_an_oversized_atomic_document_is_split_not_truncated(self) -> None:
+        # Losing the tail of a long issue comment is worse than splitting it.
+        long_comment = " ".join(
+            f"Sentence {i} of a very long issue comment that runs well past the cap."
+            for i in range(300)
+        )
+        chunks = chunk_document(kinded_doc(long_comment, "issue"))
+        self.assertGreater(len(chunks), 1)
+        rejoined = " ".join(c.text for c in chunks)
+        self.assertIn("Sentence 299", rejoined)
+
+    def test_atomic_kinds_take_no_overlap(self) -> None:
+        for kind in ("commit", "issue", "pull_request", "release"):
+            self.assertEqual(KIND_POLICIES[kind].overlap_sentences, 0, kind)
+            self.assertTrue(KIND_POLICIES[kind].atomic, kind)
+
+    def test_prose_kinds_keep_overlap(self) -> None:
+        for kind in ("readme", "web", "skill"):
+            self.assertGreater(KIND_POLICIES[kind].overlap_sentences, 0, kind)
+
+    def test_markdown_still_splits_on_headings(self) -> None:
+        # Sections must clear the runt floor, or folding them into one chunk is
+        # the correct answer and the test is measuring nothing.
+        big = "\n".join(
+            f"# Section {i}\n\n" + " ".join(
+                f"Sentence {j} of section {i}, long enough to stand on its own."
+                for j in range(14)
+            )
+            for i in range(3)
+        )
+        chunks = chunk_document(kinded_doc(big, "readme", source="file"))
+        self.assertGreater(len(chunks), 1)
+
+    def test_policy_falls_back_to_the_source_system(self) -> None:
+        raw = RawDocument("youtube", "v", "https://e.com/v", "V", "text", {})
+        doc = Document.from_raw(raw, "text", {})
+        self.assertEqual(policy_for(doc).label, "transcript")
+
+    def test_an_unknown_kind_gets_the_default(self) -> None:
+        raw = RawDocument("mystery", "x", "https://e.com/x", "X", "text", {})
+        doc = Document.from_raw(raw, "text", {})
+        self.assertEqual(policy_for(doc).label, "default")
+
+    def test_per_kind_can_be_switched_off_for_an_ab_run(self) -> None:
+        forced = ChunkConfig(target_tokens=20, max_tokens=30, per_kind=False)
+        long_commit = " ".join(f"Sentence {i} of the commit body." for i in range(60))
+        chunks = chunk_document(kinded_doc(long_commit, "commit"), forced)
+        self.assertGreater(len(chunks), 1, "per_kind=False should force the caller's sizing")
+
+
+PY_SOURCE = '''"""Module docstring."""
+
+import os
+
+
+class Widget:
+    """A class with several members."""
+
+    LIMIT = 10
+
+    @property
+    def size(self) -> int:
+        """Return the size."""
+        total = 0
+        for item in range(self.LIMIT):
+            total += item
+        return total
+
+    def render(self) -> str:
+        """Render the widget."""
+        parts = []
+        for i in range(self.LIMIT):
+            parts.append(str(i))
+        return ",".join(parts)
+
+
+def helper(value: int) -> int:
+    """A top-level helper."""
+    return value * 2
+'''
+
+
+class TestCodeAwareChunking(unittest.TestCase):
+    def chunks(self, source: str = PY_SOURCE, **cfg: object) -> list:
+        doc = kinded_doc(source, "file")
+        return chunk_document(doc, ChunkConfig(**cfg) if cfg else None)  # type: ignore[arg-type]
+
+    def test_no_chunk_begins_inside_a_statement_block(self) -> None:
+        # The cut this strategy exists to prevent: a chunk starting at `return`
+        # has behaviour with no signature, and the one before it a signature
+        # with no behaviour.
+        for chunk in self.chunks(target_tokens=30, max_tokens=60):
+            first = chunk.text.splitlines()[0]
+            self.assertFalse(
+                re.match(r"^\s{4,}(return|for |if |while |total\b|parts\b)", first),
+                f"chunk starts mid-statement: {first!r}",
+            )
+
+    def test_a_decorator_stays_with_the_member_it_decorates(self) -> None:
+        # A chunk that is only `@property` describes nothing.
+        for chunk in self.chunks(target_tokens=25, max_tokens=50):
+            self.assertNotEqual(chunk.text.strip(), "@property")
+            if chunk.text.lstrip().startswith("@property"):
+                self.assertIn("def ", chunk.text)
+
+    def test_the_module_preamble_is_its_own_unit(self) -> None:
+        chunks = self.chunks(target_tokens=25, max_tokens=50)
+        self.assertIn("Module docstring", chunks[0].text)
+
+    def test_a_small_file_is_not_split_at_all(self) -> None:
+        self.assertEqual(len(self.chunks("def f():\n    return 1\n")), 1)
+
+    def test_a_file_with_no_definitions_falls_back_to_prose(self) -> None:
+        config_text = "\n".join(f"setting_{i} = {i}" for i in range(200))
+        self.assertGreaterEqual(len(self.chunks(config_text)), 1)
+
+    def test_definitions_are_grouped_rather_than_one_chunk_each(self) -> None:
+        # Twenty one-line helpers as twenty chunks is noise.
+        tiny = "\n\n".join(f"def f{i}():\n    return {i}" for i in range(20))
+        self.assertLess(len(self.chunks(tiny)), 20)
 
 
 class TestEmbedding(unittest.TestCase):

@@ -1,0 +1,28 @@
+=== fleet sync 2026-08-27T16:10Z ===
+  origin/claude/ai-system-research-3jpwda
+  origin/claude/blind-testing-ooda-5o3s67
+  origin/claude/code-playground-parity-xw0snj
+  origin/claude/daily-file-improvement-wgiluc
+  origin/claude/go-page-ultrathink-ooda-kqxvnc
+  origin/claude/goal-prompt-task-division-0ghozd
+  origin/claude/great-euler-6tx6y6
+  origin/claude/personal-skills-repos-research-dxmflq
+  origin/claude/rag-system-data-pipeline-rdkde9
+  origin/claude/research-skill-mastery-mwjs01
+  origin/claude/reverse-engineer-chat-setup-husv9h
+  origin/claude/review-chat-archive-zrynr4
+  origin/claude/session-y42cyg
+
+=== sibling branch sizes ===
+claude/ai-system-research-3jpwda                 34 files  2026-08-27 15:21:41 +0000 Record the three loops, and the places they were wrong
+claude/blind-testing-ooda-5o3s67                 96 files  2026-08-27 15:38:14 +0000 Sınama takımını taşınabilir yap: kök, betiğin 
+claude/code-playground-parity-xw0snj             73 files  2026-08-27 15:33:27 +0000 Say plainly that a suite file is executable code
+claude/daily-file-improvement-wgiluc             52 files  2026-08-27 15:35:45 +0000 Add docs rule tests
+claude/go-page-ultrathink-ooda-kqxvnc           118 files  2026-08-27 18:39:03 +0300 mafirm: kalan dosyalar (parti 1)
+claude/goal-prompt-task-division-0ghozd          25 files  2026-08-27 15:08:06 +0000 Divide every prompt into tasks, enforced by a UserProm
+claude/great-euler-6tx6y6                        69 files  2026-08-27 15:34:15 +0000 Record the audit itself as evidence
+claude/personal-skills-repos-research-dxmflq     77 files  2026-08-27 15:32:27 +0000 Install the vendored skills at user scope, where the o
+claude/rag-system-data-pipeline-rdkde9           70 files  2026-08-27 15:30:16 +0000 Complete the pipeline: chunking, embedding, storage, r
+claude/reverse-engineer-chat-setup-husv9h       110 files  2026-08-27 15:37:51 +0000 Record the pipeline running end to end, and what its s
+claude/review-chat-archive-zrynr4                38 files  2026-08-27 15:10:31 +0000 File the KI-1 advisory as an issue, and read the sibli
+claude/session-y42cyg                            57 files  2026-08-27 15:35:23 +0000 Research CLEAR and Saraev, and build in only what the 
