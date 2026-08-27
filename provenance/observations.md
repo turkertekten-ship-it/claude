@@ -92,7 +92,7 @@ verified lives in [unknowns.md](unknowns.md), not here.
 ## Observed — the powered blind test
 
 - Run at sixty traps across six families with two arms, the comparison decided 50 pairs against the roughly 47 needed for 80% power at a 70/30 effect — the first adequately powered comparison in this repository. [src:BLIND-RUN-POWERED-2026-08-27]
-- On the deterministic layer the suite separated nothing: both variants passed 60 of 60 and no pair was discordant. On these traps a plain assistant declines to invent as reliably as the operating prompt does. [src:BLIND-RUN-POWERED-2026-08-27]
+- On the deterministic layer both variants passed 60 of 60 with no discordant pair. This is a ceiling: an arm at 100% has no headroom, so the suite could not have detected a difference in either direction. It establishes that these traps are too easy to discriminate, not that the prompts are equal. [src:BLIND-RUN-POWERED-2026-08-27]
 - Judged blind in both presentation orders, `full-doctrine` beat `plain-assistant` 42 to 8 with 10 ties — 84% excluding ties, p < 0.001, Bradley-Terry 0.844 against 0.156. The identical-pair control passed and order-disagreement was 17%. [src:BLIND-RUN-POWERED-2026-08-27]
 - The winning variant also wrote the longer answers, 768 characters against 585. [src:BLIND-RUN-POWERED-2026-08-27]
 - Splitting the judged pairs by which answer was longer resolves that: on the eleven pairs where the plain assistant wrote the longer or equal answer — where length bias pushes against the observed winner — `full-doctrine` still won 9 to 1 with one tie, p = 0.021. On the forty-nine where it was itself longer it won 33 to 7 with nine ties, p = 0.00004. Both strata significant, same direction. [src:LENGTH-CONTROL-2026-08-27]

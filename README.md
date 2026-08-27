@@ -108,9 +108,13 @@ in `prompts/` actually stop a model inventing things? Sixty fabrication traps,
 two arms, judged blind in both presentation orders, 50 decided pairs against
 the ~47 that 80% power needs. The answer has two halves and both are honest:
 
-- **Nothing separates them on refusing to invent.** Both variants passed 60 of
-  60 on the deterministic fabrication guard, with zero discordant pairs. On
-  these traps a plain assistant declines as reliably as the operating prompt.
+- **The fabrication guard cannot separate them, which is not the same as their
+  being equal.** Both variants passed 60 of 60, with zero discordant pairs.
+  That is a **ceiling effect**: a suite where every arm scores 100% has no
+  headroom left to detect a difference in either direction. The honest reading
+  is "these traps are too easy to discriminate", not "there is no difference".
+  Harder traps — ones where a plausible answer is available and inventing is
+  tempting — would be needed to say more, and are not written yet (`U-10`).
 - **Something separates them on how useful the refusal is.** The blind judge
   preferred the doctrine prompt 42–8 with 10 ties, p < 0.001 — and that
   preference survives the length control. It wrote the longer answers overall
@@ -120,8 +124,9 @@ the ~47 that 80% power needs. The answer has two halves and both are honest:
   same direction. The judge was reading content, not word count.
 
 Note what that does and does not license. On the thing the operating prompt was
-written for — refusing to fabricate — the measured difference is **zero**. What
-it buys is a more useful refusal, and only that.
+written for — refusing to fabricate — this suite measured **no difference and
+could not have measured one**. What is demonstrated is a more useful refusal,
+and only that.
 
 Getting there cost two of this repository's own bugs, both kept on the record:
 36 cached completions written by an **offline echo backend and served to a live
