@@ -81,9 +81,19 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     print("Controllable per variant on this backend:")
     print("  model, effort, system prompt, appended system prompt,")
     print("  tool availability, JSON output schema, per-run budget ceiling.")
+    print("  thinking mode and thinking-token budget    [undocumented flags]")
+    print("  max output tokens, via CLAUDE_CODE_MAX_OUTPUT_TOKENS")
+    print()
+    print("  `--thinking` and `--max-thinking-tokens` are accepted by the CLI")
+    print("  parser but absent from `claude --help`. They were found by probing")
+    print("  the parser, not by reading documentation, and may change without")
+    print("  notice. Verified working here: setting a budget changed the")
+    print("  reported thinking_tokens on an otherwise identical call.")
+    print()
     print("Not controllable:")
-    print("  temperature, top_p, top_k, stop_sequences, max_tokens —")
-    print("  the CLI exposes no flag for them.")
+    print("  temperature, top_p, top_k, stop_sequences — no CLI flag under any")
+    print("  spelling probed, and on models after Opus 4.6 the first three are")
+    print("  rejected by the API with a 400 regardless.")
     return EXIT_OK if ok else EXIT_CANNOT_RUN
 
 
@@ -124,6 +134,9 @@ def cmd_plan(args: argparse.Namespace) -> int:
                 prompt=prompt, system=system, append_system=variant.append_system,
                 model=variant.model, effort=variant.effort, tools=variant.tools,
                 json_schema=variant.json_schema, mode=variant.mode,
+                thinking=variant.thinking,
+                max_thinking_tokens=variant.max_thinking_tokens,
+                max_output_tokens=variant.max_output_tokens,
             )
             print("\n" + "=" * 70)
             print(f"{variant.id} / {case.id}   [{variant.mode} mode]")

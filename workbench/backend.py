@@ -98,6 +98,14 @@ class Request:
     tools: str | None = ""          # "" disables all tools
     json_schema: dict[str, Any] | None = None
     mode: str = "text"
+    #: `--thinking <mode>` and `--max-thinking-tokens <n>` are accepted by the
+    #: CLI parser but absent from `--help`, so they were found by probing it
+    #: rather than by reading it. Treated as real but undocumented: they may
+    #: change without notice, which is why `doctor` labels them as such.
+    thinking: str | None = None
+    max_thinking_tokens: int | None = None
+    #: There is no --max-tokens flag; the documented control is an env var.
+    max_output_tokens: int | None = None
     cwd: str | None = None
     max_budget_usd: float | None = None
     timeout_s: int = DEFAULT_TIMEOUT_S
@@ -115,6 +123,9 @@ class Request:
             "tools": self.tools,
             "json_schema": self.json_schema,
             "mode": self.mode,
+            "thinking": self.thinking,
+            "max_thinking_tokens": self.max_thinking_tokens,
+            "max_output_tokens": self.max_output_tokens,
             "repeat": self.repeat,
         }
         blob = json.dumps(payload, sort_keys=True, ensure_ascii=False)
@@ -215,6 +226,10 @@ class ClaudeCLIBackend(Backend):
             argv += ["--json-schema", json.dumps(request.json_schema)]
         if request.max_budget_usd is not None:
             argv += ["--max-budget-usd", str(request.max_budget_usd)]
+        if request.thinking:
+            argv += ["--thinking", request.thinking]
+        if request.max_thinking_tokens is not None:
+            argv += ["--max-thinking-tokens", str(request.max_thinking_tokens)]
 
         if request.mode == "text":
             # A prompt-engineering run should measure the prompt, not the
@@ -230,6 +245,12 @@ class ClaudeCLIBackend(Backend):
         argv += ["--no-session-persistence"]
         return argv
 
+    def _env(self, request: Request) -> dict[str, str]:
+        env = {**os.environ, "CLAUDE_CODE_ENTRYPOINT": "workbench"}
+        if request.max_output_tokens is not None:
+            env["CLAUDE_CODE_MAX_OUTPUT_TOKENS"] = str(request.max_output_tokens)
+        return env
+
     def complete(self, request: Request) -> Completion:
         argv = self._argv(request)
         started = time.time()
@@ -240,7 +261,7 @@ class ClaudeCLIBackend(Backend):
                 text=True,
                 timeout=request.timeout_s,
                 cwd=request.cwd,
-                env={**os.environ, "CLAUDE_CODE_ENTRYPOINT": "workbench"},
+                env=self._env(request),
             )
         except subprocess.TimeoutExpired:
             return Completion(

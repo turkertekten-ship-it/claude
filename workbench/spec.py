@@ -65,7 +65,8 @@ MODES = ("text", "agent")
 _VARIANT_KEYS = {
     "id", "system", "system_file", "model", "effort", "mode", "tools",
     "append_system", "json_schema", "vars", "prompt_prefix", "prompt_suffix",
-    "max_budget_usd", "fixture", "setup", "note",
+    "max_budget_usd", "fixture", "setup", "note", "thinking",
+    "max_thinking_tokens", "max_output_tokens",
 }
 _CASE_KEYS = {
     "id", "prompt", "prompt_file", "vars", "graders", "weight", "note",
@@ -78,6 +79,7 @@ _SUITE_KEYS = {
 _DEFAULT_KEYS = {
     "model", "effort", "mode", "tools", "system", "system_file",
     "append_system", "json_schema", "max_budget_usd", "fixture",
+    "thinking", "max_thinking_tokens", "max_output_tokens",
 }
 
 
@@ -126,6 +128,9 @@ class Variant:
     prompt_prefix: str = ""
     prompt_suffix: str = ""
     max_budget_usd: float | None = None
+    thinking: str | None = None
+    max_thinking_tokens: int | None = None
+    max_output_tokens: int | None = None
     fixture: str | None = None
     setup: list[str] = field(default_factory=list)
     note: str = ""
@@ -269,6 +274,9 @@ def load_suite(path: str | Path) -> Suite:
                 prompt_prefix=str(merged.get("prompt_prefix", "")),
                 prompt_suffix=str(merged.get("prompt_suffix", "")),
                 max_budget_usd=merged.get("max_budget_usd"),
+                thinking=merged.get("thinking"),
+                max_thinking_tokens=merged.get("max_thinking_tokens"),
+                max_output_tokens=merged.get("max_output_tokens"),
                 fixture=merged.get("fixture"),
                 setup=list(merged.get("setup") or []),
                 note=str(merged.get("note", "")),

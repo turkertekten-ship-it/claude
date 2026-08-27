@@ -207,6 +207,9 @@ def produce(suite: Suite, backend: Backend, report: Reporter,
             model=variant.model, effort=variant.effort, tools=variant.tools,
             json_schema=variant.json_schema, mode=variant.mode,
             cwd=workdir or None, max_budget_usd=variant.max_budget_usd,
+            thinking=variant.thinking,
+            max_thinking_tokens=variant.max_thinking_tokens,
+            max_output_tokens=variant.max_output_tokens,
             repeat=repeat,
         ))
 

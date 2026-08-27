@@ -312,3 +312,44 @@ sources:
       includes the model string, so re-running would have cost the full $0.95
       again to produce a result about the same model. That is a deliberate
       choice, recorded rather than hidden.
+
+  - id: REFUTATION-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:45Z"
+    method: >-
+      A nine-agent workflow, each agent instructed to REFUTE one load-bearing
+      claim in docs/parity.md rather than confirm it
+    evidence: >-
+      1 REFUTED, 3 NEEDS_QUALIFICATION, 5 STANDS. REFUTED: the claim that no
+      prompt-workbench or eval plugin exists for Claude Code --
+      anthropics/claude-plugins-official ships `skill-creator`, a first-party
+      variant-eval harness with a blind comparator, found installed on this
+      container at /mnt/skills/examples/skill-creator. QUALIFIED: the
+      sampling carve-outs are asymmetric (temperature exactly 1.0, top_p any
+      value >= 0.99, top_k nothing); `claude --help` is not a complete flag
+      inventory; FastChat's position swap is on its optional pairwise modes,
+      not its default single-answer mode.
+    note: >-
+      All four findings were applied to docs/parity.md rather than argued with.
+      The refuted claim had been made from a sweep of remote repositories
+      without checking what was already mounted locally.
+
+  - id: CLI-UNDOCUMENTED-FLAGS-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:50Z"
+    method: >-
+      Probing the CLI parser directly with candidate flag names, then a live
+      call with --thinking adaptive --max-thinking-tokens 2048
+    evidence: >-
+      `--thinking <mode>`, `--max-thinking-tokens <tokens>` and
+      `--task-budget <tokens>` are accepted by the parser (they fail with
+      "argument missing", not "unknown option") and appear nowhere in the 242
+      lines of `claude --help`. `--temperature`, `--top-p`, `--top-k`,
+      `--stop-sequences` and `--max-tokens` are rejected as unknown options
+      under every spelling probed. Two otherwise identical haiku calls reported
+      thinking_tokens 37 with a 2048 budget and 89 without one, so the flag
+      changes behaviour rather than being accepted and ignored.
+    note: >-
+      Undocumented means unsupported: these may change without notice. The
+      workbench uses them and `workbench doctor` labels them as undocumented
+      rather than presenting them as a stable interface.

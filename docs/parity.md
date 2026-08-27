@@ -48,9 +48,19 @@ not available, and not because of a missing flag:
 
 > *"Models released after Claude Opus 4.6 do not support setting temperature. A
 > value of 1.0 will be accepted for backwards compatibility, all other values
-> will be rejected with a 400 error."* — and the equivalent for `top_p`, while
-> `top_k` is rejected outright.
+> will be rejected with a 400 error."*
 > ([Messages API](https://platform.claude.com/docs/en/api/messages))
+
+All three are marked **Deprecated** unconditionally in the schema; the 400 is
+scoped to models released after Opus 4.6. The backwards-compatibility carve-outs
+are not symmetrical, and an earlier draft here flattened them into "except
+legacy default values", which is wrong for `top_p`:
+
+| Parameter | Accepted on post-4.6 models | Note |
+|---|---|---|
+| `temperature` | exactly `1.0` | which is its documented default |
+| `top_p` | any value `>= 0.99` | a *range*; `top_p` has no documented default |
+| `top_k` | nothing | any value returns a 400 |
 
 The Python SDK v1.0, released 20 August 2026, *"removes long-deprecated
 surface, including … the `temperature`, `top_p`, and `top_k` parameters on
@@ -87,9 +97,10 @@ Legend: **CC** = stock Claude Code; **WB** = this repository's `workbench/`.
 |---|---|---|---|
 | Model selection | yes | `--model` | per variant |
 | Effort | yes | `--effort` | per variant |
-| Extended thinking | yes | via effort | via effort |
+| Extended thinking | yes | `--effort`, plus undocumented `--thinking` / `--max-thinking-tokens` | per variant |
 | `temperature` / `top_p` / `top_k` | rejected by current models | no flag | deliberately not built |
-| `stop_sequences`, `max_tokens` | yes | no flag | not reachable without an API key |
+| `max_tokens` | yes | `CLAUDE_CODE_MAX_OUTPUT_TOKENS` | per variant |
+| `stop_sequences` | yes | no flag | not reachable without an API key |
 | Structured output schema | yes | `--json-schema` | per variant |
 | Tool definitions | yes | `--tools`, MCP | per variant, on/off |
 | Budget ceiling | no | `--max-budget-usd` | per variant |
@@ -149,10 +160,14 @@ A prior-art sweep found that the standard tools do not do it:
 - **openai/evals** ships 18 declarative model-graded YAML templates including a
   pairwise `battle.yaml`. Grepping `evals/elsuite/modelgraded/` for
   `shuffle|randomi|position|swap|permut` returns nothing.
-- **lm-sys/FastChat** does do it, and is the reference: `play_a_match_pair` in
-  `fastchat/llm_judge/common.py` calls the judge twice with the answers
-  transposed, and `show_result.py` scores any pair whose two verdicts disagree
-  **as a tie**.
+- **lm-sys/FastChat** does do it, and is the reference — but only on a code path
+  that is not its default. In the optional `--mode pairwise-baseline` /
+  `pairwise-all` modes, `play_a_match_pair` in `fastchat/llm_judge/common.py`
+  calls the judge twice with the answers transposed, and
+  `display_result_pairwise` in `show_result.py` scores any pair whose two
+  verdicts disagree **as a tie**. MT-Bench's default and recommended mode is
+  single-answer 1-10 grading, which grades each answer once with no pairwise
+  comparison and no swap at all.
 
 The reason it matters is measured. In *Judging LLM-as-a-Judge with MT-Bench and
 Chatbot Arena* ([arXiv 2306.05685](https://arxiv.org/abs/2306.05685)), judge
@@ -192,8 +207,15 @@ Two further findings from the same paper shape the implementation:
 - **Multi-turn message arrays.** `claude -p` takes a single prompt string.
   Multi-turn is reachable via `--input-format stream-json`; no suite here needed
   it, so it is not implemented rather than half-implemented.
-- **`stop_sequences` and `max_tokens`.** No CLI flag, and no `ANTHROPIC_API_KEY`
-  in this environment to reach the Messages API directly.
+- **`stop_sequences`.** No CLI flag under any spelling probed, and no
+  `ANTHROPIC_API_KEY` in this environment to reach the Messages API directly.
+  `max_tokens` *was* on this list until a fact-checker pointed out that
+  `claude --help` is not a complete inventory of accepted flags: probing the
+  parser directly turned up `--thinking`, `--max-thinking-tokens` and
+  `--task-budget`, none of which appear in the help text, and the documented
+  `CLAUDE_CODE_MAX_OUTPUT_TOKENS` covers output length. Thinking control and an
+  output-token cap are now wired through per variant. The lesson is worth
+  keeping: absence from `--help` is not absence from the parser.
 - **The Batch API's 50% discount.** ([pricing](https://platform.claude.com/docs/en/about-claude/pricing))
   Real money for a large sweep, and unreachable without an API key.
 - **`count_tokens` before sending.** The endpoint exists
@@ -206,13 +228,52 @@ Two further findings from the same paper shape the implementation:
   noticing, and this repository's whole premise is not writing down facts it
   cannot source at the moment of reading.
 
-## The gap that was actually open
+## The gap that was actually open — corrected
 
-Across `hesreallyhim/awesome-claude-code` (159 catalogued entries, no
-evaluation category), `anthropics/claude-plugins-official` (39 first-party
-plugins) and `anthropics/claude-code` (13 bundled plugins, 7 `plugin-dev`
-skills), a prior-art sweep found **no prompt-workbench or eval plugin for
-Claude Code**. `claude plugin eval` covers plugin-scoped, with/without
-ablation. Nothing covered N-way prompt-variant comparison.
+An earlier draft of this file claimed that no prompt-workbench or eval plugin
+existed for Claude Code across `awesome-claude-code`,
+`anthropics/claude-plugins-official` and `anthropics/claude-code`. **That was
+wrong, and it was wrong in an avoidable way.**
 
-That is the space this fills.
+`anthropics/claude-plugins-official` ships **`skill-creator`**, a first-party
+plugin that is a variant-evaluation harness: `agents/comparator.md`,
+`agents/grader.md`, `agents/analyzer.md`, `scripts/run_eval.py`,
+`scripts/aggregate_benchmark.py` (mean ± stddev with deltas),
+`scripts/run_loop.py` (an automated description-optimisation loop that proposes
+variants and selects a `best_description` by held-out score). Its comparator is
+explicitly blind: *"You receive two outputs labeled A and B, but you do NOT
+know which skill produced which."*
+
+It was installed on the machine this was written on, at
+`/mnt/skills/examples/skill-creator`, and listed among the session's own
+available skills the entire time. The claim was made from a prior-art sweep of
+remote repositories without checking what was already mounted locally — Orient
+running ahead of Observe, which is the failure this repository exists to
+prevent. A hostile fact-checker told to refute the claim found it in minutes.
+
+### What the corrected landscape looks like
+
+| Tool | Scope of comparison | Blind? | Both orders? |
+|---|---|---|---|
+| `claude plugin eval` | with-plugin vs without-plugin | arms are fixed | no |
+| `skill-creator` | with-skill vs baseline, or version A vs B | **yes** — labels A/B, identity withheld | **no** |
+| promptfoo `select-best` | N candidates, one call | no | no |
+| openai/evals `battle.yaml` | pairwise | no | no |
+| FastChat `pairwise-*` modes | pairwise | yes | **yes** |
+| this workbench | N prompt variants, all pairs | yes, with an identical-pair control | **yes** |
+
+So the honest statement is narrower than the one it replaces: blind comparison
+was **already** available first-party for skills. What none of the
+Claude-Code-side tools do is judge each pair **in both presentation orders and
+count a win only when the verdict survives the swap** — the mitigation the
+MT-Bench measurements call for. Grepping `skill-creator` for
+`swap|position bias|randomi|shuffle|both orders` returns nothing; its comparator
+makes one call with A and B in a fixed order.
+
+That, plus N-way prompt-variant comparison and the significance layer, is what
+remains genuinely additive here. It is a smaller claim than "the niche is open",
+and it is the one the evidence supports.
+
+**Use `skill-creator` instead of this** when the thing under test is a skill and
+you want its improve-loop and post-hoc analyzer. Reach for the workbench when
+you need the swap protocol, more than two variants, or a p-value.

@@ -524,6 +524,45 @@ cases:
           not no_dir.passed and "agent mode" in no_dir.detail, no_dir.detail)
 
 
+def test_thinking_controls() -> None:
+    """Thinking control rides on flags absent from `claude --help`.
+
+    They were found by probing the parser, so a test pinning the exact argv is
+    the only thing standing between a silent CLI change and a run that reports
+    a thinking budget it never applied.
+    """
+    print("\nthinking controls -- undocumented flags, so pin the argv")
+    from workbench.backend import ClaudeCLIBackend
+
+    backend = ClaudeCLIBackend()
+    argv = backend._argv(Request(
+        prompt="p", model="m", thinking="adaptive", max_thinking_tokens=2048,
+    ))
+    check("--thinking is passed", "--thinking" in argv and argv[argv.index("--thinking") + 1] == "adaptive")
+    check("--max-thinking-tokens is passed",
+          "--max-thinking-tokens" in argv
+          and argv[argv.index("--max-thinking-tokens") + 1] == "2048")
+
+    plain = backend._argv(Request(prompt="p"))
+    check("neither appears when unset",
+          "--thinking" not in plain and "--max-thinking-tokens" not in plain)
+
+    check("max output tokens goes through the environment, not a flag",
+          backend._env(Request(prompt="p", max_output_tokens=8000))
+          .get("CLAUDE_CODE_MAX_OUTPUT_TOKENS") == "8000")
+    check("no output-token flag is invented",
+          "--max-tokens" not in backend._argv(Request(prompt="p", max_output_tokens=8000)))
+
+    print("\n  thinking settings must change the cache key, or a sweep reuses one answer")
+    base = Request(prompt="p", model="m")
+    check("thinking mode changes the cache key",
+          base.cache_key() != Request(prompt="p", model="m", thinking="adaptive").cache_key())
+    check("thinking budget changes the cache key",
+          base.cache_key() != Request(prompt="p", model="m", max_thinking_tokens=99).cache_key())
+    check("output-token cap changes the cache key",
+          base.cache_key() != Request(prompt="p", model="m", max_output_tokens=99).cache_key())
+
+
 def test_registry_kinds() -> None:
     print("\ngrader taxonomy")
     kinds = dict(describe_registry())
@@ -546,6 +585,7 @@ def main() -> int:
     test_statistics()
     test_end_to_end()
     test_agent_mode_plumbing()
+    test_thinking_controls()
     test_registry_kinds()
 
     print()
