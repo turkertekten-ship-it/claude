@@ -1,6 +1,8 @@
 # oodarag
 
-An OODA-driven, end-to-end RAG pipeline that runs on the Python standard library alone.
+An OODA-driven retrieval pipeline that runs on the Python standard library
+alone. Zero required dependencies, verified from the import graph on every
+review run rather than asserted here.
 
 ```
 Observe  ->  Orient   ->  Decide   ->  Act
@@ -10,47 +12,88 @@ ingest       normalize    policy       reindex / backfill
              index
 ```
 
-## Why this exists
+That diagram is the design. The section below says which parts of it are code
+today, because a README that describes a design in the present tense is how a
+project ends up lying about itself.
 
-Most RAG code is a demo: load a folder, call an embedding API, cosine-similarity
-top-5, stuff it in a prompt. That works until it meets a real corpus, at which
-point the failure modes are always the same - the index is stale, the chunks lost
-their context, the retriever returns the site footer, and nobody can tell you
-whether last week's change made retrieval better or worse.
+## What is built
 
-`oodarag` is built around those failure modes rather than around the happy path:
+Everything below has working code today. Each row names the file that implements
+it, so the table is checkable rather than decorative:
 
-| Failure mode | What this does about it |
-|---|---|
-| Index goes stale | Content-hash incremental ingest + an OODA loop that decides when to re-fetch |
-| Chunks lose context | Contextual headers embedded with every chunk |
-| Retriever returns boilerplate | Structural + link-density boilerplate removal in the scraper |
-| Same page indexed 5 times | Canonical-URL and content-hash dedupe |
-| Semantic search misses exact terms | Hybrid dense + BM25 retrieval fused with RRF |
-| "Is retrieval any good?" | An eval harness with recall@k, MRR, nDCG and citation coverage |
-| Secrets leak into the index | Redaction at the connector boundary, before anything is written |
-| A crawl runs forever | Budgets on pages, fetches, bytes, depth and wall-clock |
+| Area | Module | What it does |
+|---|---|---|
+| HTTP | `util/http.py` | urllib client with per-host token-bucket rate limiting, retry honouring `Retry-After` and GitHub's `x-ratelimit-reset`, conditional GETs via ETag, hard response-size caps, and no silent POST replay on redirect |
+| Text | `util/text.py` | NFKC normalization, code-aware tokenization, markdown section splitting that never splits a fenced block, and secret redaction applied at the connector boundary |
+| HTML | `scrape/html.py` | a tolerant tree builder over `html.parser` with explicit recovery rules, structural plus link-density boilerplate removal, and markdown rendering that preserves headings, lists and code fences |
+| Robots | `scrape/robots.py` | RFC 9309 semantics with per-host caching; 5xx and unreachable are treated as disallow-all, not as permission |
+| Crawl | `scrape/crawler.py` | breadth-first, dedupes on content hash and declared canonical as well as URL, records why each URL was skipped, and bounds pages, fetches, bytes, depth and wall-clock |
+| Ingest | `ingest/base.py` | the connector contract: content-hash incrementality, atomically persisted cursors, and per-document failures counted rather than raised |
+| GitHub | `ingest/github.py` | repo, README, files, issues, PRs, commits and releases; head-sha short circuit, one recursive tree call, and raw-over-API blob fetches to stay inside the REST quota |
+| Web | `ingest/web.py` | the crawler as a connector, with redaction and provenance stamping |
+| Models | `models.py` | `RawDocument -> Document -> Chunk -> ScoredChunk -> Answer`, carrying provenance at every hop |
 
-## Status
+Plus three supporting modules the table would otherwise bury: `util/hashing.py`
+(process-stable content hashes — `hash()` is salted per process and is never
+used), `util/ratelimit.py` (the token bucket), and `util/logging.py`.
 
-Under active construction. See `internal/PLAN.md` for what is built and what is next.
+## Review tooling
+
+`tools/` holds the evidence framework behind `/ultrareview`: ten deterministic
+checkers that hold this repository's own prose to its own data.
+
+```bash
+PYTHONPATH=. python3 -m tools.ultrareview .      # check every claim in this repo
+PYTHONPATH=. python3 -m tools.ultrareview . --list
+bash tests/run_all.sh                            # compile, unit tests, checkers
+```
+
+They exist because the first version of this README described five capabilities
+that had no code behind them, and nothing in the repository could tell the
+difference. `provenance/observations.md` records what was actually measured;
+`provenance/unknowns.md` records what is still undetermined.
+
+The checkers are project-agnostic — point them at any repository.
+
+## Not yet built — roadmap
+
+Everything in this section is design, not code. It is separated out so that no
+reader has to guess which half of the README they are in.
+
+| Stage | Status | The failure mode it is meant to address |
+|---|---|---|
+| Chunking with contextual headers | not started; `Chunk.context_header` exists as a field, nothing populates it | chunks that lose the context that made them meaningful |
+| Embedding + index | not started | — |
+| Hybrid dense + BM25 retrieval fused with RRF | not started | semantic search missing exact terms |
+| Reranking | not started; `Connector.authority` is carried for it | boilerplate outranking content |
+| Eval harness: recall@k, MRR, nDCG, citation coverage | not started; no goldens exist | "is retrieval any good?" having no answer |
+| The OODA loop that decides when to re-fetch | not started; `IngestDelta` is the input it will read | indexes going stale silently |
+| CLI (`oodarag.cli`) | not started | — |
+
+No target retrieval quality has been set; see U-3 in `provenance/unknowns.md`.
 
 ## Quick start
 
 ```bash
-make test          # stdlib unittest, no dependencies required
-make demo          # end-to-end: ingest -> index -> query -> eval
+make lint            # compile-check every module
+make test            # stdlib unittest, no dependencies required
+make check           # lint, tests, and the evidence checkers
 ```
+
+There is deliberately no `make demo` yet. There was one, and it invoked a module
+that did not exist.
 
 ## Design principles
 
 1. **Zero required dependencies.** The whole pipeline runs on the stdlib, so it
-   works in CI, in an air-gapped container, and on a laptop. Accelerators
-   (numpy) and hosted models (Voyage, Anthropic) plug in behind interfaces.
-2. **Provenance is load-bearing.** Every chunk carries the URI and commit sha it
-   came from. Citations are verified against retrieved chunks, not generated.
+   works in CI, in an air-gapped container, and on a laptop. Accelerators and
+   hosted models plug in behind interfaces. See
+   `docs/adr/0001-zero-dependency-core.md` for what that costs.
+2. **Provenance is load-bearing.** Every document carries the URI and commit sha
+   it came from.
 3. **Everything is bounded.** Every network stage has a budget on requests,
    bytes and time.
-4. **Degrade, don't die.** Blocked egress, a missing API key or a truncated API
+4. **Degrade, don't die.** Blocked egress, a missing API key or a truncated
    response reduce what the pipeline can do; they never make it crash.
-5. **Measure, don't assert.** Retrieval quality is a number in an eval report.
+5. **Measure, don't assert.** Applies to the pipeline's retrieval quality, and
+   to this README. The second one is enforced by `tools/`.

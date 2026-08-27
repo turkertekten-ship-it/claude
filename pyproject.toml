@@ -17,15 +17,16 @@ classifiers = [
 ]
 # Deliberately empty. The whole pipeline runs on the standard library.
 # See docs/adr/0001-zero-dependency-core.md
+#
+# There is no [project.scripts] entry yet: oodarag.cli does not exist, and a
+# console script pointing at a missing module turns `pip install` into a
+# ModuleNotFoundError at first use rather than an error at build time.
 dependencies = []
 
 [project.optional-dependencies]
 fast = ["numpy>=1.26"]          # vectorised scoring for large corpora
 providers = ["requests>=2.31"]  # only if you prefer requests over urllib
 dev = ["pytest>=8.0", "ruff>=0.5"]
-
-[project.scripts]
-ooda = "oodarag.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

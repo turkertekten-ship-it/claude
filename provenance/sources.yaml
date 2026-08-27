@@ -1,0 +1,80 @@
+# Every factual claim recorded in this repository resolves to an id below.
+#
+# A source is something a later session can go back to and re-read: a commit, a
+# file at a commit, or a command with its recorded exit status. "I remember" and
+# "another agent said so" are not sources. A summary produced by another session
+# may be recorded, but only with kind: report and a named reporter, so that its
+# second-hand status travels with it.
+
+sources:
+  - id: S-1
+    kind: repository
+    ref: turkertekten-ship-it/claude
+    commit: 1d7ce8f799f754a947df7c22da38491c3aa382a4
+    subject: "Add zero-dependency core: HTTP client, web scraper, GitHub connector"
+    committed_at: "2026-08-27T14:34:34+00:00"
+    note: The tree this review's baseline observations were taken from.
+
+  - id: S-2
+    kind: file
+    ref: turkertekten-ship-it/claude-ai CLAUDE.md
+    commit: a21b4f4800b73af09ffd9eda4bb41d3be689056e
+    subject: Point this repository at the shared operating doctrine
+    committed_at: "2026-08-27T14:52:54+00:00"
+    note: States the doctrine and names the directories it expects to exist here.
+
+  - id: S-3
+    kind: measurement
+    command: make test
+    cwd: pristine worktree of S-1
+    exit_code: 2
+    observed: "ImportError: Start directory is not importable: 'tests'"
+    note: >-
+      Taken in a detached worktree at S-1 rather than the working tree, because
+      adding tests/ during this session changes the result. The re-measurement
+      after that change is S-7.
+
+  - id: S-4
+    kind: measurement
+    command: python3 -m oodarag.cli --help
+    cwd: pristine worktree of S-1
+    env: PYTHONPATH=src
+    exit_code: 1
+    observed: "ModuleNotFoundError: No module named 'oodarag.cli'"
+
+  - id: S-5
+    kind: measurement
+    command: make lint
+    cwd: pristine worktree of S-1
+    exit_code: 0
+    observed: python3 -m compileall -q src succeeded
+
+  - id: S-6
+    kind: measurement
+    command: find src -name '*.py' | wc -l
+    cwd: pristine worktree of S-1
+    exit_code: 0
+    observed: "16 python files, 2583 lines, across oodarag/{util,ingest,scrape}"
+
+  - id: S-7
+    kind: measurement
+    command: python3 -m tools.ultrareview .
+    cwd: working tree of this branch
+    exit_code: 0
+    observed: >-
+      10 checkers run, 0 skipped, 0 error, 0 warn, 2 unverifiable, in 9.1s.
+      ZERO_DEP_CONFIRMED from the import graph: 47 python files, 42 distinct
+      top-level imports, 40 standard library, 2 first-party, 0 third-party.
+      TESTS_PASS: 263 tests collected and passed.
+    note: >-
+      The two unverifiable items are stated rather than folded into the pass:
+      `make lint` was not executed because its recipe runs compileall, which
+      writes bytecode into the tree under review; and link reachability was not
+      checked because the network is off by default.
+
+  - id: S-8
+    kind: measurement
+    command: bash tests/run_all.sh
+    cwd: working tree of this branch
+    exit_code: 0
+    observed: "compile, 263 unit tests, and the ten data checkers - all checks passed"
