@@ -134,6 +134,14 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - The cause was an IDF clamped at zero, which on a small corpus zeroes every term because every term is in more than half the documents. It was fixed to the Lucene/Robertson non-negative form. [src:BM25-SILENT-ZERO-2026-08-27]
 - The regression suite was watched failing against the reverted implementation and passing against the fixed one, rather than only passing. [src:BM25-SILENT-ZERO-2026-08-27]
 
+## Observed — the pipeline end to end
+
+- The full chain runs offline against the seed corpus: 9 documents ingested to 40 chunks and 40 vectors, 18 goldens answered, no network. [src:PIPELINE-E2E-2026-08-27]
+- Answers carry 3-5 verified citations each, and a question the corpus does not cover abstains with zero citations rather than answering. [src:PIPELINE-E2E-2026-08-27]
+- Both retrieval arms contribute on every answerable question, which is what the BM25 fix restored. [src:PIPELINE-E2E-2026-08-27] [src:BM25-SILENT-ZERO-2026-08-27]
+- The harness reports recall@8=1.000, MRR=1.000, nDCG@8=0.885, citation coverage=1.000, abstention 0.167, false abstention 0.000. [src:PIPELINE-E2E-2026-08-27]
+- Those numbers measure self-consistency, not retrieval quality: the corpus and the golden set were written together by one agent, so perfect recall largely establishes that documents written to be retrievable are retrieved. [src:PIPELINE-E2E-2026-08-27]
+
 ## Conclusion
 
 The request that opened this session asked to look at "all my previous claude

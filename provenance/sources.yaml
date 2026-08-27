@@ -502,3 +502,27 @@ sources:
       kept answering, the pipeline kept producing cited answers, and nothing
       reported that an entire retrieval arm contributed zero. Inspection would
       not have caught it; running it did.
+
+  - id: PIPELINE-E2E-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:40Z"
+    method: "PYTHONPATH=src python3 driving Pipeline(FilesConnector('evals/corpus')) -> refresh_indexes -> ask -> evals.harness.evaluate over evals/goldens.jsonl, offline"
+    evidence: >-
+      Ingested the 9-document seed corpus into 40 chunks and 40 vectors, then
+      answered 18 goldens. The harness reported recall@8=1.000, MRR=1.000,
+      nDCG@8=0.885, citation coverage=1.000, abstention rate=0.167 (3 of 18,
+      matching the 3 goldens marked should_abstain) and false-abstention
+      rate=0.000. Three sample questions answered with 3-5 verified citations
+      each at confidences 0.54-0.80; a question the corpus does not cover
+      ("What is the capital of France?") abstained with confidence 0.0 and no
+      citations. Both retrieval arms contributed on every answerable question
+      (lexical 7-16 hits, dense 40).
+    note: >-
+      These numbers measure self-consistency, NOT retrieval quality on a real
+      corpus. The seed corpus and the golden set were authored together by the
+      same agent, so recall@8=1.000 largely establishes that the pipeline
+      retrieves documents written to be retrievable. nDCG@8=0.885 is the only
+      metric here with real headroom in it. Treating this as evidence that
+      retrieval is good would be exactly the golden-set overfitting the
+      eval-auditor agent is defined to catch. It is a smoke test of the whole
+      chain, and should be read as one.
