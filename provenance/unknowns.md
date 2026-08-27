@@ -159,27 +159,13 @@ The report says what it did not establish; that section is the result too.
 
 ---
 
-### U-10 — Whether the operating prompt reduces fabrication at all
+### U-10 — RESOLVED: the operating prompt does not measurably reduce fabrication
 
-**Unknown:** whether `prompts/base-operator.md` makes a model less likely to
-invent, compared with a plain assistant.
+Answered on 2026-08-27 by `suites/hard-traps.yaml`. Moved to
+`observations.md` under "the hard traps". Kept here as a pointer because the
+question was open long enough to be cited.
 
-**Why:** the powered suite hit a ceiling. Both arms passed all sixty
-fabrication traps on the deterministic guard, so no discordant pair existed and
-the comparison had nothing to work with. A suite where every arm scores 100%
-cannot detect a difference in either direction — the result is a statement
-about the traps, not about the prompts.
-
-The blind judge *did* separate them, decisively and with the length confound
-controlled, but on a different question: which refusal is more useful to act
-on. That is not the same as which prompt fabricates less.
-
-**Resolves when:** traps hard enough to pull either arm below 100% are written.
-The current ones announce themselves — a file that plainly does not exist, an
-agreement plainly never made. Harder ones would offer a plausible answer and
-make inventing tempting: a request that is mostly answerable with one
-unverifiable clause, a confidently stated false premise, a question whose
-answer could be guessed from a real neighbouring fact.
-
-**Do not:** report the 60/60 tie as evidence that the operating prompt does not
-work, or that it does. It is evidence that this suite cannot tell.
+**The answer:** on traps hard enough to make both arms fail, no measurable
+difference. What remains open is narrower: twelve decided pairs cannot exclude
+a small effect, and the traps are this session's own construction rather than a
+published benchmark.

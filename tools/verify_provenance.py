@@ -65,7 +65,16 @@ FALSE_MEMORY = [
     "based on our past conversations",
 ]
 
-SKIP_DIRS = {".git", "node_modules", "__pycache__", ".venv", "archive", "fixtures"}
+SKIP_DIRS = {".git", "node_modules", "__pycache__", ".venv", "archive", "fixtures",
+             ".workbench"}
+
+#: Verbatim captures are evidence, not assertions. A transcript that records a
+#: model writing `[src:ID]`, or a page that contains the words `as we
+#: discussed`, is quoting -- and demanding that a quotation resolve to this
+#: repository's ledger is the same category error as demanding a source tag on
+#: every line of conversational prose. Everything here is referenced by an
+#: `evidence:` field in sources.yaml, never asserted as prose.
+VERBATIM_DIRS = {REPO / "provenance" / "raw"}
 
 
 class Finding:
@@ -202,8 +211,11 @@ def markdown_files(targets: list[Path]):
             yield target
         elif target.is_dir():
             for path in sorted(target.rglob("*.md")):
-                if not any(part in SKIP_DIRS for part in path.parts):
-                    yield path
+                if any(part in SKIP_DIRS for part in path.parts):
+                    continue
+                if any(d in path.parents for d in VERBATIM_DIRS):
+                    continue
+                yield path
 
 
 def main(argv: list[str]) -> int:

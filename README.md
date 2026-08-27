@@ -108,25 +108,27 @@ in `prompts/` actually stop a model inventing things? Sixty fabrication traps,
 two arms, judged blind in both presentation orders, 50 decided pairs against
 the ~47 that 80% power needs. The answer has two halves and both are honest:
 
-- **The fabrication guard cannot separate them, which is not the same as their
-  being equal.** Both variants passed 60 of 60, with zero discordant pairs.
-  That is a **ceiling effect**: a suite where every arm scores 100% has no
-  headroom left to detect a difference in either direction. The honest reading
-  is "these traps are too easy to discriminate", not "there is no difference".
-  Harder traps — ones where a plausible answer is available and inventing is
-  tempting — would be needed to say more, and are not written yet (`U-10`).
-- **Something separates them on how useful the refusal is.** The blind judge
-  preferred the doctrine prompt 42–8 with 10 ties, p < 0.001 — and that
-  preference survives the length control. It wrote the longer answers overall
-  (768 characters against 585), but on the eleven pairs where the *plain
-  assistant* was the longer one, and length bias therefore pushed the other
-  way, the doctrine prompt still won 9–1, p = 0.021. Both strata significant,
-  same direction. The judge was reading content, not word count.
+- **On easy traps, nothing separates them.** Both variants passed 60 of 60 —
+  a ceiling, with no headroom to detect a difference either way.
+- **On hard traps, still nothing separates them, and now the suite could tell.**
+  A second suite of 26 traps that do *not* announce themselves — false premises
+  stated confidently, claims misattributed to documentation, specifics no one
+  could know — broke the ceiling: 20/26 and 21/26. It found no difference.
+  McNemar 3–2 discordant, p = 1.0. The blind judge agreed: 7–5 with 14 ties,
+  p = 0.77.
+- **The easy-trap judge preference did not survive the harder set.** There the
+  judge preferred the doctrine prompt 42–8 at p < 0.001; here 7–5 at p = 0.77.
+  The measurable benefit appeared where refusing was already easy — it made the
+  refusal more useful — and vanished where inventing was actually tempting.
+- **Both arms fabricated on roughly a fifth of the hard traps.**
 
 Note what that does and does not license. On the thing the operating prompt was
-written for — refusing to fabricate — this suite measured **no difference and
-could not have measured one**. What is demonstrated is a more useful refusal,
-and only that.
+written for — refusing to fabricate — **no advantage was found**, on either the
+easy set or the hard one. Twelve decided pairs cannot exclude a small effect,
+and the traps are this repository's own construction rather than a published
+benchmark. But the honest headline is not "the prompt works": it is that this
+repository can now tell the difference between a prompt that works and one that
+only reads as though it does, and applied that to its own.
 
 Getting there cost two of this repository's own bugs, both kept on the record:
 36 cached completions written by an **offline echo backend and served to a live

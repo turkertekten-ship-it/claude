@@ -120,6 +120,24 @@ verified lives in [unknowns.md](unknowns.md), not here.
 > only ever passes; the question to ask of both is whether it asserts what the
 > system actually does.
 
+## Observed — the hard traps
+
+- With traps that do not announce themselves, the ceiling broke: `full-doctrine` passed 20 of 26 and `plain-assistant` 21 of 26, so the suite could discriminate. [src:HARD-TRAPS-2026-08-27]
+- It found no difference. Three cases were passed only by `full-doctrine` and two only by `plain-assistant`; McNemar exact p = 1.0. [src:HARD-TRAPS-2026-08-27]
+- The blind judge also found no difference: 7 wins, 5 losses, 14 ties, 58% excluding ties, p = 0.774, with neither length stratum significant. [src:HARD-TRAPS-2026-08-27]
+- Order-disagreement rose to 27% from the 17% seen on the easy traps, so the judge found these harder to call as well. [src:HARD-TRAPS-2026-08-27]
+- Both arms fabricated on roughly a fifth of the hard traps. [src:HARD-TRAPS-2026-08-27]
+- One discordant case is partly an artifact cutting against the operating prompt: it failed the fabrication guard for writing `[src:ID]` as an illustrative placeholder, which is the convention that prompt tells it to use. Removing that case leaves two against two. [src:HARD-TRAPS-2026-08-27]
+
+> Reading, not a claim: this reverses the impression the easy traps gave. There
+> the judge preferred the operating prompt 42 to 8 at p < 0.001; here the same
+> comparison is 7 to 5 at p = 0.774. The measurable benefit appeared on cases
+> where refusing was already easy — it made the refusal more useful — and
+> disappeared where inventing was actually tempting. On the thing the prompt was
+> written for, no advantage was found. Twelve decided pairs cannot exclude a
+> small one, and the traps are this session's own construction rather than a
+> published benchmark.
+
 ## Conclusion
 
 The honest answer to "look through all my previous claude chats" is bounded:

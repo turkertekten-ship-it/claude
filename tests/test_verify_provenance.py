@@ -36,7 +36,42 @@ def codes_for(fixture: str) -> list[str]:
     return [f.code for f in vp.scan_markdown(FIXTURES / fixture, set(known))]
 
 
+def verbatim_cases() -> None:
+    """A capture that QUOTES a banned phrase is evidence, not an assertion.
+
+    provenance/raw/ holds verbatim tool output. A transcript recording a model
+    writing `[src:ID]`, or a fetched page containing `as we discussed`, is
+    quoting. Demanding that a quotation resolve to this repository's ledger is
+    the same category error as demanding a source tag on conversational prose --
+    and it fired on a real captured eval report before this exclusion existed.
+    """
+    print("verbatim capture cases")
+    raw = REPO / "provenance" / "raw"
+    probe = raw / "_verifier_probe.md"
+    probe.write_text(
+        "# capture\n\nA model wrote: [src:NOT-A-REAL-ID] and said as we discussed.\n",
+        encoding="utf-8",
+    )
+    try:
+        scanned = [p for p in vp.markdown_files([REPO])]
+        check("provenance/raw/ is not scanned for claims", probe not in scanned)
+        # But the same content IS caught anywhere else.
+        elsewhere = REPO / "docs" / "_verifier_probe.md"
+        elsewhere.write_text(probe.read_text(encoding="utf-8"), encoding="utf-8")
+        try:
+            known, _ = vp.load_sources()
+            codes = [f.code for f in vp.scan_markdown(elsewhere, set(known))]
+            check("the same content outside raw/ is still caught",
+                  "UNKNOWN_SOURCE" in codes and "FALSE_MEMORY" in codes, str(codes))
+            check("and docs/ is still scanned", elsewhere in vp.markdown_files([REPO]))
+        finally:
+            elsewhere.unlink(missing_ok=True)
+    finally:
+        probe.unlink(missing_ok=True)
+
+
 def main() -> int:
+    verbatim_cases()
     print("verifier unit cases")
     check("clean fixture passes", codes_for("clean.md") == [], codes_for("clean.md"))
     check("unsourced claim is caught", "UNSOURCED_CLAIM" in codes_for("unsourced.md"))
