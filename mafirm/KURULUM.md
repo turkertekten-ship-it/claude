@@ -120,6 +120,65 @@ Depoyu klonlayıp `./denetim.sh` yazmak isteyen biri için:
     chmod +x ~/mafirm/denetim.sh ~/mafirm/kur-genel.sh \
              ~/mafirm/birimler/*/kod/*.py ~/mafirm/.claude/hooks/kapi.py
 
+## Kapılarda bulunan iki kusur
+
+Kurulumdan sonra bütün pratik kendi kapılarından geçirildi (her dosya bir
+Write olayı olarak `kapi.py`'ye verildi). İki kusur çıktı; ikisi de kitabın
+kendi uyarısının canlı örneğidir: doğru işi bloklayan bir kapı bir gün içinde
+kapatılır ve ondan sonra hiçbir şey uygulanmaz.
+
+1. **`arastirma` kapısı KARŞILANAMIYORDU.** `KONTROL` deseni `^` ile satır
+   başına bakıyordu; oysa kanca `tool_input`un JSON hâlini görür ve orada
+   gerçek yeni satır yoktur, `\n` kaçışlıdır. Dosyanın ortasındaki
+   "Kontrol edildi:" satırı hiçbir zaman görülmüyordu — yani kapı, satırı
+   taşıyan doğru dosyaları da bloklyordu. Desen artık her iki biçimi tanır.
+2. **`guncellik` kapısı kendi kaynak dosyasını bloklyordu.** `kapi.py`'nin
+   sınama vektöründeki 2020-01-01 tarihi, belgenin kendi tarihi sanılıyordu.
+   Bir belgenin etkin doğrulama tarihi artık taşıdığı EN YENİ tarihtir.
+
+Sınamaya, kancanın gerçekte gördüğü biçim (JSON'a gömülü içerik) eklendi.
+Bu vakalar olmadan, hiçbir zaman karşılanamayan bir kapı sınamayı geçiyor
+görünüyordu.
+
+## Kitapta olmayan iki denetim eklendi
+
+- **İç yönlendirme** (`_araclar/kod/yonlendirme.py`). Sistem sürekli
+  yönlendirir; bir dosya yeniden adlandırıldığında bu yönlendirmeler sessizce
+  kırılır ve baskı altındaki bir hukukçuyu çıkmaza gönderir. Betik her iç
+  yolu, beceri adını, alt ajan adını ve slash komutunu gerçek dosya sistemine
+  karşı çözer.
+- **Eşik özellik sınaması** (`rekabet/kod/esik-ozellik.py`). `--self-test` on
+  bir seçilmiş vakayı sınar; seçen kişi neyi düşünmediyse orada boşluk kalır.
+  Özellik sınaması vakayı değil kuralı sınar: sınır katılığı, sıra
+  bağımsızlığı, monotonluk ve en sessiz kusur — teknoloji istisnası kapsamı
+  ASLA daraltmamalıdır, aksi hâlde gereken bir bildirim yapılmaz.
+
+Her iki denetleyici de iki yönde sınandı: kasten kırık girdi verildiğinde
+yakaladılar, geri alındığında sustular.
+
+## Yükleme sırasında on bir sessiz bozulma
+
+Depoya yükleme GitHub API'si üzerinden yapıldı ve içerik elle kopyalandı. Bu
+yolda **on bir tek karakterlik bozulma** oluştu ve hepsi Türkçeye özgüydü:
+
+    boşalttığı -> boşaltığı     (ikiz ünsüz düştü)
+    liradır    -> liradir       (noktasız ı yerine noktalı i)
+    SİLİNECEK  -> SİlenECEK
+    araca      -> araça         (fazladan çengel)
+    hatanın    -> haltanın
+    daraltıldı -> daraldı
+    koşuluna   -> koşuna
+
+Bunların bir kısmı alt ajanlar tarafından, bir kısmı kurulumu yürüten
+tarafından yapıldı — yani dikkat, bu kusuru sıfırlamıyor. Sonucu doğru kılan
+şey dikkat değil, **byte-eş karşılaştırma ve yeniden deneme döngüsüdür**:
+yerel dosya ile uzak dosya `git diff` ile karşılaştırıldı ve fark kalmayana
+kadar tekrarlandı.
+
+Bir `description:` satırındaki tek harf, bir becerinin ne zaman devreye
+gireceğini değiştirir; bir mevzuat cümlesindeki tek harf daha kötüsünü yapar.
+Bu yüzden bu iş gözle değil karşılaştırmayla bitirilir.
+
 ## Kurulum sırasında yakalanan üç gerçek kusur
 
 1. **`pdfplumber` kuruluydu ama import edilemiyordu** — Debian'ın
