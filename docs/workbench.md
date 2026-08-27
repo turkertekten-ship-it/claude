@@ -81,6 +81,15 @@ about whether an answer seemed careful.
 
 Mark a grader `advisory: true` to report it without letting it gate.
 
+> **A suite file is executable code.** The `command` grader runs with
+> `shell=True`, and `mode: agent` runs the model with
+> `--permission-mode bypassPermissions` inside a scratch directory. Both are
+> deliberate — sandboxing the grader would rule out the real checkers that make
+> outcome-based grading worth having, and an agent that stops for permission
+> prompts cannot run headless. The consequence is that **running a suite from
+> an untrusted source is running their shell script**. Read a suite before you
+> run it, exactly as you would a Makefile or a CI config.
+
 ## Agent mode
 
 `mode: agent` runs the variant **with tools**, inside a scratch directory

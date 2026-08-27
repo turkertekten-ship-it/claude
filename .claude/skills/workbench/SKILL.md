@@ -79,6 +79,10 @@ Reach for them in this order, and stop at the first that settles the case:
 
 `python3 -m workbench graders` lists them all with their kinds.
 
+**Before running a suite you did not write:** read it. The `command` grader
+executes shell, and `mode: agent` runs the model with permissions bypassed in a
+scratch directory. A suite is executable code, not configuration.
+
 ## Agent mode
 
 A variant with `mode: agent` runs with tools inside a scratch directory seeded

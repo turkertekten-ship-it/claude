@@ -408,8 +408,15 @@ def g_command(g: Grader, ctx: GradingContext) -> Verdict:
 
     This is the outcome-based grader: it hands the artifact to a real checker
     -- a linter, a test runner, this repository's own provenance verifier --
-    and takes that program's word for it. Placeholders ``{output_file}`` and
-    ``{workdir}`` are substituted into the command.
+    and takes that program's word for it. Placeholders ``{output_file}``,
+    ``{workdir}`` and ``{suite_dir}`` are substituted into the command.
+
+    **A suite file is executable code.** This runs with ``shell=True``, so a
+    suite is exactly as trustworthy as whoever wrote it -- running one from an
+    untrusted source is running their shell script. That is a deliberate
+    tradeoff: sandboxing the grader would rule out the checkers that make
+    outcome-based grading worth having. Review a suite before running it, the
+    same way you would a Makefile or a CI config.
     """
     command = str(_need(g, "command"))
     expect_code = int(g.config.get("exit_code", 0))
