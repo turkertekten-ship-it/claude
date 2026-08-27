@@ -9,7 +9,7 @@ Parity conformance — executed, not asserted
 [PASS] Model selection
        requested claude-haiku-4-5, backend reported canonicalModel='claude-haiku-4-5'
 [PASS] Effort control changes work done
-       thinking tokens: low=213, high=195
+       thinking tokens: low=187, high=190
 [PASS] Thinking budget (undocumented flag)
        --thinking/--max-thinking-tokens accepted and the call succeeded
 [PASS] Max output tokens
@@ -35,7 +35,7 @@ Parity conformance — executed, not asserted
 [PASS] Request is inspectable before sending
        `workbench plan` resolved every request without sending: 18 model call(s) would be made.
 [PASS] Token counts and cost are reported
-       in=248 out=55 cost=$0.00146 — provider-reported, not estimated from a price table
+       in=248 out=108 cost=$0.001725 — provider-reported, not estimated from a price table
 [----] count_tokens before sending
        /v1/messages/count_tokens is implemented and driven over real HTTP in the test suite: it returns a count and omits max_tokens, which that endpoint rejects. Missing: a credential, not code.
 [----] Batch API 50% discount
@@ -57,7 +57,7 @@ Parity conformance — executed, not asserted
 [PASS] skill-creator is available
        first-party blind comparator at /mnt/skills/examples/skill-creator: withholds which skill produced which output, and its protocol describes a single fixed-order judgement — use it for skills; use this workbench when the comparison needs the swap, more than two variants, or a p-value
 ========================================================================
-20 passed, 0 failed, 8 unreachable — $0.0232, 72s
+20 passed, 0 failed, 8 unreachable — $0.0242, 75s
 
 Unreachable is not a softer failure. Those capabilities either need
 an API key this container does not have, or were removed from the

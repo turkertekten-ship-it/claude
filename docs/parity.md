@@ -93,6 +93,13 @@ Legend: **CC** = stock Claude Code; **WB** = this repository's `workbench/`.
 
 ### Parameters
 
+> Audited against the documented `/v1/messages` surface: **24 of 24 parameters
+> carried** by the `anthropic-api` backend, each exercised over local HTTP.
+> Twelve of them were missing when that audit was first run — the playground's
+> own description is "supports every Messages API parameter", and a workbench
+> claiming parity with it cannot stop at the half a coding CLI happens to
+> expose.
+
 | Capability | playground | CC | WB |
 |---|---|---|---|
 | Model selection | yes | `--model` | per variant |

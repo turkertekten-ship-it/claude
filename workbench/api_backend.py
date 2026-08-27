@@ -138,7 +138,44 @@ class AnthropicAPIBackend(Backend):
                 "type": "json_schema", "schema": request.json_schema,
             }
         if request.thinking:
-            body["thinking"] = {"type": request.thinking}
+            thinking: dict[str, Any] = {"type": request.thinking}
+            # budget_tokens is removed on Fable 5, Opus 5/4.8/4.7 and Sonnet 5,
+            # and deprecated on 4.6. It is sent only when asked for, and only
+            # with the mode that still accepts it.
+            if request.thinking_budget is not None and request.thinking == "enabled":
+                thinking["budget_tokens"] = request.thinking_budget
+            if request.thinking_display:
+                thinking["display"] = request.thinking_display
+            body["thinking"] = thinking
+
+        # The remaining Messages API surface. Each is sent only when set, so a
+        # request stays minimal and a server that does not know a parameter is
+        # never handed one.
+        for field, key in (("metadata", "metadata"),
+                           ("container", "container"),
+                           ("inference_geo", "inference_geo"),
+                           ("service_tier", "service_tier"),
+                           ("fallbacks", "fallbacks"),
+                           ("context_management", "context_management"),
+                           ("speed", "speed")):
+            value = getattr(request, field)
+            if value is not None:
+                body[key] = value
+        if request.stream:
+            body["stream"] = True
+        if request.cache_request:
+            body["cache_control"] = {"type": "ephemeral"}
+        if request.mcp_servers:
+            # The connector needs both halves: the server list, and a toolset
+            # entry in `tools` naming each server. Sending one without the other
+            # is a validation error, so the toolset is added here rather than
+            # left to the caller to remember.
+            body["mcp_servers"] = [dict(m) for m in request.mcp_servers]
+            toolsets = [{"type": "mcp_toolset", "mcp_server_name": m["name"]}
+                        for m in request.mcp_servers]
+            body["tools"] = list(body.get("tools", [])) + toolsets
+        if request.task_budget:
+            body.setdefault("output_config", {})["task_budget"] = request.task_budget
 
         sampling = {k: v for k, v in (("temperature", request.temperature),
                                       ("top_p", request.top_p),
@@ -153,15 +190,22 @@ class AnthropicAPIBackend(Backend):
             body.update(sampling)
         return body
 
-    def _post(self, path: str, body: dict[str, Any], timeout: int = 300) -> dict[str, Any]:
+    def _headers(self, betas: tuple[str, ...] = ()) -> dict[str, str]:
+        headers = {"content-type": "application/json",
+                   "anthropic-version": API_VERSION,
+                   "x-api-key": self.api_key or ""}
+        if betas:
+            headers["anthropic-beta"] = ",".join(betas)
+        return headers
+
+    def _post(self, path: str, body: dict[str, Any], timeout: int = 300,
+              betas: tuple[str, ...] = ()) -> dict[str, Any]:
         if not self.api_key:
             raise BackendUnavailable(find_credential()[1])
         req = urllib.request.Request(
             f"{self.base_url}{path}",
             data=json.dumps(body).encode("utf-8"),
-            headers={"content-type": "application/json",
-                     "anthropic-version": API_VERSION,
-                     "x-api-key": self.api_key},
+            headers=self._headers(betas),
             method="POST",
         )
         try:
@@ -177,9 +221,64 @@ class AnthropicAPIBackend(Backend):
 
     def complete(self, request: Request) -> Completion:
         started = time.time()
-        envelope = self._post("/v1/messages", self.build_body(request),
-                              timeout=request.timeout_s)
+        if request.stream:
+            envelope = self._stream("/v1/messages", self.build_body(request),
+                                    request.timeout_s, request.betas)
+        else:
+            envelope = self._post("/v1/messages", self.build_body(request),
+                                  timeout=request.timeout_s, betas=request.betas)
         return self.parse(envelope, int((time.time() - started) * 1000))
+
+    def _stream(self, path: str, body: dict[str, Any], timeout: int,
+                betas: tuple[str, ...]) -> dict[str, Any]:
+        """Consume a server-sent event stream and rebuild the final message.
+
+        Streaming is required for large `max_tokens` -- the SDKs refuse a
+        non-streaming request above roughly 21k -- so a workbench that cannot
+        stream cannot exercise the long-output end of the parameter space at
+        all. The deltas are reassembled into the same envelope shape a
+        non-streaming call returns, so nothing downstream has to know which
+        path was taken.
+        """
+        if not self.api_key:
+            raise BackendUnavailable(find_credential()[1])
+        req = urllib.request.Request(
+            f"{self.base_url}{path}", data=json.dumps(body).encode("utf-8"),
+            headers=self._headers(betas), method="POST")
+        envelope: dict[str, Any] = {"content": [], "usage": {}}
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as response:
+                for raw in response:
+                    line = raw.decode("utf-8").strip()
+                    if not line.startswith("data:"):
+                        continue
+                    payload = line[5:].strip()
+                    if not payload or payload == "[DONE]":
+                        continue
+                    event = json.loads(payload)
+                    kind = event.get("type")
+                    if kind == "message_start":
+                        message = event.get("message", {})
+                        envelope.update({k: v for k, v in message.items()
+                                         if k != "content"})
+                        envelope["usage"] = dict(message.get("usage") or {})
+                        envelope["content"] = []
+                    elif kind == "content_block_start":
+                        envelope["content"].append(dict(event.get("content_block") or {}))
+                    elif kind == "content_block_delta":
+                        delta = event.get("delta") or {}
+                        if envelope["content"]:
+                            block = envelope["content"][-1]
+                            block["text"] = block.get("text", "") + delta.get("text", "")
+                    elif kind == "message_delta":
+                        envelope.update(event.get("delta") or {})
+                        envelope["usage"].update(event.get("usage") or {})
+        except urllib.error.HTTPError as exc:
+            detail = exc.read().decode("utf-8", errors="replace")[:400]
+            raise BackendError(f"{path} returned {exc.code}: {detail}") from exc
+        except urllib.error.URLError as exc:
+            raise BackendError(f"{path} unreachable: {exc.reason}") from exc
+        return envelope
 
     @staticmethod
     def parse(envelope: dict[str, Any], elapsed_ms: int = 0) -> Completion:

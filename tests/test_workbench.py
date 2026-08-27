@@ -975,6 +975,64 @@ def test_api_backend_over_the_wire() -> None:
         check("and the text alongside it is kept", parsed.text == "let me look")
         check("stop_reason says why it stopped", parsed.stop_reason == "tool_use")
 
+        print("\n  the rest of the Messages API surface")
+        backend.complete(Request(
+            prompt="x", model="claude-haiku-4-5",
+            metadata={"user_id": "u1"}, cache_request=True, inference_geo="us",
+            service_tier="standard_only", speed="fast", container={"skills": []},
+            fallbacks="default", context_management={"edits": []},
+            task_budget={"type": "tokens", "total": 64000},
+            mcp_servers=({"type": "url", "url": "https://x", "name": "srv"},),
+            thinking="enabled", thinking_budget=2048, thinking_display="summarized",
+            betas=("fast-mode-2026-02-01",)))
+        body = seen[-1]["body"]
+        for key in ("metadata", "cache_control", "inference_geo", "service_tier",
+                    "speed", "container", "fallbacks", "context_management",
+                    "mcp_servers"):
+            check(f"{key} crosses the wire", key in body, str(sorted(body)))
+        check("task_budget rides inside output_config",
+              body["output_config"]["task_budget"]["total"] == 64000)
+        check("thinking carries budget and display",
+              body["thinking"]["budget_tokens"] == 2048
+              and body["thinking"]["display"] == "summarized")
+        check("an mcp_toolset is auto-added, since servers alone are rejected",
+              any(t.get("type") == "mcp_toolset" for t in body["tools"]))
+
+        print("\n  streaming rebuilds the same envelope a plain call returns")
+        events = [
+            {"type": "message_start", "message": {"model": "claude-haiku-4-5",
+             "usage": {"input_tokens": 5}, "content": []}},
+            {"type": "content_block_start", "content_block": {"type": "text", "text": ""}},
+            {"type": "content_block_delta", "delta": {"text": "streamed "}},
+            {"type": "content_block_delta", "delta": {"text": "answer"}},
+            {"type": "message_delta", "delta": {"stop_reason": "end_turn"},
+             "usage": {"output_tokens": 4}},
+        ]
+
+        class StreamHandler(Handler):
+            def do_POST(self):
+                json.loads(self.rfile.read(int(self.headers["content-length"])))
+                self.send_response(200)
+                self.send_header("content-type", "text/event-stream")
+                self.end_headers()
+                for e in events:
+                    self.wfile.write(f"data: {json.dumps(e)}\n\n".encode())
+                self.wfile.write(b"data: [DONE]\n\n")
+
+        stream_server = http.server.HTTPServer(("127.0.0.1", 0), StreamHandler)
+        threading.Thread(target=stream_server.serve_forever, daemon=True).start()
+        try:
+            streamed = AnthropicAPIBackend(
+                api_key="k", base_url=f"http://127.0.0.1:{stream_server.server_port}"
+            ).complete(Request(prompt="x", model="claude-haiku-4-5", stream=True))
+            check("deltas are reassembled in order", streamed.text == "streamed answer")
+            check("usage from both ends of the stream is merged",
+                  streamed.input_tokens == 5 and streamed.output_tokens == 4)
+            check("stop_reason from message_delta survives",
+                  streamed.stop_reason == "end_turn")
+        finally:
+            stream_server.shutdown()
+
         print("\n  an HTTP error is surfaced, not swallowed")
         broken = AnthropicAPIBackend(api_key="k", base_url=f"http://127.0.0.1:{server.server_port + 1}")
         rejects("an unreachable endpoint raises rather than returning empty text",

@@ -749,3 +749,32 @@ sources:
       your schema, which is a thing a playground exists to do. Prompt caching
       and image input were not in the matrix at all. All three are now built and
       wire-tested; the gap on each is a credential.
+
+  - id: API-SURFACE-COMPLETE-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-28T00:05Z"
+    method: >-
+      enumerated the documented /v1/messages parameters against
+      AnthropicAPIBackend.build_body, then implemented what was missing and
+      re-ran the audit
+    evidence: >-
+      Before: 12 of 24 parameters unimplemented — metadata, stream,
+      cache_control, container, inference_geo, service_tier, mcp_servers,
+      betas, fallbacks, context_management, speed, task_budget. After: all 24
+      are carried, with task_budget nested inside output_config where it
+      belongs and betas sent as the anthropic-beta header rather than a body
+      field. Each is exercised over local HTTP in tests/test_workbench.py.
+    note: >-
+      The playground's own description is that it "supports every Messages API
+      parameter", so a workbench claiming parity with it needed the whole
+      surface rather than the half a coding CLI happens to expose. Two details
+      the implementation encodes rather than leaving to the caller: an
+      mcp_toolset entry is added automatically for each mcp_server, because
+      sending servers without one is a validation error; and thinking's
+      budget_tokens is sent only with the mode that still accepts it, since it
+      is removed on Fable 5, Opus 5/4.8/4.7 and Sonnet 5.
+      Streaming is implemented as well — the SDKs refuse a non-streaming
+      request above roughly 21k max_tokens, so without it the long-output end
+      of the parameter space is untestable. Server-sent deltas are reassembled
+      into the same envelope a plain call returns, so nothing downstream knows
+      which path was taken.

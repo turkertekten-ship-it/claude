@@ -130,6 +130,25 @@ class Request:
     cache_system: bool = False
     #: Base64 image and document blocks, prepended to the first user turn.
     attachments: tuple[dict[str, Any], ...] = ()
+
+    # -- the rest of the Messages API surface -------------------------------
+    #: An audit found 12 of 24 documented parameters unimplemented. The
+    #: playground's own description is that it "supports every Messages API
+    #: parameter", so a workbench claiming parity with it needs them all.
+    metadata: dict[str, Any] | None = None      # {"user_id": ...}
+    stream: bool = False
+    cache_request: bool = False                 # top-level auto-caching
+    container: dict[str, Any] | None = None     # code execution / skills
+    inference_geo: str | None = None
+    service_tier: str | None = None
+    mcp_servers: tuple[dict[str, Any], ...] = ()
+    betas: tuple[str, ...] = ()
+    fallbacks: Any = None                       # "default" or [{"model": ...}]
+    context_management: dict[str, Any] | None = None
+    speed: str | None = None                    # "fast"
+    task_budget: dict[str, Any] | None = None
+    thinking_budget: int | None = None
+    thinking_display: str | None = None
     cwd: str | None = None
     max_budget_usd: float | None = None
     timeout_s: int = DEFAULT_TIMEOUT_S
@@ -156,6 +175,14 @@ class Request:
             "tool_choice": self.tool_choice,
             "cache_system": self.cache_system,
             "attachments": list(self.attachments),
+            "metadata": self.metadata, "stream": self.stream,
+            "cache_request": self.cache_request, "container": self.container,
+            "inference_geo": self.inference_geo, "service_tier": self.service_tier,
+            "mcp_servers": list(self.mcp_servers), "betas": list(self.betas),
+            "fallbacks": self.fallbacks, "context_management": self.context_management,
+            "speed": self.speed, "task_budget": self.task_budget,
+            "thinking_budget": self.thinking_budget,
+            "thinking_display": self.thinking_display,
             "temperature": self.temperature,
             "top_p": self.top_p,
             "top_k": self.top_k,
