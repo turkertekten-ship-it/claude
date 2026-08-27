@@ -108,16 +108,71 @@ tools/
   verify_provenance.py        the fabrication guard
   ingest_chat_archive.py      chat-archive ingestion and search
 tests/                        tests for the above
+  run_all.sh                  every check, one command
 archive/                      drop conversation exports here (git-ignored)
+docs/workflows.md             how the workflows and subagents fit together
+docs/cherny-practice.md       the sourced Cherny corpus, every claim tagged
 .claude/
   settings.json               hooks
   skills/ooda/SKILL.md        the loop procedure
+  skills/cherny/SKILL.md      the practice set for driving the work
+  commands/                   the workflows, as slash commands
   agents/                     subagent definitions
 ```
 
 ---
 
-## 5. House rules
+## 5. Workflows and delegation
+
+Rules that live only in prose get skipped under pressure. Each workflow in
+`.claude/commands/` pins one phase of the loop to a command that ends by
+running the verifier, so it cannot report success over an unsourced claim.
+
+| Command | What it produces |
+|---|---|
+| `/observe <target>` | a sourced inventory, absences included |
+| `/ooda-loop <task>` | one full loop, all four artifacts |
+| `/fact-check [path]` | the specific unsupported lines, and their fixes |
+| `/source <finding>` | a ledger entry a claim can cite |
+| `/fleet-sync` | what other sessions actually pushed, read from diffs |
+| `/ingest-chats [query]` | the real contents of the chat index, or that it is empty |
+| `/verify-loop <task>` | the check a task must pass, wired as a gate, before work starts |
+
+Three subagents exist to keep phases from collapsing into each other:
+`observer` enumerates and is given nowhere to put a conclusion; `fact-checker`
+audits documents it did not write; `verifier` runs the checks on work it did not
+do and cannot edit what it judges. See `docs/workflows.md`.
+
+**A subagent's report is second-hand.** It is another process's claim about
+what it saw, exactly like another session's status line. Verify anything
+load-bearing yourself before writing it down. Delegation multiplies reach, not
+evidence.
+
+---
+
+## 6. Driving the work
+
+Doctrine says what may be written down. This says how work gets done, and comes
+from a sourced corpus of Boris Cherny's Claude Code practice in
+`docs/cherny-practice.md`. The procedure is `.claude/skills/cherny/SKILL.md`;
+`prompts/cherny-operator.md` carries it into sessions started elsewhere.
+
+- **Close the loop before opening the task.** Before starting, answer: what
+  command will show this worked? If none exists, building it is the first task.
+  Without a runnable check, "it looks done" is the only completion signal there
+  is, and the reader becomes the verification loop. Run `/verify-loop <task>`.
+- **Show the evidence, don't assert success.** Paste the command and its output.
+- **Plan in proportion to uncertainty.** Plan when the approach is unclear or
+  the change spans files; skip it when you could describe the diff in one
+  sentence. When an approach fails, re-plan rather than pushing harder.
+- **Check work in a context window that did not do the work.** That is what the
+  `verifier` agent is for. Bound it to correctness, not taste.
+- **Fold corrections back in, and prune as you add.** Facts to `CLAUDE.md`,
+  procedures to a skill, must-happen-every-time to a hook.
+
+---
+
+## 7. House rules
 
 - **Python 3.11, standard library first.** PyYAML is available. The `sqlite3`
   CLI is *not* installed — go through Python's `sqlite3` module, which does

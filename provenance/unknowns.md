@@ -18,8 +18,14 @@ entry, move the resolved fact into `observations.md` with a new source id.
 **Why:** only session metadata was retrievable; no transcript-reading tool was
 exposed, the sessions run in other containers, and none had pushed a commit.
 
-**Resolves when:** the sessions push their branches (then read the diffs), or a
-transcript export is placed in `archive/` and ingested.
+**Resolves when:** a transcript export is placed in `archive/` and ingested.
+Pushed branches do *not* resolve this: a diff shows what a session built, never
+what it was asked, what it rejected, or why.
+
+**Partially moved:** as of 15:00Z the RAG session had pushed
+`claude/rag-system-data-pipeline-rdkde9`, so its *output* is now readable. Its
+file listing has been recorded; its code has not been reviewed, and its
+reasoning remains unknown. The other two sessions have pushed nothing.
 
 **Do not:** infer their contents from their titles. A title is a label the
 system generated, not a record of the work.
@@ -97,3 +103,58 @@ searched.
 
 **Action taken:** the search was scoped strictly to locating a Claude export.
 No personal Drive file was opened, and nothing was written to Drive.
+
+---
+
+### U-7 — Whether "borris churney" designates Boris Cherny
+
+**Unknown:** the owner's request named "borris churney". No source in this
+repository records the owner confirming who that is.
+
+**Why:** the identification rests on phonetic similarity plus the subject
+matter of the request (prompts, systems, chats, OODA, workflows, subagents),
+which matches Boris Cherny, creator and head of Claude Code
+[src:CHERNY-IDENTITY-2026-08-27]. That is an inference, not a statement by the
+owner.
+
+**Resolves when:** the owner confirms or corrects the name.
+
+**Action taken:** the corpus was built on Cherny material and says so in its
+title, so a wrong identification is visible immediately rather than buried.
+
+---
+
+### U-8 — Fidelity of the tip compilation to Cherny's original posts
+
+**Unknown:** whether all 60 transcribed tips faithfully represent what Cherny
+actually posted.
+
+**Why:** `x.com` is unreachable from this container
+[src:EGRESS-BLOCKED-2026-08-27], so the linked originals could not be opened.
+One tip of 60 was checked against a screenshot bundled in the compilation and
+was faithful but abridged [src:CHERNY-TWEET13-SCREENSHOT-2026-08-27]. The
+other 59 are unchecked.
+
+**Resolves when:** the originals become reachable, or the remaining bundled
+screenshots are read and compared.
+
+**Do not:** describe the corpus as "Cherny's words". It is a third-party
+transcription of them, and the corpus labels it that way throughout.
+
+---
+
+### U-9 — What Cherny actually said about prompt engineering
+
+**Unknown:** a search result carried the headline "Head Of Anthropic's Claude
+Code Says Prompt Engineering Not That Important". Whether he said that, and in
+what context, is not established.
+
+**Why:** only the headline was returned; the article was not fetched, and the
+domain was not reachable [src:EGRESS-BLOCKED-2026-08-27]. A headline is a
+label, and this repository does not expand labels into content.
+
+**Resolves when:** the article or its underlying interview becomes reachable.
+
+**Note:** it is recorded because it may sit in tension with the corpus's
+emphasis on detailed specs and plan quality. That tension is unresolved, not
+decided.

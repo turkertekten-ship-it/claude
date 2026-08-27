@@ -10,6 +10,7 @@ prompt nobody reads to the end enforces nothing.
 | `researcher.md` | Sessions whose job is to establish facts rather than build. |
 | `builder.md` | Sessions writing code against facts already established. |
 | `archive-ingest.md` | Sessions processing a conversation export. |
+| `cherny-operator.md` | Layered on top of the base: how work gets driven, not what may be claimed. |
 
-All four inherit one rule: **an unsourced claim does not get written down.**
+The first four inherit one rule: **an unsourced claim does not get written down.**
 The prompts state it; `tools/verify_provenance.py` enforces it.

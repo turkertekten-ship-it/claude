@@ -119,3 +119,364 @@ sources:
       correctly attributed hits with verbatim excerpts and message ids. The
       claude.ai export path was exercised only against synthetic fixtures in
       tests/, never against a real export.
+
+  - id: HOOKS-VALIDATED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T14:57Z"
+    method: "each hook command from .claude/settings.json executed manually with CLAUDE_PROJECT_DIR=/home/user/claude"
+    evidence: >-
+      SessionStart printed the doctrine reminder followed by
+      "verify_provenance: OK — 20 file(s), 11 source(s), 0 violations".
+      PostToolUse printed the same verifier line. Stop ran tests/run_all.sh and
+      printed "all cases passed" then "ALL CHECKS PASSED". All three exited
+      cleanly. They were run as shell commands, not observed firing inside a
+      live Claude Code session.
+
+  - id: SIBLING-PUSH-RAG-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:00Z"
+    method: "git fetch --all --prune; git log -1 origin/claude/rag-system-data-pipeline-rdkde9; git ls-tree -r --name-only"
+    evidence: >-
+      Branch claude/rag-system-data-pipeline-rdkde9 exists on the `claude`
+      remote at commit 1d7ce8f, authored 2026-08-27 14:34:34 +0000 by
+      "Claude <turker.tekten@gmail.com>", subject "Add zero-dependency core:
+      HTTP client, web scraper, GitHub connector". It holds 20 files: a
+      Makefile, pyproject.toml, README.md, .gitignore, and a Python package
+      under src/oodarag/ with ingest/, scrape/, and util/ subpackages. The
+      branch does not exist on the `claude-ai` remote. The file listing was
+      read; the code itself was not reviewed.
+
+  - id: UNRELATED-HISTORIES-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:00Z"
+    method: "git merge-base <two branches>; git rev-list --max-parents=0 <two branches>; comm -12 over their file listings"
+    evidence: >-
+      `git merge-base origin/claude/review-chat-archive-zrynr4
+      origin/claude/rag-system-data-pipeline-rdkde9` printed nothing and exited
+      1. `git rev-list --max-parents=0` returned both branch heads themselves
+      (e37b4c2 and 1d7ce8f), so each branch is its own root commit and the two
+      share no ancestry. Their file listings overlap on exactly two paths:
+      .gitignore and README.md.
+
+  - id: BRANCHES-ABSENT-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:00Z"
+    method: "git ls-remote origin <branch> on both remotes"
+    evidence: >-
+      claude/blind-testing-ooda-5o3s67 and claude/go-page-ultrathink-ooda-kqxvnc
+      returned no refs on either remote. The `claude-ai` remote carried exactly
+      one branch, claude/review-chat-archive-zrynr4.
+
+  - id: GOAL-COVERAGE-2026-08-27
+    kind: api
+    collected_at: "2026-08-27T15:06Z"
+    method: "python3 over provenance/raw/sessions-2026-08-27T14-27Z.json, reading goal_condition per session"
+    evidence: >-
+      goal_condition is populated for exactly two of the four sessions:
+      "Claude chat archive review" and "RAG system and data pipeline". It is
+      null for "Blind testing and OODA analysis" and "Go page review and
+      ultrathink OODA". Of the three sibling sessions, only one has a goal on
+      record.
+
+  # --- Boris Cherny corpus, collected 2026-08-27 ---------------------------
+
+  - id: CHERNY-IDENTITY-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:01Z"
+    method: 'WebSearch(query="Boris Cherny Claude Code creator")'
+    evidence: provenance/raw/cherny/websearch-2026-08-27.md
+    note: >-
+      Establishes that the person the owner referred to as "borris churney" is
+      Boris Cherny, handle @bcherny, creator and head of Claude Code at
+      Anthropic. The name resolution is an inference from phonetic similarity
+      plus subject matter, not a statement by the owner; see unknowns U-7.
+
+  - id: EGRESS-BLOCKED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:03Z"
+    method: >-
+      curl -s -o /dev/null -w '%{http_code}' against ten candidate domains;
+      WebFetch("https://www.anthropic.com/engineering/claude-code-best-practices")
+    evidence: >-
+      WebFetch returned {"error_type":"EGRESS_BLOCKED","domain":"www.anthropic.com"}.
+      curl returned 000 (no connection) for x.com, www.ycombinator.com,
+      news.ycombinator.com, newsletter.pragmaticengineer.com,
+      howborisusesclaudecode.com, medium.com, substack.com and
+      gist.githubusercontent.com; 301 for docs.claude.com and
+      raw.githubusercontent.com; 302 for code.claude.com; 200 for api.github.com.
+    note: >-
+      Consequence: Cherny's own X posts and every long-form interview about him
+      were unreachable from this container. No claim in the corpus rests on a
+      page that was not actually read.
+
+  - id: CHERNY-TIPS-REPO-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:09Z"
+    method: >-
+      GIT_LFS_SKIP_SMUDGE=1 git clone --depth 1
+      https://github.com/shanraisshan/claude-code-best-practice
+      (HEAD 02cdbc6bc42adcebc72e0affb8293972c72799c0); seven tips/claude-boris-*.md
+      files read in full and copied verbatim into provenance/raw/cherny/
+    evidence: provenance/raw/cherny/
+    note: >-
+      A THIRD-PARTY COMPILATION, not a primary source. Shayan Raisshan
+      transcribes Cherny's X threads into Markdown and links each tip to the
+      status URL it came from. Seven dated collections totalling 60 tips:
+      13 (2026-01-03), 10 (2026-02-01), 12 (2026-02-12), 2 (2026-03-10),
+      2 (2026-03-25), 15 (2026-03-30), 6 (2026-04-16). The linked x.com
+      originals could not be opened from here, so the compiler's fidelity is
+      established only for the single tip spot-checked against its screenshot
+      (CHERNY-TWEET13-SCREENSHOT-2026-08-27). Some files also carry the
+      compiler's own explanatory commentary alongside the transcription; where
+      the two are not separable, the corpus attributes the claim to the
+      compilation rather than to Cherny.
+
+  - id: CHERNY-TWEET13-SCREENSHOT-2026-08-27
+    kind: filesystem
+    collected_at: "2026-08-27T15:10Z"
+    method: >-
+      Read(tips/assets/boris-26-1-3/13.png) in the cloned compilation — a
+      screenshot of the original X post, read as an image and compared against
+      the compilation's transcription of the same tip
+    evidence: >-
+      Screenshot shows "Boris Cherny @bcherny" and the text: "13/ A final tip:
+      probably the most important thing to get great results out of Claude Code
+      -- give Claude a way to verify its work. If Claude has that feedback loop,
+      it will 2-3x the quality of the final result. // Claude tests every single
+      change I land to claude.ai/code using the Claude Chrome extension. It
+      opens a browser, tests the UI, and iterates until the code works and the
+      UX feels good. // Verification looks different for each domain. It might
+      be as simple as running a bash command, or running a test suite, or
+      testing the app in a browser or phone simulator. Make sure to invest in
+      making this rock-solid."
+    note: >-
+      Fidelity check on 1 of 60 tips. The transcription is faithful in substance
+      but ABRIDGED — it renders the second paragraph as "Claude tests every
+      single change Boris lands" and drops the third entirely. So: the
+      compilation understates rather than embellishes, on this sample of one.
+      One tip checked is not the collection verified; see unknowns U-8.
+
+  - id: CHERNY-SEARCH-SETUP-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:05Z"
+    method: >-
+      WebSearch(query="Boris Cherny how he uses Claude Code CLAUDE.md plan mode
+      parallel instances git worktrees tips"); WebSearch(query="Boris Cherny
+      Claude Code tips prompting be specific context /clear escape interrupt
+      course correct"); WebSearch(query="Boris Cherny Claude Code does he use
+      subagents hooks MCP custom slash commands vanilla setup")
+    evidence: provenance/raw/cherny/websearch-2026-08-27.md
+    note: >-
+      Search-engine summaries of pages that could not be fetched. Second-hand
+      throughout. Used only to corroborate claims that the compilation states
+      independently, and to surface the checkouts-versus-worktrees disagreement
+      recorded in the raw capture.
+
+  - id: DOCS-MEMORY-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:04Z"
+    method: 'WebFetch("https://code.claude.com/docs/en/memory")'
+    evidence: >-
+      Page states: "CLAUDE.md files are markdown files that give Claude
+      persistent instructions"; load order is managed policy, then user
+      (~/.claude/CLAUDE.md), then project (./CLAUDE.md or ./.claude/CLAUDE.md),
+      then local (./CLAUDE.local.md); "Size: target under 200 lines per
+      CLAUDE.md file. Longer files consume more context and reduce adherence.";
+      imports use "@path/to/import" syntax "with a maximum depth of four hops";
+      "CLAUDE.md content is delivered as a user message after the system prompt,
+      not as part of the system prompt itself"; ".claude/rules/" files accept a
+      `paths:` frontmatter field that scopes them to matching files; "To block
+      an action regardless of what Claude decides, use a PreToolUse hook
+      instead."
+    note: First-party documentation, fetched and read directly. Verified.
+
+  - id: DOCS-SUBAGENTS-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:04Z"
+    method: 'WebFetch("https://code.claude.com/docs/en/sub-agents")'
+    evidence: >-
+      Page states subagents are "specialized AI assistants that handle specific
+      types of tasks"; each runs with its own context window, custom system
+      prompt and tool access; files live in .claude/agents/ (project) or
+      ~/.claude/agents/ (user) with YAML frontmatter whose only required fields
+      are `name` and `description`, plus optional `tools`, `disallowedTools`,
+      `model`, `permissionMode`, `skills`, `memory`, `background`, `isolation`.
+      Stated best practices, verbatim: "Design focused subagents: each subagent
+      should excel at one specific task"; "Write detailed descriptions: Claude
+      uses the description to decide when to delegate"; "Limit tool access:
+      grant only necessary permissions for security and focus"; "Check into
+      version control: share project subagents with your team". Also: "A
+      subagent doesn't see your conversation history, the skills you've already
+      invoked, or the files Claude has already read."
+    note: First-party documentation, fetched and read directly. Verified.
+
+  - id: OODARAG-NO-CLI-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:03Z"
+    method: >-
+      PYTHONPATH=src python3 -c "import oodarag.cli"; make demo; ls internal/
+    evidence: >-
+      "ModuleNotFoundError: No module named 'oodarag.cli'". `make demo` failed
+      with "/usr/local/bin/python3: No module named oodarag.cli" and exited 2.
+      `ls internal/` returned "No such file or directory".
+    note: >-
+      On this branch the Makefile advertises demo, index, query, eval and loop
+      targets that all invoke `python3 -m oodarag.cli`, and README.md points at
+      `internal/PLAN.md`. Neither exists. Recorded as observed state of
+      inherited code; not repaired by this session, which changed no code under
+      src/.
+
+  - id: DOCS-BESTPRACTICES-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:14Z"
+    method: 'WebFetch("https://code.claude.com/docs/en/best-practices")'
+    evidence: >-
+      Page states, verbatim: "Most best practices are based on one constraint:
+      Claude's context window fills up fast, and performance degrades as it
+      fills." Its first section is titled "Give Claude a way to verify its
+      work" and reads: "Claude stops when the work looks done. Without a check
+      it can run, 'looks done' is the only signal available, and you become the
+      verification loop: every mistake waits for you to notice it." It lists
+      four escalating gates, verbatim: "In one prompt", "Across a session" (a
+      /goal condition, where "A separate evaluator re-checks it after every
+      turn"), "As a deterministic gate" (a Stop hook that "blocks the turn from
+      ending until it passes"), and "By a second opinion" (a verification
+      subagent, "so the agent doing the work isn't the one grading it"). Also:
+      "Have Claude show evidence rather than asserting success". On CLAUDE.md:
+      "For each line, ask: 'Would removing this cause Claude to make mistakes?'
+      If not, cut it." On review: "A reviewer prompted to find gaps will
+      usually report some, even when the work is sound, because that is what it
+      was asked to do."
+    note: >-
+      First-party documentation, fetched and read directly by this session.
+      Verified. Independently corroborates the central claim of the Cherny
+      corpus without going through the compilation.
+
+  - id: DOCS-WORKFLOWS-SUBAGENT-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:12Z"
+    method: >-
+      Agent(subagent) tasked to fetch code.claude.com/docs/en/{common-workflows,
+      context-window,worktrees}; it additionally fetched best-practices,
+      permission-modes and checkpointing and reported back
+    evidence: >-
+      Subagent reported: worktrees are created with `claude --worktree <name>`
+      under `.claude/worktrees/<name>/` on a branch `worktree-<name>`; a
+      subagent frontmatter field `isolation: worktree` runs an agent in its own
+      worktree; `/batch <instruction>` splits a change "across 5 to 30
+      subagents", each in its own worktree opening a pull request; plan mode is
+      entered with Shift+Tab or `claude --permission-mode plan`; the four-phase
+      workflow is named "Explore first, then plan, then code" with steps
+      Explore, Plan, Implement, Commit. It reported that the strings
+      "explore-plan-code-commit", "TDD" and "safe YOLO mode" do NOT appear as
+      named workflows in the current documentation.
+    note: >-
+      SECOND-HAND. This is a subagent's report of pages it read, not pages this
+      session read. The parts of it that the corpus leans on were independently
+      re-fetched by this session and are cited to
+      DOCS-BESTPRACTICES-2026-08-27 instead. Retained here because its negative
+      finding — that three widely-repeated workflow names are absent from
+      current docs — is load-bearing for what the corpus does NOT claim.
+
+  - id: REPO-STATE-VERIFY-HOOKS-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:02Z"
+    method: >-
+      cat .claude/settings.json; python3 tools/verify_provenance.py;
+      bash tests/run_all.sh
+    evidence: >-
+      .claude/settings.json registers a PostToolUse hook matching "Write|Edit"
+      that runs `python3 tools/verify_provenance.py`, a SessionStart hook that
+      prints the doctrine summary and runs the same verifier, and a Stop hook
+      that runs `bash tests/run_all.sh`. On this branch the verifier exited 0
+      ("OK - 20 file(s), 16 source(s), 0 violations") and the suite printed
+      "ALL CHECKS PASSED".
+    note: >-
+      Recorded because it establishes that the deterministic-gate form of the
+      corpus's central practice already existed in this repository before the
+      corpus was collected. The convergence is a finding, not a design goal
+      chosen after the fact.
+
+  - id: DOCS-SKILLS-HOOKS-SUBAGENT-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:16Z"
+    method: >-
+      Agent(subagent) tasked to fetch code.claude.com/docs/en/{slash-commands,
+      skills,hooks-guide} and report their mechanics verbatim
+    evidence: >-
+      Subagent reported that /docs/en/slash-commands is not a distinct page: it
+      serves the Skills page, with canonical URL /docs/en/skills, and quotes the
+      page as stating "Custom commands have been merged into skills. A file at
+      `.claude/commands/deploy.md` and a skill at `.claude/skills/deploy/SKILL.md`
+      both create `/deploy` and work the same way. Your existing
+      `.claude/commands/` files keep working." It further reported the skills
+      guidance "Keep SKILL.md under 500 lines", the trigger for creating one
+      ("when a section of CLAUDE.md has grown into a procedure rather than a
+      fact"), and the hooks framing that hooks give "deterministic control:
+      certain actions always happen rather than relying on the LLM to choose to
+      run them".
+    note: >-
+      SECOND-HAND — a subagent's report, not pages this session read. Used only
+      for design decisions about how to package the installation (skill versus
+      command), not as the basis of any claim about Cherny. The one operative
+      consequence — that existing .claude/commands/ files keep working — was
+      acted on conservatively by keeping them and adding a skill alongside.
+
+  - id: CHERNY-OWN-DRAFT-2025-04-13
+    kind: tool_output
+    collected_at: "2026-08-27T15:22Z"
+    method: >-
+      curl -sS "https://raw.githubusercontent.com/bcherny/bcherny.github.io/main/_drafts/Tips-for-Using-Claude-Code.md"
+      (18,046 bytes), fetched and read in full by this session
+    evidence: provenance/raw/cherny/bcherny-tips-draft-2025-04-13.md
+    note: >-
+      PRIMARY. Boris Cherny's own words, in his own blog repository
+      (bcherny/bcherny.github.io), front matter dated 2025-04-13. It opens "I
+      created Claude Code as a research project". It is an UNPUBLISHED DRAFT
+      sitting in _drafts/, and visibly unfinished: section 3a is duplicated,
+      section 2 runs a-b-c-g-b-d-e-f out of order, and eight subsections
+      ("Use Claude to lint", "Use Claude for code review", all five Multi-Claude
+      subsections, "Local prompts") are headings with no body. Nothing may be
+      inferred from those empty headings — they are labels, not content. Dated
+      over a year before the 2026 tip threads, so it is the earliest primary
+      material here and is superseded on at least one point; see
+      CHERNY-PERMISSIONS-REVERSAL-2026-08-27.
+
+  - id: CHERNY-PERMISSIONS-REVERSAL-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:22Z"
+    method: >-
+      direct comparison of provenance/raw/cherny/bcherny-tips-draft-2025-04-13.md
+      section 2g against provenance/raw/cherny/claude-boris-13-tips-03-jan-26.md
+      tip 10
+    evidence: >-
+      2025-04-13 draft, section "2g. Safe yolo mode": "Instead of babysitting
+      Claude, you can use `claude --dangerously-skip-permissions` to bypass all
+      permission checks and let Claude keep going until it produces a result."
+      2026-01-03 tips, tip 10: "Don't use `--dangerously-skip-permissions`.
+      Instead, use `/permissions` to pre-allow common bash commands that you
+      know are safe in your environment". The 2026-04-16 tips then describe auto
+      mode, routing permission prompts to a model-based classifier, as "a safer
+      alternative" to that flag.
+    note: >-
+      A reversal in the same author's advice across roughly 21 months, both ends
+      sourced. Recorded because a corpus assembled from undated fragments would
+      have presented these as simultaneous and contradictory guidance.
+
+  - id: SESSION-SELF-2026-08-27
+    kind: api
+    collected_at: "2026-08-27T15:24Z"
+    method: "mcp__Claude_Code_Remote__get_session(session_id omitted, i.e. this session)"
+    evidence: >-
+      Returned id session_01FXG7QRcwJ7PiYoH5QU7QsR, created 2026-08-27T15:00:53Z,
+      environment env_01GEni7AgBA7NiyMBecyt7K1, model claude-opus-5 with
+      last_served_model claude-opus-5, effort_level xhigh, permission_mode auto,
+      origin web_claude_ai, container_cc_version 2.1.247. Sources: both
+      turkertekten-ship-it/claude and turkertekten-ship-it/claude-ai; outcome
+      branch claude/great-euler-6tx6y6 in both. Goal condition recorded as
+      "install use and utilize all of the borris churney material you can find
+      and use it for all my prompts systems and chats ooda use workflows and
+      subagents".
+    note: >-
+      A fifth session, created after the 14:27Z roster snapshot in FLEET.md was
+      taken. Recorded so the roster is not silently stale.
