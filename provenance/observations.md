@@ -91,6 +91,14 @@ reading it would establish what was built, never what was discussed or decided.
 Everything downstream of this file is built on that record alone. The chat
 contents were not reconstructed, summarised, or guessed at.
 
+## Observed — what the fleet actually built
+
+- The `claude` remote carries 12 branches, up from 2 at 15:00Z, ranging from 25 to 93 files each. [src:FLEET-BRANCHES-2026-08-27]
+- All four sibling branches checked descend from the doctrine root `e37b4c2`, so the fleet has converged on one history and the unrelated-histories hazard no longer describes it; only the oodarag pipeline arrived as a separate root. [src:FLEET-BRANCHES-2026-08-27]
+- Four sibling branches carry skills existing nowhere else: `cherny` with a sourced practice corpus, `prompt-forge` with a seven-slot prompt spec, `workbench` with a 10-module Python package for blind variant comparison, and an `/ultrareview` closing gate. [src:FLEET-SKILLS-2026-08-27]
+- Of the 12 branches, only this session's vendors skills from outside the account, so the find-install-route overlap between sessions is in mandate rather than in output. [src:FLEET-SKILLS-2026-08-27]
+- A trial merge of one sibling branch conflicted on 7 files and produced two different questions sharing the id `U-7`, because unknown ids are allocated per branch with no shared counter; the merge was aborted rather than resolved. [src:LEDGER-ID-COLLISION-2026-08-27]
+
 ## Observed — the owner's own files
 
 > Framing, not a claim: titles and metadata only. No file content was opened.

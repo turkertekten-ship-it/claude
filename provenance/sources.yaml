@@ -422,3 +422,64 @@ sources:
     note: >-
       Verified by this session directly. U-1 and U-2 stand on this session's
       own check, not only on the earlier one.
+
+  - id: FLEET-BRANCHES-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:55Z"
+    method: "git ls-remote --heads origin (both repos); git fetch '+refs/heads/*:refs/remotes/origin/*'; git ls-tree -r --name-only per branch; git merge-base --is-ancestor e37b4c2 <branch>"
+    evidence: >-
+      The `claude` remote carries 12 branches, up from 2 at 15:00Z; `claude-ai`
+      carries 5. File counts per branch on `claude` range from 25
+      (goal-prompt-task-division) to 93 (blind-testing-ooda). All four branches
+      checked - great-euler-6tx6y6, session-y42cyg,
+      code-playground-parity-xw0snj and reverse-engineer-chat-setup-husv9h -
+      return true for `git merge-base --is-ancestor e37b4c2`, so they descend
+      from the doctrine root rather than being independent roots.
+    note: >-
+      This supersedes UNRELATED-HISTORIES-2026-08-27 as a description of the
+      fleet as a whole. That finding remains true of the two branches it was
+      measured on; it is no longer true of the fleet, which has converged on
+      the doctrine root. Only the oodarag pipeline arrived as a separate root.
+
+  - id: FLEET-SKILLS-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:56Z"
+    method: "git ls-tree -r --name-only origin/claude/<branch> filtered to .claude/{skills,agents,commands}/; git show of each SKILL.md front matter"
+    evidence: >-
+      Four sibling branches carry skills that no other branch has, each read
+      first-hand rather than inferred from its name.
+      great-euler-6tx6y6@5c27418: `.claude/skills/cherny` plus
+      `docs/cherny-practice.md`, an agent `verifier` and a command
+      `/verify-loop`; its SKILL.md describes the Boris Cherny practice set and
+      leads with "Give Claude a way to verify its work before you give it the
+      work."
+      session-y42cyg@8b59cd6: `.claude/skills/prompt-forge`, an agent
+      `prompt-critic`, commands `/prompt` and `/prompt-audit`; a seven-slot
+      prompt specification with a linter and an adversarial reading pass.
+      code-playground-parity-xw0snj@2794c4a: `.claude/skills/workbench` plus a
+      `workbench/` Python package of 10 modules, an agent `blind-judge` and
+      commands `/ab` and `/wb-doctor`; blind pairwise variant comparison with
+      significance, declaring `allowed-tools`.
+      reverse-engineer-chat-setup-husv9h@abed75a: a command `/ultrareview`
+      described as "The closing gate... Work is finished when the data checkers
+      pass, not when the diff looks convincing."
+      Of the 12 branches, only this session's carries skills vendored from
+      outside the account.
+
+  - id: LEDGER-ID-COLLISION-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:58Z"
+    method: "git merge --no-commit --no-ff origin/claude/great-euler-6tx6y6, then inspection of the conflicted provenance/unknowns.md; merge aborted"
+    evidence: >-
+      The trial merge conflicted on 7 files (.gitignore, CLAUDE.md, FLEET.md,
+      README.md, docs/workflows.md, provenance/observations.md,
+      provenance/sources.yaml). In the merged unknowns register two different
+      questions both occupy the id U-7: this branch's "Whether a YouTube Data
+      API key is available to this account" and great-euler's "Whether 'borris
+      churney' designates Boris Cherny".
+    note: >-
+      Unknown ids are allocated per branch with no shared counter, so any two
+      sessions adding an unknown at the same time collide. The merge was
+      aborted rather than resolved: silently merging two ledgers that disagree
+      about what an id means is the failure CLAUDE.md names - two copies of a
+      rule set become two different rule sets.

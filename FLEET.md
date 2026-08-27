@@ -46,9 +46,19 @@ One case is already concrete rather than theoretical: `…Rj2vRw` reports it is
 "probing YouTube Data API", which is the probe this session ran between 15:02Z
 and 15:10Z. [src:FLEET-OVERLAP-2026-08-27]
 
-> Framing, not a claim: the practical consequence is that `.claude/skills/`
-> is about to be written by four sessions with four different opinions, on
-> four branches that share no ancestry.
+**Corrected at 15:56Z.** That overlap turned out to be in the mandate, not in
+the output. Reading all 12 branches shows the other sessions *wrote* original
+skills — `cherny`, `prompt-forge`, `workbench` — while this session is the only
+one vendoring skills from outside the account [src:FLEET-SKILLS-2026-08-27].
+The work is complementary, and the earlier warning below overstated the risk.
+
+What is real is the *integration* problem: those skills each exist on one
+branch only, and nothing merges them. See the fleet table in
+[SKILLS.md](SKILLS.md).
+
+> Framing, not a claim: the earlier reading was that four sessions were about
+> to write `.claude/skills/` four different ways. What actually happened is
+> that they wrote four different things and none of them can see the others.
 
 What to do about it, in order of cost:
 

@@ -33,6 +33,36 @@ Both Ailog skills were modified on the way in: front matter added so they
 index at all, and a vendor-steer note appended. Each says so at its own
 foot. The bodies are otherwise upstream's.
 
+## Built by the fleet — routable, deliberately not merged here
+
+Other sessions wrote skills that exist nowhere else. Each was read first-hand
+at the commit named; none was inferred from its name. [src:FLEET-SKILLS-2026-08-27]
+
+| Skill | Branch @ commit | What it actually does |
+|---|---|---|
+| `cherny` (+ `verifier` agent, `/verify-loop`) | `great-euler-6tx6y6@5c27418` | The Boris Cherny practice set, over a sourced corpus in `docs/cherny-practice.md`. Its rule: give Claude a way to verify the work before giving it the work. |
+| `prompt-forge` (+ `prompt-critic`, `/prompt`, `/prompt-audit`) | `session-y42cyg@8b59cd6` | A seven-slot prompt specification with a linter and an adversarial reading pass — treats a bad result as a specification failure, not a model failure. |
+| `workbench` (+ `blind-judge`, `/ab`, `/wb-doctor`) | `code-playground-parity-xw0snj@2794c4a` | Blind pairwise comparison of prompt or config variants, with significance. Ships a 10-module Python package, so it does not travel as a lone `SKILL.md`. |
+| `/ultrareview` | `reverse-engineer-chat-setup-husv9h@abed75a` | The closing gate: re-verify provenance, tests and the diff before work is called finished. |
+
+**Why they are listed rather than merged.** All four descend from the doctrine
+root, so they *can* be merged [src:FLEET-BRANCHES-2026-08-27] — a trial merge
+of one was run and then abandoned. It conflicted on seven files, and in the
+merged unknowns register two different questions both claimed the id `U-7`
+[src:LEDGER-ID-COLLISION-2026-08-27]. Merging ledgers that disagree about what
+an id means produces exactly the failure `CLAUDE.md` names: two copies of a
+rule set becoming two different rule sets. Which branch becomes the integration
+branch is the owner's call, not a session's.
+
+> Framing, not a claim: the practical effect is that `cherny`, `prompt-forge`
+> and `workbench` are each usable only by the session that wrote them until
+> someone decides where they land.
+
+**Unknown ids need a shared allocator.** They are handed out per branch with no
+common counter, so any two sessions opening a question at the same time collide
+[src:LEDGER-ID-COLLISION-2026-08-27]. Prefixing by branch (`U-dxmflq-1`) or by
+timestamp would remove the class of problem entirely.
+
 ## Routing table
 
 Match the work in hand to the left column.
@@ -45,6 +75,10 @@ Match the work in hand to the left column.
 | giving another session programmatic access to the index | `mcp-builder` | Sibling sessions run in separate containers and cannot read each other. |
 | ingesting a contract or deal document | `chunking-advisor`, Legal/Contracts branch | The owner's own corpus is a numbered transaction set; clauses are the unit of meaning, not sections. See [docs/design/chunking.md](docs/design/chunking.md). |
 | writing an ADR, a spec, or a sectioned guide | `doc-coauthoring` | Structured co-authoring rather than a wall of generated prose. |
+| setting up how a task will be worked, or about to trust unchecked output | `cherny` *(fleet)* | Builds the check before the work, so "it looks done" stops being the completion signal. |
+| writing or rewriting any prompt, or briefing a subagent | `prompt-forge` *(fleet)* | Most disappointing output is a specification failure; this makes the gaps visible instead of guessed. |
+| claiming one prompt or config is better than another | `workbench` *(fleet)* | You wrote the new one, so of course it reads better. Measure it blind. |
+| calling a branch finished | `/ultrareview` *(fleet)* | A review that only reads the code has not checked the claims. |
 | about to write a claim you have not checked | `/fact-check`, then `unknowns.md` | The claim is not ready to be written down. |
 | wondering what this container can reach | `tools/probe_egress.py` | Measured in seconds; guessed at for hours. |
 
