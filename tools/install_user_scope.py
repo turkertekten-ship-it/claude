@@ -54,6 +54,8 @@ COPY: list[tuple[str, str]] = [
     (".claude/skills/ooda/SKILL.md", "skills/ooda/SKILL.md"),
     (".claude/agents/observer.md", "agents/observer.md"),
     (".claude/agents/fact-checker.md", "agents/fact-checker.md"),
+    (".claude/agents/zero-dep-enforcer.md", "agents/zero-dep-enforcer.md"),
+    (".claude/agents/retrieval-scientist.md", "agents/retrieval-scientist.md"),
     (".claude/commands/observe.md", "commands/observe.md"),
     (".claude/commands/ooda-loop.md", "commands/ooda-loop.md"),
     (".claude/commands/fact-check.md", "commands/fact-check.md"),

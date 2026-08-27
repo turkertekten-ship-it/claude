@@ -197,9 +197,16 @@ running the verifier, so it cannot report success over an unsourced claim.
 | `/ingest-chats [query]` | the real contents of the chat index, or that it is empty |
 | `/ultrareview [scope]` | the closing gate: every checker run, every claim re-audited |
 
-Two subagents exist to keep phases from collapsing into each other:
-`observer` enumerates and is given nowhere to put a conclusion; `fact-checker`
-audits documents it did not write. See `docs/workflows.md`.
+Four subagents exist, each to stop a rule from decaying into prose:
+
+| Subagent | Guards against |
+|---|---|
+| `observer` | Orient running on an empty Observe — it enumerates and has nowhere to put a conclusion |
+| `fact-checker` | A tag that resolves but does not support the claim attached to it |
+| `zero-dep-enforcer` | An import that quietly ends the pipeline's air-gapped and CI claims |
+| `retrieval-scientist` | A retrieval change argued rather than measured |
+
+See `docs/workflows.md`.
 
 **A subagent's report is second-hand.** It is another process's claim about
 what it saw, exactly like another session's status line. Verify anything

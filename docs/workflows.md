@@ -42,6 +42,19 @@ reports the lines that outrun their evidence. It catches what the verifier
 structurally cannot: whether a tag that *resolves* actually supports the
 specific claim attached to it.
 
+Those two guard the doctrine. Two more guard the pipeline, on the same
+principle — a rule nobody checks mechanically is a rule that decays.
+
+**`zero-dep-enforcer`** — greps every import in `src/` against
+`sys.stdlib_module_names` and confirms the test and demo paths still run with no
+network. The zero-dependency claim fails far from the commit that breaks it,
+which is precisely why a human reviewer misses it.
+
+**`retrieval-scientist`** — makes retrieval changes and settles them with
+`make eval` numbers before and after, one knob at a time. It is required to
+report what a change *cost* as well as what it bought, so a precision gain paid
+for in false abstentions cannot be presented as free.
+
 ## How they fit together
 
 ```
