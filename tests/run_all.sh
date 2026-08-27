@@ -14,6 +14,9 @@ run python3 tools/verify_provenance.py
 run python3 tests/test_verify_provenance.py
 run python3 tests/test_ingest_chat_archive.py
 run python3 tests/test_workbench.py
+# Offline half of the parity conformance harness. The live half costs
+# money, so it is run deliberately: python3 tools/parity_check.py
+run python3 tools/parity_check.py --offline
 
 if [ "$status" -eq 0 ]; then
     echo "ALL CHECKS PASSED"

@@ -353,3 +353,37 @@ sources:
       Undocumented means unsupported: these may change without notice. The
       workbench uses them and `workbench doctor` labels them as undocumented
       rather than presenting them as a stable interface.
+
+  - id: PARITY-CONFORMANCE-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T16:05Z"
+    method: "python3 tools/parity_check.py — every capability exercised against the live backend"
+    evidence: provenance/raw/parity-conformance-2026-08-27.txt
+    note: >-
+      18 passed, 1 failed, 4 unreachable, $0.021. Passing includes: a replaced
+      system prompt taking effect, model selection resolving to the requested
+      canonical model, effort changing the thinking-token count, the
+      undocumented thinking flags working, structured output conforming to a
+      supplied schema, tool availability control, request inspection before
+      sending, provider-reported token and cost accounting, the eval grid, the
+      position swap catching a purely positional judge, the identical-pair
+      blinding control discriminating, significance testing, outcome grading by
+      exit code, export to `claude plugin eval`, and both first-party tools
+      being present.
+
+  - id: MAX-OUTPUT-TOKENS-NOT-HONOURED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T16:02Z"
+    method: >-
+      CLAUDE_CODE_MAX_OUTPUT_TOKENS set to 32, 64, 512 and 4096 across otherwise
+      identical `claude -p` calls asking for a long enumeration
+    evidence: >-
+      output_tokens came back 128, 256, 976 and 894 respectively -- exceeding
+      the ceiling at every setting -- and the backend reported
+      modelUsage.maxOutputTokens = 32000 unchanged in all four runs.
+    note: >-
+      The variable is documented as controlling output length; it did not do so
+      in this container. The workbench still sends it, because it may work
+      elsewhere, and tools/parity_check.py records it as a FAIL, because here it
+      does not. This is the one row in docs/parity.md that an executed matrix
+      caught and a written one would not have.

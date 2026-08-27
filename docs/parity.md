@@ -99,7 +99,7 @@ Legend: **CC** = stock Claude Code; **WB** = this repository's `workbench/`.
 | Effort | yes | `--effort` | per variant |
 | Extended thinking | yes | `--effort`, plus undocumented `--thinking` / `--max-thinking-tokens` | per variant |
 | `temperature` / `top_p` / `top_k` | rejected by current models | no flag | deliberately not built |
-| `max_tokens` | yes | `CLAUDE_CODE_MAX_OUTPUT_TOKENS` | per variant |
+| `max_tokens` | yes | `CLAUDE_CODE_MAX_OUTPUT_TOKENS` — **not honoured here** | sent, no observed effect |
 | `stop_sequences` | yes | no flag | not reachable without an API key |
 | Structured output schema | yes | `--json-schema` | per variant |
 | Tool definitions | yes | `--tools`, MCP | per variant, on/off |
@@ -213,9 +213,18 @@ Two further findings from the same paper shape the implementation:
   `claude --help` is not a complete inventory of accepted flags: probing the
   parser directly turned up `--thinking`, `--max-thinking-tokens` and
   `--task-budget`, none of which appear in the help text, and the documented
-  `CLAUDE_CODE_MAX_OUTPUT_TOKENS` covers output length. Thinking control and an
-  output-token cap are now wired through per variant. The lesson is worth
-  keeping: absence from `--help` is not absence from the parser.
+  `CLAUDE_CODE_MAX_OUTPUT_TOKENS` is documented as covering output length.
+  Thinking control is wired through per variant and verified working. The
+  lesson is worth keeping: absence from `--help` is not absence from the parser.
+
+- **An output-token cap.** `CLAUDE_CODE_MAX_OUTPUT_TOKENS` is plumbed through
+  per variant, and `tools/parity_check.py` records it as **FAIL**: measured at
+  32, 64, 512 and 4096 it never changed the ceiling the backend reported
+  (`maxOutputTokens` stayed 32000) and the output exceeded the cap every time.
+  The variable is documented; it did not work in this container. The plumbing
+  stays because it may work elsewhere, the conformance harness stays red
+  because here it does not, and this row is the reason a matrix should be
+  executed rather than believed.
 - **The Batch API's 50% discount.** ([pricing](https://platform.claude.com/docs/en/about-claude/pricing))
   Real money for a large sweep, and unreachable without an API key.
 - **`count_tokens` before sending.** The endpoint exists

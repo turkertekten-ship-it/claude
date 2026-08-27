@@ -18,7 +18,14 @@ So: never assert one variant is better than another from reading them. Measure.
 
 ```bash
 python3 -m workbench doctor
+python3 tools/parity_check.py --offline   # free; drop --offline to spend ~$0.02
 ```
+
+`parity_check.py` executes the capability matrix rather than asserting it, and
+tells you which capabilities are exercised-and-working, which are broken, and
+which cannot be reached here at all. If someone asks whether Claude Code can do
+what a playground does, run it and read the output — do not answer from
+`docs/parity.md`, which is the claim, not the evidence.
 
 It reports which backends exist here, whether `claude plugin eval` is
 available, and — importantly — what cannot be controlled. Sampling parameters

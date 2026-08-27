@@ -1,0 +1,54 @@
+Parity conformance — executed, not asserted
+========================================================================
+[PASS] System prompt replaces the default
+       the replaced system prompt took effect: asked for a designation, got 'LIGHTHOUSE-7'
+[PASS] {{variable}} templating
+       rendered 'Hello A, you are B.'; unfilled placeholder raises
+[PASS] Prompt versions are diffable artifacts
+       doctrine-adherence.yaml has 3 revision(s) in git history; a saved prompt in a console cannot be diffed or reverted
+[PASS] Model selection
+       requested claude-haiku-4-5, backend reported canonicalModel='claude-haiku-4-5'
+[PASS] Effort control changes work done
+       thinking tokens: low=232, high=226
+[PASS] Thinking budget (undocumented flag)
+       --thinking/--max-thinking-tokens accepted and the call succeeded
+[FAIL] Max output tokens
+       CLAUDE_CODE_MAX_OUTPUT_TOKENS=64 -> output_tokens=256, backend still reports maxOutputTokens=32000, stop_reason='stop_sequence'. The variable is documented but was NOT honoured in this container; measured at 32/64/512/4096 it never changed the reported ceiling.
+[----] temperature / top_p / top_k
+       no CLI flag (--temperature rejected, --top-p rejected, --top-k rejected) and on models after Opus 4.6 the API rejects them with a 400. Removed from the platform, not missing from this tool.
+[----] stop_sequences
+       supported by the Messages API but exposed by no CLI flag, and this container has no ANTHROPIC_API_KEY to call the API directly
+[PASS] Structured output against a schema
+       structured_output={"city": "Paris", "population": 2161000}; schema errors: none
+[PASS] Tool availability is controllable
+       --tools "" produced a single-turn response (num_turns=1), i.e. no tool loop
+[PASS] Request is inspectable before sending
+       `workbench plan` resolved every request without sending: 18 model call(s) would be made.
+[PASS] Token counts and cost are reported
+       in=248 out=71 cost=$0.001545 — provider-reported, not estimated from a price table
+[----] count_tokens before sending
+       /v1/messages/count_tokens exists but needs an ANTHROPIC_API_KEY, which this container does not have
+[----] Batch API 50% discount
+       /v1/messages/batches needs an ANTHROPIC_API_KEY; real money for a large sweep and genuinely absent here
+[PASS] Eval grid over test cases
+       3 variants x 6 cases graded offline on the echo backend
+[PASS] Blind comparison with position swap
+       a judge that always picks the first candidate was correctly downgraded to 'TIE' (agreed=False) — the swap caught it
+[PASS] Identical-pair blinding control
+       a tying judge passes the control and a judge that picks a winner between two identical candidates fails it
+[PASS] Significance testing
+       4-2 -> p=0.688 (not significant), 10-0 -> p=0.0020 (significant), 4/4 -> CI [0.510, 1.000]; ~47 pairs needed for a 70/30 effect
+[PASS] Grade by shell command (outcome-based)
+       the repository's own fabrication guard passed an honest answer and failed an invented one, by exit code
+[PASS] Export to claude plugin eval
+       emitted 6 case(s) and 12 grader file(s) in the format `claude plugin eval` reads
+[PASS] claude plugin eval is available
+       present and runnable; its ablation is with-plugin vs without-plugin, not N prompt variants
+[PASS] skill-creator is available
+       first-party blind comparator at /mnt/skills/examples/skill-creator: withholds which skill produced which output, and its protocol describes a single fixed-order judgement — use it for skills; use this workbench when the comparison needs the swap, more than two variants, or a p-value
+========================================================================
+18 passed, 1 failed, 4 unreachable — $0.0202, 63s
+
+Unreachable is not a softer failure. Those capabilities either need
+an API key this container does not have, or were removed from the
+platform and cannot be exercised anywhere.
