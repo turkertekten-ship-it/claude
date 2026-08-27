@@ -38,7 +38,7 @@ from workbench.graders import (  # noqa: E402
 )
 from workbench.render import render, variables_in  # noqa: E402
 from workbench.report import markdown  # noqa: E402
-from workbench.runner import execute  # noqa: E402
+from workbench.runner import _prepare_workdir, execute  # noqa: E402
 from workbench.spec import Grader, load_suite  # noqa: E402
 from workbench.stats import (  # noqa: E402
     bradley_terry, mcnemar, paired_table, required_pairs, sign_test,
@@ -464,6 +464,66 @@ cases:
     check("but it is still recorded", any(not v.passed for v in run.verdicts))
 
 
+def test_agent_mode_plumbing() -> None:
+    """Agent mode grades a directory, so the directory plumbing needs proving.
+
+    The echo backend cannot write files, so what is tested here is everything
+    around the model call: that a fixture is copied into a fresh scratch
+    directory, that setup commands run inside it, and that the filesystem
+    graders read that directory rather than the process's cwd.
+    """
+    print("\nagent mode -- the artifact is a directory, not a string")
+
+    fixture = Path(tempfile.mkdtemp(prefix="wb-fixture-")) / "seed"
+    fixture.mkdir()
+    (fixture / "given.txt").write_text("seeded content", encoding="utf-8")
+
+    suite_dir = Path(tempfile.mkdtemp(prefix="wb-agentsuite-"))
+    (suite_dir / "seed").mkdir()
+    (suite_dir / "seed" / "given.txt").write_text("seeded content", encoding="utf-8")
+    suite_path = suite_dir / "suite.yaml"
+    suite_path.write_text("""
+name: agentmode
+variants:
+  - id: v
+    mode: agent
+    fixture: seed
+    setup: ["mkdir -p made && echo produced > made/output.txt"]
+cases:
+  - id: c
+    prompt: 'do the thing'
+    graders: [{type: contains, value: x}]
+""", encoding="utf-8")
+    suite = load_suite(suite_path)
+    workdir = _prepare_workdir(suite, suite.cases[0], suite.variants[0])
+
+    check("the fixture is copied into the scratch directory",
+          (Path(workdir) / "given.txt").is_file())
+    check("the scratch directory is not the fixture itself",
+          Path(workdir).resolve() != (suite_dir / "seed").resolve())
+    check("setup commands run inside it",
+          (Path(workdir) / "made" / "output.txt").is_file())
+
+    ctx = ctx_for("irrelevant output")
+    ctx.workdir = workdir
+    found = run_grader(Grader("file_exists", {"path": "made/*.txt"}), ctx)
+    check("file_exists sees what the run produced", found.passed, found.detail)
+    missing = run_grader(Grader("file_exists", {"path": "absent/*.txt"}), ctx)
+    check("file_exists FAILS on a file that was not produced", not missing.passed)
+    contains = run_grader(
+        Grader("file_contains", {"path": "made/*.txt", "value": "produced"}), ctx)
+    check("file_contains reads the produced file", contains.passed, contains.detail)
+    absent = run_grader(
+        Grader("file_contains", {"path": "made/*.txt", "value": "nope"}), ctx)
+    check("file_contains FAILS when the text is not there", not absent.passed)
+
+    print("\n  filesystem graders must refuse to pass in text mode")
+    text_ctx = ctx_for("some text")
+    no_dir = run_grader(Grader("file_exists", {"path": "*.txt"}), text_ctx)
+    check("file_exists FAILS rather than passing without a working directory",
+          not no_dir.passed and "agent mode" in no_dir.detail, no_dir.detail)
+
+
 def test_registry_kinds() -> None:
     print("\ngrader taxonomy")
     kinds = dict(describe_registry())
@@ -485,6 +545,7 @@ def main() -> int:
     test_paired_outcomes()
     test_statistics()
     test_end_to_end()
+    test_agent_mode_plumbing()
     test_registry_kinds()
 
     print()
