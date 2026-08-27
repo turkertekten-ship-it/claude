@@ -21,6 +21,7 @@ from oodarag.reflect.detect.friction import (
     FrictionCorrection,
     FrictionReformulation,
     FrictionRepeatedInstruction,
+    _bullet,
     already_documented,
     normalize_instruction,
     stem_token,
@@ -431,7 +432,7 @@ class CorrectionTest(FrictionTestCase):
         self.assertEqual(list(FrictionCorrection().detect(self.context(signals))), [])
 
     def test_pure_annoyance_carries_no_preference(self) -> None:
-        """"no, wrong" is a mood, not an instruction: nothing to write down."""
+        """A bare "no, that's wrong" is a mood, not an instruction to record."""
         signals = corrected_session("no, that's wrong")
         self.assertEqual(list(FrictionCorrection().detect(self.context(signals))), [])
 
@@ -498,7 +499,7 @@ class HostileInputTest(FrictionTestCase):
     """Nothing in a transcript is trustworthy, and none of it may abort the run."""
 
     def hostile_signals(self) -> list[Signal]:
-        return [
+        junk = [
             prompt("", session="h", ts=T0, ordinal=0),
             prompt("   \n\n\t  ", session="h", ts=T0, ordinal=1),
             prompt("\x00\x01\x02", session="h", ts=T0, ordinal=2),
@@ -506,18 +507,25 @@ class HostileInputTest(FrictionTestCase):
             prompt("no, " + "x" * 20_000, session="h", ts=T0, ordinal=4),
             reply("", session="h", ts=T0, ordinal=5),
             prompt("no, ???!!! ***", session="h", ts=T0, ordinal=6),
-            # Same timestamp as everything else: ordering falls to `ordinal`.
-            prompt("always use ruff", session="h", ts=T0, ordinal=7),
-            prompt("```\nnot code but pasted anyway\n```", session="h", ts=T0, ordinal=8),
-            Signal(kind=KIND_PROMPT, source="chat:test", text="always use ruff", ts=0.0),
+            prompt("```\nnot code but pasted anyway\n```", session="h", ts=T0, ordinal=7),
+            # No session and no timestamp: the source could not tell us either.
+            Signal(kind=KIND_PROMPT, source="chat:test", text="?" * 300, ts=0.0),
             Signal(kind=KIND_REPLY, source="chat:test", text="ok", ts=0.0),
         ]
+        # One real, findable instruction buried in the junk, so the assertions
+        # below are about a rule that fired rather than about silence.
+        real = [
+            prompt("always use ruff for linting", session=s, ts=T0 + i * DAY, ordinal=9)
+            for i, s in enumerate(("h", "i", "j"))
+        ]
+        return junk + real
 
     def test_every_rule_survives_hostile_input(self) -> None:
         ctx = self.context(self.hostile_signals())
+        fired = 0
         for rule in (FrictionRepeatedInstruction(), FrictionReformulation(), FrictionCorrection()):
             findings = list(rule.detect(ctx))  # detect(), not run(): no safety net
-            self.assertIsInstance(findings, list)
+            fired += len(findings)
             for finding in findings:
                 self.assertTrue(finding.evidence, f"{rule.rule_id} produced an opinion")
                 self.assertTrue(0.0 <= finding.confidence <= 1.0)
@@ -525,6 +533,18 @@ class HostileInputTest(FrictionTestCase):
                     for edit in proposal.edits:
                         self.assertFalse(Path(edit.path).is_absolute())
                         self.assertNotIn("..", Path(edit.path).parts)
+        self.assertEqual(fired, 1)  # the buried instruction, and nothing the junk implied
+
+    def test_an_oversized_instruction_is_not_written_to_the_memory_file(self) -> None:
+        """A finding can be worth reporting and still be too long to be a bullet."""
+        essay = "always " + " ".join(f"consideration{i}" for i in range(80))
+        signals = [
+            prompt(essay, session=s, ts=T0 + i * DAY) for i, s in enumerate("abc")
+        ]
+        rule = FrictionRepeatedInstruction({"max_words": 200})
+        ctx = self.context(signals)
+        finding = list(rule.detect(ctx))[0]
+        self.assertEqual(list(rule.propose(finding, ctx)), [])
 
     def test_broken_config_falls_back_to_defaults(self) -> None:
         """Rule config is hand-written JSON; a quoted or bogus threshold is normal."""
@@ -546,3 +566,73 @@ class HostileInputTest(FrictionTestCase):
 
 if __name__ == "__main__":  # pragma: no cover
     unittest.main()
+
+
+class TestCorrectionMeaningIsPreserved(unittest.TestCase):
+    """A correction must never be written down as its own opposite.
+
+    These are regression tests for the worst bug this subsystem can have. The
+    marker list is used for two different jobs - deciding that a prompt is a
+    correction, and trimming the throat-clearing off the front of it - and the
+    words that do the first job are not all safe for the second. "don't" marks a
+    correction and is also the entire meaning of it.
+    """
+
+    def setUp(self) -> None:
+        self.rule = FrictionCorrection()
+
+    def instruction(self, text: str) -> str:
+        return self.rule.instruction_from(text)
+
+    def test_negation_survives_extraction(self) -> None:
+        cases = [
+            ("nope, don't force push. Use --force-with-lease instead.", "don't force push"),
+            ("wrong, do not commit the lockfile", "do not commit"),
+            ("no, never push to main - use a feature branch", "never push to main"),
+        ]
+        for raw, expected in cases:
+            with self.subTest(raw=raw):
+                got = self.instruction(raw).lower()
+                self.assertIn(expected, got)
+
+    def test_the_inverted_form_is_never_produced(self) -> None:
+        got = self.instruction("nope, don't force push. Use --force-with-lease instead.")
+        self.assertFalse(
+            got.lower().startswith("force push"),
+            f"the instruction was inverted: {got!r}",
+        )
+
+    def test_imperative_verbs_that_are_also_markers_survive(self) -> None:
+        """'stop', 'revert' and 'undo' are the instruction, not a preamble."""
+        for raw, expected in [
+            ("actually, stop using pytest fixtures here", "stop using"),
+            ("no, revert that migration", "revert that migration"),
+            ("actually undo the rename", "undo the rename"),
+        ]:
+            with self.subTest(raw=raw):
+                self.assertIn(expected, self.instruction(raw).lower())
+
+    def test_discourse_markers_are_still_stripped(self) -> None:
+        """The split must not cost us the trimming it was there to do."""
+        got = self.instruction("no, that's wrong. Use ruff for linting.")
+        self.assertEqual(got, "Use ruff for linting.")
+        self.assertNotIn("wrong", got.lower())
+
+    def test_a_correction_is_still_recognised_by_a_non_strippable_marker(self) -> None:
+        self.assertIsNotNone(self.rule.marker_in("don't force push to main"))
+        self.assertIsNotNone(self.rule.marker_in("stop reformatting the imports"))
+
+    def test_clause_boundaries_survive_the_rejoin(self) -> None:
+        """A dash separator is consumed by the splitter; the pause must come back."""
+        self.assertEqual(
+            _bullet(self.instruction("no, never push to main - use a feature branch")),
+            "- Never push to main, use a feature branch.",
+        )
+        self.assertEqual(
+            _bullet(self.instruction("nope, don't force push. Use --force-with-lease instead.")),
+            "- Don't force push. Use --force-with-lease instead.",
+        )
+
+    def test_a_configured_marker_list_still_protects_negation(self) -> None:
+        rule = FrictionCorrection({"markers": ["no,", "don't", "stop"]})
+        self.assertIn("don't deploy", rule.instruction_from("no, don't deploy on fridays").lower())

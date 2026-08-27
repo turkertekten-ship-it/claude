@@ -176,6 +176,15 @@ DEFAULT_CORRECTION_MARKERS = (
     "undo",
 )
 
+#: Markers that identify a correction but must NEVER be removed from it.
+#: "don't", "stop", "revert" and "undo" are the verb of the instruction, not
+#: throat-clearing in front of it. Stripping "don't" turns "don't force push"
+#: into "force push" and writes the exact opposite of what the user said into
+#: their memory file, where it then looks like evidence. That is the single
+#: worst thing this subsystem could do, so the two roles are kept apart: a word
+#: may signal that a prompt is a correction without being safe to delete from it.
+NON_STRIPPABLE_MARKERS = frozenset({"don't", "dont", "do not", "stop", "revert", "undo"})
+
 #: Anything that looks like a credential is never proposed as an automatic
 #: edit, whatever the risk tier would otherwise have been.
 _CREDENTIAL_RE = re.compile(
@@ -190,6 +199,9 @@ _CLAUSE_SPLIT_RE = re.compile(r"(?<=[.!?;])\s+|\s*\n+\s*|\s+[-—–]{1,2}\s+")
 # Suffix stripping leaves a doubled consonant behind ("committing" ->
 # "committ"); undoubling it is what makes it meet "commit".
 _DOUBLED_END_RE = re.compile(r"([bdfglmnprt])\1$")
+
+#: A pattern that cannot match, used where "strip nothing" is the right answer.
+_NEVER_RE = re.compile(r"(?!)")
 
 _MIN_STEM_CHARS = 3
 _STRIP_CHARS = " \t,.;:!?-\"'`*"
@@ -366,6 +378,31 @@ def _occasions(signals: list[Signal]) -> tuple[set[str], set[str]]:
 def _is_safe_relpath(relpath: str) -> bool:
     path = Path(relpath)
     return bool(relpath) and not path.is_absolute() and ".." not in path.parts
+
+
+def _join_clauses(clauses: list[str]) -> str:
+    """Rejoin kept clauses without losing the boundary that separated them.
+
+    The splitter's lookbehind keeps `.!?;` attached to the clause before it, but
+    a dash separator is consumed outright. Rejoining on a bare space then turns
+    "never push to main - use a feature branch" into "never push to main use a
+    feature branch" - which is written verbatim into the user's memory file as a
+    sentence they never wrote. A comma restores the pause the dash was doing.
+    """
+    out = ""
+    for clause in clauses:
+        if not out:
+            out = clause
+        elif out[-1] in ".!?;:,":
+            out = f"{out} {clause}"
+        elif clause[:1].isupper():
+            # The marker strip eats the terminator off the first clause, so a
+            # capital here is the surviving evidence that this began a new
+            # sentence. Joining it with a comma yields "push, Use ...".
+            out = f"{out}. {clause}"
+        else:
+            out = f"{out}, {clause}"
+    return out
 
 
 def _bullet(instruction: str, max_chars: int = 500) -> str:
@@ -766,9 +803,12 @@ class FrictionCorrection(Detector):
         self.max_evidence = _cfg_int(self.config, "max_evidence", 4)
         self.memory_file = _cfg_str(self.config, "memory_file", DEFAULT_MEMORY_FILE)
         self.section = _cfg_str(self.config, "section", CORRECTIONS_HEADING)
-        self.marker_re = _compile_terms(
-            _cfg_terms(self.config, "markers", DEFAULT_CORRECTION_MARKERS)
-        )
+        markers = _cfg_terms(self.config, "markers", DEFAULT_CORRECTION_MARKERS)
+        self.marker_re = _compile_terms(markers)
+        strippable = [m for m in markers if m.strip().lower() not in NON_STRIPPABLE_MARKERS]
+        # `_NEVER_RE` rather than an empty alternation: a regex built from no
+        # terms can match the empty string, which would strip nothing but loop.
+        self.strip_re = _compile_terms(strippable) if strippable else _NEVER_RE
 
     # -- extraction ----------------------------------------------------------
 
@@ -807,12 +847,12 @@ class FrictionCorrection(Detector):
             body = self._strip_marker_head(clause)
             if len(content_words(body)) >= self.min_instruction_words:
                 kept.append(body)
-        return flatten(" ".join(kept))
+        return flatten(_join_clauses(kept))
 
     def _strip_marker_head(self, clause: str) -> str:
         out = clause.strip(_STRIP_CHARS)
         for _ in range(4):
-            match = self.marker_re.match(out.lower())
+            match = self.strip_re.match(out.lower())
             if not match:
                 break
             out = out[match.end() :].lstrip(_STRIP_CHARS)
