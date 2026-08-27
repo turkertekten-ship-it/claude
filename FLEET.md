@@ -68,6 +68,26 @@ Roster read from live refs at 2026-08-27T15:06:40+00:00. [src:FLEET-REFS-2026082
 - No tool for reading another session's transcript was available, so cross-session knowledge is limited to metadata and to whatever gets pushed. [src:NO-TRANSCRIPT-ACCESS-2026-08-27]
 - The file listing of the sibling branch was read; its code was not reviewed, so nothing here describes what that code does. [src:SIBLING-PUSH-RAG-2026-08-27]
 
+## Observed — what the sibling branches actually contain
+
+> Read from their code, not from their titles. Only branches that have been
+> pushed can appear here; the rest remain unknown.
+
+- `claude/rag-system-data-pipeline-rdkde9` holds `oodarag`, a standard-library RAG pipeline over web and GitHub corpora: crawling with robots handling, boilerplate removal, chunking, hybrid dense + BM25 retrieval fused with RRF, and a recall/MRR/nDCG eval harness. [src:OODARAG-SCOPE-2026-08-27]
+- It contains no handling of Claude transcripts or conversation exports; the only apparent match was `jsonld` inside its HTML parser, a substring collision with `jsonl`. [src:OODARAG-SCOPE-2026-08-27]
+- `claude/code-playground-parity-xw0snj` is the merge of that branch's root with this branch's first commit, and has not advanced since. [src:PARITY-UNMOVED-2026-08-27]
+
+### Reading
+
+Not an observation — an interpretation of the two above, kept out of the
+`Observed` section so the verifier does not treat it as fact.
+
+The mandates look complementary rather than duplicated: `oodarag` retrieves over
+web and GitHub corpora, while `tools/ingest_chat_archive.py` indexes the Claude
+conversation corpus, which nothing else in either branch touches. The obvious
+seam is that the chat index is a corpus that retriever could consume. Neither
+session has agreed to that, and nobody has asked for it.
+
 ## The merge hazard
 
 Because both repositories started empty, each session's first commit became its

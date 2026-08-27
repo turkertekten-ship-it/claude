@@ -22,10 +22,15 @@ exposed, the sessions run in other containers, and none had pushed a commit.
 Pushed branches do *not* resolve this: a diff shows what a session built, never
 what it was asked, what it rejected, or why.
 
-**Partially moved:** as of 15:00Z the RAG session had pushed
-`claude/rag-system-data-pipeline-rdkde9`, so its *output* is now readable. Its
-file listing has been recorded; its code has not been reviewed, and its
-reasoning remains unknown. The other two sessions have pushed nothing.
+**Partially moved:** the RAG branch has been read, not just listed — it holds
+`oodarag`, a standard-library RAG pipeline over web and GitHub corpora, with no
+handling of Claude transcripts. [src:OODARAG-SCOPE-2026-08-27] What that session
+was *asked*, what it rejected, and why it chose this design remain unknown; a
+diff cannot carry any of that.
+
+**Still open and widening:** the fleet is now fourteen sessions.
+[src:FLEET-14-2026-08-27] Most have pushed nothing, and several declare goals
+overlapping this one. Their contents are unknown by the same argument.
 
 **Do not:** infer their contents from their titles. A title is a label the
 system generated, not a record of the work.

@@ -252,3 +252,35 @@ sources:
     collected_at: "2026-08-27T15:06:40+00:00"
     method: "git fetch --all --prune; git for-each-ref refs/remotes/origin; git ls-tree -r --name-only per branch"
     evidence: provenance/raw/fleet-refs-2026-08-27T150640+0000.txt
+
+  - id: KI1-ISSUE-2026-08-27
+    kind: api
+    collected_at: "2026-08-27T15:20Z"
+    method: "mcp__github__list_issues then mcp__github__issue_write(method=create) on turkertekten-ship-it/claude"
+    evidence: >-
+      The repository had zero issues before this. Creating the KI-1 advisory
+      returned id 5269104237 at
+      https://github.com/turkertekten-ship-it/claude/issues/1. Issues are the
+      only durable channel to sessions that cannot be messaged directly.
+
+  - id: OODARAG-SCOPE-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:18Z"
+    method: "git show origin/claude/rag-system-data-pipeline-rdkde9:README.md; git ls-tree -r --name-only; git grep -in for transcript/jsonl/conversations.json/sessionId under src/"
+    evidence: >-
+      The branch holds 34 files. Its README describes oodarag as a
+      standard-library RAG pipeline over web and GitHub corpora — crawling,
+      boilerplate removal, chunking, hybrid dense+BM25 retrieval with RRF, and
+      a recall/MRR/nDCG eval harness. Modules are access/, ingest/ (base,
+      github, web), scrape/ (crawler, html, robots), util/. The transcript grep
+      matched only "jsonld" (JSON-LD) inside scrape/html.py, a substring
+      collision; no module reads Claude transcripts or conversation exports.
+
+  - id: PARITY-UNMOVED-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:16Z"
+    method: "git fetch --all --prune; git log --oneline origin/claude/code-playground-parity-xw0snj; grep for the fix in its tools/ingest_chat_archive.py"
+    evidence: >-
+      The branch head is still merge commit e7ab452 with parents e37b4c2 and
+      1d7ce8f. Its copy of tools/ingest_chat_archive.py still has zero
+      occurrences of the "path.stem == session" fix.

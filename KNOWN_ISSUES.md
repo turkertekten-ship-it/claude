@@ -50,6 +50,13 @@ until the search is re-run.
 - That branch carries the affected version: its copy keys on `session` alone and has no `selfcheck` subcommand. [src:PARITY-MERGE-2026-08-27]
 - It does not contain the three later commits on `claude/review-chat-archive-zrynr4`, including the fix. [src:PARITY-MERGE-2026-08-27]
 
-> Sessions in this fleet run in separate containers and cannot be messaged from
-> here, so this file is the notification mechanism: it travels with the code,
-> and `selfcheck` lets any copy test itself without having read it.
+### Observed — how this was notified
+
+- Sessions in this fleet run in separate containers and no peer messaging reaches them; `ListAgents` reports no reachable agents. [src:NO-TRANSCRIPT-TOOL-CONFIRMED-2026-08-27]
+- The advisory is therefore filed as issue #1 on `turkertekten-ship-it/claude`, the repository every session takes as a source. It was the first issue on that repository. [src:KI1-ISSUE-2026-08-27]
+- As of 15:16Z the parity branch had not moved and still lacked the fix. [src:PARITY-UNMOVED-2026-08-27]
+
+> Three mechanisms, because no single one reaches a session that has already
+> merged and moved on: `selfcheck` travels with the code and needs no notice to
+> be read; this file travels with the repository; the issue is visible to anyone
+> working the repository at all.
