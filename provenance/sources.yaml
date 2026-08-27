@@ -119,3 +119,15 @@ sources:
       correctly attributed hits with verbatim excerpts and message ids. The
       claude.ai export path was exercised only against synthetic fixtures in
       tests/, never against a real export.
+
+  - id: HOOKS-VALIDATED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T14:57Z"
+    method: "each hook command from .claude/settings.json executed manually with CLAUDE_PROJECT_DIR=/home/user/claude"
+    evidence: >-
+      SessionStart printed the doctrine reminder followed by
+      "verify_provenance: OK — 20 file(s), 11 source(s), 0 violations".
+      PostToolUse printed the same verifier line. Stop ran tests/run_all.sh and
+      printed "all cases passed" then "ALL CHECKS PASSED". All three exited
+      cleanly. They were run as shell commands, not observed firing inside a
+      live Claude Code session.
