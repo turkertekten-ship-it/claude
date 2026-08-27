@@ -167,7 +167,7 @@ edilemiyordu. Fark yalnızca ona ihtiyaç duyulduğunda ortaya çıkardı.
 ## Şimdi ne yapılmalı
 
 Bir araç kullanılmadan önce `dogrula.py` çalıştırılır. Kırmızı bir satır varsa o
-araça dayanan iş durur.
+araca dayanan iş durur.
 
 ## Yetkili avukat görüşü gereken konular
 
