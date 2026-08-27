@@ -13,3 +13,8 @@ prompt nobody reads to the end enforces nothing.
 
 All four inherit one rule: **an unsourced claim does not get written down.**
 The prompts state it; `tools/verify_provenance.py` enforces it.
+
+[`DERIVATION.md`](DERIVATION.md) is the audit trail for `base-operator.md`: one
+row per rule, naming the evidence it came from. A rule with an empty evidence
+column does not belong in the prompt, which is the check that keeps this a
+reconstruction rather than a persona.
