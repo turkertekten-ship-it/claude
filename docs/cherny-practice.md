@@ -26,11 +26,11 @@ The bulk of the corpus comes from a third-party GitHub compilation that transcri
 
 That compilation is **not a primary source**. Cherny's own posts on `x.com`, every long-form interview about him, and Anthropic's own `anthropic.com` engineering blog were all unreachable from this container: the egress proxy refused them. [src:EGRESS-BLOCKED-2026-08-27]
 
-One tip of the 60 was checked against a screenshot of the original post bundled in the compilation. The transcription was faithful in substance but **abridged** — it dropped two of three paragraphs. So the compilation understates rather than embellishes, on a sample of one; the other 59 remain unchecked (U-8). [src:CHERNY-TWEET13-SCREENSHOT-2026-08-27]
+One tip of the 60 was checked against a screenshot of the original post bundled in the compilation. The transcription was faithful in substance but **abridged** — it dropped the post's third paragraph entirely and compressed the second to a single sentence. So the compilation understates rather than embellishes, on a sample of one; the other 59 remain unchecked (U-8). [src:CHERNY-TWEET13-SCREENSHOT-2026-08-27]
 
 One **primary** source was reachable and was read in full: an unpublished draft, `_drafts/Tips-for-Using-Claude-Code.md`, in Cherny's own blog repository `bcherny/bcherny.github.io`, front matter dated 2025-04-13, which opens "I created Claude Code as a research project". [src:CHERNY-OWN-DRAFT-2025-04-13]
 
-That draft is genuinely unfinished, and its gaps are load-bearing: its section lettering runs out of order, and eight subsections — including all five under "Multi-Claude" — are headings with no body at all. [src:CHERNY-OWN-DRAFT-2025-04-13]
+That draft is genuinely unfinished, and its gaps are load-bearing: its section lettering runs out of order, and nine subsections — including all five under "Multi-Claude" — are headings with no body at all, while a tenth carries only the fragment `.mcp.json`. [src:CHERNY-OWN-DRAFT-2025-04-13]
 
 It is also the *only* Claude Code writing in his own repository. His blog holds 17 published posts, the newest from 2024-07-19, and a search of all of them for "claude" matches nothing — so this material is one unpublished draft, not an excerpt from a larger body of published work. [src:CHERNY-BLOG-REPO-2026-08-27]
 
@@ -46,7 +46,7 @@ What was also reachable directly, and therefore carries more weight than the com
 
 ## Observed — the spine: give Claude a way to verify its work
 
-This is the single load-bearing claim of the entire corpus, and the one that is best sourced. Cherny states it three separate times across four months, twice calling it the most important thing. [src:CHERNY-TIPS-REPO-2026-08-27]
+This is the single load-bearing claim of the entire corpus, and the one that is best sourced. Cherny states it three separate times across three months, twice calling it the most important thing. [src:CHERNY-TIPS-REPO-2026-08-27]
 
 In his own words, from the screenshot of the original post: "probably the most important thing to get great results out of Claude Code -- give Claude a way to verify its work. If Claude has that feedback loop, it will 2-3x the quality of the final result." [src:CHERNY-TWEET13-SCREENSHOT-2026-08-27]
 
@@ -76,15 +76,17 @@ Two search summaries disagreed about whether he uses separate checkouts or git w
 > resolved — a primary-derived source distinguishing his habit from his team's —
 > is exactly the distinction a summary would have flattened.
 
-The documentation supplies the mechanics the tips assume: `claude --worktree <name>` creates an isolated checkout, and a subagent frontmatter field `isolation: worktree` gives an agent its own. [src:DOCS-WORKFLOWS-SUBAGENT-2026-08-27]
+A subagent tasked with reading the workflow documentation reported the mechanics the tips assume: `claude --worktree <name>` creates an isolated checkout, and a subagent frontmatter field `isolation: worktree` gives an agent its own. Only the existence of the `isolation` field is corroborated first-hand. [src:DOCS-WORKFLOWS-SUBAGENT-2026-08-27]
 
-For fan-out beyond hand-managed sessions, `/batch <instruction>` splits a change across 5 to 30 subagents, each working in its own worktree and opening a pull request. [src:DOCS-BESTPRACTICES-2026-08-27]
+For fan-out beyond hand-managed sessions, `/batch <instruction>` splits a change across subagents, each working in its own worktree and opening a pull request. [src:DOCS-BESTPRACTICES-2026-08-27]
+
+The two sources give different bounds for that fan-out: the documentation says "5 to 30 subagents", while Cherny's 2026-03-30 tip says "as many worktree agents as it takes (dozens, hundreds, even thousands)". [src:BATCH-FANOUT-DISCREPANCY-2026-08-27]
 
 The documented rationale for parallel *review* is not throughput but independence: "A fresh context improves code review since Claude won't be biased toward code it just wrote." [src:DOCS-BESTPRACTICES-2026-08-27]
 
 Cherny generalises that into a theory he calls test time compute: more tokens on a coding problem gives a better result, and **separate context windows** make it better still — which is why "one agent can cause bugs and another (using the same exact model) can find them". [src:CHERNY-TIPS-REPO-2026-08-27]
 
-He draws the analogy explicitly to human teams, and concludes that "multiple uncorrelated context windows" is the approach that works until models write bug-free code. [src:CHERNY-TIPS-REPO-2026-08-27]
+He draws the analogy explicitly to human teams, and concludes that "multiple uncorrelated context windows" — in his hedged wording, "tends to be a good approach" — will hold until agents "probably" write bug-free code. [src:CHERNY-TIPS-REPO-2026-08-27]
 
 ## Observed — plan before code
 
@@ -98,9 +100,9 @@ The documentation names the workflow "Explore first, then plan, then code", with
 
 It also bounds the practice, which the tips do not: "If you could describe the diff in one sentence, skip the plan." [src:DOCS-BESTPRACTICES-2026-08-27]
 
-Three workflow names widely attributed to Anthropic — "explore-plan-code-commit", "TDD", and "safe YOLO mode" — do **not** appear as named workflows in the current documentation. [src:DOCS-WORKFLOWS-SUBAGENT-2026-08-27]
+A subagent tasked with reading those pages reported that three workflow names widely attributed to Anthropic — "explore-plan-code-commit", "TDD", and "safe YOLO mode" — do **not** appear as named workflows in the current documentation. This is an absence claim taken on report, and absence is the weakest thing to take second-hand. [src:DOCS-WORKFLOWS-SUBAGENT-2026-08-27]
 
-They are, however, Cherny's own names, from his 2025 draft, where the four steps appear verbatim as "Explore, plan, code, commit". [src:CHERNY-OWN-DRAFT-2025-04-13]
+Two of the three are his own names, from his 2025 draft: "Explore, plan, code, commit" and "Safe yolo mode" are its section headings verbatim. "TDD" is not his coinage — the draft's heading is "Write tests, commit; code, iterate, commit", and it invokes TDD as an existing practice: "There has been a lot written about TDD". [src:CHERNY-OWN-DRAFT-2025-04-13]
 
 > So the names are authentic but dated: they are what he called these workflows
 > in 2025, not what the current documentation calls them. Anyone citing them as
@@ -179,7 +181,7 @@ Its stated best practices for subagents are, verbatim: "Design focused subagents
 
 **Hooks** are for what must happen deterministically. Cherny's standing example is a `PostToolUse` hook that formats Claude's code, "to handle the last 10%" and avoid CI formatting failures. [src:CHERNY-TIPS-REPO-2026-08-27]
 
-His other named hook uses are loading context at `SessionStart`, logging every bash command at `PreToolUse`, routing permission prompts to a phone at `PermissionRequest`, and poking Claude to continue at `Stop`. [src:CHERNY-TIPS-REPO-2026-08-27]
+His other named hook uses are loading context at `SessionStart`, logging every bash command at `PreToolUse`, routing permission prompts to WhatsApp at `PermissionRequest`, and poking Claude to continue at `Stop`. [src:CHERNY-TIPS-REPO-2026-08-27]
 
 **Permissions**: he is explicit that you should *not* use `--dangerously-skip-permissions`, and should instead pre-allow known-safe commands via `/permissions`, checked into the team's `.claude/settings.json`. [src:CHERNY-TIPS-REPO-2026-08-27]
 
@@ -189,9 +191,9 @@ The through-line across all five primitives is that configuration is checked int
 
 ## Observed — model, effort, and how he actually drives the tool
 
-He uses the largest available model with thinking for everything, and the reasoning is throughput rather than quality alone: you have to steer it less and it is better at tool use, so it is "almost always faster than using a smaller model in the end". [src:CHERNY-TIPS-REPO-2026-08-27]
+He named Opus 4.5 with thinking as his model for everything on 2026-01-03, and the reasoning is throughput rather than quality alone: you have to steer it less and it is better at tool use, so it is "almost always faster than using a smaller model in the end". [src:CHERNY-TIPS-REPO-2026-08-27]
 
-On effort, his stated preference is the maximum: "High for everything". [src:CHERNY-TIPS-REPO-2026-08-27]
+On effort, as of 2026-02-12 when the slider had three levels, his stated preference was "High for everything" — then the top setting. By 2026-04-16 the same compilation records five levels (`low`, `medium`, `high`, `xhigh`, `max`), so "high" had become the middle one. [src:CHERNY-TIPS-REPO-2026-08-27]
 
 He does most of his coding by speaking rather than typing; the team's rationale is that you speak ~3x faster than you type and your prompts get more detailed as a result. [src:CHERNY-TIPS-REPO-2026-08-27]
 
@@ -215,7 +217,7 @@ Those PRs are always squash-merged, and their size distribution was a median of 
 
 The practice to extract is not the volume but the shape: small, single-purpose PRs, one commit each, which stay reviewable and revertible at any rate of output. [src:CHERNY-TIPS-REPO-2026-08-27]
 
-He also reports that Anthropic built its Code Review feature because code output per engineer rose 200% in a year and review became the bottleneck. [src:CHERNY-TIPS-REPO-2026-08-27]
+He also reports that Anthropic built its Code Review feature because code output per engineer was "up 200% this year" as of 2026-03-10, i.e. across roughly ten weeks and review became the bottleneck. [src:CHERNY-TIPS-REPO-2026-08-27]
 
 > Note the direction of causation being claimed: the constraint moved from
 > writing code to checking it. Every practice in this corpus that looks like

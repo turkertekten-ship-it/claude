@@ -73,7 +73,15 @@ class Finding:
         self.path, self.line, self.code, self.message = path, line, code, message
 
     def __str__(self) -> str:
-        rel = self.path.relative_to(REPO) if self.path.is_absolute() else self.path
+        # A path outside REPO has no relative form. Reporting it absolutely is
+        # correct; raising ValueError here would kill the run at the moment it
+        # found something, which is exactly when the output matters.
+        rel: Path | str = self.path
+        if self.path.is_absolute():
+            try:
+                rel = self.path.relative_to(REPO)
+            except ValueError:
+                rel = self.path
         return f"{rel}:{self.line}: {self.code}: {self.message}"
 
 

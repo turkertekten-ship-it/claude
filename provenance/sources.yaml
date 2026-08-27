@@ -346,11 +346,22 @@ sources:
       "For each line, ask: 'Would removing this cause Claude to make mistakes?'
       If not, cut it." On review: "A reviewer prompted to find gaps will
       usually report some, even when the work is sound, because that is what it
-      was asked to do."
+      was asked to do." Its planning section is headed "Explore first, then
+      plan, then code" and runs four Steps titled Explore, Plan, Implement and
+      Commit, bounded by: "If you could describe the diff in one sentence, skip
+      the plan." Its failure-pattern list includes "The over-specified
+      CLAUDE.md. If your CLAUDE.md is too long, Claude ignores half of it
+      because important rules get lost in the noise." with "Fix: Ruthlessly
+      prune." On fan-out: "In a git repository, run /batch <instruction> to have
+      Claude split the change across 5 to 30 subagents. Each subagent works in
+      its own worktree and opens a pull request."
     note: >-
       First-party documentation, fetched and read directly by this session.
       Verified. Independently corroborates the central claim of the Cherny
-      corpus without going through the compilation.
+      corpus without going through the compilation. The evidence field was
+      extended on audit: four strings the corpus quotes from this page were
+      cited to it without being transcribed here, which left the ledger unable
+      to check them. Same fetch, not a new one.
 
   - id: DOCS-WORKFLOWS-SUBAGENT-2026-08-27
     kind: tool_output
@@ -434,9 +445,10 @@ sources:
       (bcherny/bcherny.github.io), front matter dated 2025-04-13. It opens "I
       created Claude Code as a research project". It is an UNPUBLISHED DRAFT
       sitting in _drafts/, and visibly unfinished: section 3a is duplicated,
-      section 2 runs a-b-c-g-b-d-e-f out of order, and eight subsections
-      ("Use Claude to lint", "Use Claude for code review", all five Multi-Claude
-      subsections, "Local prompts") are headings with no body. Nothing may be
+      section 2 runs a-b-c-g-b-d-e-f out of order, and nine subsections
+      ("Use Claude to lint", "Use Claude for code review", "Bash tools",
+      "Local prompts", and all five Multi-Claude subsections) are headings with
+      no body; a tenth, "MCP", carries only the fragment ".mcp.json". Nothing may be
       inferred from those empty headings — they are labels, not content. Dated
       over a year before the 2026 tip threads, so it is the earliest primary
       material here and is superseded on at least one point; see
@@ -501,3 +513,19 @@ sources:
       product & infra. A few years ago I wrote a book: O'Reilly's Programming
       TypeScript." The clone is shallow, so commit history for the draft was not
       retrievable beyond one commit.
+
+  - id: BATCH-FANOUT-DISCREPANCY-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:40Z"
+    method: >-
+      comparison of the /batch description in
+      WebFetch("https://code.claude.com/docs/en/best-practices") against
+      provenance/raw/cherny/claude-boris-15-tips-30-mar-26.md tip 11
+    evidence: >-
+      The documentation says /batch splits a change "across 5 to 30 subagents".
+      Cherny's 2026-03-30 tip 11 says /batch "has Claude fan out the work to as
+      many worktree agents as it takes (dozens, hundreds, even thousands)".
+    note: >-
+      Recorded rather than reconciled. Both were read; they describe the same
+      command with different bounds, and this session has no basis for deciding
+      which is current.

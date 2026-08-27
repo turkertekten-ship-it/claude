@@ -85,6 +85,30 @@ def main() -> int:
     check("a violating file exits 1", bad.returncode == 1, bad.returncode)
     check("violation is reported on stderr", "UNSOURCED_CLAIM" in bad.stderr)
 
+    # A violation in a file outside the repository used to crash the reporter:
+    # Finding.__str__ called Path.relative_to(REPO) unconditionally, so the tool
+    # died with an uncaught ValueError at the exact moment it found something,
+    # printing no finding at all. Exit 1 came from the traceback, not from the
+    # documented "1 = findings" contract.
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as tmp:
+        outside = Path(tmp) / "outside.md"
+        outside.write_text(
+            (FIXTURES / "unsourced.md").read_text(encoding="utf-8"), encoding="utf-8"
+        )
+        away = subprocess.run(
+            [sys.executable, str(VERIFIER), str(outside)],
+            capture_output=True,
+            text=True,
+        )
+        check("a violating file outside the repo exits 1", away.returncode == 1, away.returncode)
+        check(
+            "it reports the finding rather than crashing",
+            "UNSOURCED_CLAIM" in away.stderr and "Traceback" not in away.stderr,
+            away.stderr.strip()[:200],
+        )
+
     print()
     if FAILURES:
         print(f"FAILED: {len(FAILURES)} case(s): {', '.join(FAILURES)}")

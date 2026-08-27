@@ -109,6 +109,7 @@ tools/
   ingest_chat_archive.py      chat-archive ingestion and search
 tests/                        tests for the above
   run_all.sh                  every check, one command
+  test_layer_integrity.py     the doctrine layer still resolves and parses
 archive/                      drop conversation exports here (git-ignored)
 docs/workflows.md             how the workflows and subagents fit together
 docs/cherny-practice.md       the sourced Cherny corpus, every claim tagged

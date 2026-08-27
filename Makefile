@@ -9,8 +9,8 @@ help:
 install: ## Install in editable mode with dev extras
 	$(PY) -m pip install -e ".[dev]"
 
-test: ## Run the full test suite (stdlib unittest, no deps needed)
-	$(PY) -m unittest discover -s tests -v
+test: ## Run the full test suite (every check, via tests/run_all.sh)
+	bash tests/run_all.sh
 
 lint: ## Compile-check every module
 	$(PY) -m compileall -q src

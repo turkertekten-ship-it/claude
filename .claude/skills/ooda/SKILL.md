@@ -52,7 +52,7 @@ Distinguish sharply between:
 |---|---|---|
 | Verified | you ran it and saw the output | claim with `[src:ID]` |
 | Second-hand | another system or session reports it | claim, marked second-hand, with the reporter named |
-| Unknown | not established | an entry in `unknowns.md` |
+| Unknown | not established | an entry in `provenance/unknowns.md` |
 
 Never silently promote second-hand to verified. That is the most common way an
 honest process produces a dishonest artifact.
@@ -88,7 +88,7 @@ closed; if it fails, the loop is not closed.
 A loop is done when you can answer, in plain terms:
 
 1. What exists? (sourced)
-2. What does not exist, or could not be reached? (in `unknowns.md`)
+2. What does not exist, or could not be reached? (in `provenance/unknowns.md`)
 3. What did I do about it?
 4. What is still open?
 
