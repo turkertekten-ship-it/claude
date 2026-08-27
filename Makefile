@@ -1,7 +1,7 @@
 PY ?= python3
 export PYTHONPATH := src
 
-.PHONY: help install test lint demo index query eval loop clean
+.PHONY: help install test lint demo index query eval loop clean task-division task-division-check
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -29,6 +29,12 @@ eval: ## Run the evaluation harness against evals/goldens.jsonl
 
 loop: ## Run one OODA cycle
 	$(PY) -m oodarag.cli loop --cycles 1
+
+task-division: ## Divide every prompt into tasks, for every project on this machine
+	$(PY) tools/install_task_division.py
+
+task-division-check: ## Report whether prompt task division is installed (0 yes, 1 no)
+	$(PY) tools/install_task_division.py --check
 
 clean:
 	rm -rf .oodarag .data **/__pycache__ .pytest_cache

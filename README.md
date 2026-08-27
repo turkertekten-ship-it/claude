@@ -54,3 +54,20 @@ make demo          # end-to-end: ingest -> index -> query -> eval
 4. **Degrade, don't die.** Blocked egress, a missing API key or a truncated API
    response reduce what the pipeline can do; they never make it crash.
 5. **Measure, don't assert.** Retrieval quality is a number in an eval report.
+
+## Session tooling
+
+Beyond the pipeline, this repository carries tooling for the Claude Code
+sessions that work on it.
+
+**Task division.** Every submitted prompt is divided into an explicit numbered
+task list before any work begins, enforced by a `UserPromptSubmit` hook rather
+than by remembering to do it:
+
+```bash
+python3 tools/install_task_division.py          # every project on this machine
+python3 tools/install_task_division.py --check  # 0 installed, 1 not installed
+```
+
+See `docs/task-division.md` for the mechanism, the scope it covers, and how to
+switch it off.
