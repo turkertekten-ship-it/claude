@@ -13,7 +13,7 @@ sıralamalar mantıksal önceliğe dayanır, ölçülmüş takvime değil.
 Bu sistemde üç ayrı şey vardır ve birbirinin yerine geçmezler:
 
 - **Birim** (`birimler/*/yontem/`) *kuralı* tutar: TTK m.595 ne der, eşik kaç
-  liradir, kıdem yükü nasıl hesaplanır.
+  liradır, kıdem yükü nasıl hesaplanır.
 - **Beceri ve komut** (`.claude/skills/`, `.claude/commands/`) *işi* tutar: bir
   SPA nasıl incelenir, bir koşul listesi nasıl kurulur.
 - **İş akışı** (bu klasör) *sırayı* tutar: hangi iş hangisinden önce yapılır,
