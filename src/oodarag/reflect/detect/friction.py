@@ -319,8 +319,16 @@ def normalize_instruction(text: str, max_words: int = 40) -> str:
 
 
 def content_words(text: str) -> set[str]:
-    """Content words for similarity. Stopwords carry no intent and inflate overlap."""
-    return {w for w in words(text) if len(w) > 1 and w not in STOPWORDS}
+    """Content words for similarity: stopwords dropped, inflections collapsed.
+
+    Stemmed for the same reason `normalize_instruction` stems - and it must be
+    the *same* reason, or the two halves of this module disagree about whether
+    two prompts are the same thought. Unstemmed, "run the tests before pushing"
+    and "run tests before you push" overlap on two words out of five and score
+    0.4, which is under every sensible threshold; stemmed they score 0.75 and
+    are recognised as the restatement they obviously are.
+    """
+    return {stem_token(w) for w in words(text) if len(w) > 1 and w not in STOPWORDS}
 
 
 def _representative(signals: list[Signal]) -> str:
