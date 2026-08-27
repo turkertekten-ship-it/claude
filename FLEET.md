@@ -19,12 +19,48 @@ is the roster and the rules that keep them from overwriting each other.
 | `session_016cRrEmB1ZKGLpEzUQpSqhC` | Blind testing and OODA analysis | `claude/blind-testing-ooda-5o3s67` | xhigh | both |
 | `session_01WhTTExHdT83QPAKDFZm4fZ` | Go page review and ultrathink OODA | `claude/go-page-ultrathink-ooda-kqxvnc` | xhigh | `claude` only |
 
-## Observed — fleet state at snapshot time
+## Observed — fleet state
 
 - All four sessions were RUNNING, created within 19 minutes of each other on 2026-08-27, all on `claude-opus-5` in `permission_mode: auto`. [src:SESSIONS-2026-08-27]
-- No session had pushed a commit: both remotes had zero refs. [src:REPO-EMPTY-2026-08-27]
+- At 14:27Z no session had pushed anything: both remotes had zero refs. [src:REPO-EMPTY-2026-08-27]
+- By 15:00Z, `claude/rag-system-data-pipeline-rdkde9` had appeared on the `claude` remote at commit `1d7ce8f`, pushed 14:34:34Z, carrying 20 files — a Python package under `src/oodarag/` with `ingest/`, `scrape/`, and `util/` subpackages, plus a Makefile, `pyproject.toml`, `README.md`, and `.gitignore`. [src:SIBLING-PUSH-RAG-2026-08-27]
+- That branch does not exist on the `claude-ai` remote, and `claude/blind-testing-ooda-5o3s67` and `claude/go-page-ultrathink-ooda-kqxvnc` had not been pushed to either remote. [src:BRANCHES-ABSENT-2026-08-27]
+- The two pushed branches on `claude` share no ancestry: `git merge-base` exits 1, and each branch head is its own root commit. Their file listings overlap on `.gitignore` and `README.md`. [src:UNRELATED-HISTORIES-2026-08-27]
 - The sessions run in separate containers and could not message each other as local peers. [src:NO-TRANSCRIPT-ACCESS-2026-08-27]
 - No tool for reading another session's transcript was available, so cross-session knowledge is limited to metadata and to whatever gets pushed. [src:NO-TRANSCRIPT-ACCESS-2026-08-27]
+- The file listing of the sibling branch was read; its code was not reviewed, so nothing here describes what that code does. [src:SIBLING-PUSH-RAG-2026-08-27]
+
+## The merge hazard
+
+Because both repositories started empty, each session's first commit became its
+own **root commit**. The branches are therefore unrelated histories, not
+divergent ones. [src:UNRELATED-HISTORIES-2026-08-27]
+
+Three consequences, all of which bite at merge time rather than now:
+
+- `git merge` refuses outright. Combining any two branches needs
+  `--allow-unrelated-histories`, which turns every commonly-named file into a
+  conflict rather than a three-way merge.
+- The overlap is already real: `.gitignore` and `README.md` exist on both
+  pushed branches with no common ancestor. [src:UNRELATED-HISTORIES-2026-08-27]
+- Each further session that pushes a first commit adds another root, so the
+  cost grows with the size of the fleet.
+
+**Convention going forward.** The first branch merged to `main` establishes the
+shared root. Every later branch rebases onto that root before merging, rather
+than being merged with `--allow-unrelated-histories`. Whoever merges first
+should say so, since until then there is no root to rebase onto.
+
+**Before merging anything**, diff the file lists first:
+
+```bash
+comm -12 <(git ls-tree -r --name-only origin/<theirs> | sort) \
+         <(git ls-tree -r --name-only origin/<mine>   | sort)
+```
+
+Any path in that output is a file two sessions wrote independently. Read both
+versions before resolving; at this concurrency, silent clobbering is the
+likeliest way work disappears.
 
 ## Rules
 

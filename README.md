@@ -30,7 +30,10 @@ bash tests/run_all.sh        # verifier + both test suites
 | `tools/verify_provenance.py` | The fabrication guard. |
 | `tools/ingest_chat_archive.py` | Conversation-archive ingestion and search. |
 | `tests/` | Tests for both tools, including their failure cases. |
-| `.claude/` | Hooks, the OODA skill, subagent definitions. |
+| `.claude/commands/` | The workflows, as slash commands. |
+| `.claude/agents/` | `observer` and `fact-checker` subagents. |
+| `.claude/` | Hooks and the OODA skill. |
+| `docs/workflows.md` | How the workflows and subagents fit together. |
 
 ## Searching your conversations
 

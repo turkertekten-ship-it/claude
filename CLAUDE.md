@@ -108,16 +108,45 @@ tools/
   verify_provenance.py        the fabrication guard
   ingest_chat_archive.py      chat-archive ingestion and search
 tests/                        tests for the above
+  run_all.sh                  every check, one command
 archive/                      drop conversation exports here (git-ignored)
+docs/workflows.md             how the workflows and subagents fit together
 .claude/
   settings.json               hooks
   skills/ooda/SKILL.md        the loop procedure
+  commands/                   the workflows, as slash commands
   agents/                     subagent definitions
 ```
 
 ---
 
-## 5. House rules
+## 5. Workflows and delegation
+
+Rules that live only in prose get skipped under pressure. Each workflow in
+`.claude/commands/` pins one phase of the loop to a command that ends by
+running the verifier, so it cannot report success over an unsourced claim.
+
+| Command | What it produces |
+|---|---|
+| `/observe <target>` | a sourced inventory, absences included |
+| `/ooda-loop <task>` | one full loop, all four artifacts |
+| `/fact-check [path]` | the specific unsupported lines, and their fixes |
+| `/source <finding>` | a ledger entry a claim can cite |
+| `/fleet-sync` | what other sessions actually pushed, read from diffs |
+| `/ingest-chats [query]` | the real contents of the chat index, or that it is empty |
+
+Two subagents exist to keep phases from collapsing into each other:
+`observer` enumerates and is given nowhere to put a conclusion; `fact-checker`
+audits documents it did not write. See `docs/workflows.md`.
+
+**A subagent's report is second-hand.** It is another process's claim about
+what it saw, exactly like another session's status line. Verify anything
+load-bearing yourself before writing it down. Delegation multiplies reach, not
+evidence.
+
+---
+
+## 6. House rules
 
 - **Python 3.11, standard library first.** PyYAML is available. The `sqlite3`
   CLI is *not* installed — go through Python's `sqlite3` module, which does

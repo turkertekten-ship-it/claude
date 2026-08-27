@@ -18,8 +18,14 @@ entry, move the resolved fact into `observations.md` with a new source id.
 **Why:** only session metadata was retrievable; no transcript-reading tool was
 exposed, the sessions run in other containers, and none had pushed a commit.
 
-**Resolves when:** the sessions push their branches (then read the diffs), or a
-transcript export is placed in `archive/` and ingested.
+**Resolves when:** a transcript export is placed in `archive/` and ingested.
+Pushed branches do *not* resolve this: a diff shows what a session built, never
+what it was asked, what it rejected, or why.
+
+**Partially moved:** as of 15:00Z the RAG session had pushed
+`claude/rag-system-data-pipeline-rdkde9`, so its *output* is now readable. Its
+file listing has been recorded; its code has not been reviewed, and its
+reasoning remains unknown. The other two sessions have pushed nothing.
 
 **Do not:** infer their contents from their titles. A title is a label the
 system generated, not a record of the work.

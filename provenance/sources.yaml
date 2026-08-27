@@ -131,3 +131,49 @@ sources:
       printed "all cases passed" then "ALL CHECKS PASSED". All three exited
       cleanly. They were run as shell commands, not observed firing inside a
       live Claude Code session.
+
+  - id: SIBLING-PUSH-RAG-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:00Z"
+    method: "git fetch --all --prune; git log -1 origin/claude/rag-system-data-pipeline-rdkde9; git ls-tree -r --name-only"
+    evidence: >-
+      Branch claude/rag-system-data-pipeline-rdkde9 exists on the `claude`
+      remote at commit 1d7ce8f, authored 2026-08-27 14:34:34 +0000 by
+      "Claude <turker.tekten@gmail.com>", subject "Add zero-dependency core:
+      HTTP client, web scraper, GitHub connector". It holds 20 files: a
+      Makefile, pyproject.toml, README.md, .gitignore, and a Python package
+      under src/oodarag/ with ingest/, scrape/, and util/ subpackages. The
+      branch does not exist on the `claude-ai` remote. The file listing was
+      read; the code itself was not reviewed.
+
+  - id: UNRELATED-HISTORIES-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:00Z"
+    method: "git merge-base <two branches>; git rev-list --max-parents=0 <two branches>; comm -12 over their file listings"
+    evidence: >-
+      `git merge-base origin/claude/review-chat-archive-zrynr4
+      origin/claude/rag-system-data-pipeline-rdkde9` printed nothing and exited
+      1. `git rev-list --max-parents=0` returned both branch heads themselves
+      (e37b4c2 and 1d7ce8f), so each branch is its own root commit and the two
+      share no ancestry. Their file listings overlap on exactly two paths:
+      .gitignore and README.md.
+
+  - id: BRANCHES-ABSENT-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:00Z"
+    method: "git ls-remote origin <branch> on both remotes"
+    evidence: >-
+      claude/blind-testing-ooda-5o3s67 and claude/go-page-ultrathink-ooda-kqxvnc
+      returned no refs on either remote. The `claude-ai` remote carried exactly
+      one branch, claude/review-chat-archive-zrynr4.
+
+  - id: GOAL-COVERAGE-2026-08-27
+    kind: api
+    collected_at: "2026-08-27T15:06Z"
+    method: "python3 over provenance/raw/sessions-2026-08-27T14-27Z.json, reading goal_condition per session"
+    evidence: >-
+      goal_condition is populated for exactly two of the four sessions:
+      "Claude chat archive review" and "RAG system and data pipeline". It is
+      null for "Blind testing and OODA analysis" and "Go page review and
+      ultrathink OODA". Of the three sibling sessions, only one has a goal on
+      record.
