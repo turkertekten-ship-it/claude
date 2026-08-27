@@ -1,0 +1,397 @@
+# Provenance ledger.
+#
+# Every factual claim in an enforced document must cite one of these ids as
+# [src:ID]. Adding a claim without a source, or citing an id that is not
+# listed here, fails `python3 tools/verify_provenance.py`.
+#
+# Required fields per entry: id, kind, collected_at, method, evidence
+#   kind: one of tool_output | filesystem | api | user_statement | repo_state
+#   evidence: a path under provenance/raw/, or a verbatim excerpt.
+
+sources:
+  - id: SESSIONS-2026-08-27
+    kind: api
+    collected_at: "2026-08-27T14:27Z"
+    method: "mcp__Claude_Code_Remote__list_sessions(limit=100, mine=true)"
+    evidence: provenance/raw/sessions-2026-08-27T14-27Z.json
+    note: >-
+      Returned exactly 4 sessions for this account. Session metadata only;
+      message bodies were not returned and no tool to fetch them was exposed.
+
+  - id: REPO-EMPTY-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T14:27Z"
+    method: "git ls-remote origin (both repos); git log; git status"
+    evidence: >-
+      `git ls-remote origin` returned zero refs for both
+      https://github.com/turkertekten-ship-it/claude and
+      https://github.com/turkertekten-ship-it/claude-ai. `git log` reported
+      "your current branch 'claude/review-chat-archive-zrynr4' does not have
+      any commits yet" in both clones.
+
+  - id: NO-LOCAL-ARCHIVE-2026-08-27
+    kind: filesystem
+    collected_at: "2026-08-27T14:26Z"
+    method: "find over ~/.claude/projects, /mnt/attach, /mnt/user-data, /home, and an -xdev sweep for *conversation*/*chat*/*export*/*archive* files"
+    evidence: >-
+      ~/.claude/projects contained exactly two files, both belonging to this
+      session (39f45f12-0454-50a5-8115-31fff3e1bbf0.jsonl and its ccr-tip.json).
+      /mnt/attach was empty. /mnt/user-data contained only an empty `working`
+      directory. The filesystem sweep matched only Go toolchain testdata.
+
+  - id: NO-DRIVE-ARCHIVE-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T14:28Z"
+    method: "mcp__Google_Drive__search_files(title contains 'claude'/'conversation'/'chat'); mcp__Google_Drive__list_recent_files(pageSize=25)"
+    evidence: >-
+      The title search returned an empty result set `{}`. The 25 most recent
+      Drive files were unrelated personal documents (academic PDFs, finance
+      spreadsheets, videos, catalogs); none was a Claude conversation export.
+      Search was stopped at this point rather than reading personal files.
+
+  - id: NO-TRANSCRIPT-ACCESS-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T14:28Z"
+    method: "inspection of the exposed claude-code-remote MCP toolset; ListAgents"
+    evidence: >-
+      The claude-code-remote server exposed no `list_events` or equivalent
+      transcript-reading tool in this session, so sibling session message
+      bodies were unreadable. ListAgents reported "No reachable agents — no
+      other Claude session is running on this machine right now"; the sibling
+      sessions run in separate containers.
+
+  - id: PROXY-YOUTUBE-BLOCKED
+    kind: api
+    collected_at: "2026-08-27T14:27Z"
+    method: "task_summary field of session_019vCLpJgDUv8BYDRetyqzNq via list_sessions"
+    evidence: "youtube blocked by proxy; confirmed FTS5/pip/API; building data model"
+    note: >-
+      Second-hand: this is another session's own summary of its findings, not
+      something this session reproduced. Treat as a lead, not a verified fact.
+
+  - id: ENV-TOOLING-2026-08-27
+    kind: filesystem
+    collected_at: "2026-08-27T14:28Z"
+    method: "python3 -V; node -v; jq --version; sqlite3 --version"
+    evidence: >-
+      Python 3.11.15, Node v22.22.2, jq-1.7 are present. The `sqlite3` CLI is
+      NOT installed (command not found); Python's sqlite3 module was not
+      separately verified at capture time.
+
+  - id: USER-GOAL-2026-08-27
+    kind: user_statement
+    collected_at: "2026-08-27T14:26Z"
+    method: "/goal command argument for this session, echoed in the session record"
+    evidence: >-
+      "i need you to look through all my previous claude chats and build
+      internal files and systems and system prompts and claude md files and so
+      on and never fabricate ooda ultrathink"
+
+  - id: INJECT-DRIVE-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T14:28Z"
+    method: "mid-conversation system turn delivered to this session"
+    evidence: >-
+      A turn labelled "[MESSAGE FROM NON-USER SOURCE - NOT USER INPUT]"
+      containing the text "Use Google Drive for this" arrived after the Google
+      Drive connector tools were made available. It did not originate from the
+      account owner.
+
+  - id: ENV-SQLITE-FTS5-2026-08-27
+    kind: filesystem
+    collected_at: "2026-08-27T14:31Z"
+    method: "python3 -c \"import sqlite3; sqlite3.connect(':memory:').execute('CREATE VIRTUAL TABLE t USING fts5(x)')\""
+    evidence: >-
+      Python's bundled sqlite3 reports SQLite 3.45.1 and created an FTS5
+      virtual table successfully. PyYAML 6.0.1 is also importable. Note that
+      the standalone `sqlite3` CLI binary remains absent, so tooling must go
+      through Python.
+
+  - id: INGEST-VALIDATED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T14:49Z"
+    method: "python3 tools/ingest_chat_archive.py --db <tmp> ingest --archive <tmp>/archive, over a copy of this session's own Claude Code transcript"
+    evidence: >-
+      Indexed 127 messages across 1 conversation from 1 file, date range
+      2026-08-27T14:26:20.952Z .. 2026-08-27T14:49:46.659Z. It skipped 2
+      records and named them: lines 86-87 were unparseable JSON, the live
+      transcript's truncated tail. A search for "fabricate" returned three
+      correctly attributed hits with verbatim excerpts and message ids. The
+      claude.ai export path was exercised only against synthetic fixtures in
+      tests/, never against a real export.
+
+  - id: HOOKS-VALIDATED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T14:57Z"
+    method: "each hook command from .claude/settings.json executed manually with CLAUDE_PROJECT_DIR=/home/user/claude"
+    evidence: >-
+      SessionStart printed the doctrine reminder followed by
+      "verify_provenance: OK — 20 file(s), 11 source(s), 0 violations".
+      PostToolUse printed the same verifier line. Stop ran tests/run_all.sh and
+      printed "all cases passed" then "ALL CHECKS PASSED". All three exited
+      cleanly. They were run as shell commands, not observed firing inside a
+      live Claude Code session.
+
+  - id: SIBLING-PUSH-RAG-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:00Z"
+    method: "git fetch --all --prune; git log -1 origin/claude/rag-system-data-pipeline-rdkde9; git ls-tree -r --name-only"
+    evidence: >-
+      Branch claude/rag-system-data-pipeline-rdkde9 exists on the `claude`
+      remote at commit 1d7ce8f, authored 2026-08-27 14:34:34 +0000 by
+      "Claude <turker.tekten@gmail.com>", subject "Add zero-dependency core:
+      HTTP client, web scraper, GitHub connector". It holds 20 files: a
+      Makefile, pyproject.toml, README.md, .gitignore, and a Python package
+      under src/oodarag/ with ingest/, scrape/, and util/ subpackages. The
+      branch does not exist on the `claude-ai` remote. The file listing was
+      read; the code itself was not reviewed.
+
+  - id: UNRELATED-HISTORIES-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:00Z"
+    method: "git merge-base <two branches>; git rev-list --max-parents=0 <two branches>; comm -12 over their file listings"
+    evidence: >-
+      `git merge-base origin/claude/review-chat-archive-zrynr4
+      origin/claude/rag-system-data-pipeline-rdkde9` printed nothing and exited
+      1. `git rev-list --max-parents=0` returned both branch heads themselves
+      (e37b4c2 and 1d7ce8f), so each branch is its own root commit and the two
+      share no ancestry. Their file listings overlap on exactly two paths:
+      .gitignore and README.md.
+
+  - id: BRANCHES-ABSENT-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:00Z"
+    method: "git ls-remote origin <branch> on both remotes"
+    evidence: >-
+      claude/blind-testing-ooda-5o3s67 and claude/go-page-ultrathink-ooda-kqxvnc
+      returned no refs on either remote. The `claude-ai` remote carried exactly
+      one branch, claude/review-chat-archive-zrynr4.
+
+  - id: GOAL-COVERAGE-2026-08-27
+    kind: api
+    collected_at: "2026-08-27T15:06Z"
+    method: "python3 over provenance/raw/sessions-2026-08-27T14-27Z.json, reading goal_condition per session"
+    evidence: >-
+      goal_condition is populated for exactly two of the four sessions:
+      "Claude chat archive review" and "RAG system and data pipeline". It is
+      null for "Blind testing and OODA analysis" and "Go page review and
+      ultrathink OODA". Of the three sibling sessions, only one has a goal on
+      record.
+
+  - id: NO-TRANSCRIPT-TOOL-CONFIRMED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:08Z"
+    method: "ToolSearch for 'list_events session transcript messages history' and for '+send_message session'; ListAgents"
+    evidence: >-
+      No list_events tool or equivalent exists in this session. The second
+      query returned "No matching deferred tools found". The generic
+      SendMessage tool exists, but ListAgents reported "No reachable agents —
+      no other Claude session is running on this machine right now". Earlier
+      this absence was inferred from reading a tool listing; it is now
+      established by query.
+
+  - id: SUBAGENT-SESSION-COLLISION-2026-08-27
+    kind: filesystem
+    collected_at: "2026-08-27T15:00Z"
+    method: "head -1 on the main transcript and on a subagents/agent-*.jsonl, comparing the sessionId field"
+    evidence: >-
+      /root/.claude/projects/-home-user/39f45f12-...jsonl and
+      .../subagents/agent-a61cb96d1a200c0a2.jsonl both report
+      sessionId=39f45f12-0454-50a5-8115-31fff3e1bbf0. A subagent transcript
+      carries its parent's sessionId, so sessionId alone does not identify a
+      transcript.
+
+  - id: PROJECTS-INGEST-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:01Z"
+    method: "python3 tools/ingest_chat_archive.py --db <tmp> ingest --include-projects; then stats and search"
+    evidence: >-
+      Read 3 transcripts from /root/.claude/projects and indexed 347 messages
+      across 3 conversations (1 claude_code, 2 claude_code_subagent), date
+      range 2026-08-27T14:26:20.952Z .. 2026-08-27T15:01:07.358Z. A search
+      returned correctly attributed verbatim excerpts with message ids and
+      source files. Before the id fix, the same run reported 3 conversations
+      ingested but stored only 1 with 44 messages, because the shared
+      sessionId caused each file to overwrite the previous one.
+
+  - id: PARITY-MERGE-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:12Z"
+    method: "git log --graph origin/claude/code-playground-parity-xw0snj; git merge-base --is-ancestor per commit; git show <branch>:tools/ingest_chat_archive.py | grep"
+    evidence: >-
+      Merge commit e7ab452, subject "Merge fleet doctrine substrate into the
+      parity branch", has parents 1d7ce8f (the RAG branch root) and e37b4c2
+      (this branch's first commit). merge-base --is-ancestor reports e37b4c2 IN
+      parity, and f304fce, b11a6fa, e392678 NOT in parity. The branch's copy of
+      tools/ingest_chat_archive.py contains "session = record.get(...)" keyed
+      directly into Conversation(id=f"cc:{session}") with zero occurrences of
+      the "path.stem == session" fix.
+
+  - id: FLEET-14-2026-08-27
+    kind: api
+    collected_at: "2026-08-27T15:10Z"
+    method: "mcp__Claude_Code_Remote__list_sessions(limit=20, mine=true)"
+    evidence: >-
+      The listing returned 14 sessions, all SESSION_STATUS_RUNNING on
+      env_01GEni7AgBA7NiyMBecyt7K1, created between 14:07:19Z and 15:00:53Z.
+      Ten did not exist at the 14:27Z capture. All but one take both
+      repositories as sources; each declares its own outcome branch.
+
+  - id: SELFCHECK-VALIDATED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:14Z"
+    method: "python3 tools/ingest_chat_archive.py selfcheck on this copy, and on a copy with only the fix line reverted"
+    evidence: >-
+      On this copy: 2 conversations and 2 messages stored, "OK — this copy
+      keeps both transcripts", exit 0. On the copy with the fix reverted and
+      nothing else changed: 1 conversation and 1 message stored, "FAIL — this
+      copy SILENTLY DISCARDS transcripts", exit 1.
+
+# ---------------------------------------------------------------------------
+# Session claude/ai-system-research-3jpwda — subject, firm and field research.
+# Verbatim captures: provenance/raw/subject-research-2026-08-27.md
+# ---------------------------------------------------------------------------
+
+  - id: SUBJECT-IDENTITY-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:02Z"
+    method: 'WebSearch(query="\"Turker Tekten\"")'
+    evidence: provenance/raw/subject-research-2026-08-27.md
+    note: >-
+      Search-engine summary over MarketScreener, Crunchbase, Bloomberg and
+      LinkedIn profile pages. Career history is second-hand aggregation by
+      those data vendors, not a statement by the subject; the underlying
+      profile pages were not individually fetched.
+
+  - id: WAM-FIRM-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:03Z"
+    method: 'WebSearch(query="WAM Asset Portfolio Management Turkey Turker Tekten CFO") and WebSearch(query="WAM Portföy girişim sermayesi yatırım fonu GSYF gayrimenkul yatırım fonu 2026")'
+    evidence: provenance/raw/subject-research-2026-08-27.md
+    note: >-
+      Establishes the firm's legal name, Istanbul/Teşvikiye location, 2022
+      founding, and that it manages GSYF and GYF for qualified investors.
+      Fund names, fund sizes and AUM were NOT established — see U-6.
+
+  - id: EGRESS-BLOCKED-WAM-KAP-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:03Z"
+    method: "WebFetch(https://www.wamportfoy.com/board-members) and WebFetch(https://kap.org.tr/tr/sirket-bilgileri/ozet/5808-...)"
+    evidence: provenance/raw/subject-research-2026-08-27.md
+    note: >-
+      Both returned EGRESS_BLOCKED from the network proxy. The firm's own site
+      and its primary regulatory filing record were therefore unreadable in
+      this session, which is why firm-level detail rests on secondary sources.
+
+  - id: DRIVE-WORKFILES-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:02Z"
+    method: "mcp__Google_Drive__list_recent_files(pageSize=25), then targeted jq over the saved result for work-relevant titles and content snippets"
+    evidence: provenance/raw/subject-research-2026-08-27.md
+    note: >-
+      Initiated by the account owner's own request to research himself and his
+      workplace, not by a non-user turn — the distinction recorded under
+      INJECT-DRIVE-2026-08-27 for the earlier session does not apply here.
+      Only the work-relevant subset was recorded; personal files in the same
+      listing were left unread and unrecorded.
+
+  - id: GITHUB-ACCOUNT-2026-08-27
+    kind: api
+    collected_at: "2026-08-27T15:02Z"
+    method: "mcp__github__get_me()"
+    evidence: >-
+      Returned login "turkertekten-ship-it", id 321806368, created_at
+      "2026-08-27T14:04:18Z", public_repos 1, followers 0, following 0.
+
+  - id: SPK-VALUATION-2026-07-23
+    kind: tool_output
+    collected_at: "2026-08-27T15:04Z"
+    method: 'WebSearch(query="SPK portföy yönetim şirketi raporlama yükümlülükleri enflasyon muhasebesi GSYF 2026")'
+    evidence: provenance/raw/subject-research-2026-08-27.md
+    note: >-
+      Reported by Turkish financial press (yatirimx.com.tr, paraajansi.com.tr)
+      as an SPK decision dated 23 July 2026 with a 31 July 2026 compliance
+      date. The SPK bulletin itself was not retrieved; treat the exact scope
+      and wording as unconfirmed — see U-7.
+
+  - id: TCMB-MACRO-2026-08
+    kind: tool_output
+    collected_at: "2026-08-27T15:05Z"
+    method: 'WebSearch(query="Turkey inflation policy rate August 2026 TCMB lira outlook")'
+    evidence: provenance/raw/subject-research-2026-08-27.md
+    note: >-
+      Policy rate 37%, O/N lending 40%, O/N borrowing 35.5%; July 2026 CPI
+      31.75% y/y (June 32.11%); TCMB year-end 2026 projection revised up to
+      26%; TRY record low ~47.2/USD. Sourced from TCMB Inflation Report
+      2026-III (13 Aug 2026) coverage and TradingEconomics, via search summary
+      rather than a direct fetch of the TCMB report PDF.
+
+  - id: PE-AI-SURVEY-2026
+    kind: tool_output
+    collected_at: "2026-08-27T15:03Z"
+    method: 'WebSearch(query="private equity firms AI adoption 2026 deal sourcing due diligence portfolio monitoring survey")'
+    evidence: provenance/raw/subject-research-2026-08-27.md
+    note: >-
+      S&P Global Market Intelligence 2026 PE survey and Deloitte figures, read
+      from the search summary and secondary write-ups rather than the primary
+      survey PDFs. The headline percentages are consistent across several
+      independent write-ups, which is why they are used; the primary documents
+      were not obtained.
+
+  - id: MIT-PILOT-FAILURE-2026
+    kind: tool_output
+    collected_at: "2026-08-27T15:05Z"
+    method: 'WebSearch(query="why enterprise AI pilots fail 2026 MIT study small firms what separates winners")'
+    evidence: provenance/raw/subject-research-2026-08-27.md
+    note: >-
+      The widely-cited MIT "GenAI Divide" result: 52 executive interviews, 153
+      leader surveys, 300 public deployments, ~95% of pilots with no measurable
+      P&L impact. Reported through secondary coverage (Forbes, CIO Dive,
+      Yahoo Finance); the paper itself was not fetched.
+
+  - id: FUNDADMIN-AI-2026
+    kind: tool_output
+    collected_at: "2026-08-27T15:04Z"
+    method: 'WebSearch(query="asset management CFO AI 2026 fund administration NAV LP reporting automation what works")'
+    evidence: provenance/raw/subject-research-2026-08-27.md
+    note: >-
+      Several figures here (98% of IR professionals using AI weekly; 78%/66%
+      fund-accountant figures) come from vendor-published content marketing
+      their own products. They are recorded because the qualitative pattern
+      recurs across independent vendors, but the percentages should be treated
+      as low-confidence vendor claims, not survey findings.
+
+  - id: EQT-MOTHERBRAIN-2026
+    kind: tool_output
+    collected_at: "2026-08-27T15:04Z"
+    method: 'WebSearch(query="EQT Motherbrain Blackstone AI data science private equity how they built it lessons")'
+    evidence: provenance/raw/subject-research-2026-08-27.md
+    note: >-
+      Descriptions originate largely from EQT's own pages (eqtgroup.com/about/
+      motherbrain, eqtgroup.com/thinq). Self-reported by the firm; no
+      independent evaluation of Motherbrain's returns impact was found.
+
+  - id: REPO-BRANCHES-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:07Z"
+    method: "git fetch origin; git branch -r; git merge-base; git ls-tree -r --name-only per branch (both clones)"
+    evidence: provenance/raw/subject-research-2026-08-27.md
+    note: >-
+      Five branches on the `claude` remote and one on `claude-ai`. This
+      session's branch, claude/ai-system-research-3jpwda, carried a single
+      commit (1d7ce8f) holding the oodarag package with no CLAUDE.md,
+      provenance/ or tools/. The doctrine files were taken from
+      origin/claude/review-chat-archive-zrynr4 with `git checkout <ref> --`,
+      because the two branches share no ancestry and cannot be merged.
+
+  - id: OODARAG-PRIOR-STATE-2026-08-27
+    kind: filesystem
+    collected_at: "2026-08-27T15:00Z"
+    method: "wc -l over src/oodarag; grep for top-level defs and classes; cat of models.py, ingest/base.py, Makefile, pyproject.toml"
+    evidence: >-
+      16 Python files, 2,583 lines: util/{http,hashing,ratelimit,text,logging},
+      models.py, ingest/{base,web,github}, scrape/{robots,crawler,html}. No
+      tests directory existed. The Makefile already declared targets for
+      `demo`, `index`, `query`, `eval` and `loop` against `oodarag.cli`, and
+      pyproject declared the `ooda` console script — all pointing at modules
+      that did not yet exist.
