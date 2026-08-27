@@ -35,6 +35,15 @@ bash tests/run_all.sh        # verifier + every test suite
 | `tests/` | Tests for all of the above, including their failure cases. |
 | `.claude/` | Hooks, skills, slash commands, subagent definitions. |
 
+## What is not done
+
+Three things, with exactly what would close each:
+[`docs/remaining.md`](docs/remaining.md). Short version — eight capabilities are
+built and wire-tested but need an `ANTHROPIC_API_KEY` this container does not
+have; the Console Workbench was sunset on 2026-08-17 so parity with its UI is
+impossible for anyone; and the operating prompt is not shown to reduce
+fabrication, across six runs.
+
 ## The workbench
 
 `workbench/` closes the gap between a terminal coding agent and the Console
