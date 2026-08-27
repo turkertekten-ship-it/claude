@@ -147,14 +147,6 @@ class PathHelperTests(HygieneTestCase):
         self.assertEqual(_class_name("src/pkg/text_utils.py"), "TextUtils")
 
 
-def _replace_uri(self: Signal, uri: str) -> Signal:
-    self.uri = uri
-    return self
-
-
-Signal._replace_uri = _replace_uri  # test-only convenience, not part of the contract
-
-
 # -- 1. debt markers ---------------------------------------------------------
 
 
@@ -198,6 +190,23 @@ class DebtMarkerTests(HygieneTestCase):
         signals = [file_signal("tests/test_a.py", "# TODO: cover the error path\n")]
         rule = HygieneDebtMarker({"exclude_prefixes": ["vendor/"], "exclude_self": False})
         self.assertEqual(len(rule.run(self.context(signals))), 1)
+
+    def test_the_word_in_prose_is_not_a_marker(self) -> None:
+        # A README describing what this rule looks for is the canonical case:
+        # the words are there, the deferral is not, and the finding it would
+        # produce could never be resolved.
+        text = "| `hygiene.debt_marker` | TODO/FIXME/XXX markers, one row per file |\n"
+        self.assertEqual(
+            HygieneDebtMarker().run(self.context([file_signal("README.md", text)])), []
+        )
+
+    def test_punctuation_or_a_comment_opener_makes_it_a_marker(self) -> None:
+        for line in ("TODO: rename", "TODO(alice): rename", "# TODO rename", "// FIXME rename"):
+            with self.subTest(line=line):
+                findings = HygieneDebtMarker().run(
+                    self.context([file_signal("src/a.py", line + "\n")])
+                )
+                self.assertEqual(len(findings), 1)
 
     def test_prose_and_partial_words_are_not_markers(self) -> None:
         text = "The todo list is long.\nTODOS are not markers.\nxTODOx neither.\ndebug()\n"
@@ -401,6 +410,21 @@ class UntestedModuleTests(HygieneTestCase):
             self.context([file_signal("pkg/thing.py", module_text(60))])
         )
         self.assertEqual(findings[0].metadata["import_path"], "pkg.thing")
+
+    def test_two_modules_sharing_a_stem_do_not_fight_over_one_test_path(self) -> None:
+        rule = HygieneUntestedModule()
+        ctx = self.context(
+            [
+                file_signal("src/pkg/ingest/base.py", module_text(60)),
+                file_signal("src/pkg/sources/base.py", module_text(60)),
+            ]
+        )
+        findings = rule.run(ctx)
+        self.assertEqual(len(findings), 2)
+        paths = sorted(f.metadata["suggested_test"] for f in findings)
+        self.assertEqual(paths, ["tests/test_ingest_base.py", "tests/test_sources_base.py"])
+        edits = sorted(p.edits[0].path for f in findings for p in rule.run_propose(f, ctx))
+        self.assertEqual(edits, paths)  # two creates, two destinations
 
     def test_the_skeleton_proposal_is_a_reviewable_create(self) -> None:
         rule = HygieneUntestedModule()

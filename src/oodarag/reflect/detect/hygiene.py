@@ -264,6 +264,10 @@ def line_count(sig: Signal) -> int:
     return len(sig.text.splitlines())
 
 
+def path_stem(rel: str) -> str:
+    return rel.rsplit("/", 1)[-1].rsplit(".", 1)[0]
+
+
 def extension(rel: str) -> str:
     name = rel.rsplit("/", 1)[-1]
     # A leading dot is a name, not an extension: ".gitignore" has none.
@@ -294,6 +298,26 @@ def top_level_definitions(text: str, limit: int = 500) -> list[_Definition]:
             if len(out) >= limit:
                 break
     return out
+
+
+#: Comment openers a debt marker sits behind. Deliberately excludes "-" and "*",
+#: which are markdown bullets far more often than they are comment syntax.
+_COMMENT_OPENER_RE = re.compile(r"(?:^|\s)(?:#|//|/\*|<!--|;;?)(?:\s|$)")
+
+
+def looks_like_a_marker(line: str, match: re.Match[str]) -> bool:
+    """Whether a matched word is a debt marker or just the word in a sentence.
+
+    "TODO" appearing in prose about deferred work - a README describing what
+    this very rule looks for, a changelog entry, a style guide - is not a
+    backlog item, and reporting it produces a finding that can never be
+    resolved because there is nothing there to fix. A real marker either carries
+    its conventional punctuation (`TODO:`, `TODO(alice):`) or sits behind a
+    comment opener.
+    """
+    if line[match.end() : match.end() + 1] in {":", "("}:
+        return True
+    return bool(_COMMENT_OPENER_RE.search(line[: match.start()]))
 
 
 def marker_pattern(markers: Iterable[str]) -> re.Pattern[str]:
@@ -363,7 +387,7 @@ class HygieneDebtMarker(Detector):
         out: list[_MarkerHit] = []
         for number, line in enumerate(text.splitlines(), start=1):
             match = self.marker_re.search(line)
-            if match:
+            if match and looks_like_a_marker(line, match):
                 out.append(_MarkerHit(line=number, marker=match.group(0), text=line.strip()))
         return out
 
@@ -582,16 +606,22 @@ class HygieneUntestedModule(Detector):
         blob = self._test_blob(tests)
         churn = self._churn(ctx)
 
-        for sig in self._candidates(files):
+        candidates = self._candidates(files)
+        stems = Counter(path_stem(rel_path(sig)) for sig in candidates)
+
+        for sig in candidates:
             rel = rel_path(sig)
-            stem = rel.rsplit("/", 1)[-1].rsplit(".", 1)[0]
+            stem = path_stem(rel)
             import_path = self._import_path(rel)
             if self._is_mentioned(blob, stem, import_path):
                 continue
             lines = line_count(sig)
             if lines < self.min_lines:
                 continue
-            yield self._finding(sig, rel, stem, import_path, lines, churn.get(rel, []))
+            yield self._finding(
+                sig, rel, stem, import_path, lines, churn.get(rel, []),
+                ambiguous=stems[stem] > 1,
+            )
 
     def _candidates(self, files: list[Signal]) -> list[Signal]:
         """Source modules worth asking the question about.
@@ -683,9 +713,10 @@ class HygieneUntestedModule(Detector):
         import_path: str,
         lines: int,
         commits: list[Signal],
+        ambiguous: bool = False,
     ) -> Finding:
         names = [d for d in top_level_definitions(sig.text) if not d.name.startswith("_")]
-        suggested = self._suggested_test(stem)
+        suggested = self._suggested_test(rel, ambiguous)
         weight = min(1.0, lines / max(1, self.big_module_lines))
         evidence = [
             Evidence.from_signal(
@@ -730,10 +761,24 @@ class HygieneUntestedModule(Detector):
             },
         )
 
-    def _suggested_test(self, stem: str) -> str:
-        safe_stem = re.sub(r"[^A-Za-z0-9_]+", "_", stem).strip("_") or "module"
+    def _suggested_test(self, rel: str, ambiguous: bool = False) -> str:
+        """Where the missing test would go.
+
+        Qualified by the parent directory when two candidate modules share a
+        stem. Both `ingest/base.py` and `sources/base.py` would otherwise
+        propose `tests/test_base.py`, and the second `create` would fail its own
+        precondition against the file the first one wrote an hour earlier - one
+        finding silently losing its fix to another is exactly the kind of thing
+        nobody notices in a report they skim.
+        """
+        name = path_stem(rel)
+        if ambiguous:
+            parent = rel.rsplit("/", 2)[-2] if "/" in rel else ""
+            if parent:
+                name = f"{parent}_{name}"
+        safe = re.sub(r"[^A-Za-z0-9_]+", "_", name).strip("_") or "module"
         directory = self.test_dir.strip("/") or "tests"
-        return f"{directory}/test_{safe_stem}.py"
+        return f"{directory}/test_{safe}.py"
 
     # -- proposal ------------------------------------------------------------
 
@@ -870,8 +915,7 @@ class HygieneOversizedModule(Detector):
 
 
 def _class_name(module_rel: str) -> str:
-    stem = module_rel.rsplit("/", 1)[-1].rsplit(".", 1)[0]
-    parts = [p for p in re.split(r"[^A-Za-z0-9]+", stem) if p]
+    parts = [p for p in re.split(r"[^A-Za-z0-9]+", path_stem(module_rel)) if p]
     name = "".join(p[:1].upper() + p[1:] for p in parts)
     return name if name and name[0].isalpha() else "Module"
 
