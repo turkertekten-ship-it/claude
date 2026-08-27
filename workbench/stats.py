@@ -158,12 +158,17 @@ def summarise_pairwise(outcomes: Sequence[str], a: str, b: str,
     wins = sum(1 for o in outcomes if o == a)
     losses = sum(1 for o in outcomes if o == b)
     ties = sum(1 for o in outcomes if o == "TIE")
+    errors = sum(1 for o in outcomes if o == "ERROR")
+    # An unreadable verdict is not a tie, so it must not sit in the denominator
+    # of a rate that treats ties as half a win. It is reported on its own.
+    scored = wins + losses + ties
     p = sign_test(wins, losses)
     return {
         "a": a, "b": b, "wins_a": wins, "wins_b": losses, "ties": ties,
+        "errors": errors,
         "decided": wins + losses,
         "win_rate_a_excluding_ties": (wins / (wins + losses)) if (wins + losses) else None,
-        "win_rate_a_ties_as_half": (wins + 0.5 * ties) / len(outcomes) if outcomes else None,
+        "win_rate_a_ties_as_half": (wins + 0.5 * ties) / scored if scored else None,
         "p_value_sign_test": round(p, 5),
         "significant_at_0.05": p < 0.05,
         "ci95_win_rate_a": str(bootstrap_win_rate(outcomes, a, seed=seed)),

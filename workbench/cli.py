@@ -167,6 +167,15 @@ def _run(args: argparse.Namespace, blind: bool) -> int:
     suite = load_suite(args.suite)
     backend, judge = _build_backends(args)
 
+    if blind and not args.judge_model:
+        print(
+            "workbench: --judge-model was not given, so judges will run on the "
+            "backend's default model, which may be the session's (expensive) "
+            "default. Pin a cheaper model from a DIFFERENT family than the "
+            "variants under test, e.g. --judge-model claude-sonnet-5.",
+            file=sys.stderr,
+        )
+
     usable, detail = backend.available()
     if not usable:
         print(f"backend {args.backend!r} cannot run here: {detail}", file=sys.stderr)

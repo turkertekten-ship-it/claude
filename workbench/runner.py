@@ -105,6 +105,9 @@ class RunResult:
     controls: list[dict[str, Any]] = field(default_factory=list)
     #: Characters of output per variant, so a length confound stays visible.
     lengths: dict[str, int] = field(default_factory=dict)
+    #: The judge model, recorded because a judge is a measuring instrument:
+    #: changing it invalidates comparison against every earlier run.
+    judge_model: str = ""
 
     @property
     def cost_usd(self) -> float:
@@ -132,6 +135,7 @@ class RunResult:
             "position_bias_rate": round(position_bias_rate(self.judgements), 4),
             "controls": self.controls,
             "mean_output_chars": self.lengths,
+            "judge_model": self.judge_model or "(backend default)",
             "notes": self.notes,
         }
 
@@ -293,6 +297,14 @@ def execute(suite: Suite, backend: Backend, report: Reporter,
             result.notes.append("blind comparison requested but no judge backend available")
             report("  ! no judge backend; skipping comparison")
         else:
+            result.judge_model = judge_model or ""
+            if not judge_model:
+                result.notes.append(
+                    "no judge model was pinned, so judging ran on whatever the "
+                    "backend defaults to. Pin one with --judge-model: a judge is "
+                    "a measuring instrument, and an unpinned one makes this run "
+                    "incomparable with any other"
+                )
             result.judgements = compare(
                 suite, result.runs, judge_backend, report, chosen,
                 judge_model=judge_model,

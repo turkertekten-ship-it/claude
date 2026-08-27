@@ -200,6 +200,7 @@ def markdown(result: RunResult) -> str:
             f"are recorded as ties.")
         total_redactions = sum(j.redactions for j in result.judgements)
         add(f"- Identity strings redacted before judging: **{total_redactions}**.")
+        add(f"- Judge model: `{result.judge_model or '(backend default — not pinned)'}`.")
         if bias > 0.4:
             add("")
             add("> **The judge is reading position, not content.** With "
@@ -225,8 +226,11 @@ def markdown(result: RunResult) -> str:
             f"that as directional, not settled.")
         add("")
 
+        # Only decided pairs feed the fit. An ERROR is not a win by a variant
+        # called "ERROR", and a TIE carries no direction.
         wins = [(j.winner, j.left if j.winner == j.right else j.right)
-                for j in result.judgements if j.winner != "TIE"]
+                for j in result.judgements
+                if j.winner not in ("TIE", "ERROR")]
         if len({w for w, _ in wins}) > 1:
             strengths = bradley_terry([(w, loser) for w, loser in wins])
             add("### Bradley-Terry strengths")

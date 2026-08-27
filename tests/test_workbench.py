@@ -393,6 +393,15 @@ def test_statistics() -> None:
           all(v == v and v != float("inf") for v in
               bradley_terry([("a", "b"), ("a", "b")]).values()))
 
+    print("\n  an unreadable verdict must not be laundered into a tie")
+    with_error = summarise_pairwise(["a", "a", "TIE", "ERROR", "b"], "a", "b")
+    check("errors are counted separately", with_error["errors"] == 1)
+    check("errors are excluded from the decided count", with_error["decided"] == 3)
+    check("errors are excluded from the ties-as-half denominator",
+          abs(with_error["win_rate_a_ties_as_half"] - 2.5 / 4) < 1e-9,
+          str(with_error["win_rate_a_ties_as_half"]))
+    check("an error is not counted as a tie", with_error["ties"] == 1)
+
     summary = summarise_pairwise(["a", "a", "TIE", "b", "a", "a"], "a", "b")
     check("ties are excluded from the significance test", summary["decided"] == 5)
     check("ties count as half in the headline rate",
