@@ -558,3 +558,18 @@ sources:
       stdlib path the ADR names. The table reproduces; the numbers were measured
       rather than invented, and the ADR correctly marks its 1,000 and 50,000-row
       memory figures as scaled from the single 10,000-chunk measurement.
+
+  - id: SECTION-DROP-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:20Z"
+    method: "grep for INGEST-VALIDATED / HOOKS-VALIDATED across provenance/observations.md; git show b11a6fa:provenance/observations.md"
+    evidence: >-
+      An edit to provenance/observations.md in this session used a
+      partition-based range replacement from "## Observed — environment" to
+      "## Conclusion", which took the "## Observed — tooling built here" section
+      sitting between them. Three sourced lines citing INGEST-VALIDATED-2026-08-27
+      and HOOKS-VALIDATED-2026-08-27 were lost. The loss was invisible to
+      verify_provenance, which checks that cited ids resolve but not that
+      declared ids are still cited. It surfaced only when the two ids were
+      grepped for during a later merge and returned nothing. The section was
+      recovered from b11a6fa and restored in merge commit 8f8a2d0.

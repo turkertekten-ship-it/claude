@@ -412,6 +412,14 @@ def cmd_demo(args: argparse.Namespace, console: Console) -> int:
             report = evaluate(pipeline, goldens, args.k)
             payload["eval"] = report.as_dict()
             console.out(report.render())
+
+        # The demo's isolation is worth one line of explanation at the end: the
+        # obvious next command is `make query`, which reads the main root and
+        # would otherwise report an index the user just watched get built.
+        console.say()
+        console.say(f"demo index: {root} (scratch, rebuilt each run)")
+        console.say(f"next: `make index` builds the real one at {Path(args.root)}, "
+                    f"then `make query Q=\"...\"`")
     finally:
         pipeline.close()
 

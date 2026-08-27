@@ -85,6 +85,38 @@ def main() -> int:
     check("a violating file exits 1", bad.returncode == 1, bad.returncode)
     check("violation is reported on stderr", "UNSOURCED_CLAIM" in bad.stderr)
 
+    print("orphaned-source advisory cases")
+    # The other checks all run one way: a claim's tag must resolve. This one runs
+    # the other way, and exists because a range edit once deleted three sourced
+    # lines here while every check still passed - the ids they cited were still
+    # valid, just no longer cited by anything.
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as tmp:
+        scratch = Path(tmp)
+        (scratch / "doc.md").write_text(
+            "# Scratch\n\nA claim citing one source. [src:REPO-EMPTY-2026-08-27]\n"
+        )
+        orphans = vp.orphaned_sources([scratch], set(known))
+        check("a source cited in the scanned tree is not reported orphaned",
+              "REPO-EMPTY-2026-08-27" not in orphans)
+        check("sources cited nowhere in it are reported orphaned",
+              "SESSIONS-2026-08-27" in orphans, orphans[:3])
+
+        # An id mentioned only inside inline code is an example, not a citation,
+        # and must not count as keeping the source alive.
+        (scratch / "doc.md").write_text(
+            "# Scratch\n\nTag them like `[src:REPO-EMPTY-2026-08-27]`.\n"
+        )
+        check("an id in inline code does not count as a citation",
+              "REPO-EMPTY-2026-08-27" in vp.orphaned_sources([scratch], set(known)))
+
+    advisory = subprocess.run(
+        [sys.executable, str(VERIFIER), str(REPO)], capture_output=True, text=True
+    )
+    check("the advisory never turns a clean scan into a failure",
+          advisory.returncode == 0, advisory.returncode)
+
     print()
     if FAILURES:
         print(f"FAILED: {len(FAILURES)} case(s): {', '.join(FAILURES)}")

@@ -206,20 +206,53 @@ def markdown_files(targets: list[Path]):
                     yield path
 
 
+def orphaned_sources(targets: list[Path], known: set[str]) -> list[str]:
+    """Ledger ids that nothing cites any more.
+
+    The other four checks all run in one direction: they confirm that a claim's
+    tag resolves to a source. Nothing confirms the reverse, and the gap is not
+    theoretical - a careless range edit to a Markdown file deleted three sourced
+    lines here, and every check still passed, because the ids they cited were
+    still perfectly valid. They were simply no longer cited by anything.
+
+    Reported as an advisory rather than a violation, because an orphan is
+    ambiguous: it may be a claim that vanished, or a source that legitimately
+    backs something outside the Markdown - a commit message, a superseded
+    snapshot. Failing the build on it would train people to delete evidence to
+    get green, which is the opposite of the point.
+    """
+    cited: set[str] = set()
+    for path in markdown_files(targets):
+        text = INLINE_CODE.sub("", path.read_text(encoding="utf-8", errors="replace"))
+        cited.update(SRC_TAG.findall(text))
+    return sorted(known - cited)
+
+
 def main(argv: list[str]) -> int:
     targets = [Path(a).resolve() for a in argv[1:]] or [REPO]
     known, findings = load_sources()
     for path in markdown_files(targets):
         findings.extend(scan_markdown(path, set(known)))
 
+    orphans = orphaned_sources(targets, set(known))
+
     if not findings:
         scanned = len(list(markdown_files(targets)))
         print(f"verify_provenance: OK — {scanned} file(s), {len(known)} source(s), 0 violations")
+        if orphans:
+            print(f"  advisory: {len(orphans)} ledger source(s) no longer cited by any document.")
+            print("  Either a claim was deleted, or the evidence backs something outside")
+            print("  Markdown. Check the first case before assuming the second:")
+            for sid in orphans:
+                print(f"    - {sid}")
         return 0
 
     for finding in sorted(findings, key=lambda f: (str(f.path), f.line)):
         print(str(finding), file=sys.stderr)
     print(f"\nverify_provenance: {len(findings)} violation(s)", file=sys.stderr)
+    if orphans:
+        print(f"  advisory: {len(orphans)} ledger source(s) no longer cited: "
+              f"{', '.join(orphans)}", file=sys.stderr)
     return 1
 
 

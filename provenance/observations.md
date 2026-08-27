@@ -149,6 +149,13 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - One OODA cycle produces the four-block report the design called for, and its single decision carries a stated reason and an expected value. [src:CLI-VERIFIED-2026-08-27]
 - `python3 -m oodarag.cli` fails without `PYTHONPATH=src`, which is why the Makefile is the documented entry point. [src:CLI-VERIFIED-2026-08-27]
 
+## Observed — claims recovered by the orphan advisory
+
+- The ADR's dense-search latency table reproduces independently: 1,000 chunks at 15.0 ms/query against its stated 13 ms, 10,000 at 128.7 ms against its 123 ms. The subagent measured rather than invented. [src:ADR-PERF-REPRODUCED-2026-08-27]
+- The `selfcheck` subcommand was validated by the substrate session before this branch extended it. [src:SELFCHECK-VALIDATED-2026-08-27]
+- The goal recorded for the substrate session at 14:26Z asked to look through previous chats and build internal files, systems and system prompts, and to never fabricate. [src:USER-GOAL-2026-08-27]
+- One ledger source is legitimately orphaned: `FLEET-REFS-20260827T150640` backs a FLEET.md roster that a later regeneration replaced, and the current roster cites the newer snapshot. [src:CLAUDE-AI-SHARED-ROOT-2026-08-27]
+
 ## Conclusion
 
 The request that opened this session asked to look at "all my previous claude
