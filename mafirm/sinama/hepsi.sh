@@ -3,7 +3,7 @@
 # Kitabın kendi öz-sınamalarından bağımsız. Her vaka kitabın DÜZYAZISINDAN
 # türetildi, kodundan değil.
 set -u
-S="$HOME/mafirm/sinama"
+S="${MAFIRM_SINAMA:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
 declare -a ad kod
 topla() { ad+=("$1"); kod+=("$2"); }
 

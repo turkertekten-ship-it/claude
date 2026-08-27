@@ -13,11 +13,20 @@ import os
 import subprocess
 import sys
 import contextlib
+# Kök dizin, betiğin KENDİ konumundan çözülür; sabit ~/mafirm değil.
+# [Kör sınamanın kendi bulgusu] Betikler ~/mafirm'i sabitlediği sürece bir
+# klon KENDİ ağacını değil, makinedeki kurulumu ölçer: klondaki kapi.py
+# tamamen boşaltıldığında klonun denetimi hâlâ "DENETİM OK" diyordu. Bu, D
+# takımının kitapta bulduğu kusurun aynısıdır — iddia ettiği şeye bakmayan
+# bir kontrol. MAFIRM ortam değişkeniyle geçersiz kılınabilir.
+_KOK_COZ = os.environ.get("MAFIRM") or os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__)))
 
-sys.path.insert(0, os.path.expanduser("~/mafirm/birimler/rekabet/kod"))
+
+sys.path.insert(0, os.path.join(_KOK_COZ, "birimler/rekabet/kod"))
 import esik  # noqa: E402
 
-ESIK_PY = os.path.expanduser("~/mafirm/birimler/rekabet/kod/esik.py")
+ESIK_PY = os.path.join(_KOK_COZ, "birimler/rekabet/kod/esik.py")
 sonuclar = []
 
 

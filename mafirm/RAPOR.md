@@ -390,7 +390,16 @@ Bir sınama takımı da sınanmalıdır. Üç hata yapıldı ve üçü de düzel
    §7'nin istediği dayanağın ta kendisidir. İkinci sürüm söyleme fiili aradı ama
    "<kitap> kitabında … yazdı" cümlesi hâlâ eşleşti. Ayrıca tırnaklar
    eşleştirilmediği için hayalet aralıklar üretiliyordu. Üçüncü sürüm doğru.
-4. **İki mevzuat/depo şüphem yanlıştı** (G-06, I-06). Kitap her ikisinde de
+4. **Teslim ettiğim takım taşınabilir değildi — ve bu, kitapta bulduğum
+   kusurun aynısıydı.** Bütün betikler `~/mafirm` yolunu sabitliyordu;
+   dolayısıyla depoyu klonlayan biri KENDİ ağacını değil, makinedeki kurulumu
+   ölçüyordu. Kanıtlandı: klondaki `kapi.py` tamamen boşaltıldı ve klonun
+   denetimi hâlâ **DENETİM OK** dedi — tıpkı D takımının kitapta bulduğu gibi,
+   iddia ettiği şeye bakmayan bir kontrol. Her betik artık kökü kendi
+   konumundan çözüyor. Klondan koşum ayrıca kaynak ağaçtan koşumun yapısal
+   olarak göremeyeceği ikinci bir kusuru yakaladı (B-34 ad kaydını yanlış
+   ağaca yazıyordu).
+5. **İki mevzuat/depo şüphem yanlıştı** (G-06, I-06). Kitap her ikisinde de
    haklıydı; benim hatırladığım bayattı. Kitabın kendi §14 kuralının kanıtı:
    *"bir ad, var olduğunun kanıtı değildir"* kadar *"hatırladığın ad, doğru ad
    değildir"* de geçerli.

@@ -171,7 +171,10 @@ def _ad_kaydi():
     bir KAYITTIR. Kayıt yoksa bu kural kapsanmıyor demektir ve sistem bunu
     saklamak yerine söyler (bkz. denetim.sh "müvekkil ad kaydı" satırı).
     """
-    yol = os.path.expanduser("~/mafirm/hafiza/muvekkil-adlari.txt")
+    # kapı, kendi konumundan iki üst dizindeki hafiza/ dizinini okur
+    kok = os.environ.get("MAFIRM") or os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    yol = os.path.join(kok, "hafiza", "muvekkil-adlari.txt")
     try:
         with open(yol, encoding="utf-8") as f:
             return [a.strip() for a in f if a.strip()

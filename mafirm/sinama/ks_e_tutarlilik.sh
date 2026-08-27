@@ -4,7 +4,7 @@
 # değer yazıyor. Bu takım her komutu çalıştırır ve yazılı beklenen değerle
 # karşılaştırır. Kurulum kitaba SADIK yapıldı; sapma varsa kaynağı kitaptadır.
 set -u
-M="$HOME/mafirm"
+M="${MAFIRM:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 gecti=0; kaldi=0
 
 kontrol() {   # kontrol "<bölüm>" "<beklenen>" "<gerçek>" "<not>"

@@ -20,9 +20,18 @@ import json
 import os
 import subprocess
 import sys
+# Kök dizin, betiğin KENDİ konumundan çözülür; sabit ~/mafirm değil.
+# [Kör sınamanın kendi bulgusu] Betikler ~/mafirm'i sabitlediği sürece bir
+# klon KENDİ ağacını değil, makinedeki kurulumu ölçer: klondaki kapi.py
+# tamamen boşaltıldığında klonun denetimi hâlâ "DENETİM OK" diyordu. Bu, D
+# takımının kitapta bulduğu kusurun aynısıdır — iddia ettiği şeye bakmayan
+# bir kontrol. MAFIRM ortam değişkeniyle geçersiz kılınabilir.
+_KOK_COZ = os.environ.get("MAFIRM") or os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__)))
 
-KAPI = os.path.expanduser("~/mafirm/.claude/hooks/kapi.py")
-MAFIRM = os.path.expanduser("~/mafirm")
+
+KAPI = os.path.join(_KOK_COZ, ".claude/hooks/kapi.py")
+MAFIRM = _KOK_COZ
 sonuclar = []
 
 

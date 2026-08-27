@@ -11,7 +11,7 @@
 # küme düzeltilir), taban çizgisinin YEŞİL olduğu doğrulanır, sonra mutasyon
 # uygulanır. Ölçülen şey artık yalnızca mutasyonun etkisidir.
 set -u
-KAYNAK="$HOME/mafirm"
+KAYNAK="${MAFIRM:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 KUM="${TMPDIR:-/tmp}/ks_d_kum"
 gecti=0; kaldi=0
 
@@ -19,12 +19,13 @@ kur() {
   rm -rf "$KUM"; mkdir -p "$KUM"
   cp -a "$KAYNAK/." "$KUM/"
   # Denetim betiğini kum havuzuna yönlendir. İKİ biçim de değiştirilir:
-  # kitaba sadık sürüm literal ~/mafirm kullanıyordu, yamalı sürüm M="$HOME/mafirm".
-  sed -e "s#~/mafirm#$KUM#g" -e "s#^M=\"\$HOME/mafirm\"#M=\"$KUM\"#" \
+  # kitaba sadık sürüm literal ~/mafirm kullanıyordu, yamalı sürüm M="${MAFIRM:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}".
+  sed -e "s#~/mafirm#$KUM#g" \
+      -e "s#^M=.*#M=\"$KUM\"#" \
       "$KAYNAK/denetim.sh" > "$KUM/denetim.sh"
   # Yönlendirmenin gerçekten tuttuğunu doğrula; tutmazsa mutasyon sınaması
   # asıl kurulumu ölçer ve her mutasyonu "kaçırmış" görünür.
-  if grep -q "HOME/mafirm" "$KUM/denetim.sh"; then
+  if ! grep -q "^M=\"$KUM\"" "$KUM/denetim.sh"; then
     echo "KUM HAVUZU YÖNLENDİRMESİ BAŞARISIZ — sınama geçersiz olurdu"; exit 98
   fi
   chmod +x "$KUM/denetim.sh"

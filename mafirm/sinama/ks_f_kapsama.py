@@ -14,7 +14,17 @@ Sınıflar:
   KISMİ      — kapı var ama kör sınama B'de kanıtlanmış boşlukları var
   YOK        — hiçbir otomatik kontrol bu kuralı görmüyor
 """
+import os
 import sys
+# Kök dizin, betiğin KENDİ konumundan çözülür; sabit ~/mafirm değil.
+# [Kör sınamanın kendi bulgusu] Betikler ~/mafirm'i sabitlediği sürece bir
+# klon KENDİ ağacını değil, makinedeki kurulumu ölçer: klondaki kapi.py
+# tamamen boşaltıldığında klonun denetimi hâlâ "DENETİM OK" diyordu. Bu, D
+# takımının kitapta bulduğu kusurun aynısıdır — iddia ettiği şeye bakmayan
+# bir kontrol. MAFIRM ortam değişkeniyle geçersiz kılınabilir.
+_KOK_COZ = os.environ.get("MAFIRM") or os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__)))
+
 
 KURALLAR = [
     ("1",  "Kanıt kuralı",

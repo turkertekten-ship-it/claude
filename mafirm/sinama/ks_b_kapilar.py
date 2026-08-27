@@ -12,8 +12,17 @@ import importlib.util
 import os
 import sys
 from datetime import date
+# Kök dizin, betiğin KENDİ konumundan çözülür; sabit ~/mafirm değil.
+# [Kör sınamanın kendi bulgusu] Betikler ~/mafirm'i sabitlediği sürece bir
+# klon KENDİ ağacını değil, makinedeki kurulumu ölçer: klondaki kapi.py
+# tamamen boşaltıldığında klonun denetimi hâlâ "DENETİM OK" diyordu. Bu, D
+# takımının kitapta bulduğu kusurun aynısıdır — iddia ettiği şeye bakmayan
+# bir kontrol. MAFIRM ortam değişkeniyle geçersiz kılınabilir.
+_KOK_COZ = os.environ.get("MAFIRM") or os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__)))
 
-yol = os.path.expanduser("~/mafirm/.claude/hooks/kapi.py")
+
+yol = os.path.join(_KOK_COZ, ".claude/hooks/kapi.py")
 spec = importlib.util.spec_from_file_location("kapi", yol)
 kapi = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(kapi)
@@ -137,7 +146,7 @@ vaka("B-33", "11 araştır",
 # B-34: [B-28]'in mekanizma sınaması. Gerçek kişi adı desenle yakalanamaz;
 # tek dürüst çözüm bir KAYITTIR. Kayıt DOLUYKEN kapı ateşlemeli.
 import tempfile
-_kayit = os.path.expanduser("~/mafirm/hafiza/muvekkil-adlari.txt")
+_kayit = os.path.join(_KOK_COZ, "hafiza", "muvekkil-adlari.txt")
 _yedek = open(_kayit, encoding="utf-8").read() if os.path.exists(_kayit) else ""
 try:
     with open(_kayit, "w", encoding="utf-8") as f:

@@ -14,7 +14,8 @@
 #   3. `test -z "$(grep -rL ...)"` hiç dosya yokken boş döner ve GEÇER.
 # Aşağıdaki her kontrol artık bir EŞİK doğrular, bir sayı yazdırmaz.
 set -u
-M="$HOME/mafirm"
+# Kök dizin betiğin KENDİ konumundan çözülür (MAFIRM ile geçersiz kılınabilir).
+M="${MAFIRM:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
 hata=0
 YAPISAL_SADECE=0
 [ "${1:-}" = "--yapisal" ] && YAPISAL_SADECE=1
@@ -58,7 +59,7 @@ kontrol "boş koltuklar işaretli (>=2)" \
 
 echo "=== kod sınamaları ==="
 kontrol "rekabet eşiği" "oz_sinama $M/birimler/rekabet/kod/esik.py 'SELFTEST OK'"
-kontrol "beş kapı"      "oz_sinama $M/.claude/hooks/kapi.py 'SELFTEST OK'"
+kontrol "altı kapı"     "oz_sinama $M/.claude/hooks/kapi.py 'SELFTEST OK'"
 
 echo "=== bileşenler ==="
 kontrol "beceriler (>=11)"        "enaz 11 $M/.claude/skills/*/SKILL.md"
