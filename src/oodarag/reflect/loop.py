@@ -37,6 +37,7 @@ from typing import Any
 from oodarag.reflect.act.edits import ApplyReport, EditApplier
 from oodarag.reflect.act.queue import ReviewQueue, proposal_from_dict
 from oodarag.reflect.act.report import render_json, render_markdown, write_report
+from oodarag.reflect.decide.conflicts import resolve_edit_conflicts
 from oodarag.reflect.decide.policy import Decision, PolicyConfig, PolicyEngine
 from oodarag.reflect.decide.priors import RulePriors
 from oodarag.reflect.detect.base import DetectContext, build_detectors
@@ -198,6 +199,7 @@ def build_sources(config: ReflectConfig) -> list[SignalSource]:
 class ReflectLoop:
     def __init__(self, config: ReflectConfig | None = None) -> None:
         self.config = config or ReflectConfig()
+        self._deferred: list[Proposal] = []
         self.journal = Journal(self.config.journal_dir)
         self.queue = ReviewQueue(self.config.queue_path)
         self.priors = RulePriors(self.journal)
@@ -294,9 +296,15 @@ class ReflectLoop:
         # risk gate - a person already looked at the diff and said yes, which is
         # exactly the authority the risk tiers exist to stand in for.
         approved = self._accepted_proposals()
-        to_apply = approved + decision.apply
+        # Two rules may both want to create the same file; settle that here,
+        # visibly, rather than letting the loser fail a precondition in silence.
+        to_apply, conflict_notes = resolve_edit_conflicts(approved + decision.apply)
+        decision.notes.extend(conflict_notes)
+        survived = {p.fingerprint for p in to_apply}
+        self._deferred = [p for p in decision.apply if p.fingerprint not in survived]
         report = applier.apply_all(to_apply, cycle_id)
-        self.queue.put(decision.queue, cycle_id)
+        # Deferred proposals are queued rather than dropped, so they stay visible.
+        self.queue.put(decision.queue + self._deferred, cycle_id)
         for entry in approved:
             self.queue.drop(entry.fingerprint)
         return report
@@ -315,7 +323,10 @@ class ReflectLoop:
     def learn(self, report: CycleReport, decision: Decision, applied: ApplyReport) -> None:
         outcomes: list[Outcome] = []
         by_path = {r.path: r for r in applied.results}
+        deferred = {p.fingerprint for p in self._deferred}
         for proposal in decision.apply:
+            if proposal.fingerprint in deferred:
+                continue  # it never ran, so there is no verdict to learn from
             results = [by_path.get(p) for p in proposal.paths]
             ok = all(r is not None and r.applied for r in results)
             if self.config.dry_run:
@@ -371,7 +382,10 @@ class ReflectLoop:
             report.applied = [
                 p.fingerprint
                 for p in decision.apply
-                if all(
+                # An all() over an empty sequence is True, which would report a
+                # proposal that changed nothing as applied.
+                if p.paths
+                and all(
                     any(r.path == path and r.applied for r in applied.results)
                     for path in p.paths
                 )

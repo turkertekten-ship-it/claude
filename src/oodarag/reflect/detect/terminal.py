@@ -503,6 +503,13 @@ class TerminalRetryLoop(Detector):
     # -- detection -----------------------------------------------------------
 
     def _attempts(self, signals: list[Signal]) -> list[_Attempt]:
+        """Comparable commands, in order, with the incidental ones dropped.
+
+        Dropped rather than treated as a boundary: glancing at `ls` or `git
+        status` between two attempts is part of the struggle, not the end of
+        it, and a rule that let a stray `cd` split one run into two would find
+        two half-runs and report neither.
+        """
         out: list[_Attempt] = []
         for sig in signals:
             parts = effective_tokens(sig.text)
@@ -661,9 +668,7 @@ class TerminalRepeatedCommand(Detector):
         self, command: str, signals: list[Signal], sessions: set[str], days: set[str]
     ) -> Finding:
         runs = len(signals)
-        confidence = (
-            0.5 + 0.05 * (runs - self.min_runs) + 0.1 * (len(days) - self.min_days)
-        )
+        confidence = 0.5 + 0.05 * (runs - self.min_runs) + 0.1 * (len(days) - self.min_days)
         return Finding(
             rule_id=self.rule_id,
             title=f'Retyped {runs} times: "{command[:70]}"',

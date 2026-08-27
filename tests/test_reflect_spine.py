@@ -410,3 +410,69 @@ class TestSafeReadText(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestEditConflictResolution(unittest.TestCase):
+    """Two rules can want the same file. Only one may have it in a cycle.
+
+    Without this, the second proposal fails its `create` precondition inside the
+    actuator and the finding behind it disappears for the night with nothing
+    said - the exact silent loss the nightly report exists to prevent.
+    """
+
+    def proposal(self, rule: str, path: str, op: str, key: str = "") -> Proposal:
+        finding = Finding(rule_id=rule, title=rule, key=key or rule, targets=[path])
+        return Proposal(finding=finding, title=f"{op} {path}",
+                        edits=[EditOp(path=path, op=op, text="body", anchor="## H")])
+
+    def resolve(self, proposals):
+        from oodarag.reflect.decide.conflicts import resolve_edit_conflicts
+
+        return resolve_edit_conflicts(proposals)
+
+    def test_two_creates_on_one_path_keep_the_first(self) -> None:
+        first = self.proposal("friction.repeated_instruction", "CLAUDE.md", "create")
+        second = self.proposal("friction.correction", "CLAUDE.md", "create")
+        kept, notes = self.resolve([first, second])
+        self.assertEqual([p.fingerprint for p in kept], [first.fingerprint])
+        self.assertEqual(len(notes), 1)
+        self.assertIn(second.fingerprint[:8], notes[0])
+        self.assertIn("friction.correction", notes[0])
+        self.assertIn("next run", notes[0], "the note must say it is deferred, not dropped")
+
+    def test_additive_ops_may_share_a_file(self) -> None:
+        """ensure_section and append are idempotent, so several rules may contribute."""
+        a = self.proposal("friction.repeated_instruction", "CLAUDE.md", "ensure_section")
+        b = self.proposal("friction.correction", "CLAUDE.md", "ensure_section")
+        kept, notes = self.resolve([a, b])
+        self.assertEqual(len(kept), 2)
+        self.assertEqual(notes, [])
+
+    def test_a_create_blocks_a_later_additive_op_on_the_same_file(self) -> None:
+        create = self.proposal("docs.broken_ref", "internal/PLAN.md", "create")
+        append = self.proposal("docs.undocumented_entrypoint", "internal/PLAN.md", "append")
+        kept, notes = self.resolve([create, append])
+        self.assertEqual([p.fingerprint for p in kept], [create.fingerprint])
+        self.assertEqual(len(notes), 1)
+
+    def test_replace_is_exclusive_too(self) -> None:
+        """The first replace may move the text the second is anchored to."""
+        a = self.proposal("r.a", "README.md", "replace")
+        b = self.proposal("r.b", "README.md", "replace")
+        kept, _ = self.resolve([a, b])
+        self.assertEqual(len(kept), 1)
+
+    def test_different_files_never_conflict(self) -> None:
+        kept, notes = self.resolve([
+            self.proposal("r.a", "a.md", "create"),
+            self.proposal("r.b", "b.md", "create"),
+        ])
+        self.assertEqual(len(kept), 2)
+        self.assertEqual(notes, [])
+
+    def test_order_decides_the_winner(self) -> None:
+        """The loop hands proposals over in score order, so first claim wins."""
+        low = self.proposal("r.low", "CLAUDE.md", "create")
+        high = self.proposal("r.high", "CLAUDE.md", "create")
+        kept, _ = self.resolve([high, low])
+        self.assertEqual([p.finding.rule_id for p in kept], ["r.high"])
