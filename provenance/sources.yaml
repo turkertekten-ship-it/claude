@@ -529,3 +529,36 @@ sources:
       Recorded rather than reconciled. Both were read; they describe the same
       command with different bounds, and this session has no basis for deciding
       which is current.
+
+  - id: AUDIT-SUBAGENTS-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:45Z"
+    method: >-
+      two Agent(subagent) audits of this session's own work — one following
+      .claude/agents/fact-checker.md against docs/cherny-practice.md, one
+      following .claude/agents/verifier.md against the repository's checks;
+      each finding below was then re-derived by this session before being acted
+      on
+    evidence: >-
+      The document auditor returned 8 findings and 5 minor flags, and confirmed
+      clean: the 60-tip count, every PR statistic, both screenshot quotations,
+      and that no content was invented under the draft's empty headings. Its
+      substantive findings — a miscount of empty subsections (nine, not eight),
+      "TDD" wrongly attributed to Cherny as a coinage, a paragraph-drop
+      arithmetic error, an effort-level gloss contradicted by the corpus's own
+      later capture, two subagent reports written as flat fact, and four
+      quotations cited to a ledger entry that did not transcribe them — were
+      each re-checked here and all held. The checks auditor established that
+      deleting .claude/agents/verifier.md, prompts/cherny-operator.md and
+      docs/workflows.md, and replacing the cherny skill with invalid YAML, left
+      `bash tests/run_all.sh` printing "ALL CHECKS PASSED" with exit 0; that
+      `make test` ran unittest discovery over zero TestCase classes and passed
+      vacuously; and that a violation in a file outside the repository crashed
+      Finding.__str__ with an uncaught ValueError.
+    note: >-
+      Recorded because it is the result of applying this corpus's central
+      practice to the corpus itself, and because it establishes what the green
+      suite did and did not prove at the time. Both auditors were told a clean
+      result was acceptable; both nonetheless found real defects, and the
+      document auditor also correctly cleared the counts it was asked to attack
+      hardest. All findings acted on in commit 7018b08.

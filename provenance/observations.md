@@ -86,3 +86,11 @@ contents were not reconstructed, summarised, or guessed at.
 ## Observed — inherited state of the code on this branch
 
 - `oodarag.cli` does not exist, so the `demo`, `index`, `query`, `eval` and `loop` targets advertised in the Makefile all fail; `internal/PLAN.md`, referenced by `README.md`, is also absent. This session did not repair it and changed nothing under `src/`. [src:OODARAG-NO-CLI-2026-08-27]
+
+## Observed — what auditing this work found
+
+- Two subagents audited this session's own output; between them they found a miscount, a misattributed term, an arithmetic error, a gloss contradicted by the corpus's own sources, two second-hand claims written as fact, and four quotations the ledger could not check. Each was re-derived here before being acted on, and all held. [src:AUDIT-SUBAGENTS-2026-08-27]
+- The test suite could not see any of the installed layer: deleting three files named in `CLAUDE.md` and replacing a skill with invalid YAML still produced "ALL CHECKS PASSED" and exit 0. [src:AUDIT-SUBAGENTS-2026-08-27]
+- `make test` passed vacuously, running unittest discovery over test scripts that define no `TestCase` subclass. [src:AUDIT-SUBAGENTS-2026-08-27]
+- The fabrication guard crashed rather than reporting when a violation lay outside the repository root, so it failed at the moment it found something. [src:AUDIT-SUBAGENTS-2026-08-27]
+- The document auditor separately confirmed clean what it was asked to attack hardest: the 60-tip count, every PR statistic, both screenshot quotations, and the absence of any invented content under the draft's empty headings. [src:AUDIT-SUBAGENTS-2026-08-27]
