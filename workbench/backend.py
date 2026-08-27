@@ -90,7 +90,12 @@ class Completion:
 class Request:
     """Everything that identifies one call, and therefore its cache key."""
 
-    prompt: str
+    prompt: str = ""
+    #: Successive user turns, for testing a conversation rather than a prompt.
+    #: Assistant turns are not settable: prefill is rejected on current models,
+    #: so what a multi-turn case controls is what the user says, and the model
+    #: fills in the rest. When set, ``prompt`` is ignored.
+    turns: tuple[str, ...] = ()
     system: str | None = None
     append_system: str | None = None
     model: str | None = None
@@ -116,6 +121,7 @@ class Request:
     def cache_key(self) -> str:
         payload = {
             "prompt": self.prompt,
+            "turns": list(self.turns),
             "system": self.system,
             "append_system": self.append_system,
             "model": self.model,
@@ -160,14 +166,18 @@ class EchoBackend(Backend):
 
     def complete(self, request: Request) -> Completion:
         marker = "[[echo:"
-        text = request.prompt
-        if marker in request.prompt:
-            start = request.prompt.index(marker) + len(marker)
-            end = request.prompt.index("]]", start)
-            text = request.prompt[start:end].strip()
+        # A multi-turn request is answered from its last turn, which is what a
+        # real backend does too: earlier turns are context, the last one is the
+        # thing being asked.
+        source = request.turns[-1] if request.turns else request.prompt
+        text = source
+        if marker in source:
+            start = source.index(marker) + len(marker)
+            end = source.index("]]", start)
+            text = source[start:end].strip()
         else:
             digest = hashlib.sha256(request.cache_key().encode()).hexdigest()[:8]
-            text = f"echo({digest}): {request.prompt.strip()[:200]}"
+            text = f"echo({digest}): {source.strip()[:200]}"
         structured = None
         if request.json_schema:
             try:
@@ -212,7 +222,16 @@ class ClaudeCLIBackend(Backend):
         return True, f"{path} ({out.stdout.strip()})"
 
     def _argv(self, request: Request) -> list[str]:
-        argv = [self.executable, "-p", request.prompt, "--output-format", "json"]
+        if request.turns:
+            # Multi-turn needs the streaming transport in both directions, and
+            # --verbose on top; the CLI refuses each of those combinations
+            # separately, which is why this is a distinct argv shape rather
+            # than one more flag on the single-prompt one.
+            argv = [self.executable, "-p",
+                    "--input-format", "stream-json",
+                    "--output-format", "stream-json", "--verbose"]
+        else:
+            argv = [self.executable, "-p", request.prompt, "--output-format", "json"]
         model = request.model or self.default_model
         if model:
             argv += ["--model", model]
@@ -251,12 +270,45 @@ class ClaudeCLIBackend(Backend):
             env["CLAUDE_CODE_MAX_OUTPUT_TOKENS"] = str(request.max_output_tokens)
         return env
 
+    @staticmethod
+    def _stdin_for(request: Request) -> str | None:
+        """NDJSON user turns, one per line, for the stream-json input format."""
+        if not request.turns:
+            return None
+        return "\n".join(
+            json.dumps({"type": "user", "message": {
+                "role": "user", "content": [{"type": "text", "text": turn}]}})
+            for turn in request.turns
+        ) + "\n"
+
+    @staticmethod
+    def _last_result(stdout: str) -> dict[str, Any] | None:
+        """The final ``result`` event in a stream.
+
+        A multi-turn run emits one ``result`` per user turn. The last one is
+        the answer to the last thing the user said, which is what the case is
+        asking about; the earlier ones are intermediate.
+        """
+        final: dict[str, Any] | None = None
+        for line in stdout.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if event.get("type") == "result":
+                final = event
+        return final
+
     def complete(self, request: Request) -> Completion:
         argv = self._argv(request)
         started = time.time()
         try:
             proc = subprocess.run(
                 argv,
+                input=self._stdin_for(request),
                 capture_output=True,
                 text=True,
                 timeout=request.timeout_s,
@@ -279,6 +331,16 @@ class ClaudeCLIBackend(Backend):
                                 f"{proc.stderr.strip()[:400]}",
                 backend=self.name, duration_ms=elapsed_ms, workdir=request.cwd or "",
             )
+        if request.turns:
+            envelope = self._last_result(proc.stdout)
+            if envelope is None:
+                return Completion(
+                    text="", error="no result event in the stream: "
+                                   f"{proc.stderr.strip()[:300]}",
+                    backend=self.name, duration_ms=elapsed_ms,
+                    workdir=request.cwd or "",
+                )
+            return self._from_envelope(envelope, request, elapsed_ms)
         try:
             envelope = json.loads(proc.stdout)
         except json.JSONDecodeError:
@@ -288,6 +350,10 @@ class ClaudeCLIBackend(Backend):
                 backend=self.name, duration_ms=elapsed_ms, workdir=request.cwd or "",
             )
 
+        return self._from_envelope(envelope, request, elapsed_ms)
+
+    def _from_envelope(self, envelope: dict[str, Any], request: Request,
+                       elapsed_ms: int) -> Completion:
         usage = envelope.get("usage") or {}
         model_usage = envelope.get("modelUsage") or envelope.get("model_usage") or {}
         model_name = next(iter(model_usage), request.model or "")

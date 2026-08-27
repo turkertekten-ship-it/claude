@@ -563,6 +563,75 @@ def test_thinking_controls() -> None:
           base.cache_key() != Request(prompt="p", model="m", max_output_tokens=99).cache_key())
 
 
+def test_multi_turn() -> None:
+    print("\nmulti-turn -- a conversation, not a prompt")
+    from workbench.backend import ClaudeCLIBackend
+
+    backend = ClaudeCLIBackend()
+    req = Request(turns=("first", "second"))
+    argv = backend._argv(req)
+    check("multi-turn uses the streaming transport both ways",
+          "--input-format" in argv and "--output-format" in argv
+          and argv[argv.index("--output-format") + 1] == "stream-json")
+    check("--verbose is present, which the CLI requires for it",
+          "--verbose" in argv)
+    check("the prompt is not passed positionally", "first" not in argv)
+
+    stdin = backend._stdin_for(req)
+    lines = [json.loads(l) for l in stdin.strip().splitlines()]
+    check("one NDJSON user event per turn", len(lines) == 2)
+    check("each carries the turn text",
+          lines[0]["message"]["content"][0]["text"] == "first"
+          and lines[1]["message"]["content"][0]["text"] == "second")
+    check("single-prompt requests send no stdin",
+          backend._stdin_for(Request(prompt="p")) is None)
+
+    print("\n  the last result event wins -- earlier ones are intermediate turns")
+    stream = "\n".join([
+        json.dumps({"type": "system"}),
+        json.dumps({"type": "result", "result": "ACK", "usage": {}}),
+        json.dumps({"type": "assistant"}),
+        json.dumps({"type": "result", "result": "UNIT-42", "usage": {}}),
+    ])
+    final = backend._last_result(stream)
+    check("the final result event is taken", final["result"] == "UNIT-42")
+    check("a stream with no result event yields None",
+          backend._last_result('{"type": "system"}') is None)
+    check("unparseable lines are skipped, not fatal",
+          backend._last_result('garbage\n' + json.dumps(
+              {"type": "result", "result": "ok"}))["result"] == "ok")
+
+    print("\n  turns change the cache key, and are graded end to end")
+    check("turns change the cache key",
+          Request(turns=("a",)).cache_key() != Request(turns=("a", "b")).cache_key())
+
+    path = write_suite("""
+name: mt
+vars: {who: UNIT-42}
+variants: [{id: v}]
+cases:
+  - id: convo
+    turns:
+      - 'My designation is {{who}}.'
+      - 'What is it? [[echo: {{who}}]]'
+    graders: [{type: contains, value: UNIT-42}]
+""")
+    result = execute(load_suite(path), EchoBackend(), report=lambda m: None)
+    run = result.runs[0]
+    check("a multi-turn case runs and grades", run.passed, run.output)
+    check("variables render inside every turn", "{{who}}" not in run.prompt)
+    check("the transcript records the whole conversation",
+          "My designation" in run.prompt and "What is it" in run.prompt)
+
+    rejects("a case setting both prompt and turns is refused",
+            lambda: load_suite(write_suite(
+                "name: t\nvariants: [{id: a}]\n"
+                "cases: [{id: c, prompt: x, turns: [y]}]")), SpecError)
+    rejects("a case with neither is refused",
+            lambda: load_suite(write_suite(
+                "name: t\nvariants: [{id: a}]\ncases: [{id: c}]")), SpecError)
+
+
 def test_registry_kinds() -> None:
     print("\ngrader taxonomy")
     kinds = dict(describe_registry())
@@ -586,6 +655,7 @@ def main() -> int:
     test_end_to_end()
     test_agent_mode_plumbing()
     test_thinking_controls()
+    test_multi_turn()
     test_registry_kinds()
 
     print()

@@ -87,7 +87,7 @@ Legend: **CC** = stock Claude Code; **WB** = this repository's `workbench/`.
 | System prompt control | yes | `--system-prompt` | per variant | Also `--append-system-prompt` |
 | `{{variable}}` templating | retired with Workbench | no | yes | Strict: an unfilled placeholder is an error, not an empty string |
 | Saved prompt versions | retired with Workbench | no | yes | They are files in git, which is a stronger guarantee than a saved prompt in a console that can be sunset |
-| Multi-turn message arrays | yes | via `--input-format stream-json` | no | See *Not built* below |
+| Multi-turn message arrays | yes | `--input-format stream-json` | `turns:` on a case | See *Not built* below |
 | Assistant prefill | yes | no | no | Incompatible with thinking on current models ([thinking](https://platform.claude.com/docs/en/build-with-claude/thinking)) |
 | Prompt generator / improver | retired | no | no | The endpoints return an error |
 
@@ -204,9 +204,13 @@ Two further findings from the same paper shape the implementation:
 
 ## Not built, and why
 
-- **Multi-turn message arrays.** `claude -p` takes a single prompt string.
-  Multi-turn is reachable via `--input-format stream-json`; no suite here needed
-  it, so it is not implemented rather than half-implemented.
+- ~~**Multi-turn message arrays.**~~ Built. A case may carry `turns:` instead of
+  `prompt:`, and the backend switches to the stream-json transport in both
+  directions plus `--verbose` — the CLI refuses each of those combinations
+  separately, which is why it is a distinct argv shape rather than one more
+  flag. Assistant turns are deliberately not settable: prefill is rejected on
+  current models, so a multi-turn case controls what the *user* says and
+  measures what the model does with the accumulating conversation.
 - **`stop_sequences`.** No CLI flag under any spelling probed, and no
   `ANTHROPIC_API_KEY` in this environment to reach the Messages API directly.
   `max_tokens` *was* on this list until a fact-checker pointed out that

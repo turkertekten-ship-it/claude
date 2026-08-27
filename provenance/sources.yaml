@@ -387,3 +387,24 @@ sources:
       elsewhere, and tools/parity_check.py records it as a FAIL, because here it
       does not. This is the one row in docs/parity.md that an executed matrix
       caught and a written one would not have.
+
+  - id: MULTITURN-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T16:20Z"
+    method: >-
+      claude -p --input-format stream-json --output-format stream-json --verbose,
+      fed two NDJSON user turns; run three times through the workbench backend
+      and twice through the raw CLI
+    evidence: >-
+      A first turn stating "My designation is UNIT-42" and a second asking for
+      the designation returned "UNIT-42" in both raw CLI runs and in 3/3
+      workbench runs of the final conformance pass (an earlier 3-run set
+      returned 2/3, the miss being a haiku wobble rather than a plumbing
+      fault: the wired argv matches the raw invocation exactly). The CLI
+      refuses --input-format stream-json without --output-format stream-json,
+      and refuses that without --verbose, so all three are required together.
+    note: >-
+      This closed the last reachable parity gap. Assistant turns remain
+      unsettable because prefill is rejected on current models, so a multi-turn
+      case controls what the user says and measures what the model does with
+      the accumulating conversation.

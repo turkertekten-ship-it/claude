@@ -69,7 +69,7 @@ _VARIANT_KEYS = {
     "max_thinking_tokens", "max_output_tokens",
 }
 _CASE_KEYS = {
-    "id", "prompt", "prompt_file", "vars", "graders", "weight", "note",
+    "id", "prompt", "prompt_file", "turns", "vars", "graders", "weight", "note",
     "fixture", "skip",
 }
 _SUITE_KEYS = {
@@ -141,7 +141,12 @@ class Case:
     """One input, plus the checks its output must survive."""
 
     id: str
-    prompt: str
+    prompt: str = ""
+    #: Successive user turns. A case sets `prompt` or `turns`, never both.
+    #: Assistant turns are not settable -- prefill is rejected on current
+    #: models -- so a multi-turn case controls what the user says and measures
+    #: what the model does with the accumulating conversation.
+    turns: tuple[str, ...] = ()
     vars: dict[str, Any] = field(default_factory=dict)
     graders: tuple[Grader, ...] = ()
     weight: float = 1.0
@@ -305,8 +310,13 @@ def load_suite(path: str | Path) -> Suite:
             if prompt:
                 raise SpecError(f"{where}: set `prompt` or `prompt_file`, not both")
             prompt = _read_file(base, str(rc["prompt_file"]), where)
-        if not prompt:
-            raise SpecError(f"{where}: missing `prompt` or `prompt_file`")
+        turns = rc.get("turns") or []
+        if turns and prompt:
+            raise SpecError(f"{where}: set `prompt` or `turns`, not both")
+        if turns and not isinstance(turns, list):
+            raise SpecError(f"{where}: `turns` must be a list of user messages")
+        if not prompt and not turns:
+            raise SpecError(f"{where}: missing `prompt`, `prompt_file` or `turns`")
 
         case_graders = [
             _load_grader(g, f"{where}: graders[{j}]")
@@ -315,7 +325,8 @@ def load_suite(path: str | Path) -> Suite:
         cases.append(
             Case(
                 id=str(cid),
-                prompt=str(prompt),
+                prompt=str(prompt or ""),
+                turns=tuple(str(t) for t in turns),
                 vars=dict(rc.get("vars") or {}),
                 graders=tuple(copy.deepcopy(shared_graders) + case_graders),
                 weight=float(rc.get("weight", 1.0)),

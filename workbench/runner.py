@@ -146,7 +146,7 @@ class RunResult:
 
 
 def _resolve_prompt(suite: Suite, case: Case,
-                    variant: Variant) -> tuple[str, str | None]:
+                    variant: Variant) -> tuple[str | tuple[str, ...], str | None]:
     """Merge variable scopes and render, returning ``(prompt, system)``.
 
     Variable precedence is case, then variant, then suite -- narrowest scope
@@ -155,12 +155,18 @@ def _resolve_prompt(suite: Suite, case: Case,
     """
     variables = {**suite.vars, **variant.vars, **case.vars,
                  "case_id": case.id, "variant_id": variant.id}
-    body = render(case.prompt, variables)
+    body = render(case.prompt, variables) if case.prompt else ""
+    turns = tuple(render(t, variables) for t in case.turns)
     prefix = render(variant.prompt_prefix, variables) if variant.prompt_prefix else ""
     suffix = render(variant.prompt_suffix, variables) if variant.prompt_suffix else ""
     # The system prompt may use the same variables -- that is how one prompt
     # file serves as several variants.
     system = render(variant.system, variables) if variant.system else None
+    if turns:
+        # Prefix and suffix wrap the last turn: they are framing for the thing
+        # being asked, and the earlier turns are setup.
+        turns = turns[:-1] + (f"{prefix}{turns[-1]}{suffix}",)
+        return turns, system
     return f"{prefix}{body}{suffix}", system
 
 
@@ -192,7 +198,9 @@ def produce(suite: Suite, backend: Backend, report: Reporter,
     results: list[CaseRun] = []
 
     for variant, case, repeat in itertools.product(variants, cases, range(suite.repeats)):
-        prompt, system = _resolve_prompt(suite, case, variant)
+        resolved, system = _resolve_prompt(suite, case, variant)
+        turns = resolved if isinstance(resolved, tuple) else ()
+        prompt = "" if turns else resolved
         workdir = ""
         if variant.mode == "agent":
             workdir = _prepare_workdir(suite, case, variant)
@@ -203,7 +211,8 @@ def produce(suite: Suite, backend: Backend, report: Reporter,
         report(f"  run  {label}")
 
         completion = backend.complete(Request(
-            prompt=prompt, system=system, append_system=variant.append_system,
+            prompt=prompt, turns=turns,
+            system=system, append_system=variant.append_system,
             model=variant.model, effort=variant.effort, tools=variant.tools,
             json_schema=variant.json_schema, mode=variant.mode,
             cwd=workdir or None, max_budget_usd=variant.max_budget_usd,
@@ -222,7 +231,8 @@ def produce(suite: Suite, backend: Backend, report: Reporter,
         verdicts = grade(case.graders, ctx)
         results.append(CaseRun(
             case_id=case.id, variant_id=variant.id, repeat=repeat,
-            prompt=prompt, output=completion.text, verdicts=verdicts,
+            prompt=prompt or "\n---\n".join(turns),
+            output=completion.text, verdicts=verdicts,
             completion=completion, workdir=workdir,
         ))
         if workdir and not keep_workdirs:

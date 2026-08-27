@@ -188,6 +188,28 @@ def c_max_tokens(backend) -> Result:
                                       "output_tokens": c.output_tokens})
 
 
+@check("Multi-turn conversation")
+def c_multiturn(backend) -> Result:
+    """Does the second turn see the first? Repeated, because a small model wobbles."""
+    turns = ("My designation is UNIT-42. Acknowledge with just: ACK",
+             "What is my designation? Reply with just the designation.")
+    hits, cost, seen = 0, 0.0, []
+    for i in range(3):
+        c = backend.complete(Request(turns=turns, system=TERSE, model=MODEL,
+                                     tools="", repeat=i))
+        cost += c.cost_usd or 0.0
+        seen.append(c.text.strip()[:40])
+        if "UNIT-42" in c.text:
+            hits += 1
+    ok = hits >= 2
+    return Result("Multi-turn conversation", PASS if ok else FAIL,
+                  f"context from turn 1 was available in turn 2 in {hits}/3 runs "
+                  f"({seen}). Carried over the stream-json transport in both "
+                  f"directions plus --verbose; the CLI refuses each of those "
+                  f"combinations separately.",
+                  cost, {"hits": hits, "of": 3})
+
+
 @check("temperature / top_p / top_k", live=False)
 def c_sampling(backend) -> Result:
     probes = {}

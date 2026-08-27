@@ -9,23 +9,25 @@ Parity conformance — executed, not asserted
 [PASS] Model selection
        requested claude-haiku-4-5, backend reported canonicalModel='claude-haiku-4-5'
 [PASS] Effort control changes work done
-       thinking tokens: low=232, high=226
+       thinking tokens: low=214, high=334
 [PASS] Thinking budget (undocumented flag)
        --thinking/--max-thinking-tokens accepted and the call succeeded
 [FAIL] Max output tokens
        CLAUDE_CODE_MAX_OUTPUT_TOKENS=64 -> output_tokens=256, backend still reports maxOutputTokens=32000, stop_reason='stop_sequence'. The variable is documented but was NOT honoured in this container; measured at 32/64/512/4096 it never changed the reported ceiling.
+[PASS] Multi-turn conversation
+       context from turn 1 was available in turn 2 in 2/3 runs (['UNIT-42', 'UNIT-42', "You've hit your session limit · resets 7"]). Carried over the stream-json transport in both directions plus --verbose; the CLI refuses each of those combinations separately.
 [----] temperature / top_p / top_k
        no CLI flag (--temperature rejected, --top-p rejected, --top-k rejected) and on models after Opus 4.6 the API rejects them with a 400. Removed from the platform, not missing from this tool.
 [----] stop_sequences
        supported by the Messages API but exposed by no CLI flag, and this container has no ANTHROPIC_API_KEY to call the API directly
-[PASS] Structured output against a schema
-       structured_output={"city": "Paris", "population": 2161000}; schema errors: none
-[PASS] Tool availability is controllable
+[FAIL] Structured output against a schema
+       structured_output=None; schema errors: ['no structured_output']
+[FAIL] Tool availability is controllable
        --tools "" produced a single-turn response (num_turns=1), i.e. no tool loop
 [PASS] Request is inspectable before sending
        `workbench plan` resolved every request without sending: 18 model call(s) would be made.
-[PASS] Token counts and cost are reported
-       in=248 out=71 cost=$0.001545 — provider-reported, not estimated from a price table
+[FAIL] Token counts and cost are reported
+       in=0 out=0 cost=$0 — provider-reported, not estimated from a price table
 [----] count_tokens before sending
        /v1/messages/count_tokens exists but needs an ANTHROPIC_API_KEY, which this container does not have
 [----] Batch API 50% discount
@@ -47,7 +49,7 @@ Parity conformance — executed, not asserted
 [PASS] skill-creator is available
        first-party blind comparator at /mnt/skills/examples/skill-creator: withholds which skill produced which output, and its protocol describes a single fixed-order judgement — use it for skills; use this workbench when the comparison needs the swap, more than two variants, or a p-value
 ========================================================================
-18 passed, 1 failed, 4 unreachable — $0.0202, 63s
+16 passed, 4 failed, 4 unreachable — $0.0208, 43s
 
 Unreachable is not a softer failure. Those capabilities either need
 an API key this container does not have, or were removed from the

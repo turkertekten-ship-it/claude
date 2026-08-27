@@ -130,9 +130,12 @@ def cmd_plan(args: argparse.Namespace) -> int:
             if case.skip:
                 continue
             total += suite.repeats
-            prompt, system = _resolve_prompt(suite, case, variant)
+            resolved, system = _resolve_prompt(suite, case, variant)
+            turns = resolved if isinstance(resolved, tuple) else ()
+            prompt = "" if turns else resolved
             request = Request(
-                prompt=prompt, system=system, append_system=variant.append_system,
+                prompt=prompt, turns=turns,
+                system=system, append_system=variant.append_system,
                 model=variant.model, effort=variant.effort, tools=variant.tools,
                 json_schema=variant.json_schema, mode=variant.mode,
                 thinking=variant.thinking,
@@ -150,8 +153,13 @@ def cmd_plan(args: argparse.Namespace) -> int:
             if system:
                 print(f"system ({len(system)} chars):")
                 print("  " + system.strip()[:400].replace("\n", "\n  "))
-            print(f"prompt ({len(prompt)} chars):")
-            print("  " + prompt.strip()[:600].replace("\n", "\n  "))
+            if turns:
+                print(f"conversation ({len(turns)} user turn(s)):")
+                for i, turn in enumerate(turns, 1):
+                    print(f"  [{i}] " + turn.strip()[:200].replace("\n", "\n      "))
+            else:
+                print(f"prompt ({len(prompt)} chars):")
+                print("  " + prompt.strip()[:600].replace("\n", "\n  "))
             print(f"graders: {', '.join(g.label for g in case.graders) or 'none'}")
     print("\n" + "=" * 70)
     variants, cases = len(suite.variants), len([c for c in suite.cases if not c.skip])
