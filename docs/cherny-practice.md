@@ -224,6 +224,46 @@ Several tips describe features, settings and model versions as of early 2026; fe
 
 ---
 
+## The surprises
+
+> Orient, per `.claude/skills/ooda/SKILL.md`: where reality diverged from what
+> was assumed walking in. A loop with no surprise usually means Observe was
+> skipped, so these are recorded rather than tidied away.
+>
+> **The material was reachable by a route nobody would search first.** The
+> assumption after the egress probe was that this task was mostly blocked:
+> `x.com`, every interview, every tip site, and `anthropic.com` itself all
+> refused. The primary source turned out to sit in a plain file in Cherny's own
+> GitHub Pages repository, reachable because `raw.githubusercontent.com` is
+> allowed. The lesson generalises: "the site is blocked" is not "the content is
+> unreachable" until the source repository has been checked too.
+>
+> **The compilation understated rather than embellished.** The expectation
+> going into the fidelity check was the usual failure of third-party
+> transcription — embroidery, invented emphasis. The screenshot showed the
+> opposite: two of three paragraphs dropped, nothing added. That inverts which
+> way the corpus is likely to be wrong, and it is why the corpus quotes the
+> screenshot over the transcription wherever both exist.
+>
+> **The corpus's centre of gravity was already installed here.** The
+> expectation was that a practice set from a different author would need
+> reconciling against this repository's doctrine. Instead its most-repeated
+> rule — give the work a runnable check and show the output — was already
+> implemented as `tools/verify_provenance.py` plus the `PostToolUse` and `Stop`
+> hooks. The convergence is the reason the installation is small: almost
+> nothing had to be argued for.
+>
+> **The famous workflow names are dated, not current.** "Explore, plan, code,
+> commit" and "safe yolo mode" read as canonical Anthropic terminology. They
+> are Cherny's own names from an unpublished 2025 draft, and the current
+> documentation uses neither. Anything citing them as present-day guidance is
+> citing a rename that already happened.
+>
+> **He reversed himself, and the reversal is the most useful thing here.** The
+> 2025 draft recommends the exact flag the 2026 tips tell you not to use. Any
+> undated "Cherny tips" collection — and most of them are undated — silently
+> merges those two positions into one incoherent one.
+
 ## How this repository applies it
 
 > This section states decisions, not facts, so it is outside the enforced

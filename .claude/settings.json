@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$CLAUDE_PROJECT_DIR\" && printf '\\n== operating doctrine ==\\nRead CLAUDE.md, then provenance/observations.md.\\nA claim is either tagged [src:ID] or it is not written down.\\nOpen questions go in provenance/unknowns.md.\\n' && python3 tools/verify_provenance.py 2>&1 | tail -3"
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && printf '\\n== operating doctrine ==\\nRead CLAUDE.md, then provenance/observations.md.\\nA claim is either tagged [src:ID] or it is not written down.\\nOpen questions go in provenance/unknowns.md.\\nBefore starting a task: what command will show it worked? If none exists, build it first.\\nShow the command and its output; do not assert success. See .claude/skills/cherny/SKILL.md.\\n' && python3 tools/verify_provenance.py 2>&1 | tail -3"
           }
         ]
       }
