@@ -349,12 +349,6 @@ class HygieneDebtMarker(Detector):
                 continue
             if self.exclude_self and rel.endswith(SELF_MODULE_SUFFIX):
                 continue
-            if sig.metadata.get("redacted") is False:
-                # The observer redacted nothing here, so any marker in this text
-                # is the file's own content - it defines or documents the
-                # markers rather than having been scrubbed of a secret. Absent
-                # metadata means "unknown" and falls through to matching.
-                continue
             hits = self._hits(sig.text)
             if hits:
                 yield self._finding(sig, rel, hits)
