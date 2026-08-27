@@ -3,7 +3,7 @@
 
 Bu neden kod, neden hafıza değil. Testin iki ayağı var, her ayakta iki koşul
 var ve teknoloji istisnası yalnızca bir ayaktaki bir rakamı değiştiriyor.
-Bunu düzyazıda akıl yürüterek çözmek, haltanın yapıldığı yerdir; hata da iki
+Bunu düzyazıda akıl yürüterek çözmek, hatanın yapıldığı yerdir; hata da iki
 yönde de pahalıdır: gereksiz bildirim haftalara mal olur, gereken bildirimin
 yapılmaması kapanışı geçersiz kılar.
 
