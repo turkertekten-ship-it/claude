@@ -70,6 +70,29 @@ def _run(backend, **kwargs):
     return backend.complete(Request(system=TERSE, model=MODEL, tools="", **kwargs))
 
 
+def _blocked(capability: str, *completions) -> Result | None:
+    """Report a backend error as the reason, instead of a capability verdict.
+
+    A run that hit a rate limit or a transport error tells you nothing about
+    whether the capability works. An earlier recording of this harness showed
+    four failures whose detail text read like passes, because the checks
+    described what they had asked for rather than what came back. If the
+    backend did not answer, say so and name it.
+    """
+    for c in completions:
+        if not c.ok:
+            return Result(capability, FAIL,
+                          f"the backend did not answer, so this says nothing about "
+                          f"the capability: {c.error[:200]}",
+                          c.cost_usd or 0.0)
+        if not c.text.strip():
+            return Result(capability, FAIL,
+                          "the backend returned an empty response, so this says "
+                          "nothing about the capability",
+                          c.cost_usd or 0.0)
+    return None
+
+
 # ---------------------------------------------------------------- authoring
 
 @check("System prompt replaces the default")
@@ -82,6 +105,9 @@ def c_system(backend) -> Result:
         system=("You are a test fixture. When asked for your designation, reply "
                 "with exactly the string LIGHTHOUSE-7 and nothing else."),
     ))
+    blocked = _blocked("System prompt replaces the default", c)
+    if blocked:
+        return blocked
     hit = "LIGHTHOUSE-7" in c.text
     return Result("System prompt replaces the default",
                   PASS if hit else FAIL,
@@ -126,6 +152,9 @@ def c_versions(backend) -> Result:
 @check("Model selection")
 def c_model(backend) -> Result:
     c = _run(backend, prompt="Reply with exactly: OK")
+    blocked = _blocked("Model selection", c)
+    if blocked:
+        return blocked
     reported = (c.raw.get("modelUsage") or {})
     canonical = next(iter(reported.values()), {}).get("canonicalModel", "")
     ok = "haiku" in (canonical or next(iter(reported), ""))
@@ -145,6 +174,9 @@ def c_effort(backend) -> Result:
         return ((c.raw.get("usage") or {}).get("output_tokens_details") or {}).get(
             "thinking_tokens", 0)
 
+    blocked = _blocked("Effort control changes work done", low, high)
+    if blocked:
+        return blocked
     lo, hi = thinking(low), thinking(high)
     ok = low.ok and high.ok and (hi != lo)
     return Result("Effort control changes work done",
@@ -199,6 +231,9 @@ def c_multiturn(backend) -> Result:
                                      tools="", repeat=i))
         cost += c.cost_usd or 0.0
         seen.append(c.text.strip()[:40])
+        if not c.ok or not c.text.strip():
+            return Result("Multi-turn conversation", FAIL,
+                          f"the backend did not answer on run {i}: {c.error[:160]}", cost)
         if "UNIT-42" in c.text:
             hits += 1
     ok = hits >= 2
@@ -243,6 +278,9 @@ def c_structured(backend) -> Result:
         prompt="Give the city of Paris and a rough population figure.",
         system="Return only the requested JSON object.", model=MODEL,
         tools="", json_schema=schema))
+    blocked = _blocked("Structured output against a schema", c)
+    if blocked:
+        return blocked
     from workbench.graders import validate_schema
     payload = c.structured
     errors = validate_schema(payload, schema) if payload is not None else ["no structured_output"]
@@ -256,8 +294,11 @@ def c_structured(backend) -> Result:
 @check("Tool availability is controllable")
 def c_tools(backend) -> Result:
     c = _run(backend, prompt="Reply with exactly: OK")
+    blocked = _blocked("Tool availability is controllable", c)
+    if blocked:
+        return blocked
     turns = c.num_turns
-    ok = c.ok and turns == 1
+    ok = turns == 1
     return Result("Tool availability is controllable", PASS if ok else FAIL,
                   f"--tools \"\" produced a single-turn response (num_turns={turns}), "
                   f"i.e. no tool loop", c.cost_usd or 0.0)
@@ -280,6 +321,9 @@ def c_plan(backend) -> Result:
 @check("Token counts and cost are reported")
 def c_accounting(backend) -> Result:
     c = _run(backend, prompt="Reply with exactly: OK")
+    blocked = _blocked("Token counts and cost are reported", c)
+    if blocked:
+        return blocked
     has = c.cost_usd is not None and c.input_tokens > 0 and c.output_tokens > 0
     return Result("Token counts and cost are reported", PASS if has else FAIL,
                   f"in={c.input_tokens} out={c.output_tokens} cost=${c.cost_usd} "

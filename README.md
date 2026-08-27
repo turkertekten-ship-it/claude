@@ -55,7 +55,7 @@ python3 tools/parity_check.py                   # execute the parity matrix
 `parity_check.py` is the part worth pointing at. `docs/parity.md` is a table of
 claims, and a table is not evidence — so this exercises each capability against
 the live backend and reports PASS, FAIL, or UNREACHABLE with the reason. It
-currently records **18 passed, 1 failed, 4 unreachable**. The failure is real
+currently records **19 passed, 1 failed, 4 unreachable**. The failure is real
 and kept red: `CLAUDE_CODE_MAX_OUTPUT_TOKENS` is documented as capping output
 and did not cap anything here at any of four settings. A written matrix would
 have carried that claim indefinitely.

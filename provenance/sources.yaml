@@ -360,7 +360,7 @@ sources:
     method: "python3 tools/parity_check.py — every capability exercised against the live backend"
     evidence: provenance/raw/parity-conformance-2026-08-27.txt
     note: >-
-      18 passed, 1 failed, 4 unreachable, $0.021. Passing includes: a replaced
+      19 passed, 1 failed, 4 unreachable, $0.026, 72s. Passing includes: a replaced
       system prompt taking effect, model selection resolving to the requested
       canonical model, effort changing the thinking-token count, the
       undocumented thinking flags working, structured output conforming to a
@@ -369,7 +369,8 @@ sources:
       position swap catching a purely positional judge, the identical-pair
       blinding control discriminating, significance testing, outcome grading by
       exit code, export to `claude plugin eval`, and both first-party tools
-      being present.
+      being present, and a two-turn conversation carrying context in 3 of 3
+      runs.
 
   - id: MAX-OUTPUT-TOKENS-NOT-HONOURED-2026-08-27
     kind: tool_output
@@ -408,3 +409,24 @@ sources:
       unsettable because prefill is rejected on current models, so a multi-turn
       case controls what the user says and measures what the model does with
       the accumulating conversation.
+
+  - id: RATELIMIT-DEGRADED-RUN-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T16:25Z"
+    method: "an earlier recording of python3 tools/parity_check.py, overwritten after re-running"
+    evidence: >-
+      That run reported 16 passed, 4 failed, 4 unreachable. Three of the four
+      failures -- structured output, tool availability, token accounting --
+      were the account hitting a usage ceiling mid-run: one completion came
+      back containing "You've hit your session limit". The capabilities were
+      fine; the backend had stopped answering.
+    note: >-
+      Two things came out of this. First, the recorded figure and the figure
+      quoted in README.md had drifted apart, which is why the README now takes
+      its number from the recorded file rather than from memory. Second, and
+      worse, three of those checks printed detail text that read like a pass
+      ("--tools \"\" produced a single-turn response") because they described
+      what had been asked for rather than what came back. Every live check now
+      short-circuits on a backend error and names it, so a degraded run reports
+      "the backend did not answer" instead of a capability verdict it has no
+      basis for.
