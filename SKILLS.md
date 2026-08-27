@@ -43,6 +43,7 @@ Match the work in hand to the left column.
 | deciding how to split a corpus into chunks | `chunking-advisor` | Addresses the "chunks lose context" failure mode named in `README.md`. |
 | reviewing retrieval code before calling a stage done | `rag-audit` | Reads the code that is present rather than the design that was intended. |
 | giving another session programmatic access to the index | `mcp-builder` | Sibling sessions run in separate containers and cannot read each other. |
+| ingesting a contract or deal document | `chunking-advisor`, Legal/Contracts branch | The owner's own corpus is a numbered transaction set; clauses are the unit of meaning, not sections. See [docs/design/chunking.md](docs/design/chunking.md). |
 | writing an ADR, a spec, or a sectioned guide | `doc-coauthoring` | Structured co-authoring rather than a wall of generated prose. |
 | about to write a claim you have not checked | `/fact-check`, then `unknowns.md` | The claim is not ready to be written down. |
 | wondering what this container can reach | `tools/probe_egress.py` | Measured in seconds; guessed at for hours. |

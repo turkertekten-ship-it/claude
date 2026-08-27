@@ -59,6 +59,19 @@ The document itself was never in reach of this session.
 **Resolves when:** the source document is committed to a repository, or the
 owner names it.
 
+**Narrowed, not resolved (2026-08-27).** The owner's own Drive files are a
+corporate-transaction set indexed `1.g`, `3.a`, `4.a` — a closing-checklist
+numbering, not a filename habit [src:DRIVE-OWNED-FILES-2026-08-27]. That
+establishes the *domain* the phrase sits in: M&A transaction documents, where
+a numbered section reference like "§2–§7" is ordinary. It does not establish
+which document. In that domain "the book" has at least two common referents —
+a closing book or deal bible compiling the executed set, and an information
+memorandum — and nothing seen here distinguishes them.
+
+**Do not** pick one and build section scaffolding against it. A guide written
+to the wrong §-numbering is worse than no guide, because it looks authoritative
+and cites sections that do not exist.
+
 ---
 
 ### U-4 — What "imb youtube" designates

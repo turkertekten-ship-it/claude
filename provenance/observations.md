@@ -91,6 +91,20 @@ reading it would establish what was built, never what was discussed or decided.
 Everything downstream of this file is built on that record alone. The chat
 contents were not reconstructed, summarised, or guessed at.
 
+## Observed — the owner's own files
+
+> Framing, not a claim: titles and metadata only. No file content was opened.
+> The set is executed legal agreements naming private third parties, and the
+> question the goal asked is answered by the titles.
+
+- The owner has modified no file they own in the connected Drive since 2025-01-01; the query returned empty. [src:DRIVE-OWNED-FILES-2026-08-27]
+- Their own files are a corporate-transaction set dated Nov–Dec 2020: an executed SHA, a numbered series indexed `1.g`, `3.a` and `4.a` covering investment, master and employment agreements, plus tax workstreams, D&O insurance, a KVKK employee-consent form and an investor presentation. [src:DRIVE-OWNED-FILES-2026-08-27]
+- The numbering is a closing-checklist index rather than a filename convention: the same prefix recurs across counterparties. [src:DRIVE-OWNED-FILES-2026-08-27]
+- Nearly all are `.note` archives, a handwriting-app export format, which no current connector reads. [src:DRIVE-OWNED-FILES-2026-08-27]
+- Also present are study notes titled "Modern Mantık" and "Mantık Çeşitleri I" — modern logic and types of logic. [src:DRIVE-OWNED-FILES-2026-08-27]
+- No Claude conversation export exists in the connected Drive; re-checked by this session rather than inherited. [src:DRIVE-NO-EXPORT-2026-08-27]
+- No transcript-reading tool is exposed to this session, and no sibling session is addressable as a local peer, so the other 13 sessions' conversations remain unreadable. [src:NO-TRANSCRIPT-TOOL-2026-08-27]
+
 ## Addendum — 2026-08-27, skills and egress session
 
 The bounded answer above still stands: the sibling sessions' transcripts were

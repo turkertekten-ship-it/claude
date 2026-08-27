@@ -368,3 +368,57 @@ sources:
       heading_path (offset -> heading stack), split_sentences, and
       estimate_tokens, whose docstring states it approximates ~4 chars/token
       for English and ~3 for code and is deliberately an estimate.
+
+  - id: DRIVE-OWNED-FILES-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:40Z"
+    method: "mcp__Google_Drive__search_files(query=\"owner = 'me'\", pageSize=30); and the same with modifiedTime > 2025-01-01"
+    evidence: >-
+      The date-filtered query returned `{}` - the owner has modified no file
+      they own since 2025-01-01. The unfiltered query returned 30 files, of
+      which the substantive set is dated Nov-Dec 2020 and consists of
+      corporate transaction documents held in one folder: "Project Apollo -
+      Fully Executed SHA", "1.g Apollo Investment and Nominee execution
+      version_<counterparty>", "3.a Master Agreement_<name>", "4.a LO
+      Employment Agreement execution copy_<name>" (two counterparties),
+      "201123 Tax workstreams DTM", "D&O Insurance 25 Nov 2020", "KVKK
+      Aydınlatma Metni ve Çalışan Kabul Beyanı", "Litmus Capital Partners -
+      Investor Presentation 201201", "Dubai residency 23 Nov 2020", and dated
+      working notes. Also present: "Delhi Cargo_Import & Export_Internal Audit
+      Report", and study notes "Modern Mantık" and "Mantık Çeşitleri I"
+      (Turkish: modern logic / types of logic). Nearly all carry the extension
+      `.note` with mimeType application/x-zip.
+    note: >-
+      TITLES AND METADATA ONLY. No file content was read. These are executed
+      legal agreements naming private third parties; the domain question the
+      goal asked is answered by the titles, so opening them would have been
+      intrusive without being informative. Individual counterparty names are
+      redacted above and should stay redacted downstream.
+
+  - id: DRIVE-NO-EXPORT-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:38Z"
+    method: "mcp__Google_Drive__search_files(query=\"title contains 'conversations' or title contains 'claude' or title contains 'export'\", pageSize=20)"
+    evidence: >-
+      Two hits, neither a Claude export: "Charting Excel Export - Aug 12th
+      2020" (a .note zip) and "Delhi Cargo_Import & Export_Internal Audit
+      Report". No conversations.json and no claude.ai data export exists in
+      the connected Drive.
+    note: >-
+      Independently re-checked by this session rather than inherited from
+      NO-DRIVE-ARCHIVE-2026-08-27, and it confirms that earlier finding.
+
+  - id: NO-TRANSCRIPT-TOOL-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:35Z"
+    method: "ToolSearch('select:mcp__Claude_Code_Remote__list_events,SendMessage,mcp__Claude_Code_Remote__get_session'); ListAgents"
+    evidence: >-
+      ToolSearch resolved SendMessage and get_session but returned no
+      list_events or any other transcript-reading tool. ListAgents reported
+      "No reachable agents — no other Claude session is running on this
+      machine right now", so the 13 sibling sessions are not addressable as
+      local peers despite their records carrying
+      cross_session_inbound: "available".
+    note: >-
+      Verified by this session directly. U-1 and U-2 stand on this session's
+      own check, not only on the earlier one.
