@@ -45,8 +45,8 @@ shown to a judge in both orders, and a win only counts when both orders agree.
 
 ```bash
 python3 -m workbench doctor                     # what this environment can do
-python3 -m workbench run    suites/example.yaml # run a suite, grade it
-python3 -m workbench blind  suites/example.yaml # blind pairwise A/B
+python3 -m workbench run    suites/doctrine-adherence.yaml   # grade it
+python3 -m workbench blind  suites/doctrine-adherence.yaml   # blind pairwise A/B
 python3 -m workbench report .workbench/<run-id> # markdown + JSON report
 
 python3 tools/parity_check.py                   # execute the parity matrix
@@ -55,7 +55,7 @@ python3 tools/parity_check.py                   # execute the parity matrix
 `parity_check.py` is the part worth pointing at. `docs/parity.md` is a table of
 claims, and a table is not evidence — so this exercises each capability against
 the live backend and reports PASS, FAIL, or UNREACHABLE with the reason. It
-currently records **19 passed, 1 failed, 4 unreachable**. The failure is real
+currently records **20 passed, 1 failed, 5 unreachable**. The failure is real
 and kept red: `CLAUDE_CODE_MAX_OUTPUT_TOKENS` is documented as capping output
 and did not cap anything here at any of four settings. A written matrix would
 have carried that claim indefinitely.

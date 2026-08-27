@@ -356,21 +356,27 @@ sources:
 
   - id: PARITY-CONFORMANCE-2026-08-27
     kind: tool_output
-    collected_at: "2026-08-27T16:05Z"
+    collected_at: "2026-08-27T16:35Z"
     method: "python3 tools/parity_check.py — every capability exercised against the live backend"
     evidence: provenance/raw/parity-conformance-2026-08-27.txt
     note: >-
-      19 passed, 1 failed, 4 unreachable, $0.026, 72s. Passing includes: a replaced
-      system prompt taking effect, model selection resolving to the requested
-      canonical model, effort changing the thinking-token count, the
-      undocumented thinking flags working, structured output conforming to a
-      supplied schema, tool availability control, request inspection before
-      sending, provider-reported token and cost accounting, the eval grid, the
-      position swap catching a purely positional judge, the identical-pair
-      blinding control discriminating, significance testing, outcome grading by
-      exit code, export to `claude plugin eval`, and both first-party tools
-      being present, and a two-turn conversation carrying context in 3 of 3
-      runs.
+      20 passed, 1 failed, 5 unreachable — $0.0288, 80s. Passing includes: a replaced system prompt taking effect,
+      model selection resolving to the requested canonical model, effort
+      changing the thinking-token count, the undocumented thinking flags,
+      structured output conforming to a supplied schema, tool availability
+      control, a two-turn conversation carrying context in 3 of 3 runs, the
+      --max-budget-usd ceiling aborting a long task with error_max_budget_usd
+      at $0.000964 spent, request inspection before sending, provider-reported
+      accounting, the eval grid, the position swap downgrading a purely
+      positional judge to a tie, the identical-pair blinding control, exact
+      significance testing, outcome grading by exit code, export to
+      `claude plugin eval`, and both first-party tools being present.
+      The one failure is CLAUDE_CODE_MAX_OUTPUT_TOKENS, kept red deliberately.
+      This figure is regenerated from the evidence file rather than typed: an
+      earlier version of this note, and of README.md, drifted to three
+      different numbers across a doc, a commit message and the capture they
+      both claimed to summarise.
+
 
   - id: MAX-OUTPUT-TOKENS-NOT-HONOURED-2026-08-27
     kind: tool_output

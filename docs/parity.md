@@ -103,7 +103,7 @@ Legend: **CC** = stock Claude Code; **WB** = this repository's `workbench/`.
 | `stop_sequences` | yes | no flag | not reachable without an API key |
 | Structured output schema | yes | `--json-schema` | per variant |
 | Tool definitions | yes | `--tools`, MCP | per variant, on/off |
-| Budget ceiling | no | `--max-budget-usd` | per variant |
+| Budget ceiling | no | `--max-budget-usd` | per variant, exercised |
 
 ### Inspection
 
@@ -279,9 +279,17 @@ So the honest statement is narrower than the one it replaces: blind comparison
 was **already** available first-party for skills. What none of the
 Claude-Code-side tools do is judge each pair **in both presentation orders and
 count a win only when the verdict survives the swap** — the mitigation the
-MT-Bench measurements call for. Grepping `skill-creator` for
-`swap|position bias|randomi|shuffle|both orders` returns nothing; its comparator
-makes one call with A and B in a fixed order.
+MT-Bench measurements call for. Grepping `skill-creator/agents/` for
+`swap|position bias|randomi|shuffle|both orders` returns nothing, and reading
+`agents/comparator.md` confirms it: one call, outputs A and B read once, a
+single winner-or-tie verdict, no second pass.
+
+> The same grep over the *whole* package returns six matches, and an earlier
+> draft of this paragraph claimed it returned none — which was false as
+> written. All six are irrelevant: three are `font-display: swap` in HTML
+> report templates, and three are `random.shuffle` in `scripts/run_loop.py`
+> stratifying a train/test split. The conclusion survives; the sentence did
+> not, and a fact-checker run over this document caught it.
 
 That, plus N-way prompt-variant comparison and the significance layer, is what
 remains genuinely additive here. It is a smaller claim than "the niche is open",

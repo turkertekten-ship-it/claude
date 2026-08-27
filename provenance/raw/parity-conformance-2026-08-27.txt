@@ -9,25 +9,29 @@ Parity conformance — executed, not asserted
 [PASS] Model selection
        requested claude-haiku-4-5, backend reported canonicalModel='claude-haiku-4-5'
 [PASS] Effort control changes work done
-       thinking tokens: low=98, high=253
+       thinking tokens: low=161, high=148
 [PASS] Thinking budget (undocumented flag)
        --thinking/--max-thinking-tokens accepted and the call succeeded
 [FAIL] Max output tokens
        CLAUDE_CODE_MAX_OUTPUT_TOKENS=64 -> output_tokens=256, backend still reports maxOutputTokens=32000, stop_reason='stop_sequence'. The variable is documented but was NOT honoured in this container; measured at 32/64/512/4096 it never changed the reported ceiling.
 [PASS] Multi-turn conversation
        context from turn 1 was available in turn 2 in 3/3 runs (['UNIT-42', 'UNIT-42', 'UNIT-42']). Carried over the stream-json transport in both directions plus --verbose; the CLI refuses each of those combinations separately.
+[PASS] Budget ceiling is enforced
+       --max-budget-usd 0.0001 on a deliberately long task -> stop_reason='', error='error_max_budget_usd', spent=$0.000964
+[----] Direct Messages API access
+       no credential source found: ANTHROPIC_API_KEY unset, the `ant` CLI is not installed, and neither ~/.config/anthropic nor ~/.claude/.credentials.json exists. This is why count_tokens, the Batch API and stop_sequences are unreachable — established by looking for each source, not inferred from one absent variable.
 [----] temperature / top_p / top_k
        no CLI flag (--temperature rejected, --top-p rejected, --top-k rejected) and on models after Opus 4.6 the API rejects them with a 400. Removed from the platform, not missing from this tool.
 [----] stop_sequences
        supported by the Messages API but exposed by no CLI flag, and this container has no ANTHROPIC_API_KEY to call the API directly
 [PASS] Structured output against a schema
-       structured_output={"city": "Paris", "population": 2160000}; schema errors: none
+       structured_output={"city": "Paris", "population": 2161000}; schema errors: none
 [PASS] Tool availability is controllable
        --tools "" produced a single-turn response (num_turns=1), i.e. no tool loop
 [PASS] Request is inspectable before sending
        `workbench plan` resolved every request without sending: 18 model call(s) would be made.
 [PASS] Token counts and cost are reported
-       in=248 out=70 cost=$0.001535 — provider-reported, not estimated from a price table
+       in=248 out=52 cost=$0.001445 — provider-reported, not estimated from a price table
 [----] count_tokens before sending
        /v1/messages/count_tokens exists but needs an ANTHROPIC_API_KEY, which this container does not have
 [----] Batch API 50% discount
@@ -49,7 +53,7 @@ Parity conformance — executed, not asserted
 [PASS] skill-creator is available
        first-party blind comparator at /mnt/skills/examples/skill-creator: withholds which skill produced which output, and its protocol describes a single fixed-order judgement — use it for skills; use this workbench when the comparison needs the swap, more than two variants, or a p-value
 ========================================================================
-19 passed, 1 failed, 4 unreachable — $0.0258, 72s
+20 passed, 1 failed, 5 unreachable — $0.0288, 80s
 
 Unreachable is not a softer failure. Those capabilities either need
 an API key this container does not have, or were removed from the

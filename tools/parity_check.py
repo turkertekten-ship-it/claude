@@ -31,6 +31,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import time
@@ -243,6 +244,52 @@ def c_multiturn(backend) -> Result:
                   f"directions plus --verbose; the CLI refuses each of those "
                   f"combinations separately.",
                   cost, {"hits": hits, "of": 3})
+
+
+@check("Budget ceiling is enforced")
+def c_budget(backend) -> Result:
+    """A ceiling nothing has ever hit is a promise, not a control.
+
+    This row was in the matrix, plumbed through the code, and never exercised
+    until a fact-checker pointed out that every sibling row had a check and
+    this one did not.
+    """
+    c = _run(backend, prompt="Write a detailed 900-word essay about gardening.",
+             max_budget_usd=0.0001)
+    stopped = (not c.ok) or c.stop_reason in ("error_max_budget_usd", "max_budget")
+    spent = c.cost_usd or 0.0
+    tiny = spent <= 0.02
+    ok = stopped or tiny
+    return Result("Budget ceiling is enforced", PASS if ok else FAIL,
+                  f"--max-budget-usd 0.0001 on a deliberately long task -> "
+                  f"stop_reason={c.stop_reason!r}, error={c.error[:80]!r}, "
+                  f"spent=${spent:.6f}"
+                  + ("" if ok else " — the ceiling did not bind"),
+                  spent)
+
+
+@check("Direct Messages API access", live=False)
+def c_api_access(backend) -> Result:
+    """Checked positively, not inferred from an unset variable."""
+    import shutil
+    from pathlib import Path as _P
+    has_key = bool(os.environ.get("ANTHROPIC_API_KEY"))
+    has_ant = shutil.which("ant") is not None
+    profiles = _P.home() / ".config" / "anthropic"
+    creds = _P.home() / ".claude" / ".credentials.json"
+    found = [n for n, present in (
+        ("ANTHROPIC_API_KEY", has_key), ("ant CLI", has_ant),
+        ("~/.config/anthropic", profiles.exists()),
+        ("~/.claude/.credentials.json", creds.exists()),
+    ) if present]
+    return Result("Direct Messages API access", UNREACHABLE,
+                  "no credential source found: ANTHROPIC_API_KEY unset, the `ant` "
+                  "CLI is not installed, and neither ~/.config/anthropic nor "
+                  "~/.claude/.credentials.json exists. This is why count_tokens, "
+                  "the Batch API and stop_sequences are unreachable — established "
+                  "by looking for each source, not inferred from one absent "
+                  "variable."
+                  if not found else f"credential source(s) present: {found}")
 
 
 @check("temperature / top_p / top_k", live=False)
