@@ -19,9 +19,10 @@ import unittest
 from pathlib import Path
 
 from oodarag.reflect.act.queue import ReviewQueue
+from oodarag.reflect.decide.priors import RulePriors
 from oodarag.reflect.journal import Journal
 from oodarag.reflect.loop import CycleLock, ReflectConfig, ReflectLoop
-from oodarag.reflect.models import Outcome
+from oodarag.reflect.models import CycleReport, Outcome
 
 README = """# demo project
 
@@ -284,3 +285,86 @@ class TestSafety(LoopTestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestVerdictAccounting(LoopTestCase):
+    """What the journal learns from a night, and what it must not learn.
+
+    Both bugs pinned here are silent and slow: they do not break a run, they
+    corrupt the priors over weeks until the loop distrusts its own best rules.
+    """
+
+    def _outcomes(self, config):
+        return Journal(config.journal_dir).outcomes()
+
+    def test_a_permanently_satisfied_proposal_is_not_a_failure(self) -> None:
+        """`ensure_section` is idempotent, so a stuck convention reports
+        applied=False forever. Counting that as failure would punish exactly the
+        rules whose suggestions worked."""
+        config = self.config(dry_run=False)
+        ReflectLoop(config).run_cycle(since=0)
+        first = self._outcomes(config)
+        self.assertTrue(first, "the first night should have learned something")
+
+        # Second and third nights: the same findings, already satisfied on disk.
+        ReflectLoop(config).run_cycle(since=0)
+        ReflectLoop(config).run_cycle(since=0)
+        failures = [o for o in self._outcomes(config) if o.verdict == "failed"]
+        self.assertEqual(
+            failures, [],
+            f"re-running must not manufacture failures: {[o.rule_id for o in failures]}",
+        )
+
+    def test_a_rule_that_keeps_working_does_not_lose_confidence(self) -> None:
+        config = self.config(dry_run=False)
+        loop = ReflectLoop(config)
+        loop.run_cycle(since=0)
+        applied = [o for o in self._outcomes(config) if o.verdict == "applied"]
+        self.assertTrue(applied, "need an applied proposal to track")
+        rule = applied[0].rule_id
+
+        before = RulePriors(Journal(config.journal_dir)).confidence(rule)
+        for _ in range(3):
+            ReflectLoop(config).run_cycle(since=0)
+        after = RulePriors(Journal(config.journal_dir)).confidence(rule)
+        # Not assertGreaterEqual: the posterior decays with elapsed wall-clock by
+        # design, so three runs a millisecond apart lose ~1e-9. What must not
+        # happen is a *material* fall, which is what a manufactured failure per
+        # night would cause.
+        self.assertAlmostEqual(
+            after, before, places=4,
+            msg="a rule whose edit is still in place must not decay for repeating",
+        )
+        self.assertGreater(after, 0.6, "a rule with a clean record should stay trusted")
+
+    def test_results_are_attributed_to_the_proposal_that_caused_them(self) -> None:
+        """Two additive proposals may share a file; a {path: result} lookup
+        would credit one of them with the other's outcome."""
+        from oodarag.reflect.decide.policy import Decision
+        from oodarag.reflect.models import EditOp, Finding, Proposal
+
+        config = self.config(dry_run=False)
+        loop = ReflectLoop(config)
+        (self.root / "CLAUDE.md").write_text(
+            "# Memory\n\n## Conventions\n\n- Already written down.\n", encoding="utf-8")
+
+        def proposal(rule: str, body: str) -> Proposal:
+            return Proposal(
+                finding=Finding(rule_id=rule, title=rule, key=rule),
+                title=rule, risk="safe",
+                edits=[EditOp(path="CLAUDE.md", op="ensure_section",
+                              anchor="## Conventions", text=body)],
+            )
+
+        stale = proposal("rule.stale", "- Already written down.")
+        fresh = proposal("rule.fresh", "- Brand new thing.")
+        decision = Decision(apply=[stale, fresh])
+        cycle = CycleReport(cycle_id="attrib", dry_run=False)
+        applied = loop.act(decision, "attrib")
+        cycle.ended_at = time.time()
+        loop.learn(cycle, decision, applied)
+
+        verdicts = {o.rule_id: o.verdict for o in self._outcomes(config)}
+        self.assertNotIn("rule.stale", verdicts, "an already-satisfied op teaches nothing")
+        self.assertEqual(verdicts.get("rule.fresh"), "applied")
+        self.assertIn("Brand new thing.", (self.root / "CLAUDE.md").read_text("utf-8"))

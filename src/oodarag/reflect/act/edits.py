@@ -80,6 +80,19 @@ _STATUS_OK = "ok"      # would change the file
 _STATUS_NOOP = "noop"  # already in the desired state; not a failure
 _STATUS_FAIL = "fail"  # precondition violated; blocks the whole proposal
 
+#: Reasons that mean "there was nothing to do", as opposed to "it would not go".
+#: The distinction is load-bearing outside this module: `ensure_section` is
+#: idempotent by design and runs every night, so a convention already written to
+#: the memory file reports applied=False for the rest of time. Counted as a
+#: failure, that would drive the rule which proposed it to zero confidence for
+#: the crime of having succeeded permanently.
+NOOP_REASONS = frozenset({
+    "already present",
+    "no change",
+    "already absent",
+    "already matches backup",
+})
+
 
 # -- text helpers -------------------------------------------------------------
 
@@ -243,6 +256,11 @@ class EditResult:
     reason: str = ""
     diff: str = ""
     bytes_changed: int = 0
+
+    @property
+    def is_noop(self) -> bool:
+        """Not applied because there was nothing left to do, not because it failed."""
+        return not self.applied and self.reason in NOOP_REASONS
 
     def as_dict(self) -> dict[str, Any]:
         return asdict(self)

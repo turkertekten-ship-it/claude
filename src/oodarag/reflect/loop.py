@@ -34,7 +34,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from oodarag.reflect.act.edits import ApplyReport, EditApplier
+from oodarag.reflect.act.edits import ApplyReport, EditApplier, EditResult
 from oodarag.reflect.act.queue import ReviewQueue, proposal_from_dict
 from oodarag.reflect.act.report import render_json, render_markdown, write_report
 from oodarag.reflect.decide.conflicts import resolve_edit_conflicts
@@ -103,6 +103,25 @@ class ReflectConfig:
     @property
     def lock_path(self) -> Path:
         return Path(self.state_dir) / "lock"
+
+
+def verdict_for(results: list[EditResult]) -> str | None:
+    """What one proposal's edits amount to: applied, failed, or nothing learned.
+
+    A proposal whose every operation was already satisfied did not fail - it
+    succeeded permanently on some earlier night, and `ensure_section` is
+    idempotent precisely so that it can. Recording that as a failure would
+    punish exactly the rules whose suggestions stuck, night after night, which
+    is the opposite of what the journal is for. `None` means the cycle learned
+    nothing from this proposal, which is different from learning that it failed.
+    """
+    if not results:
+        return None
+    if any(not r.applied and not r.is_noop for r in results):
+        return "failed"
+    if any(r.applied for r in results):
+        return "applied"
+    return None
 
 
 class CycleLock:
@@ -200,6 +219,8 @@ class ReflectLoop:
     def __init__(self, config: ReflectConfig | None = None) -> None:
         self.config = config or ReflectConfig()
         self._deferred: list[Proposal] = []
+        self._accepted_this_cycle: list[Proposal] = []
+        self._results: dict[str, ApplyReport] = {}
         self.journal = Journal(self.config.journal_dir)
         self.queue = ReviewQueue(self.config.queue_path)
         self.priors = RulePriors(self.journal)
@@ -296,13 +317,27 @@ class ReflectLoop:
         # risk gate - a person already looked at the diff and said yes, which is
         # exactly the authority the risk tiers exist to stand in for.
         approved = self._accepted_proposals()
+        self._accepted_this_cycle = approved
         # Two rules may both want to create the same file; settle that here,
         # visibly, rather than letting the loser fail a precondition in silence.
         to_apply, conflict_notes = resolve_edit_conflicts(approved + decision.apply)
         decision.notes.extend(conflict_notes)
         survived = {p.fingerprint for p in to_apply}
         self._deferred = [p for p in decision.apply if p.fingerprint not in survived]
-        report = applier.apply_all(to_apply, cycle_id)
+
+        # One call per proposal rather than one call for the batch. Two additive
+        # proposals may legitimately share a file - a convention and a correction
+        # both appending to the memory file - and a {path: result} lookup would
+        # then credit one of them with the other's outcome. That misattribution
+        # is not cosmetic: it is what the journal learns from, so a rule could
+        # earn trust for an edit that was actually skipped.
+        report = ApplyReport(cycle_id=cycle_id, results=[], backup_dir="")
+        self._results: dict[str, ApplyReport] = {}
+        for proposal in to_apply:
+            outcome = applier.apply(proposal, cycle_id)
+            self._results[proposal.fingerprint] = outcome
+            report.results.extend(outcome.results)
+            report.backup_dir = report.backup_dir or outcome.backup_dir
         # Deferred proposals are queued rather than dropped, so they stay visible.
         self.queue.put(decision.queue + self._deferred, cycle_id)
         for entry in approved:
@@ -321,29 +356,43 @@ class ReflectLoop:
     # -- Learn ---------------------------------------------------------------
 
     def learn(self, report: CycleReport, decision: Decision, applied: ApplyReport) -> None:
+        if self.config.dry_run:
+            # A dry run establishes nothing. Recording verdicts for edits that
+            # were never attempted would teach the priors from fiction.
+            self.journal.record_cycle(report)
+            return
+
         outcomes: list[Outcome] = []
-        by_path = {r.path: r for r in applied.results}
-        deferred = {p.fingerprint for p in self._deferred}
-        for proposal in decision.apply:
-            if proposal.fingerprint in deferred:
-                continue  # it never ran, so there is no verdict to learn from
-            results = [by_path.get(p) for p in proposal.paths]
-            ok = all(r is not None and r.applied for r in results)
-            if self.config.dry_run:
-                continue  # a dry run establishes nothing; recording it would poison the priors
+        for fingerprint, result in self._results.items():
+            proposal = self._proposal_by_fingerprint(decision, fingerprint)
+            if proposal is None:
+                continue
+            verdict = verdict_for(result.results)
+            if verdict is None:
+                continue  # nothing happened tonight, so there is nothing to learn
             outcomes.append(
                 Outcome(
-                    fingerprint=proposal.fingerprint,
+                    fingerprint=fingerprint,
                     rule_id=proposal.finding.rule_id,
-                    verdict="applied" if ok else "failed",
+                    verdict=verdict,
                     cycle_id=report.cycle_id,
-                    note="" if ok else "; ".join(
-                        r.reason for r in applied.results if r and not r.applied
+                    note="" if verdict == "applied" else "; ".join(
+                        r.reason for r in result.results if not r.applied and not r.is_noop
                     )[:300],
                 )
             )
         self.journal.record_outcomes(outcomes)
         self.journal.record_cycle(report)
+
+    def _proposal_by_fingerprint(self, decision: Decision, fingerprint: str) -> Proposal | None:
+        """Find a proposal among tonight's applied set, accepted queue included."""
+        for proposal in decision.apply:
+            if proposal.fingerprint == fingerprint:
+                return proposal
+        for proposal in self._accepted_this_cycle:
+            if proposal.fingerprint == fingerprint:
+                return proposal
+        return None
 
     # -- the whole cycle -----------------------------------------------------
 

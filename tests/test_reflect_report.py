@@ -393,15 +393,23 @@ class TestPopulatedReport(TempCase):
         )
         report = CycleReport(cycle_id="20260827-020000", dry_run=False)
         report.signals = 128
-        report.findings = [done.finding, waiting.finding, Finding(rule_id="hygiene.stale",
-                                                                 title="orphan note", key="o",
-                                                                 severity="low",
-                                                                 targets=["notes/old.md"])]
+        orphan = Finding(
+            rule_id="hygiene.stale",
+            title="orphan note",
+            key="o",
+            severity="low",
+            targets=["notes/old.md"],
+        )
+        report.findings = [done.finding, waiting.finding, orphan]
         report.proposals = [done, waiting]
         report.applied = [done.fingerprint]
         report.queued = [waiting.fingerprint]
         applied = applied_report(
-            FakeEditResult(path="Makefile", applied=True, diff="--- a/Makefile\n+++ b/Makefile\n+test:\n+\tpython -m unittest\n")
+            FakeEditResult(
+                path="Makefile",
+                applied=True,
+                diff="--- a/Makefile\n+++ b/Makefile\n+test:\n+\tpython -m unittest\n",
+            )
         )
         return report, applied, done, waiting
 
