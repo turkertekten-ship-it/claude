@@ -629,3 +629,28 @@ sources:
       caught the error leaked a handle it had no reference to. Fixed by closing
       the connection in an except clause before re-raising. All 48 then pass,
       and the whole suite is 125 tests, OK, 1 skipped.
+
+  - id: INVARIANT-SUITES-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T16:30Z"
+    method: "tests/test_generate_invariants.py, tests/test_ooda_invariants.py and tests/test_chunk_invariants.py written and run under PYTHONPATH=src python3 -m unittest"
+    evidence: >-
+      Three suites were written by hand after the workflow's test agents were
+      killed by a session limit, covering the invariants CLAUDE.md names rather
+      than aiming at coverage. generate: 9 cases - a quote absent from its chunk
+      is dropped, a citation naming an unretrieved chunk is dropped, an
+      abstention carries no citations, confidence stays in [0,1] for empty,
+      zero, unit and out-of-range inputs. ooda: 9 cases - decide() runs on a
+      loop constructed with no pipeline attached, is deterministic across two
+      calls, contains no IO tokens by source inspection, orient() takes no
+      clock, and a dry cycle leaves documents/chunks/vectors byte-identical.
+      chunk: 13 cases - doc.text[char_start:char_end] recovers every chunk body,
+      no chunk holds an odd number of code-fence markers even under a
+      target_tokens of 40, chunk ids are unique and reproducible, and empty or
+      whitespace input yields no chunks.
+    note: >-
+      The dry-run case initially passed in 0.084s, which was suspicious. It was
+      given three preconditions asserting documents, chunks and vectors are all
+      non-zero before the comparison, because an ingest that silently did
+      nothing would otherwise make every assertion in it trivially true - the
+      exact shape of test that passes while proving nothing.

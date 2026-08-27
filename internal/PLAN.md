@@ -81,13 +81,26 @@ retrieval does. Treat it as a regression baseline and nothing more; the number
 that would mean something comes from a corpus nobody wrote the questions
 against.
 
-**2. Nine of the eleven stages have no unit tests.** Normalize, embed, store,
-retrieve, rerank, generate, evaluate, loop and cli are covered only by the
-end-to-end demo, which asserts nothing — it prints. A bug that degrades ranking
-without breaking it produces a demo that looks identical. The one regression
-test that exists (`test_bm25_small_corpus.py`) exists because exactly that
-happened: a clamped IDF silenced the whole lexical arm on a small corpus, the
-dense arm kept answering, and every number stayed plausible.
+**2. Six of the eleven stages still have no unit tests.** Normalize, embed,
+retrieve, rerank, evaluate and cli are covered only by the end-to-end demo,
+which asserts nothing — it prints. A bug that degrades ranking without breaking
+it produces a demo that looks identical.
+
+Five stages now have unit tests, and three of the five suites were written
+because something had already gone wrong in them:
+
+| Stage | Suite | Why it exists |
+|---|---|---|
+| ingest, scrape | `test_{github_offline,github_blind,crawler_blind,robots,html_extract,http_client}.py` | Inherited from the pipeline branch; 72 tests against a local stub server |
+| chunk | `test_chunk_invariants.py` | Offsets and fence atomicity are what every citation rests on |
+| index / store | `test_store.py` | Found a connection leak on a refused open — a caller catching the error kept a handle it could not reach |
+| index / bm25 | `test_bm25_small_corpus.py` | A clamped IDF silenced the whole lexical arm on a small corpus; the dense arm kept answering and every number stayed plausible |
+| generate | `test_generate_invariants.py` | Citation verification and abstention are the last gate before a fabrication reaches a caller |
+| loop | `test_ooda_invariants.py` | `decide()` purity and dry-run side-effect freedom are claims that erode silently |
+
+The gap that matters most of the six is **retrieve and rerank**: fusion is the
+stage the golden set cannot currently measure (gap 1), so it has neither a unit
+test nor a meaningful end-to-end signal.
 
 **3. Deletions never propagate.** `Connector.run` records vanished documents in
 `cursor["removed_last_run"]` and `Store.delete_document` is implemented, but

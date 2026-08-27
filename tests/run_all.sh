@@ -16,16 +16,13 @@ run python3 tests/test_ingest_chat_archive.py
 run python3 tests/test_install_user_scope.py
 run python3 tools/ingest_chat_archive.py selfcheck
 
-# The oodarag pipeline suite, once it exists. test_pipeline_e2e.py is the
-# marker: it is the suite that exercises the whole pipeline, so if it is absent
-# the pipeline is not finished and there is nothing meaningful to run. Guarded
-# rather than unconditional so this script stays useful on a tree where only the
-# substrate is built.
-if [ -f tests/test_pipeline_e2e.py ]; then
-    echo "== oodarag suite =="
-    PYTHONPATH=src python3 -m unittest discover -s tests -t . -q || status=1
-    echo
-fi
+# The oodarag pipeline suite. Unconditional: the pipeline is built, so a tree
+# where this cannot run is a broken tree, not an incomplete one. -t . makes the
+# repo root the import root, which the blind-test suites need for
+# `tests.support.httpserver`.
+echo "== oodarag suite =="
+PYTHONPATH=src python3 -m unittest discover -s tests -t . -q || status=1
+echo
 
 if [ "$status" -eq 0 ]; then
     echo "ALL CHECKS PASSED"

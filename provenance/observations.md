@@ -176,6 +176,12 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - Repaired to use stdlib mock, that test failed for a real reason: `Store.__init__` raised `SchemaVersionError` without closing the connection it had opened, leaking a handle the caller could not reach. [src:STORE-LEAK-2026-08-27]
 - With the leak fixed, all 48 pass and the full pipeline suite is 125 tests, OK, 1 skipped. [src:STORE-LEAK-2026-08-27]
 
+## Observed — invariant suites written after the agents were cut off
+
+- The workflow's three test agents and two audit agents all failed on a session limit, so those suites were written by hand instead. [src:INVARIANT-SUITES-2026-08-27]
+- Three suites cover the invariants CLAUDE.md actually names — citation verification and abstention, `decide()` purity and dry-run side-effect freedom, and chunk offsets and fence atomicity — rather than aiming at coverage. [src:INVARIANT-SUITES-2026-08-27]
+- The dry-run case was strengthened after passing suspiciously fast: it now asserts the pipeline is non-empty before comparing, so an ingest that silently did nothing cannot make it trivially true. [src:INVARIANT-SUITES-2026-08-27]
+
 ## Conclusion
 
 The request that opened this session asked to look at "all my previous claude
