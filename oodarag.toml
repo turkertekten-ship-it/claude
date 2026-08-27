@@ -20,6 +20,21 @@ root     = "."
 patterns = ["src/**/*.py", "tests/**/*.py", "docs/**/*.md", "internal/**/*.md", "*.md"]
 authority = 1.2
 
+# --- Reference notes: authored design notes, with sources cited inline.
+[[source]]
+type      = "filesystem"
+root      = "corpus/reference"
+patterns  = ["**/*.md"]
+authority = 1.0
+
+# --- IBM Technology video manifest. Ingests as metadata-only wherever
+# youtube.com is unreachable, and hydrates real captions where it is.
+# Run `ooda preflight` to find out which case you are in.
+[[source]]
+type      = "youtube"
+manifest  = "corpus/ibm-technology/manifest.json"
+authority = 0.85
+
 # --- Session transcripts: decisions and reasoning that exist nowhere else.
 # Tool output and reasoning blocks are excluded by default - see ingest/chat.py.
 [[source]]

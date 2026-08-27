@@ -81,7 +81,8 @@ def verify(text: str, available: list[Citation]) -> CitationCheck:
         cleaned = cleaned.replace(f"[{marker}]", "")
     cleaned = re.sub(r"\s{2,}", " ", cleaned).strip()
 
-    claims = [s for s in split_sentences(cleaned)
+    sentences = _attach_trailing_markers(split_sentences(cleaned))
+    claims = [s for s in sentences
               if len(s.split()) >= 5 and not _NON_CLAIM_RE.match(s)]
     cited = [s for s in claims if _MARKER_RE.search(s)]
     coverage = len(cited) / len(claims) if claims else (1.0 if cleaned else 0.0)
@@ -93,6 +94,31 @@ def verify(text: str, available: list[Citation]) -> CitationCheck:
         invalid_markers=invalid,
         text=cleaned,
     )
+
+
+_MARKER_ONLY_RE = re.compile(r"^[\s\[\]\d,;.]*$")
+
+
+def _attach_trailing_markers(sentences: list[str]) -> list[str]:
+    """Re-join fragments that are nothing but citation markers.
+
+    Sentence splitting breaks after terminal punctuation, and `[` opens a new
+    sentence - so "Claim about chunking. [1]" splits into a claim with no
+    citation and a fragment that is only a citation. Coverage then reads 0% for
+    a perfectly cited answer, and strict mode abstains on it.
+
+    This is the conventional placement for a trailing citation, so it has to be
+    handled rather than styled around: an LLM will produce it whatever the
+    prompt says.
+    """
+    joined: list[str] = []
+    for sentence in sentences:
+        stripped = sentence.strip()
+        if joined and stripped and _MARKER_ONLY_RE.match(stripped) and "[" in stripped:
+            joined[-1] = f"{joined[-1]} {stripped}"
+            continue
+        joined.append(sentence)
+    return joined
 
 
 def format_context(citations: list[Citation], results: list[ScoredChunk],

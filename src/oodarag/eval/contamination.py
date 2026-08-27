@@ -93,7 +93,7 @@ def detect(store: SqliteStore, questions: list[str], *,
            verbatim_threshold: float = 0.85,
            overlap_threshold: float = 0.9,
            negative_verbatim_threshold: float = 0.5,
-           negative_overlap_threshold: float = 0.7,
+           negative_overlap_threshold: float = 0.6,
            max_docs_scanned: int = 5000) -> ContaminationReport:
     """Check whether any question appears in the indexed corpus.
 
@@ -114,9 +114,13 @@ def detect(store: SqliteStore, questions: list[str], *,
     if not questions:
         return report
 
+    # Weighted by informativeness, for the same reason retrieval relevance is:
+    # a document sharing a question's rare terms is discussing that question; one
+    # sharing only its common words is not.
+    idf = store.idf_lookup()
     documents = store.all_documents()[:max_docs_scanned]
     prepared = [
-        (doc, _normalize(doc.text), set(tokenize(doc.text)))
+        (doc, _normalize(doc.text), set(tokenize(doc.text, stem_words=True)))
         for doc in documents
     ]
 
@@ -127,7 +131,7 @@ def detect(store: SqliteStore, questions: list[str], *,
         overlap_floor = (negative_overlap_threshold if is_negative
                          else overlap_threshold)
         q_norm = _normalize(question)
-        q_terms = set(tokenize(question))
+        q_terms = set(tokenize(question, stem_words=True))
         q_words = _normalize(" ".join(tokenize_all(question))).split()
         if not q_words:
             continue
@@ -149,12 +153,16 @@ def detect(store: SqliteStore, questions: list[str], *,
                     report.by_source.get(doc.source_system, 0) + 1
                 continue
             # 2. overlap: nearly every distinctive term of the question present.
-            if q_terms and len(q_terms & doc_terms) / len(q_terms) >= overlap_floor:
+            if not q_terms:
+                continue
+            total_weight = sum(idf(t) for t in q_terms) or 1.0
+            weighted = sum(idf(t) for t in q_terms & doc_terms) / total_weight
+            if weighted >= overlap_floor:
                 fatal = is_negative
                 report.findings.append(Contamination(
                     question=question, doc_id=doc.doc_id, uri=doc.uri,
                     source_system=doc.source_system, kind="overlap",
-                    score=round(len(q_terms & doc_terms) / len(q_terms), 3), fatal=fatal,
+                    score=round(weighted, 3), fatal=fatal,
                 ))
                 if fatal:
                     report.by_source[doc.source_system] = \

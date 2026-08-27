@@ -1,0 +1,84 @@
+{
+  "_about": "IBM Technology video manifest for the YouTube connector.",
+  "_provenance": [
+    "Video ids and titles were obtained by web search from this environment.",
+    "youtube.com is NOT reachable from the container this was built in (see",
+    "internal/ACCESS.md), so captions could not be fetched and no transcript",
+    "text is included here. Entries therefore ingest as `metadata_only`.",
+    "",
+    "No entry carries a `summary` or `notes_file`, deliberately. Attributing",
+    "prose to a specific video whose captions were never read would produce a",
+    "citation that looks verbatim and is not - the exact failure the citation",
+    "contract exists to prevent. Run this manifest from an environment with",
+    "youtube.com egress and the connector hydrates real captions in place.",
+    "",
+    "`verification` records how strongly the channel attribution is supported:",
+    "  search_confirmed  - multiple independent results attribute it to IBM",
+    "  search_listed     - a search result asserted IBM Technology, unverified",
+    "Anything weaker is not listed."
+  ],
+  "_hydrate": "ooda index  (with youtube.com reachable) -> transcript_source becomes 'captions'",
+  "videos": [
+    {
+      "video_id": "T-D1OfcDW1M",
+      "title": "What is Retrieval-Augmented Generation (RAG)?",
+      "channel": "IBM Technology",
+      "presenter": "Marina Danilevsky",
+      "verification": "search_confirmed",
+      "topics": ["rag", "grounding", "hallucination", "citations"],
+      "related": [
+        "https://www.ibm.com/think/videos/rag",
+        "https://research.ibm.com/blog/retrieval-augmented-generation-RAG"
+      ]
+    },
+    {
+      "video_id": "LpKGm1jJXv4",
+      "title": "Setting up Retrieval Augmented Generation (RAG) in 3 Steps",
+      "channel": "IBM Technology",
+      "verification": "search_listed",
+      "topics": ["rag", "pipeline", "implementation"]
+    },
+    {
+      "video_id": "00Q0G84kq3M",
+      "title": "RAG vs. Fine Tuning",
+      "channel": "IBM Technology",
+      "verification": "search_listed",
+      "topics": ["rag", "fine-tuning", "model-adaptation"]
+    },
+    {
+      "video_id": "Yq29bZ8Hlrc",
+      "title": "Optimize RAG with AI Agents & Vector Databases",
+      "channel": "IBM Technology",
+      "verification": "search_listed",
+      "topics": ["rag", "agents", "vector-database"]
+    },
+    {
+      "video_id": "zYGDpG-pTho",
+      "title": "RAG vs Fine-Tuning vs Prompt Engineering: Optimizing AI Models",
+      "channel": "IBM Technology",
+      "verification": "search_listed",
+      "topics": ["rag", "fine-tuning", "prompt-engineering"]
+    },
+    {
+      "video_id": "E6Qe_gy-fjc",
+      "title": "RAG & AI Agents: Vector Databases, Function Calling & Memory Explained",
+      "channel": "IBM Technology",
+      "verification": "search_listed",
+      "topics": ["rag", "agents", "memory", "function-calling"]
+    },
+    {
+      "video_id": "sMQ5R92F86o",
+      "title": "Unlocking Smarter AI Agents with Unstructured Data, RAG & Vector Databases",
+      "channel": "IBM Technology",
+      "verification": "search_listed",
+      "topics": ["rag", "unstructured-data", "vector-database"]
+    },
+    {
+      "video_id": "xc63tFIIfeA",
+      "title": "Why RAG Solutions Fail with Complex Documents & Vector Databases",
+      "channel": "IBM Technology",
+      "verification": "search_listed",
+      "topics": ["rag", "failure-modes", "document-parsing"]
+    }
+  ]
+}

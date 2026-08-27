@@ -111,6 +111,60 @@ class RetryPolicy:
 
 
 @dataclass
+class CircuitBreaker:
+    """Stop paying the full retry cost for a host that is known unreachable.
+
+    Retry policy assumes failures are transient. Egress policy is not: when a
+    proxy refuses CONNECT to a host, every request to it fails identically for
+    the life of the process, and each one costs the full attempt count plus
+    backoff. Ingesting eight videos from a blocked domain took 129 seconds to
+    produce nothing, and would have cost the same on every subsequent run.
+
+    Connection-level failures are counted per host. After `threshold`
+    consecutive ones with no success between, the circuit opens and further
+    requests to that host fail immediately for `cooldown_s`; any success closes
+    it. Only transport failures count - an HTTP error means the host answered,
+    which is the opposite of unreachable.
+    """
+
+    threshold: int = 3
+    cooldown_s: float = 300.0
+    _failures: dict[str, int] = field(default_factory=dict, repr=False)
+    _opened_at: dict[str, float] = field(default_factory=dict, repr=False)
+
+    def is_open(self, host: str) -> bool:
+        opened = self._opened_at.get(host)
+        if opened is None:
+            return False
+        if time.monotonic() - opened >= self.cooldown_s:
+            # Cooldown elapsed: let one probe through to see if it recovered.
+            del self._opened_at[host]
+            self._failures[host] = 0
+            return False
+        return True
+
+    def record_failure(self, host: str) -> None:
+        count = self._failures.get(host, 0) + 1
+        self._failures[host] = count
+        if count >= self.threshold and host not in self._opened_at:
+            self._opened_at[host] = time.monotonic()
+            log.warn("circuit opened; host treated as unreachable",
+                     host=host, failures=count, cooldown_s=self.cooldown_s)
+
+    def record_success(self, host: str) -> None:
+        self._failures.pop(host, None)
+        self._opened_at.pop(host, None)
+
+    @property
+    def open_hosts(self) -> list[str]:
+        return sorted(self._opened_at)
+
+
+class CircuitOpenError(TransportError):
+    """Raised instead of retrying a host already established as unreachable."""
+
+
+@dataclass
 class HttpClient:
     """Blocking HTTP client with retries, rate limiting and conditional GETs."""
 
@@ -122,11 +176,13 @@ class HttpClient:
     max_bytes: int = MAX_BYTES
     verify_tls: bool = True
     default_headers: dict[str, str] = field(default_factory=dict)
+    breaker: CircuitBreaker = field(default_factory=CircuitBreaker)
     _bucket: TokenBucket = field(init=False, repr=False)
     _etags: dict[str, str] = field(default_factory=dict, repr=False)
     _opener: Any = field(default=None, init=False, repr=False)
     stats: dict[str, int] = field(default_factory=lambda: {
-        "requests": 0, "retries": 0, "errors": 0, "not_modified": 0, "bytes": 0
+        "requests": 0, "retries": 0, "errors": 0, "not_modified": 0, "bytes": 0,
+        "short_circuited": 0,
     })
 
     def __post_init__(self) -> None:
@@ -163,6 +219,14 @@ class HttpClient:
         if conditional and url in self._etags:
             hdrs["If-None-Match"] = self._etags[url]
 
+        host = urllib.parse.urlsplit(url).netloc
+        if self.breaker.is_open(host):
+            self.stats["short_circuited"] += 1
+            raise CircuitOpenError(
+                f"{host} is unreachable from this environment (circuit open); "
+                f"skipped without retrying. See internal/CAPABILITY-PROTOCOL.md."
+            )
+
         last_exc: Exception | None = None
         for attempt in range(1, self.retry.attempts + 1):
             self._bucket.acquire()
@@ -181,10 +245,13 @@ class HttpClient:
                     )
                 self.stats["requests"] += 1
                 self.stats["bytes"] += len(resp.body)
+                self.breaker.record_success(host)
                 if etag := resp.headers.get("etag"):
                     self._etags[url] = etag
                 return resp
             except urllib.error.HTTPError as e:  # noqa: PERF203 - retry loop
+                # The host answered, so it is reachable - whatever it said.
+                self.breaker.record_success(host)
                 resp_headers = {k.lower(): v for k, v in (e.headers or {}).items()}
                 if e.code == 304:
                     self.stats["not_modified"] += 1
@@ -208,6 +275,7 @@ class HttpClient:
                 last_exc = TransportError(f"{type(e).__name__}: {e} ({url})")
                 if attempt == self.retry.attempts:
                     self.stats["errors"] += 1
+                    self.breaker.record_failure(host)
                     raise last_exc from e
                 wait = self.retry.delay_for(attempt)
                 self.stats["retries"] += 1

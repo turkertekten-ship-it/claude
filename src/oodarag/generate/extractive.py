@@ -31,6 +31,18 @@ _CODE_START_RE = re.compile(
 _SYMBOL_RE = re.compile(r"[(){}\[\]=<>;:|&^~%\\/_*+-]")
 
 
+def _cite(sentence: str, marker: int) -> str:
+    """Attach a citation marker inside the sentence's terminal punctuation.
+
+    "Claim [1]." rather than "Claim. [1]" - the marker is part of the claim, and
+    a splitter that breaks on terminal punctuation cannot separate them.
+    """
+    text = sentence.rstrip()
+    if text and text[-1] in ".!?":
+        return f"{text[:-1].rstrip()} [{marker}]{text[-1]}"
+    return f"{text} [{marker}]"
+
+
 def _code_likeness(sentence: str) -> float:
     """0 = prose, 1 = definitely code."""
     if not sentence:
@@ -82,7 +94,7 @@ def extractive_answer(question: str, results: list[ScoredChunk],
         # opening, which is at least the most relevant passage retrieved.
         best, citation = results[0], citations[0]
         opening = " ".join(split_sentences(best.chunk.text)[:2])
-        return f"{opening} [{citation.marker}]"
+        return _cite(opening, citation.marker)
 
     scored.sort(key=lambda item: item[0], reverse=True)
     seen: set[str] = set()
@@ -92,7 +104,7 @@ def extractive_answer(question: str, results: list[ScoredChunk],
         if key in seen:
             continue
         seen.add(key)
-        lines.append(f"{sentence} [{marker}]")
+        lines.append(_cite(sentence, marker))
         if len(lines) >= max_sentences:
             break
     return " ".join(lines)

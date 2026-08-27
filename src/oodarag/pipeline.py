@@ -27,7 +27,7 @@ from typing import Any, Sequence
 from oodarag.chunking import ChunkConfig, chunk_document, summarize_chunking
 from oodarag.embedding.base import Embedder
 from oodarag.embedding.hashing import HashingEmbedder
-from oodarag.ingest.base import Connector, StateStore
+from oodarag.ingest.base import Connector, SqliteStateStore, StateStore
 from oodarag.models import Document, IngestDelta, RawDocument
 from oodarag.store.sqlite_store import SqliteStore
 from oodarag.util.logging import get_logger
@@ -88,7 +88,10 @@ class IndexPipeline:
         self.store = store
         self.embedder = embedder or HashingEmbedder()
         self.chunk_config = chunk_config or ChunkConfig()
-        self.state = state
+        # Never None: a pipeline with no state store re-ingests the entire
+        # corpus on every run and reports it all as new, which looks like
+        # working software until the bill or the rate limit arrives.
+        self.state = state or SqliteStateStore(store)
         self._restore_embedder_state()
 
     def _restore_embedder_state(self) -> None:

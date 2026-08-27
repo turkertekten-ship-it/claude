@@ -70,6 +70,26 @@ class JsonStateStore:
             raise
 
 
+class SqliteStateStore:
+    """Cursor storage inside the index itself.
+
+    The alternative - a JSON file beside the database - can be deleted, moved or
+    forgotten independently of the index, and when it is, every connector
+    silently reports every document as new and the whole corpus is re-fetched.
+    Keeping the cursor in the same file as the data it describes makes that
+    impossible.
+    """
+
+    def __init__(self, store: Any) -> None:
+        self.store = store
+
+    def get(self, key: str) -> dict[str, Any]:
+        return dict(self.store.get_meta(f"source_state:{key}", {}))
+
+    def set(self, key: str, value: dict[str, Any]) -> None:
+        self.store.set_meta(f"source_state:{key}", value)
+
+
 class MemoryStateStore:
     def __init__(self) -> None:
         self._data: dict[str, dict[str, Any]] = {}

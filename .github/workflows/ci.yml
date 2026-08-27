@@ -1,0 +1,81 @@
+name: ci
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # No install step and no dependency cache, deliberately: the core runs on
+      # the standard library, and a green build here is evidence of that claim.
+      - name: Compile every module
+        run: python -m compileall -q src tests
+
+      - name: Test suite
+        env:
+          PYTHONPATH: src
+          # Live cross-checks against GitHub skip cleanly without a token; they
+          # run on push to this repository, where one is available.
+          OODARAG_SKIP_NETWORK_TESTS: ${{ github.event_name == 'pull_request' && '1' || '' }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python -m unittest discover -s tests -v
+
+  numpy-path:
+    # store/vectors.py has two scoring kernels. The pure-Python one is covered
+    # by the job above; this proves the accelerated path agrees with it.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet numpy
+      - env:
+          PYTHONPATH: src
+          OODARAG_SKIP_NETWORK_TESTS: "1"
+        run: python -m unittest discover -s tests -v
+
+  retrieval-quality:
+    # The regression gate. A change that makes retrieval worse fails here even
+    # when every unit test still passes - which is exactly how the three real
+    # retrieval bugs in internal/LEARNINGS.md were caught.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Index this repository
+        env:
+          PYTHONPATH: src
+        run: python -m oodarag.cli index
+      - name: Evaluate retrieval
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m oodarag.cli eval \
+            --exclude-source chat \
+            --min-pass-rate 0.85 \
+            --out eval-report.md
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-report
+          path: eval-report.md

@@ -93,6 +93,13 @@ class Config:
 
                 seeds = options.pop("seeds", [])
                 connectors.append(WebConnector(seeds, **options))
+            elif source.type == "youtube":
+                from oodarag.ingest.youtube import YouTubeConnector
+
+                manifest = options.pop("manifest", None)
+                if "languages" in options:
+                    options["languages"] = tuple(options["languages"])
+                connectors.append(YouTubeConnector(manifest, **options))
             elif source.type == "chat":
                 from oodarag.ingest.chat import ChatTranscriptConnector
 

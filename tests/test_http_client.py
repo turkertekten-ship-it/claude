@@ -4,7 +4,16 @@ from __future__ import annotations
 
 import unittest
 
-from oodarag.util.http import HttpClient, HttpError, RetryPolicy, TransportError, normalize_url, same_site
+from oodarag.util.http import (
+    CircuitBreaker,
+    CircuitOpenError,
+    HttpClient,
+    HttpError,
+    RetryPolicy,
+    TransportError,
+    normalize_url,
+    same_site,
+)
 from tests.support.httpserver import Route, TestSite
 
 
@@ -108,6 +117,69 @@ class HttpClientTest(unittest.TestCase):
                                   allow_status=(302,))
             self.assertEqual(resp.status, 302)
             self.assertNotIn(("POST", "/landing"), site.requests)
+
+    def test_circuit_opens_after_repeated_transport_failures(self):
+        """A host that cannot be reached must stop costing a full retry cycle."""
+        import time as clock
+
+        # Bind and immediately close a port so connections are actively refused.
+        import socket
+
+        sock = socket.socket()
+        sock.bind(("127.0.0.1", 0))
+        port = sock.getsockname()[1]
+        sock.close()
+        dead = f"http://127.0.0.1:{port}/x"
+
+        client = HttpClient(rate_per_sec=200,
+                            retry=RetryPolicy(attempts=2, base_delay=0.01),
+                            breaker=CircuitBreaker(threshold=2, cooldown_s=60))
+        for _ in range(2):
+            with self.assertRaises(TransportError):
+                client.get(dead)
+        self.assertIn(f"127.0.0.1:{port}", client.breaker.open_hosts)
+
+        started = clock.monotonic()
+        with self.assertRaises(CircuitOpenError):
+            client.get(dead)
+        self.assertLess(clock.monotonic() - started, 0.05,
+                        "an open circuit still paid for a connection attempt")
+        self.assertEqual(client.stats["short_circuited"], 1)
+
+    def test_an_http_error_does_not_open_the_circuit(self):
+        """A 404 means the host answered. Answering is the opposite of unreachable."""
+        with TestSite({"/missing": Route(body="", status=404)}) as site:
+            client = HttpClient(rate_per_sec=200,
+                                retry=RetryPolicy(attempts=1, base_delay=0.01),
+                                breaker=CircuitBreaker(threshold=2, cooldown_s=60))
+            for _ in range(4):
+                with self.assertRaises(HttpError):
+                    client.get(site.url("/missing"))
+            self.assertEqual(client.breaker.open_hosts, [])
+
+    def test_a_success_closes_the_circuit(self):
+        with TestSite({"/ok": Route(body="fine")}) as site:
+            client = HttpClient(rate_per_sec=200,
+                                retry=RetryPolicy(attempts=1, base_delay=0.01),
+                                breaker=CircuitBreaker(threshold=3, cooldown_s=60))
+            host = f"127.0.0.1:{site.port}"
+            client.breaker.record_failure(host)
+            client.breaker.record_failure(host)
+            client.get(site.url("/ok"))
+            self.assertEqual(client.breaker.open_hosts, [])
+            # And the failure count reset, so two more do not immediately open it.
+            client.breaker.record_failure(host)
+            self.assertEqual(client.breaker.open_hosts, [])
+
+    def test_cooldown_allows_a_probe_through(self):
+        breaker = CircuitBreaker(threshold=1, cooldown_s=0.05)
+        breaker.record_failure("example.test")
+        self.assertTrue(breaker.is_open("example.test"))
+        import time as clock
+
+        clock.sleep(0.08)
+        self.assertFalse(breaker.is_open("example.test"),
+                         "the circuit never reopens, so a recovered host stays blocked")
 
     def test_rate_limiter_actually_throttles(self):
         import time
