@@ -63,13 +63,19 @@ KURALLAR = [
 
 EK = [
     ("§7 koltuk sağlaması",
-     "YOK",
-     "'bir koltuk o hukukçunun gerçekten yazdığına dayanır' kuralı en yüksek "
-     "itibar riskini taşıyor; hiçbir kapı bir koltuk dosyasının uydurma olup "
-     "olmadığını kontrol etmiyor"),
+     "MEKANİZMA*",
+     "KİTAPTA YOKTU: 'bir koltuk o hukukçunun gerçekten yazdığına dayanır' "
+     "kuralı sistemin en yüksek itibar riskiydi ve hiçbir kapı bakmıyordu "
+     "[K-14]. Altıncı kapı eklendi: beyansız bir koltuk dosyası bloklanıyor, "
+     "yöntem dosyaları etkilenmiyor [K-15]. Denetim de kontrol ediyor."),
     ("§18 kapsam sınırları",
      "YOK",
      "dokuz açık sınır sayılıyor; hiçbiri makinece kontrol edilmiyor"),
+    ("kapıların yapısal sınırı",
+     "SINIR",
+     "töreni eksiksiz ama RAKAMI yanlış bir cevap altı kapıdan da geçiyor "
+     "[J-09]. Kapılar biçimi denetler, muhakemeyi değil — ve §17.1'in kendi "
+     "bulgusu tam olarak budur: kazanç açıklıkta, doğrulukta değil."),
 ]
 
 

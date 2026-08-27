@@ -1,6 +1,6 @@
 ---
 name: once-arastir
-description: Bir eşik, harç, süre, düzenleyici gerekliliği, piyasa uygulaması ya da bir aracın var olup bakımının yapılıp yapılmadığı içeren HER soruya cevap vermeden ÖNCE kullan. Önce web, sonra GitHub, sonra yerel kaynaklar sırasıyla çalışır ve cevabı "Kontrol edildi" satırıyla döndürür. Bu tür soruları hafızadan cevaplama.
+description: Bir eşik, harç, süre, düzenleyici gerekliliği, piyasa uygulaması ya da bir aracın var olup bakımının yapılıp yapılmadığı içeren HER soruya cevap vermeden ÖNCE kullan. Önce web, sonra GitHub, sonra yerel kaynaklar sırasıyla çalışır ve cevabı "Kontrol edildi" satırıyla döndürür. Bu tür soruları hafızadan cevaplama. Yalnızca yerel dosyalardan cevaplanabilecek sorular için KULLANMA.
 ---
 
 # Önce araştır, sonra cevap ver

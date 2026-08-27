@@ -30,8 +30,13 @@ Dokuz takım, 96 vaka:
 | G | §13 deposu — 16 depo bağımsız yeniden çözüldü | GitHub API |
 | H | §17 kaynakları — dört akademik çalışma | Yayıncı kayıtları |
 | I | §5 mevzuatı — eşikler ve madde numaraları | Birincil kaynak (denendi) |
+| J | **§19 kabul sınaması** — kitabın kendi son kapısı, uçtan uca | §19 |
+| K | Yönlendirme, üst bilgi ve koltuk sağlaması | §7, §9, §10, §11 |
 
-**Sonuç: 85 vaka koşuldu, 56'sı kaldı.** Yamadan sonra 96 vaka, 11 kaldı.
+**Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamadan ve iki
+takım eklendikten sonra **122 vaka, 13 kaldı** — ve on üçünün her biri ya
+kitabın davranışının bilerek bırakılmış kaydıdır ya da belgelenmiş bir
+öntanımlı boşluktur; hiçbiri yamalı sistemde çözülmemiş bir kusur değildir.
 
 ---
 
@@ -300,6 +305,59 @@ katmanı zayıftır. `hafiza/dogrulama-bulgulari.md` içinde açık bırakıldı
 
 ---
 
+## Yedi buçuk · §19: kitabın kendi kabul sınaması
+
+§19, kitabın son kapısıdır ve şunu söyler: *"Doğru cevap neye benzer: esik.py
+çalıştırılır, avro rakamı TL'ye çevrilir… Yanlış cevap neye benzer: kod çıktısı
+ve tarih olmadan kendinden emin bir 'evet'. **Bu iki cevabın arasındaki fark,
+kurulumun tamamının sebebidir.**"*
+
+Bu ölçülebilir bir iddiadır. İki cevap da üretilip beş kapıdan geçirildi.
+
+| | Doğru cevap | Yanlış cevap |
+|---|---|---|
+| **Kitaba sadık kapılar** | **BLOKLANDI** `[arastirma]` | BLOKLANDI `[arastirma, kanit, kapsam]` |
+| **Yamalı kapılar** | geçer (0) | BLOKLANDI `[arastirma, guncellik, kanit, kapsam]` |
+
+Kitaba sadık sistemde **her ikisi de bloklanıyor.** Kapı sistemi, §19'un
+"kurulumun tamamının sebebi" dediği farkı ifade edemiyor: eşik rakamı içeren
+her şeyi durduruyor. Duyarlılık %100, isabet %0.
+
+Pilot ayrıca **hiç hesaplanamıyor**: `esik.py`'nin komut satırı arayüzü yok,
+avro çevirisi modellenmemiş, ve §14 sonrası öz-sınama kırmızı olduğu için §0'ın
+kuralına göre buraya zaten hiç gelinmiyor.
+
+### Ve kapıların göremediği şey
+
+Töreni eksiksiz ama **rakamı yanlış** bir cevap — dayanağı, tarihi, iki başlığı
+ve "Kontrol edildi" satırı olan, ama eşiği ters okuyan — **altı kapıdan da
+geçiyor** (J-09).
+
+Bu bir kusur değil bir sınırdır ve yazılması gerekir: kapılar **biçimi**
+denetler, **muhakemeyi** değil. Kitabın kendi §17.1 bulgusu tam olarak budur —
+kazanç açıklıkta, düzende ve profesyonellikte; **doğrulukta değil.** Doğruluğu
+sağlayan şey kapılar değil, yetkili avukat onayıdır.
+
+---
+
+## Yedi çeyrek · Yönlendirme ve koltuk sağlaması
+
+Hiçbir kapının bakmadığı katman. On beş vaka; ikisi kitabın metnine ait:
+
+- **§9 negatif sınır kuralını gösteriyor ama söylemiyor.** Tek işlenmiş
+  örneğinde ("Türkiye dışındaki rekabet rejimleri için KULLANMA") kullanıyor,
+  kural olarak yazmıyor. Kitabı izleyen biri kalan on beceriyi negatif sınırsız
+  yazar — ve §9'un kendi uyarısına göre yönlendirme yalnızca o alanı okur.
+- **§7'nin koltuk kuralının hiçbir mekanizması yok.** *"Bir koltuğun ağzına, o
+  kişinin belgelenmiş görüşüyle çelişen bir söz asla konmaz."* Bu, sistemin en
+  yüksek itibar riskidir — yaşayan, adı belli bir hukukçu söz konusudur — ve
+  onu uygulayan tek şey iyi niyetti. §12'nin kendi uyarısı buraya düşüyor.
+
+Kapatıldı: **altıncı kapı** eklendi. Beyansız bir koltuk dosyası bloklanıyor
+(K-14), yöntem dosyaları etkilenmiyor (K-15), denetim de kontrol ediyor.
+
+---
+
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
 
 | Bölüm | Beklenen | Gerçek | Sebep |
@@ -326,7 +384,13 @@ Bir sınama takımı da sınanmalıdır. Üç hata yapıldı ve üçü de düzel
    `M="$HOME/mafirm"` kullanıyor; `sed` literal `~/mafirm` arıyordu. Mutasyonlar
    kum havuzuna uygulanırken denetim ASIL kurulumu ölçüyordu. Yönlendirmenin
    tuttuğunu doğrulayan bir kontrol eklendi.
-3. **İki mevzuat/depo şüphem yanlıştı** (G-06, I-06). Kitap her ikisinde de
+3. **Uydurma alıntı dedektörünü iki kez yanlış yazdım.** Birinci sürüm her
+   tırnaklı diziyi alıntı saydı ve anılan ESER ADLARINI ("A Manual of Style for
+   Contract Drafting") uydurma söz diye işaretledi — oysa bir eser adını anmak
+   §7'nin istediği dayanağın ta kendisidir. İkinci sürüm söyleme fiili aradı ama
+   "<kitap> kitabında … yazdı" cümlesi hâlâ eşleşti. Ayrıca tırnaklar
+   eşleştirilmediği için hayalet aralıklar üretiliyordu. Üçüncü sürüm doğru.
+4. **İki mevzuat/depo şüphem yanlıştı** (G-06, I-06). Kitap her ikisinde de
    haklıydı; benim hatırladığım bayattı. Kitabın kendi §14 kuralının kanıtı:
    *"bir ad, var olduğunun kanıtı değildir"* kadar *"hatırladığın ad, doğru ad
    değildir"* de geçerli.
@@ -345,6 +409,8 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | C · üretim yolu | 9 kaldı | **temiz** |
 | D · mutasyon | 11 kaçtı | **temiz — 15/15 yakalandı** |
 | E · beklenen değerler | 4 kaldı | 3 kaldı (kitabın kendi değerleri) |
+| J · §19 kabul sınaması | doğru cevap da bloklu | 2 kaldı (**bilerek** — kitaba sadık karşılaştırma) |
+| K · yönlendirme + koltuk | 3 kaldı | **temiz** |
 
 Mühendislik katmanı yeşil: `denetim.sh --yapisal` → `DENETİM OK`.
 Tam denetim kırmızı: `denetim.sh` → `DENETİM BAŞARISIZ: 3` — üç ENGELLEYİCİ
@@ -379,10 +445,12 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-~/mafirm/sinama/hepsi.sh          # dokuz takım, 96 vaka
+~/mafirm/sinama/hepsi.sh          # on bir takım, 122 vaka
 ~/mafirm/denetim.sh --yapisal     # mühendislik katmanı
 ~/mafirm/denetim.sh               # mevzuat bulguları dâhil
 ```
 Ham çıktılar: `sinama/SONUC-once.txt` (kitaba sadık) ve
 `sinama/SONUC-sonra.txt` (yamalı). Dış doğrulamalar: `sinama/ks_g_depolar.md`,
 `ks_h_kaynaklar.md`, `ks_i_mevzuat.md`.
+Kitabın metni için düzeltme listesi: **`KITAP-ERRATA.md`** — bölüm bölüm,
+ağırlık işaretli, her madde onu bulan sınama vakasıyla.

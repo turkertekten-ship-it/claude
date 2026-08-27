@@ -1,6 +1,6 @@
 ---
 name: madde-karsilastirma
-description: Bir maddenin iki sürümü, iki tur arasındaki bir değişiklik ya da karşı tarafın işaretlediği bir taslak gerçekten karşılaştırılırken kullan. Farkın metinde nerede olduğunu değil, sonuçta neyi değiştirdiğini çıkarır.
+description: Bir maddenin iki sürümü, iki tur arasındaki bir değişiklik ya da karşı tarafın işaretlediği bir taslak gerçekten karşılaştırılırken kullan. Farkın metinde nerede olduğunu değil, sonuçta neyi değiştirdiğini çıkarır. Tek bir sürümü incelemek için KULLANMA; bu beceri İKİ sürüm arasındaki farkı okur.
 ---
 
 # Madde karşılaştırma

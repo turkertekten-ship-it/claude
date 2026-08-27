@@ -80,6 +80,14 @@ kontrol "her yöntem dosyası tarih taşıyor" \
   "test \$(ls $M/birimler/*/yontem/*.md 2>/dev/null | wc -l) -ge 9 && test -z \"\$(grep -rL 'Doğrulama:' $M/birimler/*/yontem/*.md)\" && echo hepsi"
 kontrol "çıkar çatışması dosyası var" \
   "test -s $M/hafiza/cikar-catismasi.md && echo var"
+kontrol "her koltuk kaynak beyanı taşıyor" \
+  "test \$(ls $M/birimler/_koltuklar/*.md 2>/dev/null | wc -l) -ge 15 && test -z \"\$(grep -LE '^## Kaynak durumu|KOLTUK BOŞ' $M/birimler/_koltuklar/*.md)\" && echo hepsi"
+kontrol "koltuk kapısı gerçekten bloklıyor" \
+  "python3 -c \"import json,subprocess,sys,os
+o={'tool_name':'Write','tool_input':{'file_path':'birimler/_koltuklar/x.md','content':'# X'}}
+r=subprocess.run([sys.executable,os.path.expanduser('~/mafirm/.claude/hooks/kapi.py')],input=json.dumps(o),capture_output=True,text=True)
+assert r.returncode==2, 'beyansız koltuk bloklanmadı'
+print('bloklanıyor')\""
 
 echo "=== kapsanmayan kurallar sesli bildirilir ==="
 adet=$(grep -cve '^[[:space:]]*#' -e '^[[:space:]]*$' "$M/hafiza/muvekkil-adlari.txt" 2>/dev/null | head -1)

@@ -1,6 +1,6 @@
 ---
 name: dosya-ac
-description: Yeni bir dosya (iş) açılırken, bir işe klasör, çıkar çatışması kontrolü ve kapsam notu gerektiğinde kullan. Çatışma kontrolünü açılışın önkoşulu yapar ve bir eşleşmede durur.
+description: Yeni bir dosya (iş) açılırken, bir işe klasör, çıkar çatışması kontrolü ve kapsam notu gerektiğinde kullan. Çatışma kontrolünü açılışın önkoşulu yapar ve bir eşleşmede durur. Var olan bir dosyada çalışmak için KULLANMA; yalnızca yeni dosya açılışında.
 ---
 
 # Dosya açma

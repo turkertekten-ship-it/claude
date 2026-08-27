@@ -1,6 +1,6 @@
 ---
 name: kosul-takibi
-description: Kapanış öncesi koşullar listelenip sahiplendirilip tarihlenirken, nihai tarihin gerçekçi olup olmadığı sorulduğunda ya da hangi koşulun kritik yolda olduğu belirlenirken kullan. Koşulları saat uzunluğuna göre sıralar ve bekletici olanları işaretler.
+description: Kapanış öncesi koşullar listelenip sahiplendirilip tarihlenirken, nihai tarihin gerçekçi olup olmadığı sorulduğunda ya da hangi koşulun kritik yolda olduğu belirlenirken kullan. Koşulları saat uzunluğuna göre sıralar ve bekletici olanları işaretler. Kapanış GÜNÜ mekaniği ve belge sırası için KULLANMA; o kapanis-listesi'dir.
 ---
 
 # Kapanış öncesi koşul takibi

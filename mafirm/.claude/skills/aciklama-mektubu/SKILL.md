@@ -1,6 +1,6 @@
 ---
 name: aciklama-mektubu
-description: Beyanlara karşı açıklama mektubu (disclosure letter) kaleme alınırken, incelenirken ya da bir açıklamanın belirli bir beyanı gerçekten sınırlayıp sınırlamadığı sorulduğunda kullan. Genel açıklama ile belirli açıklama ayrımını, veri odasının genel açıklama sayılmasının maliyetini ve W&I poliçesiyle ilişkisini kapsar.
+description: Beyanlara karşı açıklama mektubu (disclosure letter) kaleme alınırken, incelenirken ya da bir açıklamanın belirli bir beyanı gerçekten sınırlayıp sınırlamadığı sorulduğunda kullan. Genel açıklama ile belirli açıklama ayrımını, veri odasının genel açıklama sayılmasının maliyetini ve W&I poliçesiyle ilişkisini kapsar. Beyanların kendisini kaleme almak ya da SPA'nın tamamını incelemek için KULLANMA; onlar spa-inceleme'dir.
 ---
 
 # Açıklama mektubu

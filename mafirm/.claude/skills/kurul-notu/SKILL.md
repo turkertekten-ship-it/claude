@@ -1,6 +1,6 @@
 ---
 name: kurul-notu
-description: Bir karar yönetim kuruluna, yatırım komitesine ya da bir müvekkil yöneticisine götürülürken kullan. Önce cevap, sonra gerekçe, en sonda yöntem sırasıyla yazar; karşı görüşü en güçlü hâliyle kurar ve tavsiyenin yanlış olması için neyin doğru olması gerektiğini söyler.
+description: Bir karar yönetim kuruluna, yatırım komitesine ya da bir müvekkil yöneticisine götürülürken kullan. Önce cevap, sonra gerekçe, en sonda yöntem sırasıyla yazar; karşı görüşü en güçlü hâliyle kurar ve tavsiyenin yanlış olması için neyin doğru olması gerektiğini söyler. Teknik bir analiz ya da madde incelemesi üretmek için KULLANMA; bu beceri karar belgesi yazar.
 ---
 
 # Yönetim kurulu notu

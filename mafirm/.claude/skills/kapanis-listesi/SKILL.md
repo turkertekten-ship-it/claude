@@ -1,6 +1,6 @@
 ---
 name: kapanis-listesi
-description: Kapanış mekaniği sıralanırken, hangi belgenin hangi sırayla imzalanacağı ya da kapanışın tek günde yapılıp yapılamayacağı sorulduğunda kullan. Türk noter ve ticaret sicili mekaniğini fiziksel kısıt olarak modeller.
+description: Kapanış mekaniği sıralanırken, hangi belgenin hangi sırayla imzalanacağı ya da kapanışın tek günde yapılıp yapılamayacağı sorulduğunda kullan. Türk noter ve ticaret sicili mekaniğini fiziksel kısıt olarak modeller. Kapanış ÖNCESİ koşulların takibi için KULLANMA; o kosul-takibi'dir.
 ---
 
 # Kapanış kontrol listesi

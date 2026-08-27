@@ -23,6 +23,10 @@ bash   "$S/ks_e_tutarlilik.sh"; topla "E · kitabın kendi beklenen değerleri" 
 echo
 python3 "$S/ks_f_kapsama.py" | tail -8; topla "F · doktrin kapsama matrisi" 0
 echo
+python3 "$S/ks_j_kabul.py";    topla "J · §19 kabul sınaması (uçtan uca)" $?
+echo
+python3 "$S/ks_k_yonlendirme.py"; topla "K · yönlendirme ve koltuk sağlaması" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

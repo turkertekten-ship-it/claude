@@ -1,6 +1,6 @@
 ---
 name: inceleme-bayraklari
-description: İnceleme bulguları fiyat, tazminat, koşul ya da çekilme diye ayrılırken, bir bulgunun ne kadar ciddi olduğu değil neyi değiştirdiği sorulduğunda ya da bir veri odası bulgu listesi sınıflandırılacağında kullan. Sınıflandırma ölçütünü ve Türkiye'ye özgü kırmızı bayrakları kapsar.
+description: İnceleme bulguları fiyat, tazminat, koşul ya da çekilme diye ayrılırken, bir bulgunun ne kadar ciddi olduğu değil neyi değiştirdiği sorulduğunda ya da bir veri odası bulgu listesi sınıflandırılacağında kullan. Sınıflandırma ölçütünü ve Türkiye'ye özgü kırmızı bayrakları kapsar. Belgeleri OKUMAK için KULLANMA; bu beceri okunmuş bulguları sınıflandırır. Okuma işi inceleme-okuyucu alt ajanınındır.
 ---
 
 # İnceleme bulgularının ayrıştırılması

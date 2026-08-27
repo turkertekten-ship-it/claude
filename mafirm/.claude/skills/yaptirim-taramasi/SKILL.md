@@ -1,6 +1,6 @@
 ---
 name: yaptirim-taramasi
-description: Bir karşı taraf, gerçek lehtar, yönetici, müşteri yoğunlaşması ya da ülke maruziyeti kontrol edilirken kullan. OFAC, AB, OFSI ve BM listelerini, siyasi nüfuz sahibi kişi taramasını, çift kullanımlı ürün sorusunu ve FCPA ile Bribery Act maruziyetini kapsar. Sorgu soyutlama kuralı burada zorunludur.
+description: Bir karşı taraf, gerçek lehtar, yönetici, müşteri yoğunlaşması ya da ülke maruziyeti kontrol edilirken kullan. OFAC, AB, OFSI ve BM listelerini, siyasi nüfuz sahibi kişi taramasını, çift kullanımlı ürün sorusunu ve FCPA ile Bribery Act maruziyetini kapsar. Sorgu soyutlama kuralı burada zorunludur. Genel inceleme bulguları ya da rekabet izni için KULLANMA. Gerçek bir adı dış aramaya sokmak için de KULLANMA.
 ---
 
 # Yaptırım, nüfuz ve rüşvet taraması

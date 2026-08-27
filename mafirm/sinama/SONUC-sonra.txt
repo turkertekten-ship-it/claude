@@ -1,5 +1,5 @@
 ###############################################################
-#  KÖR SINAMA TAKIMI — 2026-08-27T15:10:53Z
+#  KÖR SINAMA TAKIMI — 2026-08-27T15:31:28Z
 ###############################################################
 
 ==============================================================================
@@ -175,6 +175,81 @@ KÖR SINAMA E — kitabın doğrulama komutları vs kitabın beklenen değerleri
 uyulan şeydir.' Ölçüm: on bir kuralın 7 tanesi baskı altında
 çalışan bir mekanizmaya sahip DEĞİL; kalan 4 tanesi kısmi.
 
+================================================================================================
+KÖR SINAMA J — §19 kabul sınaması, uçtan uca
+================================================================================================
+KALDI J-01s   KİTABA SADIK: pilot komut satırından hesaplanabiliyor mu
+        beklenen: hesap çıktısı          gerçek: hesap yok
+        §19 'esik.py çalıştırılır' diyor; sadık sürümde --self-test dışında giriş yok
+GEÇTİ J-01y   YAMALI: pilot komut satırından hesaplanabiliyor mu
+        beklenen: hesap çıktısı          gerçek: hesap çıktısı
+GEÇTİ J-02    cevap EVET ve B eşiği mi
+        beklenen: True                   gerçek: True
+        §19 doğru cevabı: B eşiği tespit edilir
+GEÇTİ J-03    çevrilmemiş avro sessizce kabul ediliyor mu
+        beklenen: reddedilir             gerçek: reddedilir
+        kur verilmezse hesap yapılmamalı
+GEÇTİ J-04    bilinmeyen alıcı TR cirosu eksik olarak bildiriliyor mu
+        beklenen: True                   gerçek: True
+        olumsuz iddia kuralı: bilinmeyen saklanmaz
+GEÇTİ J-05    iki zorunlu başlık çıktıda var mı
+        beklenen: True                   gerçek: True
+GEÇTİ J-06    doğrulama tarihi çıktıda var mı
+        beklenen: True                   gerçek: True
+KALDI J-07s   KİTABA SADIK: §19'un DOĞRU cevabı kapılardan geçiyor mu
+        beklenen: geçer (0)              gerçek: BLOKLANDI ['arastirma']
+        doğru işi bloklayan kapı bir gün içinde kapatılır (§12)
+GEÇTİ J-07y   YAMALI: §19'un DOĞRU cevabı kapılardan geçiyor mu
+        beklenen: geçer (0)              gerçek: geçer (0)
+        doğru işi bloklayan kapı bir gün içinde kapatılır (§12)
+GEÇTİ J-08s   KİTABA SADIK: §19'un YANLIŞ cevabı bloklanıyor mu
+        beklenen: bloklanır (2)          gerçek: bloklanır (2)
+        ateşleyen kapılar: ['arastirma', 'kanit', 'kapsam']
+GEÇTİ J-08y   YAMALI: §19'un YANLIŞ cevabı bloklanıyor mu
+        beklenen: bloklanır (2)          gerçek: bloklanır (2)
+        ateşleyen kapılar: ['arastirma', 'guncellik', 'kanit', 'kapsam']
+GEÇTİ J-09    YAMALI: töreni eksiksiz ama RAKAMI yanlış cevap
+        beklenen: kapılar bunu göremez   gerçek: kapılar bunu göremez
+        yapısal bir sınır: kapılar biçimi denetler, muhakemeyi değil
+------------------------------------------------------------------------------------------------
+12 vaka, 10 geçti, 2 KALDI
+
+================================================================================================
+KÖR SINAMA K — yönlendirme, üst bilgi ve koltuk sağlaması
+================================================================================================
+GEÇTİ K-01   her becerinin YAML üst bilgisi var
+        11 beceri
+GEÇTİ K-02   her beceride name alanı var
+        eksik: []
+GEÇTİ K-03   name alanı klasör adıyla eşleşiyor
+        uyuşmayan: []
+GEÇTİ K-04   her beceride description alanı var
+        eksik: []
+GEÇTİ K-05   her açıklama NE ZAMAN tetikleneceğini yazıyor
+        11/11 beceri
+GEÇTİ K-06   açıklamalar negatif sınır taşıyor (>= yarısı)
+        11/11 beceride negatif sınır var: ['aciklama-mektubu', 'dosya-ac', 'inceleme-bayraklari', 'kapanis-listesi', 'kosul-takibi', 'kurul-notu', 'madde-karsilastirma', 'once-arastir', 'rekabet-esigi', 'spa-inceleme', 'yaptirim-taramasi']
+GEÇTİ K-07   hiçbir beceri çifti yönlendirmede çakışmıyor (Jaccard < 0,25)
+        en yüksek çakışma 0.08 — kapanis-listesi ↔ kosul-takibi (ortak: kapanış, kullanma, mekaniği, öncesi)
+GEÇTİ K-08   her ajanda name + description + tools var
+        5 ajan
+GEÇTİ K-09   her komutta description var
+        9 komut
+GEÇTİ K-10   her koltuk bir kaynak durumu beyanı taşıyor
+        15 koltuk
+GEÇTİ K-11   belgelenmemiş koltuklar açıkça işaretli
+        kısmen belgelenmiş olarak işaretli: ['david-higgins.md', 'faiza-saeed.md']
+GEÇTİ K-12   hiçbir koltukta kişiye ATFEDİLEN uydurma söz yok
+        temiz — 6 tırnaklı dizi incelendi; eser adları ve sistem ifadeleri dışlandı, hiçbiri söyleme fiiliyle atfedilmedi
+GEÇTİ K-13   her dolu koltuk kendi sınırını yazıyor
+        13/13 dolu koltuk
+GEÇTİ K-14   beyansız bir koltuk dosyası GERÇEKTEN bloklanıyor mu
+        beyansız -> çıkış 2 ([koltuk) · beyanlı -> çıkış 0
+GEÇTİ K-15   koltuk kapısı yöntem dosyalarını bloklamıyor
+        yöntem dosyası -> çıkış 0
+------------------------------------------------------------------------------------------------
+15 vaka, 15 geçti, 0 KALDI
+
 ###############################################################
 #  ÖZET
 ###############################################################
@@ -184,8 +259,10 @@ uyulan şeydir.' Ölçüm: on bir kuralın 7 tanesi baskı altında
   D · denetim mutasyon sınaması       temiz
   E · kitabın kendi beklenen değerleri 3 kaldı
   F · doktrin kapsama matrisi           temiz
+  J · §19 kabul sınaması (uçtan uca) 2 kaldı
+  K · yönlendirme ve koltuk sağlaması temiz
   ------------------------------------------------------------
-  toplam başarısız vaka               11
+  toplam başarısız vaka               13
 
   G · §13 depo kataloğu       -> sinama/ks_g_depolar.md
   H · §17 kaynak doğrulaması  -> sinama/ks_h_kaynaklar.md

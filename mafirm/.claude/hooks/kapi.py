@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bir birleşme devralma pratiğinin her esaslı çıktısındaki beş kapı.
+"""Bir birleşme devralma pratiğinin her esaslı çıktısındaki altı kapı.
 
 Bunlar neden otomatik kontrol, neden CLAUDE.md'de bir kural değil. Belgedeki
 bir kurala model sakinken uyulur, görev uzayınca atlanır. Aşağıdaki kusurlar
@@ -11,6 +11,7 @@ döndüren bir süreçle uygulanırlar.
   sir         müvekkili tanıtan bilginin dışarıya giden bir çağrıya girmesi
   guncellik   doğrulama tarihi bayatlamış ya da hiç olmayan bir eşik
   arastirma   araştırılmadan anılan bir eşik rakamı ya da depo
+  koltuk      kaynak durumu beyanı taşımayan bir ortak koltuğu
 
 Her kapı iki yönde de sınanır: kusurlu vakada ateşlemeli, doğru vakada susmalı.
 Yalnızca geçen bir kapı, kapı değildir.
@@ -232,13 +233,36 @@ def kapi_arastirma(metin, yol=None, disari=False):
     return None
 
 
+# [K-14] Altıncı kapı. §7: "bir koltuk, o hukukçunun gerçekten yazdığı,
+# savunduğu ya da karara bağladığı şeye dayanır... Görüşü bilinmiyorsa koltuk
+# bunu yazar." Bu, sistemin en yüksek İTİBAR riski: yaşayan, adı belli bir
+# hukukçunun ağzına belgelenmemiş bir görüş koymak. Kitapta bu kuralı uygulayan
+# hiçbir mekanizma yoktu — yalnızca iyi niyet. §12'nin kendi uyarısı tam olarak
+# buraya düşüyor: "belgedeki bir kurala model sakinken uyulur, görev uzayınca
+# atlanır."
+KOLTUK_YOLU = re.compile(r"(^|/)_koltuklar/[^/]+\.md$", re.I)
+KAYNAK_BEYANI = re.compile(r"^##\s*Kaynak durumu|KOLTUK BOŞ", re.M)
+
+
+def kapi_koltuk(metin, yol=None):
+    """Bir koltuk dosyası, kaynak durumu beyanı olmadan yazılamaz."""
+    if not yol or not KOLTUK_YOLU.search(str(yol).replace("\\", "/")):
+        return None
+    if not KAYNAK_BEYANI.search(metin):
+        return ("koltuk", "koltuk dosyası 'Kaynak durumu' beyanı taşımıyor: "
+                          "mercek neye dayanıyor, belgelenmiş mi, "
+                          "bilinmiyorsa bunu yazın (§7)")
+    return None
+
+
 def denetle(metin, disari=False, bugun=None, yol=None):
-    """Beş kapının hepsi. (kapı, ileti) listesi döner."""
+    """Altı kapının hepsi. (kapı, ileti) listesi döner."""
     return [b for b in (kapi_kapsam(metin, yol, disari),
                         kapi_kanit(metin),
                         kapi_sir(metin, disari),
                         kapi_guncellik(metin, bugun),
-                        kapi_arastirma(metin, yol, disari))
+                        kapi_arastirma(metin, yol, disari),
+                        kapi_koltuk(metin, yol))
             if b]
 
 
@@ -313,13 +337,31 @@ def _selftest():
         ("cd ~/mafirm && ls birimler/ çalıştır", False, set()),
     ]
     bugun = date(2026, 8, 27)
+    # [K-14] koltuk kapısı iki yönde: beyansız ateşler, beyanlı susar.
+    KV = [
+        ("# Martin Lipton\n\n## Getirdiği mercek\nKurulun menfaati.",
+         "birimler/_koltuklar/martin-lipton.md", {"koltuk"}),
+        ("# Martin Lipton\n\n## Kaynak durumu\nBelgelenmiş: yazdığı "
+         "yönetişim metinleri.\n\n## Getirdiği mercek\nKurulun menfaati.",
+         "birimler/_koltuklar/martin-lipton.md", set()),
+        ("# Türk hukukçu — KOLTUK BOŞ\n\nBu koltuk bilerek boştur.",
+         "birimler/_koltuklar/turk-hukukcu.md", set()),
+        ("Herhangi bir yöntem dosyası, koltuk değil.",
+         "birimler/rekabet/yontem/x.md", set()),
+    ]
+    for metin, yol, bekle in KV:
+        bulunan = {k for k, _ in denetle(metin, False, bugun, yol=yol)}
+        if bulunan != bekle:
+            print("  HATA koltuk %r -> %s, beklenen %s"
+                  % (yol, bulunan or "{}", bekle or "{}"))
+            h += 1
     for metin, disari, bekle in V:
         bulunan = {k for k, _ in denetle(metin, disari, bugun)}
         if bulunan != bekle:
             print("  HATA %r -> %s, beklenen %s"
                   % (metin[:44], bulunan or "{}", bekle or "{}"))
             h += 1
-    print("SELFTEST %s (%d vaka)" % ("OK" if not h else "HATA %d" % h, len(V)))
+    print("SELFTEST %s (%d vaka)" % ("OK" if not h else "HATA %d" % h, len(V) + len(KV)))
     return h
 
 
