@@ -1,5 +1,5 @@
 ###############################################################
-#  KÖR SINAMA TAKIMI — 2026-08-27T15:44:43Z
+#  KÖR SINAMA TAKIMI — 2026-08-27T15:48:49Z
 ###############################################################
 
 /root/mafirm/sinama/ks_a_esik.py:41: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.

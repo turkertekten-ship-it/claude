@@ -445,9 +445,16 @@ Bir sınama takımı da sınanmalıdır. Üç hata yapıldı ve üçü de düzel
    ağaca yazıyordu).
 5. **Referans dedektörünü iki kez yanlış yazdım.** Birinci sürüm düzyazıdaki
    çıplak dosya adlarını ("esik.py çalıştırılır") bağlantı saydı: 32 sahte
-   kırık. İkinci sürüm GÖRECELİ atıfları köke göre çözdü — `birimler/rekabet/
-   INDEX.md` içindeki `yontem/tr-esikler.md`, INDEX'in kendi dizinine göre
-   çözülür: 12 sahte kırık daha. Üçüncü sürüm doğru; gerçek kırık sayısı sıfır.
+   kırık. İkinci sürüm GÖRECELİ atıfları köke göre çözdü: bir birim INDEX'i
+   içindeki "yontem/..." biçimi, INDEX'in kendi dizinine göre çözülür — 12 sahte
+   kırık daha. Üçüncü sürüm doğru; gerçek kırık sayısı sıfır.
+
+   Üçüncü sürüm de bir sınır taşıyor ve bu sınır bir YAZIM KURALI doğurdu:
+   dedektör, bağlantı olarak kullanılan bir yolu ile düzyazıda ÖRNEK olarak
+   anılan bir yolu ayırt edemez. Dolayısıyla örnek yollar kod sözdizimiyle
+   yazılmaz — bu cümlenin kendisi o kuralın ilk uygulamasıdır. Kuralın
+   alternatifi, dedektörü gevşetmekti; gevşemiş bir kontrol hiçbir şey
+   yakalamaz.
 6. **Bir mutasyon sınamam sessizce hiçbir şeyi bozmadı.** İşaret kontrolünü
    sınarken `sed` deseni hedefi tutturamadı ve dosya hiç değişmediği hâlde
    "kontrol ateşlemedi" sonucuna varıyordum. Mutasyonun gerçekten tuttuğunu

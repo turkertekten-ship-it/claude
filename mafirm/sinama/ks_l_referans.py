@@ -15,6 +15,12 @@ Bu takımın kendi kusur kaydı (kör sınama de sınanır):
      içindeki `yontem/tr-esikler.md`, INDEX'in KENDİ dizinine göre çözülür.
      12 sahte kırık daha üretti.
   3. sürüm: önce içeren dosyanın dizinine, sonra köke göre çözer.
+
+BİLİNEN SINIR ve ondan doğan yazım kuralı: dedektör, BAĞLANTI olarak kullanılan
+bir yol ile düzyazıda ÖRNEK olarak anılan bir yolu ayırt edemez. Bu yüzden
+kural şudur: **örnek yollar kod sözdizimiyle (ters tırnak) yazılmaz.** Dedektörü
+bu ayrımı yapacak kadar gevşetmek, onu hiçbir şey yakalamayan bir kontrole
+çevirirdi — D takımının kitapta bulduğu kusurun aynısı.
 """
 import glob
 import os
