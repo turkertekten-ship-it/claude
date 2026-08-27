@@ -439,7 +439,13 @@ class ReflectLoop:
                     for path in p.paths
                 )
             ]
-            report.queued = [p.fingerprint for p in decision.queue]
+            # Deferred proposals went to the review queue too, so they belong in
+            # this list. Without them the report finds them in neither the
+            # applied nor the queued set and files them under "would apply" -
+            # promising something the cycle had already decided to hold back.
+            report.queued = [p.fingerprint for p in decision.queue] + [
+                p.fingerprint for p in self._deferred
+            ]
             report.ended_at = time.time()
 
             self.learn(report, decision, applied)
