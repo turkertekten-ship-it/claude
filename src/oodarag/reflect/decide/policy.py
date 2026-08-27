@@ -76,7 +76,12 @@ class PolicyConfig:
     max_queued: int = 20
     max_files_touched: int = 5
     max_bytes_changed: int = 20_000
-    min_score: float = 0.15
+    #: Attention floor, on the same 0-1 scale as `score`. Because the quality
+    #: factors are combined as a geometric mean, this reads as "on balance at
+    #: least this good on every axis" - 0.35 keeps a proposal that is weak
+    #: across the board out of the unattended path while letting a genuinely
+    #: useful one through on its first night, before any prior has been earned.
+    min_score: float = 0.35
     allow_risk: str = "safe"
     #: Applying edits on top of uncommitted work makes "what changed, and who
     #: changed it" unanswerable: the user's diff and the loop's diff arrive in
@@ -116,6 +121,14 @@ class PolicyEngine:
         Severity is normalized against the highest tier so it lands in (0, 1]
         like the other factors; effort divides rather than multiplies so that
         zero effort is neutral instead of fatal.
+
+        The four quality factors are combined as a geometric mean rather than a
+        raw product. Four middling factors should read as 0.5, not as 0.0625 -
+        and a raw product makes every threshold depend on how many factors
+        happen to exist, so adding a fifth would silently retune every gate in
+        the system. The mean keeps the property that actually matters, that any
+        single zero is fatal, while leaving the number on a scale a person can
+        hold an opinion about when they read it in the report.
         """
         finding = proposal.finding
         severity = _clamp01(finding.severity_rank / _MAX_SEVERITY)
@@ -125,12 +138,14 @@ class PolicyEngine:
         nag = max(1.0, self.priors.nag_factor(proposal.fingerprint))
         effort = max(0.0, proposal.effort)
 
-        score = severity * confidence * prior * impact * nag / (1.0 + effort)
+        quality = (severity * confidence * prior * impact) ** 0.25
+        score = quality * nag / (1.0 + effort)
         proposal.score_parts = {
             "severity": severity,
             "confidence": confidence,
             "prior": prior,
             "impact": impact,
+            "quality": quality,
             "nag": nag,
             "effort": effort,
             "score": score,

@@ -245,7 +245,7 @@ class TestScoring(PolicyTestCase):
         self.assertAlmostEqual(parts["prior"], 0.5)
         self.assertAlmostEqual(parts["impact"], 0.5)
         self.assertAlmostEqual(parts["nag"], 1.0)
-        self.assertAlmostEqual(score, 0.75 * 0.8 * 0.5 * 0.5 / 2.0)
+        self.assertAlmostEqual(score, (0.75 * 0.8 * 0.5 * 0.5) ** 0.25 / 2.0)
         self.assertAlmostEqual(proposal.score, score)
 
     def test_any_zero_factor_kills_the_proposal(self) -> None:
