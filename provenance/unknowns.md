@@ -72,6 +72,11 @@ definition, and this session did not reach the source.
 **Resolves when:** the owner expands the term, or that session commits a
 resolved source list.
 
+**Narrowed:** whatever "imb youtube" designates, reaching YouTube from this
+container is credential-gated rather than impossible — the consumer site is
+refused at CONNECT while the Data API host answers and asks for a key. See
+U-7 and U-8.
+
 ---
 
 ### U-5 — Intended relationship between the two repositories
@@ -103,3 +108,43 @@ searched.
 
 **Action taken:** the search was scoped strictly to locating a Claude export.
 No personal Drive file was opened, and nothing was written to Drive.
+
+---
+
+### U-7 — Whether a valid API key reaches caption *metadata*
+
+**Unknown:** whether `captions.list` returns track metadata for a video the
+caller does not own when given a *valid* API key.
+
+**Why:** it was probed only with a deliberately invalid key, which produced
+`API_KEY_INVALID` — proving the method evaluates a key, but not what a good one
+would get. No valid key exists in this environment.
+
+**Settled and not unknown:** `captions.download` refuses API-key authentication
+outright, at any validity, so caption *text* for a video the caller does not own
+is not obtainable through the Data API. That part was established.
+
+**Resolves when:** a key is supplied and `captions.list` is called against a
+third-party video.
+
+---
+
+### U-8 — Whether YouTube ingestion is wanted at the price it carries
+
+**Unknown:** whether the owner wants YouTube ingested at all, given that it
+costs a Google Cloud project, an API key held as a secret, and a daily quota.
+
+**Why:** the goal string naming YouTube as a source establishes that it was
+named, not that the owner accepted those costs. Nothing was found stating a
+preference.
+
+**Built anyway, deliberately:** `src/oodarag/ingest/youtube.py` is complete and
+tested against the API's error shapes. It needs one input — `YOUTUBE_API_KEY` —
+and it works. Without one it reports `auth_required` and names the remedy. The
+offline path, a directory of exported caption files, needs no key and no
+network.
+
+**Resolves when:** the owner supplies a key, or says YouTube is not wanted.
+
+**Do not:** treat the connector's existence as evidence that YouTube data is in
+the corpus. Nothing has been ingested from it.

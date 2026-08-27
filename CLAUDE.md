@@ -72,7 +72,11 @@ Two rules that give the loop its value:
 - **Name the surprise.** Every loop, write down where reality diverged from
   expectation. A loop with no surprise usually means Observe was skipped.
 
-The full procedure is in `.claude/skills/ooda/SKILL.md`.
+The full procedure is in `.claude/skills/ooda/SKILL.md`. The wider version —
+research the ground before starting, and do not stop while anything is open —
+is in `.claude/skills/researching-before-acting/SKILL.md`. Skills committed
+here load in cloud sessions; a skill left in `~/.claude/skills/` does not.
+[src:SKILL-LOAD-PATHS-2026-08-27]
 
 ---
 
@@ -104,16 +108,25 @@ provenance/
   unknowns.md                 open questions, deliberately left open
   raw/                        verbatim captures backing the ledger
 prompts/                      system prompts carrying the doctrine
+src/oodarag/                  the retrieval pipeline (see below)
+  net/reachability.py         which barrier stands in front of a source
+  ingest/                     connectors: files, web, github, youtube, skills
+  chunk.py embed.py store.py  the index
+  retrieve.py generate.py     hybrid search and cited, abstaining answers
+  evaluate.py loop.py cli.py  measurement, the OODA cycle, the entry point
+evals/goldens.jsonl           the retrieval cases the pipeline is scored on
 tools/
   verify_provenance.py        the fabrication guard
   ingest_chat_archive.py      chat-archive ingestion and search
-tests/                        tests for the above
-  run_all.sh                  every check, one command
+tests/                        tests for all of the above
+  run_all.sh                  every doctrine check, one command
 archive/                      drop conversation exports here (git-ignored)
 docs/workflows.md             how the workflows and subagents fit together
+docs/adr/                     decisions that constrain later work
 .claude/
   settings.json               hooks
-  skills/ooda/SKILL.md        the loop procedure
+  skills/ooda/                the loop procedure
+  skills/researching-before-acting/   research first, route through the loop
   commands/                   the workflows, as slash commands
   agents/                     subagent definitions
 ```
@@ -144,13 +157,30 @@ what it saw, exactly like another session's status line. Verify anything
 load-bearing yourself before writing it down. Delegation multiplies reach, not
 evidence.
 
+A worked example of that rule, rather than a restatement of it: a sibling
+session reported YouTube blocked by the proxy [src:PROXY-YOUTUBE-BLOCKED]. Taken
+as settled, that closes the source. Re-probed, it turned out the consumer site
+is refused at CONNECT while the Data API host answers and asks for a key
+[src:YOUTUBE-API-OPEN-2026-08-27] — a different situation, with a remedy. The
+second-hand claim was not wrong; it was reported at a level of detail that had
+already thrown the actionable part away.
+
 ---
 
 ## 6. House rules
 
 - **Python 3.11, standard library first.** PyYAML is available. The `sqlite3`
   CLI is *not* installed — go through Python's `sqlite3` module, which does
-  have FTS5. [src:ENV-SQLITE-FTS5-2026-08-27]
+  have FTS5. [src:ENV-SQLITE-FTS5-2026-08-27] The pipeline under `src/` takes
+  this further: it requires nothing outside the standard library, so `make test`
+  and `make demo` run with no network and no credentials. See
+  `docs/adr/0001-zero-dependency-core.md`.
+- **Name the barrier, not the failure.** Egress here is an allowlist, so an
+  unreachable host is one of several different situations with different
+  remedies: refused at CONNECT, answered-but-wants-a-credential, rate limited,
+  or wrong path. [src:EGRESS-ALLOWLIST-2026-08-27] Reporting "blocked" for all
+  four sends the reader to fix the wrong thing. `make reachability` reports
+  which one applies.
 - **Every tool is runnable and exits meaningfully.** 0 clean, 1 findings, 2
   could not run.
 - **Tests prove the failure case.** A guard is only real once you have watched

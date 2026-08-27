@@ -18,6 +18,10 @@ is the roster and the rules that keep them from overwriting each other.
 | `session_019vCLpJgDUv8BYDRetyqzNq` | RAG system and data pipeline | `claude/rag-system-data-pipeline-rdkde9` | xhigh | both |
 | `session_016cRrEmB1ZKGLpEzUQpSqhC` | Blind testing and OODA analysis | `claude/blind-testing-ooda-5o3s67` | xhigh | both |
 | `session_01WhTTExHdT83QPAKDFZm4fZ` | Go page review and ultrathink OODA | `claude/go-page-ultrathink-ooda-kqxvnc` | xhigh | `claude` only |
+| (this session) | Research and skill mastery | `claude/research-skill-mastery-mwjs01` | — | both |
+
+> The last row was added after the snapshot above and is not part of it; this
+> session was not in the 14:27Z listing.
 
 ## Observed — fleet state
 
@@ -50,6 +54,18 @@ Three consequences, all of which bite at merge time rather than now:
 shared root. Every later branch rebases onto that root before merging, rather
 than being merged with `--allow-unrelated-histories`. Whoever merges first
 should say so, since until then there is no root to rebase onto.
+
+**This is that first merge, and this says so.** Branch
+`claude/research-skill-mastery-mwjs01` merged
+`claude/review-chat-archive-zrynr4` into the pipeline history with
+`--allow-unrelated-histories`. Only the two predicted files conflicted,
+`.gitignore` and `README.md`, and both sides were read before resolving.
+[src:UNIFIED-ROOT-2026-08-27]
+
+That branch now carries **both** histories as ancestors, so it is the root every
+later branch should rebase onto. A branch that instead merges one of the two
+original roots again will reintroduce the problem this paragraph exists to
+close.
 
 **Before merging anything**, diff the file lists first:
 

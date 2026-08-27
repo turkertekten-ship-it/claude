@@ -1,0 +1,22 @@
+URL                                                                 BARRIER         CODE  REMEDY
+------------------------------------------------------------------  --------------- ----  ----------------------------------------
+https://api.github.com/rate_limit                                   open             200  nothing; the host is reachable
+https://raw.githubusercontent.com/anthropics/skills/main/README.md  open             200  nothing; the host is reachable
+https://pypi.org/simple/                                            open             200  nothing; the host is reachable
+https://registry.npmjs.org/                                         open             200  nothing; the host is reachable
+https://youtube.googleapis.com/youtube/v3/videos                    auth_required    403  supply a credential for this host
+https://www.googleapis.com/youtube/v3/videos                        auth_required    403  supply a credential for this host
+https://www.youtube.com/robots.txt                                  egress_blocked     -  add the host to the network egress allowlist; no code change can reach it from here
+https://youtu.be/dQw4w9WgXcQ                                        egress_blocked     -  add the host to the network egress allowlist; no code change can reach it from here
+https://i.ytimg.com/vi/dQw4w9WgXcQ/default.jpg                      egress_blocked     -  add the host to the network egress allowlist; no code change can reach it from here
+https://piped.video/                                                egress_blocked     -  add the host to the network egress allowlist; no code change can reach it from here
+https://yewtu.be/                                                   egress_blocked     -  add the host to the network egress allowlist; no code change can reach it from here
+https://r.jina.ai/https://www.youtube.com/                          egress_blocked     -  add the host to the network egress allowlist; no code change can reach it from here
+https://web.archive.org/                                            egress_blocked     -  add the host to the network egress allowlist; no code change can reach it from here
+https://en.wikipedia.org/wiki/OODA_loop                             egress_blocked     -  add the host to the network egress allowlist; no code change can reach it from here
+https://arxiv.org/                                                  egress_blocked     -  add the host to the network egress allowlist; no code change can reach it from here
+https://stackoverflow.com/                                          egress_blocked     -  add the host to the network egress allowlist; no code change can reach it from here
+https://www.anthropic.com/                                          egress_blocked     -  add the host to the network egress allowlist; no code change can reach it from here
+https://platform.claude.com/                                        open             200  nothing; the host is reachable
+
+11 of 18 host(s) refused at CONNECT. These cannot be reached by any code path from here.

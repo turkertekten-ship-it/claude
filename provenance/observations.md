@@ -53,6 +53,41 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - The claude.ai export reader was exercised only against synthetic fixtures under `tests/`, never against a real export. [src:INGEST-VALIDATED-2026-08-27]
 - All three hook commands in `.claude/settings.json` were executed directly and exited cleanly; they were not observed firing inside a live session. [src:HOOKS-VALIDATED-2026-08-27]
 
+## Observed — what this container can reach
+
+- Egress is an **allowlist**, not a blocklist: 11 of 18 probed hosts were refused at the proxy's CONNECT with no HTTP response at all, and a sweep of 24 further candidate mirrors and reader-proxies returned zero successes. [src:EGRESS-ALLOWLIST-2026-08-27]
+- The reachable set is GitHub (`api`, `raw`, `codeload`, `objects`), the package registries (`pypi`, `files.pythonhosted`, `registry.npmjs`, `proxy.golang`, `crates`), `*.googleapis.com`, and the Anthropic documentation hosts. [src:EGRESS-ALLOWLIST-2026-08-27]
+- `www.anthropic.com`, `en.wikipedia.org`, `arxiv.org` and `stackoverflow.com` are among the hosts refused at CONNECT. [src:EGRESS-ALLOWLIST-2026-08-27]
+
+## Observed — YouTube, at the level of which barrier applies
+
+> Framing, not a claim: a sibling session reported "youtube blocked by proxy"
+> [src:PROXY-YOUTUBE-BLOCKED]. That report is second-hand here and was not
+> taken as settled. The probes below were run independently, and they refine
+> it rather than contradict it.
+
+- `www.youtube.com`, `youtu.be`, `i.ytimg.com`, and the third-party mirrors tried (Invidious, Piped, `r.jina.ai`, `web.archive.org`, transcript scrapers) are all refused at CONNECT, so no scraping path reaches YouTube from here. [src:EGRESS-ALLOWLIST-2026-08-27]
+- `youtube.googleapis.com` and `www.googleapis.com` are a different case: the tunnel succeeds and the YouTube Data API answers at the application layer, returning HTTP 403 `PERMISSION_DENIED` with "Method doesn't allow unregistered callers". The barrier there is a missing credential, not the network. [src:YOUTUBE-API-OPEN-2026-08-27]
+- No API key for that host is present in the environment; none was set in any environment variable. [src:YOUTUBE-API-OPEN-2026-08-27]
+- `captions.download` answered HTTP 401 "API keys are not supported by this API… Expected OAuth2 access token", reason `CREDENTIALS_MISSING`, so an API key is not evaluated for that method at all. `captions.list` answered HTTP 400 `API_KEY_INVALID` for the same key, so that method does evaluate one. [src:YOUTUBE-CAPTIONS-KEYLESS-2026-08-27]
+- The consequence for ingestion: video metadata is obtainable with an API key alone, and caption text for a video the caller does not own is not obtainable through the Data API by any key. [src:YOUTUBE-CAPTIONS-KEYLESS-2026-08-27]
+
+## Observed — Agent Skills
+
+- A skill's `name` is limited to 64 characters of lowercase letters, numbers and hyphens, may not contain XML tags, and may not contain the reserved words "anthropic" or "claude"; `description` must be non-empty and at most 1,024 characters. [src:SKILL-CONSTRAINTS-2026-08-27]
+- Published guidance, as distinct from validation, is a SKILL.md body under 500 lines and references kept one level deep. [src:SKILL-CONSTRAINTS-2026-08-27]
+- Skills load from `~/.claude/skills/`, from a project's `.claude/skills/`, and from a plugin's `skills/` directory. [src:SKILL-LOAD-PATHS-2026-08-27]
+- Cloud sessions do not read `~/.claude/skills/` from a local machine; they additionally load project skills committed to the cloned repository's `.claude/skills/`. Committing a skill to this repository is therefore what makes it available to a future cloud session. [src:SKILL-LOAD-PATHS-2026-08-27]
+- Nine SKILL.md files were reachable from this container at capture time, with no load-blocking errors among them; one had a `name` differing from its directory, and three had descriptions stating what the skill does without stating when to use it. [src:SKILLS-INSTALLED-2026-08-27]
+
+## Observed — tooling built here
+
+- The two unrelated histories on this repository were merged onto one root. The only conflicts were the two files FLEET.md predicted, `.gitignore` and `README.md`; both sides were read before resolving, and the verifier reported 0 violations afterwards. [src:UNIFIED-ROOT-2026-08-27]
+- SQLite's FTS5 `bm25()` returns a negative score where a better match is numerically smaller, so ascending order is best-first; on a 3-document corpus every score collapsed to -0.00000 because the IDF term vanishes when a term appears in most documents. [src:FTS5-BM25-SIGN-2026-08-27]
+- The full suite — unit tests plus the two doctrine suites and the provenance verifier — passed: 125 tests, all checks green. [src:OODARAG-VERIFIED-2026-08-27]
+- The retrieval evaluation over 8 golden cases passed all 8, at recall@8 0.9286, MRR 0.9286 and nDCG@8 0.892, with zero citation problems, zero contaminated cases, and the one abstention case abstaining as required. [src:OODARAG-VERIFIED-2026-08-27]
+- Evaluating against the whole repository instead of the documentation corpus contaminated the run: `evals/goldens.jsonl` and a captured report from a previous run both contain the golden questions verbatim, the abstention case retrieved its own question and stopped abstaining, and it failed. Excluding the eval material restored it. [src:EVAL-CONTAMINATION-2026-08-27]
+
 ## Conclusion
 
 The honest answer to "look through all my previous claude chats" is bounded:

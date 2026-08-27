@@ -177,3 +177,126 @@ sources:
       null for "Blind testing and OODA analysis" and "Go page review and
       ultrathink OODA". Of the three sibling sessions, only one has a goal on
       record.
+
+  # ---------------------------------------------------------------- 15:00-15:30Z
+  # Captures from the session on branch claude/research-skill-mastery-mwjs01.
+
+  - id: EGRESS-ALLOWLIST-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:26Z"
+    method: "python3 -m oodarag.cli reachability <18 urls>  (and an earlier curl sweep of 24 further hosts)"
+    evidence: provenance/raw/egress-probe-2026-08-27.txt
+    note: >-
+      11 of 18 probed hosts were refused at the proxy's CONNECT with no HTTP
+      response at all. The reachable set is GitHub (api, raw, codeload,
+      objects), the package registries (pypi, files.pythonhosted, npm,
+      proxy.golang, crates), *.googleapis.com, and the Anthropic doc hosts.
+      An earlier sweep of 24 candidate YouTube mirrors and reader-proxies
+      (Invidious, Piped, r.jina.ai, web.archive.org, allorigins, corsproxy,
+      transcript scrapers, searx, duckduckgo html) returned zero successes,
+      which is what establishes allowlist rather than blocklist.
+
+  - id: YOUTUBE-API-OPEN-2026-08-27
+    kind: api
+    collected_at: "2026-08-27T15:26Z"
+    method: "GET https://youtube.googleapis.com/youtube/v3/videos?part=snippet&id=dQw4w9WgXcQ (no key)"
+    evidence: >-
+      HTTP 403 with body {"error":{"code":403,"message":"Method doesn't allow
+      unregistered callers (callers without established identity). Please use
+      API Key or other form of API consumer identity to call this API.",
+      "status":"PERMISSION_DENIED"}}. A well-formed application-layer response,
+      which means the TLS tunnel to this host succeeded — in contrast to
+      www.youtube.com, which produced no HTTP response at all.
+
+  - id: YOUTUBE-CAPTIONS-KEYLESS-2026-08-27
+    kind: api
+    collected_at: "2026-08-27T15:25Z"
+    method: "GET youtube/v3/captions/SOMEID?key=... and GET youtube/v3/captions?part=snippet&videoId=...&key=..."
+    evidence: provenance/raw/youtube-captions-probe-2026-08-27.txt
+    note: >-
+      captions.download answered HTTP 401 "API keys are not supported by this
+      API. Expected OAuth2 access token or other authentication credentials
+      that assert a principal", reason CREDENTIALS_MISSING — the key is not
+      evaluated at all. captions.list answered HTTP 400 with
+      details[].reason=API_KEY_INVALID, so that method does evaluate a key.
+      The two differ, so the refusal is specific to download. Probed with a
+      deliberately invalid key; behaviour with a valid key was not tested.
+
+  - id: SKILL-CONSTRAINTS-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:05Z"
+    method: "WebFetch https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices.md"
+    evidence: >-
+      "name: Maximum 64 characters; Must contain only lowercase letters,
+      numbers, and hyphens; Cannot contain XML tags; Cannot contain reserved
+      words: 'anthropic', 'claude'." and "description: Must be non-empty;
+      Maximum 1,024 characters; Cannot contain XML tags". Also "Keep SKILL.md
+      body under 500 lines" and "Keep references one level deep from SKILL.md".
+
+  - id: SKILL-LOAD-PATHS-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:08Z"
+    method: "WebFetch https://code.claude.com/docs/en/skills"
+    evidence: >-
+      Personal `~/.claude/skills/<name>/SKILL.md`, project
+      `.claude/skills/<name>/SKILL.md`, plugin `<plugin>/skills/<name>/SKILL.md`.
+      "Cloud sessions additionally load project skills committed to the cloned
+      repository's `.claude/skills/`" and cloud sessions "don't read
+      `~/.claude/skills/` on your machine".
+
+  - id: SKILLS-INSTALLED-2026-08-27
+    kind: filesystem
+    collected_at: "2026-08-27T15:12Z"
+    method: "python3 -m oodarag.cli skills (discover_skills over .claude/skills and ~/.claude/skills)"
+    evidence: >-
+      9 SKILL.md files found: ooda (project), startup-hook-skill (personal),
+      and docx, import-memory, morning, pdf, pptx, skill-creator, xlsx (synced).
+      Zero load-blocking errors. One name/directory mismatch
+      (name startup-hook-skill in directory session-start-hook) and three
+      descriptions stating what the skill does without stating when to use it.
+
+  - id: FTS5-BM25-SIGN-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:18Z"
+    method: "python3 -c 'sqlite3 FTS5 table, 23 docs, SELECT bm25(f) ... ORDER BY bm25(f)'"
+    evidence: >-
+      For MATCH 'bm25 retrieval' the best-matching row scored -6.47700 and the
+      weaker one -4.08758, so ascending order is best-first and a better match
+      is numerically smaller. On a 3-document corpus both scored -0.00000,
+      because the IDF term vanishes when a term appears in most documents.
+
+  - id: OODARAG-VERIFIED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:40Z"
+    method: "make test  (python3 -m unittest discover -s tests; bash tests/run_all.sh)"
+    evidence: provenance/raw/test-run-2026-08-27.txt
+    note: >-
+      Unit tests plus the two doctrine suites and the provenance verifier.
+      Counts and the retrieval scores are in the captured output.
+
+  - id: UNIFIED-ROOT-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:15Z"
+    method: "git merge origin/claude/review-chat-archive-zrynr4 --allow-unrelated-histories"
+    evidence: >-
+      Two add/add conflicts, in .gitignore and README.md, matching the file
+      overlap FLEET.md predicted. Both were resolved by hand after reading both
+      sides. After the merge `python3 tools/verify_provenance.py` reported
+      "OK — 20 file(s), 16 source(s), 0 violations".
+
+  - id: EVAL-CONTAMINATION-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:47Z"
+    method: "make demo  (ingesting the repository root), then grep -rl 'airspeed velocity'"
+    evidence: >-
+      With the repository root as the corpus the abstention case reported
+      "FAIL     0.000  0.000  0.000  what is the airspeed velocity of an
+      unladen" and the run summary showed "abstentions: 0" where 1 was
+      required. `grep -rl` located the question verbatim in
+      evals/goldens.jsonl, provenance/raw/test-run-2026-08-27.txt and
+      tests/test_generate_evaluate.py. After excluding the eval material the
+      same case passed with "abstentions: 1".
+    note: >-
+      The failure was visible only because an abstention case existed. The
+      seven positive cases all still passed, and their scores improved, which
+      is the direction contamination always moves them.

@@ -1,0 +1,17 @@
+# Golden retrieval cases. One JSON object per line; `#` lines are ignored.
+#
+# Each case names the file that should answer the question. URIs are used
+# rather than doc_ids because a doc_id depends on the connector key, so it
+# changes when the corpus is re-ingested under a different root, while a URI
+# is a property of the source.
+#
+# The last case has no answer in the corpus on purpose: a retriever is only
+# trustworthy if it is also tested on questions it should decline.
+{"question": "why is reciprocal rank fusion used instead of adding the retrieval scores together?", "relevant_uris": ["file:///home/user/claude/src/oodarag/retrieve.py"], "notes": "RRF combines ranks because BM25 and cosine scores are on incomparable scales"}
+{"question": "how does the pipeline avoid re-embedding a document that did not change?", "relevant_uris": ["file:///home/user/claude/src/oodarag/pipeline.py", "file:///home/user/claude/src/oodarag/ingest/base.py"], "notes": "content-hash incremental ingest"}
+{"question": "what is the difference between a host blocked at CONNECT and one that demands an API key?", "relevant_uris": ["file:///home/user/claude/src/oodarag/net/reachability.py"], "notes": "the barrier taxonomy"}
+{"question": "why does every chunk carry a context header?", "relevant_uris": ["file:///home/user/claude/src/oodarag/chunk.py"], "notes": "contextual retrieval without a model call"}
+{"question": "can a caption transcript be downloaded for a video you do not own?", "relevant_uris": ["file:///home/user/claude/src/oodarag/ingest/youtube.py"], "notes": "no: captions.download rejects API keys outright"}
+{"question": "what makes a skill fail to load rather than merely be badly written?", "relevant_uris": ["file:///home/user/claude/src/oodarag/ingest/skills.py"], "notes": "name charset, length, reserved words"}
+{"question": "why does the loop insist on recording a surprise every cycle?", "relevant_uris": ["file:///home/user/claude/src/oodarag/loop.py"], "notes": "an empty surprise means Observe was skipped"}
+{"question": "what is the airspeed velocity of an unladen swallow", "should_abstain": true, "notes": "absent from the corpus; the retriever must decline rather than assemble something"}
