@@ -1,0 +1,16 @@
+# === MAFIRM — sınır ötesi M&A pratiği · her terminalde geçerli ===
+# ~/.bashrc (etkileşimsizlik korumasından ÖNCE) ve ~/.profile buradan okur,
+# böylece hem etkileşimli kabuk hem de betikler aynı ortamı görür.
+export MAFIRM="$HOME/mafirm"
+export MAFIRM_KAPI="${MAFIRM_KAPI:-warn}"     # block | warn | off
+
+alias mafirm='cd $MAFIRM'
+alias mafirm-denetim='bash $MAFIRM/denetim.sh'
+alias mafirm-araclar='python3 $MAFIRM/birimler/_araclar/kod/dogrula.py'
+alias mafirm-esik='python3 $MAFIRM/birimler/rekabet/kod/esik.py'
+alias mafirm-kapi='python3 $MAFIRM/.claude/hooks/kapi.py'
+alias mafirm-token='python3 $MAFIRM/birimler/_araclar/kod/token-butce.py'
+alias mafirm-belge='python3 $MAFIRM/birimler/_araclar/kod/belge.py'
+alias mafirm-tara='python3 $MAFIRM/birimler/_araclar/kod/tarama.py'
+alias mafirm-fark='python3 $MAFIRM/birimler/_araclar/kod/karsilastir.py'
+alias mafirm-cetvel='python3 $MAFIRM/birimler/_araclar/kod/cetvel.py'
