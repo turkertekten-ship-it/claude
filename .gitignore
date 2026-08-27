@@ -1,0 +1,9 @@
+# Conversation exports are the owner's data, not repository content.
+# Drop them in archive/ and index them locally; never commit them.
+archive/
+!archive/.gitkeep
+
+__pycache__/
+*.pyc
+.venv/
+*.db
