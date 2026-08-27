@@ -12,7 +12,13 @@ provenance: enforced
 
 ## Observed — whose material this is, and how much of it was reachable
 
-Boris Cherny (`@bcherny`) is the creator and head of Claude Code at Anthropic, previously a principal engineer at Meta and the author of *Programming TypeScript*. [src:CHERNY-IDENTITY-2026-08-27]
+Boris Cherny (`@bcherny`) describes himself, on his own About page, as "a Software Engineer at Anthropic, where I created Claude Code", previously at Instagram, and the author of O'Reilly's *Programming TypeScript*. [src:CHERNY-BLOG-REPO-2026-08-27]
+
+> A search summary instead described him as "creator and Head of Claude Code"
+> and as having spent "five years at Meta as a Principal Engineer". Neither the
+> title nor the tenure is confirmed by his own page, which says Instagram and
+> gives no duration. The primary wording is used above; the discrepancy is
+> noted rather than averaged. [src:CHERNY-IDENTITY-2026-08-27]
 
 The owner's request named "borris churney". No record in this repository has the owner confirming that this means Boris Cherny; the identification is an inference from phonetic similarity and subject matter, and is registered as an open question in `provenance/unknowns.md` under U-7. [src:CHERNY-IDENTITY-2026-08-27]
 
@@ -25,6 +31,8 @@ One tip of the 60 was checked against a screenshot of the original post bundled 
 One **primary** source was reachable and was read in full: an unpublished draft, `_drafts/Tips-for-Using-Claude-Code.md`, in Cherny's own blog repository `bcherny/bcherny.github.io`, front matter dated 2025-04-13, which opens "I created Claude Code as a research project". [src:CHERNY-OWN-DRAFT-2025-04-13]
 
 That draft is genuinely unfinished, and its gaps are load-bearing: its section lettering runs out of order, and eight subsections — including all five under "Multi-Claude" — are headings with no body at all. [src:CHERNY-OWN-DRAFT-2025-04-13]
+
+It is also the *only* Claude Code writing in his own repository. His blog holds 17 published posts, the newest from 2024-07-19, and a search of all of them for "claude" matches nothing — so this material is one unpublished draft, not an excerpt from a larger body of published work. [src:CHERNY-BLOG-REPO-2026-08-27]
 
 > Those empty headings are the sharpest illustration in this whole exercise of
 > the rule against expanding a label into content. "Use git worktrees" is a

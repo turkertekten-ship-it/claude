@@ -480,3 +480,24 @@ sources:
     note: >-
       A fifth session, created after the 14:27Z roster snapshot in FLEET.md was
       taken. Recorded so the roster is not silently stale.
+
+  - id: CHERNY-BLOG-REPO-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:31Z"
+    method: >-
+      GIT_LFS_SKIP_SMUDGE=1 git clone --depth 1
+      https://github.com/bcherny/bcherny.github.io /home/user/bcherny-blog;
+      ls _posts/ | wc -l; grep -ril 'claude' _posts/; cat about.md
+    evidence: provenance/raw/cherny/bcherny-about.md
+    note: >-
+      PRIMARY, and a completeness finding. His blog repository holds 17
+      published posts, the newest dated 2024-07-19; `grep -ril claude _posts/`
+      matched NOTHING. The only Claude Code writing in his own repository is the
+      single unpublished draft in _drafts/. So the draft is not one of several
+      posts — it is the whole of the Claude Code material he has written on his
+      own site, and he never published it. His About page reads, verbatim: "I am
+      a Software Engineer at Anthropic, where I created Claude Code. Before that
+      I was at Instagram, where I prototyped and scaled the next big ideas for
+      product & infra. A few years ago I wrote a book: O'Reilly's Programming
+      TypeScript." The clone is shallow, so commit history for the draft was not
+      retrievable beyond one commit.
