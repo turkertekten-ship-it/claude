@@ -118,6 +118,14 @@ MAX_GAPS_REPORTED = 8
 #: Targets meaning "every connector this loop was given".
 ALL_TARGETS = ("", "*", "all")
 
+#: Where `act` records that it has already re-fetched every source. It lives in
+#: the connector state store - the same durable file the cursors live in, and
+#: namespaced so it can never collide with a connector key - because the fact it
+#: records ("we already tried fetching everything and the store did not grow")
+#: has to survive a process restart. Held in memory instead, restarting the loop
+#: would re-trigger a full re-fetch of every source, forever.
+BACKFILL_STATE_KEY = "_ooda:backfill"
+
 
 # ---- scoring primitives -------------------------------------------------
 #
@@ -377,6 +385,7 @@ class OodaLoop:
         # them again later) is what lets `orient` and `decide` stay functions of
         # their arguments alone.
         stats["cursors"] = cursors
+        stats["last_backfill"] = self._read_marker(BACKFILL_STATE_KEY, errors)
 
         # A clock comparison, not a verdict: a source is "past due" when more
         # time has elapsed than the interval it declared. Whether that *matters*
@@ -389,7 +398,13 @@ class OodaLoop:
 
         deltas = list(self._last_deltas)
         for delta in deltas:
-            _extend_capped(errors, [f"{delta.source_key}: {e}" for e in delta.errors])
+            # `Connector.run` already prefixes most of its own error strings with
+            # the source key; prefixing again reads as two different sources.
+            _extend_capped(
+                errors,
+                [e if str(e).startswith(delta.source_key) else f"{delta.source_key}: {e}"
+                 for e in delta.errors],
+            )
 
         observation = Observation(
             stats=stats,
@@ -461,6 +476,17 @@ class OodaLoop:
                 "interval_s": interval,
             }
         return cursors
+
+    def _read_marker(self, key: str, errors: list[str]) -> dict[str, Any]:
+        """One of the loop's own state-store records, or `{}` if unreadable."""
+        state = getattr(self.pipeline, "state", None)
+        if state is None:
+            return {}
+        try:
+            return dict(state.get(key))
+        except Exception as e:
+            _extend_capped(errors, [f"marker {key}: {type(e).__name__}: {e}"])
+            return {}
 
     def _read_eval(self, stats: Mapping[str, Any], errors: list[str]) -> dict[str, Any] | None:
         """The current eval numbers, re-measured only when the store has moved.
@@ -561,11 +587,13 @@ class OodaLoop:
             notes.append(f"{len(gaps)} golden(s) currently failing: {_join(gaps, 2)}")
         if failed:
             notes.append(f"{failed} of {attempted} documents failed last ingest")
+        # Guarded on a non-empty store for the same reason `decide` is: indexes
+        # over nothing are not behind, they are simply indexes over nothing.
         deficit = index_deficit(obs.stats)
-        if deficit > 0 or not obs.stats.get("indexes_built", True):
+        built = bool(obs.stats.get("indexes_built", True))
+        if _num(obs.stats.get("chunks")) > 0 and (deficit > 0 or not built):
             notes.append(
-                f"indexes {'unbuilt' if not obs.stats.get('indexes_built', True) else 'behind'} "
-                f"(deficit {deficit:.2f})"
+                f"indexes {'behind' if built else 'not built'} (deficit {deficit:.2f})"
             )
         if obs.errors:
             notes.append(f"{len(obs.errors)} error(s) recorded while observing")
@@ -658,15 +686,20 @@ class OodaLoop:
 
         # -- goldens failing for want of material -> backfill.
         # Gated on the share of failures rather than on any failure, and gated
-        # again on the previous cycle's evidence: if the last ingest already ran
-        # and brought in nothing, the missing answers are not missing because of
-        # a fetch, and re-fetching every source each cycle is a livelock with a
-        # network bill attached.
+        # again on whether a full re-fetch has already been tried: a backfill
+        # clears the incremental cursors, so its own re-fetch reports every
+        # document as new and *looks* productive whether or not it found
+        # anything. Delta counts therefore cannot detect a fruitless backfill;
+        # the store's document count against the mark left by the last one can.
+        # Without that test this is a livelock with a network bill attached.
         gaps = orientation.coverage_gaps
         total = max(_num((obs.eval_report or {}).get("n")), float(len(gaps)))
         gap_ratio = len(gaps) / total if total else 0.0
-        fetch_was_productive = not obs.deltas or any(d.touched for d in obs.deltas)
-        if gaps and gap_ratio > (1.0 - policy.quality_floor) and fetch_was_productive:
+        last_backfill = obs.stats.get("last_backfill") or {}
+        already_refetched = bool(last_backfill) and (
+            _num(obs.stats.get("documents")) <= _num(last_backfill.get("documents"))
+        )
+        if gaps and gap_ratio > (1.0 - policy.quality_floor) and not already_refetched:
             candidates.append(
                 (
                     ACTION_VALUE["backfill"] * gap_ratio,
@@ -683,7 +716,10 @@ class OodaLoop:
                     ),
                 )
             )
-        elif gaps and not fetch_was_productive:
+        elif gaps and already_refetched:
+            # Repeated every cycle for as long as it holds, deliberately: a loop
+            # that mentions a problem once and then goes quiet teaches its
+            # operator that silence means healthy, which here it does not.
             candidates.append(
                 (
                     ACTION_VALUE["alert"] * gap_ratio,
@@ -691,8 +727,8 @@ class OodaLoop:
                         kind="alert",
                         target="coverage",
                         reason=(
-                            f"{len(gaps)} golden(s) still failing after an ingest that "
-                            "brought in nothing new - the material is not in any source"
+                            f"{len(gaps)} golden(s) still failing after a full re-fetch that "
+                            "grew the corpus by nothing - the material is in no configured source"
                         ),
                         params={"gaps": gaps[:MAX_GAPS_REPORTED]},
                     ),
@@ -897,6 +933,19 @@ class OodaLoop:
         self._record(deltas, result)
         result["cursors_cleared"] = cleared
 
+        # The mark `decide` reads to know a full re-fetch has been tried. Kept
+        # out of the result dict's failure path on purpose: a backfill that
+        # partially failed still re-fetched, and losing the mark would let the
+        # loop try the same thing again next cycle.
+        if state is not None:
+            try:
+                documents = _num(self.pipeline.stats().get("documents"))
+                state.set(BACKFILL_STATE_KEY, {"at": time.time(), "documents": documents,
+                                               "targets": [c.key for c in connectors]})
+                result["documents_after"] = documents
+            except Exception as e:
+                log.warn("backfill mark not written", err=f"{type(e).__name__}: {e}"[:200])
+
     def _act_reindex(self, action: Action, result: dict[str, Any]) -> None:
         self.pipeline.refresh_indexes()
         bm25, dense = len(self.pipeline.bm25), len(self.pipeline.dense)
@@ -1041,18 +1090,23 @@ def _extend_capped(errors: list[str], new: Sequence[str]) -> None:
 #: Per-question keys the harness may use to mark a golden as answered. Truthy
 #: means success; the first one present decides.
 _SUCCESS_FLAGS = ("ok", "passed", "hit", "found", "success")
-#: ...and the score keys, where <= 0 means the relevant chunk never surfaced.
+#: ...and the score keys, where <= 0 means nothing relevant was retrieved.
 _SUCCESS_SCORES = ("recall_at_k", "recall", "reciprocal_rank", "rr", "ndcg_at_k", "ndcg")
 
 
 def _failing_goldens(eval_report: Mapping[str, Any] | None) -> list[str]:
-    """Questions the eval report says currently fail.
+    """Questions whose *corpus coverage* the eval report says is missing.
 
     `EvalReport.per_question` is frozen as `list[dict[str, Any]]` with no schema,
     so this reads whichever of the conventional keys the harness actually wrote
-    and treats an entry it cannot interpret as *passing*. That default is
-    deliberate: inventing failures out of an unrecognized payload would have the
-    loop re-fetching the whole corpus, every cycle, over nothing.
+    and treats a row it cannot interpret as passing. That default is deliberate:
+    inventing failures out of an unrecognized payload would have the loop
+    re-fetching the whole corpus, every cycle, over nothing.
+
+    Coverage, specifically, and not every kind of failure. These gaps are what
+    `decide` turns into a backfill, and a backfill can only ever fix one thing:
+    material that is not in the index. Three row shapes are therefore excluded
+    even though they are failures, because re-fetching cannot touch them.
     """
     if not eval_report:
         return []
@@ -1064,13 +1118,28 @@ def _failing_goldens(eval_report: Mapping[str, Any] | None) -> list[str]:
     for position, entry in enumerate(entries):
         if not isinstance(entry, dict):
             continue
-        if _entry_failed(entry):
+        if _is_coverage_gap(entry):
             question = entry.get("question") or entry.get("q") or f"golden #{position}"
             gaps.append(_cut(str(question), 160))
     return gaps
 
 
-def _entry_failed(entry: Mapping[str, Any]) -> bool:
+def _is_coverage_gap(entry: Mapping[str, Any]) -> bool:
+    if entry.get("error"):
+        # The question raised. Real, already reported by the harness, and not
+        # something more documents will fix.
+        return False
+    if entry.get("should_abstain"):
+        # An honesty golden has no relevant documents by construction, so it
+        # scores recall 0.0 whatever the corpus contains. Counting it as a gap
+        # would make every abstention case a permanent, unfixable backfill
+        # trigger - the loop would re-fetch the world to satisfy a question
+        # whose correct answer is "I don't know".
+        return False
+    if "targets" in entry and _num(entry.get("targets")) <= 0:
+        # Unlabelled: nothing to be found, so nothing to be missing.
+        return False
+
     for flag in _SUCCESS_FLAGS:
         if flag in entry:
             return not bool(entry[flag])
