@@ -53,6 +53,27 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - The claude.ai export reader was exercised only against synthetic fixtures under `tests/`, never against a real export. [src:INGEST-VALIDATED-2026-08-27]
 - All three hook commands in `.claude/settings.json` were executed directly and exited cleanly; they were not observed firing inside a live session. [src:HOOKS-VALIDATED-2026-08-27]
 
+## Observed — egress, measured
+
+- The proxy enforces an allowlist at CONNECT: every unreachable host fails identically with "Tunnel connection failed: 403 Forbidden" and returns no body, which is a policy refusal rather than a network fault. [src:EGRESS-2026-08-27]
+- Reachable: `www.googleapis.com`, `github.com`, `api.github.com`, `raw.githubusercontent.com`, `pypi.org`, `files.pythonhosted.org`, `registry.npmjs.org`, `api.anthropic.com`. Unreachable: `www.youtube.com`, `i.ytimg.com`, `huggingface.co`, `arxiv.org`, `research.ibm.com`, `www.ibm.com`. [src:EGRESS-2026-08-27]
+- `www.googleapis.com/youtube/v3/videos` returns Google's own JSON error asking for an API key, so the YouTube Data API is reachable and only unauthenticated; this narrows the sibling session's second-hand report, which was true of the hostname `www.youtube.com` and misleading as a statement about YouTube data. [src:YOUTUBE-API-REACHABLE-2026-08-27]
+- `huggingface.co` being unreachable means no tokenizer or model weights can be downloaded here, which independently supports the pipeline's zero-dependency stance. [src:EGRESS-2026-08-27]
+
+## Observed — skills surveyed and installed
+
+- Anthropic's public skills repository holds exactly 19 skills at commit `3b3fad9`. [src:SKILLS-ANTHROPIC-2026-08-27]
+- `discernment-nudge`, whose name suggests a fabrication guard, is a consumer-facing reflection prompt whose own exclusions cover code the user will run and users who already asked for verification and sourcing. [src:DISCERNMENT-REJECTED-2026-08-27]
+- `floflo777/claude-rag-skills` at commit `d74f066` is MIT-licensed to Ailog, and none of its four SKILL.md files carries YAML front matter, so none can be indexed by Claude Code as published. [src:SKILLS-AILOG-2026-08-27]
+- This account's own claude.ai skill library returned no match for RAG, ingestion, provenance or OODA; the plugin catalogue returned ten plugins, all disabled, the relevant ones commercial and keyed. [src:PLUGIN-CATALOG-2026-08-27]
+- Docling is IBM Research Zurich's document-conversion toolkit, hosted by the LF AI & Data Foundation, and its vision model line is named Granite. [src:DOCLING-IBM-2026-08-27]
+
+## Observed — pipeline audit
+
+- `src/oodarag/` is 2583 lines across `models.py`, `ingest/`, `scrape/` and `util/`; the `chunk`, `embed`, `index`, `retrieve`, `rerank`, `eval`, `policy` and `store` stages are all absent. [src:AUDIT-OODARAG-2026-08-27]
+- `pyproject.toml` declares the console script `ooda = "oodarag.cli:main"` while `src/oodarag/cli.py` does not exist, so an installed `ooda` command cannot run. [src:AUDIT-OODARAG-2026-08-27]
+- Secret redaction is called on every `RawDocument` construction path in both connectors, and the crawler bounds pages, fetches, depth and wall-clock while recording which budget stopped it. [src:AUDIT-OODARAG-2026-08-27]
+
 ## Conclusion
 
 The honest answer to "look through all my previous claude chats" is bounded:
@@ -69,3 +90,17 @@ reading it would establish what was built, never what was discussed or decided.
 
 Everything downstream of this file is built on that record alone. The chat
 contents were not reconstructed, summarised, or guessed at.
+
+## Addendum — 2026-08-27, skills and egress session
+
+The bounded answer above still stands: the sibling sessions' transcripts were
+never reachable, and nothing here reconstructs them. What this session added is
+of a different kind — measurements of the environment they all share, and a
+review of the one sibling artifact that *is* readable.
+
+Two of those measurements change what the fleet can plan for. The YouTube Data
+API is reachable and merely unauthenticated [src:YOUTUBE-API-REACHABLE-2026-08-27],
+where the standing belief was that YouTube was closed. And the pipeline's
+README describes roughly twice the system that exists in the tree
+[src:AUDIT-OODARAG-2026-08-27] — which is the same failure this repository
+exists to prevent, appearing in a sibling's work rather than in a claim.

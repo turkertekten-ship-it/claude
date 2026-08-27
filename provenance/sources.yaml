@@ -177,3 +177,176 @@ sources:
       null for "Blind testing and OODA analysis" and "Go page review and
       ultrathink OODA". Of the three sibling sessions, only one has a goal on
       record.
+
+  - id: EGRESS-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:10Z"
+    method: "python3 tools/probe_egress.py --json provenance/raw/egress-2026-08-27T15-10Z.json"
+    evidence: provenance/raw/egress-2026-08-27T15-10Z.json
+    note: >-
+      14 hosts probed, 8 reachable and 6 blocked. Every blocked host failed
+      identically with "Tunnel connection failed: 403 Forbidden", i.e. the
+      proxy refused the CONNECT, which is an allowlist decision rather than a
+      network fault. Reachable: www.googleapis.com, github.com,
+      api.github.com, raw.githubusercontent.com, pypi.org,
+      files.pythonhosted.org, registry.npmjs.org, api.anthropic.com. Blocked:
+      www.youtube.com, i.ytimg.com, huggingface.co, arxiv.org,
+      research.ibm.com, www.ibm.com.
+
+  - id: YOUTUBE-API-REACHABLE-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:02Z"
+    method: "curl -sS -i https://www.googleapis.com/youtube/v3/videos?part=snippet&id=dQw4w9WgXcQ"
+    evidence: >-
+      Returned HTTP/2 403 from `server: scaffolding on HTTPServer2` with the
+      JSON body {"error":{"code":403,"message":"Method doesn't allow
+      unregistered callers (callers without established identity). Please use
+      API Key or other form of API consumer identity to call this API.",
+      "errors":[{"reason":"forbidden","domain":"global"}]}}. That is Google's
+      own API responding through the proxy, not the proxy refusing the
+      connection: compare www.youtube.com, which fails at CONNECT with
+      "Tunnel connection failed: 403 Forbidden" and returns no body at all.
+    note: >-
+      This narrows PROXY-YOUTUBE-BLOCKED, which was second-hand. The hostname
+      www.youtube.com is genuinely unreachable. The YouTube Data API v3 is
+      reachable and returns a well-formed authorisation error, so the only
+      thing standing between this container and YouTube metadata or caption
+      tracks is an API key, not the egress policy.
+
+  - id: SKILLS-ANTHROPIC-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:05Z"
+    method: "git clone --depth 1 https://github.com/anthropics/skills; ls skills/; parse of each SKILL.md front matter"
+    evidence: >-
+      Clone at commit 3b3fad96af16a10759d930941b4520ba0c40edae. The skills/
+      directory holds exactly 19 entries: academy-guide, algorithmic-art,
+      brand-guidelines, canvas-design, claude-api, discernment-nudge,
+      doc-coauthoring, docx, frontend-design, internal-comms, mcp-builder,
+      pdf, pptx, skill-creator, slack-gif-creator, theme-factory,
+      web-artifacts-builder, webapp-testing, xlsx. mcp-builder carries a
+      reference/ directory of 4 markdown files and a scripts/ directory
+      including evaluation.py; doc-coauthoring is a single SKILL.md.
+
+  - id: DISCERNMENT-REJECTED-2026-08-27
+    kind: filesystem
+    collected_at: "2026-08-27T15:06Z"
+    method: "full read of skills/discernment-nudge/SKILL.md at commit 3b3fad9"
+    evidence: >-
+      The skill appends 2-3 reflection questions after a substantive answer,
+      at most once per conversation. Its "When not to" section excludes, in
+      its own words, "Code the user will execute - running it is the
+      verification", and "The user asked you to verify, cite, or flag
+      uncertainty ... A nudge on top of that reads as not having listened".
+    note: >-
+      Rejected for this repository. Both exclusions describe this owner's
+      standing instructions, so the skill would self-suppress on nearly every
+      turn here. The name suggests a fabrication guard; the content is a
+      consumer-facing reflection prompt. tools/verify_provenance.py already
+      occupies this role and enforces rather than suggests.
+
+  - id: SKILLS-AILOG-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:07Z"
+    method: "git clone --depth 1 https://github.com/floflo777/claude-rag-skills; head -1 of each SKILL.md; cat LICENSE marketplace.json"
+    evidence: >-
+      Clone at commit d74f0663f32ad9db1b0a7a5326455610cd0fd9fd. Four skills:
+      rag-audit, rag-eval, chunking-advisor, rag-scaffold. LICENSE is MIT,
+      "Copyright (c) 2026 Ailog"; marketplace.json gives homepage
+      https://ailog.fr. None of the four SKILL.md files begins with a `---`
+      front-matter delimiter; each begins with a markdown H1, so Claude Code
+      cannot index them as skills without modification. rag-scaffold offers
+      framework choices led by LangChain and LlamaIndex and lists "Ailog API -
+      Managed RAG-as-a-Service"; rag-eval Mode 2 benchmarks against Ailog's
+      API and requires an Ailog API key.
+
+  - id: DOCLING-IBM-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:01Z"
+    method: "WebSearch 'docling IBM Research document conversion library GitHub'"
+    evidence: >-
+      IBM Research states Docling was started by the AI for Knowledge team at
+      IBM Research Zurich and is hosted by the LF AI & Data Foundation, at
+      github.com/docling-project/docling. It converts PDF, DOCX, PPTX, XLSX,
+      HTML, EPUB, images and audio into Markdown/HTML/JSON for RAG, and is
+      "Powered by Granite Docling (IBM's open-source vision language model)
+      and TableFormer".
+    note: >-
+      Establishes that Docling is IBM's and that its model line is called
+      Granite. It does NOT establish what the sibling session meant by "imb
+      youtube" or "G stack"; see unknowns U-4.
+
+  - id: PLUGIN-CATALOG-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:00Z"
+    method: "SearchPlugins(keywords=['rag','research','github','documentation','agents'])"
+    evidence: >-
+      Returned 10 plugins from marketplace 'knowledge-work-plugins', all with
+      "enabled": false. Relevant entries: `tavily` (skills tavily-search,
+      tavily-extract, tavily-crawl, tavily-research); `brightdata-plugin`
+      (18 skills including rag-pipeline and scrape, described as extracting
+      from "Amazon, LinkedIn, Instagram, TikTok, YouTube, and more");
+      `engineering` (skills architecture, code-review, documentation,
+      system-design, testing-strategy). A SearchSkills call over
+      ['rag','document ingestion','research provenance','ooda','pdf parsing']
+      returned an empty result set.
+    note: >-
+      Both web-data plugins are commercial and require an account and API key
+      with the respective vendor. Neither was enabled, and no key for either
+      is present in this environment.
+
+  - id: AUDIT-OODARAG-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:20Z"
+    method: "ls src/oodarag/; grep for module dirs chunk/embed/index/retrieve/rerank/eval/cli/policy/store; grep -A2 project.scripts pyproject.toml; ls src/oodarag/cli.py; test -e on README-referenced paths; grep -rn redact_secrets src/oodarag/; grep -nE 'max_(pages|bytes|fetches|depth)|budget' src/oodarag/scrape/crawler.py"
+    evidence: >-
+      src/oodarag/ contains exactly __init__.py, models.py, ingest/, scrape/,
+      util/ - 2583 lines total. Directories chunk, embed, index, retrieve,
+      rerank, eval, policy, store are all absent, and src/oodarag/cli.py does
+      not exist while pyproject.toml [project.scripts] declares
+      `ooda = "oodarag.cli:main"`. README.md references internal/PLAN.md and
+      docs/adr/0001-zero-dependency-core.md; `test -e` reports both ABSENT.
+      redact_secrets is imported and called in both connectors
+      (ingest/web.py:53, ingest/github.py:402,414,448,471,491), i.e. on every
+      RawDocument construction path. crawler.py carries max_pages, max_fetches,
+      max_depth and a time budget that sets report.stopped_by = "time_budget".
+      Makefile declares targets demo, index, query, eval and loop.
+
+  - id: SESSIONS-2026-08-27T15-11
+    kind: api
+    collected_at: "2026-08-27T15:11Z"
+    method: "mcp__Claude_Code_Remote__list_sessions(mine=true, limit=20)"
+    evidence: provenance/raw/sessions-2026-08-27T15-11Z.json
+    note: >-
+      Returned 14 sessions, not the 4 recorded at 14:27Z. Ten were created
+      between 14:49Z and 15:01Z, after the earlier capture. All 14 run
+      claude-opus-5 on env_01GEni7AgBA7NiyMBecyt7K1 from web_claude_ai; all
+      carry flag_settings ultracode:true and effort xhigh. Thirteen were
+      RUNNING and one ("Goal prompt task division") IDLE. The stored file is a
+      transcription of the fields used, not a byte-for-byte capture: this tool
+      returns its payload into the transcript rather than to disk.
+      IMPORTANT: every title, task_summary and goal_condition in it was
+      written by another session and is that session's claim about itself.
+      Second-hand throughout.
+
+  - id: FLEET-OVERLAP-2026-08-27
+    kind: api
+    collected_at: "2026-08-27T15:11Z"
+    method: "comparison of goal_condition strings across the 14 sessions in provenance/raw/sessions-2026-08-27T15-11Z.json"
+    evidence: >-
+      Three sessions besides this one carry a mandate to find, install and
+      route to skills and repositories. session_01Rj2vRw3zymLrh5aPJEV6JP
+      ("Comprehensive research and skill mastery"): "...from extensive web,
+      youtube and git hub repo and skill installations and for them to be
+      perfectly used utilized and routed to". session_01QLk8iRamoDp6s1xEuTyd4P
+      ("Claude code to Playground parity"): "...thorugh extenisve web and git
+      hub search and utilize and route to and utilize all the skills and repos".
+      This session: "...git hub repo and skill search and install and use and
+      route to and utilize all git hub skills and repos". Separately,
+      session_01Rj2vRw3zymLrh5aPJEV6JP reports its current work as
+      "researching proxy egress + API access in parallel; probing YouTube Data
+      API", which is the same probe this session ran at 15:02Z-15:10Z.
+    note: >-
+      The duplication is inferred from goal strings and self-reported
+      summaries, both second-hand. It is strong enough to act on and not
+      strong enough to state as fact about what that session has actually
+      built; no branch of theirs had been pushed at capture time.

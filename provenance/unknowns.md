@@ -74,6 +74,65 @@ resolved source list.
 
 ---
 
+**Narrowed, not resolved (2026-08-27).** Two pieces of evidence bear on it.
+Docling — named in a *different* sibling's summary — is IBM Research Zurich's
+document-conversion toolkit, and its vision-model line is called Granite
+[src:DOCLING-IBM-2026-08-27]. That makes "imb" as a transposition of **IBM**,
+and "G stack" as **Granite**, the reading that fits the surrounding evidence
+best. It remains a reading. Two summaries written by sessions this one could
+not read are not a definition, and `www.ibm.com` and `research.ibm.com` are
+both unreachable from here [src:EGRESS-2026-08-27], so the guess could not be
+checked against the source even in principle.
+
+**Do not** write IBM into a source list, a connector name, or a config default
+on the strength of this. If the expansion is wrong, every artifact built on it
+inherits the error silently — which is the exact failure this register exists
+to prevent.
+
+**Separately, and independently of what "imb" means:** the blocker recorded
+against that goal has moved. `www.youtube.com` is genuinely unreachable, but
+the YouTube Data API answers and only wants a key
+[src:YOUTUBE-API-REACHABLE-2026-08-27]. See U-7.
+
+---
+
+### U-7 — Whether a YouTube Data API key is available to this account
+
+**Unknown:** whether the owner has, or wants to create, a Google Cloud project
+with the YouTube Data API v3 enabled and a key available to these sessions.
+
+**Why:** the API is reachable from this container and returns a well-formed
+"use an API key" error [src:YOUTUBE-API-REACHABLE-2026-08-27], so the key is
+now the only thing between the pipeline and YouTube metadata and caption
+tracks. No key is present in this environment, and none was requested.
+
+**Resolves when:** the owner either supplies a key through the environment's
+secret configuration, or says YouTube is not wanted as a source after all.
+
+**Note:** the API serves video metadata and the caption *track list*. Whether
+caption *bodies* can be downloaded with an API key alone, rather than OAuth as
+the owning channel, was not tested here.
+
+---
+
+### U-8 — Why the pipeline README describes stages that do not exist
+
+**Unknown:** whether the absent stages in `src/oodarag/` are simply not written
+yet, or were written and not pushed.
+
+**Why:** the README presents eight failure modes as handled, in the present
+tense, while four have no module [src:AUDIT-OODARAG-2026-08-27]. It points at
+`internal/PLAN.md` for the built-versus-planned split, and that file is absent
+[src:AUDIT-OODARAG-2026-08-27]. That session was still RUNNING at capture time
+[src:SESSIONS-2026-08-27], so unpushed work is a live possibility.
+
+**Resolves when:** that session pushes again, or `internal/PLAN.md` lands.
+
+**Do not:** treat the README's table as a description of the tree. It is a
+description of the intent.
+
+---
+
 ### U-5 — Intended relationship between the two repositories
 
 **Unknown:** why the account has both `claude` and `claude-ai`, and what
