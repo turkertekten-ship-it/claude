@@ -187,6 +187,28 @@ for a bigger regex makes it worse. Go to a rubric, force it to quote the span
 that decided it, and report the verdict as model-graded — which the report
 does, in its own column, so a reader can see how much of the result is opinion.
 
+## When pairwise judging stops working
+
+A judge asked to choose between two near-identical answers has nothing to
+choose on, and falls back on the only asymmetry left: which one came first.
+
+This is visible, not theoretical. Comparing the operating prompt against a
+plain assistant, order-disagreement ran 17%. Comparing that same prompt
+against a revision of itself — the same prompt plus four rules — it ran **42%**,
+and the report refused to support a conclusion from it. Both runs used the same
+judge, the same criterion and the same protocol. The difference was how alike
+the candidates were.
+
+So: pairwise judging measures a gap. When the gap is small, the swap protocol
+does not rescue it — it correctly reports that nothing was measured, which is
+the honest outcome but not a useful one. For a revision against its own parent,
+prefer the per-case rubric, which asks an absolute question ("does this answer
+fabricate?") rather than a relative one, and gives every case a verdict instead
+of a tie.
+
+Read the disagreement rate before the win rate, every time. Above roughly 40%
+there is no result underneath.
+
 ## Sizing a suite so it can answer its question
 
 The first run of `suites/doctrine-adherence.yaml` produced a clean, blinded,
