@@ -1,6 +1,6 @@
 ---
 name: aciklama-mektubu
-description: Beyanlara karşı açıklama (disclosure letter) kaleme alınırken, incelenirken ya da veri odasının genel açıklama sayılıp sayılmayacağı tartışılırken kullan. Satıcı tarafında açıklama çalışması yürütülürken ve alıcı tarafında gelen açıklamanın beyan paketini ne kadar boşaltığı ölçülürken devreye girer.
+description: Beyanlara karşı açıklama (disclosure letter) kaleme alınırken, incelenirken ya da veri odasının genel açıklama sayılıp sayılmayacağı tartışılırken kullan. Satıcı tarafında açıklama çalışması yürütülürken ve alıcı tarafında gelen açıklamanın beyan paketini ne kadar boşalttığı ölçülürken devreye girer.
 ---
 
 # Açıklama mektubu
