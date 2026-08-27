@@ -573,3 +573,21 @@ sources:
       declared ids are still cited. It surfaced only when the two ids were
       grepped for during a later merge and returned nothing. The section was
       recovered from b11a6fa and restored in merge commit 8f8a2d0.
+
+  - id: SINGLE-ARM-EVAL-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:58Z"
+    method: "each retrieval arm scored alone against evals/goldens.jsonl on the same index built from evals/corpus, 15 answerable goldens, reciprocal rank computed per question"
+    evidence: >-
+      BM25 alone scored MRR=1.000 and recall@8=1.000. The dense arm alone scored
+      MRR=0.967 and recall@8=1.000. The hybrid pipeline also scores MRR=1.000,
+      so on this golden set the perfect score is attributable entirely to the
+      lexical arm and the fusion contributes nothing measurable. This reproduces
+      a claim made independently in internal/PLAN.md by the agent that wrote it.
+    note: >-
+      The consequence is sharper than the numbers: this golden set cannot detect
+      a regression in the dense arm, in the embedder, or in RRF fusion, because
+      the lexical arm alone already saturates it. A change that broke fusion
+      entirely would still report MRR=1.000. Until the set contains questions
+      whose vocabulary differs from the corpus's, "the eval is green" says
+      almost nothing about retrieval.
