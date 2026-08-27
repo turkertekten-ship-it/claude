@@ -22,16 +22,22 @@ exposed, the sessions run in other containers, and none had pushed a commit.
 Pushed branches do *not* resolve this: a diff shows what a session built, never
 what it was asked, what it rejected, or why.
 
-**Partially closed.** `claude/rag-system-data-pipeline-rdkde9` has now been
-read in full — 2,583 lines across 16 modules, not merely listed
+**Partially closed.** `claude/rag-system-data-pipeline-rdkde9` has been read in
+full rather than listed — 2,583 lines across 16 modules
 [src:RAG-CODE-READ-2026-08-27] — and merged into this branch
-[src:SUBSTRATE-MERGED-2026-08-27]. What that session *built* is therefore
-established. What it was asked, what it rejected, and why it chose as it did
-remain unknown, and reading more code will not close that gap.
+[src:SUBSTRATE-MERGED-2026-08-27]. It holds `oodarag`, a standard-library RAG
+pipeline over web and GitHub corpora, with no handling of Claude transcripts.
+[src:OODARAG-SCOPE-2026-08-27] What that session *built* is therefore
+established. What it was asked, what it rejected, and why it chose this design
+remain unknown; a diff cannot carry any of that, and reading more code will not
+close the gap.
 
-**Widened.** The fleet is now 13 sessions, not 4 [src:FLEET-13-2026-08-27], and
-11 of them have pushed nothing at all [src:BRANCHES-2026-08-27T15-04Z]. The
-unknown is correspondingly larger than when this entry was written.
+**Still open and widening.** The fleet was 4 sessions at 14:27Z
+[src:SESSIONS-2026-08-27], 13 at 15:04Z [src:FLEET-13-2026-08-27] and 14 shortly
+after [src:FLEET-14-2026-08-27]. Most have pushed nothing
+[src:BRANCHES-2026-08-27T15-04Z], and several declare goals overlapping this
+one. Their contents are unknown by the same argument, and the unknown grows
+faster than it is being closed.
 
 **Do not:** infer their contents from their titles. A title is a label the
 system generated, not a record of the work.
@@ -50,6 +56,12 @@ threads exists on this container or in the connected Drive.
 **Resolves when:** the owner exports their data from claude.ai (Settings →
 Privacy → Export data) and drops `conversations.json` into `archive/`.
 `tools/ingest_chat_archive.py` reads that format directly.
+
+**Partly addressed:** Claude *Code* history is a different store, and it is
+reachable — `ingest --include-projects` reads `~/.claude/projects` directly. On
+the machine that ran those sessions that is the full Claude Code history; on
+this container it was only the current session, 347 messages across 3
+transcripts. claude.ai chat threads remain out of reach without an export.
 
 ---
 

@@ -14,6 +14,7 @@ run python3 tools/verify_provenance.py
 run python3 tests/test_verify_provenance.py
 run python3 tests/test_ingest_chat_archive.py
 run python3 tests/test_install_user_scope.py
+run python3 tools/ingest_chat_archive.py selfcheck
 
 # The oodarag pipeline suite, once it exists. test_pipeline_e2e.py is the
 # marker: it is the suite that exercises the whole pipeline, so if it is absent

@@ -1,0 +1,18 @@
+{"question": "What does the BM25 parameter k1 control?", "relevant_uris": ["evals/corpus/bm25-scoring.md"], "relevant_doc_ids": [], "must_include": ["k1"], "should_abstain": false}
+{"question": "What is the default value of the BM25 length normalization parameter b?", "relevant_uris": ["evals/corpus/bm25-scoring.md"], "relevant_doc_ids": [], "must_include": ["0.75"], "should_abstain": false}
+{"question": "What is inverse document frequency and what does it weight?", "relevant_uris": ["evals/corpus/bm25-scoring.md"], "relevant_doc_ids": [], "must_include": ["idf"], "should_abstain": false}
+{"question": "Why does hybrid retrieval use reciprocal rank fusion instead of adding scores?", "relevant_uris": ["evals/corpus/hybrid-retrieval.md"], "relevant_doc_ids": [], "must_include": ["rank"], "should_abstain": false}
+{"question": "Why are two retrieval arms kept instead of one?", "relevant_uris": ["evals/corpus/hybrid-retrieval.md"], "relevant_doc_ids": [], "must_include": ["differently"], "should_abstain": false}
+{"question": "How much overlap should neighbouring chunks share?", "relevant_uris": ["evals/corpus/chunking-strategies.md"], "relevant_doc_ids": [], "must_include": ["overlap"], "should_abstain": false}
+{"question": "What is a contextual header and why is it indexed with the chunk body?", "relevant_uris": ["evals/corpus/chunking-strategies.md"], "relevant_doc_ids": [], "must_include": ["header"], "should_abstain": false}
+{"question": "Why does cosine similarity reduce to a dot product on L2-normalized vectors?", "relevant_uris": ["evals/corpus/embeddings-and-vector-search.md"], "relevant_doc_ids": [], "must_include": ["dot product"], "should_abstain": false}
+{"question": "How does the hashing trick build an embedder without a trained model?", "relevant_uris": ["evals/corpus/embeddings-and-vector-search.md"], "relevant_doc_ids": [], "must_include": ["buckets"], "should_abstain": false}
+{"question": "What is recall at k and why is it the metric to fix first?", "relevant_uris": ["evals/corpus/evaluation-metrics.md"], "relevant_doc_ids": [], "must_include": ["recall"], "should_abstain": false}
+{"question": "Why report a false abstention rate next to the abstention rate?", "relevant_uris": ["evals/corpus/evaluation-metrics.md", "evals/corpus/citations-and-abstention.md"], "relevant_doc_ids": [], "must_include": ["abstention"], "should_abstain": false}
+{"question": "What should a crawler do when robots.txt returns a 5xx response?", "relevant_uris": ["evals/corpus/crawling-and-robots.md"], "relevant_doc_ids": [], "must_include": ["disallow"], "should_abstain": false}
+{"question": "Why does redaction run at the connector boundary and again during normalization?", "relevant_uris": ["evals/corpus/secret-redaction.md"], "relevant_doc_ids": [], "must_include": ["normalization"], "should_abstain": false}
+{"question": "What are the four phases of the OODA loop?", "relevant_uris": ["evals/corpus/ooda-loop.md"], "relevant_doc_ids": [], "must_include": ["Observe"], "should_abstain": false}
+{"question": "Why are citations verified by substring containment rather than trusted?", "relevant_uris": ["evals/corpus/citations-and-abstention.md"], "relevant_doc_ids": [], "must_include": ["substring"], "should_abstain": false}
+{"question": "How much does the OpenAI GPT-4 API charge per million input tokens?", "relevant_uris": [], "relevant_doc_ids": [], "must_include": [], "should_abstain": true}
+{"question": "What memory limit should I set on the Kubernetes indexer pods?", "relevant_uris": [], "relevant_doc_ids": [], "must_include": [], "should_abstain": true}
+{"question": "Who won the 2024 Formula One world championship?", "relevant_uris": [], "relevant_doc_ids": [], "must_include": [], "should_abstain": true}

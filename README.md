@@ -32,8 +32,11 @@ bash tests/run_all.sh        # verifier + tool suites + the pipeline suite
 | `provenance/` | The ledger, the observations, the unknowns, the raw captures. |
 | `prompts/` | System prompts carrying the doctrine into a session. |
 | `tools/verify_provenance.py` | The fabrication guard. |
-| `tools/ingest_chat_archive.py` | Conversation-archive ingestion and search. |
+| `tools/ingest_chat_archive.py` | Conversation-archive ingestion, search, and `selfcheck`. |
 | `tools/install_user_scope.py` | Installs the doctrine into `~/.claude/`, so it reaches every terminal. |
+| `tools/fleet_snapshot.py` | Regenerates the `FLEET.md` roster from live git refs. |
+| `KNOWN_ISSUES.md` | Defects that may have spread to other branches. |
+| `tests/` | Tests for every tool, including their failure cases. |
 | `.claude/commands/` | The workflows, as slash commands. |
 | `.claude/agents/` | The subagent definitions. |
 | `.claude/` | Hooks and the OODA skill. |
@@ -83,17 +86,25 @@ make demo          # end-to-end, offline: ingest -> index -> query -> eval
 
 ## Searching your conversations
 
-The archive ships empty of claude.ai exports. To populate it:
+**Run this on your own machine.** Claude Code keeps every transcript under
+`~/.claude/projects`, so that is where your history actually lives — one flag
+indexes all of it:
 
 ```bash
-# claude.ai: Settings -> Privacy -> Export data, unzip into archive/
-# Claude Code: cp ~/.claude/projects/**/*.jsonl archive/
-
-python3 tools/ingest_chat_archive.py ingest
+python3 tools/ingest_chat_archive.py ingest --include-projects
 python3 tools/ingest_chat_archive.py search "retrieval pipeline"
 python3 tools/ingest_chat_archive.py search "ooda" --role user   # your words only
 python3 tools/ingest_chat_archive.py stats
 ```
+
+On the container this was built in, that directory held only this session, so
+what you get here is small and what you get on your own machine is not.
+
+Your **claude.ai** threads are separate and are not on disk anywhere. Export
+them (Settings → Privacy → Export data), unzip `conversations.json` into
+`archive/`, and run `ingest` again — that reader is written to the documented
+export shape but has only been exercised against fixtures, so check the skip
+count on the first real run.
 
 Messages are stored verbatim and every hit carries its conversation id,
 message id, timestamp, and source file, so a result can be quoted as evidence.
@@ -117,6 +128,17 @@ inference cannot later be used as though it were a strong one.
 That corpus is not the conversation history. It is the opening line of each
 session, which is what was actually reachable. The gap is recorded as U-2 in
 [`provenance/unknowns.md`](provenance/unknowns.md) rather than papered over.
+
+## If you inherited this code from another branch
+
+Merging a snapshot is not tracking it. Check the copy you got:
+
+```bash
+python3 tools/ingest_chat_archive.py selfcheck
+```
+
+Exit 1, or a missing `selfcheck` subcommand, means your copy carries KI-1 and
+silently discards transcripts. See `KNOWN_ISSUES.md`.
 
 ## Status
 

@@ -1,0 +1,11 @@
+# claude: git for-each-ref refs/remotes/origin
+claude/review-chat-archive-zrynr4	2026-08-27T15:05:45+00:00	Make the transcript data-loss bug self-detecting, and warn the fleet
+claude/rag-system-data-pipeline-rdkde9	2026-08-27T15:03:11+00:00	Add access probing, blind test suites, and the capability protocol
+claude/go-page-ultrathink-ooda-kqxvnc	2026-08-27T18:01:30+03:00	mafirm: .gitignore (kurulum tabanı)
+claude/code-playground-parity-xw0snj	2026-08-27T14:58:50+00:00	Merge fleet doctrine substrate into the parity branch
+# overlap claude/review-chat-archive-zrynr4 ^ claude/rag-system-data-pipeline-rdkde9: .gitignore, README.md
+# overlap claude/review-chat-archive-zrynr4 ^ claude/go-page-ultrathink-ooda-kqxvnc: .gitignore, README.md
+# overlap claude/review-chat-archive-zrynr4 ^ claude/code-playground-parity-xw0snj: .claude/agents/fact-checker.md, .claude/agents/observer.md, .claude/settings.json, .claude/skills/ooda/SKILL.md, .gitignore, CLAUDE.md, FLEET.md, README.md, prompts/README.md, prompts/archive-ingest.md, prompts/base-operator.md, prompts/builder.md, prompts/researcher.md, provenance/observations.md, provenance/raw/sessions-2026-08-27T14-27Z.json, provenance/sources.yaml, provenance/unknowns.md, tests/fixtures/clean.md, tests/fixtures/code_tag_not_citation.md, tests/fixtures/false_memory.md, tests/fixtures/unenforced.md, tests/fixtures/unknown_source.md, tests/fixtures/unsourced.md, tests/run_all.sh, tests/test_ingest_chat_archive.py, tests/test_verify_provenance.py, tools/ingest_chat_archive.py, tools/verify_provenance.py
+
+# claude-ai: git for-each-ref refs/remotes/origin
+claude/review-chat-archive-zrynr4	2026-08-27T14:52:54+00:00	Point this repository at the shared operating doctrine

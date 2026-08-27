@@ -32,7 +32,11 @@ def check(name: str, condition: bool, detail="") -> None:
 
 
 class Args:
+    """cmd_ingest reads these attributes; defaults keep the projects tree out."""
+
     def __init__(self, **kw):
+        self.include_projects = False
+        self.projects_dir = "/nonexistent"
         self.__dict__.update(kw)
 
 
@@ -85,7 +89,9 @@ def main() -> int:
         check("skip is explained", bool(report.problems), report.problems)
 
         by_id = {c.id: c for c in convs}
-        s1 = by_id["cc:S1"]
+        # The file stem differs from the sessionId, so ids carry both.
+        check("ids disambiguate session by file", set(by_id) == {"cc:S1:t", "cc:S2:t"}, set(by_id))
+        s1 = by_id["cc:S1:t"]
         check("sidecar records are not indexed as messages", len(s1.messages) == 3, len(s1.messages))
         check("text is stored verbatim", s1.messages[0].text == verbatim, repr(s1.messages[0].text))
         check("block types are recorded",
@@ -138,13 +144,53 @@ def main() -> int:
               "vector databases" in hits[0]["text"])
         conn.close()
 
+        print("session-collision cases")
+        # Subagent transcripts carry the PARENT's sessionId. Two files sharing
+        # a session must stay two conversations, or one silently erases the
+        # other -- which is data loss, not a display bug.
+        sub = archive / "subagents"
+        sub.mkdir()
+        shared = {"type": "user", "uuid": "s1", "sessionId": "SHARED",
+                  "timestamp": "2026-03-01T00:00:00Z",
+                  "message": {"role": "user", "content": "parent transcript line"}}
+        (archive / "SHARED.jsonl").write_text(json.dumps(shared) + "\n")
+        child = dict(shared, uuid="s2",
+                     message={"role": "user", "content": "subagent transcript line"})
+        (sub / "agent-abc.jsonl").write_text(json.dumps(child) + "\n")
+
+        report3 = ica.Report()
+        parent_convs = ica.parse_claude_code_jsonl(archive / "SHARED.jsonl", report3)
+        child_convs = ica.parse_claude_code_jsonl(sub / "agent-abc.jsonl", report3)
+        check("a shared sessionId yields distinct conversation ids",
+              parent_convs[0].id != child_convs[0].id,
+              (parent_convs[0].id, child_convs[0].id))
+        check("subagent transcripts are labelled as such",
+              child_convs[0].kind == "claude_code_subagent", child_convs[0].kind)
+
+        db2 = tmp / "collide.db"
+        conn2 = ica.connect(db2)
+        ica.store(conn2, parent_convs + child_convs, ica.Report())
+        kept = conn2.execute("SELECT COUNT(*) n FROM conversations").fetchone()["n"]
+        msgs2 = conn2.execute("SELECT COUNT(*) n FROM messages").fetchone()["n"]
+        check("neither transcript overwrites the other", kept == 2, kept)
+        check("both transcripts' messages survive", msgs2 == 2, msgs2)
+        conn2.close()
+
         print("idempotence cases")
+        # Compare against the count this same archive produces, not a constant,
+        # so adding a fixture above cannot masquerade as a duplication bug.
+        ica.cmd_ingest(Args(archive=str(archive), db=str(db)))
+        conn = ica.connect(db)
+        first = conn.execute("SELECT COUNT(*) n FROM messages").fetchone()["n"]
+        conn.close()
+
         ica.cmd_ingest(Args(archive=str(archive), db=str(db)))
         conn = ica.connect(db)
         again = conn.execute("SELECT COUNT(*) n FROM messages").fetchone()["n"]
         fts = conn.execute("SELECT COUNT(*) n FROM messages_fts").fetchone()["n"]
-        check("re-ingesting does not duplicate messages", again == 6, again)
-        check("re-ingesting does not duplicate the search index", fts == 6, fts)
+        check("re-ingesting does not duplicate messages", again == first, (first, again))
+        check("re-ingesting does not duplicate the search index", fts == first, (first, fts))
+        check("the collision fixtures are in this count", first >= 7, first)
         conn.close()
 
         print("role-filter cases")
@@ -164,6 +210,25 @@ def main() -> int:
               [r["id"] for r in as_user] == ["cc:u1"], [r["id"] for r in as_user])
         rc = ica.cmd_search(Args(db=str(db), query="tabs", limit=10, role="user"))
         check("search accepts a role filter and exits clean", rc == 0, rc)
+
+    print("selfcheck cases")
+    import subprocess as sp
+    good = sp.run([sys.executable, str(REPO / "tools" / "ingest_chat_archive.py"), "selfcheck"],
+                  capture_output=True, text=True)
+    check("selfcheck passes on this copy", good.returncode == 0, good.stdout[-200:])
+
+    # Revert only the fix and confirm the detector catches it. A detector that
+    # cannot fail proves nothing about the copies it is meant to screen.
+    with tempfile.TemporaryDirectory() as tmp2:
+        src = (REPO / "tools" / "ingest_chat_archive.py").read_text()
+        marker = 'key = session if path.stem == session else f"{session}:{path.stem}"'
+        broken = src.replace("        " + marker, "        key = session", 1)
+        check("the fix line is present to revert", broken != src)
+        target = Path(tmp2) / "ingest_chat_archive.py"
+        target.write_text(broken)
+        bad = sp.run([sys.executable, str(target), "selfcheck"], capture_output=True, text=True)
+        check("selfcheck fails when the fix is reverted", bad.returncode == 1, bad.returncode)
+        check("failure names the data loss", "SILENTLY DISCARDS" in bad.stdout)
 
     print()
     if FAILURES:

@@ -25,8 +25,10 @@ Rules it follows, which matter more than its features:
 
 Usage
   python3 tools/ingest_chat_archive.py ingest [--archive DIR] [--db PATH]
+  python3 tools/ingest_chat_archive.py ingest --include-projects
   python3 tools/ingest_chat_archive.py search "vector database" [--limit N]
   python3 tools/ingest_chat_archive.py stats
+  python3 tools/ingest_chat_archive.py selfcheck
   python3 tools/ingest_chat_archive.py show <conversation-id>
 
 Exit
@@ -46,6 +48,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 DEFAULT_ARCHIVE = REPO / "archive"
 DEFAULT_DB = REPO / "archive" / "index.db"
+CLAUDE_PROJECTS = Path.home() / ".claude" / "projects"
 
 # claude.ai export field names differ across export versions; try each in turn.
 CONV_ID_FIELDS = ("uuid", "id", "conversation_id")
@@ -64,7 +67,9 @@ CREATE TABLE IF NOT EXISTS conversations (
     source_file   TEXT NOT NULL,
     started_at    TEXT,
     ended_at      TEXT,
-    message_count INTEGER NOT NULL DEFAULT 0
+    message_count INTEGER NOT NULL DEFAULT 0,
+    cwd           TEXT,
+    git_branch    TEXT
 );
 
 CREATE TABLE IF NOT EXISTS messages (
@@ -111,6 +116,8 @@ class Conversation:
     title: str | None
     source_file: str
     messages: list[Message] = field(default_factory=list)
+    cwd: str | None = None
+    git_branch: str | None = None
 
     @property
     def started_at(self) -> str | None:
@@ -216,11 +223,26 @@ def parse_claude_code_jsonl(path: Path, report: Report) -> list[Conversation]:
             continue                     # no textual content to index
 
         session = record.get("sessionId") or path.stem
-        conv = grouped.setdefault(
-            session,
-            Conversation(id=f"cc:{session}", kind="claude_code", title=None, source_file=rel),
-        )
-        uuid = record.get("uuid") or f"{session}:{lineno}"
+        # Subagent transcripts carry their PARENT's sessionId, so the session
+        # alone is not unique across files. Keying on the file too keeps one
+        # transcript from overwriting another that merely shares a session.
+        key = session if path.stem == session else f"{session}:{path.stem}"
+        if key not in grouped:
+            kind = "claude_code_subagent" if "subagents" in path.parts else "claude_code"
+            grouped[key] = Conversation(
+                id=f"cc:{key}", kind=kind, title=None, source_file=rel,
+                cwd=record.get("cwd"), git_branch=record.get("gitBranch"),
+            )
+        conv = grouped[key]
+        # A transcript's own fields are the only title available; never invent one.
+        if conv.cwd is None:
+            conv.cwd = record.get("cwd")
+        if conv.git_branch is None:
+            conv.git_branch = record.get("gitBranch")
+        if conv.title is None and conv.cwd:
+            conv.title = conv.cwd if not conv.git_branch else f"{conv.cwd} @ {conv.git_branch}"
+
+        uuid = record.get("uuid") or f"{key}:{lineno}"
         conv.messages.append(
             Message(
                 id=f"cc:{uuid}",
@@ -308,10 +330,10 @@ def store(conn: sqlite3.Connection, conversations: list[Conversation], report: R
     for conv in conversations:
         conn.execute(
             "INSERT OR REPLACE INTO conversations"
-            " (id, kind, title, source_file, started_at, ended_at, message_count)"
-            " VALUES (?,?,?,?,?,?,?)",
+            " (id, kind, title, source_file, started_at, ended_at, message_count, cwd, git_branch)"
+            " VALUES (?,?,?,?,?,?,?,?,?)",
             (conv.id, conv.kind, conv.title, conv.source_file,
-             conv.started_at, conv.ended_at, len(conv.messages)),
+             conv.started_at, conv.ended_at, len(conv.messages), conv.cwd, conv.git_branch),
         )
         # Re-ingesting a file must not duplicate its messages.
         conn.execute("DELETE FROM messages_fts WHERE message_id IN"
@@ -334,31 +356,51 @@ def store(conn: sqlite3.Connection, conversations: list[Conversation], report: R
     conn.commit()
 
 
-def discover(archive: Path) -> list[Path]:
-    if not archive.exists():
-        return []
-    files = sorted(p for p in archive.rglob("*") if p.suffix in (".json", ".jsonl") and p.is_file())
-    return [p for p in files if p.name != "index.db"]
+def discover(archive: Path, projects: Path | None = None) -> list[Path]:
+    """Archive files, plus every Claude Code transcript if `projects` is given.
+
+    `projects` is normally ~/.claude/projects, where Claude Code keeps its
+    transcripts on the machine that ran them. On a fresh container that holds
+    only the current session; on the owner's own machine it is the whole
+    Claude Code history, which is the point of the flag.
+    """
+    found: list[Path] = []
+    if archive.exists():
+        found += [p for p in archive.rglob("*")
+                  if p.is_file() and p.suffix in (".json", ".jsonl")]
+    if projects and projects.exists():
+        found += [p for p in projects.rglob("*.jsonl") if p.is_file()]
+    # Two paths can resolve to the same file (~ and an absolute root path).
+    unique = {p.resolve(): p for p in found if p.name != "index.db"}
+    return sorted(unique.values(), key=str)
 
 
 def cmd_ingest(args) -> int:
     archive, db_path = Path(args.archive), Path(args.db)
+    projects = Path(args.projects_dir).expanduser() if args.include_projects else None
     report = Report()
-    paths = discover(archive)
+    paths = discover(archive, projects)
 
     if not paths:
-        print(f"No archive files found under {archive}/.")
+        print(f"No conversation files found under {archive}/"
+              + (f" or {projects}/." if projects else "."))
         print()
-        print("This is not an error — it means no conversation export has been")
-        print("placed there yet. Nothing was indexed, and nothing was invented")
-        print("to stand in for it. To populate it:")
+        print("This is not an error — it means no conversation record is")
+        print("reachable from here. Nothing was indexed, and nothing was")
+        print("invented to stand in for it. To populate it:")
         print()
-        print("  claude.ai   Settings -> Privacy -> Export data, then unzip")
-        print("              conversations.json into archive/")
-        print("  Claude Code copy ~/.claude/projects/**/*.jsonl into archive/")
+        print("  Claude Code  re-run with --include-projects, on the machine")
+        print("               whose ~/.claude/projects holds your transcripts")
+        print("  claude.ai    Settings -> Privacy -> Export data, then unzip")
+        print("               conversations.json into archive/")
         print()
         print("Then re-run this command.")
         return 0
+
+    if projects:
+        from_projects = sum(1 for p in paths if projects in p.resolve().parents)
+        print(f"Reading {from_projects} transcript(s) from {projects} "
+              f"and {len(paths) - from_projects} file(s) from {archive}.")
 
     conn = connect(db_path)
     for path in paths:
@@ -471,6 +513,64 @@ def cmd_show(args) -> int:
     return 0
 
 
+def cmd_selfcheck(args) -> int:
+    """Prove this copy does not silently discard transcripts.
+
+    Subagent transcripts carry their PARENT's sessionId. A copy that keys
+    conversations on session id alone lets each file overwrite the last, and
+    still reports the full ingest count — the loss is invisible in the output.
+
+    This builds that exact situation and checks the messages survive, so any
+    copy of this tool, on any branch, can test itself in one command.
+    """
+    import tempfile
+
+    session = "SELFCHECK-SESSION"
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "subagents").mkdir()
+        line = {"type": "user", "sessionId": session, "timestamp": "2026-01-01T00:00:00Z"}
+        (root / f"{session}.jsonl").write_text(json.dumps(
+            {**line, "uuid": "p1", "message": {"role": "user", "content": "parent line"}}) + "\n")
+        (root / "subagents" / "agent-selfcheck.jsonl").write_text(json.dumps(
+            {**line, "uuid": "c1", "message": {"role": "user", "content": "subagent line"}}) + "\n")
+
+        report = Report()
+        conversations: list[Conversation] = []
+        for path in sorted(root.rglob("*.jsonl")):
+            conversations += parse_claude_code_jsonl(path, report)
+
+        conn = connect(root / "selfcheck.db")
+        store(conn, conversations, Report())
+        convs = conn.execute("SELECT COUNT(*) n FROM conversations").fetchone()["n"]
+        msgs = conn.execute("SELECT COUNT(*) n FROM messages").fetchone()["n"]
+        conn.close()
+
+    print(f"two transcripts sharing sessionId {session!r}:")
+    print(f"  conversations stored: {convs} (expected 2)")
+    print(f"  messages stored:      {msgs} (expected 2)")
+
+    if convs == 2 and msgs == 2:
+        print("\nOK — this copy keeps both transcripts.")
+        return 0
+
+    print("\nFAIL — this copy SILENTLY DISCARDS transcripts.")
+    print()
+    print("Every subagent transcript shares its parent's sessionId, so on a real")
+    print("history this loses most of it while still reporting a full count.")
+    print("Ingested indexes built with this copy are incomplete and the numbers")
+    print("they reported cannot be trusted.")
+    print()
+    print("Fix: in parse_claude_code_jsonl, key the conversation on the session")
+    print("AND the transcript file, not the session alone:")
+    print()
+    print('    key = session if path.stem == session else f"{session}:{path.stem}"')
+    print()
+    print("then group and build ids from `key`. Re-ingest afterwards; the stored")
+    print("counts do not correct themselves.")
+    return 1
+
+
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--db", default=str(DEFAULT_DB), help="index database path")
@@ -478,6 +578,11 @@ def main(argv: list[str]) -> int:
 
     p_ingest = sub.add_parser("ingest", help="read archive/ into the index")
     p_ingest.add_argument("--archive", default=str(DEFAULT_ARCHIVE))
+    p_ingest.add_argument(
+        "--include-projects", action="store_true",
+        help="also index every Claude Code transcript under --projects-dir. On your "
+             "own machine that is your whole Claude Code history.")
+    p_ingest.add_argument("--projects-dir", default=str(CLAUDE_PROJECTS))
     p_ingest.set_defaults(func=cmd_ingest)
 
     p_search = sub.add_parser("search", help="full-text search the index")
@@ -492,6 +597,11 @@ def main(argv: list[str]) -> int:
     p_search.set_defaults(func=cmd_search)
 
     sub.add_parser("stats", help="index summary").set_defaults(func=cmd_stats)
+
+    sub.add_parser(
+        "selfcheck",
+        help="verify this copy does not silently discard transcripts",
+    ).set_defaults(func=cmd_selfcheck)
 
     p_show = sub.add_parser("show", help="print one conversation in full")
     p_show.add_argument("conversation_id")

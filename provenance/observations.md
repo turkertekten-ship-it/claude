@@ -16,6 +16,7 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - Each session writes to its own outcome branch, and three of the four take both repositories as sources; `Go page review and ultrathink OODA` takes only `turkertekten-ship-it/claude`. [src:SESSIONS-2026-08-27]
 - A goal string is recorded for only two of the four sessions; it is null for two of the three siblings. [src:GOAL-COVERAGE-2026-08-27]
 - Only session metadata was retrievable. Message bodies were not returned by the listing, and this session was given no tool that reads another session's transcript. [src:NO-TRANSCRIPT-ACCESS-2026-08-27]
+- A direct search for such a tool confirms none exists here, rather than merely not appearing in a listing. [src:NO-TRANSCRIPT-TOOL-CONFIRMED-2026-08-27]
 - The sibling sessions run in separate containers and were not reachable as local peers. [src:NO-TRANSCRIPT-ACCESS-2026-08-27]
 
 ## Observed — what the sessions report about themselves
@@ -82,7 +83,19 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - The container reports 4 CPUs, which caps this session's workflow fan-out at 2 concurrent subagents. [src:ENV-CONCURRENCY-2026-08-27]
 - PyYAML 6.0.1 imports and Python's bundled sqlite3 (3.45.1) creates an FTS5 virtual table successfully. [src:ENV-CONCURRENCY-2026-08-27] [src:ENV-SQLITE-FTS5-2026-08-27]
 
-## Observed — the chat archive, populated
+## Observed — tooling built by the substrate session
+
+- `tools/ingest_chat_archive.py` was run against a copy of that session's own transcript: 127 messages across 1 conversation, spanning 14:26:20.952Z to 14:49:46.659Z, with 2 unparseable records skipped and named rather than repaired. [src:INGEST-VALIDATED-2026-08-27]
+- The claude.ai export reader was exercised only against synthetic fixtures under `tests/`, never against a real export. [src:INGEST-VALIDATED-2026-08-27]
+- All three hook commands in `.claude/settings.json` were executed directly and exited cleanly; they were not observed firing inside a live session. [src:HOOKS-VALIDATED-2026-08-27]
+
+## Observed — chat transcripts actually indexed
+
+- Three Claude Code transcripts exist on this container: this session's, and two subagent transcripts it spawned. Indexing them yields 347 messages across 3 conversations, spanning 14:26:20.952Z to 15:01:07.358Z, searchable with verbatim attributed excerpts. [src:PROJECTS-INGEST-2026-08-27]
+- A subagent transcript carries its *parent's* sessionId, so a session id alone does not identify a transcript. [src:SUBAGENT-SESSION-COLLISION-2026-08-27]
+- Keying conversations on session id alone silently discarded two of the three transcripts, storing 44 messages instead of 347; keying on session and file preserves all of them. [src:PROJECTS-INGEST-2026-08-27]
+
+## Observed — the chat archive on this branch
 
 - The chat index now holds real data rather than shipping empty: 144 messages across 1 conversation, spanning 14:50:16.588Z to 15:13:44.637Z, with 0 records skipped. [src:ARCHIVE-INGESTED-2026-08-27]
 - That one conversation is this session's own transcript. No other session's transcript exists on this container, so the index covers one of 13 sessions. [src:ARCHIVE-INGESTED-2026-08-27]

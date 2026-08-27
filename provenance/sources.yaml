@@ -178,6 +178,112 @@ sources:
       ultrathink OODA". Of the three sibling sessions, only one has a goal on
       record.
 
+  - id: NO-TRANSCRIPT-TOOL-CONFIRMED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:08Z"
+    method: "ToolSearch for 'list_events session transcript messages history' and for '+send_message session'; ListAgents"
+    evidence: >-
+      No list_events tool or equivalent exists in this session. The second
+      query returned "No matching deferred tools found". The generic
+      SendMessage tool exists, but ListAgents reported "No reachable agents —
+      no other Claude session is running on this machine right now". Earlier
+      this absence was inferred from reading a tool listing; it is now
+      established by query.
+
+  - id: SUBAGENT-SESSION-COLLISION-2026-08-27
+    kind: filesystem
+    collected_at: "2026-08-27T15:00Z"
+    method: "head -1 on the main transcript and on a subagents/agent-*.jsonl, comparing the sessionId field"
+    evidence: >-
+      /root/.claude/projects/-home-user/39f45f12-...jsonl and
+      .../subagents/agent-a61cb96d1a200c0a2.jsonl both report
+      sessionId=39f45f12-0454-50a5-8115-31fff3e1bbf0. A subagent transcript
+      carries its parent's sessionId, so sessionId alone does not identify a
+      transcript.
+
+  - id: PROJECTS-INGEST-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:01Z"
+    method: "python3 tools/ingest_chat_archive.py --db <tmp> ingest --include-projects; then stats and search"
+    evidence: >-
+      Read 3 transcripts from /root/.claude/projects and indexed 347 messages
+      across 3 conversations (1 claude_code, 2 claude_code_subagent), date
+      range 2026-08-27T14:26:20.952Z .. 2026-08-27T15:01:07.358Z. A search
+      returned correctly attributed verbatim excerpts with message ids and
+      source files. Before the id fix, the same run reported 3 conversations
+      ingested but stored only 1 with 44 messages, because the shared
+      sessionId caused each file to overwrite the previous one.
+
+  - id: PARITY-MERGE-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:12Z"
+    method: "git log --graph origin/claude/code-playground-parity-xw0snj; git merge-base --is-ancestor per commit; git show <branch>:tools/ingest_chat_archive.py | grep"
+    evidence: >-
+      Merge commit e7ab452, subject "Merge fleet doctrine substrate into the
+      parity branch", has parents 1d7ce8f (the RAG branch root) and e37b4c2
+      (this branch's first commit). merge-base --is-ancestor reports e37b4c2 IN
+      parity, and f304fce, b11a6fa, e392678 NOT in parity. The branch's copy of
+      tools/ingest_chat_archive.py contains "session = record.get(...)" keyed
+      directly into Conversation(id=f"cc:{session}") with zero occurrences of
+      the "path.stem == session" fix.
+
+  - id: FLEET-14-2026-08-27
+    kind: api
+    collected_at: "2026-08-27T15:10Z"
+    method: "mcp__Claude_Code_Remote__list_sessions(limit=20, mine=true)"
+    evidence: >-
+      The listing returned 14 sessions, all SESSION_STATUS_RUNNING on
+      env_01GEni7AgBA7NiyMBecyt7K1, created between 14:07:19Z and 15:00:53Z.
+      Ten did not exist at the 14:27Z capture. All but one take both
+      repositories as sources; each declares its own outcome branch.
+
+  - id: SELFCHECK-VALIDATED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:14Z"
+    method: "python3 tools/ingest_chat_archive.py selfcheck on this copy, and on a copy with only the fix line reverted"
+    evidence: >-
+      On this copy: 2 conversations and 2 messages stored, "OK — this copy
+      keeps both transcripts", exit 0. On the copy with the fix reverted and
+      nothing else changed: 1 conversation and 1 message stored, "FAIL — this
+      copy SILENTLY DISCARDS transcripts", exit 1.
+
+  - id: FLEET-REFS-20260827T150640
+    kind: repo_state
+    collected_at: "2026-08-27T15:06:40+00:00"
+    method: "git fetch --all --prune; git for-each-ref refs/remotes/origin; git ls-tree -r --name-only per branch"
+    evidence: provenance/raw/fleet-refs-2026-08-27T150640+0000.txt
+
+  - id: KI1-ISSUE-2026-08-27
+    kind: api
+    collected_at: "2026-08-27T15:20Z"
+    method: "mcp__github__list_issues then mcp__github__issue_write(method=create) on turkertekten-ship-it/claude"
+    evidence: >-
+      The repository had zero issues before this. Creating the KI-1 advisory
+      returned id 5269104237 at
+      https://github.com/turkertekten-ship-it/claude/issues/1. Issues are the
+      only durable channel to sessions that cannot be messaged directly.
+
+  - id: OODARAG-SCOPE-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:18Z"
+    method: "git show origin/claude/rag-system-data-pipeline-rdkde9:README.md; git ls-tree -r --name-only; git grep -in for transcript/jsonl/conversations.json/sessionId under src/"
+    evidence: >-
+      The branch holds 34 files. Its README describes oodarag as a
+      standard-library RAG pipeline over web and GitHub corpora — crawling,
+      boilerplate removal, chunking, hybrid dense+BM25 retrieval with RRF, and
+      a recall/MRR/nDCG eval harness. Modules are access/, ingest/ (base,
+      github, web), scrape/ (crawler, html, robots), util/. The transcript grep
+      matched only "jsonld" (JSON-LD) inside scrape/html.py, a substring
+      collision; no module reads Claude transcripts or conversation exports.
+
+  - id: PARITY-UNMOVED-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:16Z"
+    method: "git fetch --all --prune; git log --oneline origin/claude/code-playground-parity-xw0snj; grep for the fix in its tools/ingest_chat_archive.py"
+    evidence: >-
+      The branch head is still merge commit e7ab452 with parents e37b4c2 and
+      1d7ce8f. Its copy of tools/ingest_chat_archive.py still has zero
+      occurrences of the "path.stem == session" fix.
   # --- captured by session_01FQvAGnEvu2XY7hGtWRkMG3 (reverse-engineer chat setup) ---
 
   - id: FLEET-13-2026-08-27
@@ -315,3 +421,9 @@ sources:
       The installer was NOT run with --apply against this container's real
       ~/.claude. Its effect on a live session is therefore untested here; what is
       tested is its file handling.
+
+  - id: FLEET-REFS-20260827T152536
+    kind: repo_state
+    collected_at: "2026-08-27T15:25:36+00:00"
+    method: "git fetch --all --prune; git for-each-ref refs/remotes/origin; git ls-tree -r --name-only per branch"
+    evidence: provenance/raw/fleet-refs-2026-08-27T152536+0000.txt
