@@ -61,8 +61,10 @@ A temperature sweep in 2026 is therefore not a parity gap. It is a feature
 request for an API that no longer exists. What replaced it as the quality dial
 is **effort** — `output_config.effort` at `low | medium | high | xhigh | max`
 ([Messages API](https://platform.claude.com/docs/en/api/messages)) — which the
-Claude Code CLI exposes directly as `--effort`, and which the workbench sweeps
-per variant.
+Claude Code CLI exposes directly as `--effort`. The workbench varies it the
+same way it varies anything else: by declaring a variant per level and
+comparing them. There is no separate sweep command, and no sweep of the
+parameters above, because those are the ones the API now rejects.
 
 ## The matrix
 
@@ -84,7 +86,7 @@ Legend: **CC** = stock Claude Code; **WB** = this repository's `workbench/`.
 | Capability | playground | CC | WB |
 |---|---|---|---|
 | Model selection | yes | `--model` | per variant |
-| Effort | yes | `--effort` | per variant, sweepable |
+| Effort | yes | `--effort` | per variant |
 | Extended thinking | yes | via effort | via effort |
 | `temperature` / `top_p` / `top_k` | rejected by current models | no flag | deliberately not built |
 | `stop_sequences`, `max_tokens` | yes | no flag | not reachable without an API key |

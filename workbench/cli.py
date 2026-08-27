@@ -22,6 +22,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -219,7 +220,11 @@ def cmd_export_eval(args: argparse.Namespace) -> int:
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
 
-    translatable = {"regex", "file_exists", "judge"}
+    # `claude plugin eval`'s regex grader takes match: contains | not_contains |
+    # count:N, so the substring graders translate into it rather than being
+    # dropped. Anything genuinely without an equivalent on the other side is
+    # reported, not silently lost.
+    translatable = {"regex", "file_exists", "judge", "contains", "not_contains", "equals"}
     dropped: list[str] = []
     written = 0
 
@@ -247,6 +252,18 @@ def cmd_export_eval(args: argparse.Namespace) -> int:
                 body = ["---", "type: regex",
                         f"pattern: {json.dumps(str(g.config.get('pattern', '')))}",
                         f"match: {g.config.get('match', 'contains')}", "---", ""]
+            elif g.type in ("contains", "not_contains", "equals"):
+                # A substring check is a regex over its own escaped literal.
+                match = "not_contains" if g.type == "not_contains" else "contains"
+                pattern = re.escape(str(g.config.get("value", "")))
+                body = ["---", "type: regex",
+                        f"pattern: {json.dumps(pattern)}",
+                        "flags: i" if g.config.get("ignore_case", True) else "",
+                        f"match: {match}", "---", ""]
+                body = [line for line in body if line != ""] + [""]
+                if g.type == "equals":
+                    dropped.append(f"{case.id}: equals (exported as a substring "
+                                   f"check; it no longer requires an exact match)")
             elif g.type == "file_exists":
                 body = ["---", "type: file_exists",
                         f"path: {g.config.get('path', '')}", "---", ""]
