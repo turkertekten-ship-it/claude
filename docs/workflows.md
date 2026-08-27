@@ -28,6 +28,51 @@ Invoke as slash commands. Definitions in `.claude/commands/`.
 | `/fleet-sync` | Observe | what the other sessions have actually pushed, read from diffs |
 | `/ingest-chats [query]` | Observe | the real contents of the chat index, or the fact that it is empty |
 
+## Skills
+
+Skills differ from commands in when they load. A command runs because someone
+typed it; a skill loads because its `description` matched the situation. So a
+skill is the right home for a procedure that should apply *whether or not
+anyone remembers to invoke it*.
+
+| Skill | Loads when |
+|---|---|
+| `ooda` | a request rests on facts that have not been checked |
+| `researching-before-acting` | a task needs the ground established first, or a source looks unreachable |
+
+`researching-before-acting` is the wider procedure: research from every
+reachable source before starting, route the findings through the loop, and
+treat an open item as a reason to continue rather than a reason to caveat. It
+also carries the barrier taxonomy — the distinction between a host refused at
+the network layer and one that answered and asked for a credential — because
+collapsing those is the most common way a usable source gets written off.
+
+**Skills must be committed here to exist in a cloud session.**
+[src:SKILL-LOAD-PATHS-2026-08-27] A skill in a personal `~/.claude/skills/` is
+invisible to every session that clones this repository, which is all of them.
+That is why both skills live in `.claude/skills/` under version control.
+
+Run `make skills` to discover and lint every SKILL.md reachable from here. The
+lint separates what the runtime rejects — a `name` outside its character set or
+length, a reserved word, a missing description — from what is only guidance,
+because a skill that cannot load and a skill that is merely verbose are
+different problems.
+
+## Tooling the workflows call
+
+| Command | Answers |
+|---|---|
+| `make reachability` | what this container can fetch, and which barrier stops the rest |
+| `make skills` | which skills exist, and which could never trigger |
+| `make test` | every unit test, both doctrine suites, and the provenance verifier |
+| `make demo` | the whole pipeline end to end, with no network and no credentials |
+| `python3 -m oodarag.cli loop --cycles 1` | one OODA cycle over the corpus, with all four artifacts |
+
+The last one is the loop as code rather than as procedure: it observes the
+index, orients on what that means, states a decision with its falsifier, acts,
+and reports all four. It is the same discipline `/ooda-loop` applies to a task,
+applied to a corpus.
+
 ## Subagents
 
 Definitions in `.claude/agents/`.
