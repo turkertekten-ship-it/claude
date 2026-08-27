@@ -371,7 +371,7 @@ class GitHubConnector(Connector):
             external_id=f"{self.slug}#repo",
             uri=meta.get("html_url", f"https://github.com/{self.slug}"),
             title=f"{self.slug} - repository overview",
-            text=body,
+            text=redact_secrets(body),
             metadata={
                 **self._base_meta("repo", head_sha),
                 "ref": ref,

@@ -35,9 +35,33 @@ DEFAULT_UA = "oodarag/0.1 (+https://github.com/turkertekten-ship-it/claude; rese
 MAX_BYTES = 8 * 1024 * 1024  # 8 MiB: nothing useful to a text pipeline is bigger
 
 
+def safe_url(url: str) -> str:
+    """A URL fit to appear in a log line or an exception message.
+
+    The query string is where credentials live — the YouTube Data API takes
+    `?key=`, signed URLs take `?signature=`, and plenty of APIs take
+    `?access_token=`. A retry is a routine event (429 *is* what quota
+    exhaustion looks like), so anything that logs the full URL leaks the key on
+    an ordinary failure, into stderr, which is exactly what CI captures.
+
+    Scheme, host and path are kept because they are what makes a log entry
+    useful; the query is replaced by a marker rather than dropped, so a reader
+    can tell one was present.
+    """
+    try:
+        parts = urllib.parse.urlsplit(url)
+    except ValueError:
+        return "<unparseable url>"
+    base = urllib.parse.urlunsplit((parts.scheme, parts.netloc, parts.path, "", ""))
+    return f"{base}?<redacted>" if parts.query else base
+
+
 class HttpError(Exception):
     def __init__(self, status: int, url: str, body: str = "", headers: dict[str, str] | None = None):
-        super().__init__(f"HTTP {status} for {url}: {body[:300]}")
+        # The message is what propagates into `raise ... from exc` chains and
+        # into any handler that stringifies the cause, so it must never carry
+        # the query string.
+        super().__init__(f"HTTP {status} for {safe_url(url)}: {body[:300]}")
         self.status = status
         self.url = url
         self.body = body
@@ -148,7 +172,7 @@ class HttpClient:
         handlers = [
             urllib.request.ProxyHandler(),          # reads *_PROXY / NO_PROXY from env
             urllib.request.HTTPSHandler(context=ctx),
-            _NoRedirectOnPost(),
+            _SafeRedirectHandler(),
         ]
         self._opener = urllib.request.build_opener(*handlers)
 
@@ -186,7 +210,8 @@ class HttpClient:
                         url=raw.geturl(),
                         status=raw.status,
                         headers=resp_headers,
-                        body=_decompress(payload, resp_headers.get("content-encoding", "")),
+                        body=_decompress(payload, resp_headers.get("content-encoding", ""),
+                                         self.max_bytes),
                         elapsed_s=time.monotonic() - started,
                     )
                 self.stats["requests"] += 1
@@ -203,7 +228,9 @@ class HttpClient:
                 if e.code in allow_status:
                     payload = e.read() if hasattr(e, "read") else b""
                     return Response(url, e.code, resp_headers,
-                                    _decompress(payload, resp_headers.get("content-encoding", "")),
+                                    _decompress(payload,
+                                                resp_headers.get("content-encoding", ""),
+                                                self.max_bytes),
                                     elapsed_s=time.monotonic() - started)
                 err = HttpError(e.code, url, _safe_read(e), resp_headers)
                 last_exc = err
@@ -212,19 +239,20 @@ class HttpClient:
                     raise err
                 wait = self.retry.delay_for(attempt, _retry_after(resp_headers))
                 self.stats["retries"] += 1
-                log.warn("retrying", url=url, status=e.code, attempt=attempt, wait=round(wait, 2))
+                log.warn("retrying", url=safe_url(url), status=e.code,
+                         attempt=attempt, wait=round(wait, 2))
                 time.sleep(wait)
             except (urllib.error.URLError, TimeoutError, ssl.SSLError, OSError) as e:
-                last_exc = TransportError(f"{type(e).__name__}: {e} ({url})")
+                last_exc = TransportError(f"{type(e).__name__}: {e} ({safe_url(url)})")
                 if attempt == self.retry.attempts:
                     self.stats["errors"] += 1
                     raise last_exc from e
                 wait = self.retry.delay_for(attempt)
                 self.stats["retries"] += 1
-                log.warn("transport retry", url=url, err=str(e)[:120], attempt=attempt,
-                         wait=round(wait, 2))
+                log.warn("transport retry", url=safe_url(url), err=str(e)[:120],
+                         attempt=attempt, wait=round(wait, 2))
                 time.sleep(wait)
-        raise last_exc or TransportError(f"request failed: {url}")
+        raise last_exc or TransportError(f"request failed: {safe_url(url)}")
 
     def get(self, url: str, **kw: Any) -> Response:
         return self.request("GET", url, **kw)
@@ -254,28 +282,90 @@ class HttpClient:
         return buf.getvalue()
 
 
-class _NoRedirectOnPost(urllib.request.HTTPRedirectHandler):
-    """Follow redirects for safe methods only; never silently replay a POST."""
+class _SafeRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Follow redirects for safe methods only, and never carry credentials off-origin.
+
+    Two separate protections:
+
+    - A POST is never silently replayed against a different URL.
+    - `Authorization` and `Cookie` are stripped when the origin changes.
+      urllib copies every header to the redirect target, and unlike `requests`
+      it does **not** drop `Authorization` on a host change. Since the GitHub
+      client sets a bearer token as a default header and then follows both
+      `raw.githubusercontent.com` blob URLs and whatever host a `Link:
+      rel="next"` header names, a server-controlled redirect would otherwise
+      hand the token to that server.
+    """
+
+    SENSITIVE = ("authorization", "cookie", "proxy-authorization", "www-authenticate")
 
     def redirect_request(self, req, fp, code, msg, headers, newurl):  # type: ignore[no-untyped-def]
         if req.get_method() not in ("GET", "HEAD"):
             return None
-        return super().redirect_request(req, fp, code, msg, headers, newurl)
+        new = super().redirect_request(req, fp, code, msg, headers, newurl)
+        if new is None:
+            return None
+        if _origin(req.full_url) != _origin(newurl):
+            for name in self.SENSITIVE:
+                # Request headers are stored capitalised; remove both spellings.
+                new.headers.pop(name.capitalize(), None)
+                new.headers.pop(name.title(), None)
+                new.headers.pop(name, None)
+                new.unredirected_hdrs.pop(name.capitalize(), None)
+                new.unredirected_hdrs.pop(name.title(), None)
+                new.unredirected_hdrs.pop(name, None)
+            log.debug("dropped credentials across origin change",
+                      to=safe_url(newurl))
+        return new
 
 
-def _decompress(payload: bytes, encoding: str) -> bytes:
+def _origin(url: str) -> tuple[str, str, int | None]:
+    parts = urllib.parse.urlsplit(url)
+    return (parts.scheme.lower(), (parts.hostname or "").lower(), parts.port)
+
+
+#: How far a compressed body may expand. The wire cap bounds what is read; it
+#: does not bound what that expands to, and gzip of a repetitive payload reaches
+#: ratios of a thousand to one — so an 8 MiB response that passed the wire cap
+#: becomes gigabytes resident unless the output is capped too.
+MAX_DECOMPRESSED_RATIO = 50
+
+
+def _decompress(payload: bytes, encoding: str, max_bytes: int = MAX_BYTES) -> bytes:
+    """Inflate a response body, bounded.
+
+    Decompression is streamed through a bounded loop rather than done in one
+    call, so the cap is enforced *while* expanding rather than after — the
+    whole point being never to materialise the oversized result.
+    """
     enc = encoding.lower().strip()
+    if enc not in ("gzip", "deflate"):
+        return payload
+    limit = min(max_bytes, len(payload) * MAX_DECOMPRESSED_RATIO + 4096)
     try:
         if enc == "gzip":
-            return gzip.decompress(payload)
-        if enc == "deflate":
+            obj = zlib.decompressobj(16 + zlib.MAX_WBITS)
+        else:
+            obj = zlib.decompressobj()
+        out = obj.decompress(payload, limit)
+        if obj.unconsumed_tail:
+            raise TransportError(
+                f"compressed response expanded past the {limit} byte cap"
+            )
+        return out
+    except zlib.error:
+        if enc == "deflate":  # some servers send raw deflate with no zlib header
             try:
-                return zlib.decompress(payload)
+                obj = zlib.decompressobj(-zlib.MAX_WBITS)
+                out = obj.decompress(payload, limit)
+                if obj.unconsumed_tail:
+                    raise TransportError(
+                        f"compressed response expanded past the {limit} byte cap"
+                    ) from None
+                return out
             except zlib.error:
-                return zlib.decompress(payload, -zlib.MAX_WBITS)
-    except (OSError, zlib.error):
+                return payload
         return payload  # server lied about the encoding; take the bytes as-is
-    return payload
 
 
 def _safe_read(e: Any) -> str:

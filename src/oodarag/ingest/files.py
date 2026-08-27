@@ -120,8 +120,29 @@ class FileConnector(Connector):
             dirnames[:] = sorted(d for d in dirnames if d not in self.excludes)
             for name in sorted(filenames):
                 path = Path(dirpath) / name
-                if path.suffix.lower() in self.suffixes:
-                    yield path
+                if path.suffix.lower() not in self.suffixes:
+                    continue
+                if not self.follow_symlinks and not self._within_root(path):
+                    # `os.walk(followlinks=False)` only stops the walk
+                    # *descending* into symlinked directories; a symlinked
+                    # file is still listed and read. A repository can ship
+                    # `notes.md -> ~/.aws/credentials` and have it indexed.
+                    log.warn("skipping symlink outside the ingest root",
+                             path=str(path))
+                    continue
+                yield path
+
+    def _within_root(self, path: Path) -> bool:
+        """Does this path, fully resolved, still live under the ingest root?
+
+        Redaction blunts some payloads but is not a containment boundary, so
+        the boundary is enforced here.
+        """
+        try:
+            path.resolve().relative_to(self.root)
+        except (OSError, ValueError):
+            return False
+        return True
 
     def next_cursor(self, cursor: dict[str, Any]) -> dict[str, Any]:
         cursor["root"] = str(self.root)

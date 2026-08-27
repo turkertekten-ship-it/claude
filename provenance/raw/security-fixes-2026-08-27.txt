@@ -1,0 +1,23 @@
+=== security fixes verified — 2026-08-27T20:19Z ===
+1. key in a logged URL:
+   before fix the full URL was logged; safe_url gives: https://youtube.googleapis.com/youtube/v3/videos?<redacted>
+2. ReDoS in _MEMBER_RE (was 11.2s at 16k spaces, 4x per doubling):
+     16000 leading spaces -> 0.00089s
+    400000 leading spaces -> 0.02026s
+3. decompression bomb (8 MiB wire cap expanded to 8 GiB before):
+   refused: compressed response expanded past the 8388608 byte cap
+4. redaction of shapes previously missed:
+   google api key     -> redacted
+   fine-grained PAT   -> redacted
+   jwt                -> redacted
+   stripe             -> redacted
+   dsn                -> redacted
+
+5. crawler off-host redirect (live two-server test):
+   ! [crawler] refused a redirect off the permitted set frm=http://127.0.0.1/redir to=http://127.0.0.2/secret reason=offsite
+   indexed URLs: ['http://127.0.0.1/']  -> off-host content not indexed
+
+=== suite ===
+Ran 281 tests in 3.922s
+OK
+ALL CHECKS PASSED

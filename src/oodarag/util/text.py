@@ -155,9 +155,29 @@ def redact_secrets(text: str) -> str:
     an index is a file that gets copied around, so it must never carry them.
     """
     patterns = [
+        # Google API keys. Listed first because this is the pipeline's *own*
+        # YouTube credential format: a key that leaks into a log line or a
+        # document must be caught by the function meant to catch it.
+        (r"\bAIza[0-9A-Za-z_\-]{35}\b", "<redacted:google-api-key>"),
+        # A credential in a query string, whatever the parameter is called.
+        # The name-based rule below cannot see `?key=` because "key" alone is
+        # too generic to match safely in prose — but inside a URL it is not.
+        (r"(?i)([?&](?:key|api[_-]?key|access[_-]?token|token|auth|signature|sig)=)"
+         r"[A-Za-z0-9._\-]{8,}", r"\1<redacted>"),
         (r"\b(gh[pousr]_[A-Za-z0-9]{16,})", "<redacted:github-token>"),
+        # Fine-grained personal access tokens use a different prefix entirely.
+        (r"\b(github_pat_[A-Za-z0-9_]{20,})", "<redacted:github-token>"),
+        # JSON Web Tokens: three base64url segments separated by dots.
+        (r"\beyJ[A-Za-z0-9_\-]{8,}\.[A-Za-z0-9_\-]{8,}\.[A-Za-z0-9_\-]{8,}",
+         "<redacted:jwt>"),
+        # Credentials in a connection string's userinfo.
+        (r"\b([a-zA-Z][a-zA-Z0-9+.\-]*://[^\s:/@]+):[^\s/@]{3,}@", r"\1:<redacted>@"),
+        (r"(?i)\b(basic)\s+[A-Za-z0-9+/=]{16,}", r"\1 <redacted>"),
         (r"\b(sk-ant-[A-Za-z0-9_\-]{16,})", "<redacted:anthropic-key>"),
-        (r"\b(sk-[A-Za-z0-9]{32,})", "<redacted:api-key>"),
+        # Provider keys that carry separators inside the body: sk-proj-...,
+        # sk_live_..., sk_test_.... The older `sk-[A-Za-z0-9]{32,}` stopped at
+        # the first hyphen or underscore and matched nothing.
+        (r"\b(sk[-_][A-Za-z0-9][A-Za-z0-9_\-]{20,})", "<redacted:api-key>"),
         (r"\b(AKIA[0-9A-Z]{16})\b", "<redacted:aws-key-id>"),
         # AWS secret access keys are 40 chars of base64 alphabet with no
         # distinguishing prefix, so they are only findable by their key name.

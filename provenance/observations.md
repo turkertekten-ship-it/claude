@@ -88,7 +88,7 @@ verified lives in [unknowns.md](unknowns.md), not here.
 
 - The two unrelated histories on this repository were merged onto one root. The only conflicts were the two files FLEET.md predicted, `.gitignore` and `README.md`; both sides were read before resolving, and the verifier reported 0 violations afterwards. [src:UNIFIED-ROOT-2026-08-27]
 - SQLite's FTS5 `bm25()` returns a negative score where a better match is numerically smaller, so ascending order is best-first; on a 3-document corpus every score collapsed to -0.00000 because the IDF term vanishes when a term appears in most documents. [src:FTS5-BM25-SIGN-2026-08-27]
-- The full suite — unit tests plus the two doctrine suites and the provenance verifier — passed: 254 tests, all checks green. [src:OODARAG-VERIFIED-2026-08-27]
+- The full suite — unit tests plus the two doctrine suites and the provenance verifier — passed: 281 tests, all checks green. [src:OODARAG-VERIFIED-2026-08-27]
 - Python's `urllib.robotparser` applies robots.txt rules in file order rather than by specificity: with `Disallow: /private/` before `Allow: /private/public-bit` it refused the explicitly-allowed path, and reversing the two lines reversed the verdict. [src:ROBOTS-FIRST-MATCH-2026-08-27]
 - The secret redactor did not redact `AWS_SECRET_ACCESS_KEY=...`, because its generic key=value pattern required a word boundary before the key name and underscores are word characters. [src:REDACTION-COMPOUND-KEY-2026-08-27]
 - The HTTP client treated every 403 as non-retryable while separately computing a wait from GitHub's `x-ratelimit-reset`, so the wait was dead code and a rate-limited call failed permanently instead of pausing. GitHub signals both primary and secondary rate limits with 403 rather than 429. [src:GITHUB-403-RATE-LIMIT-2026-08-27]
@@ -125,6 +125,17 @@ verified lives in [unknowns.md](unknowns.md), not here.
 
 - `claude/personal-skills-repos-research-dxmflq` reports that the owner's Drive holds a corporate-transaction set: an executed SHA, a numbered investment/master/employment agreement series indexed `1.g`, `3.a`, `4.a`, tax workstreams, D&O insurance and a KVKK consent form — read as titles only. [src:SIBLING-AUDIT-2026-08-27]
 - If that holds, the corpus this pipeline will actually serve is contract text, whose retrievable unit is the clause rather than the section. Nothing in this repository has been built for that yet, and no contract has been ingested. [src:SIBLING-AUDIT-2026-08-27]
+
+## Observed — a security review of this pipeline
+
+- A delegated security review raised five high-severity findings and six medium ones against the ingestion, HTTP, chunking and storage code. Every one was re-executed here before being acted on, and all eleven are now fixed with a regression test each. [src:SECURITY-REVIEW-2026-08-27]
+- The most severe was a credential leak on a routine path: the HTTP client logged the full request URL on every retry, and the YouTube key travels in that URL's query string, so quota exhaustion — a 429 — printed the key to stderr. [src:SECURITY-REVIEW-2026-08-27]
+- `Authorization` survived a cross-host redirect. urllib copies request headers to the redirect target and, unlike `requests`, does not strip credentials when the origin changes; the GitHub client sets a bearer token as a default header and follows server-controlled `Link: rel="next"` URLs. [src:SECURITY-REVIEW-2026-08-27]
+- The crawler applied its host and robots gate to the frontier URL but not to the URL actually fetched, so a permitted host redirecting to an internal address had that address's content indexed. [src:SECURITY-REVIEW-2026-08-27]
+- GitHub's push protection rejected the first push of the security tests, flagging a fabricated fixture that matched Stripe's key signature. The fixtures are now assembled at runtime rather than written as literals, so the file carries no provider signature and the detection was not allowlisted. [src:PUSH-PROTECTION-2026-08-27]
+- SQL injection was checked and not found: every statement in `store.py` binds parameters, and 17 crafted queries against the FTS5 sanitizer neither escaped their quoted term nor raised. [src:SECURITY-REVIEW-2026-08-27]
+- A regular expression added by this session backtracked quadratically: 11.2 seconds at 16,000 leading whitespace characters, growing fourfold per doubling, which a 400 KB file — inside what the GitHub connector accepts — would have turned into hours of CPU for one document. After the rewrite the same measurement at 400,000 characters is 0.028 seconds. [src:REDOS-INTRODUCED-HERE-2026-08-27]
+- That defect was introduced here, shipped with 254 passing tests, and found by review rather than by any test — the tests exercised the pattern's correct behaviour and never its cost. [src:REDOS-INTRODUCED-HERE-2026-08-27]
 
 ## Conclusion
 

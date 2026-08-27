@@ -22,9 +22,12 @@ from pathlib import Path
 from oodarag.chunk import ChunkConfig
 from oodarag.embed import HashingEmbedder
 from oodarag.evaluate import evaluate, load_goldens
-from oodarag.ingest.base import JsonStateStore
+from oodarag.ingest.base import Connector, JsonStateStore
 from oodarag.ingest.files import FileConnector
-from oodarag.ingest.skills import discover_skills, lint_skill
+from oodarag.ingest.github import GitHubConnector
+from oodarag.ingest.skills import SkillConnector, discover_skills, lint_skill
+from oodarag.ingest.web import WebConnector
+from oodarag.ingest.youtube import YouTubeConnector
 from oodarag.loop import OodaLoop
 from oodarag.net.reachability import Barrier, probe_all, render_json, render_table
 from oodarag.pipeline import Pipeline
@@ -62,13 +65,61 @@ def _pipeline(args: argparse.Namespace) -> Pipeline:
 # --------------------------------------------------------------- subcommands
 
 
+def build_connectors(args: argparse.Namespace) -> tuple[list[Connector], list[str]]:
+    """Assemble the sources named on the command line.
+
+    Every connector the package ships was previously unreachable from here
+    except the file one, which made the rest built-but-uninvocable — the same
+    class of defect as a console script pointing at a module that does not
+    exist. Each source is independent: one that cannot be configured is
+    reported and skipped rather than aborting the others, because a partial
+    index is worth more than none.
+    """
+    connectors: list[Connector] = []
+    notes: list[str] = []
+
+    for root in args.paths or ([] if (args.youtube or args.skills or args.github
+                                      or args.web) else ["."]):
+        connectors.append(FileConnector(root))
+
+    if args.skills is not None:
+        roots = args.skills or [".claude/skills", str(Path.home() / ".claude/skills")]
+        connectors.append(SkillConnector([r for r in roots if Path(r).exists()]))
+
+    if args.youtube:
+        for manifest in args.youtube:
+            if not Path(manifest).exists():
+                notes.append(f"youtube: no manifest at {manifest}")
+                continue
+            # A manifest needs neither a key nor egress; the API is used only
+            # to enrich it when one happens to be configured.
+            connectors.append(YouTubeConnector(manifest=manifest))
+
+    for slug in args.github or []:
+        owner, _, repo = slug.partition("/")
+        if not owner or not repo:
+            notes.append(f"github: expected owner/repo, got {slug!r}")
+            continue
+        connectors.append(GitHubConnector(owner=owner, repo=repo))
+
+    if args.web:
+        connectors.append(WebConnector(list(args.web)))
+
+    return connectors, notes
+
+
 def cmd_index(args: argparse.Namespace) -> int:
     pipe = _pipeline(args)
-    roots = args.paths or ["."]
-    connectors = [FileConnector(r) for r in roots]
+    connectors, notes = build_connectors(args)
+    for note in notes:
+        print(f"  skipped — {note}", file=sys.stderr)
+    if not connectors:
+        print("no sources selected; pass paths or --skills/--youtube/--github/--web",
+              file=sys.stderr)
+        return EXIT_CANNOT_RUN
     report = pipe.ingest(connectors, state=JsonStateStore(args.state))
     print(report.render())
-    return EXIT_OK if report.ok else EXIT_FINDINGS
+    return EXIT_OK if (report.ok and not notes) else EXIT_FINDINGS
 
 
 def cmd_query(args: argparse.Namespace) -> int:
@@ -106,9 +157,10 @@ def cmd_eval(args: argparse.Namespace) -> int:
 
 def cmd_loop(args: argparse.Namespace) -> int:
     pipe = _pipeline(args)
-    roots = args.paths or ["."]
-    loop = OodaLoop(pipe, [FileConnector(r) for r in roots],
-                    state=JsonStateStore(args.state))
+    connectors, notes = build_connectors(args)
+    for note in notes:
+        print(f"  skipped — {note}", file=sys.stderr)
+    loop = OodaLoop(pipe, connectors, state=JsonStateStore(args.state))
     reports = loop.run(args.cycles)
     for i, report in enumerate(reports, start=1):
         print(f"===== cycle {i}/{len(reports)} =====")
@@ -199,6 +251,19 @@ def cmd_demo(args: argparse.Namespace) -> int:
 # -------------------------------------------------------------------- parser
 
 
+def _add_source_args(p: argparse.ArgumentParser) -> None:
+    """Source selection, shared by the commands that ingest."""
+    p.add_argument("paths", nargs="*", help="local directories or files to ingest")
+    p.add_argument("--skills", nargs="*", metavar="DIR",
+                   help="index SKILL.md files; with no value, the usual skill locations")
+    p.add_argument("--youtube", nargs="+", metavar="MANIFEST", default=[],
+                   help="index videos from a manifest; needs no API key and no egress")
+    p.add_argument("--github", nargs="+", metavar="OWNER/REPO", default=[],
+                   help="index a repository through the GitHub API")
+    p.add_argument("--web", nargs="+", metavar="URL", default=[],
+                   help="crawl from these seed URLs, within the configured budgets")
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="ooda",
@@ -213,8 +278,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("-v", "--verbose", action="store_true")
     sub = parser.add_subparsers(dest="command", required=True)
 
-    p = sub.add_parser("index", help="ingest and index paths")
-    p.add_argument("paths", nargs="*")
+    p = sub.add_parser("index", help="ingest and index the selected sources")
+    _add_source_args(p)
     p.set_defaults(func=cmd_index)
 
     p = sub.add_parser("query", help="ask the corpus a question")
@@ -225,8 +290,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--goldens", default=DEFAULT_GOLDENS)
     p.set_defaults(func=cmd_eval)
 
-    p = sub.add_parser("loop", help="run OODA cycles")
-    p.add_argument("paths", nargs="*")
+    p = sub.add_parser("loop", help="run OODA cycles over the selected sources")
+    _add_source_args(p)
     p.add_argument("--cycles", type=int, default=1)
     p.set_defaults(func=cmd_loop)
 

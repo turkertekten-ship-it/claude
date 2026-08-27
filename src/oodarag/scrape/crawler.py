@@ -217,6 +217,20 @@ class Crawler:
                 self.report.skipped["not_modified"] += 1
                 continue
 
+            # The gate above was applied to the frontier URL; a redirect can
+            # land somewhere else entirely. Without re-checking, a page on an
+            # allowed host that returns `302 -> http://169.254.169.254/...`
+            # gets fetched and its body indexed — content from a host the
+            # crawl was never permitted to reach, now searchable. Robots for
+            # the final host is unchecked at that point too.
+            if resp.url != url:
+                ok, reason = self._wanted(resp.url, depth)
+                if not ok:
+                    self.report.skipped[f"redirect_{reason}"] += 1
+                    log.warn("refused a redirect off the permitted set",
+                             frm=url, to=resp.url, reason=reason)
+                    continue
+
             ctype = resp.content_type
             if ctype not in HTML_TYPES and ctype not in TEXT_TYPES:
                 self.report.skipped[f"ctype_{ctype or 'unknown'}"] += 1
@@ -232,7 +246,17 @@ class Crawler:
                     markdown=resp.text,
                 )
             else:
-                page = extract(resp.text, resp.url)
+                try:
+                    page = extract(resp.text, resp.url)
+                except RecursionError:
+                    # The extractor recurses per DOM level, and ~200 nested
+                    # elements exhaust the stack. Unguarded this unwinds the
+                    # generator and abandons the rest of the crawl, so one
+                    # deeply-nested page costs every page after it.
+                    self.report.skipped["too_deeply_nested"] += 1
+                    self.report.errors.append((resp.url, "RecursionError in extract()"))
+                    log.warn("page too deeply nested to parse", url=resp.url)
+                    continue
 
             # A redirect can land two frontier entries on the same final page.
             final = normalize_url(resp.url)
@@ -313,6 +337,16 @@ class Crawler:
             if sm_url in seen_maps:
                 continue
             seen_maps.add(sm_url)
+            # robots.txt is written by the site, and its `Sitemap:` directive
+            # can name any host at all. Fetching it unchecked lets a seed host
+            # aim the crawler at an internal service; the same gate that
+            # governs pages governs these.
+            ok, reason = self._wanted(sm_url, 0)
+            if not ok:
+                self.report.skipped[f"sitemap_{reason}"] += 1
+                log.warn("refused a sitemap outside the permitted set",
+                         url=sm_url, reason=reason)
+                continue
             try:
                 resp = self.client.get(sm_url, allow_status=(404, 403))
                 if resp.status >= 400:

@@ -509,3 +509,57 @@ sources:
       mcp-builder, rag-audit) and SKILLS.md, the audit's own severity labels
       (F-1 blocking, F-2 and F-3 high, F-4 medium, F-5 low), and the commit
       c897524 "Unify the fleet's two unrelated roots on this session's branch".
+
+  - id: SECURITY-REVIEW-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T20:30Z"
+    method: "security review of src/oodarag and tools, delegated to a subagent; every finding re-executed here before being acted on"
+    evidence: provenance/raw/security-fixes-2026-08-27.txt
+    note: >-
+      Five high-severity findings and six medium. High: the API key was logged
+      verbatim on every retry, and 429 is what quota exhaustion looks like so
+      the leak fired on a routine failure; Authorization survived a cross-host
+      redirect because urllib copies headers and, unlike requests, does not
+      strip it on an origin change; the crawler applied its host gate to the
+      frontier URL and not to the redirect target, so an allowed host could
+      redirect it to an internal service and have that body indexed; a regex
+      added this session backtracked quadratically, 11.2 seconds at 16,000
+      leading spaces and fourfold per doubling; and gzip output was uncapped,
+      so an 8 MiB response within the wire cap expanded to gigabytes. Medium:
+      two RawDocument paths skipped redaction, the redactor missed eight
+      realistic credential shapes including this pipeline's own key format, a
+      skill reference could name an absolute path and escape its directory, a
+      symlinked file escaped the ingest root, one deeply-nested page ended the
+      whole crawl, and sitemap URLs bypassed every host gate. All eleven are
+      fixed with a regression test each.
+
+  - id: REDOS-INTRODUCED-HERE-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T20:22Z"
+    method: "python3 timing of _MEMBER_RE against payloads of increasing leading whitespace, before and after the fix"
+    evidence: provenance/raw/security-fixes-2026-08-27.txt
+    note: >-
+      Before: 0.19s at 2,000 leading spaces, 0.68s at 4,000, 2.75s at 8,000,
+      11.2s at 16,000 — fourfold per doubling. The pattern was
+      `[ \t]+(?:decorators)?[ \t]*`, whose two whitespace runs can divide one
+      line of indentation between them in quadratically many ways. After
+      rewriting it to a single `[ \t]+` with decorators attached by a backward
+      line scan: 0.028s at 400,000 leading spaces. The defect was introduced by
+      this session, in the member-splitting work, and found by review rather
+      than by any test.
+
+  - id: PUSH-PROTECTION-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T20:38Z"
+    method: "git push -u origin claude/research-skill-mastery-mwjs01"
+    evidence: >-
+      "remote: error: GH013: Repository rule violations found... GITHUB PUSH
+      PROTECTION... Push cannot contain secrets... —— Stripe API Key ——
+      locations: path: tests/test_security.py:164".
+    note: >-
+      The blocked string was a fabricated, non-functional test fixture that
+      happened to match Stripe's published key signature. Resolved by
+      assembling the credential-shaped fixtures at runtime instead of writing
+      them as literals, rather than by allowlisting the detection — a
+      repository whose secret scanning is permanently noisy stops being a
+      useful signal.

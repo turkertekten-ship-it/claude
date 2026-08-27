@@ -298,16 +298,45 @@ _DEFINITION_RE = re.compile(
 )
 
 
-#: A member of a class or object literal: an indented definition, optionally
-#: preceded by its decorators. Used only when a top-level definition is itself
-#: too large, so that an oversized class splits on its methods rather than on
-#: sentences — a sentence boundary inside a method body is the "mid-function"
-#: cut the whole strategy exists to avoid.
+#: A member of a class: an indented definition. Used only when a top-level
+#: definition is itself too large, so an oversized class splits on its methods
+#: rather than on sentences — a sentence boundary inside a method body is the
+#: "mid-function" cut the whole strategy exists to avoid.
+#:
+#: The indentation is matched by exactly one `[ \t]+`, with no second
+#: whitespace run behind an optional group. An earlier version read
+#: `[ \t]+(?:decorators)?[ \t]*`, and those two runs could divide one line of
+#: indentation between them in quadratically many ways: 16,000 leading spaces
+#: with no definition after them took 11 seconds, growing fourfold per
+#: doubling. A 400 KB file — inside what the GitHub connector accepts — would
+#: have been hours of CPU for a single document, plantable by any repository
+#: the pipeline ingests. Decorators are attached in `_split_members` instead,
+#: by a backward line scan that cannot backtrack.
 _MEMBER_RE = re.compile(
-    r"^[ \t]+(?:@[\w.]+.*\n(?:[ \t]*@[\w.]+.*\n)*)?[ \t]*"
-    r"(?:(?:async\s+)?def\s+\w+|class\s+\w+|(?:pub\s+)?fn\s+\w+)",
+    r"^[ \t]+(?:async[ \t]+)?(?:def|class|fn)[ \t]+\w+",
     re.MULTILINE,
 )
+
+#: A decorator line, matched on its own rather than inside the member pattern.
+_DECORATOR_RE = re.compile(r"^[ \t]*@[\w.]+")
+
+
+def _decorator_start(body: str, start: int) -> int:
+    """Walk back over any decorator lines immediately above `start`.
+
+    A chunk beginning `@property` with the `def` it applies to in the next
+    chunk describes nothing, and one beginning at the `def` with its decorators
+    stranded above is just as wrong. This is a linear backward scan over lines,
+    so it cannot reintroduce the backtracking the pattern above was rewritten
+    to avoid.
+    """
+    cursor = start
+    while cursor > 0:
+        line_start = body.rfind("\n", 0, cursor - 1) + 1
+        if not _DECORATOR_RE.match(body[line_start:cursor].rstrip("\n")):
+            break
+        cursor = line_start
+    return cursor
 
 
 def _split_members(body: str) -> list[tuple[str, int, int]]:
@@ -316,10 +345,12 @@ def _split_members(body: str) -> list[tuple[str, int, int]]:
     Decorators stay with the member they decorate: a chunk that begins
     `@property` and ends before the `def` it applies to describes nothing.
     """
-    starts = []
+    starts: list[int] = []
     for m in _MEMBER_RE.finditer(body):
         # Rewind to the start of the decorator block, not the def line.
-        starts.append(m.start())
+        start = _decorator_start(body, m.start())
+        if not starts or start > starts[-1]:
+            starts.append(start)
     if len(starts) < 2:
         return []
     if starts[0] > 0:

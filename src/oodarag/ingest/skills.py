@@ -29,7 +29,7 @@ from typing import Any
 from oodarag.ingest.base import Connector
 from oodarag.models import RawDocument
 from oodarag.util.logging import get_logger
-from oodarag.util.text import clean
+from oodarag.util.text import clean, redact_secrets
 
 log = get_logger("ingest.skills")
 
@@ -219,7 +219,15 @@ def lint_skill(skill: Skill) -> list[SkillFinding]:
 
     # --- references -------------------------------------------------------
     for target in skill.references():
-        resolved = (skill.directory / target).resolve()
+        resolved = _resolve_reference(skill, target)
+        if resolved is None:
+            # An escaping reference is reported without being followed. The
+            # linter reads referenced files and echoes their contents into
+            # findings, so following one outside the skill would turn a lint
+            # into an arbitrary-file read whose result lands in the index.
+            add("error", "reference-escapes",
+                f"body links to {target!r}, which resolves outside the skill directory")
+            continue
         if not resolved.exists():
             add("error", "reference-missing", f"body links to {target!r}, which does not exist")
             continue
@@ -230,6 +238,29 @@ def lint_skill(skill: Skill) -> list[SkillFinding]:
         add("error", "windows-path", "references use backslashes; paths must use forward slashes")
 
     return sorted(findings, key=lambda f: SEVERITY_ORDER.get(f.severity, 9))
+
+
+def _resolve_reference(skill: Skill, target: str) -> Path | None:
+    """Resolve a body reference, or None if it escapes the skill directory.
+
+    `Path.__truediv__` with an absolute right-hand side discards the left, so
+    `[notes](/etc/passwd)` needs no `..` to escape — and `..` works too. Both
+    are refused here rather than at read time, because the caller reads the
+    file *and* copies text out of it into a finding that is stored in the
+    document index.
+    """
+    if not target or target.startswith(("//", "\\")):
+        return None
+    candidate = Path(target)
+    if candidate.is_absolute():
+        return None
+    try:
+        base = skill.directory.resolve()
+        resolved = (base / candidate).resolve()
+        resolved.relative_to(base)
+    except (OSError, ValueError):
+        return None
+    return resolved
 
 
 def _lint_reference(skill: Skill, resolved: Path, target: str) -> list[SkillFinding]:
@@ -336,7 +367,10 @@ class SkillConnector(Connector):
                 external_id=str(skill.path),
                 uri=skill.path.as_uri(),
                 title=skill.name or skill.directory.name,
-                text=body,
+                # Redaction at the connector boundary, as everywhere else. A
+                # SKILL.md is exactly the kind of file an example credential
+                # gets pasted into, and an indexed secret is retrievable.
+                text=redact_secrets(body),
                 metadata={
                     "kind": "skill",
                     "scope": skill.scope,
