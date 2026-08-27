@@ -93,12 +93,18 @@ Legend: **CC** = stock Claude Code; **WB** = this repository's `workbench/`.
 
 ### Parameters
 
-> Audited against the documented `/v1/messages` surface: **24 of 24 parameters
-> carried** by the `anthropic-api` backend, each exercised over local HTTP.
-> Twelve of them were missing when that audit was first run — the playground's
-> own description is "supports every Messages API parameter", and a workbench
-> claiming parity with it cannot stop at the half a coding CLI happens to
-> expose.
+> **18 of 18** generally-available `/v1/messages` parameters are reachable, plus
+> 6 of 6 beta ones, each exercised over local HTTP. Twelve were missing when
+> that audit was first run.
+>
+> This is checked rather than claimed: `docs/messages-api-surface.yaml` records
+> the documented list and where it came from, and `tools/api_surface_check.py`
+> diffs it against what the backend actually emits, in `tests/run_all.sh`. The
+> matrix was found incomplete three separate times before that existed — each
+> time by re-reading the API, never by a mechanism. It cannot catch a parameter
+> the API gained after the snapshot date; what it does is make the *snapshot*
+> the thing that goes stale, which is visible, instead of a belief, which is
+> not.
 
 | Capability | playground | CC | WB |
 |---|---|---|---|

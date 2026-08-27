@@ -17,6 +17,8 @@ run python3 tests/test_workbench.py
 # Offline half of the parity conformance harness. The live half costs
 # money, so it is run deliberately: python3 tools/parity_check.py
 run python3 tools/parity_check.py --offline
+# Is the API backend still complete against the documented surface?
+run python3 tools/api_surface_check.py
 
 if [ "$status" -eq 0 ]; then
     echo "ALL CHECKS PASSED"
