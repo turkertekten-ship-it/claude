@@ -63,7 +63,7 @@ Neden zayıf: tavsiye yok, rakam yok, kurul buna evet diyemez.
 </ornek>
 <ornek>
 **Güçlü ilk paragraf:** "İşlemin, bedelin 4,2 milyon avroya indirilmesi ve
-ruhsat yenilemesinin kapanış koşuna bağlanması kaydıyla onaylanmasını
+ruhsat yenilemesinin kapanış koşuluna bağlanması kaydıyla onaylanmasını
 öneriyoruz. İndirim, tespit edilen 400.000 TL damga vergisi maruziyeti ile
 18,4 milyon TL'lik stok değer düzeltmesinin (inceleme raporu s. 31, s. 47)
 toplamını karşılar."
