@@ -545,3 +545,16 @@ sources:
       advertises now runs. Running `python3 -m oodarag.cli` without PYTHONPATH=src
       fails with ModuleNotFoundError, which is why every entry point goes through
       the Makefile.
+
+  - id: ADR-PERF-REPRODUCED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:55Z"
+    method: "independent re-measurement of the DenseIndex latency table in docs/adr/0001-zero-dependency-core.md, 512 dimensions, 20 queries per size, numpy absent"
+    evidence: >-
+      The ADR was written by a subagent and its performance table is
+      load-bearing - readers size their corpus on it. Re-measured here: 1,000
+      chunks 15.0 ms/query against the ADR's 13 ms; 10,000 chunks 128.7 ms/query
+      against its 123 ms. Both within ordinary run-to-run variance, on the
+      stdlib path the ADR names. The table reproduces; the numbers were measured
+      rather than invented, and the ADR correctly marks its 1,000 and 50,000-row
+      memory figures as scaled from the single 10,000-chunk measurement.
