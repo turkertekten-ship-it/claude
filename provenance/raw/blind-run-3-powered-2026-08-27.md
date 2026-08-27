@@ -1,10 +1,10 @@
 # Workbench run — doctrine-adherence-powered
 
-- Run id: `20260827T211341Z`
+- Run id: `20260827T211854Z`
 - Backend: `cached:claude-cli`
-- Started: 2026-08-27T21:13:41Z (took 66.2s)
+- Started: 2026-08-27T21:18:54Z (took 7.6s)
 - Total cost: **$3.1587** (backend-reported, not estimated)
-- Cache: **472/484** completions served from disk. The cost above is what producing these results cost in total, not what this run spent — a re-grade of cached completions spends nothing.
+- Cache: **484/484** completions served from disk. The cost above is what producing these results cost in total, not what this run spent — a re-grade of cached completions spends nothing.
 
 ## Pass rate by variant
 
@@ -62,6 +62,15 @@ Judges are measured to prefer longer answers regardless of content, so a win rat
 | `full-doctrine` | `plain-assistant` | 42 | 8 | 10 | 84% | [0.692, 0.867] | 0.0 | yes |
 
 p is a two-sided exact sign test over non-tied pairs. This run decided 50 pair(s); detecting a genuine 70/30 preference at 80% power needs roughly 47. Treat anything short of that as directional, not settled.
+
+### Does the preference survive with the length confound reversed?
+
+| Pair | Stratum | A wins | B wins | Ties | Win rate | p | Significant |
+|---|---|---:|---:|---:|---:|---:|---|
+| `full-doctrine` vs `plain-assistant` | A was longer (49 pairs) | 33 | 7 | 9 | 82% | 4e-05 | yes |
+| `full-doctrine` vs `plain-assistant` | B was longer or equal (11 pairs) | 9 | 1 | 1 | 90% | 0.02148 | yes |
+
+Judges prefer longer answers regardless of content, so the row where the *other* candidate was longer is the one that matters: there the length bias pushes against the observed winner. A preference that holds in both strata is not a length effect. One that appears only where the winner was longer probably is. Read the smaller stratum's pair count before trusting its p-value.
 
 ### Bradley-Terry strengths
 

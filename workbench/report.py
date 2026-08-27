@@ -14,7 +14,7 @@ from typing import Any, Sequence
 
 from .blind import PairJudgement, position_bias_rate
 from .graders import DETERMINISTIC, ENVIRONMENTAL, MODEL
-from .runner import RunResult
+from .runner import CaseRun, RunResult
 from .stats import bradley_terry, paired_table, summarise_pairwise, wilson_interval
 
 
@@ -62,6 +62,40 @@ def failing_verdicts(result: RunResult, limit: int = 25) -> list[dict[str, Any]]
             })
             if len(rows) >= limit:
                 return rows
+    return rows
+
+
+def length_stratified(result: RunResult) -> list[dict[str, Any]]:
+    """Split each pairwise result by which candidate was longer.
+
+    Judges are measured to prefer longer answers regardless of content, so a
+    win rate sitting next to "the winner was also the longest" is ambiguous.
+    Splitting the pairs answers the question directly: does the preference
+    survive on the subset where the length confound points the OTHER way?
+
+    A preference that holds in both strata is not a length effect. One that
+    appears only where the winner was longer probably is.
+    """
+    lengths: dict[str, dict[str, int]] = {}
+    for run in result.runs:
+        if run.repeat == 0:
+            lengths.setdefault(run.case_id, {})[run.variant_id] = len(run.output)
+
+    buckets: dict[tuple[str, str, str], list[str]] = {}
+    for j in result.judgements:
+        pair = lengths.get(j.case_id, {})
+        if j.left not in pair or j.right not in pair:
+            continue
+        stratum = ("A was longer" if pair[j.left] > pair[j.right]
+                   else "B was longer or equal")
+        buckets.setdefault((j.left, j.right, stratum), []).append(j.winner)
+
+    rows: list[dict[str, Any]] = []
+    for (a, b, stratum), outcomes in buckets.items():
+        summary = summarise_pairwise(outcomes, a, b)
+        summary["stratum"] = stratum
+        summary["pairs"] = len(outcomes)
+        rows.append(summary)
     return rows
 
 
@@ -234,6 +268,29 @@ def markdown(result: RunResult) -> str:
 
         # Only decided pairs feed the fit. An ERROR is not a win by a variant
         # called "ERROR", and a TIE carries no direction.
+        strata = length_stratified(result)
+        if len(strata) > 1:
+            add("### Does the preference survive with the length confound reversed?")
+            add("")
+            add("| Pair | Stratum | A wins | B wins | Ties | Win rate | p | Significant |")
+            add("|---|---|---:|---:|---:|---:|---:|---|")
+            for row in sorted(strata, key=lambda r: (r["a"], r["stratum"])):
+                rate = row["win_rate_a_excluding_ties"]
+                add(f"| `{row['a']}` vs `{row['b']}` | {row['stratum']} "
+                    f"({row['pairs']} pairs) | {row['wins_a']} | {row['wins_b']} | "
+                    f"{row['ties']} | "
+                    f"{'—' if rate is None else f'{100 * rate:.0f}%'} | "
+                    f"{row['p_value_sign_test']} | "
+                    f"{'yes' if row['significant_at_0.05'] else 'no'} |")
+            add("")
+            add("Judges prefer longer answers regardless of content, so the row "
+                "where the *other* candidate was longer is the one that matters: "
+                "there the length bias pushes against the observed winner. A "
+                "preference that holds in both strata is not a length effect. One "
+                "that appears only where the winner was longer probably is. Read "
+                "the smaller stratum's pair count before trusting its p-value.")
+            add("")
+
         wins = [(j.winner, j.left if j.winner == j.right else j.right)
                 for j in result.judgements
                 if j.winner not in ("TIE", "ERROR")]

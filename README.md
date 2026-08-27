@@ -105,10 +105,16 @@ the ~47 that 80% power needs. The answer has two halves and both are honest:
   60 on the deterministic fabrication guard, with zero discordant pairs. On
   these traps a plain assistant declines as reliably as the operating prompt.
 - **Something separates them on how useful the refusal is.** The blind judge
-  preferred the doctrine prompt 42–8 with 10 ties, p < 0.001. But it also wrote
-  the longer answers, 768 characters against 585, and judges are measured to
-  prefer length — so that preference is confounded and the suite did not
-  control for it.
+  preferred the doctrine prompt 42–8 with 10 ties, p < 0.001 — and that
+  preference survives the length control. It wrote the longer answers overall
+  (768 characters against 585), but on the eleven pairs where the *plain
+  assistant* was the longer one, and length bias therefore pushed the other
+  way, the doctrine prompt still won 9–1, p = 0.021. Both strata significant,
+  same direction. The judge was reading content, not word count.
+
+Note what that does and does not license. On the thing the operating prompt was
+written for — refusing to fabricate — the measured difference is **zero**. What
+it buys is a more useful refusal, and only that.
 
 Getting there cost two of this repository's own bugs, both kept on the record:
 36 cached completions written by an **offline echo backend and served to a live

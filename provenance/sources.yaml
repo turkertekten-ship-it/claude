@@ -497,3 +497,23 @@ sources:
       phrasing. It now reports without gating; the gate is the repository's own
       fabrication guard, which checks the artifact, and the comparative question
       goes to the blind judge, which reads content.
+
+  - id: LENGTH-CONTROL-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T21:40Z"
+    method: >-
+      the 60 judged pairs of the powered run, split by which candidate produced
+      the longer answer, each stratum tested with the exact sign test
+    evidence: >-
+      Where `full-doctrine` wrote the longer answer (49 pairs): 33 wins, 7
+      losses, 9 ties, 82% excluding ties, p = 0.00004. Where `plain-assistant`
+      wrote the longer or equal answer (11 pairs): 9 wins, 1 loss, 1 tie, 90%
+      excluding ties, p = 0.02148. Both significant, same direction.
+    note: >-
+      This is the control the earlier reports said was missing. Judges are
+      measured to prefer longer answers regardless of content, so the eleven
+      pairs where the plain assistant was the longer one are the ones that
+      matter: there the length bias pushes AGAINST the observed winner, and the
+      preference survives it. Length is not what the judge was reading. The
+      stratum is small -- eleven pairs, ten decided -- and the report says so
+      next to the p-value.

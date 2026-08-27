@@ -682,6 +682,54 @@ def test_cache_is_per_backend() -> None:
           json.loads(stray.read_text()).get("backend") == "pretend-live")
 
 
+def test_length_stratification() -> None:
+    """The control that separates a real preference from a length effect."""
+    print("\nlength stratification -- is the judge reading content or word count?")
+    from workbench.report import length_stratified
+    from workbench.runner import CaseRun, RunResult
+    from workbench.blind import PairJudgement
+
+    result = RunResult(suite="s", run_id="r", backend="echo", started_at="now")
+    # Two cases where A is longer, two where B is. A wins all four.
+    plan = [("c1", 500, 100), ("c2", 500, 100), ("c3", 100, 500), ("c4", 100, 500)]
+    for case, a_len, b_len in plan:
+        result.runs.append(CaseRun(case_id=case, variant_id="A", repeat=0,
+                                   prompt="p", output="x" * a_len))
+        result.runs.append(CaseRun(case_id=case, variant_id="B", repeat=0,
+                                   prompt="p", output="x" * b_len))
+        result.judgements.append(PairJudgement(case_id=case, left="A", right="B",
+                                               winner="A", agreed=True))
+    rows = {r["stratum"]: r for r in length_stratified(result)}
+    check("both strata are reported", len(rows) == 2, str(list(rows)))
+    check("the stratum where A was longer holds 2 pairs",
+          rows["A was longer"]["pairs"] == 2)
+    check("the stratum where B was longer holds 2 pairs",
+          rows["B was longer or equal"]["pairs"] == 2)
+    check("A's wins are counted in both strata",
+          rows["A was longer"]["wins_a"] == 2
+          and rows["B was longer or equal"]["wins_a"] == 2)
+
+    print("\n  a pure length effect must show up as a one-sided stratum")
+    biased = RunResult(suite="s", run_id="r", backend="echo", started_at="now")
+    for case, a_len, b_len in plan:
+        biased.runs.append(CaseRun(case_id=case, variant_id="A", repeat=0,
+                                   prompt="p", output="x" * a_len))
+        biased.runs.append(CaseRun(case_id=case, variant_id="B", repeat=0,
+                                   prompt="p", output="x" * b_len))
+        # The judge always picks whichever answer is longer.
+        biased.judgements.append(PairJudgement(
+            case_id=case, left="A", right="B",
+            winner="A" if a_len > b_len else "B", agreed=True))
+    rows = {r["stratum"]: r for r in length_stratified(biased)}
+    check("a length-following judge wins A only where A was longer",
+          rows["A was longer"]["wins_a"] == 2 and rows["A was longer"]["wins_b"] == 0)
+    check("and loses A entirely where B was longer",
+          rows["B was longer or equal"]["wins_a"] == 0
+          and rows["B was longer or equal"]["wins_b"] == 2)
+    check("so the two strata disagree, which is the signal to look for",
+          rows["A was longer"]["wins_a"] > rows["B was longer or equal"]["wins_a"])
+
+
 def test_registry_kinds() -> None:
     print("\ngrader taxonomy")
     kinds = dict(describe_registry())
@@ -707,6 +755,7 @@ def main() -> int:
     test_thinking_controls()
     test_multi_turn()
     test_cache_is_per_backend()
+    test_length_stratification()
     test_registry_kinds()
 
     print()
