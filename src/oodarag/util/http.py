@@ -46,7 +46,22 @@ class HttpError(Exception):
     @property
     def retryable(self) -> bool:
         # 429 and 5xx are worth retrying; 408 is a server-side timeout.
-        return self.status in (408, 425, 429) or 500 <= self.status < 600
+        if self.status in (408, 425, 429) or 500 <= self.status < 600:
+            return True
+        # GitHub signals *both* primary quota exhaustion and secondary rate
+        # limits with 403, not 429. Treating every 403 as permanent turns the
+        # single most common GitHub failure mode into a hard failure halfway
+        # through an ingest. Only retry the ones that actually say "rate limit",
+        # so a genuine permission denial still fails fast.
+        if self.status == 403:
+            if self.headers.get("x-ratelimit-remaining") == "0":
+                return True
+            if "retry-after" in self.headers:
+                return True
+            body = self.body.lower()
+            return any(marker in body for marker in
+                       ("rate limit", "secondary rate", "abuse detection"))
+        return False
 
 
 class TransportError(Exception):

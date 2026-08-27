@@ -165,6 +165,9 @@ class GitHubConnector(Connector):
     max_issues: int = 200
     max_commits: int = 200
     authority: float = 1.2                        # a repo is authoritative about itself
+    #: Overridable so the connector can be pointed at a stand-in API in tests
+    #: and at GitHub Enterprise in production.
+    raw_root: str = RAW_ROOT
     gh: GitHubClient = field(default_factory=GitHubClient)
     stats: dict[str, Any] = field(default_factory=dict)
 
@@ -203,7 +206,7 @@ class GitHubConnector(Connector):
 
     def _fetch_blob(self, path: str, sha: str, ref: str) -> str | None:
         """Raw first (free), API blob second (costs quota but always works)."""
-        raw_url = f"{RAW_ROOT}/{self.slug}/{ref}/{urllib.parse.quote(path)}"
+        raw_url = f"{self.raw_root}/{self.slug}/{ref}/{urllib.parse.quote(path)}"
         try:
             resp = self.gh.client.get(raw_url, allow_status=(404, 403))
             if resp.status == 200:
@@ -325,7 +328,7 @@ class GitHubConnector(Connector):
 
         self.stats["counts"] = counts
         self.stats["skipped"] = skipped
-        log.info("github fetch complete", repo=self.slug, **counts)
+        log.info("github fetch complete", repo=self.slug, counts=counts)
 
     def next_cursor(self, cursor: dict[str, Any]) -> dict[str, Any]:
         cursor["head_sha"] = self.stats.get("head_sha", cursor.get("head_sha"))
