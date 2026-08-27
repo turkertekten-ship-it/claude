@@ -305,8 +305,17 @@ class Store:
             check_same_thread=False,
         )
         self._conn.row_factory = sqlite3.Row
-        self._configure()
-        self.schema_version = self._open_schema()
+        # If validation refuses the file, close the handle before propagating.
+        # A caller that catches SchemaVersionError has no reference to this
+        # connection and cannot close it, so leaving it open leaks the handle
+        # and, on Windows, the file lock with it.
+        try:
+            self._configure()
+            self.schema_version = self._open_schema()
+        except BaseException:
+            self._conn.close()
+            self._closed = True
+            raise
 
     # ---- lifecycle -------------------------------------------------------
 

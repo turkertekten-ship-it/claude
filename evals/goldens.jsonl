@@ -16,3 +16,11 @@
 {"question": "What is our support SLA for enterprise customers?", "relevant_uris": [], "relevant_doc_ids": [], "must_include": [], "should_abstain": true}
 {"question": "Which GPU do I need to fine-tune a cross-encoder?", "relevant_uris": [], "relevant_doc_ids": [], "must_include": [], "should_abstain": true}
 {"question": "Who won the 2024 Formula One world championship?", "relevant_uris": [], "relevant_doc_ids": [], "must_include": [], "should_abstain": true}
+{"question": "Why is cutting text into equal blocks of a set length a poor default?", "relevant_uris": ["evals/corpus/chunking-strategies.md"], "relevant_doc_ids": [], "must_include": [], "should_abstain": false, "kind": "paraphrase"}
+{"question": "What goes wrong when a passage is too brief to say what it refers to?", "relevant_uris": ["evals/corpus/chunking-strategies.md"], "relevant_doc_ids": [], "must_include": [], "should_abstain": false, "kind": "paraphrase"}
+{"question": "Why strip passwords and keys twice rather than once?", "relevant_uris": ["evals/corpus/secret-redaction.md"], "relevant_doc_ids": [], "must_include": [], "should_abstain": false, "kind": "paraphrase"}
+{"question": "What makes a stored search database a dangerous place for a password to end up?", "relevant_uris": ["evals/corpus/secret-redaction.md"], "relevant_doc_ids": [], "must_include": [], "should_abstain": false, "kind": "paraphrase"}
+{"question": "When does meaning-based matching fail to find an exact string like a version number?", "relevant_uris": ["evals/corpus/hybrid-retrieval.md"], "relevant_doc_ids": [], "must_include": [], "should_abstain": false, "kind": "paraphrase"}
+{"question": "How can you tell whether a change made finding things better or worse?", "relevant_uris": ["evals/corpus/evaluation-metrics.md"], "relevant_doc_ids": [], "must_include": [], "should_abstain": false, "kind": "paraphrase"}
+{"question": "How do you stop an automated page fetcher from running forever?", "relevant_uris": ["evals/corpus/crawling-and-robots.md"], "relevant_doc_ids": [], "must_include": [], "should_abstain": false, "kind": "paraphrase"}
+{"question": "When should the system admit it does not know instead of replying?", "relevant_uris": ["evals/corpus/citations-and-abstention.md"], "relevant_doc_ids": [], "must_include": [], "should_abstain": false, "kind": "paraphrase"}

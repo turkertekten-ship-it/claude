@@ -591,3 +591,41 @@ sources:
       entirely would still report MRR=1.000. Until the set contains questions
       whose vocabulary differs from the corpus's, "the eval is green" says
       almost nothing about retrieval.
+
+  - id: PARAPHRASE-GOLDENS-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T16:02Z"
+    method: "8 paraphrase goldens added to evals/goldens.jsonl, worded to avoid the corpus's own vocabulary; each arm then scored alone and fused on the same index"
+    evidence: >-
+      MRR by subset and arm - original 15 goldens: BM25 1.000, dense 0.967,
+      hybrid 1.000. The 8 paraphrase goldens: BM25 0.671, dense 0.385, hybrid
+      0.546. All 23 answerable: BM25 0.886, dense 0.764, hybrid 0.842. The
+      paraphrase subset separates the arms by 0.29 MRR where the original set
+      separated them by 0.03.
+    note: >-
+      Two findings, the second unwelcome. First, the set now discriminates: a
+      regression in the embedder or in fusion would move a number, which it
+      could not before. Second, on paraphrase questions the fused result (0.546)
+      is WORSE than its own lexical arm alone (0.671). Equal-weight RRF assumes
+      both arms are comparably useful; when one is much weaker it drags good
+      hits down the fused ranking. This is the ceiling docs/adr/0001 predicted
+      in prose - a hashing embedder cannot recover paraphrase across disjoint
+      vocabulary - now measured rather than asserted. It is deliberately NOT
+      fixed by re-weighting: tuning the weights against the same 8 questions
+      that revealed the problem is the golden-set overfitting the eval-auditor
+      agent exists to catch.
+
+  - id: STORE-LEAK-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T16:20Z"
+    method: "tests/test_store.py run under PYTHONPATH=src python3 -m unittest, after repairing one test that used a pytest-mock API"
+    evidence: >-
+      The suite of 48 store tests was written by a subagent that was cut off by
+      a session limit before it could run them. 47 passed; one errored because
+      it used `spy_return`, which belongs to pytest-mock and does not exist in
+      stdlib unittest.mock. Rewritten with a recording side_effect, the test
+      then FAILED for a real reason: Store.__init__ raised SchemaVersionError
+      without closing the connection it had already opened, so a caller that
+      caught the error leaked a handle it had no reference to. Fixed by closing
+      the connection in an except clause before re-raising. All 48 then pass,
+      and the whole suite is 125 tests, OK, 1 skipped.

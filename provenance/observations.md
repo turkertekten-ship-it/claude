@@ -162,6 +162,20 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - The hybrid pipeline's MRR=1.000 is therefore attributable entirely to the lexical arm; fusion contributes nothing measurable on this set. [src:SINGLE-ARM-EVAL-2026-08-27]
 - It follows that the set cannot detect a regression in the embedder, the dense index, or RRF fusion — a change breaking fusion outright would still report MRR=1.000. [src:SINGLE-ARM-EVAL-2026-08-27]
 
+## Observed — the golden set, made able to discriminate
+
+- 8 paraphrase goldens were added, worded to avoid the corpus's own vocabulary so term overlap alone cannot rank the right document first. [src:PARAPHRASE-GOLDENS-2026-08-27]
+- On those 8, MRR is BM25 0.671, dense 0.385, hybrid 0.546 — a spread of 0.29, against 0.03 on the original 15. The set can now detect a regression in the embedder or in fusion. [src:PARAPHRASE-GOLDENS-2026-08-27]
+- On paraphrase questions the fused result is worse than its own lexical arm alone: 0.546 against 0.671. Equal-weight RRF drags good lexical hits down when the other arm is much weaker. [src:PARAPHRASE-GOLDENS-2026-08-27]
+- That is the ceiling `docs/adr/0001-zero-dependency-core.md` predicted in prose — a hashing embedder cannot recover paraphrase across disjoint vocabulary — now measured. [src:PARAPHRASE-GOLDENS-2026-08-27]
+- It was deliberately not fixed by re-weighting, because tuning weights against the same questions that revealed the problem is the overfitting the harness exists to expose. [src:PARAPHRASE-GOLDENS-2026-08-27]
+
+## Observed — the store suite, and a leak it found
+
+- A subagent wrote 48 store tests but was cut off by a session limit before running them; 47 passed as written and one used a pytest-mock API absent from stdlib unittest.mock. [src:STORE-LEAK-2026-08-27]
+- Repaired to use stdlib mock, that test failed for a real reason: `Store.__init__` raised `SchemaVersionError` without closing the connection it had opened, leaking a handle the caller could not reach. [src:STORE-LEAK-2026-08-27]
+- With the leak fixed, all 48 pass and the full pipeline suite is 125 tests, OK, 1 skipped. [src:STORE-LEAK-2026-08-27]
+
 ## Conclusion
 
 The request that opened this session asked to look at "all my previous claude
