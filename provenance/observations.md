@@ -90,6 +90,13 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - Searching the populated index exposed a defect that only real data could reveal: Claude Code files tool *results* as `type: "user"` records, so command output was being indexed as the owner speaking. Two of the first three hits for "reverse engineer" were Bash output. [src:ROLE-ATTRIBUTION-BUG-2026-08-27]
 - The ingester now derives the role from the content blocks and search takes a `--role` filter; after the fix, `search "ooda" --role user` returns only the owner's own goal text, and a regression case covering it passes. [src:ROLE-ATTRIBUTION-BUG-2026-08-27]
 
+## Observed — user-scope installation
+
+- `tools/install_user_scope.py` plans 9 writes under `~/.claude` — a managed block in CLAUDE.md plus the OODA skill, 2 agents and 5 commands — and its dry run creates nothing. [src:INSTALLER-VALIDATED-2026-08-27]
+- All 18 installer test cases pass, including that hand-written owner content survives an install, survives a re-run, and survives an uninstall. [src:INSTALLER-VALIDATED-2026-08-27]
+- The installer has not been run with `--apply` against this container's real `~/.claude`, so its effect on a live session is untested here; only its file handling is. [src:INSTALLER-VALIDATED-2026-08-27]
+- It reaches Claude Code sessions on one machine. It does not reach claude.ai web conversations, which do not read `~/.claude/`; that half of the request needs a manual paste into a Project's custom instructions. [src:INSTALLER-VALIDATED-2026-08-27]
+
 ## Conclusion
 
 The request that opened this session asked to look at "all my previous claude

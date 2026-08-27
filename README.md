@@ -33,6 +33,7 @@ bash tests/run_all.sh        # verifier + tool suites + the pipeline suite
 | `prompts/` | System prompts carrying the doctrine into a session. |
 | `tools/verify_provenance.py` | The fabrication guard. |
 | `tools/ingest_chat_archive.py` | Conversation-archive ingestion and search. |
+| `tools/install_user_scope.py` | Installs the doctrine into `~/.claude/`, so it reaches every terminal. |
 | `.claude/commands/` | The workflows, as slash commands. |
 | `.claude/agents/` | The subagent definitions. |
 | `.claude/` | Hooks and the OODA skill. |

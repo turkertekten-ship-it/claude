@@ -296,3 +296,22 @@ sources:
       which the same term appears in both the owner's message and the tool
       output, and the filter must keep the former and drop the latter;
       `bash tests/run_all.sh` prints "ALL CHECKS PASSED".
+
+  - id: INSTALLER-VALIDATED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:22Z"
+    method: "python3 tools/install_user_scope.py (dry run); python3 tests/test_install_user_scope.py against a temporary HOME"
+    evidence: >-
+      The dry run planned 9 writes under ~/.claude (CLAUDE.md plus the OODA
+      skill, 2 agents and 5 commands) and created nothing. The test suite drove
+      the installer against a temporary directory and all 18 cases passed,
+      including the destructive ones: hand-written owner content above the
+      managed block survives an install and stays above it, content after the
+      block survives, an edit made inside the block is overwritten on re-run,
+      re-running does not duplicate the block, and uninstall removes the block
+      while leaving everything the owner wrote. A second uninstall exits 1
+      reporting nothing to do.
+    note: >-
+      The installer was NOT run with --apply against this container's real
+      ~/.claude. Its effect on a live session is therefore untested here; what is
+      tested is its file handling.

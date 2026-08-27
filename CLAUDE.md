@@ -110,11 +110,21 @@ Two things to keep straight when acting on these:
 - **A grade is not a licence.** `Single` means one goal said it once. It is a
   real request; it is not a general law, and it does not justify reshaping
   unrelated work around it.
-- **P4 is the one this repository cannot satisfy on its own.** A rule committed
-  here governs work in this repository. Making it reach every chat and terminal
-  needs it installed at user scope (`~/.claude/`), which is a separate act from
-  committing a file. Say what still has to be installed rather than reporting a
-  commit as delivery.
+- **P4 is the one this repository cannot satisfy by committing.** A rule
+  committed here governs work in this repository. `tools/install_user_scope.py`
+  closes the part that can be closed — it splices the doctrine into
+  `~/.claude/CLAUDE.md` and installs the skill, agents and commands, so every
+  Claude Code session on the machine picks them up:
+
+  ```bash
+  python3 tools/install_user_scope.py            # dry run, prints the plan
+  python3 tools/install_user_scope.py --apply
+  ```
+
+  It does **not** reach claude.ai web conversations — those do not read
+  `~/.claude/`, and no script here can change them. That half needs
+  `prompts/base-operator.md` pasted into a Project's custom instructions by
+  hand. Say which half was actually delivered.
 
 ---
 
