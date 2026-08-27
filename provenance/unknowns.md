@@ -9,7 +9,7 @@ entry, move the resolved fact into `observations.md` with a new source id.
 
 ---
 
-### U-1 — Contents of the three sibling sessions
+### U-1 — Contents of the sibling sessions — LARGELY ANSWERED
 
 **Unknown:** what was actually said, decided, or built in
 `RAG system and data pipeline`, `Blind testing and OODA analysis`, and
@@ -51,6 +51,13 @@ threads exists on this container or in the connected Drive.
 Privacy → Export data) and drops `conversations.json` into `archive/`.
 `tools/ingest_chat_archive.py` reads that format directly.
 
+**Partially advanced.** The index is no longer empty: this session's own Claude
+Code transcript is ingested — 620 messages, 0 unparseable, searchable with
+verbatim quotes. [src:CHAT-INDEX-POPULATED-2026-08-27] That demonstrates the
+tool against real data rather than fixtures, but it says nothing about
+conversations predating today, which is what this entry asks. At least two
+other sessions are blocked on the same export. [src:SESSION-GOALS-2026-08-27]
+
 ---
 
 ### U-3 — What "the book" refers to
@@ -64,6 +71,21 @@ The document itself was never in reach of this session.
 
 **Resolves when:** the source document is committed to a repository, or the
 owner names it.
+
+**Advanced, still unnamed.** The `go-page-ultrathink-ooda-kqxvnc` session
+reports "book §0–§19 installed as working system; 8 units, 13 seats, tests
+pass; legal citations flagged", and the `personal-skills-repos-research`
+session lists "clarify U-3 book type (closing/info memo)" among what it needs.
+[src:SESSION-GOALS-2026-08-27] So the book is a legal or transactional text
+with at least twenty numbered sections, being installed as a working system —
+consistent with the M&A transaction documents another session reports in the
+owner's Drive. [src:SIBLING-AUDIT-2026-08-27] Its title is still not
+established, and no session states it.
+
+**Do not** infer the title from the `great-euler` session's goal, which names
+"borris churney material". That names material a session was told to install;
+nothing connects it to this book, and treating a nearby string as an answer is
+the error this register exists to prevent.
 
 **Checked, not assumed.** Every Markdown, text and YAML file on all twelve
 sibling branches was searched for "the book", "kitap" and "imb". No match.

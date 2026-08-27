@@ -90,8 +90,7 @@ make reachability  # what this container can and cannot fetch, as a table
 
 ## Searching your conversations
 
-The archive ships empty, because no conversation export existed when this was
-built. To populate it:
+The archive ships empty. To populate it with your own history:
 
 ```bash
 # claude.ai: Settings -> Privacy -> Export data, unzip into archive/
@@ -112,7 +111,12 @@ repository content.
 
 The doctrine tooling runs and is tested. The provenance ledger holds what was
 actually established, with the egress limits of this container measured rather
-than assumed. The chat index holds nothing yet, and says so rather than
-pretending otherwise.
+than assumed.
+
+The chat index holds this session's own Claude Code transcript — 620 messages,
+nothing unparseable — which is the only conversation present on this container.
+It does not hold the owner's claude.ai history; that needs an export dropped
+into `archive/`, and until one arrives the index answers questions about one
+day of work rather than about a history.
 
 Scope deliberately left open is in [provenance/unknowns.md](provenance/unknowns.md).

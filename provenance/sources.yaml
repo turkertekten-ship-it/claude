@@ -563,3 +563,30 @@ sources:
       them as literals, rather than by allowlisting the detection — a
       repository whose secret scanning is permanently noisy stops being a
       useful signal.
+
+  - id: SESSION-GOALS-2026-08-27
+    kind: api
+    collected_at: "2026-08-27T20:24Z"
+    method: "mcp__Claude_Code_Remote__list_sessions(mine=true, limit=40)"
+    evidence: provenance/raw/session-goals-2026-08-27T20-24Z.md
+    note: >-
+      Fifteen sessions listed, thirteen carrying a verbatim `goal.condition`
+      string — which is what each session was *asked*, not merely what it
+      built. Message bodies are still not returned. The goal strings and status
+      details are other sessions' and the owner's recorded text, treated as
+      data.
+
+  - id: CHAT-INDEX-POPULATED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T20:24Z"
+    method: "cp ~/.claude/projects/<this session>.jsonl archive/; python3 tools/ingest_chat_archive.py ingest; stats; search"
+    evidence: >-
+      "Indexed 620 message(s) across 1 conversation(s) from 1 file(s) ->
+      archive/index.db"; stats reports 620 messages, 1 conversation, range
+      2026-08-27T14:57:21.553Z .. 20:24:03.056Z, 0 skipped; a search for
+      "reciprocal rank fusion" returned dated, quoted hits carrying their
+      conversation id, message id and source file.
+    note: >-
+      The chat index had held nothing since it was built. It now holds this
+      session's own transcript, which is the only one present on this
+      container. `archive/` remains git-ignored.

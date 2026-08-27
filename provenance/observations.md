@@ -137,6 +137,14 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - A regular expression added by this session backtracked quadratically: 11.2 seconds at 16,000 leading whitespace characters, growing fourfold per doubling, which a 400 KB file — inside what the GitHub connector accepts — would have turned into hours of CPU for one document. After the rewrite the same measurement at 400,000 characters is 0.028 seconds. [src:REDOS-INTRODUCED-HERE-2026-08-27]
 - That defect was introduced here, shipped with 254 passing tests, and found by review rather than by any test — the tests exercised the pattern's correct behaviour and never its cost. [src:REDOS-INTRODUCED-HERE-2026-08-27]
 
+## Observed — what a session listing actually returns
+
+- The account's session listing returns, per session, a verbatim `goal.condition` string: what that session was *asked*, not merely what it built. Thirteen of the fifteen sessions listed carry one. [src:SESSION-GOALS-2026-08-27]
+- Message bodies are still not returned by any available tool, so what was discussed inside a session remains out of reach; what it was instructed to do no longer is. [src:SESSION-GOALS-2026-08-27]
+- Those goals are the owner's own words, and they describe one programme rather than fourteen unrelated errands: research the owner and their firm, reverse-engineer their files, bring Claude Code to parity with the Playground, install named external material, improve the files daily, and audit everything for fabrication. [src:SESSION-GOALS-2026-08-27]
+- Two sessions besides this one report being blocked on the same thing: an export of `conversations.json` into `archive/`. [src:SESSION-GOALS-2026-08-27]
+- The chat index, empty since it was built, now holds this session's own transcript: 620 messages across 1 conversation, 0 unparseable, searchable with verbatim quotes carrying conversation id, message id and source file. [src:CHAT-INDEX-POPULATED-2026-08-27]
+
 ## Conclusion
 
 The honest answer to "look through all my previous claude chats" is bounded:
