@@ -76,6 +76,19 @@ verified lives in [unknowns.md](unknowns.md), not here.
 > suite cannot tell, at this size, with this length imbalance. That is a
 > statement about the experiment, and the honest one to make.
 
+## Observed — prior art, after being refuted
+
+- `anthropics/claude-plugins-official` ships `skill-creator`, a first-party plugin that evaluates skill variants: a blind comparator, a grader, a post-hoc analyzer, benchmark aggregation with mean and standard deviation, and an automated description-optimisation loop. It was installed on this container at `/mnt/skills/examples/skill-creator` throughout. [src:REFUTATION-2026-08-27]
+- Its comparator withholds which skill produced which output, but a search of the whole plugin for `swap`, `position bias`, `randomi`, `shuffle` and `both orders` returns no match: it makes one call with a fixed A/B order. [src:REFUTATION-2026-08-27]
+- `claude --help` is not a complete inventory of the flags the CLI accepts. `--thinking`, `--max-thinking-tokens` and `--task-budget` are accepted by the parser and absent from all 242 lines of help text; `--temperature`, `--top-p`, `--top-k`, `--stop-sequences` and `--max-tokens` are rejected as unknown options. [src:CLI-UNDOCUMENTED-FLAGS-2026-08-27]
+- Setting a thinking budget changes behaviour rather than being silently ignored: two otherwise identical calls reported 37 thinking tokens with a 2048 budget and 89 without. [src:CLI-UNDOCUMENTED-FLAGS-2026-08-27]
+
+> Reading, not a claim: the claim that no eval tooling existed for Claude Code
+> was made by sweeping remote repositories without listing what was already
+> mounted on the machine. It survived four research passes and was caught only
+> when an agent was told to disprove it. Enumerating the local environment is
+> cheaper than any of the searches that missed it.
+
 ## Conclusion
 
 The honest answer to "look through all my previous claude chats" is bounded:

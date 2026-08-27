@@ -101,13 +101,30 @@ question is "did it do the job", not "did it say the right thing".
   how many pairs would be needed. The report computes it.
 - Say what the suite could not test.
 
-## When to use `claude plugin eval` instead
+## When to use something else instead
 
-It ships with Claude Code and grades things this package does not: which tools
+Check these before writing a suite. Two of them are first-party and already
+installed, and reaching for this package when one of them fits is wasted work.
+
+**`skill-creator`** (`/mnt/skills/examples/skill-creator`, also a plugin in
+`anthropics/claude-plugins-official`). If the thing under test is a **skill**,
+use this. It runs eval sets with-skill against baseline, grades them, aggregates
+a benchmark with mean ± stddev and deltas, does blind A/B between two skill
+versions via `agents/comparator.md`, explains *why* the winner won via
+`agents/analyzer.md`, and runs an automated loop that proposes description
+variants and picks the best by held-out score. Its comparator is blind but makes
+a single fixed-order call — so if you need the position swap, run the pair
+through this workbench instead, or as well.
+
+**`claude plugin eval`**
+
+ships with Claude Code and grades things this package does not: which tools
 fired, in what order, and what files a run created, with a with-plugin /
 without-plugin ablation. If the question is "does my plugin trigger correctly",
 use it. `python3 -m workbench export-eval suites/mine.yaml` translates a suite
 across and tells you which graders had no equivalent.
 
-Use the workbench when the question is "which of these N prompts is better",
-which is the comparison `claude plugin eval` does not make.
+**Use this workbench** when the question is "which of these N prompts or
+configurations is better" — N-way comparison, judged in both presentation
+orders, with a p-value and a blinding control. That is the comparison neither of
+the above makes.
