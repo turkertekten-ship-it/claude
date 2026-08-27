@@ -103,6 +103,7 @@ provenance/
   observations.md             established fact, fully sourced
   unknowns.md                 open questions, deliberately left open
   raw/                        verbatim captures backing the ledger
+  loop-*.md                   loop logs — the surprise, named at the time
 prompts/                      system prompts carrying the doctrine
 tools/
   verify_provenance.py        the fabrication guard
