@@ -1,7 +1,27 @@
 ###############################################################
-#  KÖR SINAMA TAKIMI — 2026-08-27T15:37:30Z
+#  KÖR SINAMA TAKIMI — 2026-08-27T15:44:43Z
 ###############################################################
 
+/root/mafirm/sinama/ks_a_esik.py:41: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
+  esik.bildirilmeli([2_000_000_000, 1_000_000_000], 0, []),
+/root/mafirm/sinama/ks_a_esik.py:63: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
+  esik.bildirilmeli([2_000_000_000, 1_500_000_000], 0, [],
+/root/mafirm/sinama/ks_a_esik.py:71: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
+  pilot_cevrilmemis = esik.bildirilmeli([], 1_400_000_000, [2_400_000_000])
+/root/mafirm/sinama/ks_a_esik.py:71: RuntimeWarning: OLASI BİRİM HATASI: devre konu taraf eşiği aşıyor ama 'diğer dünya cirosu' (2400000000) 9000000000 eşiğinin altında. Bu rakam TL mi? Yabancı para ise tl(tutar, birim, kur, kaynak) ile çevirin.
+  pilot_cevrilmemis = esik.bildirilmeli([], 1_400_000_000, [2_400_000_000])
+/root/mafirm/sinama/ks_a_esik.py:78: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
+  pilot_cevrilmis = esik.bildirilmeli([], 1_400_000_000, [2_400_000_000 * 47])
+/root/mafirm/sinama/ks_a_esik.py:87: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
+  dogru = esik.bildirilmeli([2_500_000_000, 1_400_000_000], 1_400_000_000, [])
+/root/mafirm/sinama/ks_a_esik.py:88: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
+  unutulmus = esik.bildirilmeli([2_500_000_000], 1_400_000_000, [])
+/root/mafirm/sinama/ks_a_esik.py:95: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
+  bilinmeyen_sifir = esik.bildirilmeli([0, 0], 0, [])
+/root/mafirm/sinama/ks_a_esik.py:102: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
+  esik.bildirilmeli([None], 0, [])
+/root/mafirm/sinama/ks_a_esik.py:113: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
+  esik.bildirilmeli([-5_000_000_000, 9_000_000_000], 0, []))
 ==============================================================================
 KÖR SINAMA A — rekabet eşiği (şartnameden türetilmiş, koddan değil)
 ==============================================================================
@@ -250,6 +270,24 @@ GEÇTİ K-15   koltuk kapısı yöntem dosyalarını bloklamıyor
 ------------------------------------------------------------------------------------------------
 15 vaka, 15 geçti, 0 KALDI
 
+================================================================================================
+KÖR SINAMA L — çapraz referans bütünlüğü
+================================================================================================
+GEÇTİ L-01   belgelerdeki her yol atfının hedefi var
+        32 atıf incelendi, kırık: yok
+GEÇTİ L-02   her INDEX kendi yöntem dosyalarının hepsini anıyor
+        anılmayan: yok
+GEÇTİ L-03   belgelerde sabit ~/mafirm yolu kalmamış
+        Bir klon KENDİ ağacını değil makinedeki kurulumu çalıştırmaya yönlendirilir. Kalan: yok
+GEÇTİ L-04   beceri ve komutların çalıştırdığı her betik var
+        kayıp: yok
+GEÇTİ L-05   izin reddi kalıpları Araç(desen) biçiminde
+        4 kalıp, biçimsiz: yok
+GEÇTİ L-06   hafiza/ dosyalarının hepsi var
+        eksik: yok
+------------------------------------------------------------------------------------------------
+6 vaka, 6 geçti, 0 KALDI
+
 ###############################################################
 #  ÖZET
 ###############################################################
@@ -261,6 +299,7 @@ GEÇTİ K-15   koltuk kapısı yöntem dosyalarını bloklamıyor
   F · doktrin kapsama matrisi           temiz
   J · §19 kabul sınaması (uçtan uca) 2 kaldı
   K · yönlendirme ve koltuk sağlaması temiz
+  L · çapraz referans bütünlüğü   temiz
   ------------------------------------------------------------
   toplam başarısız vaka               13
 

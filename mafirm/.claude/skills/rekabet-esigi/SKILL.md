@@ -9,7 +9,7 @@ description: Bir işlemin Türkiye'de rekabet izni gerektirip gerektirmediği, e
 
 Eşikler değişir. Kodu çalıştır:
 
-    python3 ~/mafirm/birimler/rekabet/kod/esik.py --self-test
+    python3 birimler/rekabet/kod/esik.py --self-test
 
 Sonra gerçek ciro rakamlarıyla işlemi hesapla. Hangi ayağın karşılandığını ve
 hangi rakamları kullandığını yaz. Bir ciro rakamı tahminse bunu söyle ve cevabı

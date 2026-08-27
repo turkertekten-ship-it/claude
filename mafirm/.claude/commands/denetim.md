@@ -2,7 +2,7 @@
 description: Sistemdeki her sınamayı ve kapıyı çalıştırır; denetim betiğinin gerçek çıktısını yapıştırır ve başarısız her satırı açıklar.
 ---
 
-`~/mafirm/denetim.sh` betiğini çalıştır ve GERÇEK çıktısını yapıştır. Özetleme.
+`./denetim.sh` betiğini (pratik kökünden) çalıştır ve GERÇEK çıktısını yapıştır. Özetleme.
 
 Başarısız her satır için:
 1. Hangi kontrol, hangi komut.

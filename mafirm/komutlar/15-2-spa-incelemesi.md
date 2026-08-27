@@ -15,6 +15,8 @@ bulgudur:
 1. Kapanış öncesi koşullar: neler, her birini kim kontrol ediyor, saati ne.
 2. Ara dönem taahhütleri: değer koruma mı fiilî kontrol mü? 4054 sayılı Kanun
    madde 11 bakımından izinsiz kapanış riski doğuranları işaretle.
+   (Madde numarası DOĞRULANAMADI — bekletici kural m.10 olabilir;
+   bkz. hafiza/dogrulama-bulgulari.md I-03.)
 3. Beyanlar: kapsam, sınırlayıcılar, bilgi ve önemlilik kayıtları.
 4. Açıklama: veri odasının genel açıklama sayılması kabul edilmiş mi? Alıcıya
    maliyeti ne?

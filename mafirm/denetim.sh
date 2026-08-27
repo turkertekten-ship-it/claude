@@ -90,6 +90,28 @@ r=subprocess.run([sys.executable,os.path.expanduser('~/mafirm/.claude/hooks/kapi
 assert r.returncode==2, 'beyansız koltuk bloklanmadı'
 print('bloklanıyor')\""
 
+kontrol "engelleyici bulgular yerinde işaretli" \
+  "python3 - <<'PYX'
+import os,re,sys
+kok=os.environ.get('MAFIRM') or os.path.expanduser('~/mafirm')
+kayit=os.path.join(kok,'hafiza','dogrulama-bulgulari.md')
+eksik=[]
+for satir in open(kayit,encoding='utf-8'):
+    if '| ENGELLEYICI |' not in satir: continue
+    alan=[a.strip() for a in satir.split('|')]
+    for yol in alan[2].split(' · '):
+        t=os.path.join(kok,yol)
+        if not os.path.exists(t): eksik.append(yol+' (dosya yok)'); continue
+        icerik=open(t,encoding='utf-8').read()
+        # İşaret, BULGUYU ADIYLA anmalı. Yoksa aynı dosyadaki başka bir
+        # bulgunun işareti hepsini aklıyor — kontrolün kendi kusuruydu.
+        if 'DOĞRULANAMADI' not in icerik or alan[0] not in icerik:
+            eksik.append(alan[0]+' -> '+yol)
+if eksik:
+    print('işaretsiz: '+', '.join(eksik)); sys.exit(1)
+print('hepsi işaretli')
+PYX"
+
 echo "=== kapsanmayan kurallar sesli bildirilir ==="
 adet=$(grep -cve '^[[:space:]]*#' -e '^[[:space:]]*$' "$M/hafiza/muvekkil-adlari.txt" 2>/dev/null | head -1)
 adet=${adet:-0}

@@ -27,6 +27,8 @@ python3 "$S/ks_j_kabul.py";    topla "J · §19 kabul sınaması (uçtan uca)" $
 echo
 python3 "$S/ks_k_yonlendirme.py"; topla "K · yönlendirme ve koltuk sağlaması" $?
 echo
+python3 "$S/ks_l_referans.py";    topla "L · çapraz referans bütünlüğü" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

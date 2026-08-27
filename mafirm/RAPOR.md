@@ -32,9 +32,10 @@ Dokuz takım, 96 vaka:
 | I | §5 mevzuatı — eşikler ve madde numaraları | Birincil kaynak (denendi) |
 | J | **§19 kabul sınaması** — kitabın kendi son kapısı, uçtan uca | §19 |
 | K | Yönlendirme, üst bilgi ve koltuk sağlaması | §7, §9, §10, §11 |
+| L | Çapraz referans bütünlüğü ve taşınabilirlik | §4'ün düzen gerekçesi |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamadan ve iki
-takım eklendikten sonra **122 vaka, 13 kaldı** — ve on üçünün her biri ya
+takım eklendikten sonra **128 vaka, 13 kaldı** — ve on üçünün her biri ya
 kitabın davranışının bilerek bırakılmış kaydıdır ya da belgelenmiş bir
 öntanımlı boşluktur; hiçbiri yamalı sistemde çözülmemiş bir kusur değildir.
 
@@ -358,6 +359,49 @@ Kapatıldı: **altıncı kapı** eklendi. Beyansız bir koltuk dosyası bloklan�
 
 ---
 
+## Yedi buçuk artı · Referans bütünlüğü ve iki canlı kusur
+
+Üçüncü tur, kapatıldı sanılan iki şeyin canlı kaldığını gösterdi.
+
+**Taşınabilirlik düzeltmem bir regresyon bıraktı.** İki belge — `rekabet-esigi`
+becerisi ve `denetim` komutu — hâlâ `~/mafirm` yolunu sabitliyordu. Yani bir
+klonun becerisi, modele KENDİ ağacını değil makinedeki kurulumu çalıştırmasını
+söylüyordu. Betikleri taşınabilir yapmak yetmiyor; onlara işaret eden belgeler
+de taşınabilir olmalı.
+
+**Eski API'nin sessizliği belgelenmişti ama kapatılmamıştı.** `bildirilmeli()`
+hâlâ çağrılabiliyordu ve §19 pilotunda hiçbir uyarı olmadan
+`(False, 'hiçbir eşik')` döndürüyordu. Bir kusuru belgelemek, onu kaldırmaz:
+kod canlı kaldığı sürece biri onu çağırır. Artık iki uyarı veriyor — biri
+kullanımdan kaldırma, biri de **olası birim hatası**: devre konu taraf eşiği
+aşarken "diğer dünya cirosu" eşiğin hemen altında kalıyorsa, bu tipik olarak
+çevrilmemiş bir yabancı para tutarıdır. Uyarı iki yönde sınandı: §19 pilotunda
+ateşliyor, meşru bir TL işleminde susuyor.
+
+---
+
+## Yedi buçuk artı iki · I-03'ün kanıt katmanı yükseldi
+
+Alt ajan birincil kaynağa ulaşamamıştı. Kendim iki bağımsız arama yaptım ve
+düzenleyicinin kendi alan adında şunu doğruladım: **madde 10** ön inceleme, on
+beş günlük süre, işlemin askıya alınması ve bildirimden otuz gün sonra zımni
+geçerlilik mekanizmasını taşıyor; **madde 11** ise bildirilmeme hâlini
+düzenliyor. Kitabın atfı yanlış.
+
+Yine de statü **ENGELLEYİCİ kalıyor**: kanunun birebir metni
+(`mevzuat.gov.tr/MevzuatMetin/1.5.4054.pdf`) egress ile engelli ve madde
+başlığı okunamadı. Karar, kitabın kendi §11 kuralına uygun: **atıf
+değiştirilmedi**, ama CLAUDE.md §1'in emrettiği gibi **yerinde işaretlendi** —
+dört dosyanın dördünde de `DOĞRULANAMADI` ibaresi, ne olduğunu ve nereye
+bakılacağını söyleyerek duruyor.
+
+Aynı işlem I-01 ve I-02 için de yapıldı ve **denetime yeni bir kontrol
+eklendi**: her ENGELLEYİCİ bulgunun adı geçen dosyalarda, **bulguyu adıyla
+anan** bir işaret bulunmak zorunda. Böylece bulgu kaydı bir not olmaktan çıkıp
+uygulanan bir mekanizma oldu. İki yönde sınandı.
+
+---
+
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
 
 | Bölüm | Beklenen | Gerçek | Sebep |
@@ -399,7 +443,18 @@ Bir sınama takımı da sınanmalıdır. Üç hata yapıldı ve üçü de düzel
    konumundan çözüyor. Klondan koşum ayrıca kaynak ağaçtan koşumun yapısal
    olarak göremeyeceği ikinci bir kusuru yakaladı (B-34 ad kaydını yanlış
    ağaca yazıyordu).
-5. **İki mevzuat/depo şüphem yanlıştı** (G-06, I-06). Kitap her ikisinde de
+5. **Referans dedektörünü iki kez yanlış yazdım.** Birinci sürüm düzyazıdaki
+   çıplak dosya adlarını ("esik.py çalıştırılır") bağlantı saydı: 32 sahte
+   kırık. İkinci sürüm GÖRECELİ atıfları köke göre çözdü — `birimler/rekabet/
+   INDEX.md` içindeki `yontem/tr-esikler.md`, INDEX'in kendi dizinine göre
+   çözülür: 12 sahte kırık daha. Üçüncü sürüm doğru; gerçek kırık sayısı sıfır.
+6. **Bir mutasyon sınamam sessizce hiçbir şeyi bozmadı.** İşaret kontrolünü
+   sınarken `sed` deseni hedefi tutturamadı ve dosya hiç değişmediği hâlde
+   "kontrol ateşlemedi" sonucuna varıyordum. Mutasyonun gerçekten tuttuğunu
+   doğrulayan bir adım eklendi. Bu, D takımında bir kez daha yaşandığı için
+   artık bir alışkanlık: **bir mutasyon sınaması, mutasyonun olduğunu
+   kanıtlamadan geçerli değildir.**
+7. **İki mevzuat/depo şüphem yanlıştı** (G-06, I-06). Kitap her ikisinde de
    haklıydı; benim hatırladığım bayattı. Kitabın kendi §14 kuralının kanıtı:
    *"bir ad, var olduğunun kanıtı değildir"* kadar *"hatırladığın ad, doğru ad
    değildir"* de geçerli.
@@ -420,6 +475,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | E · beklenen değerler | 4 kaldı | 3 kaldı (kitabın kendi değerleri) |
 | J · §19 kabul sınaması | doğru cevap da bloklu | 2 kaldı (**bilerek** — kitaba sadık karşılaştırma) |
 | K · yönlendirme + koltuk | 3 kaldı | **temiz** |
+| L · referans bütünlüğü | 1 kaldı (kendi regresyonum) | **temiz** |
 
 Mühendislik katmanı yeşil: `denetim.sh --yapisal` → `DENETİM OK`.
 Tam denetim kırmızı: `denetim.sh` → `DENETİM BAŞARISIZ: 3` — üç ENGELLEYİCİ
@@ -454,10 +510,13 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-~/mafirm/sinama/hepsi.sh          # on bir takım, 122 vaka
-~/mafirm/denetim.sh --yapisal     # mühendislik katmanı
-~/mafirm/denetim.sh               # mevzuat bulguları dâhil
+./sinama/hepsi.sh                 # on iki takım, 128 vaka
+./denetim.sh --yapisal            # mühendislik katmanı
+./denetim.sh                      # mevzuat bulguları dâhil
 ```
+Betikler kökü kendi konumundan çözer; klon da kaynak ağaç da aynı sonucu
+verir (`MAFIRM` ile geçersiz kılınabilir).
+
 Ham çıktılar: `sinama/SONUC-once.txt` (kitaba sadık) ve
 `sinama/SONUC-sonra.txt` (yamalı). Dış doğrulamalar: `sinama/ks_g_depolar.md`,
 `ks_h_kaynaklar.md`, `ks_i_mevzuat.md`.

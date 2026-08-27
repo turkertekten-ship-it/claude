@@ -131,7 +131,8 @@ class Sonuc:
         print("Şimdi ne yapılmalı")
         if self.sonuc == EVET:
             print("  Bildirim hazırlanır. İZİNDEN ÖNCE KAPANIŞ YAPILMAZ "
-                  "(4054 sayılı Kanun, madde 11).")
+                  "(4054 sayılı Kanun; madde numarası DOĞRULANAMADI — "
+                  "bkz. hafiza/dogrulama-bulgulari.md I-03).")
         elif self.sonuc == BELIRSIZ:
             print("  Yukarıdaki bilinmeyen rakamlar temin edilir. Bu hâliyle "
                   "cevap verilmez.")
@@ -171,7 +172,31 @@ def bildirilmeli(tr_cirolar, hedef_tr, diger_dunya_cirolari, teknoloji=False):
     UYARI: bu imza aynı işlemi İKİ ayrı biçimde ister ve tutarlılığı kontrol
     etmez [A-09]; ayrıca üç değerli cevap veremez [A-10]. Yeni işler için
     degerlendir() kullanın.
+
+    [A-07 kalıntısı] Bu fonksiyon birim taşımaz. Belgelemek yetmedi: kusur
+    kodda CANLI kaldığı sürece biri onu çağırır ve §19'un sessiz yanlış
+    cevabını alır. Artık sessiz değil — birim belirsizliği yakalanabilecek
+    her yerde uyarıyor ve hiçbir eşiğin karşılanmadığı hâlde büyük bir
+    rakamın verildiği durumu ayrıca işaretliyor.
     """
+    import warnings
+    warnings.warn(
+        "bildirilmeli() birim taşımaz ve üç değerli cevap veremez; "
+        "yabancı para birimindeki bir ciro çevrilmeden verilirse cevap "
+        "SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.",
+        DeprecationWarning, stacklevel=2)
+    # Birim tuzağı: B ayağı karşılanmadı ama devre konu taraf eşiği aşıyor ve
+    # 'diğer dünya' rakamı DIGER_DUNYA'nın hemen altında kalıyorsa, bu tipik
+    # olarak çevrilmemiş bir yabancı para tutarıdır.
+    _bilinen = [c for c in diger_dunya_cirolari if c is not BILINMIYOR]
+    if (hedef_tr not in (BILINMIYOR, 0) and hedef_tr > HEDEF_TR_TEKNOLOJI
+            and _bilinen and max(_bilinen) < DIGER_DUNYA
+            and max(_bilinen) > DIGER_DUNYA / 100):
+        warnings.warn(
+            "OLASI BİRİM HATASI: devre konu taraf eşiği aşıyor ama 'diğer "
+            "dünya cirosu' (%s) %s eşiğinin altında. Bu rakam TL mi? "
+            "Yabancı para ise tl(tutar, birim, kur, kaynak) ile çevirin."
+            % (max(_bilinen), DIGER_DUNYA), RuntimeWarning, stacklevel=2)
     a = esik_a(tr_cirolar)
     b = esik_b(hedef_tr, diger_dunya_cirolari, teknoloji)
     if a and b:
@@ -357,6 +382,12 @@ def main(argv=None):
 
 def _selftest():
     h = 0
+    # Öz-sınama eski API'yi BİLEREK çalıştırıyor (geriye dönük uyum kaydı);
+    # kullanımdan kaldırma uyarısı burada gürültüdür. Birim uyarısı ayrıca
+    # sınanır, bkz. aşağıdaki "birim tuzağı" vakası.
+    import warnings
+    warnings.filterwarnings("ignore", category=DeprecationWarning,
+                            module=__name__)
 
     def esit(ad, bekle, ger):
         nonlocal h
@@ -444,6 +475,19 @@ def _selftest():
         print("  HATA tutarsız ciro kabul edildi"); h += 1
     except CiroHatasi:
         pass
+
+    # [A-07 kalıntısı] Eski API, §19 pilotunda birim uyarısı vermeli.
+    with warnings.catch_warnings(record=True) as yakalanan:
+        warnings.simplefilter("always")
+        bildirilmeli([], 1_400_000_000, [2_400_000_000])
+    if not any("BİRİM HATASI" in str(w.message) for w in yakalanan):
+        print("  HATA eski API §19 pilotunda birim uyarısı vermedi"); h += 1
+    # Ve TL cinsinden meşru bir işlemde uyarı VERMEMELİ (iki yönlü sınama).
+    with warnings.catch_warnings(record=True) as yakalanan2:
+        warnings.simplefilter("always")
+        bildirilmeli([0], 1_200_000_000, [10_000_000_000])
+    if any("BİRİM HATASI" in str(w.message) for w in yakalanan2):
+        print("  HATA meşru TL işleminde yanlış birim uyarısı"); h += 1
 
     print("SELFTEST %s (rakamlar %s tarihinde doğrulandı)"
           % ("OK" if not h else "HATA %d" % h, DOGRULAMA))

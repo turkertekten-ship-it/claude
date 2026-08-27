@@ -55,6 +55,13 @@ tekrarlanır. Esas doğru, atıf kuralın kendisini değil YAPTIRIMINI gösteriy
 → Düzeltilecek dört yer: `tr-esikler.md`, `esik.py`, `spa-inceleme` becerisi,
 §15.2 komutu. *(I-03)*
 
+> **Kanıt katmanı yükseltildi (2026-08-27).** Düzenleyicinin kendi alan adında
+> iki bağımsız arama: m.10 ön inceleme + askıya alma + otuz günde zımni
+> geçerlilik mekanizmasını taşıyor; m.11 bildirilmeme hâlini düzenliyor.
+> Kanunun birebir metni egress ile engelli olduğu için statü hâlâ
+> ENGELLEYİCİ. Atıf DEĞİŞTİRİLMEDİ; dört dosyada da yerinde `DOĞRULANAMADI`
+> işareti duruyor (CLAUDE.md §1).
+
 **[C] M.16 cezasının kanuni alt sınırı yazılmamış** (2026 için 302.484,86 TL).
 "Küçük bir devralma için ölçeklenmez" savı doğru ama eksik. *(I-04)*
 
