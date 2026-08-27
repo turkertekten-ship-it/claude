@@ -1,56 +1,128 @@
 # oodarag
 
-An OODA-driven, end-to-end RAG pipeline that runs on the Python standard library alone.
+An OODA loop over a Turkish fund manager's obligations and numbers, running on
+the Python standard library alone.
 
 ```
-Observe  ->  Orient   ->  Decide   ->  Act
-ingest       normalize    policy       reindex / backfill
-             chunk        engine       / alert / answer
-             embed
-             index
+Observe   ->   Orient      ->   Decide      ->   Act
+SPK · KAP      chunk/index      rules, not       brief · alert · escalate
+Resmî Gazete   restate to       a model          (drafted, never sent)
+TÜFE · TCMB    real terms
 ```
 
-## Why this exists
+## What this is for
 
-Most RAG code is a demo: load a folder, call an embedding API, cosine-similarity
-top-5, stuff it in a prompt. That works until it meets a real corpus, at which
-point the failure modes are always the same - the index is stale, the chunks lost
-their context, the retriever returns the site footer, and nobody can tell you
-whether last week's change made retrieval better or worse.
+It watches the obligations and the numbers that keep four fund licences clean,
+and makes every figure it emits traceable to its source and honest about
+inflation. It is a control system for a CFO, not an investment system.
 
-`oodarag` is built around those failure modes rather than around the happy path:
+The full argument is in **[docs/DESIGN.md](docs/DESIGN.md)**; the evidence it
+was designed against is in [docs/research/](docs/research/). The short version
+is that the industry's own surveys rate AI ineffective for deal sourcing (64%)
+and portfolio monitoring (75%) — the two things it is usually sold as — and
+effective on document-heavy work, so this builds the second and refuses the
+first.
 
-| Failure mode | What this does about it |
-|---|---|
-| Index goes stale | Content-hash incremental ingest + an OODA loop that decides when to re-fetch |
-| Chunks lose context | Contextual headers embedded with every chunk |
-| Retriever returns boilerplate | Structural + link-density boilerplate removal in the scraper |
-| Same page indexed 5 times | Canonical-URL and content-hash dedupe |
-| Semantic search misses exact terms | Hybrid dense + BM25 retrieval fused with RRF |
-| "Is retrieval any good?" | An eval harness with recall@k, MRR, nDCG and citation coverage |
-| Secrets leak into the index | Redaction at the connector boundary, before anything is written |
-| A crawl runs forever | Budgets on pages, fetches, bytes, depth and wall-clock |
+## What it deliberately does not do
 
-## Status
+- **No deal sourcing.** EQT's Motherbrain took ten years and roughly twenty
+  engineers to attribute about fifteen investments. At this scale that is a
+  rounding error against one partner's phone.
+- **No monitoring dashboard.** The thing that gets built, demoed, and stops
+  being opened in week three.
+- **No language model near a number.** Models read documents and draft prose.
+  Deterministic code owns money, dates, obligations and NAV.
+- **Nothing is sent.** Every executor writes to disk. Drafting is what a system
+  can be trusted with; filing is a decision with a person's name on it.
 
-Under active construction. See `internal/PLAN.md` for what is built and what is next.
+## The two invariants
 
-## Quick start
+**Fund figures are nominal; management-company figures are TMS 29 restated.**
+SPK exempts investment funds from inflation accounting while the manager itself
+applies it, so the two are different money. `Money` refuses to add them.
+
+**A nominal return is not a return.** At 32% inflation a 40% nominal IRR is
+about 6% real. Every metric has a `real_` twin, and the brief prints both.
+
+## Try it
 
 ```bash
-make test          # stdlib unittest, no dependencies required
-make demo          # end-to-end: ingest -> index -> query -> eval
+make demo        # end to end, no network, no API key
+make test        # 283 tests, stdlib unittest
 ```
+
+```bash
+PYTHONPATH=src python3 -m oodarag.cli rules        # every rule, and why its threshold is there
+PYTHONPATH=src python3 -m oodarag.cli provenance   # which configured facts nobody has confirmed
+PYTHONPATH=src python3 -m oodarag.cli obligations  # the calendar, unverified entries marked
+PYTHONPATH=src python3 -m oodarag.cli brief        # the Monday-morning page
+```
+
+Exit codes are the house rule: `0` clean, `1` findings, `2` could not run. The
+demo exits `1` because it finds things.
+
+## Built, and not built
+
+The build ran as a thirteen-agent workflow that hit a session limit with seven
+agents unrun. What exists is what exists:
+
+| | |
+|---|---|
+| `util/`, `models`, `ingest/{base,web,github}`, `scrape/` | prior session |
+| `chunk/`, `embed/`, `index/`, `retrieve/` | built, 169 tests |
+| `config.py` — the firm as graded data | built, 28 tests |
+| `domain/` — money, inflation, obligations, valuation | built, 57 tests |
+| `ooda/` — signals, policy, rules, act | built, 29 tests |
+| `cli.py` — demo, index, query, loop, brief, rules, provenance, obligations | built |
+| `ingest/regulatory.py`, `ingest/marketdata.py` | **not built** |
+| `redact.py`, `answer/` (incl. citation verification) | **not built** |
+| `eval/` — the retrieval quality harness | **not built** |
+
+Consequences, stated rather than implied. There is **no live regulatory feed**:
+the Observe phase is designed and specified, and its connectors do not exist, so
+today the loop runs on seeded signals. There is **no redaction layer**, so this
+must not be pointed at documents containing personal data yet. There is **no
+answering layer**, so `query` returns retrieved passages with their sources and
+synthesises nothing. And retrieval quality is **unmeasured** — `ooda eval` exits
+2 and says so rather than printing a placeholder.
+
+## What could not be established
+
+`wamportfoy.com` and `kap.org.tr` are both blocked by this environment's egress
+proxy, so the firm's own filings were never read. Fund sizes, holdings and AUM
+are unknown (U-7); every fund-level figure the demo prints is a labelled
+fixture. The 30 seeded obligations come from research that could not reach a
+primary source and all load `UNVERIFIED`. The load-bearing assumption — that
+VII-128.10's data-residency rule binds, which is what makes building rather
+than buying correct here — rests on legal commentary, not the tebliğ (U-10).
+
+Open questions live in [`provenance/unknowns.md`](provenance/unknowns.md), and
+the largest of them is U-9: nobody has asked the owner what his week actually
+contains.
+
+## Verifying the claims
+
+Every factual claim in this repository carries a `[src:ID]` tag resolving to
+`provenance/sources.yaml`. The guard is mechanical:
+
+```bash
+python3 tools/verify_provenance.py    # 0 clean, 1 violations
+```
+
+It rejected three drafts during this session — an interpretation written inside
+an `## Observed` section, a dangling source id, and a claim with no tag. See
+[CLAUDE.md](CLAUDE.md) for the doctrine it enforces.
 
 ## Design principles
 
-1. **Zero required dependencies.** The whole pipeline runs on the stdlib, so it
-   works in CI, in an air-gapped container, and on a laptop. Accelerators
-   (numpy) and hosted models (Voyage, Anthropic) plug in behind interfaces.
-2. **Provenance is load-bearing.** Every chunk carries the URI and commit sha it
-   came from. Citations are verified against retrieved chunks, not generated.
+1. **Zero required dependencies.** Data security is the top adoption blocker at
+   67% for firms like this one, and SPK requires primary and secondary systems
+   to sit inside Turkey. Air-gapped reproducibility is the point.
+2. **Provenance is load-bearing.** Every chunk carries its source; every
+   configured fact carries whether anyone checked it.
 3. **Everything is bounded.** Every network stage has a budget on requests,
    bytes and time.
-4. **Degrade, don't die.** Blocked egress, a missing API key or a truncated API
-   response reduce what the pipeline can do; they never make it crash.
-5. **Measure, don't assert.** Retrieval quality is a number in an eval report.
+4. **Degrade, don't die.** A missing key, blocked egress or a truncated response
+   reduces what the pipeline can do; it never crashes.
+5. **Measure, don't assert** — and where nothing has been measured, say so
+   instead of asserting.
