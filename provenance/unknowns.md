@@ -45,6 +45,12 @@ threads exists on this container or in the connected Drive.
 Privacy → Export data) and drops `conversations.json` into `archive/`.
 `tools/ingest_chat_archive.py` reads that format directly.
 
+**Partly addressed:** Claude *Code* history is a different store, and it is
+reachable — `ingest --include-projects` reads `~/.claude/projects` directly. On
+the machine that ran those sessions that is the full Claude Code history; on
+this container it was only the current session, 347 messages across 3
+transcripts. claude.ai chat threads remain out of reach without an export.
+
 ---
 
 ### U-3 — What "the book" refers to

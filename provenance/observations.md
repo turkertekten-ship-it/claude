@@ -16,6 +16,7 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - Each session writes to its own outcome branch, and three of the four take both repositories as sources; `Go page review and ultrathink OODA` takes only `turkertekten-ship-it/claude`. [src:SESSIONS-2026-08-27]
 - A goal string is recorded for only two of the four sessions; it is null for two of the three siblings. [src:GOAL-COVERAGE-2026-08-27]
 - Only session metadata was retrievable. Message bodies were not returned by the listing, and this session was given no tool that reads another session's transcript. [src:NO-TRANSCRIPT-ACCESS-2026-08-27]
+- A direct search for such a tool confirms none exists here, rather than merely not appearing in a listing. [src:NO-TRANSCRIPT-TOOL-CONFIRMED-2026-08-27]
 - The sibling sessions run in separate containers and were not reachable as local peers. [src:NO-TRANSCRIPT-ACCESS-2026-08-27]
 
 ## Observed — what the sessions report about themselves
@@ -46,6 +47,12 @@ verified lives in [unknowns.md](unknowns.md), not here.
 ## Observed — environment
 
 - Python 3.11.15, Node v22.22.2, and jq 1.7 are available; the `sqlite3` command-line binary is not installed. [src:ENV-TOOLING-2026-08-27]
+
+## Observed — chat transcripts actually indexed
+
+- Three Claude Code transcripts exist on this container: this session's, and two subagent transcripts it spawned. Indexing them yields 347 messages across 3 conversations, spanning 14:26:20.952Z to 15:01:07.358Z, searchable with verbatim attributed excerpts. [src:PROJECTS-INGEST-2026-08-27]
+- A subagent transcript carries its *parent's* sessionId, so a session id alone does not identify a transcript. [src:SUBAGENT-SESSION-COLLISION-2026-08-27]
+- Keying conversations on session id alone silently discarded two of the three transcripts, storing 44 messages instead of 347; keying on session and file preserves all of them. [src:PROJECTS-INGEST-2026-08-27]
 
 ## Observed — tooling built here
 

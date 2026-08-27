@@ -7,9 +7,14 @@ allowed-tools: Bash, Read
 Ingest the chat archive, then report honestly on it.
 
 ```bash
-python3 tools/ingest_chat_archive.py ingest
+python3 tools/ingest_chat_archive.py ingest --include-projects
 python3 tools/ingest_chat_archive.py stats
 ```
+
+`--include-projects` reads `~/.claude/projects`, where Claude Code keeps its
+transcripts. On the owner's own machine that is the whole Claude Code history;
+in a fresh container it is only the current session. Say which case you are in
+rather than reporting the count as if it were the whole archive.
 
 If a query was given (**$ARGUMENTS**), also run:
 

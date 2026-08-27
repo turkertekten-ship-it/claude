@@ -177,3 +177,39 @@ sources:
       null for "Blind testing and OODA analysis" and "Go page review and
       ultrathink OODA". Of the three sibling sessions, only one has a goal on
       record.
+
+  - id: NO-TRANSCRIPT-TOOL-CONFIRMED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:08Z"
+    method: "ToolSearch for 'list_events session transcript messages history' and for '+send_message session'; ListAgents"
+    evidence: >-
+      No list_events tool or equivalent exists in this session. The second
+      query returned "No matching deferred tools found". The generic
+      SendMessage tool exists, but ListAgents reported "No reachable agents —
+      no other Claude session is running on this machine right now". Earlier
+      this absence was inferred from reading a tool listing; it is now
+      established by query.
+
+  - id: SUBAGENT-SESSION-COLLISION-2026-08-27
+    kind: filesystem
+    collected_at: "2026-08-27T15:00Z"
+    method: "head -1 on the main transcript and on a subagents/agent-*.jsonl, comparing the sessionId field"
+    evidence: >-
+      /root/.claude/projects/-home-user/39f45f12-...jsonl and
+      .../subagents/agent-a61cb96d1a200c0a2.jsonl both report
+      sessionId=39f45f12-0454-50a5-8115-31fff3e1bbf0. A subagent transcript
+      carries its parent's sessionId, so sessionId alone does not identify a
+      transcript.
+
+  - id: PROJECTS-INGEST-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:01Z"
+    method: "python3 tools/ingest_chat_archive.py --db <tmp> ingest --include-projects; then stats and search"
+    evidence: >-
+      Read 3 transcripts from /root/.claude/projects and indexed 347 messages
+      across 3 conversations (1 claude_code, 2 claude_code_subagent), date
+      range 2026-08-27T14:26:20.952Z .. 2026-08-27T15:01:07.358Z. A search
+      returned correctly attributed verbatim excerpts with message ids and
+      source files. Before the id fix, the same run reported 3 conversations
+      ingested but stored only 1 with 44 messages, because the shared
+      sessionId caused each file to overwrite the previous one.

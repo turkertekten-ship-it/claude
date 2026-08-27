@@ -37,17 +37,24 @@ bash tests/run_all.sh        # verifier + both test suites
 
 ## Searching your conversations
 
-The archive ships empty, because no conversation export existed when this was
-built. To populate it:
+**Run this on your own machine.** Claude Code keeps every transcript under
+`~/.claude/projects`, so that is where your history actually lives — one flag
+indexes all of it:
 
 ```bash
-# claude.ai: Settings -> Privacy -> Export data, unzip into archive/
-# Claude Code: cp ~/.claude/projects/**/*.jsonl archive/
-
-python3 tools/ingest_chat_archive.py ingest
+python3 tools/ingest_chat_archive.py ingest --include-projects
 python3 tools/ingest_chat_archive.py search "retrieval pipeline"
 python3 tools/ingest_chat_archive.py stats
 ```
+
+On the container this was built in, that directory held only this session, so
+what you get here is small and what you get on your own machine is not.
+
+Your **claude.ai** threads are separate and are not on disk anywhere. Export
+them (Settings → Privacy → Export data), unzip `conversations.json` into
+`archive/`, and run `ingest` again — that reader is written to the documented
+export shape but has only been exercised against fixtures, so check the skip
+count on the first real run.
 
 Messages are stored verbatim and every hit carries its conversation id,
 message id, timestamp, and source file, so a result can be quoted as evidence.
