@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>20 çalıştırılabilir takım · 205 vaka · 0 sinyal</span>
+    <span>21 çalıştırılabilir takım · 212 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -1251,6 +1251,65 @@ connect_rejected  <span class="bad">www.spk.gov.tr:443</span>         gateway an
 </section>
 
 <section>
+  <span class="sec-tag">On altıncı tur</span>
+  <h2>Yetki bir açıklama değil, bir imkândır</h2>
+  <p>§10 beş alt ajan kuruyor ve her birine bir <code>tools:</code> satırı
+  yazıyor. O satır bir <strong>açıklama değil, bir yetkidir</strong>: ajanın
+  gerçekten yapabildiği şey. Kural 6 (sır saklama) sistemin en yüksek sonuçlu
+  kuralı ve sır kapısıyla uygulanıyor — ama kapı <strong>metin</strong>
+  denetler, <strong>yetki</strong> denetlemez. On beş tur boyunca hiçbir takım
+  şunu sormadı: <em>her ajanın elindeki her araç, kancanın gerçekten izlediği
+  bir araç mı?</em></p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">X-06</span>
+      <span class="pill f">Kural, yetkinin olmadığı yerde</span></div>
+    <h3>İnternete ulaşabilen ajan, sır sınırını yazmıyordu</h3>
+    <p><em class="term">esik-denetcisi</em> sistemdeki iki web yetkili ajandan
+    biri. Sorgu soyutlama kuralı — "gerçek bir adı dış aramaya sokma" — ise
+    <em class="term">yaptirim-taramasi</em> <strong>becerisinin</strong>
+    metninde yazılı. Yani kural, onu uygulayacak <strong>yetkinin
+    bulunmadığı</strong> yerde duruyordu. Ajanın metnine sorgu sınırı eklendi:
+    aranan mevzuattır, işlem değil; sorgu soyutlanır; emin değilsen sorma.</p>
+  </div>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">X-02 · X-07</span>
+      <span class="pill w">Uygulanmayan beyan</span></div>
+    <h3>Kapı "dışarı" diyordu, kanca bakmıyordu</h3>
+    <p>Kapı <code>BashOutput</code>'u dışarı aracı sayıyordu; kancanın
+    matcher'ında ise <strong>yoktu</strong>. Beyan hiçbir zaman
+    uygulanmıyordu — ve <strong>beyan edilmiş ama uygulanmayan bir kural,
+    kuralın hiç olmamasından kötüdür</strong>: okuyucu korunduğunu sanır.</p>
+    <p>Düzeltme matcher'a eklemek <strong>değil</strong>:
+    <code>BashOutput</code>'un girdisi yalnızca bir <code>bash_id</code>'dir,
+    dışarı giden bir yük taşımaz. Gerçek koruma komutun
+    <strong>başlatıldığı</strong> andadır — arka planda başlatılan bir
+    <code>curl</code> de Bash olarak bloklanıyor. Bir gerekçe, yorum satırında
+    kaldığı sürece bir iddiadır; X-07 onu davranışa sabitledi.</p>
+  </div>
+
+  <div class="callout">
+    <strong>Ve aynı katman ihlalini ikinci kez kurdum — bu kez veri
+    yolundan.</strong> Vaka sayısını denetime denetletmek istedim; kayıt olarak
+    <em class="term">SONUC-sonra.txt</em>'i seçtim. Ama
+    <code>hepsi.sh &gt; SONUC-sonra.txt</code> yönlendirmesi dosyayı
+    <strong>başta keser</strong>: içeriden koşan D takımı denetimi çağırıyor,
+    denetim yarım kaydı okuyup kırmızıya dönüyor, D'nin taban çizgisi
+    bozuluyor. Onuncu turda bu ihlalin <em>çağrı</em> yolundan gelen hâlini
+    bulup gerekçesiyle yazmıştım. <strong>Bir katman kuralı, yalnızca ihlalin
+    bilinen biçimine karşı yazılırsa tutmuyor.</strong>
+    <br><br>
+    İlk düzeltme de yetmedi: kaydı atomik ayrı bir dosyaya taşıyınca bu kez
+    denetim bir <strong>önceki</strong> koşumu okudu — sayı değiştiğinde
+    birinci koşum kırmızı, ikincisi yeşil. <strong>İki koşumda yakınsayan bir
+    kontrol, "kırmızıysa bir daha koş" alışkanlığı öğretir</strong>; bu takımın
+    bütün amacının tersi. Doğru yer üçüncüsüydü: toplamı bayatlamadan bilen tek
+    yer, <code>hepsi.sh</code>'in kendi kapanışı.
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -1368,7 +1427,7 @@ connect_rejected  <span class="bad">www.spk.gov.tr:443</span>         gateway an
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 20 takım · 205 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 21 takım · 212 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
