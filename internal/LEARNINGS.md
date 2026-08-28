@@ -1054,3 +1054,49 @@ case, which is the tightness it is for.
 3. Deliberately raising the difficulty of a measurement is a legitimate and
    valuable act; it is also the moment the old thresholds stop meaning what they
    meant.
+
+---
+
+## L32 - The floor was set against a corpus that no longer exists, and my sweep had a substring bug
+
+**Evidence.** `min_relevance = 0.15` decides whether a question is answered or
+refused. Swept in steps of 0.01 over both corpora it turns out to sit in a
+two-sample *dip*: 0.10-0.14 and 0.17-0.21 both score better, and 0.15-0.16 is
+the worst region in the range. It was chosen against a 33-document corpus. This
+is L31's rule again, on a second threshold - a number set against an old
+difficulty stops meaning what it meant - and the two were found within an hour
+of each other, which suggests looking for the third.
+
+Moved to **0.19**, the middle of the 0.17-0.21 plateau. External 47/54 to 48/54,
+primary 17/20 to 18/20.
+
+**0.20 scores one case higher and was declined.** It is a single sample with
+0.19 and 0.21 both below it. Picking the peak of a swept curve fits the
+threshold to 74 questions; the plateau is the part of the curve that carries
+information about the corpus rather than about the golden set.
+
+**The sweep's first table was wrong, and the way it was wrong is the lesson.**
+Failure modes were counted with `"expected abstention" in failure`. The string
+for the opposite failure is `"unexpected abstention"`, which **contains** it, so
+every wrongly-refused case was also counted as wrongly-answered. The table then
+said that *raising* the abstention floor *increased* over-answering, which
+cannot happen. That impossibility is what exposed it - not a test, and not
+review.
+
+Corrected, the table is monotonic and decides something the pass count could
+not. Two plateaus reach 48/54 with different mixes: the low one over-answers
+three times and never wrongly refuses; the high one over-answers twice and
+wrongly refuses three times. Over-answering is the dangerous direction here -
+returning a weak match is how a RAG system confidently cites an irrelevant page -
+so the higher plateau is better than its equal pass rate suggests.
+
+**Rules.**
+1. **A measurement that violates a monotonic expectation is a bug in the
+   measurement** until proved otherwise. Raising a threshold cannot increase the
+   failures that threshold suppresses.
+2. Substring tests on human-readable status strings are a trap when one status
+   is the negation of another and shares its spelling. `startswith`, an enum, or
+   a structured field; never `in`.
+3. Report the failure *mix*, not just the count. Two settings with the same pass
+   rate can be differently safe, and which direction is safe is a property of the
+   system rather than of the metric.

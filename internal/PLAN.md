@@ -27,7 +27,7 @@ negative case look like a retrieval regression.
 
 | | primary (this repo) | external (91 PyPI pages) |
 |---|---|---|
-| golden cases | 17/20 | **47/54** |
+| golden cases | 18/20 | **48/54** |
 | recall@8 | 0.8125 | 0.9186 |
 | precision@8 | 0.2031 | 0.2355 |
 | hit@8 | 0.8750 | 0.9302 |
@@ -101,10 +101,21 @@ its current failures are that artefact. See docs/EVALUATION.md.
      question made entirely of ordinary words, which is the case
      `gate_features.py` showed match specificity cannot detect (AUC 0.555).
 
-   What is left needs a signal about term *co-occurrence*, or a judge that
-   reads. Both are larger than a scoring tweak, and the honest next step is to
-   say so rather than to try a seventh arithmetic combination of the same
-   features.
+   **Term co-occurrence was tried and is dead.** The idea was that a question
+   whose informative terms never appear together is unattested. Measured
+   directly against the index: `pdf` and `jinja` *do* co-occur in one chunk, so
+   the signal misses the very case it was designed for - while the answerable
+   `bcrypt`, `orjson` and `watchdog` questions have zero co-occurrence among
+   their top-idf terms and would all be wrongly refused. A well-phrased question
+   does not reuse the document's words, which is the same semantic gap that
+   causes the remaining retrieval failures.
+
+   The limit is now measured rather than asserted. The worst unanswerable case
+   scores 0.595 with answerability 1.0 and surface 1.0 - every word genuinely in
+   the corpus - while the answerable cases that fail score 0.147 and 0.148. That
+   is a 4x overlap, not a margin, and both directions are "the corpus contains
+   these words". Separating them is a judgement about meaning, which is item 1,
+   and item 1 is blocked on a key.
 
 3. **Widen the corpus again.** 33 to 91 documents overturned three recorded
    conclusions and de-saturated every metric (L29). There is no reason to think

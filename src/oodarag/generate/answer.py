@@ -35,7 +35,35 @@ class AnswerConfig:
     #: This is the gate that actually catches an out-of-corpus question: a
     #: fused score includes authority and recency, which are high for a trusted
     #: recent document regardless of whether it answers anything.
-    min_relevance: float = 0.15
+    #:
+    #: Swept in steps of 0.01 over both corpora (`scripts/floor_sweep.py`):
+    #:
+    #:   floor            0.10-0.14  0.15-0.16  0.17-0.19  0.20  0.21  0.22+
+    #:   external         48/54      47/54      48/54      49    48    46 down
+    #:   primary          17/20      17/20      18/20      18    18    18
+    #:   combined         65/74      64/74      66/74      67    66    declining
+    #:   over-answered     3          3          2          1     1     1
+    #:   over-refused      0          2          2-3        3     4     5 up
+    #:
+    #: Two plateaus reach 48/54 on the external set with different failure
+    #: mixes, and the pass count alone does not choose between them. The higher
+    #: one also gains a primary case and cuts over-answering from three to two -
+    #: and over-answering is the failure this project treats as dangerous, since
+    #: returning a weak match is how a RAG system confidently cites an
+    #: irrelevant page. It costs refusing two or three questions the corpus
+    #: could have answered, which is the safe direction to be wrong in.
+    #:
+    #: 0.15 was set against a 33-document corpus and sits in a two-point dip on
+    #: the 91-document one - the same way CI's pass-rate floor stopped meaning
+    #: what it meant when the corpus got harder (L31). This is the midpoint of
+    #: the 0.17-0.21 plateau.
+    #:
+    #: **0.20 scores one case higher and is deliberately not chosen.** It is a
+    #: single sample with 0.19 and 0.21 both below it; picking the peak of a
+    #: swept curve is fitting the threshold to 74 questions, and the plateau is
+    #: the part of the curve that carries information. Re-sweep when the corpus
+    #: changes - this number is a property of the corpus, not of the algorithm.
+    min_relevance: float = 0.19
     generator: str = "auto"  # "auto" | "extractive" | "claude"
 
 
