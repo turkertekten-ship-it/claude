@@ -4622,3 +4622,62 @@ is to miss the pages it was told to miss.
 6. **"Not indexed" and "not requested" are different guarantees**, and the one
    a politeness rule asks for is the second. Test it with the other server's
    log, which is the one thing the crawler cannot report its way around.
+
+## L91 - Eight failures triaged: five are the gate, and no floor can fix them
+
+Every sweep in `scripts/` optimises a number that eight cases dominate, and no
+script said *why* those eight fail. `scripts/failure_triage.py` sorts each
+failure by the stage that lost it, distinguishing four outcomes that call for
+four different fixes - and three of them are not reachable by any parameter
+this project has swept.
+
+    false-answer 3     an abstain case that got answered
+    abstention   2     retrieved and ranked, and the gate refused
+    unreachable  1     absent from a pool of 100 with MMR off
+    ranking      1     in the shipped pool at rank 12, below k=8
+    candidate    1     reachable at rank 40, outside the shipped pool of 20
+
+**Five of eight are the abstention gate**, which confirms L77 by measurement
+rather than by argument. Sharper: both `abstention` losses had the expected
+document at **rank 1 and rank 5**. Retrieval did its job and the gate threw the
+answer away.
+
+    Which library plots charts and figures?
+      rank 1 = matplotlib.md, relevance 0.0850, floor 0.19
+      gate_coverage 0.376  phrase 0.000  answerability 0.376
+
+**Checked before concluding: the phrase term is not dead.** It is nonzero on
+40 of 76 rank-1 chunks and 21% of all scored chunks, mean 0.361 when nonzero.
+The 0.000 above is a real signal, not a miswiring.
+
+**Then the decisive measurement.** Relevance for all 76 cases, split by whether
+the case is answerable:
+
+    lowest answerable        highest abstainable
+    0.0850 plots charts      0.7249 sends mail over SMTP
+    0.1392 fakes HTTP        0.5910 renders Jinja templates to PDF
+    0.1501 parses HTML       0.3303 what is the capital of France?
+
+55 of 61 answerable cases score at or below the highest abstainable case. The
+best single floor anywhere on the range makes **8 errors** - the shipped floor
+of 0.19 is already at the achievable optimum. **There is no threshold left to
+find.** Every abstention-floor sweep this project has run was searching a space
+whose best point was already occupied.
+
+The mechanism is visible in the two worst false-answers. Coverage asks how much
+of the query's IDF mass appears *somewhere* in the chunk, which a multi-clause
+question satisfies on its common clause alone: "renders Jinja templates to PDF"
+scores 0.59 against a corpus that has Jinja and no PDF renderer, because
+nothing in the feature expresses conjunction. The gate cannot tell "the corpus
+does not have this" from "the corpus has half of this".
+
+**Rules.**
+1. **Triage failures by stage before tuning anything.** Five of these eight
+   were immune to every knob under measurement, and that was not visible in
+   any aggregate number.
+2. **Before sweeping a threshold, check that a threshold exists.** One pass
+   over both classes says whether the signal separates them at all. Here the
+   best possible floor and the shipped floor make the same number of errors.
+3. **A weighted-average feature cannot express a conjunction**, and questions
+   are full of them. Averaging over query terms means the rare, discriminating
+   term is outvoted by the common one that any near-miss also has.
