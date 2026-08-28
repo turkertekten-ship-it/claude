@@ -9,6 +9,31 @@ entry, move the resolved fact into `observations.md` with a new source id.
 
 ---
 
+## Status at 2026-08-28
+
+Ten entries. Six have moved; four cannot move from here.
+
+| Entry | Status |
+|---|---|
+| U-1 sibling sessions | output known from diffs, reasoning still unreadable |
+| U-2 chat history before 2026-08-27 | **blocked on the owner** — needs a data export |
+| U-3 "the book" | answered from diffs; the handbook itself never in reach |
+| U-4 "imb youtube" | answered second-hand as IBM Technology |
+| U-5 repo split | convention holding by consensus; intent still unstated |
+| U-6 Drive suggestion | **blocked on the owner** — only they know who asked |
+| U-7 "borris churney" | **blocked on the owner** — one word confirms or corrects it |
+| U-8 tip fidelity | **closed** — all 60 checked against screenshots |
+| U-9 prompt engineering | answered second-hand; underlying talks unreachable |
+| U-10 post-April material | partly closed; the May post recovered, Threads still out |
+
+The four blocked entries are not blocked by effort. U-2 needs a file only the
+owner can export; U-6 needs a fact only they hold; U-7 needs one word from
+them; and the residue of U-1 needs a transcript no tool here exposes. Every
+route this container can take has been taken, and the honest end state of this
+loop is that these four stay open with the exact question written down.
+
+---
+
 ### U-1 — Contents of the sibling sessions — **OUTPUT KNOWN, REASONING NOT**
 
 **Moved 2026-08-28.** The fleet has grown to 14 branches on `claude` and 10 on
@@ -64,33 +89,55 @@ document this session has not read.
 
 ---
 
-### U-4 — What "imb youtube" designates
+### U-4 — What "imb youtube" designates — **ANSWERED SECOND-HAND**
 
-**Unknown:** the `RAG system and data pipeline` goal names "imb youtube" as a
-data source. The expansion of "imb" is not established.
+**Answered 2026-08-28, from a sibling's work rather than from the owner.** The
+session whose goal string carries "imb youtube" committed
+`corpus/ibm-technology/manifest.json`, a manifest of videos attributed to the
+**IBM Technology** YouTube channel, built for its YouTube connector. Read as a
+transposition, "imb" is "ibm", and that session acted on the string that way.
+[src:IBM-MANIFEST-2026-08-28]
 
-**Why:** it appears only in that session's goal string, with no accompanying
-definition, and this session did not reach the source.
+**Why this is not promoted to established:** it is one session's reading of its
+own instruction, not the owner's word. Another sibling reached the same
+conclusion independently, which raises confidence without changing its kind.
 
-**Resolves when:** the owner expands the term, or that session commits a
-resolved source list.
+**Worth noting for its own sake:** that manifest refuses to attach summaries to
+videos whose captions it could never fetch, on the stated grounds that doing so
+"would produce a citation that looks verbatim and is not". That is the same rule
+this repository enforces, arrived at separately. [src:IBM-MANIFEST-2026-08-28]
+
+**Resolves fully when:** the owner confirms the expansion, or corrects it.
 
 ---
 
-### U-5 — Intended relationship between the two repositories
+### U-5 — Intended relationship between the two repositories — **CONVENTION HOLDING, INTENT STILL UNSTATED**
 
-**Unknown:** why the account has both `claude` and `claude-ai`, and what
-belongs in each.
+**Unknown:** why the account has both `claude` and `claude-ai`, and what belongs
+in each.
 
-**Why:** both were empty at capture time, so there was no README, history, or
-structure to read intent from.
+**Why it stays open:** the owner has still not stated the split. Nothing has
+changed about that.
 
-**Resolves when:** the owner states the split, or content lands in both and the
-division becomes evident.
+**What the fleet now shows.** Nine of the ten branches on `claude-ai` each add a
+single commit editing only `CLAUDE.md` — the interim pointer convention,
+followed independently by nine sessions that never coordinated.
+[src:FLEET-DIFFS-2026-08-28]
 
-**Interim convention:** doctrine and shared tooling live in `claude`;
-`claude-ai` carries a pointer to it. This is a working decision made to keep
-four concurrent sessions from diverging — not a discovered fact.
+One does not: `claude-ai`'s `rag-system-data-pipeline-rdkde9` roots at an
+unrelated commit and installs a **second, self-contained operating doctrine**
+there, with its own protocol documents, skills and workflows.
+[src:FLEET-DIFFS-2026-08-28]
+
+> So the convention is being followed by consensus and broken by one branch.
+> That is evidence about what sessions *do*, not about what the owner wants,
+> and it is not promoted into an answer. Nine sessions agreeing is nine
+> sessions making the same interim decision this file already recorded.
+
+**Resolves when:** the owner states the split.
+
+**Interim convention, unchanged:** doctrine and shared tooling live in `claude`;
+`claude-ai` points at them.
 
 ---
 

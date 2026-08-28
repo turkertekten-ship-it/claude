@@ -798,3 +798,29 @@ sources:
       Recorded because the claim was already registered as an open question, and
       because the answer changes how the corpus's emphasis on specificity should
       be read.
+
+  - id: IBM-MANIFEST-2026-08-28
+    kind: repo_state
+    collected_at: "2026-08-28T08:20Z"
+    method: >-
+      git ls-tree -r --name-only and git show against
+      origin/claude/rag-system-data-pipeline-rdkde9 and
+      origin/claude/research-skill-mastery-mwjs01, reading
+      corpus/ibm-technology/manifest.json in full
+    evidence: >-
+      Both branches carry corpus/ibm-technology/manifest.json, described in its
+      own header as "IBM Technology video manifest for the YouTube connector".
+      Its first entry is video_id "T-D1OfcDW1M", "What is Retrieval-Augmented
+      Generation (RAG)?", channel "IBM Technology", presenter "Marina
+      Danilevsky", verification "search_confirmed". Its _provenance block states
+      that "youtube.com is NOT reachable from the container this was built in",
+      that entries therefore ingest as metadata_only, and that no entry carries
+      a summary "deliberately", because "attributing prose to a specific video
+      whose captions were never read would produce a citation that looks
+      verbatim and is not".
+    note: >-
+      Read directly by this session. Bears on U-4: the session whose goal string
+      says "imb youtube" built a corpus for the IBM Technology channel, which
+      reads "imb" as a transposition of "ibm". That is that session's
+      interpretation of its own instruction, not a statement by the owner, so it
+      answers U-4 second-hand and does not close it.
