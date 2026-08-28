@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>24 çalıştırılabilir takım · 243 vaka · 0 sinyal</span>
+    <span>25 çalıştırılabilir takım · 249 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -1495,6 +1495,57 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Yirminci tur</span>
+  <h2>Kapı teşhis koyuyordu, çare söylemiyordu</h2>
+  <p>§14 bir kapının nasıl öldüğünü kendisi yazar: <em>"Doğru işi bloklayan bir
+  kapı bir gün içinde kapatılır; sonra hiçbir şey uygulanmaz."</em> On dördüncü
+  tur bunu <strong>yanlış pozitif</strong> ekseninde ölçtü. Ama ekonomi aynıdır:
+  <strong>doğru</strong> bir blok da uyulacak yolu söylemiyorsa her seferinde
+  zaman yakar, ve en ucuz çözüm kapıyı kapatmaktır.</p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AB-01 · AB-02</span>
+      <span class="pill f">Çaresiz teşhis</span></div>
+    <h3>Doğru teşhis, sıfır yol tarifi</h3>
+<pre>BLOKLANDI [guncellik] eşik rakamı var ama doğrulama tarihi yok</pre>
+    <p>Eksiksiz bir teşhis — ve <strong>hangi biçimin kabul edildiğine dair tek
+    kelime yok</strong>. Üstelik bu, kitabın <strong>iki</strong> biçim kabul
+    ettiği yer: yöntem dosyalarında <code>Doğrulama: &lt;tarih&gt;</code>,
+    çıktılarda <code>Kontrol edildi: &lt;kaynak&gt; (&lt;tarih&gt;)</code>. On
+    dördüncü tur bu ikiliğin kitabın kendi çelişkisi olduğunu bulmuştu;
+    bloklanan kişi hangisinin tuttuğunu <strong>deneyerek</strong> bulmak
+    zorundaydı. Altı kapının iletisine çare eklendi — ve kitaba sadık kapı
+    üzerinde AB <strong>beş vakada kırmızı</strong>, yani kusur kitabın.</p>
+  </div>
+
+  <div class="callout">
+    <strong>İki şey zaten iyiydi ve ikisini de hiç ölçmemiştim.</strong> Çok
+    kapılı bir blokta <strong>bütün</strong> ihlaller tek seferde bildiriliyor
+    — kullanıcı üç tur değil bir tur harcıyor (AB-04). Ve kapı
+    <strong>determinist</strong>: aynı girdi beş koşumda aynı kapı kümesini
+    veriyor (AB-05). Bir sınama takımının işi yalnızca kusur bulmak değil;
+    neyin sağlam olduğunu da <em>ölçmektir</em>.
+  </div>
+
+  <div class="callout">
+    <strong>Takımın kusuru: kendi niyetimi sınamışım.</strong> AB-03 "çare
+    uygulanınca kapı susuyor mu" diye soruyordu ve <strong>geçiyordu</strong>.
+    Mutasyon onu sağ kaldı: kapıya kasten yanlış bir çare yazdım —
+    <em>"dosyanın sonuna 'BITTI' yazın"</em> — ve takım yeşil kaldı.
+    <br><br>
+    Sebebi: AB-03, <strong>sınamaya benim yazdığım</strong> düzeltilmiş
+    metinleri deniyordu, <strong>iletinin önerdiği</strong> biçimi değil. Yani
+    sistemin iddiasını değil kendi niyetimi ölçüyordum. AB-03b iletideki her
+    biçim örneğini çıkarıp uyguluyor ve kapının susmasını bekliyor.
+    <br><br>
+    Ve AB-03b'nin kendisi de bir kez <strong>boşa geçti</strong>: kitaba sadık
+    kapıda hiçbir ileti çare taşımadığı için döngü hiç dönmüyordu.
+    <strong>Sınanacak bir iddianın bulunmaması, iddianın doğrulanması
+    değildir.</strong>
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -1612,7 +1663,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 24 takım · 243 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 25 takım · 249 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
