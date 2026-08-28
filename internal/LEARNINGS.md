@@ -4214,3 +4214,49 @@ vacuous.
    could cause**, not a generic one. "Offsets shifted by one" is the easy
    mutant; "line offsets frozen at the unit start" is the one this month's diff
    could actually have written.
+
+---
+
+## L84 - The test for the structural fix went through the paths that never needed it
+
+Redaction was moved onto `RawDocument.__post_init__` because seven connectors
+each had to remember it and one did not. The test written with that fix builds a
+corpus, indexes it, and asserts no secret reaches the index. It passes.
+
+It also passes with the boundary redaction **entirely removed** - all three
+lines. Mutating them away:
+
+    boundary redaction removed -> existing corpus test    SURVIVED
+    boundary redaction removed -> new youtube-path test   CAUGHT
+
+The reason is in the ingest directory. Four of five connectors still call
+`redact_secrets` themselves; the call is idempotent and the calls were left in
+place. `youtube.py` calls it zero times - it is the connector the whole fix was
+for, and it is covered by the boundary and nothing else. The existing test's
+corpus comes from `filesystem.py`, which redacts redundantly, so the test
+validates the redundancy and says nothing about the structure it was written to
+protect.
+
+**The failure mode this leaves open** is not exotic. Someone tidying up
+"duplicate" redaction, or reverting the boundary change as unnecessary because
+the connectors already do it, gets a green suite and re-opens the exact hole -
+in the one source whose text is a curated notes file and whose title comes from
+a human, both ordinary places for a pasted token.
+
+The new test goes through the connector that has no convention of its own, and
+asserts the positive as well as the absence: the document must still contain its
+video id and non-empty text, since empty fields satisfy "the secret is not
+there" perfectly. It also asserts `youtube.py` still contains no
+`redact_secrets`, so that if that ever changes the test says it has stopped
+covering what it claims rather than quietly weakening.
+
+**Rules.**
+1. **Test a structural guarantee through the path that lacked the convention**,
+   not the path that already had it. The convention-following paths will pass
+   either way and tell you nothing.
+2. **When a fix removes the need for redundant calls but leaves them in, the
+   redundancy will mask the fix's own test.** Either delete them, or test where
+   they are absent.
+3. **Mutate the fix, not the symptom.** "Does a secret reach the index" was the
+   symptom; "is the boundary doing it" was the fix, and only the second mutation
+   distinguishes the two tests.

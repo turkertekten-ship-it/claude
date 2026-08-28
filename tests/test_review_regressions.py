@@ -2811,3 +2811,65 @@ class ChunkOffsetsPointAtTheirOwnTextTest(unittest.TestCase):
                                 f"  source: {window[:80]!r}")
         # A silent zero here would make every assertion above vacuous.
         self.assertGreater(checked, 1000, f"only {checked} chunks checked")
+
+
+class TheOneConnectorThatDoesNotRedactItselfTest(unittest.TestCase):
+    """Non-negotiable 5, exercised through the path that had the hole.
+
+    Redaction was moved onto `RawDocument.__post_init__` because seven
+    connectors each had to remember it and the YouTube one did not. Four of the
+    five ingest modules still call `redact_secrets` themselves - the call is
+    idempotent - and `youtube.py` calls it zero times. It is covered by the
+    boundary and nothing else.
+
+    That makes the existing redaction test weaker than the guarantee it names:
+    mutating the boundary redaction away leaves it green, because every corpus
+    it exercises comes from a connector that redacts redundantly. This test goes
+    through the one that does not, so removing the boundary - the exact fix that
+    closed the hole - fails the suite instead of passing it.
+    """
+
+    SECRET = "ghp_" + "S3cretTokenValue" * 2
+
+    def _document(self):
+        import json
+        from tempfile import TemporaryDirectory
+
+        from oodarag.ingest.youtube import YouTubeConnector
+
+        with TemporaryDirectory() as tmp:
+            manifest = pathlib.Path(tmp) / "videos.json"
+            # A secret in the two places a curator would paste one: the human
+            # title and the free-text summary that becomes the body when no
+            # transcript exists.
+            manifest.write_text(json.dumps({"videos": [{
+                "video_id": "dQw4w9WgXcQ",
+                "title": f"Setting up CI with {self.SECRET}",
+                "channel": "example",
+                "summary": f"Export the token {self.SECRET} before running.",
+            }]}), encoding="utf-8")
+            connector = YouTubeConnector(manifest=str(manifest), allow_network=False)
+            documents = list(connector.fetch({}))
+        self.assertEqual(len(documents), 1, "the manifest entry did not produce a document")
+        return documents[0]
+
+    def test_no_connector_side_redaction_exists_to_mask_the_boundary(self):
+        # If youtube.py ever gains its own redact_secrets call, this test stops
+        # covering what it claims to and should be re-pointed at whatever
+        # connector is then relying on the boundary alone.
+        source = pathlib.Path("src/oodarag/ingest/youtube.py").read_text(encoding="utf-8")
+        self.assertNotIn("redact_secrets", source,
+                         "youtube.py now redacts itself; this test no longer "
+                         "exercises the boundary in isolation")
+
+    def test_the_boundary_redacts_a_connector_that_does_not(self):
+        document = self._document()
+        for field, value in (("text", document.text), ("title", document.title)):
+            self.assertNotIn(self.SECRET, value,
+                             f"the secret survived in RawDocument.{field}")
+        self.assertNotIn(self.SECRET, json.dumps(document.metadata),
+                         "the secret survived in RawDocument.metadata")
+        # Verify the positive too: redaction happened rather than the fields
+        # being empty, which would satisfy every assertion above.
+        self.assertIn("dQw4w9WgXcQ", document.external_id)
+        self.assertTrue(document.text.strip(), "no text to have redacted")
