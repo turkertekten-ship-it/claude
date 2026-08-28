@@ -1,11 +1,11 @@
 {
   "aggregate": {
     "abstention_rate": 0.1,
-    "calibration_error": 0.336085,
-    "citation_coverage": 0.7191666666666667,
-    "mrr": 0.45833333333333337,
-    "ndcg_at_5": 0.4689441663347503,
-    "pass_rate": 0.85,
+    "calibration_error": 0.28051500000000007,
+    "citation_coverage": 0.7066666666666668,
+    "mrr": 0.4333333333333334,
+    "ndcg_at_5": 0.45049065401332317,
+    "pass_rate": 0.8,
     "recall_at_5": 0.6583333333333333
   },
   "cases": [
@@ -179,17 +179,17 @@
     },
     {
       "abstained": false,
-      "citation_coverage": 1.0,
-      "confidence": 0.4048,
-      "mrr": 1.0,
-      "ndcg_at_5": 1.0,
-      "passed": true,
+      "citation_coverage": 0.75,
+      "confidence": 0.5162,
+      "mrr": 0.5,
+      "ndcg_at_5": 0.6309297535714575,
+      "passed": false,
       "question": "What is the doctrine rule about fabrication?",
       "recall_at_5": 1.0,
       "should_abstain": false,
       "substrings_expected": 1,
-      "substrings_found": 1,
-      "why": ""
+      "substrings_found": 0,
+      "why": "none of the expected substrings appeared"
     },
     {
       "abstained": false,

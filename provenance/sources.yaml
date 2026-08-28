@@ -739,3 +739,21 @@ sources:
       tools/ingest_chat_archive.py. Issues are the fleet's only durable channel
       to sessions that cannot be messaged, which is why the collision hazard was
       filed there rather than left in a file only this branch reads.
+
+  - id: EVAL-CORPUS-DILUTION-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T09:05Z"
+    method: "PYTHONPATH=src python3 -m oodarag.cli eval, re-run after committing docs/research/00-ooda-log.md and provenance/observations.md"
+    evidence: >-
+      pass_rate fell from 0.85 (17/20) to 0.80 (16/20) with no code change. The
+      case that flipped is "What is the doctrine rule about fabrication?": the
+      newly added loop log and observations discuss fabrication, doctrine and
+      sourcing at length, so retrieval now returns commentary about the rule
+      instead of CLAUDE.md's statement of it. The regression check did not flag
+      it — the drop is exactly at the 0.05 tolerance — so it was found by reading
+      the failure list rather than by the gate.
+    note: >-
+      A measured property of a self-documenting corpus, not a defect in
+      retrieval: writing about the corpus dilutes it. Recorded rather than
+      baselined away, because re-saving a baseline to make a drop disappear is
+      precisely the move the harness exists to prevent. The case stays red.

@@ -79,13 +79,21 @@ agents unrun. What exists is what exists:
 | `cli.py` — demo, index, query, loop, brief, eval, rules, provenance, obligations | built |
 | `ingest/regulatory.py`, `ingest/marketdata.py` | built, 26 tests — **never run against a real host** |
 
-**Measured, not asserted.** `ooda eval` scores 17/20 on the golden set:
-recall@5 0.66, MRR 0.48, verified-citation coverage 0.74, abstention rate 0.10.
+**Measured, not asserted.** `ooda eval` scores 16/20 on the golden set:
+recall@5 0.66, MRR 0.46, verified-citation coverage 0.72, abstention rate 0.10.
 The first run scored an abstention rate of **0.00** — it answered all four
-unanswerable questions — which is the defect those cases exist to catch. Three
-cases are still red and are documented rather than tuned away: one is a real
-retrieval weakness (the word "verify" saturates this corpus), and two are the
-harder case where the corpus discusses the subject but not the fact asked for.
+unanswerable questions — which is the defect those cases exist to catch.
+
+Four cases are red and documented rather than tuned away. Two are the hard case
+where the corpus discusses the subject but not the fact asked for; no lexical
+signal separates those, and measuring showed the obvious candidates score real
+answerable questions *lower* than the unanswerable ones. The other two are a
+property of a self-documenting corpus: the words "verify", "fabrication" and
+"doctrine" saturate it, so a question about the rule retrieves commentary about
+the rule. That one cost a case when the loop log was committed — a 17/20 became
+16/20 with no code change. It is recorded rather than baselined away, because
+re-saving a baseline to make a drop disappear is exactly what the harness exists
+to prevent.
 
 **No live regulatory feed, and it is not a scheduling gap.** Thirteen Turkish
 domains — spk.gov.tr, kap.org.tr, resmigazete.gov.tr, tspb.org.tr,
