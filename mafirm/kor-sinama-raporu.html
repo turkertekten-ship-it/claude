@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>37 çalıştırılabilir takım · 312 vaka · 0 sinyal</span>
+    <span>38 çalıştırılabilir takım · 317 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -2194,6 +2194,64 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Otuz üçüncü tur</span>
+  <h2>Çatışma kontrolü tek yönlü bakıyordu — ve yalnızca bir an</h2>
+  <p>§8 tek cümledir: <em>"Bir dosya <strong>açılmadan önce</strong>
+  <code>hafiza/cikar-catismasi.md</code> <strong>karşı taraflar için</strong>
+  kontrol edilir. Çatışma bir uyarı değil, durma sebebidir."</em>
+  <code>/dosya-ac</code> bunu birebir uyguluyor: <em>"verilen
+  <strong>karşı taraf</strong> adlarını ara."</em> O cümlede iki bağ var ve
+  ikisi de sınanmamıştı.</p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AO-02</span>
+      <span class="pill a">Yön</span></div>
+    <h3>Çatışma simetriktir; kontrol değildi</h3>
+    <p>En ağır hâl tersidir: yeni dosyanın <strong>müvekkili</strong>, açık
+    bir dosyanın <strong>karşı tarafı</strong> olabilir — yani şu anda
+    <em>aleyhine</em> çalıştığımız kişi için çalışmaya başlarız. Kaydın kendi
+    biçimi <code>&lt;taraf adı&gt; · &lt;dosya&gt; · &lt;hangi tarafta&gt; ·
+    &lt;tarih&gt;</code> bu soruyu cevaplayacak veriyi <strong>zaten
+    taşıyordu</strong>; prosedür hiç sormuyordu.</p>
+  </div>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AO-03</span>
+      <span class="pill a">Zaman</span></div>
+    <h3>Kontrol bir ana bağlıydı, olaya değil</h3>
+    <p>Kayda sonradan bir ad girdiğinde çatışma <strong>o an doğar</strong> ve
+    hiçbir şey geriye bakmıyordu. Bu, otuz birinci turdaki eşik sorusunun
+    çıkar çatışması ayağındaki hâlidir — ve aynı kök: <strong>kitap
+    kontrolleri olaylara değil anlara bağlıyor.</strong></p>
+  </div>
+
+  <div class="callout">
+    <strong>Yamanın sınırı açıkça yazıldı:</strong> neyin çatışma
+    <em>sayıldığına</em> karar verilmedi. O bir meslek kuralları meselesidir
+    ve §9 uyarınca insana aittir; yalnızca mekanik kontrolün iki yönü de
+    kapsaması sağlandı. Kitabın doğru yaptığı iki şey de olumlu kontrol
+    olarak tutuldu: boş kayıt "temiz" sayılmıyor, eşleşme durma sebebi.
+  </div>
+
+  <h3>Aynı ölçüt üç kez fazla geniş çıktı</h3>
+  <p>AO-02 bu turda üç kez yeşil verdi ve üçü de yanlıştı — üçü de tek bir
+  sınıfın örneği: <strong>yakınlık kanıt değildir.</strong></p>
+  <table><thead><tr><th>ölçek</th><th>neyi yakaladı</th><th>neden yanlıştı</th></tr></thead><tbody>
+  <tr><td>600 karakterlik <strong>pencere</strong></td><td>"müvekkil"</td>
+      <td>üçüncü adımdan — KAPSAM.md'ye <em>yazan</em> bir talimattan</td></tr>
+  <tr><td><strong>cümle</strong></td><td>"müvekkilinin"</td>
+      <td>yamanın <em>açıklama</em> cümlesiydi, iki nokta üst üstenin ardında</td></tr>
+  <tr><td><code>ara\b</code></td><td>—</td>
+      <td>Türkçe çekimi görmüyor: "aranır" = ara + ek <em>(AE sınıfı, beşinci kez)</em></td></tr>
+  </tbody></table>
+  <p>Ölçüt sonunda <strong>cümleciğe</strong> indirildi. Ancak o zaman
+  mutasyon yakalandı. <strong>Ve AO-05 kendi yamamı yakaladı:</strong> cümleye
+  bir ara söz eklemek ("eşleşme varsa —hangi yönde olursa olsun— DUR")
+  ölçütün aradığı dizgeyi bozdu. Bir ölçüt bir <em>cümleyi</em> değil bir
+  <em>anlamı</em> sınamalı.</p>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -2311,7 +2369,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 37 takım · 312 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 38 takım · 317 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
