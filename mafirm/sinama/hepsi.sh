@@ -146,6 +146,8 @@ python3 "$S/ks_bj_birim_celiskisi.py"; topla "BJ · birimler arası hukuki nitel
 echo
 python3 "$S/ks_bk_atif_kapsama.py"; topla "BK · hüküm atıflarının kapsaması (keşifle)" $?
 echo
+python3 "$S/ks_bl_anma_kapilari.py"; topla "BL · kapılar anma ile taşımayı ayırıyor mu" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** altmış çalıştırılabilir takım — **430
+**Yamalı hâlde sistem çalışıyor:** altmış bir çalıştırılabilir takım — **435
 vaka, 27 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15 → **27/27** (mutasyon kümesi otuz
 sekizinci turda on beşten yirmi yediye çıkarıldı: 26 kontrolün dokuzu hiç
@@ -2692,7 +2692,7 @@ içinde kırmızı, koşumdan sonra yeşil görünüyordu. Onuncu ve on altınc�
 turların katman kuralı — *denetim, kendini denetleyen takımı denetleyemez* —
 **üçüncü kez**, bu kez veri yoluyla çiğnenmişti. Sayı artık durağan ölçülüyor:
 `hepsi.sh`'e bağlı her takımın kendi `BEKLENEN_VAKA` beyanı toplanıyor
-— bugün toplam 430 vaka — ve her takımın kendi sıfırıncı vakası o beyanın
+— bugün toplam 435 vaka — ve her takımın kendi sıfırıncı vakası o beyanın
 gerçeğe eşit olduğunu ayrıca güvenceye alıyor. Bozulmuş bir `SAYIM.txt` ile BB'nin çıktısı
 **birebir aynı** kalıyor; bağımsızlık ölçülerek gösterildi.
 
@@ -3148,6 +3148,28 @@ Kapı artık başlığı **yapıdan** okuyor: satır başında, başlık işaret
 susturur* — ve öz-sınama 26 vakaya çıktı. **Anmak taşımak değildir**, altıncı
 kez ve bu kez bir kapının içinde.
 
+### Peki öteki kapılar? Sınıf kapatıldı
+
+Bir kapıda bulunan kusur, sınıfı kapatmaz. Aynı çift **her kapıya** verildi:
+istediği şeyi **taşıyan** metin susturmalı, ondan yalnızca **söz eden** metin
+ateşlemelidir.
+
+**Sonuç: üç kapının üçü de ayrımı yapıyor.** Elli sekizinci turda bulunan tek
+gerçek örnekti; güncellik ve araştırma kapıları zaten satır başı ve gerçek
+tarih arıyordu.
+
+**Ve iki kırmızı okuma benimdi.** Güncellik için yazdığım "anan" metin
+**gerçek bir tarih taşıyordu**; kapı haklı olarak susuyordu ve ben bunu
+kapının kusuru sandım. Araştırma için yazdığım metinde depo adı düz yazıydı,
+oysa kapı `github.com` alan adını arıyor: **tetikleyici hiç kurulmamıştı**,
+yani kapı ateşlemediği için değil, ateşleyecek bir sebep olmadığı için
+sessizdi. İki kural birden: *anan metin, anılan şeyi taşımamalıdır* ve
+**tetiklenmemiş bir kapı, sınanmamış bir kapıdır.**
+
+Sağlama artık duruyor: üç kapıdan herhangi biri düzyazı aramasına geri
+dönerse — ya da kapının kendi öz-sınamasındaki ayrım vakaları kaldırılırsa —
+takım kırmızıya döner. Mutasyon dördünü de yakaladı.
+
 ---
 
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
@@ -3288,6 +3310,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | BI · risk uyarısı her cevap yolunda | *kapanış yasağı yalnızca "evet" cevabında yazılıydı* | **temiz** — değişmez sınanıyor: cevap HAYIR değilse yasak var |
 | BJ · birimler arası nitelik çelişkisi | *iki yöntem dosyası m.595/2'ye birbirini dışlayan nitelik veriyordu, ikisi de sessizdi* | **temiz** — çelişki iki uçta da görünür, karar insana bırakıldı |
 | BK · hüküm atıflarının kapsaması | *BJ elle seçilmiş tek bir çelişkiye bakıyordu; I-05 hiçbir yöntem dosyasında anılmıyordu* | **temiz** — çoklu atıflar keşifle, açık sorular dosyasında işaretli |
+| BL · kapılar anma ile taşımayı ayırıyor mu | *kapsam kapısı, başlığın adını anan bir cümleyle susturulabiliyordu* | **temiz** — üç kapının üçü de ayırt ediyor, sağlama duruyor |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -3345,8 +3368,8 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # 60 çalıştırılabilir takım:
-                                  #   430 vaka + 27 mutasyon (D)
+./sinama/hepsi.sh                 # 61 çalıştırılabilir takım:
+                                  #   435 vaka + 27 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -3380,7 +3403,7 @@ vakalardır ve hepsi geçer. Kör sınama o aklın dışında kalanı arar: bir
 hukukçunun gerçekten yazacağı cümleyi, kancanın gerçekten göreceği veriyi,
 bozulduğunda denetimin gerçekten yakalayıp yakalamadığını.
 
-Altmış üç takım, 430 vaka:
+Altmış dört takım, 435 vaka:
 
 | Takım | Neyi sınar | Kaynağı |
 |---|---|---|
@@ -3447,9 +3470,10 @@ Altmış üç takım, 430 vaka:
 | BI | **Risk uyarısının kapsaması** — kapanış yasağı, riskin bulunduğu her cevap yolunda mı | §5, kural 2, kural 9 |
 | BJ | **Birimler arası nitelik çelişkisi** — iki yöntem dosyası aynı işleme farklı hukuki nitelik veriyorsa ikisi de bunu yazıyor mu | §5, §6, kural 9 |
 | BK | **Hüküm atıflarının kapsaması** — birden fazla dosyada nitelendirilen her hüküm beyanlı mı; açık nitelendirme soruları dosyasında işaretli mi | §5, §6, kural 1, kural 9 |
+| BL | **Anma/taşıma ayrımı** — her kapı, istediği şeyi TAŞIYAN metinle ondan SÖZ EDEN metni ayırt ediyor mu | §12, §14, §16 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**430 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On üç**
+**435 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On üç**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)
