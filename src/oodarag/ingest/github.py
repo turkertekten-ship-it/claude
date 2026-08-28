@@ -175,6 +175,7 @@ class GitHubConnector(Connector):
         if not self.owner or not self.repo:
             raise ValueError("GitHubConnector requires owner and repo")
         self.key = f"github:{self.owner}/{self.repo}"
+        self.source_system = "github"
 
     # ------------------------------------------------------------------ helpers
 

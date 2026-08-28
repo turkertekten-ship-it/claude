@@ -32,6 +32,7 @@ class FilesystemConnector(Connector):
         self.authority = authority
         self.follow_symlinks = follow_symlinks
         self.key = key or f"fs:{self.root}"
+        self.source_system = "filesystem"
         self.skipped: dict[str, int] = {}
 
     def fetch(self, cursor: dict[str, Any]) -> Iterator[RawDocument]:

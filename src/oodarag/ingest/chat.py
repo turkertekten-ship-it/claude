@@ -63,6 +63,7 @@ class ChatTranscriptConnector(Connector):
         self.min_turns = min_turns
         self.authority = authority
         self.key = key or f"chat:{self.root}"
+        self.source_system = "chat"
         self.stats: dict[str, Any] = {}
 
     def fetch(self, cursor: dict[str, Any]) -> Iterator[RawDocument]:

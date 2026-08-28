@@ -37,6 +37,20 @@ log = get_logger("pipeline")
 
 
 @dataclass
+class PruneReport:
+    """What a prune did, or refused to do, per source."""
+
+    deleted: int = 0
+    skipped: int = 0
+    refused: list[str] = field(default_factory=list)
+    per_source: dict[str, int] = field(default_factory=dict)
+
+    def as_dict(self) -> dict[str, Any]:
+        return {"deleted": self.deleted, "skipped": self.skipped,
+                "refused": self.refused, "per_source": self.per_source}
+
+
+@dataclass
 class IndexReport:
     documents_ingested: int = 0
     documents_indexed: int = 0
@@ -190,6 +204,55 @@ class IndexPipeline:
             )
         log.info("embedded", vectors=written, fingerprint=fingerprint)
         return written
+
+    def prune(self, deltas: Sequence[IngestDelta],
+              max_removal_fraction: float = 0.25) -> PruneReport:
+        """Delete documents their source no longer has.
+
+        Without this, a document removed upstream stays in the index and stays
+        citable for ever - an answer quoting text that no longer exists, with a
+        URI that no longer resolves. That is the same class of failure as a
+        stale lexical posting, one level up.
+
+        The guard is the reason this is not automatic. A source can return
+        nothing for reasons that have nothing to do with deletion: an expired
+        token, a truncated listing, a path that is temporarily unmounted. Acting
+        on that would empty the index in one run, and the next successful run
+        would silently re-fetch everything as new. So a removal set larger than
+        `max_removal_fraction` of the source is refused and reported, and a
+        connector that failed at all contributes no removals in the first place.
+        """
+        report = PruneReport()
+        for delta in deltas:
+            if not delta.removed:
+                continue
+            system = delta.source_system
+            if not system:
+                report.refused.append(
+                    f"{delta.source_key}: connector reports no source_system; cannot scope a prune")
+                report.skipped += len(delta.removed)
+                continue
+            total = self.store.count_documents(system)
+            fraction = len(delta.removed) / total if total else 1.0
+            if fraction > max_removal_fraction:
+                report.refused.append(
+                    f"{delta.source_key}: {len(delta.removed)}/{total} documents "
+                    f"({fraction:.0%}) disappeared at once, above the "
+                    f"{max_removal_fraction:.0%} guard - not pruning. If this is a real "
+                    f"bulk deletion, prune explicitly."
+                )
+                report.skipped += len(delta.removed)
+                log.warn("prune refused", source=delta.source_key,
+                         removed=len(delta.removed), total=total)
+                continue
+            found = self.store.find_doc_ids(system, delta.removed)
+            for doc_id in found.values():
+                self.store.delete_document(doc_id)
+            report.deleted += len(found)
+            report.per_source[delta.source_key] = len(found)
+            log.info("pruned removed documents", source=delta.source_key,
+                     deleted=len(found), reported=len(delta.removed))
+        return report
 
     def reindex_all(self) -> IndexReport:
         """Rechunk and re-embed everything already stored.

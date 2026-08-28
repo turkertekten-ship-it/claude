@@ -15,11 +15,13 @@
 | Generation | done | Citation contract verified against retrieved chunks; extractive default, Claude optional |
 | Eval | done | recall/precision/MRR/nDCG, citation coverage, abstention, contamination detection and quarantine |
 | OODA loop | done | Five journalled phases, auditable policy rules, action budget |
+| Incremental deletion | done | Removals propagate to the delta, prune guarded at 25% of a source, refused entirely for a failed connector |
 | CLI | done | `preflight, index, query, eval, loop, status, journal, demo` |
 | CI | done | Three jobs: stdlib matrix, numpy path, retrieval regression gate |
 
 **Current measurements** (this repository as corpus, offline embedder):
-156 tests passing · 17/19 golden cases · citation coverage 1.0 · ~65ms per query.
+192 tests passing · 18/20 golden cases · recall@8 0.65 · nDCG@8 0.62 ·
+citation coverage 1.0 · ~63ms per query.
 
 ## Known limitations, deliberately not fixed
 
@@ -44,9 +46,6 @@
 2. **A hosted embedder behind the existing interface**, measured against the
    offline baseline on the same goldens. The interface and the baseline exist;
    only the comparison is missing.
-3. **Incremental deletion.** Connectors report documents that vanished from a
-   source; nothing acts on it yet. Deletion is deliberately an explicit action so
-   a transient empty response cannot wipe an index.
 4. **Query expansion** for the semantic-gap case, as the cheaper alternative to a
    neural embedder.
 5. **Multi-hop retrieval**, once single-shot recall is well characterised.

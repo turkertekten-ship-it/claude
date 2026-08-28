@@ -265,6 +265,34 @@ class SqliteStore:
         ).fetchall()
         return {row["doc_id"]: _row_to_document(row) for row in rows}
 
+    def find_doc_ids(self, source_system: str, external_ids: Sequence[str]) -> dict[str, str]:
+        """Map external ids to document ids, scoped to one source system.
+
+        Scoped because external ids are only unique *within* a source: two
+        connectors can legitimately both call a document "README.md", and an
+        unscoped prune would delete the wrong one.
+        """
+        if not external_ids:
+            return {}
+        found: dict[str, str] = {}
+        batch = 500  # stay well inside SQLite's variable limit
+        for start in range(0, len(external_ids), batch):
+            chunk = list(external_ids[start:start + batch])
+            placeholders = ",".join("?" * len(chunk))
+            rows = self.conn.execute(
+                f"""SELECT doc_id, external_id FROM documents
+                    WHERE source_system = ? AND external_id IN ({placeholders})""",
+                (source_system, *chunk),
+            ).fetchall()
+            for row in rows:
+                found[row["external_id"]] = row["doc_id"]
+        return found
+
+    def count_documents(self, source_system: str) -> int:
+        return self.conn.execute(
+            "SELECT COUNT(*) AS n FROM documents WHERE source_system = ?", (source_system,)
+        ).fetchone()["n"]
+
     def all_documents(self) -> list[Document]:
         return [_row_to_document(r) for r in self.conn.execute("SELECT * FROM documents")]
 

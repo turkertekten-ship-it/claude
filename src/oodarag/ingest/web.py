@@ -43,6 +43,7 @@ class WebConnector(Connector):
         self.config = CrawlConfig(seeds=seeds, **crawl_options)
         self.client = client
         self.key = key or f"web:{seeds[0] if seeds else 'empty'}"
+        self.source_system = "web"
         self.authority = authority
         self.last_report: dict[str, Any] = {}
 

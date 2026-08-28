@@ -32,6 +32,7 @@ from oodarag.ooda.policy import (
     BACKFILL_SOURCE,
     EMBED_MISSING,
     NOOP,
+    PRUNE_REMOVED,
     QUARANTINE_SOURCE,
     REFIT_EMBEDDER,
     REINDEX,
@@ -92,6 +93,7 @@ class OodaLoop:
         self.connectors = list(connectors)
         self.config = config or LoopConfig()
         self._generator = generator
+        self._last_deltas: list[Any] = []
         self.cycle_number = int(self.store.get_meta("ooda_cycle", 0))
 
     # ------------------------------------------------------------------ phases
@@ -109,6 +111,9 @@ class OodaLoop:
             }
 
         index_report: IndexReport = self.pipeline.run(self.connectors)
+        # Kept so the Act phase can prune with the actual removal lists rather
+        # than the truncated copy carried in the journal.
+        self._last_deltas = index_report.deltas
         observations.update({
             "documents_ingested": index_report.documents_ingested,
             "chunks_written": index_report.chunks_written,
@@ -144,6 +149,9 @@ class OodaLoop:
             sources[key] = {
                 "new": delta["new"], "changed": delta["changed"],
                 "failed": failed,
+                "removed": len(delta.get("removed") or []),
+                "removed_ids": (delta.get("removed") or [])[:50],
+                "source_system": delta.get("source_system", ""),
                 "failure_rate": round(failed / max(1, touched + failed), 4),
                 "consecutive_failures": consecutive,
                 "last_success": last_success,
@@ -238,6 +246,16 @@ class OodaLoop:
                     self.store.set_meta("source_health", health)
                 self.connectors = [c for c in self.connectors if c.key != action.target]
                 result["detail"] = "source removed from this loop's connector set"
+            elif action.kind == PRUNE_REMOVED:
+                delta = next((d for d in self._last_deltas
+                              if d.source_key == action.target), None)
+                if delta is None:
+                    result.update({"status": "skipped", "detail": "no delta for source"})
+                else:
+                    prune = self.pipeline.prune([delta])
+                    result.update(prune.as_dict())
+                    if prune.refused:
+                        result["status"] = "refused"
             elif action.kind == RUN_EVAL:
                 result.update(self._run_eval(situation))
             elif action.kind == ALERT:

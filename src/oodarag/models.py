@@ -195,6 +195,14 @@ class IngestDelta:
     failed: int = 0
     errors: list[str] = field(default_factory=list)
     duration_s: float = 0.0
+    #: External ids present on the previous run and absent from this one.
+    #: Detected here but never acted on downstream: the document stayed in the
+    #: index and stayed citable, so an answer could quote text that no longer
+    #: exists in its source. Pruning is a separate, guarded action - see
+    #: IndexPipeline.prune - because a source that returns nothing for a
+    #: transient reason must not be able to empty an index.
+    removed: list[str] = field(default_factory=list)
+    source_system: str = ""
 
     @property
     def touched(self) -> int:

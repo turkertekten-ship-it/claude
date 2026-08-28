@@ -125,6 +125,10 @@ class Connector(ABC):
     #: relative to others. Official docs outrank a stranger's blog post.
     authority: float = 1.0
 
+    #: The `source_system` this connector stamps on its documents. Needed to
+    #: scope a prune: two sources can legitimately use the same external id.
+    source_system: str = ""
+
     @abstractmethod
     def fetch(self, cursor: dict[str, Any]) -> Iterator[RawDocument]:
         """Yield documents. `cursor` is whatever this connector stored last run."""
@@ -174,7 +178,13 @@ class Connector(ABC):
         # Documents that vanished from the source are reported, not deleted here;
         # deletion is an explicit downstream action so a transient empty response
         # can never wipe an index.
-        removed = [k for k in seen_hashes if k not in new_hashes]
+        # Only meaningful when the run completed: a source that failed part
+        # way through has not proved anything is gone, and treating a truncated
+        # listing as a deletion is how an index empties itself.
+        completed = delta.failed == 0 and not delta.errors
+        removed = [k for k in seen_hashes if k not in new_hashes] if completed else []
+        delta.removed = removed
+        delta.source_system = self.source_system
         delta.duration_s = round(time.monotonic() - started, 3)
         next_cursor = self.next_cursor(dict(cursor))
         next_cursor["hashes"] = new_hashes or seen_hashes

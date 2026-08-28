@@ -333,3 +333,110 @@ class TranscriptTimestampTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PruneRemovedDocumentsTest(unittest.TestCase):
+    """Documents removed at the source stayed in the index and stayed citable.
+
+    The connector detected the removal and recorded it in its cursor; nothing
+    downstream could see it, because the delta did not carry it. An answer could
+    therefore quote text that no longer existed, with a URI that no longer
+    resolved - the same class of failure as a stale lexical posting, one level
+    up from it.
+    """
+
+    def setUp(self):
+        import shutil
+        import tempfile
+        from pathlib import Path
+
+        from oodarag.ingest.filesystem import FilesystemConnector
+
+        self.root = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.root, ignore_errors=True)
+        (self.root / "keep.md").write_text(
+            "# Keep\n\nThis document describes the retention policy for archives.\n")
+        (self.root / "gone.md").write_text(
+            "# Gone\n\nThe pangolin protocol governs classified salary bands.\n")
+        for i in range(8):
+            (self.root / f"f{i}.md").write_text(
+                f"# Doc {i}\n\nRoutine content about indexing number {i}.\n")
+        self.store = SqliteStore(":memory:")
+        self.pipeline = IndexPipeline(self.store)
+        self.connector = FilesystemConnector(self.root, patterns=("**/*.md",))
+        self.pipeline.run([self.connector])
+        self.addCleanup(self.store.close)
+
+    def test_the_delta_carries_the_removed_ids(self):
+        (self.root / "gone.md").unlink()
+        report = self.pipeline.run([self.connector])
+        self.assertEqual(report.deltas[0].removed, ["gone.md"])
+        self.assertEqual(report.deltas[0].source_system, "filesystem")
+
+    def test_pruning_deletes_the_document_and_it_stops_being_retrievable(self):
+        before = self.store.stats()["documents"]
+        (self.root / "gone.md").unlink()
+        report = self.pipeline.run([self.connector])
+        prune = self.pipeline.prune(report.deltas)
+        self.assertEqual(prune.deleted, 1)
+        self.assertEqual(self.store.stats()["documents"], before - 1)
+        retriever = HybridRetriever(self.store, self.pipeline.embedder)
+        hits, _ = retriever.retrieve("pangolin protocol classified", top_k=3)
+        for hit in hits:
+            self.assertNotIn("gone.md", hit.citation_title)
+        # And its text is gone from the lexical index too, not just the table.
+        for chunk_id, _ in self.store.search_lexical("pangolin", k=5):
+            chunk = self.store.get_chunks([chunk_id])[chunk_id]
+            self.assertNotIn("pangolin", chunk.text.lower())
+
+    def test_a_bulk_disappearance_is_refused_not_obeyed(self):
+        """A source can return almost nothing for reasons unrelated to deletion:
+        an expired token, a truncated listing, an unmounted path. Obeying that
+        empties the index in one run."""
+        before = self.store.stats()["documents"]
+        for path in sorted(self.root.glob("*.md"))[:-1]:
+            path.unlink()
+        report = self.pipeline.run([self.connector])
+        prune = self.pipeline.prune(report.deltas)
+        self.assertEqual(prune.deleted, 0)
+        self.assertTrue(prune.refused)
+        self.assertIn("guard", prune.refused[0])
+        self.assertEqual(self.store.stats()["documents"], before,
+                         "the guard did not hold and the index was emptied")
+
+    def test_an_explicit_bulk_prune_is_still_possible(self):
+        before = self.store.stats()["documents"]
+        for path in sorted(self.root.glob("*.md"))[:-1]:
+            path.unlink()
+        report = self.pipeline.run([self.connector])
+        prune = self.pipeline.prune(report.deltas, max_removal_fraction=1.0)
+        self.assertEqual(prune.deleted, before - 1)
+
+    def test_a_failed_connector_reports_no_removals(self):
+        """A source that failed part way through has not proved anything is
+        gone; treating a truncated listing as deletion is how an index empties
+        itself."""
+        from oodarag.ingest.filesystem import FilesystemConnector
+
+        class Failing(FilesystemConnector):
+            def fetch(self, cursor):
+                yield from ()
+                raise RuntimeError("source unavailable")
+
+        failing = Failing(self.root, patterns=("**/*.md",), key=self.connector.key)
+        report = self.pipeline.run([failing])
+        self.assertEqual(report.deltas[0].failed, 1)
+        self.assertEqual(report.deltas[0].removed, [])
+
+    def test_a_prune_is_scoped_to_one_source_system(self):
+        """Two sources may legitimately use the same external id."""
+        from oodarag.models import Document
+
+        self.store.upsert_documents([
+            Document("other", "web", "gone.md", "https://e.com/gone.md",
+                     "someone else's gone.md", "unrelated text", "h")])
+        (self.root / "gone.md").unlink()
+        report = self.pipeline.run([self.connector])
+        self.pipeline.prune(report.deltas)
+        self.assertIsNotNone(self.store.get_document("other"),
+                             "the prune crossed a source boundary")

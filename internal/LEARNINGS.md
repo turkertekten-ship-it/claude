@@ -308,3 +308,33 @@ class, not its instance.
 
 **The honest footnote.** Fixing #3 moved reported `recall@8` from 0.84 to 0.65.
 Nothing got worse; the number started meaning something.
+
+---
+
+## L15 - Detection without propagation is not a feature
+
+**Evidence.** The connector contract detected removed documents correctly and
+had done since it was written: after a file was deleted from a source, the
+cursor recorded `removed_last_run: ['secret.md']`. Nothing downstream could see
+it, because `IngestDelta` did not carry the field. The document stayed in the
+index, stayed embedded, and stayed citable - an answer could quote text that no
+longer existed at a URI that no longer resolved.
+
+The gap survived because every visible signal said it was handled: the code that
+computes removals is there, it is commented, and `internal/PLAN.md` listed
+deletion as "next" rather than "missing", which reads as a decision rather than
+an omission.
+
+**Rule.** A value that is computed and not consumed is dead code wearing a
+feature's clothes. When a plan says a capability is "deliberately deferred",
+check that the deferral is actually enforced somewhere - and that what exists is
+either wired up or clearly marked unreachable.
+
+**On the fix.** Pruning is guarded rather than automatic, for the reason the
+original deferral gave: a source returning almost nothing is usually an expired
+token or a truncated listing, not a bulk deletion. A removal set above 25% of a
+source is refused and reported, a connector that failed contributes no removals
+at all, and the prune is scoped by source system because two sources can
+legitimately use the same external id. The loop decides it at priority 85 -
+below index integrity, above freshness, because a citation to deleted text is
+wrong rather than merely stale.

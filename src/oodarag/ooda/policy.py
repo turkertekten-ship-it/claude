@@ -24,6 +24,7 @@ EMBED_MISSING = "embed_missing"
 BACKFILL_SOURCE = "backfill_source"
 QUARANTINE_SOURCE = "quarantine_source"
 RUN_EVAL = "run_eval"
+PRUNE_REMOVED = "prune_removed"
 ALERT = "alert"
 NOOP = "noop"
 
@@ -84,6 +85,18 @@ def decide(situation: dict[str, Any], thresholds: Thresholds | None = None) -> l
             REFIT_EMBEDDER, priority=70,
             reason="corpus grew enough that term statistics no longer describe it",
             evidence={"growth": round(growth, 3), "threshold": t.corpus_growth_refit},
+        ))
+
+    # --- Documents their source no longer has. Ranked below index integrity
+    # but above freshness: a citation to deleted text is wrong, not just stale.
+    for name, health in (situation.get("sources") or {}).items():
+        removed = health.get("removed", 0)
+        if not removed:
+            continue
+        actions.append(Action(
+            PRUNE_REMOVED, priority=85, target=name,
+            reason="documents were removed at the source and are still citable",
+            evidence={"removed": removed, "source_system": health.get("source_system", "")},
         ))
 
     # --- Source health.

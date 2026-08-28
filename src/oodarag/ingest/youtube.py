@@ -170,6 +170,7 @@ class YouTubeConnector(Connector):
         self.languages = languages
         self.authority = authority
         self.key = key or f"youtube:{self.manifest_path or ','.join(self.videos[:2]) or 'empty'}"
+        self.source_system = "youtube"
         self.stats: dict[str, Any] = {}
 
     # ---------------------------------------------------------------- manifest
