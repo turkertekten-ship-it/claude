@@ -20,3 +20,4 @@
 {"question": "What is the capital of France?", "expect_abstain": true, "tags": ["negative"]}
 {"question": "Who won the 1998 FIFA World Cup final?", "expect_abstain": true, "tags": ["negative"]}
 {"question": "What is the recommended dosage of ibuprofen for adults?", "expect_abstain": true, "tags": ["negative"]}
+{"question": "What is the boiling point of mercury?", "expect_abstain": true, "notes": "Regression case. The relevance gate measured its phrase component over every token including stopwords, so the run 'what is the' scored 0.43 and carried this question past the abstention floor on its own. Phrase is now measured over content tokens with a two-token minimum.", "tags": ["negative", "regression", "stopword-phrase"]}

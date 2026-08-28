@@ -18,6 +18,7 @@ from oodarag.pipeline import IndexPipeline, normalize
 from oodarag.retrieve.fusion import RankedList, reciprocal_rank_fusion
 from oodarag.retrieve.hybrid import HybridRetriever, RetrievalConfig
 from oodarag.retrieve.mmr import jaccard, mmr_select
+from oodarag.retrieve.rerank import _longest_common_run
 from oodarag.store.sqlite_store import SqliteStore
 from oodarag.store.vectors import VectorIndex, pack, unpack
 from oodarag.util.stemming import stem
@@ -337,6 +338,37 @@ class RetrievalTest(unittest.TestCase):
         self.assertIn("pre_rerank_score", components)
 
 
+class PhraseScoringTest(unittest.TestCase):
+    """The phrase component of relevance must not be satisfied by stopwords."""
+
+    def test_a_stopword_run_scores_nothing(self):
+        # "what is the boiling point of mercury" -> content terms only.
+        query = tokenize("What is the boiling point of mercury?", stem_words=True)
+        haystack = " ".join(tokenize(
+            "The journal is the point: a cron job is silent about whether it worked.",
+            stem_words=True))
+        self.assertEqual(_longest_common_run(query, haystack), 0.0,
+                         "a stopword run scored as a phrase match")
+
+    def test_a_real_phrase_scores_fully(self):
+        query = tokenize("reciprocal rank fusion", stem_words=True)
+        haystack = " ".join(tokenize(
+            "Results are combined with reciprocal rank fusion because the arms differ.",
+            stem_words=True))
+        self.assertEqual(_longest_common_run(query, haystack), 1.0)
+
+    def test_a_single_shared_word_is_not_a_phrase(self):
+        query = tokenize("boiling point mercury", stem_words=True)
+        haystack = " ".join(tokenize("Past a point this measures less.", stem_words=True))
+        self.assertEqual(_longest_common_run(query, haystack), 0.0,
+                         "one shared word counted as proximity evidence")
+
+    def test_a_partial_run_scores_proportionally(self):
+        query = tokenize("reciprocal rank fusion diversity", stem_words=True)
+        haystack = " ".join(tokenize("We use reciprocal rank fusion here.", stem_words=True))
+        self.assertAlmostEqual(_longest_common_run(query, haystack), 3 / 4)
+
+
 class GroundingTest(unittest.TestCase):
     def setUp(self):
         self.store = make_store()
@@ -356,7 +388,10 @@ class GroundingTest(unittest.TestCase):
     def test_an_out_of_corpus_question_abstains(self):
         for question in ["What is the capital of France?",
                          "What is the recommended dosage of ibuprofen?",
-                         "Who won the 1998 World Cup final?"]:
+                         "Who won the 1998 World Cup final?",
+                         # Overlaps the corpus only on stopwords plus the common
+                         # word "point"; must not clear the floor on that alone.
+                         "What is the boiling point of mercury?"]:
             with self.subTest(question=question):
                 answer = self.generator.answer(question)
                 self.assertTrue(answer.abstained,

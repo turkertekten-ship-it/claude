@@ -226,3 +226,32 @@ coverage cannot absorb that.
 **Meta-finding.** Each of these was caught by the eval harness and by nothing
 else. There was no failing test, no exception, and no log line - just a number
 that moved. A retrieval change without a measurement is a guess.
+
+---
+
+## L12 - A relevance signal must not be satisfiable by stopwords
+
+**Evidence.** An independent end-to-end run asked "What is the boiling point of
+mercury?" - a question the corpus cannot answer - and got a confident answer
+(0.68) assembled from passages about journals and connectors.
+
+The abstention gate reads `relevance = 0.6 * coverage + 0.4 * phrase`. Coverage
+was correctly low (0.181, IDF-weighted: "boil" and "mercuri" are absent, "point"
+is common). But `phrase` scored **0.429**, because it measured the longest
+contiguous run of the query's tokens *including stopwords*: "what is the" is
+three of the seven words in "what is the boiling point of mercury". That
+contributed 0.17 on its own - more than the entire 0.15 floor.
+
+**Rule.** Every component of a relevance score has to be evidence. A run of
+stopwords is not evidence of anything; neither is a single shared common word,
+which coverage already measures and weights by informativeness. The phrase
+signal now uses stemmed content tokens with a minimum run of two.
+
+**Why the earlier fixes did not catch it.** L11 made coverage IDF-weighted, and
+coverage behaved correctly here. The bug was in the *other* term of the same sum
+- one that had never been weighted at all, and that no golden case exercised
+because every negative case until now shared no common word with the corpus.
+
+**Generalisation.** When you fix a scoring component, check its siblings for the
+same class of defect. A weighted term and an unweighted term in one sum means
+the unweighted one now dominates the cases the weighting was meant to fix.

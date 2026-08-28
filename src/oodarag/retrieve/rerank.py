@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 from typing import Callable
 
 from oodarag.models import ScoredChunk
-from oodarag.util.text import tokenize, tokenize_all
+from oodarag.util.text import tokenize
 
 
 class Reranker(ABC):
@@ -53,13 +53,19 @@ class HeuristicReranker(Reranker):
         # so demotes the exact passages the lexical arm ranked first.
         query_terms = tokenize(query, stem_words=True)
         query_set = set(query_terms)
-        phrase = " ".join(tokenize_all(query))
+        # Content tokens only. Measuring the phrase over every token lets a run
+        # of stopwords score: "what is the" is three of the seven words in
+        # "what is the boiling point of mercury", which scored 0.43 and carried
+        # an out-of-corpus question past the abstention floor on its own.
+        # Stopword adjacency is not evidence of anything.
+        phrase_terms = tokenize(query, stem_words=True)
         now = time.time()
 
         for result in results:
             chunk = result.chunk
-            haystack = chunk.indexed_text.lower()
-            chunk_terms = set(tokenize(haystack, stem_words=True))
+            haystack_terms = tokenize(chunk.indexed_text, stem_words=True)
+            haystack = " ".join(haystack_terms)
+            chunk_terms = set(haystack_terms)
 
             if not query_set:
                 coverage = 0.0
@@ -73,10 +79,7 @@ class HeuristicReranker(Reranker):
                 coverage = matched_weight / total_weight if total_weight else 0.0
             # Exact phrase match is rare and highly diagnostic; partial credit
             # for a long shared prefix keeps it from being all-or-nothing.
-            if phrase and phrase in haystack:
-                phrase_score = 1.0
-            else:
-                phrase_score = _longest_common_run(phrase, haystack)
+            phrase_score = _longest_common_run(phrase_terms, haystack)
 
             authority = float(chunk.metadata.get("authority", 1.0))
             authority_score = max(0.0, min(1.5, authority)) / 1.5
@@ -125,16 +128,22 @@ class HeuristicReranker(Reranker):
         return results
 
 
-def _longest_common_run(phrase: str, haystack: str) -> float:
-    """Fraction of the query phrase present as one contiguous run.
+def _longest_common_run(words: list[str], haystack: str, min_run: int = 2) -> float:
+    """Fraction of the query's content terms present as one contiguous run.
 
-    Cheap proxy for proximity: a chunk containing "reciprocal rank fusion"
-    should outrank one that merely contains all three words scattered apart.
+    A cheap proximity signal: a chunk containing "reciprocal rank fusion"
+    should outrank one merely containing all three words scattered apart.
+
+    `words` must already have stopwords removed and be stemmed the same way as
+    `haystack`, and a run shorter than `min_run` scores zero - a single shared
+    word is coverage, which is measured separately and weighted by how
+    informative the word is. Counting it here too would double-count it, and
+    counting an unweighted single word would let the most common term in the
+    corpus stand in for a match.
     """
-    words = phrase.split()
-    if not words:
+    if len(words) < min_run:
         return 0.0
-    for length in range(len(words), 1, -1):
+    for length in range(len(words), min_run - 1, -1):
         for start in range(0, len(words) - length + 1):
             if " ".join(words[start:start + length]) in haystack:
                 return length / len(words)
