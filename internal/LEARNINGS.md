@@ -3345,3 +3345,90 @@ Its value is entirely in never having been optimised for.
 3. **Discount a tuned-set gain by what a held-out set does not reproduce.** Here
    that factor was about a half, measured rather than assumed - and it is the
    right lens for re-reading every improvement recorded above.
+
+---
+
+## L68 - The non-negotiables re-checked, and one apparent hole that is a design
+
+Twenty cycles of change later - redaction moved to the boundary type, front
+matter added, the corpus rebuilt and dated, six defaults retuned - the five
+stated guarantees were due to be run rather than read (L47's rule). All five
+hold, and the interesting part is a check that *looks* like a failure.
+
+| non-negotiable | check | result |
+| --- | --- | --- |
+| 1. zero required deps | import every module on bare 3.11 | all import, no third party loaded |
+| 2. provenance load-bearing | 1810 chunks, orphans and missing URIs | 0 and 0 |
+| 3. everything bounded | budget parameters per network module | http 10, crawler 9, builder 2 |
+| 4. degrade, don't die | fetch a blocked host | `PolicyDeniedError`, handled |
+| 5. secrets redacted | see below | holds |
+
+**The apparent hole.** Eight committed corpus files contain text the redactor
+matches. Looking at what, rather than counting:
+
+```
+pyjwt         eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...   the canonical example JWT
+environs      https://sloria:secret@localhost           a README example
+asyncpg       password='password'                        a docs example
+itsdangerous  token = auth_s.dumps({"id": 5, ...})       a variable named token
+```
+
+Not one is a credential. They are public documentation examples, and the last is
+a false positive on an assignment.
+
+**And they are supposed to be there.** The corpus is a faithful copy of what was
+fetched; the manifest hashes that text; redacting it would falsify the
+provenance this project treats as load-bearing, and would also destroy the best
+test material available for the redactor. Non-negotiable 5 is about *the index* -
+"before text can reach an index file" - and the index is clean.
+
+Measured end to end: **12 redactable lines in the committed corpus, 0 appearing
+verbatim in the built index, exactly 12 `<redacted` markers in it.** A perfect
+correspondence, on text nobody wrote as a fixture.
+
+Both halves are now tests, and the first exists because of L57's lesson: the
+assertion "no credential shapes reach the index" passes trivially if the corpus
+stops containing any, and a vacuous pass looks exactly like a working redactor.
+So one test asserts the corpus still contains at least five such lines, and the
+other asserts none of them reach the index.
+
+**Mutation testing then said the test had no teeth, and mutation testing was
+wrong twice before it was right.** Removing the redaction from
+`RawDocument.__post_init__`: survived. Removing it from the filesystem connector
+as well: survived. That looked like a vacuous test - until a grep for every call
+site found a **third** layer, `pipeline.py:92`, `redact_secrets(clean(raw.text))`.
+
+| removed | result |
+| --- | --- |
+| boundary only | survived |
+| connector only | survived |
+| pipeline only | survived |
+| **all three** | **caught** |
+
+So redaction is three-deep, each layer independently sufficient, and the test
+asserts the *invariant* rather than any one mechanism - which is the correct
+shape for a safety guarantee and the reason no single mutation moves it.
+
+**Two of the three earlier "survived" results were my own harness lying.** A
+pattern with the wrong indentation, and an `assert` on a short string guarding a
+`str.replace` of a longer one: `replace` does nothing quietly, the suite runs on
+unmutated code, and the harness prints SURVIVED. That is a false negative in the
+one tool whose job is finding false negatives - L55's rule, for the third time
+this session, in my own scratch script. The harness now compares the file before
+and after and refuses to report anything if the text did not change.
+
+The redundancy has a measured cost: `redact_secrets` is ~277ms over the corpus,
+so three passes is roughly 10% of an 8s index build. Worth it for a guarantee
+about credentials, and worth knowing rather than discovering.
+
+**Rules.**
+1. **When a check looks like a violation, read what it matched before believing
+   it.** Eight files "containing secrets" were eight files containing a JWT from
+   a specification and the word `password` in an example.
+2. **State which artifact a guarantee is about.** "Redacted at the connector
+   boundary" and "no credential shapes anywhere in the repository" are different
+   promises, and only one of them is compatible with keeping a faithful copy of
+   what was fetched.
+3. **Pair an absence assertion with a presence assertion.** "Nothing leaked"
+   needs "and there was something to leak", or the test measures the corpus
+   rather than the code.

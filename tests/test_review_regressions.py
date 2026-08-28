@@ -783,6 +783,61 @@ class CandidateWindowTest(unittest.TestCase):
                                  "fusion is weighted by configuration rather than rank")
 
 
+class CorpusIsUnredactedAndTheIndexIsNotTest(unittest.TestCase):
+    """Non-negotiable 5, checked against real credential-shaped text.
+
+    The committed corpus contains strings the redactor matches - the canonical
+    example JWT from `pyjwt`, `https://sloria:secret@localhost` from `environs`,
+    `password='password'` from `asyncpg`. Those are public documentation
+    examples and they stay: the corpus is a faithful copy of what was fetched,
+    the manifest hashes it, and redacting it would falsify the provenance the
+    project treats as load-bearing.
+
+    What must be clean is the **index**, which is the file the rule is about.
+    This asserts the boundary does its job on text nobody wrote as a fixture.
+    """
+
+    def _redactable_lines(self):
+        from oodarag.util.text import redact_secrets
+
+        lines = []
+        for path in sorted(pathlib.Path("corpus/external/pypi").glob("*.md")):
+            for line in path.read_text("utf-8").splitlines():
+                line = line.strip()
+                if line and redact_secrets(line) != line:
+                    lines.append((path.stem, line))
+        return lines
+
+    def test_the_corpus_still_contains_the_shapes_this_is_testing_against(self):
+        """Otherwise the test below passes for the wrong reason. A corpus that
+        happened to contain no credential shapes would make it vacuous, and it
+        would look identical to a working redactor."""
+        lines = self._redactable_lines()
+        self.assertGreaterEqual(len(lines), 5,
+                                "the corpus no longer exercises the redactor, so the "
+                                "assertion below proves nothing")
+
+    def test_none_of_them_reach_the_index(self):
+        from oodarag.ingest.filesystem import FilesystemConnector
+        from oodarag.ingest.base import MemoryStateStore
+        from oodarag.pipeline import IndexPipeline
+        from oodarag.store.sqlite_store import SqliteStore
+
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        IndexPipeline(store).run([FilesystemConnector(
+            "corpus/external/pypi", patterns=["**/*.md"], key="fs:redaction")])
+        indexed = "\n".join(c.indexed_text for c in store.all_chunks())
+
+        leaked = [(name, line) for name, line in self._redactable_lines()
+                  if line in indexed]
+        self.assertEqual(leaked, [],
+                         "text the redactor matches reached the index verbatim")
+        self.assertGreater(indexed.count("<redacted"), 0,
+                           "nothing was redacted at all, so the lines above are "
+                           "absent for some other reason")
+
+
 if __name__ == "__main__":
     unittest.main()
 
