@@ -2097,12 +2097,40 @@ question(s)", and a test asserts the two counts differ when a document
 contaminates two questions and coincide when none does. Both mutations of the
 counters are caught.
 
+**The same defect was in three more places, found by applying the rule once.**
+`docs/adr/0004-hybrid-retrieval.md` carries a copy of the same ablation table
+and had gone stale in exactly the same column - and its prose drew a conclusion
+from it, crediting reranking with "+4 cases" where the current numbers say +8.
+`docs/EVALUATION.md` had two more: "fourteen PyPI project pages" for a corpus
+that has held 91 since the widening, and the quarantine count copied with the
+wrong unit again.
+
+Its third claim was the one that mattered: *"Contamination there is reported
+clean, so the numbers need no quarantine to be trustworthy."* The external set
+is the regression gate, and it is **not** clean - 4 of 54 questions, 14
+documents held out. The cause is not self-reference, which the corpus genuinely
+cannot have, but authorship: the goldens were written from those pages, so a
+question can reuse enough of a page's wording to match it. The detector is
+working; the sentence claiming it had nothing to find was false, and it was a
+claim about whether the gate's own numbers can be trusted.
+
 **Rules.**
 1. **Re-run the command, do not read the table.** The cost was one minute per
-   table and both were wrong.
-2. **Refresh a measurement table whole, never a column.** Different columns have
+   table and every one was wrong - two in `PLAN.md`, one in an ADR, three in
+   `EVALUATION.md`.
+2. **A measurement copied into a second document goes stale in both.** The same
+   ablation table lived in `internal/PLAN.md` and in ADR 0004 and drifted
+   identically. Refresh every copy from the script, or keep one copy.
+3. **A claim that a check found nothing ages worse than a number.** "Reported
+   clean" was true when written and became false silently, and unlike a stale
+   count it reads as reassurance rather than as data. Re-run the check that
+   produced it, not just the metrics beside it.
+4. **Refresh a living table; do not rewrite a dated record.** The same
+   "fourteen pages" figure appears in this file and is correct there, because
+   these entries describe a moment. `EVALUATION.md` describes the present.
+5. **Refresh a measurement table whole, never a column.** Different columns have
    different sensitivities, so a change can move one and leave the rest exactly
    right - which is the state that looks most trustworthy and is not.
-3. **A count needs its unit in the sentence that prints it.** "29 documents"
+6. **A count needs its unit in the sentence that prints it.** "29 documents"
    and "29 per-question holdouts over 14 documents" are the same number and
    different facts; only one of them survives being copied somewhere else.
