@@ -12,6 +12,8 @@ import base64
 import json
 import unittest
 
+from oodarag.ingest.base import Connector
+
 from oodarag.ingest.base import MemoryStateStore
 from oodarag.ingest.github import GitHubClient, GitHubConnector
 from oodarag.util.http import HttpClient, RetryPolicy
@@ -266,3 +268,95 @@ class GitHubOfflineTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class IssueDateReachesRetrievalTest(unittest.TestCase):
+    """A GitHub issue's real date was discarded before it could be scored.
+
+    The connector reads `updated_at` from the API and stores it in metadata, but
+    `Document.updated_at` came from `fetched_at` for every connector - so the
+    reranker's recency factor scored an issue last touched in January as brand
+    new, because it had been fetched a moment ago. Measured before the fix:
+    recency 0.99999998. After: 0.520, for an eight-month-old issue.
+
+    That is also why recency moved nothing on either eval corpus (L43): every
+    document in a run shared one fetch time, making the factor a constant.
+
+    This carries the connector's real output through indexing to retrieval, so
+    the shape under test is the connector's rather than one invented here.
+    """
+
+    def _issue_documents(self):
+        routes = build_api_routes()
+        issues = [{"number": 1, "title": "Crawler runs forever on a cyclic site",
+                   "state": "open",
+                   "body": "The crawler follows a redirect loop and never stops. "
+                           "Budgets should bound requests, bytes and wall clock.",
+                   "user": {"login": "alice"}, "labels": [{"name": "bug"}],
+                   "comments": 2,
+                   "created_at": "2026-01-01T00:00:00Z",
+                   "updated_at": "2026-01-02T00:00:00Z",
+                   "html_url": f"https://github.com/{SLUG}/issues/1"}]
+        site = TestSite(routes)
+        site.__enter__()
+        self.addCleanup(site.__exit__, None, None, None)
+        site.add(f"/repos/{SLUG}/issues",
+                 Route(body=json.dumps(issues), content_type="application/json"))
+        connector = make_connector(site, resources=("issues",))
+        return connector.run(MemoryStateStore()).documents
+
+    def test_the_connector_parses_the_issue_date_it_was_given(self):
+        """`source_updated_at` is the source's claim about its own content;
+        `fetched_at` is when we asked. Conflating them is what made every
+        document in a run equally fresh."""
+        docs = self._issue_documents()
+        self.assertTrue(docs)
+        self.assertEqual(docs[0].metadata.get("updated_at"), "2026-01-02T00:00:00Z")
+        self.assertIsNotNone(docs[0].source_updated_at,
+                             "the connector read the date and threw it away")
+        self.assertLess(docs[0].source_updated_at, docs[0].fetched_at)
+
+    def test_an_absent_date_is_not_invented(self):
+        """None means the source did not say, which is a different claim from
+        "it changed now" - and the document then falls back to the fetch time
+        rather than to zero."""
+        from oodarag.ingest.github import _iso_to_timestamp
+
+        for absent in (None, "", "not a date"):
+            with self.subTest(value=absent):
+                self.assertIsNone(_iso_to_timestamp(absent))
+
+    def test_an_issue_is_scored_on_its_own_date_not_the_fetch_time(self):
+        from oodarag.pipeline import IndexPipeline
+        from oodarag.retrieve.hybrid import HybridRetriever
+        from oodarag.store.sqlite_store import SqliteStore
+
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        pipeline = IndexPipeline(store)
+
+        class _Stub(Connector):
+            key = "gh"
+            source_system = "github"
+
+            def __init__(self, docs):
+                self._docs = docs
+
+            def fetch(self, cursor):
+                yield from self._docs
+
+        pipeline.run([_Stub(self._issue_documents())])
+        retriever = HybridRetriever(store, pipeline.embedder)
+        results, _ = retriever.retrieve("what stops a crawler running forever")
+        self.assertTrue(results, "the issue was not retrieved at all")
+        # The issue is months old. Scored from the fetch time it reads as
+        # brand new - which is what it did before `source_updated_at` existed.
+        recency = results[0].components["rerank_recency"]
+        self.assertLess(recency, 0.9,
+                        "the issue was scored as freshly updated, so its own "
+                        "date was discarded in favour of the fetch time")
+        self.assertGreater(recency, 0.0)
+
+        doc = store.all_documents()[0]
+        self.assertLess(doc.updated_at, doc.created_at,
+                        "updated_at should be the issue's date, older than the fetch")

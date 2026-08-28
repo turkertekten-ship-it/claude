@@ -13,6 +13,7 @@ implements the same interface and can replace it where the latency is affordable
 
 from __future__ import annotations
 
+import datetime
 import math
 import time
 from abc import ABC, abstractmethod
@@ -28,6 +29,53 @@ class Reranker(ABC):
 
     @abstractmethod
     def rerank(self, query: str, results: list[ScoredChunk]) -> list[ScoredChunk]: ...
+
+
+def _as_number(value: Any, *, default: float) -> float:
+    """A metadata value as a float, or the default. Never raises.
+
+    Metadata is whatever a connector chose to write, which is whatever the
+    upstream API returned. `float()` on it is a crash waiting for the first
+    source that stores a string.
+    """
+    try:
+        return float(value)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return default
+
+
+def _as_timestamp(value: Any) -> float:
+    """A metadata date as a POSIX timestamp, or 0.0 for "unknown".
+
+    This was written after `float(chunk.metadata.get("updated_at") or 0.0)`
+    raised ValueError on `"2026-01-02T00:00:00Z"` - the shape the GitHub
+    connector stores for an issue. **That crash is not reachable through the
+    pipeline**, and saying so matters more than the fix: the store overwrites a
+    chunk's `updated_at` with the document's, which is always a float, so the
+    reranker never meets the string. The demonstration used a chunk built by
+    hand, which proves what the function does and not what the system does.
+
+    The parse stays because metadata is whatever a connector chose to write and
+    a scorer should not raise on it, but it is a guard rather than a repair.
+
+    0.0 means unknown, which the caller reads as "neither fresh nor stale" -
+    the right answer for a date nobody can parse.
+    """
+    if value is None or value == "":
+        return 0.0
+    if isinstance(value, (int, float)):
+        return float(value)
+    text = str(value).strip()
+    try:
+        return float(text)
+    except ValueError:
+        pass
+    try:
+        # `fromisoformat` handles the trailing Z from Python 3.11 on, which is
+        # the floor this project targets.
+        return datetime.datetime.fromisoformat(text).timestamp()
+    except ValueError:
+        return 0.0
 
 
 @dataclass
@@ -281,10 +329,10 @@ class HeuristicReranker(Reranker):
             # for a long shared prefix keeps it from being all-or-nothing.
             phrase_score = _longest_common_run(phrase_terms, haystack)
 
-            authority = float(chunk.metadata.get("authority", 1.0))
+            authority = _as_number(chunk.metadata.get("authority"), default=1.0)
             authority_score = max(0.0, min(1.5, authority)) / 1.5
 
-            updated = float(chunk.metadata.get("updated_at") or 0.0)
+            updated = _as_timestamp(chunk.metadata.get("updated_at"))
             if updated:
                 age_days = max(0.0, (now - updated) / 86400.0)
                 recency = math.exp(-age_days / self.half_life_days)

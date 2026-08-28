@@ -21,6 +21,8 @@ token. Three things keep it cheap:
 
 from __future__ import annotations
 
+import datetime
+
 import base64
 import os
 import re
@@ -143,6 +145,21 @@ def _next_link(link_header: str) -> str | None:
         if 'rel="next"' in segments[1].replace(" ", "").replace("'", '"'):
             return segments[0].strip().strip("<>")
     return None
+
+
+def _iso_to_timestamp(value: Any) -> float | None:
+    """GitHub's ISO-8601 dates as a POSIX timestamp, or None if absent/unparsable.
+
+    The API returns `"2026-01-02T00:00:00Z"`. Returning None rather than a
+    fallback matters: `RawDocument.source_updated_at` left unset means "the
+    source did not say", which is a different claim from "it changed now".
+    """
+    if not value:
+        return None
+    try:
+        return datetime.datetime.fromisoformat(str(value)).timestamp()
+    except ValueError:
+        return None
 
 
 @dataclass
@@ -467,6 +484,7 @@ class GitHubConnector(Connector):
             uri=issue.get("html_url", ""),
             title=f"{self.slug} {'PR' if is_pr else 'issue'} #{number}: {issue.get('title','')}",
             text=redact_secrets("\n".join(parts)),
+            source_updated_at=_iso_to_timestamp(issue.get("updated_at")),
             metadata={
                 **self._base_meta("pull_request" if is_pr else "issue"),
                 "number": number,

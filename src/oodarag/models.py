@@ -38,6 +38,20 @@ class RawDocument:
     text: str
     metadata: dict[str, Any] = field(default_factory=dict)
     fetched_at: float = field(default_factory=_now)
+    #: When the *source* says the content last changed, if it says. Distinct
+    #: from `fetched_at`, which is when we asked.
+    #:
+    #: Without this, `Document.updated_at` was the fetch time for every
+    #: connector, so the reranker's recency factor scored a GitHub issue last
+    #: touched in January as brand new because it was fetched a moment ago -
+    #: and every document ingested in one run got the same date, which is why
+    #: recency turned out to move nothing on either eval corpus (L43). The
+    #: connectors already read the real dates; they had nowhere to put them.
+    #:
+    #: Left as None when the source does not say. That is not the same as
+    #: "now", and pretending otherwise is what made a fetch time look like a
+    #: fact about the content.
+    source_updated_at: float | None = None
 
     @property
     def content_hash(self) -> str:
@@ -71,7 +85,9 @@ class Document:
             content_hash=content_hash(text, raw.title),
             metadata=metadata,
             created_at=raw.fetched_at,
-            updated_at=raw.fetched_at,
+            # The source's own date when it gave one, the fetch time otherwise.
+            updated_at=(raw.source_updated_at
+                        if raw.source_updated_at is not None else raw.fetched_at),
         )
 
 

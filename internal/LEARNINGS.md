@@ -1678,3 +1678,49 @@ document from every other source, which is relevance ceasing to matter.
    *causing* it. "The fresher document ranked first" is satisfied by insertion
    order; it means something only alongside "and it does not, with the weight
    at zero".
+
+---
+
+## L44 - The connectors knew the real dates and had nowhere to put them
+
+**Evidence.** L43 found the recency factor inert on both eval corpora, because
+every document in a run shares a timestamp. Chasing *why* they share one:
+
+`Document.from_raw` set `updated_at = raw.fetched_at`, for every connector,
+unconditionally. `fetched_at` is when we asked. So a GitHub issue last touched
+in January, fetched a moment ago, was scored as **brand new** - measured,
+recency 0.99999998 - and every document ingested in the same run got the same
+date, which is exactly the uniformity that made the factor a constant.
+
+The connectors were not missing the information. GitHub's API returns
+`"updated_at": "2026-01-02T00:00:00Z"`, the connector reads it and puts it in
+metadata, where nothing scores it. It had nowhere else to go.
+
+`RawDocument.source_updated_at` is that place: what the source says about its own
+content, distinct from when we fetched it, and **None when the source does not
+say** - which is a different claim from "it changed now". Measured end to end
+through the connector's real output: the same issue now scores recency 0.520.
+
+**A false claim I made along the way, and the correction.** Getting here, I found
+that `float(chunk.metadata.get("updated_at") or 0.0)` raises ValueError on the
+ISO string the connector stores, and wrote that retrieving any GitHub issue
+crashes the reranker. **It does not.** The store overwrites a chunk's
+`updated_at` with the document's, which is always a float, so the reranker never
+meets the string. My demonstration built the chunk by hand - it showed what the
+function does, not what the system does, which is the mistake L36 records about
+concluding from constructed scenarios. The defensive parse stayed, correctly
+labelled as a guard rather than a repair.
+
+**Rules.**
+1. **When a value is uniform, ask where it comes from before concluding the
+   feature is useless.** The uniformity was the symptom; the cause was a field
+   assignment three modules away, and the fix makes the feature work rather than
+   documenting it as unmeasurable.
+2. "We fetched this at T" and "the source changed this at T" are different
+   facts. Storing one in the other's field is provenance that lies, and it lies
+   in the direction that makes everything look fresh.
+3. A hand-built input proves what a function does. Only an input the system
+   actually produces proves what the system does - and I have now made this
+   mistake in both directions in one session: concluding a rule was dead from
+   scenarios that were too narrow (L36), and concluding a crash was live from a
+   scenario the pipeline cannot produce.
