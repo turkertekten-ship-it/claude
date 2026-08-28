@@ -44,20 +44,28 @@ seriously here, and it wins almost everywhere — fund accounting, custody,
 document storage and audit should all be bought.
 
 It loses in exactly one place, for a reason that is specific to this firm.
-Tebliğ VII-128.10 requires a capital-markets institution to keep **both its
-primary and its secondary information systems inside Turkey**
-[src:SPK-DATA-RESIDENCY-VII-128-10]. If that binds a portföy yönetim şirketi,
-the US-hosted fund-ops stack cannot be the system of record, and the vendor
+Tebliğ VII-128.10 MADDE 27(1) requires that **both primary and secondary
+information systems be held inside Turkey**, and MADDE 2(1)(g) puts *sermaye
+piyasası kurumları* — the category a portföy yönetim şirketi belongs to —
+squarely in scope. The only exemption from 27(1) is MADDE 30(3), for publicly
+held companies with no IS-audit obligation, which does not reach a PYŞ. There
+is no size threshold. The tebliğ took force 30/6/2025 and GEÇİCİ MADDE 1(2)
+required compliance by **31/12/2025 — already passed**
+[src:SPK-VII-128-10-PRIMARY-2026-08-28].
+
+So the US-hosted fund-ops stack cannot be the system of record, and the vendor
 finding does not transfer because the vendors are not deployable. Add that no
 vendor sells SPK obligation tracking with TÜFE restatement in Turkish, and the
 buildable surface narrows to something one numerate person can own.
 
-**This is the load-bearing assumption of the whole design, and it is not
-settled.** It rests on legal commentary rather than the SPK's own text, and is
-registered as AIR-4. If counsel reads VII-128.10 and says it binds narrowly or
-not at all, a meaningful part of this document should be replaced by a
-purchase order. That is the honest position, and it is the first question to
-resolve.
+**This was the load-bearing assumption of the design, and it is now read from
+the tebliğ itself rather than from commentary.** AIR-4 is closed. The remaining
+caveat is narrow and worth stating: the text came from a third-party GitHub
+mirror of mevzuat.spk.gov.tr, snapshot 2026-06-14, because SPK's own site is
+denied at this environment's gateway [src:SPK-MIRROR-GITHUB-2026-08-28]. A
+mirror can be stale. Counsel should still confirm the wording — but the
+question has moved from "does this rule exist and bind us" to "is this copy
+faithful", which is a much smaller one.
 
 ---
 
@@ -128,10 +136,15 @@ If this system does only one thing correctly, it should be this.
 **Fund figures are nominal. Management-company figures are TMS 29 restated.
 They may never be added, compared, or charted together without a flag.**
 
-SPK decision 16.02.2024 no. 11/255 exempts investment funds from inflation
-accounting, while other capital-markets entities — including the management
-company — applied TMS 29 from the period ending 31.12.2023
-[src:SPK-FUND-TMS29-EXEMPTION]. At 31.75% CPI [src:TCMB-MACRO-2026-08] a
+SPK decision **14/382 of 07/03/2024** rules that investment funds do not apply
+inflation accounting in their TMS/TFRS financial statements, while decision
+**81/1820 of 28/12/2023** puts issuers and *sermaye piyasası kurumları* — the
+category the management company sits in — onto TMS 29 from the period ending
+31.12.2023. Both read from primary text [src:SPK-TMS29-PRIMARY-2026-08-28].
+An earlier draft of this document attributed the exemption to decision 11/255,
+following every secondary source consulted; 11/255 is about stewardship
+principles and says nothing about inflation accounting
+[src:SPK-11-255-MISATTRIBUTION-2026-08-28]. At 31.75% CPI [src:TCMB-MACRO-2026-08] a
 consolidated view that mixes the two is not slightly off; it is wrong by
 roughly a third per year of divergence, in the flattering direction.
 

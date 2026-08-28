@@ -180,8 +180,16 @@ regulatory-change detection. A rule that fires on a misread of the decision is
 worse than no rule, so the obligation seeded from it carries a `verify` flag
 rather than being presented as settled law.
 
-**Resolves when:** the SPK haftalık bülten for that week is read directly, or
-counsel confirms the scope.
+**Advanced, not closed.** The decision now has a number and a bulletin — 23/07/2026
+no. 45/1359, SPK bulletin 2026/38 [src:SPK-BULLETIN-45-1359-2026-08-28] — but the
+operative wording is still unread. The GitHub mirror of mevzuat.spk.gov.tr that
+closed AIR-4 and AIR-5 cannot close this one: its snapshot is dated 2026-06-14
+and contains no document later than that, so a July decision is simply absent.
+[src:SPK-MIRROR-GITHUB-2026-08-28] The corpus also carries tebliğs, rehbers and
+kurul kararları but no weekly bulletins at all.
+
+**Resolves when:** the SPK haftalık bülten 2026/38 is read directly, the mirror
+is refreshed past July 2026, or counsel confirms the scope.
 
 ---
 
@@ -201,47 +209,66 @@ whose answers would change the build.
 
 ---
 
-### AIR-4 — Whether the VII-128.10 residency rule binds a portföy yönetim şirketi, and how
+### AIR-4 — RESOLVED: VII-128.10 binds a portföy yönetim şirketi, with no size threshold
 
-**Unknown:** whether the requirement that primary and secondary information
-systems sit inside Turkey applies to a PYŞ of WAM's size, what counts as an
-"information system" for the purpose, whether a cloud region inside Turkey
-satisfies it, and whether any exception or transition regime exists.
+**Was unknown:** whether the requirement that primary and secondary information
+systems sit inside Turkey applies to a PYŞ of WAM's size, and whether any
+exception or transition regime exists.
 
-**Why:** the tebliğ text is established here only through legal commentary and a
-third-party PDF; the SPK's own published text was not opened.
-[src:SPK-DATA-RESIDENCY-VII-128-10]
+**Resolved from the tebliğ's own text**, reached through a GitHub mirror of
+mevzuat.spk.gov.tr after every Turkish host was denied at the gateway.
+[src:SPK-VII-128-10-PRIMARY-2026-08-28] [src:SPK-MIRROR-GITHUB-2026-08-28]
 
-**Why it matters here:** this is the single finding that reverses build-versus-buy.
-The strongest general evidence available says vendor tools succeed about twice as
-often as internal builds [src:MIT-PILOT-FAILURE-2026]. If the residency rule binds,
-the major Western fund-ops vendors cannot be the system of record and the general
-finding does not transfer. If it does not bind, or binds more narrowly than read
-here, the honest recommendation changes and part of this design should be replaced
-by a purchase.
+- **MADDE 2(1)(g)** puts *sermaye piyasası kurumları* in scope, the category a
+  portföy yönetim şirketi belongs to.
+- **MADDE 27(1)**: "Kurum, Kuruluş ve Ortaklıkların birincil ve ikincil
+  sistemlerini yurt içinde bulundurmaları zorunludur."
+- **MADDE 30(3)** is the only exemption from 27(1), and it covers publicly held
+  companies with no IS-audit obligation under III-62.2 — not a PYŞ.
+- **MADDE 30(6)** lets the Board grant exemptions case by case, so a
+  firm-specific one is possible but must be applied for.
+- **MADDE 33**: in force 30/6/2025. **GEÇİCİ MADDE 1(2)**: non-crypto
+  institutions had to comply with everything except 29(3) by **31/12/2025**.
+- There is no size or AUM threshold anywhere in the tebliğ.
 
-**Resolves when:** counsel or the compliance officer reads VII-128.10 and states
-which of the firm's systems are in scope.
+**What this settles for the design:** building rather than buying is the
+compliance-correct answer here, not a budget compromise — a US-hosted system of
+record is not lawfully available to this firm.
+
+**Residual caveat, and it is small:** the text came from a third-party mirror
+snapshotted 2026-06-14, not from SPK. Counsel should confirm the wording. The
+question has moved from "does this bind us" to "is this copy faithful".
 
 ---
 
-### AIR-5 — Whether the fund TMS 29 exemption still holds for 2026
+### AIR-5 — SUBSTANTIALLY RESOLVED: the fund exemption exists, in a different decision than reported
 
-**Unknown:** whether SPK decision 16.02.2024 no. 11/255, exempting investment
-funds from inflation accounting, is still in force for the 2026 reporting
-period.
+**Was unknown:** whether SPK decision 16.02.2024 no. 11/255, reported to exempt
+investment funds from inflation accounting, is still in force for 2026.
 
-**Why:** the 2024 decision is what is sourced. No later decision reversing or
-extending it was found, and absence of a search result is not evidence of
-absence. [src:SPK-FUND-TMS29-EXEMPTION]
+**The premise was wrong.** Decision 11/255 adds *Sorumlu Yönetim İlkeleri* —
+stewardship principles — to the Yatırım Fonlarına İlişkin Rehber as article 13.
+It says nothing about inflation accounting. Every secondary source consulted
+said otherwise, and this session repeated them.
+[src:SPK-11-255-MISATTRIBUTION-2026-08-28]
 
-**Why it matters here:** the design's central correctness invariant is that fund
-figures are nominal and management-company figures are TMS 29 restated, so the
-two may never be added together without a flag. If the exemption lapsed, that
-invariant inverts and every consolidated view built on it is wrong.
+**The exemption is real and comes from elsewhere**, both read from primary text:
+[src:SPK-TMS29-PRIMARY-2026-08-28]
 
-**Resolves when:** the current Yatırım Fonlarına İlişkin Rehber is read directly,
-or the auditor confirms the 2026 treatment.
+- **Decision 81/1820 of 28/12/2023(a)**: issuers and *sermaye piyasası
+  kurumları* apply TMS 29 from the annual reports for periods ending 31.12.2023.
+  That is the management company.
+- **Decision 14/382 of 07/03/2024(A)**: "yatırım fonlarının TMS/TFRS uyarınca
+  hazırlayacakları finansal tablolarında enflasyon muhasebesi uygulanmamasına" —
+  investment funds do not apply inflation accounting.
 
-**Built accordingly:** the restatement basis is an explicit per-entity field with
-no default, so a lapse is a configuration change rather than a rewrite.
+**So the invariant the design rests on holds**: fund figures nominal,
+management-company figures restated, never added without a flag.
+
+**Still open, narrowly:** whether any decision after 2026-06-14 changed it. The
+mirror's snapshot predates that, and SPK's own site is denied here. The
+restatement basis is an explicit per-entity field with no default, so a change
+is a configuration edit rather than a rewrite.
+
+**Resolves when:** a bulletin later than June 2026 is read, or the auditor
+confirms the 2026 treatment.

@@ -504,13 +504,14 @@ sources:
     method: 'WebSearch(query="SPK yatırım fonları enflasyon muhasebesi TMS 29 uygulanmayacak karar 11/255 istisna")'
     evidence: provenance/raw/subject-research-2026-08-27.md
     note: >-
-      SPK decision 16.02.2024 no. 11/255: investment funds do NOT apply
-      inflation accounting in TMS/TFRS financial statements, added to the
-      Yatırım Fonlarına İlişkin Rehber as principle 13 under Sorumlu Yönetim
-      İlkeleri; other SPK-regulated entities applied TMS 29 from the period
-      ending 31.12.2023. Re-run first-hand after a delegated agent reported it.
-      Whether the exemption still stands for 2026 was NOT established — the
-      2024 decision is what is sourced. See AIR-5.
+      SUPERSEDED AND PARTLY WRONG — kept because deleting a mistaken source
+      hides that anything downstream ever rested on it. This entry recorded, from
+      search summaries, that SPK decision 16.02.2024 no. 11/255 exempts
+      investment funds from TMS 29. The exemption is real; the decision number is
+      not. 11/255 concerns stewardship principles
+      [src:SPK-11-255-MISATTRIBUTION-2026-08-28]. The exemption comes from
+      decision 14/382 of 07/03/2024, read from primary text
+      [src:SPK-TMS29-PRIMARY-2026-08-28]. Cite those two instead of this.
 
   - id: DELEGATED-RECON-2026-08-27
     kind: tool_output
@@ -757,3 +758,96 @@ sources:
       retrieval: writing about the corpus dilutes it. Recorded rather than
       baselined away, because re-saving a baseline to make a drop disappear is
       precisely the move the harness exists to prevent. The case stays red.
+
+  # ---------------------------------------------------------------------------
+  # Primary SPK texts, reached through a GitHub mirror after every Turkish host
+  # was denied at the gateway. raw.githubusercontent.com is on the proxy bypass
+  # list, so a third-party mirror of mevzuat.spk.gov.tr is reachable where the
+  # regulator's own site is not. This is the "different authority" rung of the
+  # escalation ladder, and it worked.
+  # ---------------------------------------------------------------------------
+
+  - id: SPK-MIRROR-GITHUB-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T08:10Z"
+    method: "mcp__github__search_code for VII-128.10; curl https://raw.githubusercontent.com/aysinkuman/spkfiles/main/spk-corpus/download_manifest.csv and the PDFs it lists"
+    evidence: >-
+      A 379-row manifest of SPK regulation mirrored from mevzuat.spk.gov.tr,
+      each row carrying the original API url, a download date of 2026-06-14, an
+      HTTP status and a sha256. Categories: teblig, rehber, ilke_karari,
+      kurul_karari, kanun, yonetmelik, ck, anayasa. Four PDFs were fetched and
+      text-extracted into provenance/raw/spk/.
+    note: >-
+      THIRD-PARTY MIRROR, not the regulator. The manifest records provenance per
+      file and the texts are internally consistent with each other and with SPK's
+      own numbering, which is why they are used — but a mirror can be stale or
+      altered, and the snapshot is dated 2026-06-14. Anything decided after that
+      date is absent, which is precisely why AIR-2 stays open.
+
+  - id: SPK-VII-128-10-PRIMARY-2026-08-28
+    kind: filesystem
+    collected_at: "2026-08-28T08:12Z"
+    method: "pypdf text extraction of teblig_VII-128-10.pdf from the mirror; grep for Kapsam, yurt içinde, Yürürlük, GEÇİCİ MADDE"
+    evidence: provenance/raw/spk/teblig-VII-128-10.txt
+    note: >-
+      MADDE 2(1) lists who must comply and includes "(g) Sermaye piyasası
+      kurumları". MADDE 27(1): "Kurum, Kuruluş ve Ortaklıkların birincil ve
+      ikincil sistemlerini yurt içinde bulundurmaları zorunludur." MADDE 30(3)
+      exempts only halka açık ortaklıklar that have no IS-audit obligation under
+      III-62.2 from 27(1) — not sermaye piyasası kurumları. MADDE 30(4)'s foreign
+      cloud allowance is for Platformlar. MADDE 30(6) lets the Board grant
+      exemptions case by case. MADDE 33: in force 30/6/2025. GEÇİCİ MADDE 1(2):
+      non-crypto institutions had to comply with everything except 29(3) by
+      31/12/2025. No size threshold anywhere.
+
+  - id: SPK-TMS29-PRIMARY-2026-08-28
+    kind: filesystem
+    collected_at: "2026-08-28T08:14Z"
+    method: "pypdf text extraction of ilke_20231228_81-1820.pdf and kurul_20240307_14-382.pdf from the mirror"
+    evidence: provenance/raw/spk/kurul-14-382-2024-03-07.txt
+    note: >-
+      Decision 81/1820 of 28/12/2023, paragraph (a): issuers and "sermaye
+      piyasası kurumları" subject to the Board's financial reporting rules apply
+      TMS 29 from the annual reports for periods ending 31.12.2023. Decision
+      14/382 of 07/03/2024, paragraph (A): "yatırım fonlarının TMS/TFRS uyarınca
+      hazırlayacakları finansal tablolarında enflasyon muhasebesi
+      uygulanmamasına" — investment funds do not apply inflation accounting in
+      their TMS/TFRS financial statements, reasoning from their non-application
+      at first transition and from VUK Sirküler 165 of 20.02.2024.
+
+  - id: SPK-11-255-MISATTRIBUTION-2026-08-28
+    kind: filesystem
+    collected_at: "2026-08-28T08:13Z"
+    method: "pypdf text extraction of ilke_54-4-aj.pdf (i-SPK 52.4.aj, 16/02/2024, 11/255) from the mirror"
+    evidence: provenance/raw/spk/ilke-52-4-aj-11-255-2024-02-16.txt
+    note: >-
+      A CORRECTION to this session's own earlier sourcing. Decision 11/255 of
+      16/02/2024 adds "Sorumlu Yönetim İlkeleri" — stewardship principles for
+      securities investment funds founded by portfolio management companies — to
+      the Yatırım Fonlarına İlişkin Rehber as article (13), and amends article
+      4.3(c). It says NOTHING about inflation accounting. Every secondary source
+      consulted, and consequently this session's SPK-FUND-TMS29-EXEMPTION entry,
+      attributed the TMS 29 fund exemption to it. The exemption is real but comes
+      from 14/382 [src:SPK-TMS29-PRIMARY-2026-08-28]. Separately, "Sorumlu
+      Yönetim İlkeleri Rehberi" is its own distinct Rehber in the corpus, which
+      is likely how the two were conflated.
+
+  - id: AIR1-MIRROR-PATH-EXHAUSTED-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T08:20Z"
+    method: "mcp__github__search_code for TEFAS/KAP fund datasets and for the WAM fund codes, after the same path had reached primary SPK texts"
+    evidence: >-
+      A search for the fund codes VBR, VIK and WQQ alongside Turkish fund terms
+      returned zero results. A search for TEFAS data access returned eleven
+      results, all of them client libraries and scrapers that fetch from
+      tefas.gov.tr at run time — burakyilmaz321/tefas-crawler,
+      saidsurucu/borsapy, develooper1994/tefas_scraper and similar — and no
+      bundled dataset.
+    note: >-
+      The mirror path that closed AIR-4 and AIR-5 does not reach AIR-1, and the
+      reason is structural rather than incidental. Regulation is a small, stable
+      corpus somebody found worth mirroring; fund-level figures are a live feed
+      behind KAP, which is denied here. GSYF and GYF are qualified-investor
+      vehicles and are not published on TEFAS at all, so even an unblocked TEFAS
+      would not carry them. AIR-1 closes only with KAP access or the owner's own
+      numbers.
