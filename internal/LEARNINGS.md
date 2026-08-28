@@ -414,3 +414,43 @@ the interesting result rather than an inconvenience.
 **Also.** The external set found the nDCG overflow (L16) that the primary set had
 been quietly under-reporting, because its documents chunk more heavily. A second
 corpus is a second sampling of the failure space, not just a second score.
+
+---
+
+## L19 - A negative result is a result, if you write down the number
+
+**Evidence.** Pseudo-relevance feedback was implemented specifically to fix one
+documented failure - a question phrased in words the corpus does not use ("what
+stops a crawl from running *forever*" against a module that says "bounded by
+requests, bytes, depth" and "never terminates"). It did not fix it, and it made
+the primary corpus worse:
+
+| corpus   | expansion | pass  | recall@8 | nDCG@8 |
+|----------|-----------|-------|----------|--------|
+| external | off       | 20/20 | 0.800    | 0.7815 |
+| external | on        | 20/20 | 0.800    | 0.7815 |
+| primary  | off       | 17/20 | 0.625    | 0.4729 |
+| primary  | on        | 17/20 | 0.600    | 0.4642 |
+
+The target question expanded to *"neither candid markdown below model wrong eval
+rather"* - terms harvested from the same wrong results the unexpanded query had
+returned. Textbook query drift. The three mitigations built in (lower weight, a
+separate fused arm, lift-based term selection) limited the damage without
+preventing it.
+
+**Rule.** Pre-register the decision rule *before* measuring - here, "keep only
+if neither corpus regresses and at least one improves" - and then honour it.
+Without that, a result this close is easy to argue into acceptance, because the
+pass rate did not move and only two second-order metrics fell.
+
+**On what to do with the code.** It is kept, off by default, with the table
+above in its module docstring and tests pinning the default. The technique is
+sound and helps on many corpora; it does not help on this one, where the
+embedder already does subword matching and the corpus is small. Deleting it
+would mean the next person implements it and repeats the experiment; keeping it
+undocumented would mean someone enables it and quietly loses recall.
+
+**A detail worth keeping.** The feedback set for the target question included
+`retrieve/expansion.py` - the module written to fix that question became a top
+result for it, and then supplied its own vocabulary as expansion terms. A
+self-referential corpus contaminates more than its evaluation.

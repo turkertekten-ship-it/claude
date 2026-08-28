@@ -26,6 +26,7 @@ from typing import Any
 
 from oodarag.embedding.base import Embedder
 from oodarag.models import ScoredChunk
+from oodarag.retrieve.expansion import expand
 from oodarag.retrieve.fusion import RankedList, reciprocal_rank_fusion
 from oodarag.retrieve.mmr import jaccard, mmr_select
 from oodarag.retrieve.rerank import HeuristicReranker, Reranker
@@ -48,6 +49,16 @@ class RetrievalConfig:
     use_mmr: bool = True
     mmr_lambda: float = 0.7
     use_rerank: bool = True
+    #: Pseudo-relevance feedback. Off by default until it is measured on your
+    #: corpus: it helps where a question and its answer share little vocabulary,
+    #: and hurts where the initial results are wrong, because it then retrieves
+    #: more of the same. See retrieve/expansion.py.
+    use_expansion: bool = False
+    expansion_feedback_k: int = 5
+    expansion_terms: int = 8
+    #: Fused below the original arms, so expansion can add candidates but never
+    #: evict what the original query found.
+    expansion_weight: float = 0.5
     #: Results below this fused-and-reranked score are dropped. Returning weak
     #: matches is how a RAG system ends up confidently citing an irrelevant page.
     min_score: float = 0.0
@@ -60,6 +71,7 @@ class RetrievalTrace:
     query: str = ""
     dense_hits: int = 0
     lexical_hits: int = 0
+    expansion_hits: int = 0
     fused_hits: int = 0
     filtered_to: int | None = None
     returned: int = 0
@@ -70,7 +82,8 @@ class RetrievalTrace:
     def as_dict(self) -> dict[str, Any]:
         return {
             "query": self.query, "dense_hits": self.dense_hits,
-            "lexical_hits": self.lexical_hits, "fused_hits": self.fused_hits,
+            "lexical_hits": self.lexical_hits, "expansion_hits": self.expansion_hits,
+            "fused_hits": self.fused_hits,
             "filtered_to": self.filtered_to, "returned": self.returned,
             "latency_ms": round(self.latency_ms, 2),
             "stages": {k: round(v, 2) for k, v in self.stages.items()},
@@ -128,16 +141,33 @@ class HybridRetriever:
             trace.notes.append("both arms returned nothing")
             return [], trace
 
+        # --- expansion (a third arm, fused below the other two)
+        expanded: list[tuple[str, float]] = []
+        if config.use_expansion:
+            mark = time.monotonic()
+            seed_ids = [cid for cid, _ in (dense or lexical)[: config.expansion_feedback_k]]
+            feedback = list(self.store.get_chunks(seed_ids).values())
+            expansion = expand(
+                query, feedback, self.store.idf_lookup(),
+                max_terms=config.expansion_terms,
+                corpus_frequency=self.store.term_frequency(),
+            )
+            if expansion.terms:
+                trace.notes.append(f"expanded with: {' '.join(expansion.terms)}")
+                expanded = self.store.search_lexical(
+                    expansion.query, k=config.candidate_k, allowed=allowed)
+            trace.stages["expansion_ms"] = (time.monotonic() - mark) * 1000
+            trace.expansion_hits = len(expanded)
+
         # --- fusion
         mark = time.monotonic()
-        fused = reciprocal_rank_fusion(
-            [
-                RankedList("dense", dense, config.dense_weight),
-                RankedList("lexical", lexical, config.lexical_weight),
-            ],
-            k=config.rrf_k,
-            top_k=config.candidate_k,
-        )
+        arms = [
+            RankedList("dense", dense, config.dense_weight),
+            RankedList("lexical", lexical, config.lexical_weight),
+        ]
+        if expanded:
+            arms.append(RankedList("expanded", expanded, config.expansion_weight))
+        fused = reciprocal_rank_fusion(arms, k=config.rrf_k, top_k=config.candidate_k)
         trace.fused_hits = len(fused)
         trace.stages["fusion_ms"] = (time.monotonic() - mark) * 1000
 

@@ -651,6 +651,30 @@ class SqliteStore:
         """
         return set(self.idf_table())
 
+    def term_frequency(self):
+        """Callable giving a term's corpus-wide document frequency as a share.
+
+        Used by expansion to measure lift: how much more common a term is in the
+        feedback set than in the corpus at large. Selecting expansion terms on
+        raw frequency picks the corpus's most common words, which are the least
+        informative ones.
+        """
+        import math
+
+        table = self.idf_table()
+        total = max(1, self.chunk_count())
+
+        def frequency(term: str) -> float:
+            idf = table.get(term)
+            if idf is None:
+                return 0.0
+            # Invert the BM25 idf used to build the table.
+            value = math.exp(idf) - 1.0
+            df = (total + 0.5 - 0.5 * value) / (value + 1.0)
+            return max(0.0, min(1.0, df / total))
+
+        return frequency
+
     def idf_lookup(self):
         """A callable returning the IDF of a stemmed term.
 

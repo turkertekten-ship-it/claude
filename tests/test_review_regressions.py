@@ -502,3 +502,67 @@ class AnswerabilityTest(unittest.TestCase):
             for _ in range(4)
         }
         self.assertEqual(len(seen), 1, f"non-deterministic across processes: {seen}")
+
+
+class QueryExpansionTest(unittest.TestCase):
+    """Pseudo-relevance feedback: implemented, measured, and left off.
+
+    It made retrieval measurably worse on the primary corpus and changed nothing
+    on the external one (see retrieve/expansion.py for the table). These tests
+    pin the default and the properties that bound the damage, so the decision
+    survives someone flipping it on by reflex.
+    """
+
+    def test_it_is_off_by_default(self):
+        from oodarag.retrieve.hybrid import RetrievalConfig
+
+        self.assertFalse(RetrievalConfig().use_expansion,
+                         "expansion was enabled by default despite measuring worse")
+
+    def test_expansion_never_selects_the_original_query_terms(self):
+        from oodarag.retrieve.expansion import expand
+
+        chunks = [Chunk(f"c{i}", "d", i, "budget bytes depth wall clock crawl")
+                  for i in range(4)]
+        result = expand("crawl budget", chunks, idf=lambda t: 5.0)
+        self.assertNotIn("crawl", result.terms)
+        self.assertNotIn("budget", result.terms)
+
+    def test_a_term_common_across_the_corpus_is_not_selected(self):
+        """Selecting on raw frequency picks the corpus's most common words,
+        which are by definition its least informative ones."""
+        from oodarag.retrieve.expansion import expand
+
+        chunks = [Chunk(f"c{i}", "d", i, "ubiquitous rare_signal text here")
+                  for i in range(4)]
+        result = expand("query", chunks, idf=lambda t: 5.0,
+                        corpus_frequency=lambda t: 0.99 if t == "ubiquitous" else 0.01)
+        self.assertNotIn("ubiquitous", result.terms)
+        self.assertIn("rare_signal", result.terms)
+
+    def test_empty_feedback_expands_to_nothing(self):
+        from oodarag.retrieve.expansion import expand
+
+        self.assertEqual(expand("anything", [], idf=lambda t: 1.0).terms, [])
+
+    def test_enabling_it_still_returns_results(self):
+        """Off by default is a judgement about quality, not a broken path."""
+        from oodarag.ingest.filesystem import FilesystemConnector
+        from oodarag.retrieve.hybrid import RetrievalConfig
+
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        pipeline = IndexPipeline(store)
+        docs = [_doc(f"d{i}", f"{i}.md",
+                     f"Crawling is bounded by requests, bytes and depth, item {i}.")
+                for i in range(6)]
+        store.upsert_documents(docs)
+        pipeline.embedder.fit([d.text for d in docs])
+        for d in docs:
+            store.replace_chunks(d.doc_id, chunk_document(d))
+        pipeline.embed_missing()
+        retriever = HybridRetriever(store, pipeline.embedder,
+                                    RetrievalConfig(use_expansion=True))
+        results, trace = retriever.retrieve("what bounds a crawl")
+        self.assertTrue(results)
+        self.assertIn("expansion_ms", trace.stages)
