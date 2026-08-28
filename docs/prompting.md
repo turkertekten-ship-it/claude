@@ -187,6 +187,30 @@ non-compliance **visible**, because a criterion that was written down is a
 criterion that can be checked afterwards. That is the whole mechanism, and it
 is smaller and more durable than "better prompts get better answers".
 
+## The other half: checking the answer
+
+An acceptance test that nobody reads back is decoration. `tools/check_output.py`
+takes the forged prompt and the answer it produced, and counts what can be
+counted: limits on words, lines, sentences and paragraphs; one-paragraph and
+one-code-block demands; forbidden tokens; JSON validity; a missing preamble.
+
+Two design decisions are worth stating, because both are refusals:
+
+- **It scopes to the constraint sections.** A prompt written in the seven slots
+  gets its CONSTRAINTS, OUTPUT CONTRACT and ACCEPTANCE TEST read, and nothing
+  else — otherwise "the module has 400 lines" in the CONTEXT becomes a limit on
+  the answer. A prompt without slot headings is scanned whole, and the report
+  says so.
+- **It lists what it could not interpret.** Most of what a prompt constrains is
+  prose no machine can check. A checker reporting "all clear" over the parts it
+  silently skipped would be worse than no checker, so the unchecked constraints
+  are printed alongside the ones that passed.
+
+Run against this repository's own trial data it finds the 86-word overrun that
+the model judge found by reading [src:CHECK-OUTPUT-TRIAL-2026-08-27]. That is
+the whole argument for it: the constraint was written down, and until now
+nothing counted it.
+
 ## What the linter cannot check
 
 Stated plainly, because a guard whose limits are unstated gets trusted past

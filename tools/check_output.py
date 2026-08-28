@@ -1,0 +1,285 @@
+#!/usr/bin/env python3
+"""Check an answer against the constraints its own prompt stated.
+
+The prompt standard makes you write an acceptance test. Nothing until now read
+it back. That gap is not theoretical: in this repository's own A/B trial the
+winning arm was given an 80-word limit and returned 86 words, and the limit was
+in the prompt the whole time [src:FORGE-AB-TRIAL-2026-08-27].
+
+**What this does not do.** It does not verify an answer. Most of what a prompt
+constrains is prose no machine can check - "touch only `base.py`", "do not
+change behaviour". Across this repository's own forged prompts only a handful
+of constraints are countable at all. So the tool checks the countable subset,
+and then lists every constraint sentence it could not interpret, because a
+checker that reported "all clear" over the parts it silently skipped would be
+worse than no checker.
+
+Scope: if the prompt uses the slot headings, only the constraint, output and
+acceptance sections are read - a number in the CONTEXT section describes the
+input, not the answer. Without headings the whole prompt is scanned and the
+report says so.
+
+Usage
+  python3 tools/check_output.py PROMPT OUTPUT [--json] [--quiet]
+  cat answer.txt | python3 tools/check_output.py PROMPT -
+Exit
+  0 every checkable constraint held · 1 one or more failed · 2 could not run
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import sys
+from dataclasses import dataclass, field
+from pathlib import Path
+
+FENCE = re.compile(r"^\s*(```|~~~)")
+SLOT_HEADING = re.compile(
+    r"^\s*(?:#{1,6}\s*|\*\*)(CONSTRAINTS?|OUTPUT(?:\s+CONTRACT)?|ACCEPTANCE(?:\s+TEST)?"
+    r"|ROLE|CONTEXT|TASK|IF\s+YOU\s+CANNOT)\b",
+    re.I,
+)
+CHECKED_SECTIONS = ("CONSTRAINT", "OUTPUT", "ACCEPTANCE")
+
+UNITS = {
+    "word": lambda t: len(t.split()),
+    "words": lambda t: len(t.split()),
+    "line": lambda t: len([l for l in t.splitlines() if l.strip()]),
+    "lines": lambda t: len([l for l in t.splitlines() if l.strip()]),
+    "sentence": lambda t: len([s for s in re.split(r"[.!?]+(?:\s|$)", t) if s.strip()]),
+    "sentences": lambda t: len([s for s in re.split(r"[.!?]+(?:\s|$)", t) if s.strip()]),
+    "paragraph": lambda t: len([p for p in re.split(r"\n\s*\n", t.strip()) if p.strip()]),
+    "paragraphs": lambda t: len([p for p in re.split(r"\n\s*\n", t.strip()) if p.strip()]),
+    "character": len,
+    "characters": len,
+}
+
+
+@dataclass
+class Check:
+    rule: str
+    demand: str
+    ok: bool
+    detail: str
+
+
+@dataclass
+class Report:
+    checks: list[Check] = field(default_factory=list)
+    unchecked: list[str] = field(default_factory=list)
+    scoped: bool = True
+
+    @property
+    def failed(self) -> list[Check]:
+        return [c for c in self.checks if not c.ok]
+
+
+def sentences_of(text: str) -> list[str]:
+    parts = []
+    for line in text.splitlines():
+        line = line.strip().lstrip("-*# ").strip()
+        if not line:
+            continue
+        parts.extend(s.strip() for s in re.split(r"(?<=[.;])\s+", line) if s.strip())
+    return parts
+
+
+def constraint_text(prompt: str) -> tuple[str, bool]:
+    """The sections whose statements are about the answer, if they are marked."""
+    lines = prompt.splitlines()
+    if not any(SLOT_HEADING.match(l) for l in lines):
+        return prompt, False
+    kept, keeping = [], False
+    for line in lines:
+        m = SLOT_HEADING.match(line)
+        if m:
+            keeping = any(m.group(1).upper().startswith(s) for s in CHECKED_SECTIONS)
+            if keeping:
+                kept.append(re.sub(r"^\s*(?:#{1,6}\s*|\*\*)[A-Z ]+\**\.?\**", "", line))
+            continue
+        if keeping:
+            kept.append(line)
+    return "\n".join(kept), True
+
+
+def strip_fences(text: str) -> str:
+    out, inside = [], False
+    for line in text.splitlines():
+        if FENCE.match(line):
+            inside = not inside
+            continue
+        out.append(line)
+    return "\n".join(out)
+
+
+def fenced_blocks(text: str) -> int:
+    return sum(1 for line in text.splitlines() if FENCE.match(line)) // 2
+
+
+def body_of(output: str) -> str:
+    """A single fenced block is the answer; the fence is packaging."""
+    if fenced_blocks(output) == 1 and output.strip().startswith(("```", "~~~")):
+        return strip_fences(output)
+    return output
+
+
+def check(prompt: str, output: str) -> Report:
+    """Every matcher runs against every constraint sentence.
+
+    Not first-match-wins: "No bullet points, no headings, no bold labels" is one
+    sentence carrying three constraints, and an early `continue` silently
+    checked only the first of them. Identical demands stated twice — once in
+    CONSTRAINTS and again in the OUTPUT CONTRACT — collapse to one check.
+    """
+    scope, scoped = constraint_text(prompt)
+    report = Report(scoped=scoped)
+    body = body_of(output)
+    seen: set[tuple[str, str]] = set()
+
+    def add(rule: str, demand: str, ok: bool, detail: str) -> bool:
+        if (rule, demand) in seen:
+            return True
+        seen.add((rule, demand))
+        report.checks.append(Check(rule, demand, ok, detail))
+        return True
+
+    def counts(sentence: str, low: str) -> bool:
+        fired = False
+        m = re.search(r"\b(?:under|below|at most|no more than|fewer than|less than|"
+                      r"maximum of|max(?:imum)?|up to|within)\s+(\d+)\s+(\w+)", low)
+        if m and m.group(2) in UNITS:
+            limit, unit = int(m.group(1)), m.group(2)
+            actual = UNITS[unit](body)
+            fired = add("MAX_COUNT", f"at most {limit} {unit}", actual <= limit, f"{actual} {unit}")
+        m = re.search(r"\bexactly\s+(\d+)\s+(\w+)", low)
+        if m and m.group(2) in UNITS:
+            want, unit = int(m.group(1)), m.group(2)
+            actual = UNITS[unit](body)
+            fired = add("EXACT_COUNT", f"exactly {want} {unit}", actual == want, f"{actual} {unit}") or fired
+        return fired
+
+    def structure(sentence: str, low: str) -> bool:
+        fired = False
+        if re.search(r"\bone paragraph\b|\ba single paragraph\b", low):
+            actual = UNITS["paragraphs"](body)
+            fired = add("ONE_PARAGRAPH", "one paragraph", actual == 1, f"{actual} paragraphs")
+        if re.search(r"\bno (?:bullet|bullets|bullet points|lists?|numbered lists?)\b", low):
+            bad = [l for l in body.splitlines() if re.match(r"\s*(?:[-*+]\s|\d+[.)]\s)", l)]
+            fired = add("NO_LISTS", "no list markup", not bad, f"{len(bad)} list line(s)") or fired
+        if re.search(r"\bno (?:headings?|headers?)\b", low):
+            bad = [l for l in body.splitlines() if re.match(r"\s*#{1,6}\s", l)]
+            fired = add("NO_HEADINGS", "no headings", not bad, f"{len(bad)} heading(s)") or fired
+        if re.search(r"\bno bold labels?\b|\bno bold\b", low):
+            bad = [l for l in body.splitlines() if re.match(r"\s*\*\*", l)]
+            fired = add("NO_BOLD_LABELS", "no bold labels", not bad,
+                        f"{len(bad)} bold-led line(s)") or fired
+        m = re.search(r"\b(?:in\s+)?one\s+(?:\w+\s+)?code block\b", low)
+        if m:
+            actual = fenced_blocks(output)
+            fired = add("ONE_CODE_BLOCK", "one code block", actual == 1,
+                        f"{actual} fenced block(s)") or fired
+        if re.search(r"\bno preamble\b", low):
+            first = next((l for l in body.splitlines() if l.strip()), "")
+            bad = bool(re.match(r"\s*(here(?:'s| is| are)|sure|certainly|i(?:'ll| will| have)|"
+                                r"below is|this is (?:a|the) (?:summary|answer))\b", first, re.I))
+            fired = add("NO_PREAMBLE", "no preamble", not bad, f"opens {first[:44]!r}") or fired
+        return fired
+
+    def forbidden(sentence: str, low: str) -> bool:
+        fired = False
+        if re.search(r"\bno exclamation\b", low):
+            fired = add("NO_EXCLAMATION", "no exclamation marks", "!" not in body,
+                        f"{body.count('!')} found")
+        if re.search(r"\bno emoji\b", low):
+            found = [c for c in body if ord(c) > 0x2500 and c.isprintable() and not c.isalnum()]
+            fired = add("NO_EMOJI", "no emoji", not found, f"{len(found)} found") or fired
+        for m in re.finditer(r"\bno [\"'`]?(please|sorry|apolog\w*)[\"'`]?\b", low):
+            word = m.group(1)[:6]
+            hits = len(re.findall(word, body, re.I))
+            fired = add("FORBIDDEN_WORD", f"no {m.group(1)!r}", hits == 0,
+                        f"{hits} occurrence(s)") or fired
+        return fired
+
+    def formats(sentence: str, low: str) -> bool:
+        if re.search(r"\b(?:as|valid|in)\s+json\b", low):
+            probe = strip_fences(output).strip() if fenced_blocks(output) else output.strip()
+            try:
+                json.loads(probe)
+                return add("VALID_JSON", "valid JSON", True, "parses")
+            except json.JSONDecodeError as exc:
+                return add("VALID_JSON", "valid JSON", False, f"does not parse: {exc.msg}")
+        return False
+
+    for sentence in sentences_of(scope):
+        low = sentence.lower()
+        fired = False
+        for matcher in (counts, structure, forbidden, formats):
+            fired = matcher(sentence, low) or fired
+        if not fired:
+            report.unchecked.append(sentence)
+
+    return report
+
+
+def render(report: Report, quiet: bool = False) -> str:
+    lines = []
+    passed = [c for c in report.checks if c.ok]
+    lines.append(f"{len(passed)}/{len(report.checks)} checkable constraint(s) held, "
+                 f"{len(report.unchecked)} not machine-checkable")
+    if not report.scoped:
+        lines.append("note: the prompt has no slot headings, so the whole of it was scanned "
+                     "for constraints — a number describing the input may be read as a limit")
+    lines.append("")
+    for c in report.checks:
+        mark = "ok  " if c.ok else "FAIL"
+        lines.append(f"  {mark} {c.rule:<16} {c.demand:<28} {c.detail}")
+    if report.unchecked and not quiet:
+        lines.append("")
+        lines.append("  not machine-checkable — read these yourself:")
+        for sentence in report.unchecked:
+            lines.append(f"    · {sentence[:96]}")
+    return "\n".join(lines)
+
+
+def read(name: str) -> str:
+    if name == "-":
+        return sys.stdin.read()
+    path = Path(name)
+    if not path.exists():
+        raise FileNotFoundError(name)
+    return path.read_text(encoding="utf-8", errors="replace")
+
+
+def main(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(
+        prog="check_output",
+        description="Check an answer against the constraints its prompt stated. "
+                    "0 all held, 1 a failure, 2 could not run.",
+    )
+    parser.add_argument("prompt")
+    parser.add_argument("output", help="the answer, or - for stdin")
+    parser.add_argument("--json", action="store_true")
+    parser.add_argument("--quiet", action="store_true", help="omit the unchecked list")
+    args = parser.parse_args(argv[1:])
+
+    try:
+        report = check(read(args.prompt), read(args.output))
+    except FileNotFoundError as exc:
+        print(f"check_output: no such file: {exc}", file=sys.stderr)
+        return 2
+
+    if args.json:
+        print(json.dumps({
+            "scoped": report.scoped,
+            "checks": [vars(c) for c in report.checks],
+            "unchecked": report.unchecked,
+        }, indent=2))
+    else:
+        print(render(report, args.quiet))
+    return 1 if report.failed else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv))

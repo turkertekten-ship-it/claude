@@ -112,3 +112,9 @@ contents were not reconstructed, summarised, or guessed at.
 - The forged arm won three tasks and tied one, and on the tied task the raw ask scored full marks, so the forging bought nothing there. [src:FORGE-AB-TRIAL-2026-08-27]
 - Stating a constraint did not guarantee it was met: the forged summary exceeded the 80-word limit it was given, at 86 words. [src:FORGE-AB-TRIAL-2026-08-27]
 - The trial's tasks and both arms were written by the same session that ran it, so the design favours the forged arm; this is recorded with the result rather than corrected for. [src:FORGE-AB-TRIAL-2026-08-27]
+
+## Observed — checking answers, not just prompts
+
+- Run against the A/B trial's stored answers, `tools/check_output.py` reports the winning arm's 86 words against its prompt's written 80-word limit, and the losing arm's five paragraphs, ninety words and bold label. [src:CHECK-OUTPUT-TRIAL-2026-08-27]
+- It reproduces mechanically what the model judge found by reading, and additionally flags the bold label the judge folded into a prose note. [src:CHECK-OUTPUT-TRIAL-2026-08-27]
+- Of the six constraints that prompt states, five are countable and one is not; the uncountable one is listed rather than passed over. [src:CHECK-OUTPUT-TRIAL-2026-08-27]

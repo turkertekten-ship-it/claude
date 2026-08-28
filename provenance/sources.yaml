@@ -326,3 +326,13 @@ sources:
       tasks and both arms were written by the same session, which favours the
       forged arm by construction; the capture says so. Four tasks, one run
       each - an indication, not a measurement.
+
+  - id: CHECK-OUTPUT-TRIAL-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T18:40Z"
+    method: "python3 tools/check_output.py against both arms of the A/B trial's summary task"
+    evidence: provenance/raw/check-output-on-trial-2026-08-27.md
+    note: >-
+      The checker was written after the trial and run against its stored
+      answers. It reproduces mechanically the word-limit breach the model judge
+      found by reading, and additionally flags the raw arm's bold label.

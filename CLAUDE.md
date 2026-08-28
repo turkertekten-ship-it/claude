@@ -110,6 +110,7 @@ tools/
   prompt_forge.py             the prompt guard — lint, score, compile
   prompt_habits.py            scores the prompts already written
   learn_rule.py               appends a learned rule to this file
+  check_output.py             checks an answer against its prompt's constraints
   ingest_chat_archive.py      chat-archive ingestion and search
   install_prompt_system.sh    installs the prompt system into ~/.claude
 tests/                        tests for the above
@@ -189,6 +190,19 @@ prompt contract that third-party documentation attributes to Saraev names
 *failure conditions* as one of its four required parts, which is the same
 requirement arrived at independently. `docs/prompting.md` carries the
 attribution and its grade.
+
+**An acceptance test nobody reads back is decoration.** After the answer comes
+in, check it against the prompt that asked for it:
+
+```bash
+python3 tools/check_output.py forged-prompt.md answer.txt
+```
+
+It checks the countable constraints — limits, formats, forbidden tokens — and
+lists every one it could not interpret, because most of what a prompt
+constrains is prose no machine can verify. In this repository's own trial the
+winning answer broke a written 80-word limit by six words
+[src:CHECK-OUTPUT-TRIAL-2026-08-27]; nothing was reading the limit back.
 
 **A correction that is not written down is spent.** When you are corrected, or
 you get something wrong, append the rule rather than remembering it:

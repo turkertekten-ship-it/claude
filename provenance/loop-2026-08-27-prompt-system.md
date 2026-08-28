@@ -197,6 +197,32 @@ The trial's own weakness is recorded with it rather than corrected for: the
 tasks and both arms were written by the session that ran them, which chose
 ambiguities knowing which slots would resolve them.
 
+## Fifth loop — the half that was missing
+
+The fourth loop's Act produced the evidence that opened this one: the winning
+arm of the trial broke an 80-word limit that was written in its own prompt.
+
+Observe went looking for what a prompt actually constrains in checkable terms
+and found a small vocabulary — across every forged prompt in this repository,
+five countable phrasings in total. Most constraints are prose: *touch only
+`base.py`*, *do not change behaviour*.
+
+> The surprise: the system had been built entirely on the specification side.
+> It makes you write an acceptance test and then never reads it back. The
+> 86-word answer had its limit sitting in the prompt the whole time, and the
+> only thing that noticed was a language model asked to read carefully.
+
+`tools/check_output.py` closes that half for the countable subset, and its
+design is mostly refusals — it scopes to the constraint sections so a number
+describing the input is not read as a limit on the answer, and it prints every
+constraint it could not interpret rather than reporting "all clear" over them
+[src:CHECK-OUTPUT-TRIAL-2026-08-27].
+
+Writing it found two bugs in itself before it shipped: identical demands stated
+in two sections were checked twice, and only the first clause of *"No bullet
+points, no headings, no bold labels"* was ever evaluated — an early `continue`
+had silently dropped two thirds of that sentence.
+
 ## Still open
 
 `U-6`, `U-7` and `U-8` in [unknowns.md](unknowns.md): what Saraev actually
