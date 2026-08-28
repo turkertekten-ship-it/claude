@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>44 çalıştırılabilir takım · 349 vaka · 0 sinyal</span>
+    <span>45 çalıştırılabilir takım · 354 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -2565,6 +2565,60 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Kırkıncı tur</span>
+  <h2>Sınıfı arayan araç, sınıfı dört kez işledi</h2>
+  <p>Son yedi turda bulunan ölçüm kusurlarının çoğu tek bir sınıfa indi.
+  AE Türkçe desen sınıfını tarıyor; <strong>bu sınıf için hiçbir tarama
+  yoktu.</strong> Bu tur onu kurdu — ve tarama yazılırken sınıf
+  <strong>dört kez daha</strong> göründü, her seferinde taramanın
+  kendisinde.</p>
+
+  <table><thead><tr><th>tarama sürümü</th><th>hata</th><th>ne oldu</th></tr></thead><tbody>
+  <tr><td>dizge + dosya aynı kaynakta</td><td><strong>yanlış atıf</strong></td>
+      <td>altı adayın <strong>beşi</strong> taramanın kendi hatasıydı:
+      <code>"mutasyon" in a</code> bir <strong>dosya adı</strong>,
+      <code>"SELFTEST OK" in r.stdout</code> bir <strong>alt süreç
+      çıktısı</strong>, <code>"json.dumps"</code> <strong>başka</strong> bir dosya</td></tr>
+  <tr><td>"yalnız yorumlu dosyalarda"</td><td><strong>fazla dar</strong></td>
+      <td>AP-02'nin gerçek tuzağını kaçırdı: kirletici bir yorum değil,
+      becerinin <strong>açıklama düzyazısıydı</strong></td></tr>
+  <tr><td>tek adımlı veri akışı</td><td><strong>kör</strong></td>
+      <td>AF <code>_hepsi = _ham + …</code> yazıyor; eşleşme kurulamadı</td></tr>
+  <tr><td>yayılma, ayıklamadan habersiz</td><td><strong>yanlış pozitif</strong></td>
+      <td>ayıklamayı <strong>zaten yapmış</strong> AF'yi suçladı</td></tr>
+  </tbody></table>
+
+  <div class="callout">
+    Sınıfı avlamak için yazılan araç, sınıfın kendisine dört kez düştü. Bu
+    tesadüf değil: <strong>"aynı yerde geçiyor" ile "o şey oluyor" arasındaki
+    fark, otomatikleştirmesi en zor ayrımdır</strong> — ve tam da bu yüzden
+    elle yazılan her ölçüt ona düşmeye eğilimlidir.
+  </div>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AV-01 · AV-02</span>
+      <span class="pill a">İki gerçek tuzak — ikisi de benim</span></div>
+    <h3>Kapsamayı koruyan şey kod değil, kodu anlatan cümleydi</h3>
+    <p><strong>AF-04.</strong> Belirti mantığının <strong>tamamı</strong>
+    <code>epilog.py</code>'den silindiğinde ölçüt hâlâ geçiyordu — dizge
+    hepsi.sh'in bir yorumunda duruyordu, ve o yorumu <strong>otuz dokuzuncu
+    turda ayrıştırmayı anlatmak için ben yazmıştım.</strong></p>
+    <p><strong>AP-02.</strong> <code>archived</code> alanı curl komutundan
+    silindiğinde ölçüt hâlâ geçiyordu — sözcük, otuz dördüncü turda yazdığım
+    <strong>açıklama paragrafında</strong> duruyordu, 700 karakterlik
+    pencerenin içinde.</p>
+  </div>
+
+  <p><strong>Ve bir pencere her zaman yanlış değildir.</strong> AV-02'nin ilk
+  hâli 100+ karakterlik <em>her</em> pencereyi işaretledi ve K-12'yi yakaladı.
+  Ama K-12 koltuk dosyalarında bir sözün yakınında <strong>atıf</strong>
+  arıyor — atıf gerçekten bir yakınlık olgusudur; orada pencere bir vekil
+  değil, <strong>ölçülen olgunun kendisidir.</strong> Ayrım
+  otomatikleştirilemediği için ölçüt <strong>beyan ister</strong>: geniş
+  pencere kullanan her satır gerekçesini yazar.</p>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -2682,7 +2736,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 44 takım · 349 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 45 takım · 354 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
