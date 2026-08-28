@@ -4,20 +4,57 @@ Doğrulama: 2026-08-27.
 
 Kontrol edildi: PyPI ve npm kayıt uç noktaları (2026-08-27) · `git ls-remote`
 ve sığ klon ile depo çözümlemesi (2026-08-27) · bu makinedeki gerçek `import`
-denemesi (2026-08-27) · bulunamayan: **api.github.com** — bu oturumda GitHub
-API'si kapalı olduğundan **yıldız sayıları doğrulanamadı** ve bu dosyaya
-YAZILMAMIŞTIR.
+denemesi (2026-08-27) · **GitHub deposu arama uç noktası üzerinden yıldız,
+lisans ve son güncelleme (2026-08-28)** · bulunamayan: doğrudan
+`api.github.com` çağrısı — hâlâ kapalı; rakamlar GitHub arama aracıyla
+alınmıştır.
 
-## Yıldız sayıları neden yok
+## Yıldız sayıları — sonradan doğrulandı
 
-Kurulum kitabı §13 her depo için yıldız sayısı veriyor. Bu kurulumda
-api.github.com erişilebilir değil; dolayısıyla yıldızlar kitaptan
-kopyalanabilirdi. Kopyalanmadı. Kitabın kendi kuralı bunu yasaklar: doğrulanmamış
-bir rakamı doğrulanmış gibi taşımak, bu sistemin önlemek için var olduğu kusurun
-ta kendisidir. Yıldız zaten kitabın da söylediği gibi hiçbir şey kanıtlamaz.
+İlk kurulumda `api.github.com` kapalıydı ve yıldız sayıları bu dosyaya
+**yazılmadı**; kitaptan kopyalanmaları reddedildi. Sonradan GitHub deposu
+arama uç noktasının çalıştığı görüldü ve **her rakam canlı olarak çekildi**.
+Aşağıdaki tablolardaki yıldızlar 2026-08-28 tarihinde ölçülmüştür.
 
-Yerine **çözümlenebilirlik** ve **son commit tarihi** doğrulandı; ikisi de
-bakım sorusunu yıldızdan iyi cevaplar.
+**Kitabın yıldız sayıları esasen doğruydu** — sapma normal büyüme kadar.
+Yanlış olan tarihlerdi (aşağıya bakın). Bu, kitabın hangi kısmına güvenilip
+hangisine güvenilmeyeceğini gösterir: sayımı yapılmış bir olgu tutmuş,
+"en son ne zaman güncellendi" iddiası tutmamıştır.
+
+| Depo | Kitap | Ölçülen (2026-08-28) |
+|---|---|---|
+| docling-project/docling | 65.575 | **65.674** |
+| Open-Source-Legal/OpenContracts | 1.449 | **1.455** |
+| unclecode/crawl4ai | 79.445 | **79.618** |
+| Panniantong/Agent-Reach | 75.400 | **76.177** |
+| opensanctions/opensanctions | 789 | **789** |
+| opensanctions/nomenklatura | 265 | **265** |
+| google/diff-match-patch | 8.140 | **8.139** |
+| LexPredict/lexpredict-lexnlp | 795 | **795** |
+| ICLRandD/Blackstone | 696 | **696** |
+| freelawproject/eyecite | 271 | **272** |
+| freelawproject/courtlistener | 1.002 | **1.003** |
+| unionai-oss/pandera | 4.442 | **4.443** |
+| fivetran/great_expectations | 11.738 | **11.743** |
+| python-openxml/python-docx | 5.697 | **5.698** |
+| jsvine/pdfplumber | (verilmemiş) | **10.700** |
+
+## Yıldızın ölçmediği iki şey — bu kurulumda çıktı
+
+1. **`google/diff-match-patch` ARŞİVLENMİŞ bir depodur.** Kitap onu yalnızca
+   "eski" sayıyor; gerçekte Google depoyu resmen arşivlemiştir, yani salt
+   okunur ve bakımı bırakılmıştır. 8.139 yıldız bunu göstermez. Karar
+   değişmiyor (kararlı algoritma, kurulu kalıyor) ama gerekçe artık
+   "bakımsız" değil "arşivlenmiş"tir ve bir hata bulunursa düzeltilmeyecektir.
+
+2. **`Panniantong/Agent-Reach` 2026-02-24'te oluşturulmuş bir depodur** ve altı
+   ayda 76.177 yıldıza ulaşmıştır. Rakam gerçektir; ne anlama geldiği ayrı bir
+   sorudur. Zaten kurulmadı (sır saklama kuralı), ama bu, kitabın "yıldız bir
+   şey kanıtlamaz" cümlesinin en somut örneğidir: bir depoyu yaşı ve büyüme
+   hızıyla birlikte okumayan biri, buradan güven çıkarır.
+
+Yıldızın yanında **çözümlenebilirlik** ve **son commit tarihi** de doğrulandı;
+ikisi de bakım sorusunu yıldızdan iyi cevaplar.
 
 ## API kapalıyken çözümleme nasıl yapıldı
 
@@ -95,8 +132,11 @@ kapsayan bir araç, sınır ötesi bir pratikte tuzaktır.
 | fivetran/great_expectations | — | Apache-2.0 | kurulmadı, ağır; pandera yetiyor |
 
 `fivetran/great_expectations` ile `great-expectations/great_expectations` aynı
-HEAD'e çözülüyor: depo devredilmiş, eski ad yönlendiriyor. Kitaptaki ad
-geçerlidir.
+HEAD'e çözülüyor: depo devredilmiş, eski ad yönlendiriyor. **Kitaptaki ad
+geçerlidir ve tek geçerli olandır**: GitHub arama uç noktası
+`great-expectations/great_expectations` adını artık çözemiyor, yalnızca
+`fivetran/great_expectations` çözülüyor (11.743 yıldız, 2026-08-28). Eski adı
+bir bağımlılık dosyasına yazan, bir gün çözülmeyen bir ada yazmış olur.
 
 Çalıştırma: `kod/cetvel.py` (pandera şeması), belge üretimi için `docx`.
 
@@ -129,7 +169,7 @@ odasını bağlama sokmanın maliyeti gerçektir ve ölçülmeden yönetilemez.
 | yamadashy/repomix | repomix 1.18.0 (npm) | MIT | 2026-08-23 | Depoyu token sayımıyla paketler |
 | AgentOps-AI/tokencost | tokencost 0.1.26 | — | — | Maliyet tahmini |
 | isaacus-dev/semchunk | semchunk | MIT | — | Anlamsal parçalama |
-| chonkie-inc/chonkie | chonkie 1.7.0 | MIT | — | Parçalama boru hattı |
+| chonkie-inc/chonkie | chonkie 1.7.0 | MIT | yıldız ölçülemedi | Parçalama boru hattı |
 | microsoft/LLMLingua | llmlingua 0.2.2 | MIT | 2025-10-28 | İstem sıkıştırma |
 
 **Bir tuzak yakalandı ve kaydedilmesi gerekiyor.** PyPI'da `repomix` adında bir
@@ -137,6 +177,14 @@ paket vardır (0.5.0) ve GitHub bağlantısı yoktur; gerçek repomix **npm**
 paketidir ve `yamadashy/repomix` deposundan gelir. Kitabın §14'te uyardığı
 "kayıt adı depo adı olmayabilir" tuzağının bu kurulumdaki canlı örneğidir.
 Bu yüzden repomix npm'den kuruldu, PyPI'dan değil.
+
+**Boş bir arama yokluğun kanıtı değildir — bu kurulumda ikinci canlı örnek.**
+`chonkie-inc/chonkie` GitHub **arama** uç noktasından çözülmüyor ("bu kaynaklar
+mevcut değil" hatası veriyor), ama `git ls-remote` ile **çözülüyor** ve PyPI
+kaydı da aynı adresi gösteriyor. Depo vardır; arama indeksinde görünmemektedir.
+Kitabın §14'te uyardığı tuzak tam olarak budur: aramanın boş dönmesine bakıp
+"böyle bir depo yok" demek. Bu yüzden bu depo için yıldız yazılmamıştır —
+ölçülemedi, uydurulmadı.
 
 **Sır saklama kuralı burada da üsttedir.** Bu araçların hepsi yereldir ve hiçbiri
 belgeyi dışarı göndermez. llmlingua bir model indirir ve yerel çalışır; müvekkil
