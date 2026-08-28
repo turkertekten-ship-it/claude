@@ -1,5 +1,5 @@
 ###############################################################
-#  KÖR SINAMA TAKIMI — 2026-08-27T15:48:49Z
+#  KÖR SINAMA TAKIMI — 2026-08-27T15:53:40Z
 ###############################################################
 
 /root/mafirm/sinama/ks_a_esik.py:41: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
@@ -288,6 +288,20 @@ GEÇTİ L-06   hafiza/ dosyalarının hepsi var
 ------------------------------------------------------------------------------------------------
 6 vaka, 6 geçti, 0 KALDI
 
+================================================================================================
+KÖR SINAMA M — errata ↔ sınama izlenebilirliği
+================================================================================================
+GEÇTİ M-01   her errata maddesi bir sınama vakasına atıf yapıyor
+        41 madde · atıfsız 0: yok
+GEÇTİ M-02   atıf yapılan her vaka kimliği gerçekten tanımlı
+        132 tanımlı kimlik · uydurma dayanak: yok
+GEÇTİ M-03   [A] ve [B] maddelerinin atıfları sadık sistemde gerçekten kaldı
+        sadık koşumda kalan vaka: 41 · sınanmamış ağır madde: yok
+GEÇTİ M-04   sadık sistemde kalan her vaka errata'da ya da raporda açıklanmış
+        41 vaka kaldı · açıklanmamış: yok
+------------------------------------------------------------------------------------------------
+4 vaka, 4 geçti, 0 KALDI
+
 ###############################################################
 #  ÖZET
 ###############################################################
@@ -300,6 +314,7 @@ GEÇTİ L-06   hafiza/ dosyalarının hepsi var
   J · §19 kabul sınaması (uçtan uca) 2 kaldı
   K · yönlendirme ve koltuk sağlaması temiz
   L · çapraz referans bütünlüğü   temiz
+  M · errata izlenebilirliği           temiz
   ------------------------------------------------------------
   toplam başarısız vaka               13
 

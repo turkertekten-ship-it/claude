@@ -33,9 +33,10 @@ Dokuz takım, 96 vaka:
 | J | **§19 kabul sınaması** — kitabın kendi son kapısı, uçtan uca | §19 |
 | K | Yönlendirme, üst bilgi ve koltuk sağlaması | §7, §9, §10, §11 |
 | L | Çapraz referans bütünlüğü ve taşınabilirlik | §4'ün düzen gerekçesi |
+| M | **Errata ↔ sınama izlenebilirliği** — raporun kendisine kanıt kuralı | CLAUDE.md §1 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamadan ve iki
-takım eklendikten sonra **128 vaka, 13 kaldı** — ve on üçünün her biri ya
+takım eklendikten sonra **132 vaka, 13 kaldı** — ve on üçünün her biri ya
 kitabın davranışının bilerek bırakılmış kaydıdır ya da belgelenmiş bir
 öntanımlı boşluktur; hiçbiri yamalı sistemde çözülmemiş bir kusur değildir.
 
@@ -402,6 +403,45 @@ uygulanan bir mekanizma oldu. İki yönde sınandı.
 
 ---
 
+## Yedi buçuk artı üç · Raporun kendisi kanıt kuralına tabi
+
+Bu rapor kitaba kırk bir düzeltme öneriyor. Bir düzeltme önerisi, arkasında onu
+gösteren çalışan bir sınama yoksa **bir kanaattir, bir bulgu değildir** — ve
+kitabın kendi kanıt kuralı (CLAUDE.md §1) tam olarak bunu yasaklıyor:
+*"Dayanağı olmayan bir eşik yazılmaz."* Aynı ölçüt rapora uygulandı.
+
+M takımı dört soru soruyor: her madde bir vakaya atıf yapıyor mu; atıf yapılan
+her kimlik gerçekten TANIMLI mı (uydurma dayanak var mı); ağır maddelerin
+atıfları kitaba sadık sistemde gerçekten başarısız oldu mu; ve ters yönde —
+sadık sistemde kalan her vaka açıklanmış mı.
+
+İlk koşumda dördün üçü kaldı. **Üç başarısızlığın ikisi M'nin kendi
+kusuruydu**: ayrıştırıcı aralık biçimindeki atıfları (`B-07…B-09`) görmüyordu
+ve dinamik kurulan kimlikleri (`"J-07%s" % etiket`) tanıyamıyordu; bu yüzden
+yedi maddeyi "atıfsız" ve yedi kimliği "uydurma" sanıyordu.
+
+Ama arkalarında **üç gerçek kusur** vardı:
+
+1. **Sır kapısının ikinci kusuru errata'da hiç yoktu.** Kanal sorununu (Bash)
+   yazmıştım; **desen darlığını** yazmamıştım. İkisi ayrı kusurdur ve kanal
+   düzeltilse bile desen kusuru kalır: büyük harfli kod adı, İngilizce kod adı,
+   kısaltmasız unvan, gerçek kişi adı ve **fiyat** görünmüyor — oysa CLAUDE.md
+   §6 fiyatı açıkça sayıyor. Beş başarısız vaka (B-25…B-29) hiçbir errata
+   maddesine bağlı değildi. Eklendi.
+2. **İki errata maddesi hiçbir vakaya atıf yapmıyordu** (§16'nın "denetimin
+   bakmadığı şeyler" listesi ve §19'un pilot maddesi). Bağlandı.
+3. **`ks_a_esik.py` içinde ölü bir kod yapısı vardı**: `vaka("A-15" if False
+   else "A-14", ...)`. Çalışıyordu ama A-14 kimliğini statik olarak
+   bulunamaz kılıyordu. Temizlendi. Ayrıca errata'nın `J-01` atfı belirsizdi;
+   gerçek kimlik `J-01s`.
+
+Şimdi dördü de geçiyor: kırk bir maddenin kırk biri gerçek bir vakaya bağlı,
+uydurma dayanak yok, ağır maddelerin hepsi sadık sistemde gerçekten kaldı ve
+kalan kırk bir vakanın hepsi açıklanmış. Denetime kalıcı bir kontrol eklendi —
+bir errata maddesinin atfı silinirse denetim kırmızıya dönüyor.
+
+---
+
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
 
 | Bölüm | Beklenen | Gerçek | Sebep |
@@ -461,7 +501,12 @@ Bir sınama takımı da sınanmalıdır. Üç hata yapıldı ve üçü de düzel
    doğrulayan bir adım eklendi. Bu, D takımında bir kez daha yaşandığı için
    artık bir alışkanlık: **bir mutasyon sınaması, mutasyonun olduğunu
    kanıtlamadan geçerli değildir.**
-7. **İki mevzuat/depo şüphem yanlıştı** (G-06, I-06). Kitap her ikisinde de
+7. **İzlenebilirlik denetleyicimin ayrıştırıcısını da yanlış yazdım** —
+   aralık atıflarını ve dinamik kimlikleri görmüyordu, yedi maddeyi haksız yere
+   "dayanaksız" ilan etti. Bu, bu oturumdaki yedinci ayrıştırıcı kusurum ve
+   hepsi aynı yönde: **bir dedektör, ölçtüğü şeyin gerçek biçimini görmeden
+   yazılırsa, bulduğu şey kendi körlüğüdür.**
+8. **İki mevzuat/depo şüphem yanlıştı** (G-06, I-06). Kitap her ikisinde de
    haklıydı; benim hatırladığım bayattı. Kitabın kendi §14 kuralının kanıtı:
    *"bir ad, var olduğunun kanıtı değildir"* kadar *"hatırladığın ad, doğru ad
    değildir"* de geçerli.
@@ -483,6 +528,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | J · §19 kabul sınaması | doğru cevap da bloklu | 2 kaldı (**bilerek** — kitaba sadık karşılaştırma) |
 | K · yönlendirme + koltuk | 3 kaldı | **temiz** |
 | L · referans bütünlüğü | 1 kaldı (kendi regresyonum) | **temiz** |
+| M · errata izlenebilirliği | 3 kaldı (kendi raporum) | **temiz** |
 
 Mühendislik katmanı yeşil: `denetim.sh --yapisal` → `DENETİM OK`.
 Tam denetim kırmızı: `denetim.sh` → `DENETİM BAŞARISIZ: 3` — üç ENGELLEYİCİ
@@ -517,7 +563,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # on iki takım, 128 vaka
+./sinama/hepsi.sh                 # on üç takım, 132 vaka
 ./denetim.sh --yapisal            # mühendislik katmanı
 ./denetim.sh                      # mevzuat bulguları dâhil
 ```

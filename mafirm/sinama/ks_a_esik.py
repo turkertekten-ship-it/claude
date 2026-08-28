@@ -130,7 +130,7 @@ p = subprocess.run([sys.executable, ESIK_PY,
                     "--tr", "2500000000", "--hedef", "1400000000"],
                    capture_output=True, text=True)
 cli = p.stdout.strip().splitlines()[0][:60] if p.stdout.strip() else "(çıktı yok)"
-vaka("A-15" if False else "A-14",
+vaka("A-14",
      "gerçek rakamlarla komut satırından hesap yapılabiliyor mu",
      "hesap çıktısı", cli,
      "§8: 'esik.py gerçek ciro rakamlarıyla çalıştırılır'")

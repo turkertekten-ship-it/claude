@@ -29,6 +29,8 @@ python3 "$S/ks_k_yonlendirme.py"; topla "K · yönlendirme ve koltuk sağlaması
 echo
 python3 "$S/ks_l_referans.py";    topla "L · çapraz referans bütünlüğü" $?
 echo
+python3 "$S/ks_m_izlenebilirlik.py"; topla "M · errata izlenebilirliği" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

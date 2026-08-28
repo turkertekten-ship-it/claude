@@ -75,7 +75,7 @@ tekrarlanır. Esas doğru, atıf kuralın kendisini değil YAPTIRIMINI gösteriy
 **[A] Gerçek bir işlemi hesaplayacak arayüz yok.** §8, §9 ve §15.1 "gerçek ciro
 rakamlarıyla çalıştırılır" diyor; `__main__` yalnızca `--self-test` tanıyor.
 Kodun varlık sebebi hesabı kafadan yapmayı önlemekti.
-→ Bir komut satırı arayüzü şart. *(A-14, J-01)*
+→ Bir komut satırı arayüzü şart. *(A-14, J-01s)*
 
 **[B] Cevap iki değerli.** §9 becerisi "evet / hayır / **belirlenemiyor**"
 istiyor; `bildirilmeli()` yalnızca True/False dönüyor. Bilinmeyen bir ciro `0`
@@ -142,6 +142,16 @@ cümlelerinin üçü de hiçbir kapıyı ateşlemiyor. *(B-07…B-09)*
 **[B] Sır kapısı Bash'i görmüyor** ve `settings.json` matcher'ı Bash'i
 çağırmıyor — oysa kitabın kendisi `curl`, `git`, `pip` ve üç dış aracı Bash
 üzerinden öneriyor. Dışarı giden en geniş kanal izlenmiyor. *(C-05…C-09)*
+
+**[B] Sır kapısının İKİNCİ kusuru: desenler çok dar.** Yukarıdaki kanal
+sorunundan ayrı bir kusurdur ve kanal düzeltilse bile kalır. İki desen var
+("Proje Xxx" ve "Xxx A.Ş.") ve CLAUDE.md §6'nın saydığı şeylerin çoğunu
+görmüyor: BÜYÜK harfle yazılmış kod adı (`Proje ŞAHİN`), İngilizce kod adı
+(`Project Falcon`), kısaltmasız unvan (`... Anonim Şirketi`), gerçek kişi
+müvekkil adı ve **fiyat** — oysa §6 fiyatı açıkça sayıyor. Ayrıca URL
+kodlaması (`Proje+Şahin`) yalnızca boşluk arayan deseni atlatır.
+→ Gerçek kişi adı desenle çözülemez; bir KAYIT ister (bkz. §7 önerisi).
+*(B-25…B-29)*
 
 **[C] TAVSIYE sekiz sabit ifade.** Bir hukukçunun yazdığı kiplerin çoğu
 dışarıda: `-malısınız`, `zorunludur`, `şarttır`, `tabidir`, `başvurmanız
@@ -217,7 +227,7 @@ on üçü silinmiş — ve **tamamen boş bir `esik.py`**.
 **[C] Denetimin bakmadığı şeyler:** kancanın `settings.json`'da gerçekten
 kayıtlı olup olmadığı, matcher'ın kapsamı, `hafiza/cikar-catismasi.md`'nin
 varlığı (§2 klasörü kuruyor ama dosyayı hiç oluşturmuyor), koltuk sayısı ve
-koltuk kaynak beyanları.
+koltuk kaynak beyanları. *(C-09, K-14, D)*
 
 ## §17 · Ölçülmüş kanıt
 
@@ -238,9 +248,9 @@ dâhil. Üç aktarım hatası:
 ## §19 · İlk dosya
 
 **[A] Pilot, kitabın kendi kurulumunda çalıştırılamıyor.** Üç ayrı sebep:
-`esik.py`'nin komut satırı arayüzü yok (A-14), avro çevirisi modellenmemiş
-(A-07), ve §14 sonrası öz-sınama kırmızı olduğu için §0 kurala göre buraya hiç
-gelinmiyor.
+`esik.py`'nin komut satırı arayüzü yok, avro çevirisi modellenmemiş, ve §14
+sonrası öz-sınama kırmızı olduğu için §0 kurala göre buraya hiç gelinmiyor.
+*(A-14, A-07, J-01s)*
 
 **[A] Ve asıl mesele:** §19 "bu iki cevabın arasındaki fark, kurulumun
 tamamının sebebidir" diyor. Ölçüldü — kitaba sadık kapılarda **doğru cevap da
