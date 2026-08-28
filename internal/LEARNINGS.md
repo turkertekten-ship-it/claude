@@ -4163,3 +4163,54 @@ being sound.
 3. **Do not commit while the run that verifies it is still going**, however
    safe the diff looks. The cost of waiting is minutes; the cost of being wrong
    is a green history that means nothing.
+
+---
+
+## L83 - Re-running the non-negotiables, and checking the check
+
+CLAUDE.md states five guarantees. Running them as checks rather than reading
+them found a redaction hole in three places once before, and much has changed
+since: chunking now splits oversized units on line boundaries and merges leading
+runts forward, both computing `char_start`/`char_end` by hand.
+
+**Zero required dependencies (1) holds** - every module-level import in `src/`
+is stdlib.
+
+**Provenance (2) holds, and had no test.** A chunk carries char offsets into its
+source and a citation is worth exactly what they are worth, yet nothing asserted
+them - and `char_end` is `start + len(text)` computed *before* two later steps
+rewrite the text. Measured over 1,822 chunks: no span past the end of its
+document, no empty span, and every chunk's span beginning at that chunk's own
+text.
+
+**The check needed checking first.** My probe's initial verdict was "41 chunks
+with no relation at all", complete with plausible examples. It compared the
+source window to the chunk byte-for-byte, and `_pack_units` joins its units with
+a single space - so any chunk spanning a blank line differs from its source
+while its offsets are exactly right. Normalising whitespace: zero. That is the
+third probe artifact today, after the always-False `expansion_rrf` key and the
+paraphrase story, and the first one I caught *before* reporting it as a finding.
+
+The four chunks that genuinely differ at the first character are
+`_balance_fences` prepending a marker the source does not have, which is what
+that function is documented to do.
+
+**The gap is now a test**, over the real corpus rather than a fixture, allowing
+exactly the two documented transformations and nothing else. Four mutations
+caught, including the two today's changes could plausibly have introduced: line
+offsets that fail to advance inside a split unit, and a forward merge that keeps
+the follower's offset instead of the runt's. It also asserts it examined more
+than a thousand chunks, because a silent zero would make every assertion in it
+vacuous.
+
+**Rules.**
+1. **A guarantee stated in prose and never asserted is a convention**, and
+   conventions are kept by the least careful caller. Two of five non-negotiables
+   here now have tests; the others are worth the same pass.
+2. **Before reporting what a probe found, ask what the probe would say if
+   nothing were wrong.** Mine would have said "41 failures" against perfectly
+   correct code, because the comparison was stricter than the guarantee.
+3. **Mutate a provenance test with the specific corruption the recent change
+   could cause**, not a generic one. "Offsets shifted by one" is the easy
+   mutant; "line offsets frozen at the unit start" is the one this month's diff
+   could actually have written.

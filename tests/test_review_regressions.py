@@ -2747,3 +2747,67 @@ class AuthorityTest(unittest.TestCase):
                          "an unbounded authority was not clamped")
         self.assertEqual(scores["negative"], 0.0,
                          "a negative authority was not floored")
+
+
+class ChunkOffsetsPointAtTheirOwnTextTest(unittest.TestCase):
+    """Non-negotiable 2 - provenance is load-bearing - had no test.
+
+    A chunk carries char_start/char_end into its source document, and a citation
+    is worth exactly as much as those being right. Nothing asserted it, and
+    `char_end` is computed as `start + len(text)` *before* two later steps
+    rewrite the text: `_balance_fences` inserts markers and `_merge_runt_pieces`
+    joins pieces. Today's oversized-unit split also computes offsets by hand.
+
+    Run over the real corpus rather than a fixture, because the failure modes
+    here come from real documents' shapes (L31).
+
+    Two documented transformations are allowed for, and only these two:
+    `_pack_units` joins with a single space, so a chunk spanning a blank line
+    never matches byte-for-byte; and `_balance_fences` may prepend a fence the
+    source does not have. Everything else must line up.
+    """
+
+    @staticmethod
+    def _normalise(text: str) -> str:
+        return " ".join(text.replace("```", " ").split())
+
+    def test_every_chunk_span_contains_that_chunk(self):
+        import pathlib as _pathlib
+
+        from oodarag.chunking import ChunkConfig, chunk_document
+        from oodarag.ingest.filesystem import FilesystemConnector
+        from oodarag.models import Document
+
+        corpus = _pathlib.Path("corpus/external/pypi")
+        if not corpus.is_dir():
+            self.skipTest("external corpus not present")
+
+        checked = 0
+        for raw in FilesystemConnector(str(corpus), patterns=["**/*.md"],
+                                       key="fs:offsets").fetch({}):
+            document = Document.from_raw(raw, raw.text, raw.metadata)
+            length = len(document.text)
+            for chunk in chunk_document(document, ChunkConfig()):
+                checked += 1
+                self.assertGreaterEqual(chunk.char_start, 0)
+                self.assertLessEqual(chunk.char_end, length,
+                                     f"{document.uri} chunk {chunk.ordinal} ends past "
+                                     f"the document")
+                self.assertLess(chunk.char_start, length,
+                                f"{document.uri} chunk {chunk.ordinal} starts past "
+                                f"the document")
+                window = self._normalise(document.text[chunk.char_start:chunk.char_end])
+                body = self._normalise(chunk.text)
+                self.assertTrue(window.strip(),
+                                f"{document.uri} chunk {chunk.ordinal} spans no text")
+                # The span must begin where the chunk begins. A prefix rather
+                # than equality: the span is the source region, which carries
+                # whitespace the joined text collapsed.
+                head = body[:60]
+                self.assertTrue(window.startswith(head[:40]) or head in window,
+                                f"{document.uri} chunk {chunk.ordinal} at "
+                                f"[{chunk.char_start}:{chunk.char_end}] does not begin "
+                                f"at its own text\n  chunk:  {body[:80]!r}\n"
+                                f"  source: {window[:80]!r}")
+        # A silent zero here would make every assertion above vacuous.
+        self.assertGreater(checked, 1000, f"only {checked} chunks checked")
