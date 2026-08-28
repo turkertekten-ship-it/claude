@@ -2728,10 +2728,38 @@ defensible choice, but it was never a choice anyone made.
 these cases. It is also the first one that failed for an interesting reason
 rather than by doing nothing.
 
+**Correction, made immediately after: the override is not systematic.** The
+framing above - "the reranker demotes what the index found" - describes the two
+cases truthfully and implies a pattern that does not exist. Measured across the
+43 goldens with an expected source:
+
+* 36 have the expected document in the **lexical top 3**
+* **35 of those survive to the final top 8**
+* **one is demoted out of it: structlog**
+
+The reranker respects a strong lexical hit in 35 of 36 opportunities. `responses`
+is not a counter-example either; it sits at lexical rank 5, outside what anyone
+would call a strong hit.
+
+So the natural targeted fix - guarantee that the arms' top hits cannot be
+demoted - would be a rule introduced to rescue exactly one case, which is the
+thing L51 warns about: a mechanism that explains one case is a hypothesis, not a
+feature. Not built.
+
+The 34.5x scale imbalance is still real, still unexamined until now, and still
+the reason `base_weight` matters more on one corpus than the other. What is *not*
+true is that it is systematically costing correct results on the gate corpus. One
+case in thirty-six is the cost, and the sweep shows raising `base_weight` to
+recover it loses three others.
+
 **Rules.**
 1. **When several fixes fail, stop fixing and decompose.** Four attempts at
    "retrieval cannot find these documents" when the index ranked one of them
    second. The decomposition took one script and reframed the problem.
+0. **Then check whether the reframing is a pattern or an anecdote.** I wrote up
+   "the reranker demotes what the index found" from two examples and it is one
+   in thirty-six. The measurement that would have qualified it cost one script,
+   and I ran it only because the fix it implied felt too narrow to build.
 2. **Check the scales of things you add together.** Two terms combined with
    weight 1.0 are only balanced if their ranges are comparable. Here one had
    34.5x the spread of the other, so the smaller was decorative - and no test,
