@@ -244,7 +244,7 @@ def _hesapla(argv):
     if tabi:
         print("Kapanış Kurul iznine bağlanır ve bu koşuldan feragat edilemez.")
         print("İzinden önce bütünleşme, ortak fiyatlandırma ve ortak müşteri")
-        print("görüşmesi yapılmaz (4054 sayılı Kanun madde 11).")
+        print("görüşmesi yapılmaz (4054 sayılı Kanun m.10, 2010/4 sayılı Tebliğ m.10).")
     else:
         print("Olumsuz sonuç, olumludan daha yüksek kanıt ister. Ciro")
         print("rakamlarının kaynağı ve hesap yöntemi yazıya geçirilmelidir.")
