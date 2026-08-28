@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>25 çalıştırılabilir takım · 249 vaka · 0 sinyal</span>
+    <span>26 çalıştırılabilir takım · 254 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -1546,6 +1546,55 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Yirmi birinci tur</span>
+  <h2>Aynı belge, başka masa, başka karar</h2>
+  <p>S takımı taşınabilirliği <strong>yol</strong> düzeyinde ölçmüştü: klon ile
+  kaynak ağaç aynı sonucu veriyor mu. Kurulumun içinde bulunduğu
+  <strong>ortam</strong> — saat dilimi, yerel ayar — hiç sorulmamıştı. Ve bu
+  sistem için soru kozmetik değil: kitap §6'da <strong>sınır ötesi</strong> bir
+  pratik kuruyor, aynı dosyalar İstanbul, Londra, New York ve Singapur arasında
+  dolaşıyor.</p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AC-01 · AC-02</span>
+      <span class="pill f">Ortam bağımlılığı</span></div>
+    <h3>Bir takvim tarihi saat dilimi taşımaz</h3>
+    <p>Bugün İstanbul'da damgalanan bir <code>Doğrulama:</code> satırı,
+    UTC−11'deki bir masada <strong>"GELECEK tarihli (1 gün)"</strong> diye
+    bloklanıyordu. <strong>Belge doğru, kapı yanlış</strong> — ve §14'e göre
+    böyle bir kapı kapatılır.</p>
+    <p>Sebep kavramsal: bir takvim tarihi saat dilimi taşımaz;
+    <strong>makinenin "bugün"ü taşır</strong>. İkisini karşılaştırmak, kıyasa
+    olmayan bir saat dilimi sokar — dünya UTC−12 ile UTC+14 arasına,
+    <strong>26 saate</strong> yayılır. Tolerans bir gündür ve
+    <strong>orada biter</strong>: beş gün ileri bir tarih hâlâ bloklanıyor,
+    bayat kontrolü yaşıyor. Mutasyon iki yönde koştu — toleransı kaldırmak
+    AC-01/AC-02'yi, doksan güne açmak AC-04'ü kırmızıya çeviriyor.
+    <strong>Bir yanlış pozitifi, kontrolü öldürerek çözmek en kolay ve en
+    yanlış yoldur.</strong></p>
+    <p>Yerel ayar temiz çıktı: beş yerel ayarda, büyük harfli Türkçe metin
+    dâhil, karar değişmiyor.</p>
+  </div>
+
+  <div class="callout">
+    <strong>Üçüncü kez aynı desen — ve artık bir kural.</strong> Kitaba sadık
+    kapıda gelecek tarih kontrolü <strong>hiç yok</strong> (B-23 bunu kaçırma
+    olarak kaydeder). Yani bu yanlış pozitif <strong>kitabın değil benim</strong>.
+    <table><thead><tr><th>tur</th><th>kaçırmayı kapatmak için</th><th>açılan ve ölçülmeyen eksen</th></tr></thead>
+    <tbody>
+    <tr><td>14</td><td><code>ESIK</code> genişletildi</td><td><strong>yanlış pozitif</strong> — her SPA incelemesi bloklanıyordu</td></tr>
+    <tr><td>19</td><td><code>TAVSIYE</code> genişletildi</td><td><strong>sınırsız süre</strong> — 40 KB girdi kapıyı donduruyordu</td></tr>
+    <tr><td>21</td><td>gelecek tarih kontrolü eklendi</td><td><strong>ortam bağımlılığı</strong> — başka dilimde yanlış blok</td></tr>
+    </tbody></table>
+    <p>Üçünde de niyet doğruydu, üçünde de ölçüm tek eksenliydi. <strong>Bir
+    kapıyı genişletmek tek eksende iyileştirme değildir; ölçülmeyen her eksende
+    bir borçtur.</strong> Pratik karşılığı bir kuraldır: <em>bir kaçırmayı
+    kapatırken, açabileceğin eksenleri adlandır ve onları da sına.</em>
+    V, AA ve AC bu üç ekseni artık kalıcı olarak ölçüyor.</p>
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -1663,7 +1712,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 25 takım · 249 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 26 takım · 254 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
