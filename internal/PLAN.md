@@ -34,6 +34,10 @@ Verified end to end against this repository: it observes ~230 signals, produces
 18 findings and 10 proposals, applies the one `safe`-tier fix, is idempotent on
 a second run, and `ooda reflect revert <cycle>` puts everything back.
 
+The web and GitHub stack has since had a full adversarial review: 128 defects
+fixed, 663 tests added, three features that had never worked at all. Written up
+in `REVIEW-2026-08-28.md`.
+
 ### Known limits, deliberately
 
 - `.gitignore` support is a documented subset; negation (`!`) lines are dropped
