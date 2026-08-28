@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>41 çalıştırılabilir takım · 332 vaka · 0 sinyal</span>
+    <span>42 çalıştırılabilir takım · 337 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -2411,6 +2411,45 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Otuz yedinci tur</span>
+  <h2>Kitabın merkezî kusurunu, kitabı yamalarken ben de işledim</h2>
+  <p>Bu raporun <strong>birinci</strong> bulgusu şudur: §14 beşinci kapıyı
+  ekler ve §12'nin dokuz vakalık öz-sınamasının beklenen kümelerini
+  güncellemez; zincir §16'yı kırmızıya, oradan kurulumu durdurmaya götürür.</p>
+  <p>Otuz altıncı turda <strong>yedinci kapıyı ekledim ve öz-sınamaya tek bir
+  vaka yazmadım.</strong></p>
+
+  <table><thead><tr><th>kapı</th><th>öz-sınamada beklenen olarak geçtiği vaka</th></tr></thead><tbody>
+  <tr><td>kapsam · kanit · koltuk</td><td>1</td></tr>
+  <tr><td>sir</td><td>2</td></tr>
+  <tr><td>guncellik · arastirma</td><td>3</td></tr>
+  <tr><td><strong>onay</strong></td><td><strong>0</strong></td></tr>
+  </tbody></table>
+
+  <p>Öz-sınama <code>SELFTEST OK (20 vaka)</code> demeye devam etti —
+  <strong>kapı eklenmeden önce de 20 diyordu.</strong> Yeni kapı hiç
+  sınanmadan yeşil göründü, ve kırk bir takımın hiçbiri görmedi çünkü görecek
+  bir ölçüt yoktu.</p>
+
+  <div class="callout">
+    <strong>Bir kusuru teşhis etmek, ona bağışıklık kazandırmıyor.</strong>
+    Kitabın §14'te yaptığını, kitabın §14'ünü eleştiren rapor yazılırken ben
+    yaptım. Bu, incelemenin en özeleştirel bulgusu — ve muhtemelen en
+    öğreticisi.
+  </div>
+
+  <p>Yama iki katmanlı. <strong>Örnek:</strong> yedinci kapı için dört yönlü
+  öz-sınama vakası eklendi — sessizlik ateşler, onay kaydı susturur, taslak
+  beyanı susturur, içeride hiç ateşlemez (öz-sınama artık 24 vaka).
+  <strong>Sınıf:</strong> AS-01, <code>denetle()</code>'nin çağırdığı kapıları
+  <strong>kaynaktan okuyup</strong> her birinin öz-sınamada beklenen olarak
+  geçtiğini her koşumda sorar — elle yazılmış bir kapı listesi de bayatlardı
+  (AF'nin dersi). Ve AS-05 kapsamanın bir <strong>sayım değil davranış</strong>
+  olduğunu tutuyor: her kapı için ateşleyen ve susan birer metin verilir,
+  kapı ikisini ayırmalı.</p>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -2528,7 +2567,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 41 takım · 332 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 42 takım · 337 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
