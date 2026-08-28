@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>34 çalıştırılabilir takım · 295 vaka · 0 sinyal</span>
+    <span>35 çalıştırılabilir takım · 302 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -1999,6 +1999,85 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Otuzuncu tur</span>
+  <h2>Ölçen şey, ölçtüğü ağacı kirletiyordu</h2>
+  <p>Yirmi dokuzuncu turun sonunda bir eksen adlandırılmıştı: otuz dört takım
+  aynı yardımcıyı, aynı beyan tabanını ve aynı koşum betiğini paylaşıyor —
+  her biri <strong>kendi başına mı</strong> düşüyor? Takımlar ayrı süreçler
+  olduğu için sıra bağımlılığının <strong>tek kanalı dosya sistemidir</strong>.
+  Ölçüldü: o kanal açıktı.</p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AL-01 · AL-02 · AL-05</span>
+      <span class="pill a">Sessiz ve geri alınamaz veri kaybı</span></div>
+    <h3>Kural 6'yı sınayan vaka, kural 6'nın koruduğu dosyayı yok ediyordu</h3>
+    <p>B-34, gerçek kişi adı ayağını sınamak için canlı
+    <code>hafiza/muvekkil-adlari.txt</code> dosyasına bir fixture yazıyor,
+    aslını <strong>yalnızca bir değişkende</strong> tutuyor ve
+    <code>finally</code> ile geri koyuyordu. <code>finally</code> SIGKILL'de
+    koşmaz. Süreç o pencerede öldürüldü: dosyanın 274 baytı gitti. Dosya
+    <code>.gitignore</code>'da olduğu için <code>git checkout</code> ile
+    dönülemedi — <strong>tek kopya ölen sürecin belleğindeydi.</strong></p>
+    <p>Arkasından geleni daha kötüydü. <code>denetim.sh</code> kalan sınama
+    artığını "1 ad" sayıyor:</p>
+    <table><thead><tr><th>kayıtta ne var</th><th>denetimin dediği</th></tr></thead><tbody>
+    <tr><td>gerçek içerik</td><td><code>UYARI müvekkil ad kaydı BOŞ — kural 6'nın gerçek kişi ayağı kapsanmıyor</code></td></tr>
+    <tr><td>sınama artığı</td><td><code>ok&nbsp;&nbsp;&nbsp;&nbsp;müvekkil ad kaydı&nbsp;&nbsp;&nbsp;&nbsp;1 ad</code></td></tr>
+    </tbody></table>
+    <p><strong>Koruma bozulurken alarm da kapandı.</strong></p>
+  </div>
+
+  <div class="callout">
+    <strong>Kitap düzeyinde bulgu: §2'de gizlilik ile dayanıklılık aynı
+    mekanizmadır.</strong> §2 tek adımda hem <code>git init</code> (kitabın
+    tek geri alma aracı) hem <code>.gitignore</code> (tek gizlilik aracı)
+    kurar. Kural 6, müvekkil kimliği taşıyan her yolu <code>.gitignore</code>'a
+    girmeye zorlar; o yol o anda <strong>kurtarılamaz</strong> olur. Oysa
+    <code>hafiza/</code> klasörünün §2'de yazılı varlık sebebi "oturumdan sağ
+    çıkan tespitleri tutmak" — yani dayanıklılığın kendisi. Kitap ikinci bir
+    dayanıklılık aracı önermiyor: ne yedek, ne kopya, ne "üzerine yazmadan
+    önce yedekle" cümlesi. <em>Cevabın altıncı sebebi oldu.</em>
+  </div>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AF-03</span>
+      <span class="pill b">Katman ihlali · üçüncü yer</span></div>
+    <h3>Kontrol, kendi koşumunun yazdığı dosyayı okuyordu</h3>
+    <p>AL-06 ilk koşumda iki bağ buldu. Biri meşru çıktı: M-03'ün okuduğu
+    <code>SONUC-once.txt</code> <strong>donmuş bir arşivdir</strong>. Muafiyet
+    tanındı ama <strong>sınanmadan değil</strong> — AL-07 tam o iddiayı ölçer.
+    İkincisi gerçek ihlaldi:</p>
+    <table><thead><tr><th>AF nasıl koştu</th><th>gördüğü satır</th><th>nihai dosya</th></tr></thead><tbody>
+    <tr><td>bağımsız</td><td>853 <span class="dim">(bir ÖNCEKİ koşum)</span></td><td>—</td></tr>
+    <tr><td>yönlendirmenin içinde</td><td><strong>690</strong></td><td>832</td></tr>
+    </tbody></table>
+    <p>AF'den sonraki altı takım onun görüş alanının dışındaydı. Bugün geçiyor
+    olmasının tek sebebi beyan edilmiş her vakanın erken bir takımda durması.
+    <strong>Geç bir takımda beyanlı bir vaka kaybolsa göremezdi</strong> — tam
+    da en çok gerekli olduğu aralığa kördü. Sağlama, tam günlüğü bilen tek
+    yere taşındı.</p>
+  </div>
+
+  <div class="callout">
+    <strong>Mutasyon sınaması iki kez kendi aparatımı yakaladı.</strong>
+    AL-01 ilk sürümde <em>kaçtı</em>: ölçüt tam göreli yolu arıyordu, kod ise
+    yolu <code>os.path.join(...)</code> ile <strong>bileşen bileşen</strong>
+    kuruyor. Ve AL-03 sahte bir GEÇTİ verdi — sebebi ölçüm değil,
+    <strong>benim kanıtımdı</strong>: mutasyonun indiğini kanıtlamak için
+    takımı koşturdum, o da mutasyon gereği ağaca dosyayı yazdı, böylece dosya
+    "önce" anlık görüntüsüne de girdi ve <strong>fark yok oldu</strong>.
+    Kanıt ile ölçüm ayrı kum havuzlarına alındı. Bu, "mutasyon indiğini
+    kanıtlamadan okuma" kuralının bir adım ilerisi:
+    <strong>kanıtın kendisi de ölçüme karışmamalıdır.</strong>
+  </div>
+
+  <p>Doğru desen zaten ailede vardı — D ve Z her şeyi kum havuzunda bozuyor.
+  Kusur disiplinin <em>yokluğu</em> değil, <strong>tek tip
+  uygulanmamasıydı</strong>: yirmi yedinci ve yirmi sekizinci turlarda
+  adlandırılan sınıfın aynısı — <em>bir örneği düzeltmek sınıfı kapatmaz.</em></p>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -2116,7 +2195,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 34 takım · 295 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 35 takım · 302 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
