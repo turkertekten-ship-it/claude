@@ -85,18 +85,69 @@ BEKLENEN_BASLIK = {
 
 # OLUMSUZ İDDİALAR: her biri, KENDİ BÖLÜMÜNDE aranacak çürütücülerle.
 # Çürütücü bölümde geçiyorsa iddia YANLIŞTIR ve vaka kırmızı olur.
+# Raporun kitap hakkındaki YOKLUK iddiaları: "kitap şunu söylemiyor".
+# Her biri, o iddiayı ÇÜRÜTECEK metnin hangi bölümde aranacağını yazar.
+#
+# [Elli üçüncü tur] Bu tablo beş satırdı; teslimatlarda ise YİRMİ yoklukiddiası
+# vardı. Kural 2 olumsuz iddiadan olumludan YÜKSEK kanıt ister — ve on beşi
+# hiç sınanmamıştı. Üstelik elli birinci tura kadar kitap metni bozuk
+# okunuyordu: satır sonunu geçen her birebir arama sessizce başarısız
+# oluyordu, yani bir yokluk iddiası YANLIŞLIKLA doğrulanmış olabilirdi.
+# AY-05 artık kapsamayı zorunlu kılıyor: beyan edilmemiş bir yokluk iddiası
+# sınanmamış bir olumsuz iddiadır.
 OLUMSUZ = {
     "§2 ikinci bir dayanıklılık aracı önermiyor (yedek yok)":
-        (2, ["yedek", "yedekle", "backup", "kopyasını al"]),
+        (2, None, ["yedek", "yedekle", "backup", "kopyasını al"]),
     "§13 araç kataloğu kurulumda dosya bırakmıyor":
-        (13, ["arac-katalogu", "katalog.md", "> ~/mafirm/hafiza"]),
+        (13, None, ["arac-katalogu", "katalog.md", "> ~/mafirm/hafiza"]),
     "§16 kontrollerinin mutasyonla sınandığını hiçbir yer söylemiyor":
-        (16, ["mutasyon", "bozarak sına"]),
+        (16, None, ["mutasyon", "bozarak sına"]),
     "§12 hiçbir kapı onay durumuna bakmıyor":
-        (12, ["onay:", "onaylayan", "onaylandı"]),
+        (12, None, ["onay:", "onaylayan", "onaylandı"]),
     "§14 boş sonuç ilkesini yaptırım taramasına taşımıyor":
-        (13, ["temizlik kanıtı", "eşleşmenin yokluğu"]),
+        (13, None, ["temizlik kanıtı", "eşleşmenin yokluğu"]),
+    # --- elli üçüncü turda eklenenler ---
+    "§13 diff-match-patch'in arşivlendiğini yazmıyor":
+        (13, "diff-match-patch", ["arşiv", "archived", "2024-08-05"]),
+    "§9 negatif sınır kuralını gösteriyor ama söylemiyor":
+        (9, None, ["negatif sınır", "sınır kuralı", "ne yapmayacağını yaz"]),
+    "§13.3 eşleşme bulunmadığında ne anlama geldiğini söylemiyor":
+        (13, None, ["eşleşme yoksa", "bulunamazsa", "eşleşme bulunmazsa"]),
+    "§2 iki şeyi tek adımda kurmanın ödünleşimini söylemiyor":
+        (2, None, ["ödünleş", "feda", "birini seçmek"]),
+    "§16 birimler arası tutarlılığı sınamıyor":
+        (16, None, ["birimler arası", "birimler arasında tutarlı"]),
+    "§10 web yetkili ajana sır sınırını yazmıyor":
+        (10, None, ["müvekkil adı", "sır sınırı", "gizlilik sınırı"]),
+    "§2 kurulumun idempotent olmadığını söylemiyor":
+        (2, None, ["idempotent", "yeniden çalıştır", "üzerine yaz"]),
+    "§12 kapı iletilerinde çare göstermiyor":
+        (12, None, ["nasıl düzeltilir", "şu biçimde ekleyin", "çare"]),
+    "§2 özgün sürümü saklamayı söylemiyor":
+        (2, None, ["özgün sürüm", "yedek kopya", "commit et"]),
+    "§7 koltuk dayanağının doğrulanmasını istemiyor":
+        (7, None, ["dayanağı doğrula", "kaynağı teyit", "doğrulanmış görüş"]),
+    "§12 öz-sınamada her kapının bir vakası olmasını istemiyor":
+        (12, None, ["her kapının", "kapı başına", "her kural için bir vaka"]),
+    "§14 çıktı sözleşmesini once-arastir becerisine taşımıyor":
+        (14, None, ["iki başlıkla biter", "Şimdi ne yapılmalı"]),
+    "§12 metnin hangi KATMANDA olduğunu sormuyor (kural/yorum/örnek)":
+        (12, None, ["yorum satırı", "örnek olarak", "katman", "yorumda geçen"]),
 }
+
+# AY-05'in beyanı: bugün teslimatlarda bu desene uyan YİRMİ İKİ cümlecik var.
+# Bileşimi: on sekizi tabloda çürütücüsüyle beyanlı AYRI iddia; ikisi aynı
+# iddianın ikinci kez yazılmış hâli; ikisi de İDDİA DEĞİL ANMA — AY takımını
+# tarif eden tablo satırı ile §18'in kendi sözcüklerinin alıntısı.
+#
+# Sayı elli üçüncü turda 21'den 22'ye çıktı: o turun ANLATISI, takımın
+# kapsamasını anlatırken kalıba uyan bir cümle daha ekledi. Bir kusuru
+# arayan ölçüt, o kusuru belgeleyen düzyazıyı da sayar — bu incelemenin en
+# sık sınıfı. Sayı ANMALARLA birlikte beyan edilir ve bileşimi burada
+# yazılıdır; yeni bir yokluk İDDİASI yazmak sayıyı değiştirir ve iddia
+# tabloya çürütücüsüyle girene kadar vakayı kırar. [kural 2]
+BEYAN_YOKLUK = 22
+
 
 if K is None:
     for k, b in (("AY-01", "olumsuz iddialar kendi bölümlerinde ayakta"),
@@ -106,10 +157,32 @@ if K is None:
         vaka(k, b, False, "kitap kaynağı yok — DOĞRULANAMADI")
 else:
     # --- AY-01 · olumsuz iddialar KENDİ bölümlerinde çürütülüyor mu ---
+    def _cumlecikler(t):
+        for p in re.split(r"(?<=[.:;!?])\s+|\n\n|\n(?=\|)|\s—\s", t):
+            p = re.sub(r"\s+", " ", p).strip()
+            if p:
+                yield p
+
     _curuk = []
-    for iddia, (n, teyit) in OLUMSUZ.items():
-        govde = tr(BOLUM.get(n, ("", ""))[1])
-        bulunan = [t for t in teyit if tr(t) in govde]
+    for iddia, (n, konu, teyit) in OLUMSUZ.items():
+        govde = BOLUM.get(n, ("", ""))[1]
+        # [Elli üçüncü tur] Çürütücü, bölümün TAMAMINDA aranırsa BAŞKA BİR
+        # KONU hakkındaki bir sözcük iddiayı çürütmüş görünür: §13'te
+        # "bakımsız" geçiyor ama BAŞKA iki depo için. Konusu olan bir iddia,
+        # çürütücüsünü KONUSUYLA AYNI CÜMLECİKTE aramalıdır.
+        if konu:
+            alan = " ".join(p for p in _cumlecikler(govde)
+                            if tr(konu) in tr(p))
+            if not alan.strip():
+                # Çapa hiçbir cümleciği tutmuyorsa arama alanı BOŞTUR ve
+                # hiçbir çürütücü bulunamaz: iddia boşlukta geçer. Çapa bir
+                # daraltmadır, kaçış deliği değil.
+                _curuk.append("%s → ÇAPA TUTMUYOR: %r §%d'de yok"
+                              % (iddia[:40], konu, n))
+                continue
+        else:
+            alan = govde
+        bulunan = [t for t in teyit if tr(t) in tr(alan)]
         if bulunan:
             _curuk.append("%s → §%d'de bulundu: %s" % (iddia[:40], n, bulunan))
     vaka("AY-01", "kitap hakkındaki olumsuz iddialar kendi bölümlerinde ayakta",
@@ -143,6 +216,28 @@ else:
          "kural/bölüm karışması: %s — kitapta §8=İşlem el kitapları, "
          "§9=Beceriler" % (sorted(set(_karisan)) or "yok"))
 
+    # --- AY-05 · her YOKLUK iddiası beyan edilmiş -------------------
+    # Kural 2: olumsuz iddia olumludan YÜKSEK kanıt ister. Teslimatta geçen
+    # ama tabloda karşılığı olmayan bir yokluk iddiası, SINANMAMIŞ bir
+    # olumsuz iddiadır. Sayı beyanlıdır: yeni bir yokluk iddiası yazmak,
+    # onu tabloya eklemeden bu vakayı kırar.
+    _YOKLUK = re.compile(
+        r"\b(demiyor|söylemiyor|yazmıyor|geçmiyor|önermiyor|taşımıyor|"
+        r"bırakmıyor|bakmıyor|kapsamıyor|saymıyor|içermiyor|belirtmiyor|"
+        r"anmıyor|tanımlamıyor|zorunlu kılmıyor|hiçbir yer\w*|"
+        r"yer almıyor|bulunmuyor|sınanmıyor|istemiyor|yapmaz)\b", re.I)
+    _KITAP = re.compile(r"§\s*\d|kitap|kitabın|kitabı\b|kitapta", re.I)
+    _ANLATI = re.compile(r"\d+\. tur|turda|turunda|düzelt|yanlış okum", re.I)
+    _bulunan = 0
+    for _p in _cumlecikler(re.sub(r"```.*?```", " ", TESLIMAT, flags=re.S)):
+        _p = re.sub(r"[*`_]", "", _p)
+        if _YOKLUK.search(_p) and _KITAP.search(_p) and not _ANLATI.search(_p):
+            _bulunan += 1
+    vaka("AY-05", "kitap hakkındaki her yokluk iddiası tabloda beyanlı",
+         _bulunan == BEYAN_YOKLUK and len(OLUMSUZ) >= 17,
+         "teslimatta %d yokluk iddiası · beyan %d · tabloda %d çürütücü küme"
+         % (_bulunan, BEYAN_YOKLUK, len(OLUMSUZ)))
+
     # --- AY-03 · bölüm haritası raporun anladığı gibi mi -------------
     _sapan = []
     for n, anahtar in BEKLENEN_BASLIK.items():
@@ -159,7 +254,7 @@ else:
 
 
 # [AF-02] Kaybolan bir vaka, kırmızı bir vakadan kötüdür: kimse aramaz.
-BEKLENEN_VAKA = 4
+BEKLENEN_VAKA = 5
 
 
 def rapor():

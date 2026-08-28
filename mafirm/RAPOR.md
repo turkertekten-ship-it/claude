@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** elli beş çalıştırılabilir takım — **403
+**Yamalı hâlde sistem çalışıyor:** elli beş çalıştırılabilir takım — **404
 vaka, 27 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15 → **27/27** (mutasyon kümesi otuz
 sekizinci turda on beşten yirmi yediye çıkarıldı: 26 kontrolün dokuzu hiç
@@ -2416,7 +2416,7 @@ eleştiri, eleştirdiği metni doğru aktarmak zorundadır** — yoksa eleştiri
 kendisi, eleştirdiği kusurun bir örneği olur.
 
 AW artık kitaba atfedilen her alıntıyı kitabın **kaynak dosyasına** karşı
-sınıyor (21 alıntı doğrulandı). Kitaptan olmayan alıntılar — raporun kendi
+sınıyor (22 alıntı doğrulandı). Kitaptan olmayan alıntılar — raporun kendi
 cümleleri, mevzuat metinleri, madde başlıkları — **beyan edilmiş bir muafiyet
 listesinde** gerçek kaynaklarıyla duruyor; AW-02 o listenin bir kaçış deliğine
 dönüşmediğini sağlıyor: listede olup da kitapta **geçen** bir cümle kırmızı
@@ -2692,7 +2692,7 @@ içinde kırmızı, koşumdan sonra yeşil görünüyordu. Onuncu ve on altınc�
 turların katman kuralı — *denetim, kendini denetleyen takımı denetleyemez* —
 **üçüncü kez**, bu kez veri yoluyla çiğnenmişti. Sayı artık durağan ölçülüyor:
 `hepsi.sh`'e bağlı her takımın kendi `BEKLENEN_VAKA` beyanı toplanıyor
-— bugün toplam 403 vaka — ve her takımın kendi sıfırıncı vakası o beyanın
+— bugün toplam 404 vaka — ve her takımın kendi sıfırıncı vakası o beyanın
 gerçeğe eşit olduğunu ayrıca güvenceye alıyor. Bozulmuş bir `SAYIM.txt` ile BB'nin çıktısı
 **birebir aynı** kalıyor; bağımsızlık ölçülerek gösterildi.
 
@@ -2926,6 +2926,33 @@ yazıldı ve şimdi **çekimli akraba** arıyor: Türkçe bir sözcük düzyazı
 de geçer; bir kısaltma yalnızca kendisi olarak geçer. Kuralın karar
 veremediği iki kalıntı tahmin edilmedi, gerekçesiyle **beyan edildi.**
 
+### Kural 2, kendi raporuma uygulandı
+
+Elli birinci tura kadar kitap metni bozuk okunuyordu: satır sonunu geçen her
+birebir arama sessizce başarısız oluyordu. Başarısız bir arama, tam olarak
+bir **yokluk iddiasını doğrulayan** şeydir — *"kitap bunu söylemiyor"*. Yani
+bozuk alet, olumsuz iddiaları **yanlışlıkla onaylamış** olabilirdi.
+
+Ölçülünce asıl boşluk göründü: teslimatlarda kitap hakkında **yirmi bir**
+yokluk iddiası vardı; AY yalnızca **beşini** sınıyordu. Kalanı elle yazılmış bir
+listenin dışında kalmıştı — bu incelemenin üçüncü sınıfı, ama bu kez kitabın
+kendi §3'ünün **2. kuralını** çiğneyerek: *olumsuz bir iddia, olumludan daha
+yüksek bir kanıt eşiği ister.*
+
+On üç yeni çürütücü küme yazıldı; **on sekiz iddianın on sekizi de ayakta.**
+Düzeltilmiş metinle yeniden ölçüldüğünde hiçbiri çürümedi.
+
+**Ölçüt bir kez yanıldı ve yanılgısı öğreticiydi.** §13'ün gövdesinde
+*"bakımsız"* geçiyor, ve ölçüt bunu arşivlenme iddiasının çürütücüsü saydı. Değildi: o sözcük **başka iki depo
+için** yazılmış; kitap diff-match-patch için *"Kullan. Kararlı algoritma"*
+diyor. Yirmi dokuzuncu turun kuralı bir ölçek daha kazandı — **pencere bu kez
+bir BÖLÜM kadardı.** Konusu olan bir iddia, çürütücüsünü konusuyla **aynı
+cümlecikte** aramalıdır. Çapa bir daraltmadır; hiçbir cümleciği tutmadığında
+iddiayı boşlukta geçirmesin diye ayrıca sınanıyor.
+
+Ve AY-05 kapsamayı kalıcı kıldı: yeni bir yokluk iddiası yazmak, o iddia
+çürütücüsüyle tabloya girene kadar takımı kırar.
+
 **Ve mutasyon tarafında üç kez yanıldım — üçü de aynı biçimde.** Üç mutasyon
 "kaçtı" göründü; hiçbiri kaçmamıştı. Zorunlu başlıkların **önüne** bölüm
 ekledim, oysa sınanan şey sonda olmalarıydı. Onay ifadesinin **birini**
@@ -3060,9 +3087,9 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | AT · denetimin mutasyon kapsaması | *26 kontrolün 9'u hiç sınanmamıştı* | **temiz** — 12 mutasyon eklendi, hedef beyanı zorunlu |
 | AU · epilog kontrollerinin sınaması | *dört epilog kontrolü hiç sınanmamıştı* | **temiz** — saf fonksiyona çevrildi, 7 vaka 32 ms |
 | AV · anma/tanım sınıfı taraması | *iki ölçüt yorumla/düzyazıyla tatmin oluyordu* | **temiz** — ikisi de koda bağlandı, sınıf taranıyor |
-| AW · kitap alıntılarının doğruluğu | *dört alıntı yanlış; biri kitaba ait olmayan bir cümleyi kitaba mal ediyordu* | **temiz** — düzeltildi, 21 alıntı doğrulandı |
+| AW · kitap alıntılarının doğruluğu | *dört alıntı yanlış; biri kitaba ait olmayan bir cümleyi kitaba mal ediyordu* | **temiz** — düzeltildi, 22 alıntı doğrulandı |
 | AX · kitap yapısı iddiaları | *sayısal iddialar hiç sınanmamıştı* | **temiz** — dördü de doğru çıktı, doğrulama kalıcı |
-| AY · kitap hakkında olumsuz iddialar | *on iki atıf kural numarasını bölüm numarası sanıyordu* | **temiz** — atıflar düzeltildi, çürütücüler bölüm kapsamlı |
+| AY · kitap hakkında olumsuz iddialar | *yirmi bir yokluk iddiasından yalnızca beşi sınanıyordu* | **temiz** — on sekizi çürütücüsüyle beyanlı, kapsama zorunlu |
 | AZ · kitaba sadık kopyaların sadakati | *"sadık" sıfatı hiç sınanmamıştı* | **temiz** — 258/262 birebir, kalan dördü beyanlı |
 | BA · kayıt ile iddianın çelişmesi | *kaydın "çalışıyor" dediğini teslimat "işe yaramaz" diye anmıştı — üç kez* | **temiz** — bugün çelişki yok, muafiyet beyanlı |
 | BB · sayıların zaman indisi | *kırk yedinci turda görüldü, "Dokuz takım, 96 vaka" başlığı 53 satırlık tablonun üstünde duruyordu* | **temiz** — dört sürüklenmiş sayı düzeltildi |
@@ -3128,7 +3155,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 ### Nasıl yeniden koşulur
 ```
 ./sinama/hepsi.sh                 # 55 çalıştırılabilir takım:
-                                  #   403 vaka + 27 mutasyon (D)
+                                  #   404 vaka + 27 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -3162,7 +3189,7 @@ vakalardır ve hepsi geçer. Kör sınama o aklın dışında kalanı arar: bir
 hukukçunun gerçekten yazacağı cümleyi, kancanın gerçekten göreceği veriyi,
 bozulduğunda denetimin gerçekten yakalayıp yakalamadığını.
 
-Elli sekiz takım, 403 vaka:
+Elli sekiz takım, 404 vaka:
 
 | Takım | Neyi sınar | Kaynağı |
 |---|---|---|
@@ -3226,7 +3253,7 @@ Elli sekiz takım, 403 vaka:
 | BF | **Ölçüm iddiaları** — teslimattaki her ölçüm sayısı, o değeri üreten takımdan okunanla aynı mı | kural 1, §16 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**403 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On üç**
+**404 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On üç**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)
