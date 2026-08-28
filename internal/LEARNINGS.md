@@ -1827,3 +1827,74 @@ parsing dates its own way.
    a factor that is literally one value look identical in a pass rate and have
    different fixes: one needs a corpus with range, the other needs code. Report
    the spread, not the impression.
+
+---
+
+## L46 - The ranker and the abstention gate were sharing one knob
+
+**Observation.** Six external cases fail. Tracing the two most diagnosable ones
+showed they have the *same* cause pulling in opposite directions.
+
+"How should a password be stored so the stored form cannot be reversed?" is not
+a retrieval failure at all - `bcrypt.md` comes back at **rank 0**, which is the
+best answer this corpus contains. Its `rerank_relevance` is 0.1168, under the
+0.19 floor, so the system abstains. The query has five content terms and the
+chunk matches one of them - but that one is `password`, IDF 4.60, and the other
+four are question scaffolding.
+
+"How does one Python library let other packages hook into it?" fails the other
+way: every PyPI page contains `python`, `library` and `packages`, so coverage is
+high for all of them (hypothesis 0.626, httpx 0.588) and the one discriminating
+term, `hook`, cannot lift `pluggy` above them.
+
+**Hypothesis, and it was wrong.** Sharpen `coverage_power` so rare terms
+dominate. Measured on the external corpus:
+
+| power | pass | recall@8 | MRR | nDCG@8 |
+| --- | --- | --- | --- | --- |
+| 1.0 | 48/54 | 0.9186 | 0.7729 | 0.7965 |
+| 2.0 | 47/54 | 0.9186 | 0.7502 | 0.7791 |
+| 2.5 | 47/54 | **0.9419** | 0.7336 | 0.7750 |
+| 3.0 | 44/54 | 0.9070 | 0.7223 | 0.7588 |
+| 4.0 | 43/54 | 0.9070 | 0.7083 | 0.7526 |
+
+Monotonically worse on pass rate. But **recall@8 peaks at 2.5**, above every
+other row - retrieval got better while the pass rate got worse, which is not
+something a single quality knob should be able to do.
+
+**The cause.** `relevance = (0.6 * coverage + 0.4 * phrase) * answerability`,
+and `coverage` is the power-weighted number. Ranking and the abstention gate
+read the same quantity, so sharpening for ranking silently rescales what the
+fixed 0.19 floor is comparing against. One knob, two jobs, opposite directions.
+
+**Decoupled and measured.** `gate_coverage_power` lets the gate keep its own
+exponent:
+
+| rank power | gate shared | gate at 1.0 | recall@8 |
+| --- | --- | --- | --- |
+| 1.0 | 48/54 | 48/54 | 0.9186 |
+| 2.0 | 47/54 | 48/54 | 0.9186 |
+| 2.5 | 47/54 | **49/54** | 0.9419 |
+| 3.0 | 44/54 | 47/54 | 0.9070 |
+
+The recovery *grows* with the sharpening - +1, +2, +3 - which is the mechanism
+showing itself rather than one lucky cell in a grid.
+
+**What did not change: the defaults.** 49/54 is the best external number this
+project has measured, and it is not shipped. Rank power 2.5 costs 0.039 external
+MRR and 0.031 primary recall (0.8125 -> 0.7812), and on the primary corpus
+decoupling changes nothing at any power. Tuning a global default on one corpus's
+pass rate against another corpus's recall is the overfit already recorded twice
+here. The control ships available and off, with the table on it.
+
+**Rules.**
+1. **When two consumers read one number, sharpening it for one recalibrates the
+   other.** A ranking signal reused as a gate threshold is the common case: the
+   ranking is relative and the gate is absolute, so any monotone rescaling is
+   free for the first and a silent retune for the second.
+2. **Two metrics moving in opposite directions is a structural finding, not
+   noise to average away.** Recall up and pass rate down was the whole diagnosis;
+   a single headline number would have hidden it and the sweep would have ended
+   at "1.0 is best".
+3. **A measured improvement is not automatically a shipped one.** State what it
+   costs on the corpus it was not tuned on, then decide.

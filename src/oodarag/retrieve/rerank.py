@@ -125,6 +125,38 @@ class HeuristicReranker(Reranker):
     #: does not apply it.
     use_surface_answerability: bool = True
     coverage_power: float = 1.0
+    #: The power the *abstention gate* weights coverage by, when it should
+    #: differ from the ranking one. None means "the same", which is the default
+    #: and what shipped before this field existed.
+    #:
+    #: They are separable because they answer different questions. Ranking asks
+    #: which of these candidates is best; the gate asks whether the best one is
+    #: good enough to answer from at all, against a fixed floor. Raising
+    #: `coverage_power` sharpens the first and silently recalibrates the second,
+    #: because `relevance` is computed from the same number - which is why the
+    #: power sweep moves recall and pass rate in opposite directions.
+    #:
+    #: Measured on the external corpus, holding the gate at 1.0 while the ranker
+    #: sharpens (`scripts/gate_power_sweep.py`):
+    #:
+    #:     rank  gate=shared  gate=1.0   recall@8
+    #:     1.0      48/54      48/54      0.9186
+    #:     2.0      47/54      48/54      0.9186
+    #:     2.5      47/54      49/54      0.9419
+    #:     3.0      44/54      47/54      0.9070
+    #:
+    #: The recovery grows with the sharpening, which is the mechanism showing
+    #: itself rather than one lucky cell: the harder ranking is sharpened, the
+    #: more the shared knob decalibrates the floor.
+    #:
+    #: The default is None - the shared behaviour - deliberately. Setting the
+    #: ranker to 2.5 buys that 49th external case and 0.023 recall, and costs
+    #: 0.039 external MRR and 0.031 primary recall (0.8125 -> 0.7812). Tuning a
+    #: global default on one corpus's pass rate against another's recall is the
+    #: overfit this project has paid for before, so the control ships available
+    #: and off. On the primary corpus decoupling changes nothing at any power,
+    #: which is what "no behaviour change by default" should look like.
+    gate_coverage_power: float | None = None
     coverage_weight: float = 0.45
     phrase_weight: float = 0.25
     #: Invisible to both eval gates, for the same reason as `recency_weight`
@@ -313,17 +345,22 @@ class HeuristicReranker(Reranker):
             chunk_terms = set(haystack_terms)
 
             if not query_set:
-                coverage = 0.0
+                coverage = gate_coverage = 0.0
             elif self.idf is None:
-                coverage = len(query_set & chunk_terms) / len(query_set)
+                coverage = gate_coverage = len(query_set & chunk_terms) / len(query_set)
             else:
                 # Weighted by informativeness: matching a term that appears
                 # everywhere is not evidence, matching a rare one is.
-                power = self.coverage_power
-                total_weight = sum(self.idf(t) ** power for t in query_set)
-                matched_weight = sum(self.idf(t) ** power
-                                     for t in query_set & chunk_terms)
-                coverage = matched_weight / total_weight if total_weight else 0.0
+                matched = query_set & chunk_terms
+
+                def _weighted(power: float) -> float:
+                    total = sum(self.idf(t) ** power for t in query_set)
+                    return (sum(self.idf(t) ** power for t in matched) / total
+                            if total else 0.0)
+
+                coverage = _weighted(self.coverage_power)
+                gate_coverage = (coverage if self.gate_coverage_power is None
+                                 else _weighted(self.gate_coverage_power))
             # Exact phrase match is rare and highly diagnostic; partial credit
             # for a long shared prefix keeps it from being all-or-nothing.
             phrase_score = _longest_common_run(phrase_terms, haystack)
@@ -365,7 +402,7 @@ class HeuristicReranker(Reranker):
             # trusted, recent source outscores the abstention floor and the
             # system answers confidently from nothing. Ordering uses the total;
             # the abstention gate uses `rerank_relevance` alone.
-            relevance = (0.6 * coverage + 0.4 * phrase_score) * answerability
+            relevance = (0.6 * gate_coverage + 0.4 * phrase_score) * answerability
 
             result.components.update({
                 "rerank_relevance": relevance,

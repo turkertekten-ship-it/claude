@@ -371,6 +371,108 @@ class TranscriptTimestampTest(unittest.TestCase):
                 self.assertTrue(chunk.metadata["deep_link"].endswith(f"t={claimed}"))
 
 
+class GateCoveragePowerTest(unittest.TestCase):
+    """The gate and the ranker read the same coverage number, so sharpening one
+    silently recalibrates the other.
+
+    Measured on the external corpus: raising `coverage_power` to 2.5 gives the
+    best recall@8 in the sweep (0.9419 vs 0.9186) and *loses* a case
+    (47/54 vs 48/54), because the abstention floor is a fixed number applied to
+    a rescaled quantity. Holding the gate at 1.0 recovers it and one more.
+
+    `gate_coverage_power` is a control, so these assert what the protocol
+    demands of one: that its two settings differ, and that the difference lands
+    on the gate and not on the ordering.
+    """
+
+    def _results(self, texts, query, **kwargs):
+        from oodarag.models import Chunk, ScoredChunk
+        from oodarag.retrieve.rerank import HeuristicReranker
+
+        # One rare term, two that every document shares - the shape that makes
+        # the power matter at all. IDF is supplied rather than measured so the
+        # expectation is derived from the formula, not read off a corpus.
+        #
+        # Every key is its own Porter stem, and a lookup miss raises rather than
+        # defaulting. The first draft used "everywhere", which stems to
+        # "everywher", missed the table, and silently took the *rare* default -
+        # so the fixture disagreed with the derived expectation for a reason
+        # that had nothing to do with the code under test.
+        idf = {"rare": 8.0, "common": 1.0, "plain": 1.0}
+
+        def idf_of(term: str) -> float:
+            if term not in idf:
+                raise AssertionError(f"fixture has no IDF for {term!r}; "
+                                     "the tokenizer produced a term the table "
+                                     "does not key on")
+            return idf[term]
+
+        reranker = HeuristicReranker(
+            idf=idf_of,
+            vocabulary=set(idf),
+            min_vocabulary_for_answerability=0,
+            **kwargs,
+        )
+        results = [
+            ScoredChunk(chunk=Chunk(chunk_id=f"c{i}", doc_id=f"d{i}", ordinal=0,
+                                    text=text, context_header="",
+                                    metadata={"authority": 1.0}),
+                        score=0.0, components={})
+            for i, text in enumerate(texts)
+        ]
+        return reranker.rerank(query, results)
+
+    #: One chunk holds only the rare term, the other only the common ones.
+    TEXTS = ("rare", "common plain")
+    QUERY = "rare common plain"
+
+    def test_sharpening_the_shared_power_moves_the_gate_as_well_as_the_order(self):
+        flat = self._results(self.TEXTS, self.QUERY, coverage_power=1.0)
+        sharp = self._results(self.TEXTS, self.QUERY, coverage_power=3.0)
+        by_id = lambda rs: {r.chunk.chunk_id: r.components["rerank_relevance"] for r in rs}
+        self.assertNotEqual(by_id(flat)["c0"], by_id(sharp)["c0"],
+                            "the shared power left the gate's number untouched, "
+                            "so there is nothing here to decouple")
+
+    def test_holding_the_gate_flat_leaves_the_gates_number_where_it_was(self):
+        flat = self._results(self.TEXTS, self.QUERY, coverage_power=1.0)
+        decoupled = self._results(self.TEXTS, self.QUERY,
+                                  coverage_power=3.0, gate_coverage_power=1.0)
+        for a, b in zip(sorted(flat, key=lambda r: r.chunk.chunk_id),
+                        sorted(decoupled, key=lambda r: r.chunk.chunk_id)):
+            self.assertAlmostEqual(a.components["rerank_relevance"],
+                                   b.components["rerank_relevance"], places=9,
+                                   msg="the gate followed the ranker anyway")
+
+    def test_the_ranker_still_sharpens_while_the_gate_is_held(self):
+        """A control that changes nothing is dead. This one must still move the
+        ordering signal even with the gate pinned - otherwise it is just
+        `coverage_power=1.0` under a longer name."""
+        flat = self._results(self.TEXTS, self.QUERY, coverage_power=1.0)
+        decoupled = self._results(self.TEXTS, self.QUERY,
+                                  coverage_power=3.0, gate_coverage_power=1.0)
+        by_id = lambda rs: {r.chunk.chunk_id: r.components["rerank_coverage"] for r in rs}
+        self.assertNotEqual(by_id(flat)["c0"], by_id(decoupled)["c0"],
+                            "the ranking coverage did not sharpen")
+        # Derived from the formula: the rare-only chunk's share of total IDF
+        # mass, at each power. 8^p / (8^p + 1 + 1).
+        for power, results in ((1.0, flat), (3.0, decoupled)):
+            expected = 8.0 ** power / (8.0 ** power + 2 * 1.0 ** power)
+            self.assertAlmostEqual(by_id(results)["c0"], expected, places=9)
+
+    def test_none_means_the_shared_behaviour_and_is_the_default(self):
+        from oodarag.retrieve.rerank import HeuristicReranker
+
+        self.assertIsNone(HeuristicReranker().gate_coverage_power)
+        shared = self._results(self.TEXTS, self.QUERY, coverage_power=3.0)
+        explicit = self._results(self.TEXTS, self.QUERY,
+                                 coverage_power=3.0, gate_coverage_power=3.0)
+        for a, b in zip(sorted(shared, key=lambda r: r.chunk.chunk_id),
+                        sorted(explicit, key=lambda r: r.chunk.chunk_id)):
+            self.assertAlmostEqual(a.components["rerank_relevance"],
+                                   b.components["rerank_relevance"], places=9)
+
+
 if __name__ == "__main__":
     unittest.main()
 
