@@ -4787,3 +4787,54 @@ already retrieved, and every one of those is about clocks.
 3. **Diagnose to the word count.** "Register mismatch" was an abstraction for
    several sessions; `clock: 0, control: 0` is the thing itself, and it took one
    grep.
+
+## L94 - The evaluation corpus ate a golden case, and the corpus is this repo
+
+`internal/PLAN.md` recorded 19/20 on the primary corpus. Re-run through the CLI
+exactly as CI runs it: **18/20**, with recall@8 down from 0.8750 to 0.8125.
+Nothing in CI noticed, because the floor is 0.85 and 18/20 is 0.90.
+
+Measured rather than assumed. At the commit where those numbers were written
+(`1c4cd2b`, in a throwaway worktree) the same command still gives 19/20,
+recall 0.875. So the case really was lost somewhere in twenty commits.
+
+**It was not the retriever.** The newly failing case names its own cause:
+
+    How does the crawler avoid returning the same page twice?
+      expected: crawler.py
+      got:      tests/test_crawler_blind.py x3
+
+and the top chunk is text *added this session*:
+
+    Third-party evidence: the crawler cannot report its way out of a
+    request that arrived, or into one that did not.
+
+I wrote three tests about not fetching a page twice, and they now outrank the
+implementation for the question "how does the crawler avoid returning the same
+page twice". The retrieval is right; the corpus acquired a better answer to the
+question than the answer the golden names.
+
+**The control is the external corpus**, which no commit in this repository
+touches. Over the same span it did not move on a single metric and improved on
+two (hit@8 0.9302 -> 0.9535, precision 0.2471 -> 0.2500). A code regression
+would have shown there.
+
+L22 predicted exactly this - "a corpus that documents its own evaluation
+eventually cannot evaluate" - and recorded it as a trend. This is the first time
+it has taken a case, and it took it from the file that *tests the feature the
+question asks about*, which is the least avoidable version: the better the tests
+are written, the more they compete with the code.
+
+**Rules.**
+1. **A self-referential eval corpus decays fastest where the work is best.**
+   Good test prose is topical prose about the module under test, which is
+   exactly what the golden for that module asks for.
+2. **Do not repair this by excluding the intruder.** Dropping `tests/` from the
+   primary index would restore 19/20 and measure nothing. The number is honest;
+   what needs correcting is the weight put on it.
+3. **A floor with headroom hides a regression as effectively as no floor.**
+   0.85 tolerated the drop from 19 to 18 silently. Headroom is deliberate here -
+   the primary corpus is meant to be loose - but "CI is green" was not evidence
+   the number had held, and I read it as though it were until I re-ran it.
+4. **When two corpora disagree about whether something regressed, the one that
+   your commits do not edit is the witness.**
