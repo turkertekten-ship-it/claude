@@ -17,7 +17,13 @@
 #
 # Usage
 #   bash tools/install_prompt_system.sh [--check] [--dry-run] [--uninstall]
-#                                      [--prefix DIR] [--bin-dir DIR]
+#                                      [--force] [--prefix DIR] [--bin-dir DIR]
+#
+# It will not overwrite a file it did not install. ~/.claude is the owner's own
+# directory and may already hold a command of theirs at one of these names; an
+# installer that clobbers it, and an uninstaller that then deletes it, would
+# destroy work this repository never wrote. --force replaces such a file after
+# copying it aside.
 #
 # --check compares what is installed against what this repository would install
 # now, and exits 1 if any of it has drifted. Nothing else keeps the two in step:
@@ -35,12 +41,14 @@ BIN_DIR="${HOME}/.local/bin"
 DRY=0
 UNINSTALL=0
 CHECK=0
+FORCE=0
 
 while [ $# -gt 0 ]; do
     case "$1" in
         --dry-run)   DRY=1 ;;
         --uninstall) UNINSTALL=1 ;;
         --check)     CHECK=1 ;;
+        --force)     FORCE=1 ;;
         --prefix)    PREFIX="${2:?--prefix needs a directory}"; shift ;;
         --bin-dir)   BIN_DIR="${2:?--bin-dir needs a directory}"; shift ;;
         -h|--help)   sed -n '2,20p' "$0"; exit 0 ;;
@@ -70,6 +78,44 @@ TARGETS=(
 )
 
 
+MANIFEST="$PREFIX/.prompt-system-manifest"
+
+ours() {
+    # Is this path one we installed, according to the manifest?
+    [ -f "$MANIFEST" ] && grep -Fxq "$1" "$MANIFEST"
+}
+
+source_for() {
+    # The repository file a given installed path came from, if any.
+    local dst="$1" src pair
+    while IFS='|' read -r pair dst2; do
+        [ "$dst2" = "$dst" ] && { printf '%s' "$pair"; return 0; }
+    done < <(markdown_pairs)
+    for tool in prompt_forge.py prompt_habits.py learn_rule.py check_output.py _phrases.py; do
+        [ "$dst" = "$PREFIX/tools/$tool" ] && { printf '%s' "$REPO/tools/$tool"; return 0; }
+    done
+    return 1
+}
+
+unmodified() {
+    # A shim is generated rather than copied; it is ours if it says so.
+    local dst="$1" src
+    case "$dst" in
+        "$BIN_DIR"/*) grep -q "Installed by tools/install_prompt_system.sh" "$dst" && return 0
+                      return 1 ;;
+    esac
+    src="$(source_for "$dst")" || return 1
+    would_write "$src" "$dst" | cmp -s - "$dst"
+}
+
+would_write() {
+    # The content this installer would put at $2, for comparison.
+    case "$2" in
+        *.md) rendered "$1" ;;
+        *)    cat "$1" ;;
+    esac
+}
+
 rendered() {
     # What the installed copy of a markdown file should contain: the source,
     # with its commands pointed at the installed binary.
@@ -92,12 +138,24 @@ markdown_pairs() {
 
 if [ "$UNINSTALL" -eq 1 ]; then
     say "removing the prompt system from $PREFIX"
+    kept=0
     for target in "${TARGETS[@]}"; do
         [ -e "$target" ] || continue
+        if ! ours "$target"; then
+            say "  kept $target — not installed by this script"
+            kept=$((kept + 1)); continue
+        fi
+        if ! unmodified "$target"; then
+            say "  kept $target — you have edited it since it was installed"
+            kept=$((kept + 1)); continue
+        fi
         do_it rm -f "$target" && say "  removed $target"
     done
-    [ "$DRY" -eq 1 ] || rmdir "$PREFIX/skills/prompt-forge" 2>/dev/null
-    say "done. Files this script did not create were left alone."
+    if [ "$DRY" -eq 0 ]; then
+        rm -f "$MANIFEST"
+        rmdir "$PREFIX/skills/prompt-forge" 2>/dev/null
+    fi
+    say "done. $kept file(s) this script did not write were left alone."
     exit 0
 fi
 
@@ -166,21 +224,51 @@ for dir in "$PREFIX/skills/prompt-forge" "$PREFIX/commands" "$PREFIX/agents" "$P
     do_it mkdir -p "$dir" || { say "could not create $dir" >&2; exit 2; }
 done
 
+guard_target() {
+    # 0 to proceed, 1 to refuse. A file we installed, or one already identical
+    # to what we would write, is ours to replace. Anything else is the owner's.
+    local src="$1" dst="$2"
+    [ -e "$dst" ] || return 0
+    ours "$dst" && return 0
+    would_write "$src" "$dst" | cmp -s - "$dst" && return 0
+    if [ "$FORCE" -eq 1 ]; then
+        local backup="$dst.replaced-$(date +%Y-%m-%d)"
+        cp "$dst" "$backup" || return 1
+        say "  kept your version at $backup"
+        return 0
+    fi
+    say "  REFUSING to overwrite $dst" >&2
+    say "    It is not a file this installer wrote, and it is not identical to" >&2
+    say "    what would be written. Move it, or re-run with --force to have it" >&2
+    say "    copied aside first." >&2
+    return 1
+}
+
+record() {
+    [ "$DRY" -eq 1 ] && return 0
+    ours "$1" || printf '%s\n' "$1" >> "$MANIFEST"
+}
+
 install_rewritten() {
     local src="$1" dst="$2"
     if [ "$DRY" -eq 1 ]; then say "  would: install $src -> $dst"; return 0; fi
+    guard_target "$src" "$dst" || return 1
     rendered "$src" > "$dst" || return 1
+    record "$dst"
     say "  installed $dst"
 }
 
 
 while IFS='|' read -r src dst; do
-    install_rewritten "$src" "$dst" || exit 2
+    install_rewritten "$src" "$dst" || exit 1
 done < <(markdown_pairs)
 
 for tool in prompt_forge.py prompt_habits.py learn_rule.py check_output.py _phrases.py; do
+    if [ "$DRY" -eq 0 ]; then
+        guard_target "$REPO/tools/$tool" "$PREFIX/tools/$tool" || exit 1
+    fi
     do_it cp "$REPO/tools/$tool" "$PREFIX/tools/$tool" || exit 2
-    [ "$DRY" -eq 1 ] || say "  installed $PREFIX/tools/$tool"
+    if [ "$DRY" -eq 0 ]; then record "$PREFIX/tools/$tool"; say "  installed $PREFIX/tools/$tool"; fi
 done
 
 for shim in prompt-forge:prompt_forge.py prompt-habits:prompt_habits.py learn-rule:learn_rule.py check-output:check_output.py; do
@@ -195,6 +283,7 @@ for shim in prompt-forge:prompt_forge.py prompt-habits:prompt_habits.py learn-ru
 exec python3 -B "$PREFIX/tools/$script" "\$@"
 SHIM
     chmod +x "$BIN_DIR/$name" || exit 2
+    record "$BIN_DIR/$name"
     say "  installed $BIN_DIR/$name"
 done
 

@@ -55,6 +55,11 @@ bash tools/install_prompt_system.sh                               # /prompt in e
 bash tools/install_prompt_system.sh --check                       # is that copy still current?
 ```
 
+The installer will not overwrite a file it did not write. `~/.claude` is your
+own directory and may already hold a command at one of these names; a conflict
+is refused and named, and `--force` copies your version aside first. `--uninstall`
+removes only files it installed that you have not since edited.
+
 `compile` cannot invent: every line of its output is a line you wrote, a
 heading, or an explicit `<<MISSING:` marker, and the tests prove it.
 

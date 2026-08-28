@@ -88,6 +88,51 @@ def main() -> int:
         check("and the check still calls it the same",
               "same     commands/prompt.md" in repaired.stdout, repaired.stdout)
 
+    print("\nit will not clobber a file it did not write")
+    with tempfile.TemporaryDirectory() as tmp:
+        prefix, bindir = Path(tmp) / "claude", Path(tmp) / "bin"
+        (prefix / "commands").mkdir(parents=True)
+        mine = prefix / "commands" / "prompt.md"
+        original = "---\ndescription: The owner's own command.\n---\nDo the usual thing.\n"
+        mine.write_text(original)
+
+        refused = run(prefix=prefix, bindir=bindir)
+        check("install refuses", refused.returncode == 1, refused.returncode)
+        check("and names the file", "REFUSING to overwrite" in refused.stderr, refused.stderr[:200])
+        check("the owner's file is untouched", mine.read_text() == original, mine.read_text()[:80])
+
+        forced = run("--force", prefix=prefix, bindir=bindir)
+        check("--force installs", forced.returncode == 0, forced.stdout[-200:])
+        backups = list((prefix / "commands").glob("prompt.md.replaced-*"))
+        check("the original was copied aside", backups, list((prefix / "commands").iterdir()))
+        check("and the copy is the original",
+              backups and backups[0].read_text() == original, backups)
+        check("the installed copy is ours", "seven slots" in mine.read_text())
+
+        again = run(prefix=prefix, bindir=bindir)
+        check("re-installing over our own files is not a conflict", again.returncode == 0,
+              again.stderr[:200])
+        check("a manifest records what was installed",
+              (prefix / ".prompt-system-manifest").exists())
+
+        print("\nuninstall removes only its own, unmodified files")
+        stranger = prefix / "commands" / "prompt-audit.md"
+        stranger.write_text("a file the owner replaced after installation\n")
+        edited = prefix / "agents" / "prompt-critic.md"
+        edited.write_text(edited.read_text() + "\nmy own note\n")
+        foreign = prefix / "agents" / "unrelated.md"
+        foreign.write_text("nothing to do with this repository\n")
+
+        removed = run("--uninstall", prefix=prefix, bindir=bindir)
+        check("uninstall exits 0", removed.returncode == 0, removed.stdout[-200:])
+        check("a replaced file is kept", stranger.exists() and "owner replaced" in stranger.read_text())
+        check("an edited file is kept", edited.exists() and "my own note" in edited.read_text())
+        check("an unrelated file is untouched", foreign.exists())
+        check("our own unmodified files are gone",
+              not (prefix / "tools" / "prompt_forge.py").exists())
+        check("the manifest is gone", not (prefix / ".prompt-system-manifest").exists())
+        check("and it reports what it kept", "left alone" in removed.stdout, removed.stdout[-160:])
+
     print()
     if FAILURES:
         print(f"{len(FAILURES)} case(s) failed: {', '.join(FAILURES)}")

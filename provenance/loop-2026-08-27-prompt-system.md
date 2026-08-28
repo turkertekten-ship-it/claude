@@ -341,6 +341,35 @@ markdown comparison silently did nothing while the summary still reported "in
 sync" — a check that quietly checked less than it claimed, which is worse than
 no check at all.
 
+## Tenth loop — what the installer did to a machine that was not this one
+
+Observe started with the delivery path nobody had exercised: a fresh clone of
+the pushed branch, running `tests/run_all.sh` cold. It passed all ten checks,
+which was the expected and uninteresting answer.
+
+The interesting question came out of it. Every install this session had run
+into a container whose `~/.claude` held nothing of the owner's. What happens on
+a machine where it does?
+
+> The surprise, and the worst defect found in ten loops: the installer
+> **silently overwrote** a command the owner had written, and `--uninstall`
+> then **deleted it permanently**, because the path was on its list and the
+> list never recorded who wrote what. Neither could be seen from inside a
+> container where that directory was empty. The standing instruction this
+> session runs under says to look at a target before overwriting it, and the
+> tool that installs the doctrine did not.
+
+The installer now keeps a manifest of what it wrote. It refuses a target it did
+not install and that does not already match what it would write, naming the
+file; `--force` copies the owner's version aside first. `--uninstall` removes
+only files in the manifest whose content is still what was installed — a file
+edited since is left with a note, because the edit is the owner's work.
+
+Two smaller things came out of the falsifiers: a refusal was exiting 2 ("could
+not run") when it is a finding, and the first version of the edit-preserving
+uninstall checked only manifest membership, so a file we installed and the
+owner then rewrote was still deleted.
+
 ## Still open
 
 `U-6`, `U-7` and `U-8` in [unknowns.md](unknowns.md): what Saraev actually

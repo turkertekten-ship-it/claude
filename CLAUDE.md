@@ -268,3 +268,4 @@ reader decide whether it still applies. Written by `tools/learn_rule.py`.
 2. [research] Always clone a public repository when the fetch tool is refused, because the git proxy serves anonymous reads of hosts the egress gateway blocks, and that is where the answer was.
 3. [docs] Never quote a score, count, or date you did not just re-run, because the worked example carried two invented numbers into the procedure that teaches the rule against them.
 4. [output] Never exceed a stated limit on length, because an answer to a prompt demanding at most 80 words came back with 86, and nothing was reading the limit back.
+5. [install] Never overwrite a path in a shared directory without checking who wrote it, because the installer clobbered a user command in ~/.claude and the uninstaller then deleted it, and neither was visible in a container where that directory was empty.
