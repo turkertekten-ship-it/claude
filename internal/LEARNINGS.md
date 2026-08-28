@@ -3890,3 +3890,63 @@ terms the corpus genuinely contains, asked about a package it does not have.
 3. **Distinguish "this threshold is mistuned" from "this feature cannot make
    this decision".** Only the second is worth acting on, and the quartiles say
    which - overlapping tails with separated medians means tune no further.
+
+---
+
+## L78 - A better AUC that costs three cases, in the gate where a better AUC once bought three
+
+L77 concluded the abstention floor is a feature problem, not a threshold
+problem, so the next move was a different signal. Rather than invent one, rank
+everything the pipeline already computes, by AUC over 61 answerable and 15
+abstainable goldens (`scripts/abstention_signals.py`):
+
+    mean relevance over 8           0.863
+    rerank_relevance (incumbent)    0.845
+    relevance of the top chunk      0.844
+    top fused score                 0.825
+    answerability                   0.814
+    max coverage                    0.805
+    max phrase                      0.707
+    absolute margin top-2           0.593
+    relative margin (top-2)/top     0.519
+    recency (known saturated)       0.502
+
+**The controls say the ruler works.** `recency` lands at 0.502, a coin flip,
+which is exactly what L43 says a saturated feature must score. Term
+co-occurrence, re-run at 153 documents, still gives TPR-FPR 0.159 - L51 holds
+after the widening that overturned three other measurements. And the margin
+hypothesis I had formed from four questions dies at 0.593.
+
+**Then the winner lost.** Mean relevance beats the incumbent by 0.018 AUC. Swept
+end to end, each statistic against its own floor since they are on different
+scales:
+
+                external      primary     held-out
+    best max    49/54         18/20       19/22
+    best mean   46/54         18/20       20/22
+
+Mean is better on the held-out set - the only configuration all session to move
+it off 19/22 - ties on primary, and loses the gate by three cases. `max` stays.
+
+**The part worth the entry.** L22 records a 0.010 AUC gain *in this same gate*
+being worth three end-to-end cases, and drew the rule that when AUC and the
+shipping metric disagree, the shipping metric wins. Here 0.018 of AUC costs
+three cases. Both are true, and together they say something stronger than either
+alone: AUC does not predict end-to-end behaviour **in either direction**. It
+remains good for what L22 used it for - killing a candidate cheaply, as it did
+for margin and co-occurrence here - and worthless for ranking survivors.
+
+The option is kept rather than reverted, with a test asserting the two settings
+decide differently on a real retrieval with a floor derived from it (three
+mutations caught, including mean and max swapped). A measured alternative that
+lost is worth more as executable code than as a paragraph, and the held-out
+result means a different corpus could reasonably choose it.
+
+**Rules.**
+1. **A proxy metric that once predicted the real one is not thereby a
+   predictor.** Two samples, opposite directions, same gate.
+2. **Put a known-dead signal in the ranking as a control.** `recency` at 0.502
+   is what told me the AUC computation was sound before I acted on the top row.
+3. **When a candidate wins the proxy, that is the beginning of the
+   measurement.** The 0.018 bought a full end-to-end sweep, which is the only
+   thing that decided anything.

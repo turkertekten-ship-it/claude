@@ -562,6 +562,61 @@ class GuardReachabilityTest(unittest.TestCase):
                         "nothing should fall under the floor")
 
 
+class RelevanceStatisticIsARealControlTest(unittest.TestCase):
+    """The two settings must decide differently, not merely run different code.
+
+    A control that names a behaviour and does not change it is L17's failure
+    mode: both settings looked like success because the output was identical.
+    `mean` is measurably worse on the gate corpus and better on the held-out
+    set, so it is a real alternative kept behind a default - which only means
+    anything if the flag reaches the decision.
+
+    Built on a real index and a real retrieval rather than a stub: the floor is
+    *derived* from the relevances the pipeline actually produces, so the test
+    cannot pass by agreeing with numbers invented to make it pass (L31).
+    """
+
+    def test_the_two_settings_decide_differently(self):
+        import statistics
+        from tempfile import TemporaryDirectory
+
+        from oodarag.generate.answer import AnswerConfig, AnswerGenerator
+        from oodarag.ingest.filesystem import FilesystemConnector
+        from oodarag.pipeline import IndexPipeline
+        from oodarag.retrieve.hybrid import HybridRetriever, RetrievalConfig
+        from oodarag.store.sqlite_store import SqliteStore
+
+        question = "which library formats source code?"
+        with TemporaryDirectory() as tmp:
+            store = SqliteStore(f"{tmp}/index.db")
+            pipeline = IndexPipeline(store)
+            pipeline.run([FilesystemConnector("corpus/external/pypi",
+                                              patterns=["**/*.md"], key="fs:t")])
+            retriever = HybridRetriever(store, pipeline.embedder, RetrievalConfig())
+            results, _trace = retriever.retrieve(question)
+            relevances = [r.components.get("rerank_relevance", 0.0) for r in results]
+            top, average = max(relevances), statistics.mean(relevances)
+            # A maximum over eight values exceeds their mean unless every value
+            # is identical, which for a real query it is not. If this ever
+            # fails, the two statistics cannot be distinguished on this input
+            # and the rest of the test would be vacuous.
+            self.assertGreater(top, average,
+                               f"max {top} not above mean {average}; nothing to test")
+            floor = (top + average) / 2
+
+            def abstains(statistic: str) -> bool:
+                config = AnswerConfig(generator="extractive",
+                                      relevance_statistic=statistic,
+                                      min_relevance=floor)
+                return AnswerGenerator(retriever, config).answer(question).abstained
+
+            self.assertFalse(abstains("max"),
+                             "max is above the floor by construction and must answer")
+            self.assertTrue(abstains("mean"),
+                            "mean is below the floor by construction and must abstain")
+            store.close()
+
+
 class EmptyIndexIsNotAQualityCollapseTest(unittest.TestCase):
     """An eval against an empty index reported 22 failing cases and every metric
     at 0.0 - identical to the retriever having failed completely.

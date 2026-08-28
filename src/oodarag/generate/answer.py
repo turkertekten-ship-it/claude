@@ -7,6 +7,7 @@ that were actually retrieved.
 
 from __future__ import annotations
 
+import statistics
 import time
 from dataclasses import dataclass
 from typing import Any
@@ -122,6 +123,45 @@ class AnswerConfig:
     #: problem, not a threshold problem - so the next attempt here should be a
     #: different signal, not another sweep of this one.
     min_relevance: float = 0.19
+    #: Which statistic of the retrieved chunks' relevance the floor is applied
+    #: to. "max" asks whether *any* chunk looks relevant; "mean" asks whether
+    #: the retrieved set as a whole does.
+    #:
+    #: Ranked by AUC over 61 answerable and 15 abstainable goldens
+    #: (`scripts/abstention_signals.py`), mean separates the classes better than
+    #: max - 0.863 against 0.845 - which is the kind of gap L22 found worth
+    #: three end-to-end cases. The reasoning: a maximum over eight chunks is a
+    #: single-sample extreme, so one spuriously good chunk carries the whole
+    #: decision, and an out-of-corpus question can find one of those far more
+    #: easily than it can find eight.
+    #:
+    #: AUC is for killing candidates, not choosing between survivors, so the
+    #: shipped value is decided end to end, not by the 0.018. Each statistic
+    #: swept against its own floor, since they are on different scales
+    #: (`scripts/relevance_statistic_ab.py`):
+    #:
+    #:   max   floor   0.10   0.15   0.19*  0.22   0.25   0.30
+    #:   external      46/54  47/54  49/54  48/54  47/54  44/54
+    #:   primary       17/20  18/20  18/20  18/20  18/20  18/20
+    #:   held-out      19/22  19/22  19/22  19/22  18/22  16/22
+    #:
+    #:   mean  floor   0.03   0.05   0.07   0.09   0.11   0.14   0.18
+    #:   external      45/54  46/54  46/54  46/54  46/54  42/54  42/54
+    #:   primary       15/20  16/20  17/20  17/20  17/20  18/20  18/20
+    #:   held-out      19/22  20/22  20/22  19/22  18/22  19/22  16/22
+    #:
+    #: **max wins where it counts and loses everywhere else**, which is why the
+    #: default is not the higher-AUC option. Best max is 49/54 on the gate
+    #: against mean's 46; they tie at 18/20 on primary; and mean takes held-out
+    #: 20/22 against 19 - the only configuration all session to move that set
+    #: off 19/22. Three cases on the gate outweigh one on a set deliberately
+    #: barely gated.
+    #:
+    #: The 0.018 of AUC did not merely fail to pay, it pointed the wrong way.
+    #: L22 recorded a 0.010 AUC gain in this same gate being worth three
+    #: end-to-end cases; here 0.018 costs three. AUC does not predict end-to-end
+    #: behaviour in either direction, and both facts are now on record.
+    relevance_statistic: str = "max"
     generator: str = "auto"  # "auto" | "extractive" | "claude"
 
 
@@ -163,9 +203,11 @@ class AnswerGenerator:
                 metrics={"reason": "no_results", "retrieval": trace.as_dict()},
             )
 
-        best_relevance = max(
-            (r.components.get("rerank_relevance", 0.0) for r in results), default=0.0
-        )
+        relevances = [r.components.get("rerank_relevance", 0.0) for r in results]
+        best_relevance = (
+            statistics.mean(relevances) if config.relevance_statistic == "mean"
+            else max(relevances, default=0.0)
+        ) if relevances else 0.0
         if results[0].score < config.min_top_score or best_relevance < config.min_relevance:
             return Answer(
                 question=question,
