@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>42 çalıştırılabilir takım · 337 vaka · 0 sinyal</span>
+    <span>43 çalıştırılabilir takım · 342 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -2450,6 +2450,66 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Otuz sekizinci tur</span>
+  <h2>Denetimin 26 kontrolünden dokuzu hiç sınanmamıştı</h2>
+  <p>Otuz yedinci tur "her kapının bir öz-sınama vakası olmalı" sınıfını
+  kapattı. Aynı soru bir katman aşağıda hiç sorulmamıştı: <strong>denetimin
+  kontrollerinden kaçı mutasyonla sınanıyor?</strong> Çıkarım yapılmadı —
+  D'nin on beş mutasyonu tek tek koşuldu ve her birinin <strong>hangi</strong>
+  kontrolü HATA'ya düşürdüğü kaydedildi.</p>
+
+  <table><thead><tr><th></th><th></th></tr></thead><tbody>
+  <tr><td>sınanan kontrol</td><td><strong>17</strong></td></tr>
+  <tr><td><strong>hiç sınanmamış</strong></td><td><strong>9</strong></td></tr>
+  </tbody></table>
+
+  <div class="callout">
+    Bu, raporun <strong>üçüncü</strong> bulgusunun ölçüm tarafındaki hâlidir —
+    kitabın on bir kontrolünden altısının hiçbir koşulda başarısız olamaması.
+    Kitabı o ölçütle eleştirirken kendi denetimimin dokuz kontrolünü aynı
+    ölçüte tabi tutmamıştım. <strong>Doğru ifade "dokuz kontrol bozuk" değil,
+    "dokuz kontrol sınanmamış"tır</strong> — üçünün çalıştığını bu oturumda
+    kendi gözümle gördüm, ama <em>görmek sağlama değildir.</em>
+  </div>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AT-04</span>
+      <span class="pill b">Ölçümün kendisi gevşekti</span></div>
+    <h3>Mutasyon "kırmızıya döndü mü" diye soruyordu, "hangisi" diye değil</h3>
+    <p>Ölçüldü ki <em>"bütün becerileri sil"</em> mutasyonu hem hedeflenen
+    <code>beceriler (&gt;=11)</code> kontrolünü <strong>hem de alakasız</strong>
+    bir kontrolü kırmızıya çeviriyor. Hedef kontrol hiç çalışmasa bile mutasyon
+    "yakalandı" sayılabilirdi — <strong>iddia ettiği şeye bakmayan bir
+    kontrolün, ölçüm tarafındaki hâli.</strong> Küme 15'ten <strong>27</strong>'ye
+    çıktı ve her mutasyon artık hedefini beyan edip doğruluyor.</p>
+  </div>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AC sınıfı</span>
+      <span class="pill a">Cevap çağıranın ortamına bağlıydı</span></div>
+    <h3>Aynı takım, iki farklı sonuç</h3>
+    <table><thead><tr><th>koşum</th><th>sonuç</th></tr></thead><tbody>
+    <tr><td><code>bash ks_d_denetim.sh</code></td><td><strong>27/27</strong></td></tr>
+    <tr><td><code>MAFIRM=… bash ks_d_denetim.sh</code></td><td><strong>24/27</strong></td></tr>
+    </tbody></table>
+    <p>Dışarıdan <code>MAFIRM</code> verildiğinde kum havuzundaki
+    <code>denetim.sh</code> onu <strong>miras alıyor</strong> ve canlı ağacı
+    denetliyordu; üç kontrol Python takımlarına devrettiği için kum havuzuna
+    uygulanan mutasyon görünmüyordu. Kum havuzu kökü sabitlendi.</p>
+  </div>
+
+  <div class="callout">
+    <strong>Ve teslimat listesi elle yazılmıştı.</strong> Yeni mutasyonlardan
+    biri denetimi kırmızıya çevirmedi: P'nin listesi elle yazılmıştı ve otuz
+    dördüncü turda eklediğim <code>hafiza/arac-katalogu.md</code> oraya hiç
+    konmamıştı — <strong>kendi teslimatım dört tur boyunca kendi güncellik
+    kuralımın dışında durdu.</strong> Liste tersine çevrildi: teslimatlar
+    <em>keşfedilir</em>, muafiyetler <em>beyan edilir</em>. Muafiyet listesi
+    küçük ve durağan; teslimat listesi büyüyen taraf.
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -2567,7 +2627,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 42 takım · 337 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 43 takım · 342 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
