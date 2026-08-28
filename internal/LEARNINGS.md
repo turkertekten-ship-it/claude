@@ -4541,3 +4541,53 @@ also been wrong: the corpus can answer it now, and the gate was right to.
    evidence landed.
 3. **A long-quoted example deserves periodic re-checking.** This one had been
    cited as settled fact in three documents while the corpus quietly outgrew it.
+
+---
+
+## L82 - The cost side, measured for the first time, and an ADR trigger two orders out
+
+Everything this session measured was quality. The corpus grew 153 to 349 pages
+and the golden set 54 to 79 cases, and nobody asked what a query costs. The
+retrieval trace has carried per-stage timings the whole time.
+
+| documents | chunks | total | dense | lexical | fusion | rerank | mmr |
+|---|---|---|---|---|---|---|---|
+| 90 | 733 | 45.9 | 18.7 | 0.9 | 0.08 | 14.9 | 9.8 |
+| 175 | 1,983 | 87.3 | 52.5 | 1.8 | 0.14 | 17.6 | 11.3 |
+| 260 | 3,225 | 122.5 | 88.6 | 2.5 | 0.14 | 16.6 | 11.1 |
+| 349 | 4,220 | 150.1 | 114.9 | 3.2 | 0.16 | 17.3 | 10.9 |
+
+**One stage grows and the rest do not.** The dense scan is linear at **0.027 ms
+per chunk** - 18.7 ms to 114.9 ms as the corpus quadrupled - and reranking, MMR
+and fusion are flat, because each is bounded by `candidate_k` or `top_k` rather
+than by the corpus. Lexical search is 3 ms at 4,220 chunks, which is FTS5 doing
+what an index does. So `total ≈ 30 ms + 0.027 ms × chunks`, and at the current
+size the exhaustive vector scan is **97% of everything that grows**.
+
+**ADR 0002's trigger was an estimate, and the estimate was two orders of
+magnitude out.** It said exhaustive search "stays sub-millisecond at the tens of
+thousands of chunks a documentation corpus produces" and set a revisit point at
+~10^6 chunks. At the measured rate, 4,220 chunks is already 115 ms rather than
+sub-millisecond, and 10^6 chunks is a **27-second query**. The honest trigger
+comes from a latency budget instead of a round number: ~8,000 chunks for 250 ms,
+~36,000 for a second. The ADR now carries the table and revisits at 35,000.
+
+**Nothing was wrong with the decision.** Exhaustive search is still exact, still
+parameter-free, and still the right call at this scale - the eval numbers this
+session moved were all quality, and none of them would have been reachable if
+recall had been traded away for speed nobody needed. What was wrong was the
+number attached to it, which had never been checked and would have let a corpus
+grow forty times past the point where the answer changed.
+
+**Rules.**
+1. **A performance claim in a decision record is a measurement nobody has
+   taken.** "Sub-millisecond at tens of thousands" was plausible, cheap to check
+   and off by a factor of a hundred.
+2. **State a trigger as a budget, not as a round number.** "Revisit at 10^6
+   chunks" tells you nothing about when it stops working; "a second per query at
+   36,000 chunks" tells you exactly.
+3. **Profile the stages, not the total.** Four of five stages here are flat in
+   corpus size, so the whole scaling story is one line of code and the other
+   four never need optimising.
+4. **Measure cost on the same schedule as quality.** Twenty cycles of quality
+   work went by, latency tripled, and only a deliberate look found it.

@@ -111,8 +111,12 @@ its current failures are that artefact. See docs/EVALUATION.md.
   documents legitimately discuss the golden questions, so more get quarantined.
   Past a point this measures a smaller and smaller corpus. The fix is a golden
   set drawn from a corpus the repository does not describe.
-- **Flat vector search** is exact and simple, and will need revisiting somewhere
-  around 10^6 chunks. ADR 0002 states the trade and the trigger.
+- **Flat vector search** is exact and simple, and its revisit trigger is now
+  measured rather than guessed: `total ≈ 30 ms + 0.027 ms × chunks` on the
+  pure-Python path, so a second per query arrives at ~36,000 chunks and the
+  ADR's original 10^6 would be a 27-second query (L82). At 4,220 chunks the
+  dense scan is already 115 ms of a 150 ms query - it is 97% of everything that
+  grows. `scripts/latency_scaling.py` re-measures it.
 - **No cross-encoder reranker.** The heuristic reranker is transparent and cheap;
   a cross-encoder would rank better and cost latency. The harness is the place to
   decide that, and it has not been run.
