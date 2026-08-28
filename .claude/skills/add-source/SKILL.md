@@ -143,6 +143,21 @@ If the new source is one that records the evaluation itself (transcripts,
 notes, anything quoting the golden questions), it must be held out with
 `--exclude-source <system>` or the numbers measure a leak.
 
+**Then re-read the negative cases.** A wider corpus can answer a question it
+could not before, and nothing detects it: the contamination checker asks whether
+a document *contains* a question, never whether one *answers* it. Widening from
+266 to 349 pages invalidated three of fourteen negatives at once - `openpyxl`
+arrived and "which package reads and writes spreadsheet files?" stopped being
+unanswerable, `pip-tools` arrived with `--generate-hashes`, `portalocker` with
+"an easy API to file locking" (L81). Left alone they punish the system for being
+right, and they are expensive in a second way: a stale negative is contaminated
+by every document that now matches it, and quarantine held **31 documents** out
+of an evaluation they belonged in.
+
+Deciding whether a page answers a question is the judgement the pipeline itself
+cannot make, so this is a read of the failing negatives after every widening,
+not a check that can be automated here.
+
 ## Writing a new connector
 
 Only when no existing type fits. Subclass `oodarag.ingest.base.Connector` in

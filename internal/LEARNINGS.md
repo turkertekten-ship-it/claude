@@ -4491,3 +4491,53 @@ was chosen not to do.
 3. **A negative result about a whole class of solutions is worth a script.** The
    next session should not have to re-derive that the corpus has nothing to say
    about `clock`.
+
+---
+
+## L81 - Three negative cases the corpus had learned to answer
+
+Five of the external set's failures were unanswerable questions being answered.
+Three of them were not unanswerable any more, and it was this session's own
+widening that did it:
+
+| question | what arrived | the page says |
+|---|---|---|
+| "reads and writes spreadsheet files?" | `openpyxl` | "read/write Excel 2010 xlsx files" |
+| "pins dependency hashes for reproducible installs?" | `pip-tools` | `pip-compile --generate-hashes` |
+| "keeps two processes from writing the same file at once?" | `portalocker` | "an easy API to file locking" |
+
+**Nothing detects this.** The contamination checker asks whether a document
+*contains* a question; the discrimination checker asks whether an expectation
+selects a document. Neither asks whether a document *answers* a question, which
+is the judgement this pipeline exists to make and cannot yet make reliably - so
+the check is a human re-read of the failing negatives after each widening, and
+it now sits in the `add-source` skill where a widening starts.
+
+**A stale negative is expensive twice.** It punishes the system for being
+right - three cases scored as failures for correctly answering answerable
+questions - and it drags the corpus down with it. Contamination holds out every
+document that matches a negative's text, so these three had accumulated
+**31 documents** of quarantine between them; the "two processes" case alone held
+out 34 of 349 pages from an evaluation they belonged in. Converting them took
+quarantine from 45 documents and 56 holdouts to **14 and 16**.
+
+The three are now graded as answerable, and two of them fail - `portalocker` and
+`openpyxl` are in the corpus and retrieval does not find them for those
+questions. That is the better failure to have: it moved from the abstention gate,
+where it was a false accusation, to the paraphrase gap where it belongs and where
+L80 has already measured what it will take to fix. External reads **66/79**.
+
+**The oldest example in this repository was one of them.** "What keeps two
+processes from writing the same file at once?" has been quoted across several
+sessions as *the* question made entirely of ordinary words that no gate feature
+can refuse. It was a good example, and for the last two corpus widenings it has
+also been wrong: the corpus can answer it now, and the gate was right to.
+
+**Rules.**
+1. **Adding documents invalidates negative cases, silently.** Every widening
+   needs a re-read of what the golden set claims the corpus cannot do.
+2. **A negative that has gone stale quarantines the documents that made it
+   stale.** The eval shrinks its own corpus in exactly the place the new
+   evidence landed.
+3. **A long-quoted example deserves periodic re-checking.** This one had been
+   cited as settled fact in three documents while the corpus quietly outgrew it.

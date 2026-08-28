@@ -15,10 +15,10 @@
 | Generation | done | Citation contract verified against retrieved chunks; extractive default, Claude optional |
 | Eval | done | recall/precision/MRR/nDCG, citation coverage, abstention, contamination detection and quarantine |
 | OODA loop | done | Five journalled phases, auditable policy rules, action budget |
-| External eval corpus | done | 349 PyPI pages with provenance, release dates and a manifest, rebuildable by `scripts/build_external_corpus.py`; **79** golden cases; 6 contaminated, 45 documents held out as 56 holdouts |
+| External eval corpus | done | 349 PyPI pages with provenance, release dates and a manifest, rebuildable by `scripts/build_external_corpus.py`; **79** golden cases; 4 contaminated, 14 documents held out as 16 holdouts |
 | Incremental deletion | done | Removals propagate to the delta, prune guarded at 25% of a source, refused entirely for a failed connector |
 | CLI | done | `preflight, index, query, eval, loop, status, journal, demo` |
-| CI | done | Three jobs: stdlib matrix, numpy path, retrieval regression gate; floors 0.85 primary, 0.81 external (rebased for a corpus 74% larger, then ratcheted three times as the gate improved; L66-L71) |
+| CI | done | Three jobs: stdlib matrix, numpy path, retrieval regression gate; floors 0.85 primary, 0.82 external (rebased for a corpus 74% larger, then ratcheted three times as the gate improved; L66-L71) |
 | Non-negotiables | verified | All five attacked directly, not just asserted: zero-dependency walked module by module, provenance and redaction attacked with crafted inputs, degradation measured through partial and silent-empty source failures (L37-L39) |
 
 **Current measurements** (offline embedder, deterministic).
@@ -31,14 +31,14 @@ negative case look like a retrieval regression.
 
 | | primary (this repo) | external (349 PyPI pages) |
 |---|---|---|
-| golden cases | **19/20** | **65/79** |
-| recall@8 | 0.8750 | 0.8769 |
-| precision@8 | 0.2500 | 0.2692 |
-| hit@8 | 0.9375 | 0.9077 |
-| MRR | 0.6510 | 0.6967 |
-| nDCG@8 | 0.6734 | 0.7301 |
+| golden cases | **19/20** | **66/79** |
+| recall@8 | 0.8750 | 0.8529 |
+| precision@8 | 0.2500 | 0.2629 |
+| hit@8 | 0.9375 | 0.8971 |
+| MRR | 0.6510 | 0.6708 |
+| nDCG@8 | 0.6734 | 0.7053 |
 | citation coverage | 1.00 | 1.00 |
-| contamination | 4/20 questions, 10 documents (20 holdouts) | 6/79 questions, 45 documents (56 holdouts) |
+| contamination | 4/20 questions, 10 documents (20 holdouts) | 4/79 questions, 14 documents (16 holdouts) |
 | role | smoke test | **regression gate** |
 
 Both columns are freshly indexed; the primary one is the CI configuration,

@@ -110,8 +110,11 @@ project pages, fetched with robots checked, committed with provenance in
 repository, so it cannot contain a question *about* this repository.
 
 It is **not** contamination-free, and this file claimed it was. The detector
-reports 6 of 79 questions affected, holding out 45 distinct documents as 56
-holdouts. The cause is not self-reference but authorship: the golden questions
+reports 4 of 79 questions affected, holding out 14 distinct documents as 16
+holdouts. It read 45 documents and 56 holdouts until three stale negatives -
+questions a widened corpus had learned to answer - were converted into the
+answerable cases they had become: a negative nobody re-reads is contaminated by
+every document that now matches it (L81). The cause is not self-reference but authorship: the golden questions
 were written from these pages, so a question can reuse enough of a page's own
 wording to match it. That is the case contamination detection exists for, and
 the quarantine is doing its job - but "reported clean, so the numbers need no
