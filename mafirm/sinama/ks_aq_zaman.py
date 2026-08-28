@@ -108,8 +108,16 @@ vaka("AQ-03", "imza-kapanış aralığı kitabın kendi kuralından doğuyor",
 # --- AQ-04 · OLUMLU KONTROL: boş sonuç temizlik kanıtı değil ---------
 _bos = re.search(r"eşleşmenin yokluğu temizlik kanıtı değil", TARAMA, re.I) \
     is not None
-vaka("AQ-04", "eşleşmenin yokluğu temizlik kanıtı sayılmıyor",
-     _bos, "§14'ün ikinci tuzağı burada doğru kurulmuş" if _bos
+# [kırk birinci tur · KREDİ DÜZELTMESİ] Bu vaka kurulu beceriyi ölçer ve
+# ölçtüğü cümle KİTABIN DEĞİL, BENİM yamamdır. Alıntı doğrulaması (AW)
+# gösterdi ki "eşleşmenin yokluğu temizlik kanıtı değildir" kitapta hiç
+# geçmiyor; §14 aynı ilkeyi GitHub aramaları için kuruyor ama §13.3 onu
+# yaptırım taramasına taşımıyor. Otuz beşinci turda bu cümleyi kitaba
+# atfedip kitabı övmüştüm — kendi yamamı kitabın metni sanarak.
+vaka("AQ-04", "kurulu beceride boş sonuç tuzağı kapalı",
+     _bos,
+     "kurulu becerede var — AMA bu cümle YAMADIR; kitabın §13.3'ü boş "
+     "sonucun ne anlama geldiğini söylemiyor (bkz. errata §13.3)" if _bos
      else "boş sonuç tuzağı ele alınmamış")
 
 # --- AQ-05 · OLUMLU KONTROL: sır kuralı burada mutlak ----------------

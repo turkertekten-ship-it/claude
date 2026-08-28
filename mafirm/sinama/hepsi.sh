@@ -116,6 +116,8 @@ python3 "$S/ks_au_epilog.py"; topla "AU · epilog kontrollerinin sınaması" $?
 echo
 python3 "$S/ks_av_anma.py"; topla "AV · anma/tanım sınıfı taraması" $?
 echo
+python3 "$S/ks_aw_alinti.py"; topla "AW · kitap alıntılarının doğruluğu" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

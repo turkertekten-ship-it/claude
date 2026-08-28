@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** kırk beş çalıştırılabilir takım — **355
+**Yamalı hâlde sistem çalışıyor:** kırk altı çalıştırılabilir takım — **359
 vaka, 27 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15 → **27/27** (mutasyon kümesi otuz
 sekizinci turda on beşten yirmi yediye çıkarıldı: 26 kontrolün dokuzu hiç
@@ -1153,7 +1153,7 @@ tur boyunca hiçbir takım onu **iki kez** çalıştırmadı.
 `>` üzerine yazar. Aynı şey §12'nin `kapi.py`si, §5'in `esik.py`si ve §16'nın
 `denetim.sh`i için de geçerli: hepsi "yazılır" der. Kitabı yeniden izlemek —
 yeni bir oturum, ikinci bir hukukçu, ya da **§0'ın dördüncü kuralının**
-*"denetim kırmızıysa dur ve düzelt"* talimatını izleyen kişi — **her yamayı**
+denetim kırmızıysa durup düzeltme talimatını izleyen kişi — **her yamayı**
 geri alır. Bir önceki turda konan kural 6 koruması dâhil.
 
 Yıkımın olması kaçınılmaz; ölçülen şey **görülüp görülmediğidir**. Sessizce
@@ -1600,7 +1600,8 @@ Drafting*, *Tools and Weapons*. On üç koltuk, **gerçek ve çoğu yaşayan**
 hukukçuların adını taşıyor.
 
 Yirmi altı tur boyunca hiç kimse o eserlerin **var olup olmadığını** sormadı.
-§1'in kanıt kuralı — *"dayanağı olmayan bir iddia yazılmaz"* — §7'nin en çok
+§1'in kanıt kuralı — *"Her rakam, tarih, eşik, süre ve alıntı dayanağını
+yanında taşır"* — §7'nin en çok
 önemsediği iddialara **uygulanmamıştı**: gerçek kişilerin ağzına konan bir
 mercek, **doğrulanmamış bir bibliyografyaya** dayanıyordu.
 
@@ -2008,7 +2009,7 @@ okumuyor.** `once-arastir` API'den dört alan alıyor:
 | veri lisansı | **yok** | ticari kullanımı yasaklayabilir |
 
 İkisi de varsayımsal değil, yirmi dokuzuncu turda ölçüldü. §13.4'ün
-`google/diff-match-patch` için yazdığı *"eskime burada bozulma değildir"*
+`google/diff-match-patch` için yazdığı *"burada eskime bozulma değildir"*
 gerekçesi, deponun **5 Ağustos 2024'te arşivlendiği bilinmeden** yazılmış —
 ve kitabın kendi aracı çalıştırılsaydı **bile** bunu göremezdi, çünkü
 `archived` alanını okumuyor. `opensanctions` ise kodu MIT iken **verisi
@@ -2071,9 +2072,17 @@ hukuka uygun olup olmadığını** etkiler. Kontrol noktaları dörde çıkarıl
 `kapanis-listesi`ne 0. adım olarak yeniden tarama eklendi — tarama yine bir
 karar değil, ve sorgu soyutlama kuralı orada da mutlak.
 
-Kitabın burada doğru yaptığı iki şey olumlu kontrol olarak tutuldu:
-*"eşleşmenin yokluğu temizlik kanıtı değildir"* ve *"tarama karar
-değildir"*.
+Kitabın burada doğru yaptığı şey olumlu kontrol olarak tutuldu:
+*"Tarama karar değildir. Bir ad eşleşmesi bir ipucudur."*
+
+**Düzeltme (kırk birinci tur).** Bu paragraf önce kitaba ikinci bir cümle
+daha atfediyordu — *"eşleşmenin yokluğu temizlik kanıtı değildir"* — ve
+kitabı boş sonuç tuzağını kapattığı için övüyordu. **O cümle kitapta yok.**
+Onu `yaptirim-taramasi` becerisini yazarken ben ekledim ve altı tur sonra
+kendi yamamı kitabın metni sanıp kitaba kredi verdim. Otuz dördüncü turda
+AP-01'in kendi teslimatımı kitabın eseri sanmasıyla aynı sınıf: **kendi
+yamalarım ağaçta dururken kitabı ölçmek ikisini karıştırır** — orada kitabı
+olduğundan iyi göstermişti, burada da öyle.
 
 ### Yakınlık tuzağı bu oturumda dördüncü kez — hep kendi ölçütümde
 
@@ -2354,6 +2363,57 @@ Ders, bu incelemenin en sık tekrar edeni: **bir takım kırmızı verdiğinde i
 şüpheli sistem değil, ölçümün kendi koşullarıdır.** Burada "5 hata" ne kitabın
 ne yamanın kusuruydu — ölçümün kendi eşzamanlılığıydı.
 
+### Kitabı kendi yamamla övmüşüm
+
+Kırk turdur kitabı **kendi cümleleriyle** eleştiriyorum: §8'in tek cümlesi,
+§5.1'in *"İmza serbesttir; kapanış değildir"*i, §9'un dört çıktı türü,
+§13'ün Karar sütunu. **Bulguların çoğu bu alıntılara dayanıyor** — ve hiçbir
+şey alıntıların doğru olduğunu sınamıyordu. Yanlış bir alıntı, üstüne
+kurulan bulguyu da götürür.
+
+Ölçüm bir hata buldu ve hata bana aitti. Otuz beşinci turda kitabı şu cümle
+için **övmüştüm**:
+
+> *"eşleşmenin yokluğu temizlik kanıtı değildir"*
+
+— yaptırım taramasının boş sonuç tuzağını kapattığı gerekçesiyle. **O cümle
+kitapta yok.** Kitabın §13.3'ü yalnızca *"Tarama karar değildir. Bir ad
+eşleşmesi bir ipucudur"* diyor. Cümleyi `yaptirim-taramasi` becerisini
+yazarken **ben eklemiştim** ve altı tur sonra kendi yamamı kitabın metni
+sanıp kitaba kredi verdim.
+
+Otuz dördüncü turda AP-01 kendi teslimatımı kitabın eseri sanmıştı; orada
+kitabı olduğundan **iyi** göstermişti. Aynı sınıf, ikinci kez: **kendi
+yamalarım ağaçta dururken kitabı ölçmek ikisini karıştırır.**
+
+Ve düzeltme bir bulgu doğurdu. Kitap *"boş bir arama yokluğun kanıtı
+değildir"* ilkesini §14'te **GitHub aramaları** için kuruyor; en yüksek
+bedelli yere — yaptırım taramasına — taşımıyor. §13.3 eşleşme **bulunduğunda**
+ne yapılacağını söylüyor, **bulunmadığında** ne anlama geldiğini söylemiyor;
+oysa kendi cümlesiyle oradaki kaçırma *"cezai sorumluluk sorunudur"* ve yine
+kendi cümlesiyle *"Türkçe adlar birkaç biçimde çevrilir"*. Boşluk gerçek —
+ama kitabın kapattığı değil, **benim kapattığım** bir boşluk.
+
+### Üç alıntı daha yanlıştı
+
+| yazdığım | kitabın yazdığı |
+|---|---|
+| *"dayanağı olmayan bir iddia yazılmaz"* (§1) | *"Her rakam, tarih, eşik, süre ve alıntı dayanağını yanında taşır"* |
+| *"Boş bir arama yokluğun kanıtı değildir"* (§14) | *"Boş bir **GitHub araması** yokluğun kanıtı değildir"* |
+| *"eskime burada bozulma değildir"* (§13.4) | *"**burada eskime** bozulma değildir"* |
+
+Üçü de küçük; üçü de düzeltildi. Ama küçük olmaları önemli değil: **bir
+eleştiri, eleştirdiği metni doğru aktarmak zorundadır** — yoksa eleştirinin
+kendisi, eleştirdiği kusurun bir örneği olur.
+
+AW artık kitaba atfedilen her alıntıyı kitabın **kaynak dosyasına** karşı
+sınıyor (13 alıntı doğrulandı). Kitaptan olmayan alıntılar — raporun kendi
+cümleleri, mevzuat metinleri, madde başlıkları — **beyan edilmiş bir muafiyet
+listesinde** gerçek kaynaklarıyla duruyor; AW-02 o listenin bir kaçış deliğine
+dönüşmediğini sağlıyor: listede olup da kitapta **geçen** bir cümle kırmızı
+verir. Ve kitap kaynağı bulunamazsa AW sessizce geçmez, **kırmızı** olur —
+doğrulanamayan bir alıntı doğrulanmış sayılamaz.
+
 ---
 
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
@@ -2479,6 +2539,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | AT · denetimin mutasyon kapsaması | *26 kontrolün 9'u hiç sınanmamıştı* | **temiz** — 12 mutasyon eklendi, hedef beyanı zorunlu |
 | AU · epilog kontrollerinin sınaması | *dört epilog kontrolü hiç sınanmamıştı* | **temiz** — saf fonksiyona çevrildi, 7 vaka 32 ms |
 | AV · anma/tanım sınıfı taraması | *iki ölçüt yorumla/düzyazıyla tatmin oluyordu* | **temiz** — ikisi de koda bağlandı, sınıf taranıyor |
+| AW · kitap alıntılarının doğruluğu | *dört alıntı yanlış; biri kitaba ait olmayan bir cümleyi kitaba mal ediyordu* | **temiz** — düzeltildi, 13 alıntı doğrulandı |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -2537,7 +2598,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 ### Nasıl yeniden koşulur
 ```
 ./sinama/hepsi.sh                 # 34 çalıştırılabilir takım:
-                                  #   355 vaka + 27 mutasyon (D)
+                                  #   359 vaka + 27 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -2623,9 +2684,10 @@ Dokuz takım, 96 vaka:
 | AT | **Denetimin mutasyon kapsaması** — 26 kontrolün kaçı sınanıyor | §16, §12 |
 | AU | **Epilog kontrollerinin sınaması** — koşumu bilen katman nasıl sınanır | §16, §12 |
 | AV | **Anma/tanım sınıfı taraması** — ölçüt kodu mu, kodu anlatan cümleyi mi ölçüyor | §12, §16 |
+| AW | **Kitap alıntılarının doğruluğu** — raporun kitaba atfettiği her cümle kitapta var mı | §1, §13.3, §14 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**355 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**359 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)

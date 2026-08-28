@@ -208,7 +208,7 @@ YALNIZCA orayı aramak üzere görevlendirir ve §14 `once-arastir`ın üçünc�
 adımını oraya yönlendirir. Banka boş kurulur ve boşluğu hiçbir yerde
 bildirilmez. Boş bankada arama yapan ajan "yeterince yakın emsal yok" der;
 okuyucu bunu dünyaya dair bir tespit sanır. Kitabın kendi §14'ü tam bunu
-yasaklar: *"Boş bir arama yokluğun kanıtı değildir."* → Denetim boş bankayı
+yasaklar: *"Boş bir GitHub araması yokluğun kanıtı değildir."* → Denetim boş bankayı
 sesli bildirmeli ve `emsal-bulucu` "banka boş" ile "yakın emsal yok"u
 ayırmalı. *(W-02, W-03)*
 
@@ -369,6 +369,38 @@ altısı da doğrulandı ve kayda bağlandı; biri (ortak yazarlı bir kitap tek
 atfediliyordu) düzeltildi. → Koltuk beyanındaki her eser, doğrulama kaydına
 girmeli ve bir sonuç taşımalı. *(AI-02, AI-03, AI-04)*
 
+## §13.3 · Yaptırım taraması — boş sonuç tuzağı buraya taşınmamış
+
+**[A] Kitap "boş bir arama yokluğun kanıtı değildir" ilkesini §14'te
+GitHub aramaları için kuruyor; en yüksek bedelli yere, yaptırım taramasına
+taşımıyor.**
+§14 açık: *"Boş bir GitHub araması yokluğun kanıtı değildir. Kayıtlara
+bak."* §13.3 ise yaptırım taraması için yalnızca şunu diyor: *"Tarama karar
+değildir. Bir ad eşleşmesi bir ipucudur. Kimliği doğrulamak, maruziyeti
+değerlendirmek ve devam edip etmemeye karar vermek yetkili avukat ister;
+buradaki bir kaçırma ticari değil cezai sorumluluk sorunudur."*
+
+İkisi arasında bir asimetri var: §13.3 **eşleşme bulunduğunda** ne
+yapılacağını söylüyor, **eşleşme bulunmadığında** ne anlama geldiğini
+söylemiyor. Oysa kendi cümlesiyle buradaki kaçırma *"cezai sorumluluk
+sorunudur"* ve harf çevirisi farkları Türkçe adlarda taramanın en bilinen
+kaçırma sebebidir — kitabın kendisi §13.3'te bunu ayrıca yazıyor
+(*"Türkçe adlar birkaç biçimde çevrilir"*). Yani kitap boş sonucun
+güvenilmezliğini biliyor, ilkeyi başka bir bölümde yazıyor, ve tarama
+bölümünde tekrarlamıyor.
+
+**Bu madde bir hatanın ürünüdür ve öyle kaydedilmiştir.** `yaptirim-taramasi`
+becerisini yazarken bu cümleyi kendim ekledim; kırk birinci turda alıntı
+doğrulaması cümlenin kitapta olmadığını gösterdi. O ana kadar rapor, kitabı
+kendi yamamla övüyordu. Boşluk gerçektir — ama kitabın kapattığı değil,
+benim kapattığım bir boşluktur. *(AW-01)*
+
+→CEVAP: YOK — cevabın "yamalı hâlde sistem çalışıyor" cümlesi kapsıyor:
+kurulu beceri *"Harf çevirisi farkları Türkçe adlarda sık görülür;
+eşleşmenin yokluğu temizlik kanıtı değildir"* cümlesini taşıyor ve
+`yamalar/kitaba-sadik/yaptirim-taramasi-SKILL.md` kitaba sadık hâli
+saklıyor. Kredinin nereye ait olduğu artık raporda ve burada düzeltilmiştir.
+
 ## §9 · Beceriler — yaptırım taramasının zaman ekseni
 
 **[A] Yaptırım taramasının son kontrol noktası İMZA; oysa en uzun maruziyet
@@ -391,10 +423,9 @@ hesabı bir bildirim yükümlülüğünü etkiler; bu boşluk, işlemin
 **tamamlanmasının hukuka uygun olup olmadığını** etkiler: imzada temiz olan
 bir taraf izin beklenirken listeye girebilir ve işlem kapatılır.
 
-Kitap burada iki şeyi de doğru yapıyor ve ikisi de olumlu kontrol olarak
-tutuldu: *"eşleşmenin yokluğu temizlik kanıtı değildir"* ve *"tarama karar
-değildir"* — gerçek bir adın taranması insan kararıdır ve makinenin dışında
-yapılır (kural 6). *(AQ-01, AQ-02)*
+Kitap burada bir şeyi doğru yapıyor ve olumlu kontrol olarak tutuldu:
+*"Tarama karar değildir. Bir ad eşleşmesi bir ipucudur."* — kimlik
+doğrulama ve devam kararı yetkili avukat ister. *(AQ-01, AQ-02)*
 
 →CEVAP: YOK — cevabın "yamalı hâlde sistem çalışıyor" cümlesi kapsıyor:
 kontrol noktaları **dörde** çıkarıldı (kapanıştan hemen önce) ve
@@ -709,7 +740,7 @@ sorulur.
 
 * **`archived` yok.** `pushed_at` bir vekildir, olgu değil. Salt okunur bir
   depo hata düzeltmesi de güvenlik yaması da almaz. Ölçüldü: §13.4'ün
-  `google/diff-match-patch` için yazdığı *"eskime burada bozulma değildir"*
+  `google/diff-match-patch` için yazdığı *"burada eskime bozulma değildir"*
   gerekçesi, deponun **5 Ağustos 2024'te arşivlendiği bilinmeden**
   yazılmıştır. Kitabın kendi tazeleme aracı çalıştırılsaydı bile bunu
   göremezdi.
