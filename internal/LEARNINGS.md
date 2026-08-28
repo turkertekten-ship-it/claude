@@ -635,3 +635,43 @@ and misclassifications at the floor fell from 3 to 2.
 
 `GhostCompoundTest` pins it, taking the premise from SQLite itself rather than
 asserting it: if FTS5 ever stops splitting on those separators, the test says so.
+
+---
+
+## L25 - The gate's feature is not the problem, and five candidates proved it
+
+**Evidence.** Two of the four remaining external failures are the gate answering
+a question the corpus cannot answer. `gate_margin.py` showed this is not a
+threshold problem: the highest unanswerable case scores 0.355 against a 0.15
+floor, the lowest answerable case scores 0.180, and raising the coverage
+exponent widens that overlap monotonically (-0.2251 at 1.0, -0.2632 at 3.0).
+
+So the obvious next step was a better feature. `gate_features.py` ranks
+candidates by AUC - the share of (answerable, unanswerable) pairs ordered
+correctly - because a pass count at a fixed floor conflates the feature with the
+floor:
+
+    rerank_relevance (in use)   0.973
+    relevance x top-gap         0.973
+    relevance x matched idf     0.964
+    top1 - mean score           0.795
+    top1 - top2 score           0.768
+    max idf of matched terms    0.574
+
+**The feature in use won.** Nothing beat it, and combining it with the top-gap
+changed nothing at all. The hypothesis that motivated the sweep - that a question
+made entirely of ordinary words ("what keeps two processes from writing the same
+file at once") matches many moderately-rare words while identifying nothing - is
+refuted: match specificity is 0.574, near a coin flip.
+
+**Rule.** Before replacing a component, measure the one you have on the same
+scale as its replacements. AUC 0.973 over 224 pairs is roughly six misordered
+pairs; that is a tail, not a design flaw, and the two failing cases are it. A
+lexical-semantic scorer cannot distinguish "the corpus discusses these words"
+from "the corpus answers this question" - closing that gap needs a judge that
+reads, or a corpus large enough that the near-misses stop being near. Neither is
+a scoring change, so no further scoring change should be attempted for it.
+
+**On the sweep itself.** Eight unanswerable cases is a small sample and AUC will
+happily rank noise. It was used to *reject* candidates, which is what a small
+sample can support; nothing was adopted on it.
