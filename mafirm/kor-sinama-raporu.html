@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>56 çalıştırılabilir takım · 409 vaka · 0 sinyal</span>
+    <span>57 çalıştırılabilir takım · 415 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -3332,6 +3332,49 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Elli beşinci tur</span>
+  <h2>Üçüncü dosya: modelin söyleyemediği ayrım</h2>
+  <p>Bir önceki bulgu eşiğin <strong>erişimini</strong> tartışıyordu; bu
+  bulgu istisnaya kimin <strong>hak kazandığını</strong>. Kitabın ölçütü
+  <em>"Türkiye'de faaliyet gösteren ya da Ar-Ge yürüten"</em>; kayıtlı
+  alternatif <em>"Türkiye'de <strong>yerleşik</strong>"</em>. Aradaki fark bir
+  hedefi rejimin tamamen dışına çıkarır.</p>
+
+  <table><thead><tr><th>Okuma</th><th>Uygulanan eşik</th><th>Cevap</th></tr></thead>
+  <tbody>
+    <tr><td>Kitabın yazdığı</td><td>teknoloji istisnası → 250 milyon TL;
+    hedef 400 milyon</td><td><b>EVET, bildirime tabi</b></td></tr>
+    <tr><td>Kayıtlı alternatif okuma</td><td>hedef yerleşik değilse istisna
+    yok → 1 milyar TL</td><td><b>HAYIR</b></td></tr>
+  </tbody></table>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">model</span>
+      <span class="pill f">Asıl bulgu daha derinde</span></div>
+    <h3>"Faaliyet gösteriyor ama yerleşik değil" hâli girilemiyordu</h3>
+    <p>Teknoloji alanı tek bir doğru/yanlış kutusuydu. Kullanıcı onu
+    işaretlediğinde, itiraz edilen ölçütün karşılandığını <strong>istemeden
+    beyan etmiş</strong> oluyordu. <strong>Bir modelin söyleyemediği ayrım, o
+    modeli kullanan hukukçunun göremediği ayrımdır</strong> — ve burada
+    görülmeyen şey, hedefin rejime tabi olup olmadığıydı.</p>
+    <p>Alan üç değerli hâle getirildi (evet / hayır / beyan edilmemiş) ve
+    istisna yerleşiklik olumlanmadan uygulandığında uyarı, olumlu cevabın
+    yanına konuyor. Cevap yine değiştirilmiyor.</p>
+  </div>
+
+  <div class="callout">
+    <strong>Ve ölçüt yine yanıldı — bu kez temiz bir mutasyon gösterdi.</strong>
+    Ters dönme ifadesini ararken alternasyona <em>"uygulanmaz"</em> sözcüğü de
+    konmuştu. O sözcük <strong>istisnanın</strong> düşmesini anlatır,
+    <strong>cevabın</strong> dönmesini değil, ve metinde zaten başka bir
+    sebeple duruyordu: ters dönme cümlesi tamamen silindiğinde vaka yeşil
+    kalıyordu. Aynı ders, yeni bir kılıkta — <em>yakındaki bir sözcük,
+    iddianın kanıtı değildir.</em> Bir de: programı çökerten bir mutasyon,
+    ölçütü sınamaz.
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -3517,7 +3560,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 56 takım · 409 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 57 takım · 415 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:

@@ -91,7 +91,7 @@ class Taraf:
     """
 
     def __init__(self, ad, tr_ciro=BILINMIYOR, dunya_ciro=BILINMIYOR,
-                 rol="taraf", teknoloji=False):
+                 rol="taraf", teknoloji=False, yerlesik=BILINMIYOR):
         if rol not in ("devralan", "hedef", "devreden", "birlesen", "taraf"):
             raise CiroHatasi("bilinmeyen rol: %r" % rol)
         for d, ad_ in ((tr_ciro, "tr_ciro"), (dunya_ciro, "dunya_ciro")):
@@ -103,6 +103,13 @@ class Taraf:
                 "%s: Türkiye cirosu (%s) dünya cirosundan (%s) büyük olamaz"
                 % (ad, tr_ciro, dunya_ciro))
         self.ad, self.rol, self.teknoloji = ad, rol, teknoloji
+        # [BH · elli beşinci tur] Teknoloji istisnasının ÖLÇÜTÜ itirazlıdır:
+        # kitap "Türkiye'de faaliyet gösteren ya da Ar-Ge yürüten" diyor,
+        # I-02'nin kayıtlı alternatifi "Türkiye'de YERLEŞİK" olabilir diyor.
+        # Tek bir teknoloji doğru/yanlış alanı bu ayrımı SÖYLEYEMİYORDU ve
+        # kullanıcı, itiraz edilen ölçütün karşılandığını istemeden beyan
+        # etmiş oluyordu. Üçüncü bir değer (bilinmiyor) ayrımı görünür kılar.
+        self.yerlesik = yerlesik
         self.tr_ciro, self.dunya_ciro = tr_ciro, dunya_ciro
 
     def __repr__(self):
@@ -259,6 +266,7 @@ def degerlendir(taraflar, islem_turu="devralma"):
         konu = [t for t in taraflar if t.rol in ("birlesen", "taraf")] or taraflar
 
     b_var, b_belirsiz, b_gerekce = False, False, ""
+    b_itiraz = []
     for k in konu:
         esik = HEDEF_TR_TEKNOLOJI if k.teknoloji else HEDEF_TR
         # [A-13] DİĞER taraflar: devre konu tarafın kendisi hariç.
@@ -278,6 +286,22 @@ def degerlendir(taraflar, islem_turu="devralma"):
                                 asanlar[0], _bicim(DIGER_DUNYA)))
                 if k.teknoloji:
                     b_gerekce += " (teknoloji teşebbüsü istisnası uygulandı)"
+                    if k.yerlesik is not True:
+                        b_itiraz.append(
+                            "I-02 · %s için teknoloji istisnası (%s) "
+                            "uygulandı, ama istisnanın ÖLÇÜTÜ itirazlıdır: "
+                            "kitap \"Türkiye'de faaliyet gösteren ya da Ar-Ge "
+                            "yürüten\" diyor; güncel ölçüt \"Türkiye'de "
+                            "YERLEŞİK\" olabilir. Hedef yerleşik DEĞİLSE "
+                            "istisna uygulanmaz, eşik %s olur ve bu olguda "
+                            "cevap TERS DÖNER (bildirime tabi olmayabilir). "
+                            "Yerleşiklik bu girdide %s. Dayanak DOĞRULANAMADI; "
+                            "bkz. birimler/rekabet/yontem/tr-esikler.md ve "
+                            "hafiza/dogrulama-bulgulari.md I-02."
+                            % (k.ad, _bicim(HEDEF_TR_TEKNOLOJI),
+                               _bicim(HEDEF_TR),
+                               "beyan edilmemiş" if k.yerlesik is BILINMIYOR
+                               else "HAYIR diye beyan edilmiş"))
                 break
             if dunya_eksik:
                 b_belirsiz = True
@@ -294,7 +318,7 @@ def degerlendir(taraflar, islem_turu="devralma"):
         return Sonuc(EVET, "her iki eşik",
                      "A: toplam %s > %s ve iki taraf tabanı aşıyor. B: %s"
                      % (_bicim(toplam), _bicim(BIRLESIK_TR), b_gerekce),
-                     eksik, kullanilan)
+                     eksik, kullanilan, b_itiraz)
     if a_var:
         return Sonuc(EVET, "A eşiği (yurt içi)",
                      "toplam Türkiye cirosu %s > %s ve %d taraf ayrı ayrı %s'yi "
@@ -302,7 +326,8 @@ def degerlendir(taraflar, islem_turu="devralma"):
                                  _bicim(IKI_TARAF_TR)),
                      eksik, kullanilan)
     if b_var:
-        return Sonuc(EVET, "B eşiği (devre konu)", b_gerekce, eksik, kullanilan)
+        return Sonuc(EVET, "B eşiği (devre konu)", b_gerekce, eksik,
+                     kullanilan, b_itiraz)
     if a_belirsiz or b_belirsiz:
         return Sonuc(BELIRSIZ, "belirlenemedi",
                      "bilinen rakamlar hiçbir ayağı karşılamıyor, ancak "
@@ -383,7 +408,7 @@ def main(argv=None):
         formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--self-test", action="store_true")
     ap.add_argument("--taraf", action="append", default=[],
-                    help="ad,tr=..,dunya=..,rol=devralan|hedef|birlesen[,teknoloji]")
+                    help="ad,tr=..,dunya=..,rol=devralan|hedef|birlesen[,teknoloji][,yerlesik=1|0]")
     ap.add_argument("--kur", action="append", default=[],
                     help="BIRIM=kur:kaynak  (ör. EUR=47:'TCMB 2026-08-27')")
     ap.add_argument("--birlesme", action="store_true",
@@ -412,7 +437,9 @@ def main(argv=None):
             tr_ciro=_tutar_coz(alan.get("tr"), kurlar),
             dunya_ciro=_tutar_coz(alan.get("dunya"), kurlar),
             rol=alan.get("rol", "taraf"),
-            teknoloji=bool(alan.get("teknoloji"))))
+            teknoloji=bool(alan.get("teknoloji")),
+            yerlesik=(BILINMIYOR if alan.get("yerlesik") is None
+                      else alan.get("yerlesik") not in ("0", "hayir", "hayır"))))
     s = degerlendir(taraflar, "birlesme" if a.birlesme else "devralma")
     s.yazdir()
     return 0 if s.sonuc != BELIRSIZ else 3

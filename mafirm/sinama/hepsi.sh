@@ -138,6 +138,8 @@ python3 "$S/ks_bf_olcum_iddiasi.py"; topla "BF · ölçüm iddiaları canlı de�
 echo
 python3 "$S/ks_bg_ikinci_dosya.py"; topla "BG · ikinci dosya: cevabı çeviren açık soru" $?
 echo
+python3 "$S/ks_bh_ucuncu_dosya.py"; topla "BH · üçüncü dosya: itirazlı ölçüt ifade edilebiliyor mu" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

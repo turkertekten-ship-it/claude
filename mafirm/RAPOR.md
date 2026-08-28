@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** elli altı çalıştırılabilir takım — **409
+**Yamalı hâlde sistem çalışıyor:** elli yedi çalıştırılabilir takım — **415
 vaka, 27 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15 → **27/27** (mutasyon kümesi otuz
 sekizinci turda on beşten yirmi yediye çıkarıldı: 26 kontrolün dokuzu hiç
@@ -2692,7 +2692,7 @@ içinde kırmızı, koşumdan sonra yeşil görünüyordu. Onuncu ve on altınc�
 turların katman kuralı — *denetim, kendini denetleyen takımı denetleyemez* —
 **üçüncü kez**, bu kez veri yoluyla çiğnenmişti. Sayı artık durağan ölçülüyor:
 `hepsi.sh`'e bağlı her takımın kendi `BEKLENEN_VAKA` beyanı toplanıyor
-— bugün toplam 409 vaka — ve her takımın kendi sıfırıncı vakası o beyanın
+— bugün toplam 415 vaka — ve her takımın kendi sıfırıncı vakası o beyanın
 gerçeğe eşit olduğunu ayrıca güvenceye alıyor. Bozulmuş bir `SAYIM.txt` ile BB'nin çıktısı
 **birebir aynı** kalıyor; bağımsızlık ölçülerek gösterildi.
 
@@ -3002,6 +3002,47 @@ rakamlarını düzyazıya yazarken dayanaklarını yanlarına koymamıştım. Ku
 tam olarak bunu ister ve kapı bunu kendi raporumda yakaladı — bu incelemenin
 en sade doğrulaması: **kurulan sistem, onu kuran metni de denetliyor.**
 
+### Üçüncü dosya: modelin söyleyemediği ayrım
+
+I-01 eşiğin **erişimini** tartışıyordu; I-02 istisnaya kimin **hak
+kazandığını**. Kitabın ölçütü *"Türkiye'de faaliyet gösteren ya da Ar-Ge
+yürüten"*; kayıtlı alternatif *"Türkiye'de **yerleşik**"*. Aradaki fark bir
+hedefi rejimin tamamen dışına çıkarır.
+
+Üçüncü dosya bu ayrımın cevabı çevirdiği bandı seçti — Türkiye'de faaliyet
+gösteren ama yerleşik olmayan bir teknoloji hedefi, Türkiye cirosu 400 milyon
+TL; alıcının dünya cirosu 12 milyar TL *(kurgu olgu; eşikler 2010/4 sayılı
+Tebliğ'in 2026/2 ile değişik m.7 hükmünden, doğrulama 2026-08-27)*:
+
+* **kitabın okuması:** 400 > 250 → B karşılanır → **EVET, bildirime tabi**
+* **I-02'nin okuması:** istisna uygulanmaz, 400 < 1.000 → **HAYIR**
+
+Sistem *"teknoloji teşebbüsü istisnası uygulandı"* diyor ve I-02'yi hiç
+anmıyordu. Bu, elli dördüncü turun kusurunun **olumlu cevap yolundaki**
+kardeşiydi.
+
+**Ama asıl bulgu daha derinde.** `teknoloji` tek bir doğru/yanlış alanıydı:
+*"Türkiye'de faaliyet gösteriyor ama yerleşik değil"* hâli **girilemiyordu.**
+Yani kullanıcı, kutuyu işaretlediğinde itiraz edilen ölçütün karşılandığını
+istemeden **beyan etmiş** oluyordu. **Bir modelin söyleyemediği ayrım, o
+modeli kullanan hukukçunun göremediği ayrımdır** — ve burada görülmeyen şey,
+hedefin rejime tabi olup olmadığıydı.
+
+Alan üç değerli hâle getirildi (evet / hayır / beyan edilmemiş) ve istisna
+yerleşiklik olumlanmadan uygulandığında uyarı çıktıya, olumlu cevabın yanına
+konuyor. Cevap yine değişmiyor; BH-06 bunu kalıcı kılıyor.
+
+**Ve ölçüt yine yanıldı — bu kez temiz bir mutasyon gösterdi.** BH-02, ters
+dönme ifadesini ararken alternasyonuna *"uygulanmaz"* sözcüğünü de koymuştu.
+O sözcük **istisnanın** düşmesini anlatır, **cevabın** dönmesini değil, ve
+metinde zaten başka bir sebeple duruyordu: ters dönme cümlesi tamamen
+silindiğinde vaka yeşil kalıyordu. Yirmi dokuzuncu turdan beri aynı ders,
+yeni bir kılıkta — **yakındaki bir sözcük, iddianın kanıtı değildir.**
+
+Bir de mutasyon tarafında: ilk denemede biçim yer tutucularını bozan bir
+mutasyon programı çökertti ve vakayı yanlış sebeple kırmızı yaptı.
+**Programı bozan bir mutasyon, ölçütü sınamaz.**
+
 **Ve mutasyon tarafında üç kez yanıldım — üçü de aynı biçimde.** Üç mutasyon
 "kaçtı" göründü; hiçbiri kaçmamıştı. Zorunlu başlıkların **önüne** bölüm
 ekledim, oysa sınanan şey sonda olmalarıydı. Onay ifadesinin **birini**
@@ -3147,6 +3188,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | BE · kitabın kendi iç atıfları | *§18.1 bir kural numarasını bölüm sigiliyle anıyor* | **bir beyanlı taban** — kitabın metnindeki kusur, ERRATA'ya yazıldı |
 | BF · ölçüm iddiaları canlı değerle | *rapor "13 alıntı doğrulandı" diyordu; takım 21 alıntı doğruluyordu* | **temiz** — iddia canlı değerden okunuyor |
 | BG · ikinci dosya | *"bildirime tabi değil" cevabı, onu tersine çeviren açık soruyu hiç anmıyordu* | **temiz** — uyarı olumsuz cevabın yanında |
+| BH · üçüncü dosya | *model, teknoloji istisnasının itirazlı ölçütünü ifade edemiyordu* | **temiz** — yerleşiklik alanı ve I-02 uyarısı eklendi |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -3204,8 +3246,8 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # 56 çalıştırılabilir takım:
-                                  #   409 vaka + 27 mutasyon (D)
+./sinama/hepsi.sh                 # 57 çalıştırılabilir takım:
+                                  #   415 vaka + 27 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -3239,7 +3281,7 @@ vakalardır ve hepsi geçer. Kör sınama o aklın dışında kalanı arar: bir
 hukukçunun gerçekten yazacağı cümleyi, kancanın gerçekten göreceği veriyi,
 bozulduğunda denetimin gerçekten yakalayıp yakalamadığını.
 
-Elli dokuz takım, 409 vaka:
+Altmış takım, 415 vaka:
 
 | Takım | Neyi sınar | Kaynağı |
 |---|---|---|
@@ -3302,9 +3344,10 @@ Elli dokuz takım, 409 vaka:
 | BE | **Kitabın kendi iç atıfları** — her §N ve §N.M atfı var olan bir bölüme/maddeye çözülüyor mu | §3, §5, §13, §17, §18 |
 | BF | **Ölçüm iddiaları** — teslimattaki her ölçüm sayısı, o değeri üreten takımdan okunanla aynı mı | kural 1, §16 |
 | BG | **İkinci dosya** — kayıtlı bir açık soru cevabı tersine çeviriyorsa, uyarı olumsuz cevabın yanında duruyor mu | §5, §19, kural 2 |
+| BH | **Üçüncü dosya** — girdi modeli itiraz edilen ölçütü söyleyebiliyor mu; istisna uygulanırken itiraz anılıyor mu | §5, §19, kural 1 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**409 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On üç**
+**415 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On üç**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)
