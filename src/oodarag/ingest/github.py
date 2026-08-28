@@ -410,14 +410,23 @@ class GitHubClient:
     def _bounded(self, seconds: float) -> float:
         return max(0.0, min(float(seconds), max(0.0, self.max_rate_limit_sleep_s)))
 
-    def _classify(self, e: HttpError) -> GitHubError:
-        """Turn a status into an error that says what an operator should do.
+    def _scrub(self, text: str) -> str:
+        """Redact credential shapes, and then this credential specifically.
 
-        The response body is redacted on the way in. GitHub does not echo
-        credentials in error bodies, but this message travels into logs, deltas,
-        reports and issue bodies, and "probably not" is not an argument that
-        survives contact with a proxy that rewrites errors.
+        `redact_secrets` matches shapes it knows, which is everything except the
+        format that shipped last quarter - GitHub's fine-grained `github_pat_`
+        tokens are not in its table today. The one credential we can identify
+        with certainty is our own, so it is removed by value as well. A proxy
+        that echoes an Authorization header back inside an error body is not a
+        hypothetical, and this message ends up in logs, deltas and reports.
         """
+        cleaned = redact_secrets(text)
+        if self.token and self.token in cleaned:
+            cleaned = cleaned.replace(self.token, "<redacted:github-token>")
+        return cleaned
+
+    def _classify(self, e: HttpError) -> GitHubError:
+        """Turn a status into an error that says what an operator should do."""
         detail = " ".join(self._scrub(e.body or "")[:200].split())
         if e.status == 401:
             return AuthError(

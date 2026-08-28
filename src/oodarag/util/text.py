@@ -155,11 +155,28 @@ def redact_secrets(text: str) -> str:
     an index is a file that gets copied around, so it must never carry them.
     """
     patterns = [
+        # Specific formats first, so the marker names the credential that leaked.
+        # Every entry here is a *prefixed* format: a vendor that publishes a
+        # recognizable prefix is one we can match without guessing, which is why
+        # this table grows by prefix rather than by entropy heuristics.
         (r"\b(gh[pousr]_[A-Za-z0-9]{16,})", "<redacted:github-token>"),
+        # Fine-grained PATs. A separate entry because the underscore-separated
+        # body does not match the classic pattern above, and a format shipping
+        # after this table was written is the normal way a redactor goes stale.
+        (r"\b(github_pat_[A-Za-z0-9_]{20,})", "<redacted:github-token>"),
         (r"\b(sk-ant-[A-Za-z0-9_\-]{16,})", "<redacted:anthropic-key>"),
-        (r"\b(sk-[A-Za-z0-9]{32,})", "<redacted:api-key>"),
+        (r"\b(AIza[0-9A-Za-z_\-]{35,})", "<redacted:google-api-key>"),
+        (r"\b([sprk]k_(?:live|test)_[A-Za-z0-9]{16,})", "<redacted:stripe-key>"),
+        (r"\b(npm_[A-Za-z0-9]{30,})", "<redacted:npm-token>"),
+        (r"\b(pypi-[A-Za-z0-9_\-]{16,})", "<redacted:pypi-token>"),
+        (r"\b(eyJ[A-Za-z0-9_\-]{8,}\.eyJ[A-Za-z0-9_\-]{8,}\.[A-Za-z0-9_\-]{8,})",
+         "<redacted:jwt>"),
+        # Hyphens and underscores are inside the class: "sk-proj-..." is the
+        # common OpenAI form and a class of bare alphanumerics stops at the
+        # first hyphen, leaving the secret half of the string in the clear.
+        (r"\b(sk-[A-Za-z0-9_\-]{24,})", "<redacted:api-key>"),
         (r"\b(AKIA[0-9A-Z]{16})\b", "<redacted:aws-key-id>"),
-        (r"\b(xox[abposr]-[A-Za-z0-9\-]{10,})", "<redacted:slack-token>"),
+        (r"\b(x(?:ox[abposr]|app)-[A-Za-z0-9\-]{10,})", "<redacted:slack-token>"),
         (r"(?i)\b(bearer)\s+[A-Za-z0-9._\-]{20,}", r"\1 <redacted>"),
         (
             r"(?i)\b(api[_-]?key|secret|password|passwd|token)\b(\s*[:=]\s*)[\"']?[A-Za-z0-9._\-]{12,}[\"']?",

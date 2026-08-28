@@ -519,6 +519,18 @@ class ErrorClassificationTestCase(GitHubTestCase):
         self.assertNotIn(TOKEN, str(caught.exception))
         self.assertIn("<redacted:github-token>", str(caught.exception))
 
+    def test_a_credential_shape_redaction_does_not_know_is_still_removed(self) -> None:
+        """Fine-grained PATs are not in `redact_secrets`' table; ours is known."""
+        pat = "github_pat_11ABCDE0aBcDeFgHiJkL_" + "Xy9" * 15
+        body = json.dumps({"message": f"header was {pat}"}).encode()
+        opener = FakeOpener().exact(API, http_error(403, body, {"x-ratelimit-remaining": "10"}))
+
+        with self.assertRaises(AccessDeniedError) as caught:
+            list(self.connector(opener, token=pat).fetch({}))
+
+        self.assertNotIn(pat, str(caught.exception))
+        self.assertIn("<redacted:github-token>", str(caught.exception))
+
     def test_malformed_json_is_an_error_not_a_traceback(self) -> None:
         opener = FakeOpener().exact(API, text_response(b"<html>maintenance</html>"))
         with self.assertRaises(GitHubError) as caught:
