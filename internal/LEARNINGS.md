@@ -1643,14 +1643,38 @@ recency), and an undated document must read as neither fresh nor stale rather
 than as infinitely old, which would bury every document from a source that
 carries no timestamps.
 
+**Then the same question, asked of every weight.** Zeroing each in turn:
+
+    weight              external              primary
+    coverage_weight     49/54  moves          16/20  moves
+    phrase_weight       48/54  moves          17/20  moves
+    position_weight     48/54  moves          18/20  moves
+    authority_weight    48/54  NO EFFECT      18/20  NO EFFECT
+    recency_weight      48/54  NO EFFECT      18/20  NO EFFECT
+
+Authority is inert for the same structural reason: each corpus is a single
+filesystem source at authority 1.0, so the factor is constant across every
+candidate. Between them, **0.20 of the reranker's weight - a fifth of the
+score - is invisible to both regression gates.**
+
+Authority had no test at all. It now has three: a trusted source must outrank an
+identical untrusted one, that ordering must vanish with the weight at zero, and
+the value must be clamped - a connector is free to report any number, and
+without a ceiling a source claiming authority 1000 outranks every relevant
+document from every other source, which is relevance ceasing to matter.
+
 **Rules.**
 1. **Measure the effect before building the fix**, even when the fix is
    obviously correct. This one was correct, unnecessary, and the measurement
    that showed it unnecessary is the only reason the real gap was found.
-2. A component that no gate can see is not tested by the gate being green.
+2. **Ask the question of every sibling, not just the one you tripped over.**
+   Recency was found by accident; authority was found by spending five more
+   minutes asking the same question of the other four weights, and it was the
+   one with no tests at all.
+3. A component that no gate can see is not tested by the gate being green.
    Uniform inputs make a weighted factor a constant, and a constant multiplied
    through every candidate is indistinguishable from the feature being absent.
-3. When a test shows a component working, add the one that shows the component
+4. When a test shows a component working, add the one that shows the component
    *causing* it. "The fresher document ranked first" is satisfied by insertion
    order; it means something only alongside "and it does not, with the weight
    at zero".

@@ -88,6 +88,13 @@ class HeuristicReranker(Reranker):
     coverage_power: float = 1.0
     coverage_weight: float = 0.45
     phrase_weight: float = 0.25
+    #: Invisible to both eval gates, for the same reason as `recency_weight`
+    #: below: each corpus is a single filesystem source at authority 1.0, so the
+    #: factor is a constant across every candidate and cannot reorder anything.
+    #: Measured by zeroing each weight in turn - coverage, phrase and position
+    #: all move the metrics on both corpora; authority and recency move neither.
+    #: Between them that is 0.20 of the reranker's weight carried by unit tests
+    #: alone (L43).
     authority_weight: float = 0.12
     #: Neither eval gate can see this. Both corpora are written in one pass, so
     #: their documents share a timestamp - spread 0.00 days external, 0.91 days

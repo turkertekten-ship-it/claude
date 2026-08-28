@@ -2177,3 +2177,68 @@ class RecencyTest(unittest.TestCase):
         scored = ScoredChunk(chunk=chunk, score=1.0, components={})
         reranker.rerank("text", [scored])
         self.assertAlmostEqual(scored.components["rerank_recency"], 0.5, places=6)
+
+
+class AuthorityTest(unittest.TestCase):
+    """Authority is the other weight no gate can see.
+
+    Both eval corpora are a single filesystem source at authority 1.0, so the
+    factor is constant across every candidate and cannot reorder anything -
+    measured by zeroing each reranker weight in turn: coverage, phrase and
+    position all move the metrics on both corpora, authority and recency move
+    neither. These tests are its whole coverage.
+    """
+
+    def _ranked(self, authorities, weight=0.12):
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        pipeline = IndexPipeline(store)
+        text = "Reciprocal rank fusion combines a dense arm and a lexical arm by rank."
+        docs = [_doc(f"d{i}", f"{i}.md", text) for i in range(len(authorities))]
+        for doc, authority in zip(docs, authorities):
+            doc.metadata = {**doc.metadata, "authority": authority}
+        store.upsert_documents(docs)
+        pipeline.embedder.fit([d.text for d in docs])
+        for d in docs:
+            store.replace_chunks(d.doc_id, chunk_document(d))
+        pipeline.embed_missing()
+
+        retriever = HybridRetriever(store, pipeline.embedder)
+        retriever.reranker.clock = lambda: 1_700_000_000.0
+        retriever.reranker.authority_weight = weight
+        results, _ = retriever.retrieve("how are dense and lexical arms combined")
+        return [r.chunk.doc_id for r in results]
+
+    def test_a_trusted_source_outranks_an_identical_untrusted_one(self):
+        order = self._ranked([0.2, 0.6, 1.4])
+        self.assertEqual(order[0], "d2", f"the trusted source did not win: {order}")
+        self.assertEqual(order[-1], "d0", f"the least trusted did not lose: {order}")
+
+    def test_with_the_weight_at_zero_authority_stops_mattering(self):
+        """Otherwise the ordering above could be insertion order."""
+        weighted = self._ranked([0.2, 0.6, 1.4], weight=0.12)
+        flat = self._ranked([0.2, 0.6, 1.4], weight=0.0)
+        self.assertNotEqual(weighted, flat,
+                            "the ranking was unchanged with authority switched off, "
+                            "so the test above proves nothing about authority")
+
+    def test_authority_is_clamped_so_one_source_cannot_dominate(self):
+        """A connector is free to report any number. Without a ceiling, a source
+        claiming authority 1000 outranks every relevant document from every
+        other source, and relevance stops mattering at all."""
+        from oodarag.models import Chunk, ScoredChunk
+        from oodarag.retrieve.rerank import HeuristicReranker
+
+        reranker = HeuristicReranker(idf=lambda t: 1.0, vocabulary=set())
+        reranker.clock = lambda: 1_700_000_000.0
+        scores = {}
+        for label, authority in (("huge", 1000.0), ("ceiling", 1.5), ("negative", -5.0)):
+            chunk = Chunk(chunk_id="c", doc_id="d", ordinal=0, text="text",
+                          context_header="", metadata={"authority": authority})
+            scored = ScoredChunk(chunk=chunk, score=1.0, components={})
+            reranker.rerank("text", [scored])
+            scores[label] = scored.components["rerank_authority"]
+        self.assertEqual(scores["huge"], scores["ceiling"],
+                         "an unbounded authority was not clamped")
+        self.assertEqual(scores["negative"], 0.0,
+                         "a negative authority was not floored")
