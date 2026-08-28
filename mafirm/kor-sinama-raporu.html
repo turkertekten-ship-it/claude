@@ -227,11 +227,11 @@ footer p + p{margin-top:12px}
   </div>
   <h1>Yalnızca Geçen Kapı</h1>
   <p class="standfirst">Kitap kelimesi kelimesine kuruldu, sonra kendi düzyazısından
-  türetilmiş doksan altı vakayla sınandı. Kitabın kendi öz-sınamaları geçiyor.
+  türetilmiş seksen beş vakayla sınandı. Kitabın kendi öz-sınamaları geçiyor.
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>50 çalıştırılabilir takım · 377 vaka · 0 sinyal</span>
+    <span>51 çalıştırılabilir takım · 382 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -2516,7 +2516,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
   kanıtlanmış bir mutasyonu olmalı"</em> ölçütünü uyguladı. Aynı ölçüt bir
   katman <strong>yukarıda</strong> hiç uygulanmamıştı: koşum betiğinin epilogu
   dört kontrol taşıyor ve hiçbiri mutasyonla sınanmamıştı.</p>
-  <p>Sebebi teknikti: bir epilog kontrolünü kırmak <strong>kırk üç takımın
+  <p>Sebebi teknikti: bir epilog kontrolünü kırmak <strong>o turdaki kırk üç takımın
   tamamını</strong> koşturmayı gerektiriyordu. Dört kontrol için dört dakika.
   <strong>Ölçüt uygulanmadı çünkü pahalıydı</strong> — bu incelemenin baştan
   beri kabul etmediği gerekçe.</p>
@@ -2921,6 +2921,61 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Kırk yedinci tur</span>
+  <h2>Kırk altı tur depoyu sınadı; okuyucunun açtığı belge sınanmamıştı</h2>
+  <p>Bu tur şunu sordu: <strong>teslimattaki sayılar, ölçtükleri şeye hâlâ eşit
+  mi?</strong> Elle yazılan sayının ölçtüğü şeyden sürüklenmesi bu incelemenin
+  en sık ikinci sınıfıdır — ve raporun kendi metnine hiç uygulanmamıştı.</p>
+
+  <p>Dört sürüklenmiş sayı bulundu, dördü de okuyucunun gördüğü yerde: takım
+  tablosunun başlığı dokuz takım diyordu, altındaki tablo elli üç satırdı;
+  "nasıl yeniden koşulur" bölümü eskimiş bir takım sayısı taşıyordu; ve
+  <strong>bu sayfanın giriş cümlesi</strong>, sadık kuruluma yamalı koşumun
+  vaka sayısını yazıyordu.</p>
+
+  <div class="callout">
+    Eskimiş takım sayısını taşıyan satırın <strong>hemen altındaki</strong>
+    vaka satırı bir tur önce güncellenmişti. İki sayı, komşu iki satır, biri
+    bakıldı öteki bakılmadı. Giriş cümlesindeki hatanın kırk altı tur boyunca
+    nasıl hayatta kaldığı ise daha keskin: sayı rakamla değil,
+    <strong>yazıyla</strong> yazılmıştı. Rakam arayan hiçbir ölçüt onu göremez.
+  </div>
+
+  <p>Ve <strong>ölçüt dokuz kez yanıldı</strong> — her yanılgı bir sınıfın adını
+  verdi. Bir sayım, neyin sayımı olduğunu söylemeden ölçülemez: bir alt takımın
+  vaka sayısı, toplamla aynı şey değildir. Türkçe küçültme ölçütü ilk koşusunda
+  çökertti. Birim sözcüğü ek aldığında sözcük sınırı eşleşmedi. Sayı ile birimin
+  arasına sıfat girdiğinde sayım görünmez oldu — ve bu,
+  <strong>tam da bu sayfanın üst bilgisindeki iddiaydı</strong>: ölçüt, en çok
+  ölçmesi gereken cümleyi atlıyordu. Yazıyla yazılmış yüzlü toplamlar kaçtı.
+  Markdown vurgusu cümlecik bölücüsünü durdurdu. Başlık denetimi ilk eşleşmeyi
+  alıp <em>bu turun kendi düzeltme tablosunu</em> başlık sandı. Bir vaka kimliğindeki
+  rakam toplam sanıldı. Ve Türkçede "bir" hem sayı hem belirsiz artikel
+  olduğu için, ölçütün kendi açıklama cümleleri toplam iddiası gibi
+  göründü.</p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AL-06</span>
+      <span class="pill f">Katman kuralı, üçüncü kez</span></div>
+    <h3>Takım, içinde bulunduğu koşumun kaydını okuyordu</h3>
+    <p>Yeni takım vaka sayısını <code>sinama/SAYIM.txt</code>'ten okuyordu — yani
+    <strong>içinde bulunduğu koşumun kaydından.</strong> Koşum sırasında o dosya
+    henüz önceki koşumun sayısını taşır; takım koşumun içinde kırmızı, koşumdan
+    sonra yeşil görünüyordu. <em>Denetim, kendini denetleyen takımı
+    denetleyemez</em> kuralı üçüncü kez — bu kez veri yoluyla — çiğnenmişti.</p>
+    <p>Sayı artık durağan ölçülüyor: koşum betiğine bağlı her takımın kendi
+    beyanı toplanıyor, her takımın sıfırıncı vakası da o beyanın gerçeğe eşit
+    olduğunu güvenceye alıyor. Bozulmuş bir koşum kaydıyla takımın çıktısı
+    <strong>birebir aynı</strong> kalıyor; bağımsızlık ölçülerek gösterildi.</p>
+  </div>
+
+  <p>Turun kalıcı kuralı: <strong>bir sayı ya bugün ölçülebilen değere eşittir,
+  ya da hangi koşuma ait olduğunu söyler.</strong> İndissiz bir tarihsel sayı,
+  güncel bir iddiadan ayırt edilemez — ve okuyucu ayırt etmek zorunda
+  bırakılamaz.</p>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -3038,7 +3093,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 50 takım · 377 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 51 takım · 382 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:

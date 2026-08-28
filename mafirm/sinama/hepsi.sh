@@ -126,6 +126,8 @@ python3 "$S/ks_az_sadik.py"; topla "AZ · kitaba sadık kopyaların sadakati" $?
 echo
 python3 "$S/ks_ba_kayit_celiski.py"; topla "BA · kayıt ile iddianın çelişmesi" $?
 echo
+python3 "$S/ks_bb_zaman_indisi.py"; topla "BB · sayıların zaman indisi" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"
