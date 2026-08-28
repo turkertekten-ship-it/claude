@@ -4747,3 +4747,43 @@ and the gate's score for the case went with it. Nothing re-checked.
    and no test reads it. A note recording a corpus-dependent fact should name
    the corpus size it was checked at - this one did, which is the only reason
    the staleness was visible.
+
+## L93 - The one unreachable case, diagnosed to the word
+
+Of the eight residual failures L91 triaged, one is `unreachable`: absent from a
+candidate pool of 100 with MMR off, so nothing downstream can reach it.
+
+    Q: "How can a test control what the clock returns?"   expects: freezegun
+
+freezegun.md says the library "allows your Python tests to travel through time
+by mocking the datetime module". Counting the query's content words in that
+document:
+
+    test     30      freez   69
+    return    1      time   115
+    control   0
+    clock     0
+
+**Neither "clock" nor "control" occurs in the document at all.** The only real
+overlap is `test`, which every testing package shares. `clock` occurs in three
+documents corpus-wide - pytz, schedule, tqdm - and the retriever returns exactly
+those: tqdm first, pytz fourth. The system is not malfunctioning. It is
+answering the question it can see, which is a question about clocks.
+
+The dense arm cannot rescue it either, because feature hashing embeds the same
+tokens: two texts with no shared vocabulary have no shared features. That is the
+register mismatch of L48 in its purest available form, and it is a **named,
+reproducible cost of ADR 0001's zero-dependency core** rather than a defect.
+Query expansion cannot help - pseudo-relevance feedback expands from documents
+already retrieved, and every one of those is about clocks.
+
+**Rules.**
+1. **A failure whose diagnosis bottoms out in "these two texts share no words"
+   is a capability limit, not a bug.** Stop tuning at that point and name it.
+2. **Keep one such case as the acceptance test for the capability that would
+   fix it.** If a hosted embedder is ever wired in behind the existing
+   interface, this question retrieving freezegun is the check that it bought
+   something the hashing embedder cannot.
+3. **Diagnose to the word count.** "Register mismatch" was an abstraction for
+   several sessions; `clock: 0, control: 0` is the thing itself, and it took one
+   grep.
