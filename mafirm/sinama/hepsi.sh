@@ -122,6 +122,8 @@ python3 "$S/ks_ax_yapi.py"; topla "AX · kitap yapısı iddiaları" $?
 echo
 python3 "$S/ks_ay_olumsuz_kitap.py"; topla "AY · kitap hakkında olumsuz iddialar" $?
 echo
+python3 "$S/ks_az_sadik.py"; topla "AZ · kitaba sadık kopyaların sadakati" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

@@ -76,7 +76,7 @@ eski yola karşı bırakıldı: kusurun kaydı olarak dururlar.
 | 37 | **`sinama/ks_k_yonlendirme.py`** | K-12'nin 120 karakterlik penceresi MEŞRUDUR (atıf gerçekten bir yakınlık olgusudur) ama gerekçesi yazılı değildi; AV-02 MUAF beyanı eklendi. |
 | 38 | **`sinama/ks_d_denetim.sh`** | Kum havuzu yolu sabitti (`${TMPDIR}/ks_d_kum`); eşzamanlı iki koşum birbirini eziyor ve taban çizgisi sistemde hiçbir şey bozuk olmadığı hâlde kırmızı veriyordu. Her koşum kendi havuzunu alır; AL-08 sınıfı tarar. |
 | 39 | **RAPOR.md ve KITAP-ERRATA.md · atıf biçimi** | İşletim sözleşmesinin kuralları on iki yerde "§N" diye anılıyordu; oysa kitapta §8 = İşlem el kitapları, §9 = Beceriler. Kurallar §3'ün içindedir. Atıflar "kural N" biçimine çevrildi; AY-02 karışmayı her koşumda sınıyor. |
-- `hafiza/cikar-catismasi.md` — §2 `hafiza/` klasörünü kuruyordu ama bu dosyayı
+| 40 | **`yamalar/kitaba-sadik/TURETME.md` (yeni)** | "Kitaba sadık" kopyalar kırk üç tur boyunca kitabın metniyle hiç karşılaştırılmamıştı; raporun bütün önce/sonra ölçümü onlara dayanıyor. 262 satırın 258'i birebir doğrulandı; kalan dördü §14'ün talimatıyla türetilmiş `denetle()` satırları ve artık beyan ediliyor. |\n- `hafiza/cikar-catismasi.md` — §2 `hafiza/` klasörünü kuruyordu ama bu dosyayı
   hiç oluşturmuyordu; oysa CLAUDE.md §8 ve §8 el kitabı Aşama 0 onu bir kapı
   sayıyor. Boş bir listenin "temiz" DEĞİL "kontrol yapılamadı" demek olduğu
   dosyanın kendisine yazıldı.

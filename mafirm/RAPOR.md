@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** kırk sekiz çalıştırılabilir takım — **368
+**Yamalı hâlde sistem çalışıyor:** kırk dokuz çalıştırılabilir takım — **372
 vaka, 27 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15 → **27/27** (mutasyon kümesi otuz
 sekizinci turda on beşten yirmi yediye çıkarıldı: 26 kontrolün dokuzu hiç
@@ -2497,6 +2497,42 @@ On iki atıf `kural N` biçimine çevrildi. `CLAUDE.md §1` gibi açıkça
 nitelenmiş olanlar olduğu gibi bırakıldı: orada hangi belgenin §1'i olduğu
 zaten yazıyor.
 
+### "Kitaba sadık" sıfatı kırk üç tur boyunca sınanmamıştı
+
+Kırk bir, iki ve üçüncü turlar raporun kitap hakkındaki **sözlerini** sınadı.
+Dördüncüsü tabana bakıyor: raporun bütün **önce/sonra** karşılaştırması
+`yamalar/kitaba-sadik/` altındaki kopyalara dayanıyor. AG-01..05 o dosyaların
+*var olduğunu*, canlı sürümden *farklı* olduğunu ve kitabın bilinen
+kusurlarını *taşıdığını* ölçüyor — ama hiçbiri **kitabın metniyle**
+karşılaştırmıyordu.
+
+Karşılaştırıldı: **262 esaslı satırın 258'i** kitapta birebir bulundu.
+
+Kalan dördü `kapi.py`nin `denetle()` bölümünde ve sebebi öğretici: §12
+fonksiyonu **dört** kapıyla basıyor, §14 beşinciyi verip *"denetle() içine
+diğer dördün yanına eklenir"* diyor. **Kitap sonucu basmıyor, talimatı
+veriyor.** Beş kapılı `denetle()` metnini kitaptan kopyalamak mümkün değil;
+talimatı uygulayarak yazmak gerekiyor. O dört satır uydurma değil — ama
+kitabın harfi de değil, ve fark yazılmak zorunda: kırk birinci turda kendi
+yamamı kitabın metni sanıp kitaba kredi vermiştim.
+
+Beyan `yamalar/kitaba-sadik/TURETME.md` içinde: hangi satır, hangi talimattan.
+AZ-01 beyansız her satırın kitapta birebir bulunmasını ister; AZ-03 beyanın
+bir **kaçış deliğine** dönüşmediğini sağlar — beyan edilen bir satır kitapta
+*geçiyorsa* kırmızı verir.
+
+### Ve küçük bir kitap kusuru daha çıktı
+
+§16 denetim betiği kapı öz-sınamasını `kontrol "dört kapı"` etiketiyle
+çağırıyor. §14 beşinciyi ekledikten sonra sistemde **beş** kapı vardır;
+etiket güncellenmiyor ve denetim var olmayan bir yapıyı adlandırıyor.
+
+Küçük — davranış doğru, yalnızca ad bayat — ama sınıfı §14'ün merkezî
+kusuruyla aynı: **yeni bir kapı eklenirken ona bağlı hiçbir şey
+güncellenmiyor.** Beklenen kümeler güncellenmiyordu (birinci bulgu),
+öz-sınama kapsaması sorulmuyordu (AS-01), kontrolün adı da düzeltilmiyor.
+Üçü tek bir eksikliğin üç görünümü.
+
 ---
 
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
@@ -2625,6 +2661,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | AW · kitap alıntılarının doğruluğu | *dört alıntı yanlış; biri kitaba ait olmayan bir cümleyi kitaba mal ediyordu* | **temiz** — düzeltildi, 13 alıntı doğrulandı |
 | AX · kitap yapısı iddiaları | *sayısal iddialar hiç sınanmamıştı* | **temiz** — dördü de doğru çıktı, doğrulama kalıcı |
 | AY · kitap hakkında olumsuz iddialar | *on iki atıf kural numarasını bölüm numarası sanıyordu* | **temiz** — atıflar düzeltildi, çürütücüler bölüm kapsamlı |
+| AZ · kitaba sadık kopyaların sadakati | *"sadık" sıfatı hiç sınanmamıştı* | **temiz** — 258/262 birebir, kalan dördü beyanlı |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -2683,7 +2720,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 ### Nasıl yeniden koşulur
 ```
 ./sinama/hepsi.sh                 # 34 çalıştırılabilir takım:
-                                  #   368 vaka + 27 mutasyon (D)
+                                  #   372 vaka + 27 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -2772,9 +2809,10 @@ Dokuz takım, 96 vaka:
 | AW | **Kitap alıntılarının doğruluğu** — raporun kitaba atfettiği her cümle kitapta var mı | §1, §13.3, §14 |
 | AX | **Kitap yapısı iddiaları** — raporun verdiği sayılar kitapla uyuşuyor mu | §12, §14, §16, §18 |
 | AY | **Kitap hakkında olumsuz iddialar** — "kitap bunu söylemiyor" doğru mu, ve § atıfları doğru bölümü mü gösteriyor | §3, §8, §9, §16 |
+| AZ | **Kitaba sadık kopyaların sadakati** — raporun "önce" tabanı gerçekten kitabın metni mi | §12, §14, §16 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**368 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**372 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)

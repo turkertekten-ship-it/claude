@@ -872,6 +872,27 @@ ama artık sentetik bir günlükle **32 milisaniyede** sınanıyorlar. Sınanan
 şey bir kopya değil, üretimde koşan kodun kendisidir; AU-07 çağrının
 yerinde durduğunu sağlar.
 
+## §16 · Denetim — kontrolün adı §14'ten sonra bayat
+
+**[C] §16'nın kapı kontrolü "dört kapı" adını taşıyor; §14 beşinciyi
+ekledikten sonra ad yanlış kalıyor.**
+§16 denetim betiği kapı öz-sınamasını `kontrol "dört kapı"` etiketiyle
+çağırıyor. §14 `kapi_arastirma`'yı ekleyip *"denetle() içine diğer dördün
+yanına eklenir"* dedikten sonra sistemde **beş** kapı vardır; kontrolün adı
+güncellenmiyor. Denetimin çıktısı bu yüzden var olmayan bir yapıyı
+adlandırıyor.
+
+Bu küçük bir kusur — kontrolün *davranışı* doğru, yalnızca *adı* bayat — ama
+sınıfı §14'ün merkezî kusuruyla aynıdır: **yeni bir kapı eklenirken ona
+bağlı hiçbir şey güncellenmiyor.** Beklenen kümeler güncellenmiyordu
+(raporun birinci bulgusu), öz-sınama kapsaması sorulmuyordu (AS-01), ve
+kontrolün adı da düzeltilmiyor. *(AZ-01)*
+
+→CEVAP: YOK — cevabın "yamalı hâlde sistem çalışıyor" cümlesi kapsıyor:
+yamalı denetimde etiket kapı sayısıyla birlikte güncelleniyor (otuz altıncı
+turda yedinci kapı eklendiğinde "yedi kapı" oldu). Kitaba sadık sürüm
+`yamalar/kitaba-sadik/denetim.sh` etiketi olduğu gibi saklıyor.
+
 ## §16 · Denetim — kontrollerin mutasyon kapsaması
 
 **[B] §16'nın kontrollerinin kaçının hiç başarısız olamayacağını ölçen bir
