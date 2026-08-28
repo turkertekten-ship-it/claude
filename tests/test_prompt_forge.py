@@ -182,6 +182,15 @@ def test_narrowings_are_proven() -> None:
           "UNVERIFIABLE_ACCEPTANCE" not in rules_for("Write it. Done when the job name is exactly checks."))
     check("nor one naming a count",
           "UNVERIFIABLE_ACCEPTANCE" not in rules_for("Write it. Acceptance: it returns at most 3 rows."))
+    for verb in ("Extend the system.", "Correct the rule.", "Name the artifact.",
+                 "Measure the drift.", "Record what you saw."):
+        check(f"{verb!r} is a task", "NO_TASK" not in rules_for(verb), rules_for(verb))
+    check("a heading frames the test and the line below carries the handle",
+          "UNVERIFIABLE_ACCEPTANCE" not in rules_for(
+              "Write it.\n\n## ACCEPTANCE TEST\n`bash tests/run_all.sh` exits 0.\n"))
+    check("a framed section with no handle anywhere still fires",
+          "UNVERIFIABLE_ACCEPTANCE" in rules_for(
+              "Write it.\n\n## ACCEPTANCE TEST\nIt should feel right to the reader.\n"))
     check("prose mentioning verification is not a stated test",
           "UNVERIFIABLE_ACCEPTANCE" not in
           rules_for("Write it. Never silently promote a report to verified."))

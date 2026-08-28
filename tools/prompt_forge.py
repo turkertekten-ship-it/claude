@@ -100,7 +100,7 @@ SLOTS: tuple[Slot, ...] = (
     ),
     Slot(
         "TASK", "TASK",
-        _c(r"(?:^|[.;:!?][\s*_)\]]*|,\s*|\band\s+|\bthen\s+|\balso\s+|\bplease\s+|\bto\s+|\bmust\s+|\bshould\s+|\bneed (?:you )?to\s+|\bwant (?:you )?to\s+|\bcan you\s+)[\s*_#>]*(?:\d+[.)]\s*|[-]\s*)?[\s*_#>]*(write|create|build|add|fix|refactor|implement|generate|draft|list|find|search|analy[sz]e|review|audit|summari[sz]e|explain|compare|design|plan|test|debug|convert|translate|extract|rewrite|update|remove|delete|install|configure|research|investigate|check|verify|compile|document|answer|classify|rank|score|evaluate|migrate|optimi[sz]e|port|deploy|produce|give|show|make|turn|map|trace|reproduce)\b", ),
+        _c(r"(?:^|[.;:!?][\s*_)\]]*|,\s*|\band\s+|\bthen\s+|\balso\s+|\bplease\s+|\bto\s+|\bmust\s+|\bshould\s+|\bneed (?:you )?to\s+|\bwant (?:you )?to\s+|\bcan you\s+)[\s*_#>]*(?:\d+[.)]\s*|[-]\s*)?[\s*_#>]*(write|create|build|add|fix|refactor|implement|generate|draft|list|find|search|analy[sz]e|review|audit|summari[sz]e|explain|compare|design|plan|test|debug|convert|translate|extract|rewrite|update|remove|delete|install|configure|research|investigate|check|verify|compile|document|answer|classify|rank|score|evaluate|migrate|optimi[sz]e|port|deploy|produce|give|show|make|turn|map|trace|reproduce|extend|correct|name|define|measure|record|prove|resolve|close|refine|tighten|harden|validate|benchmark|instrument|split|merge|rename|parse|filter|sort)\b", ),
         "one imperative verb and the artifact it produces",
         "A topic is not a task. 'Docker' is a subject; 'write the Dockerfile' is an instruction.",
     ),
@@ -407,10 +407,14 @@ def _detect_unverifiable_acceptance(lines: list[str], text: str, raw: str) -> li
         re.I,
     )
     buckets = classify(lines)
-    stated = [line for line in buckets["ACCEPTANCE"] if line.strip() and framing.search(line)]
+    bucket = [line for line in buckets["ACCEPTANCE"] if line.strip()]
+    stated = [line for line in bucket if framing.search(line)]
     if not stated:
         return []                                      # absence is NO_ACCEPTANCE's job
-    if any(handle.search(line) for line in stated):
+    # The handle may sit anywhere in the section, not on the line that framed
+    # it: "## ACCEPTANCE TEST" states the test, and the command proving it is
+    # the line below.
+    if any(handle.search(line) for line in bucket):
         return []
     first = stated[0]
     lineno = next((i for i, l in enumerate(lines, start=1) if l.strip() == first.strip()), 0)

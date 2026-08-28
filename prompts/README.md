@@ -11,6 +11,7 @@ prompt nobody reads to the end enforces nothing.
 | `builder.md` | Sessions writing code against facts already established. |
 | `archive-ingest.md` | Sessions processing a conversation export. |
 | `prompt-smith.md` | Sessions whose output is other prompts. |
+| `forged/standing-prompt-system.md` | The owner's own standing request, put through the forge: 38/100 raw, 100/100 forged. |
 | `portable-preamble.md` | Not a session prompt — the block to paste into a chat, a project's custom instructions, or a terminal that cannot read this repository. |
 
 They inherit one rule: **an unsourced claim does not get written down.** The

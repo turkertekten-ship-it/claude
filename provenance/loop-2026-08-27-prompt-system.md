@@ -425,6 +425,43 @@ defect `UNVERIFIABLE_ACCEPTANCE` exists to catch, committed inside the tool that
 enforces it. It now requires the name as code or as an alternative in a usage
 line, and the test proves bare prose no longer satisfies it.
 
+## Thirteenth loop — running the machine on the owner's own prompt
+
+Three loops had gone on the system's own hygiene. Observe turned back to the
+only real user prompt in reach — the goal string that started this — and asked
+what the finished machine says about it.
+
+Two answers, and the second is the useful one.
+
+**It scores 38/100, exactly as it did at loop zero**, after roughly fifteen rule
+changes. Every one of those changes was a narrowing that removed a false
+positive, and none of them weakened the verdict on a genuinely under-specified
+prompt. That is the failure mode of iterative rule-tuning — drifting permissive
+one exemption at a time — not happening, and it is worth having measured rather
+than assumed.
+
+**Then the forged version was written, and the linter rejected it.** Two of the
+three findings were bugs in the tool, both exposed only by writing a prompt in
+the format the system itself recommends:
+
+- `Extend the system`, `Correct the rule`, `Name the artifact` were not
+  recognised as tasks. The verb list had been assembled from the kinds of
+  request that had happened to come up.
+- `UNVERIFIABLE_ACCEPTANCE` fired on a well-formed acceptance test. It looked
+  for the handle on the line that framed the test, and in the slot format this
+  system recommends the framing word is the heading while the command proving
+  it is the line below. The rule was punishing its own house style.
+
+> The surprise: twelve loops of guarding produced a system that failed on the
+> first real prompt written the way it tells people to write. Fixture prompts
+> and subagent briefs had exercised everything except the shape the
+> documentation actually recommends.
+
+`prompts/forged/standing-prompt-system.md` is the result, at 100/100 against 38
+for the raw ask. Its slots are filled from what was built and not corrected over
+thirteen loops rather than from a reconstruction of the owner's intent, and its
+escape clause says exactly that.
+
 ## Still open
 
 `U-6`, `U-7` and `U-8` in [unknowns.md](unknowns.md): what Saraev actually
