@@ -27,6 +27,10 @@ import os
 import re
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import beklenen  # noqa: E402  — beyan edilmiş taban (XFAIL mantığı)
+
+
 _KOK_COZ = os.environ.get("MAFIRM") or os.path.dirname(
     os.path.dirname(os.path.abspath(__file__)))
 
@@ -130,15 +134,19 @@ def rapor():
     print("=" * 96)
     kaldi = 0
     for kod, baslik, gecti, ayrinti in sonuclar:
-        d = "GEÇTİ" if gecti else "KALDI"
-        if not gecti:
+        d, sinyal = beklenen.durum(kod, gecti)
+        if sinyal:
             kaldi += 1
         print("%s %-6s %s" % (d, kod, baslik))
         if ayrinti:
             print("        %s" % ayrinti)
     print("-" * 96)
-    print("%d vaka, %d geçti, %d KALDI" % (len(sonuclar),
-                                           len(sonuclar) - kaldi, kaldi))
+    _sinyal, _sayim = beklenen.ozet([(x[0], x[2]) for x in sonuclar])
+    print("%d vaka · %d geçti · %d beklenen · %d SİNYAL"
+          % (len(sonuclar), _sayim["GEÇTİ"], _sayim["BEKLENEN"], _sinyal))
+    if _sayim["BEKLENMEDİK GEÇİŞ"]:
+        print("  %d BEKLENMEDİK GEÇİŞ — beyan bayat ya da sınama çürüdü"
+              % _sayim["BEKLENMEDİK GEÇİŞ"])
     return kaldi
 
 

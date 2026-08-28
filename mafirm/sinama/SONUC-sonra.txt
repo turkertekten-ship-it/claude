@@ -1,26 +1,26 @@
 ###############################################################
-#  KÖR SINAMA TAKIMI — 2026-08-28T07:45:25Z
+#  KÖR SINAMA TAKIMI — 2026-08-28T07:54:55Z
 ###############################################################
 
-/root/mafirm/sinama/ks_a_esik.py:41: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
+/root/mafirm/sinama/ks_a_esik.py:45: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
   esik.bildirilmeli([2_000_000_000, 1_000_000_000], 0, []),
-/root/mafirm/sinama/ks_a_esik.py:63: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
+/root/mafirm/sinama/ks_a_esik.py:67: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
   esik.bildirilmeli([2_000_000_000, 1_500_000_000], 0, [],
-/root/mafirm/sinama/ks_a_esik.py:71: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
+/root/mafirm/sinama/ks_a_esik.py:75: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
   pilot_cevrilmemis = esik.bildirilmeli([], 1_400_000_000, [2_400_000_000])
-/root/mafirm/sinama/ks_a_esik.py:71: RuntimeWarning: OLASI BİRİM HATASI: devre konu taraf eşiği aşıyor ama 'diğer dünya cirosu' (2400000000) 9000000000 eşiğinin altında. Bu rakam TL mi? Yabancı para ise tl(tutar, birim, kur, kaynak) ile çevirin.
+/root/mafirm/sinama/ks_a_esik.py:75: RuntimeWarning: OLASI BİRİM HATASI: devre konu taraf eşiği aşıyor ama 'diğer dünya cirosu' (2400000000) 9000000000 eşiğinin altında. Bu rakam TL mi? Yabancı para ise tl(tutar, birim, kur, kaynak) ile çevirin.
   pilot_cevrilmemis = esik.bildirilmeli([], 1_400_000_000, [2_400_000_000])
-/root/mafirm/sinama/ks_a_esik.py:78: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
+/root/mafirm/sinama/ks_a_esik.py:82: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
   pilot_cevrilmis = esik.bildirilmeli([], 1_400_000_000, [2_400_000_000 * 47])
-/root/mafirm/sinama/ks_a_esik.py:87: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
+/root/mafirm/sinama/ks_a_esik.py:91: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
   dogru = esik.bildirilmeli([2_500_000_000, 1_400_000_000], 1_400_000_000, [])
-/root/mafirm/sinama/ks_a_esik.py:88: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
+/root/mafirm/sinama/ks_a_esik.py:92: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
   unutulmus = esik.bildirilmeli([2_500_000_000], 1_400_000_000, [])
-/root/mafirm/sinama/ks_a_esik.py:95: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
+/root/mafirm/sinama/ks_a_esik.py:99: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
   bilinmeyen_sifir = esik.bildirilmeli([0, 0], 0, [])
-/root/mafirm/sinama/ks_a_esik.py:102: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
+/root/mafirm/sinama/ks_a_esik.py:106: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
   esik.bildirilmeli([None], 0, [])
-/root/mafirm/sinama/ks_a_esik.py:113: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
+/root/mafirm/sinama/ks_a_esik.py:117: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
   esik.bildirilmeli([-5_000_000_000, 9_000_000_000], 0, []))
 ==============================================================================
 KÖR SINAMA A — rekabet eşiği (şartnameden türetilmiş, koddan değil)
@@ -31,33 +31,33 @@ GEÇTİ  A-03  A eşiği: üç taraf, ikisi tabanı aşıyor, toplam aşıyor ->
 GEÇTİ  A-04  B eşiği: teknoloji hedefi tam 250 milyon (aşmıyor) -> B yok
 GEÇTİ  A-05  B eşiği: diğer tarafın dünya cirosu tam 9 milyar -> B yok
 GEÇTİ  A-06  teknoloji bayrağı A eşiğini DEĞİŞTİRMEMELİ
-KALDI  A-07  §19 pilotu: 2,4 milyar AVRO çevrilmeden verilirse
+BEKLENEN  A-07  §19 pilotu: 2,4 milyar AVRO çevrilmeden verilirse
         beklenen : bildirime tabi (B)
         gerçek   : TABİ DEĞİL — sessiz yanlış cevap
         şartname : §19: 'avro rakamı TL'ye çevrilir'; kodda para birimi modeli yok
 GEÇTİ  A-08  §19 pilotu: aynı olgular, TL'ye çevrilmiş
-KALDI  A-09  hedef cirosu tr_cirolar'a yazılmazsa A ayağı kaybolur
+BEKLENEN  A-09  hedef cirosu tr_cirolar'a yazılmazsa A ayağı kaybolur
         beklenen : True
         gerçek   : False
         şartname : aynı işlem, iki bağlantısız girdi biçimi; tutarlılık kontrolü yok
-KALDI  A-10  bilinmeyen ciro 0 olarak girilirse cevap ne olur
+BEKLENEN  A-10  bilinmeyen ciro 0 olarak girilirse cevap ne olur
         beklenen : belirlenemiyor
         gerçek   : hayır (hiçbir eşik)
         şartname : skills/rekabet-esigi: 'evet / hayır / belirlenemiyor'
-KALDI  A-11  bilinmeyen ciro None olarak verilirse
+BEKLENEN  A-11  bilinmeyen ciro None olarak verilirse
         beklenen : belirlenemiyor sonucu ya da açık hata iletisi
         gerçek   : sessizce kabul
         şartname : kanıt kuralı: bilinmeyen, sıfırdan farklıdır
 GEÇTİ  A-12  negatif ciro reddediliyor mu
-KALDI  A-13  hedef kendi dünya cirosuyla B ayağını karşılayabiliyor mu
+BEKLENEN  A-13  hedef kendi dünya cirosuyla B ayağını karşılayabiliyor mu
         beklenen : karşılayamamalı
         gerçek   : karşıladı
         şartname : tr-esikler.md: 'DİĞER işlem taraflarından en az birinin' — koruma yok
-KALDI  A-14  gerçek rakamlarla komut satırından hesap yapılabiliyor mu
+BEKLENEN  A-14  gerçek rakamlarla komut satırından hesap yapılabiliyor mu
         beklenen : hesap çıktısı
         gerçek   : (çıktı yok)
         şartname : §8: 'esik.py gerçek ciro rakamlarıyla çalıştırılır'
-KALDI  A-15  birleşme vakası modelleniyor mu (devralma/birleşme ayrımı)
+BEKLENEN  A-15  birleşme vakası modelleniyor mu (devralma/birleşme ayrımı)
         beklenen : ayrım var
         gerçek   : ayrım yok — tek 'hedef_tr' parametresi
         şartname : tr-esikler.md: 'birleşme işlemlerinde ise taraflardan en az birinin'
@@ -71,7 +71,7 @@ GEÇTİ  A-13y hedef kendi dünya cirosuyla B'yi karşılayamamalı
 GEÇTİ  A-14y komut satırından gerçek işlem hesaplanıyor mu
 GEÇTİ  A-15y birleşme işlemi modelleniyor mu
 ------------------------------------------------------------------------------
-24 vaka, 17 geçti, 7 KALDI
+24 vaka · 17 geçti · 7 beklenen · 0 SİNYAL
 
 ====================================================================================================
 KÖR SINAMA B — beş kapı, on bir doktrin kuralına karşı
@@ -103,7 +103,7 @@ GEÇTİ B-24   [kural 6 sır      ] Proje Şahin işlemin kod adıdır.
 GEÇTİ B-25   [kural 6 sır      ] Proje ŞAHİN işlemin kod adıdır.
 GEÇTİ B-26   [kural 6 sır      ] Project Falcon is the deal code name.
 GEÇTİ B-27   [kural 6 sır      ] Hedef, Acme Gıda Sanayi ve Ticaret Anonim Şirketi'dir.
-KALDI B-28   [kural 6 sır      ] Müvekkilimiz Ayşe Yılmaz'ın payları devredilecek.
+BEKLENEN B-28   [kural 6 sır      ] Müvekkilimiz Ayşe Yılmaz'ın payları devredilecek.
        ateşlemeli: True   ateşledi: False  ateşleyen kapılar: hiçbiri
        gerçek kişi müvekkil adı — hiç kapsanmıyor
 GEÇTİ B-29   [kural 6 sır      ] İşlem bedeli 4.250.000.000 TL olarak mutabık kalındı.
@@ -113,7 +113,7 @@ GEÇTİ B-32   [kural 11 araştır ] github.com/opensanctions/nomenklatura\nKont
 GEÇTİ B-33   [kural 11 araştır ] github.com/opensanctions/nomenklatura\n    Kontrol edildi: API
 GEÇTİ B-34   [kural 6 sır      ] Müvekkilimiz Ayşe Yılmaz'ın payları devredilecek.
 ----------------------------------------------------------------------------------------------------
-34 vaka, 33 geçti, 1 KALDI
+34 vaka · 33 geçti · 1 beklenen · 0 SİNYAL
 
 ========================================================================================================
 KÖR SINAMA C — üretim yolu (gerçek kanca JSON'u, gerçek çıkış kodu)
@@ -129,7 +129,7 @@ GEÇTİ C-08  bozuk JSON geldiğinde kapı ne yapar
 GEÇTİ C-09  settings.json matcher'ı Bash'i kapsıyor mu
 GEÇTİ C-10  AYNI metin: öz-sınama yolu vs üretim yolu
 --------------------------------------------------------------------------------------------------------
-10 vaka, 10 geçti, 0 KALDI
+10 vaka · 10 geçti · 0 beklenen · 0 SİNYAL
 
 =======================================================================
 KÖR SINAMA D — denetim.sh mutasyon sınaması (kontrollü taban çizgisi)
@@ -164,17 +164,17 @@ KÖR SINAMA E — kitabın doğrulama komutları vs kitabın beklenen değerleri
 =======================================================================
 
   GEÇTİ  §3      beklenen=11             gerçek=11            
-  KALDI  §4      beklenen=8              gerçek=9               §7 _koltuklar/ ekliyor; §4'ün beklenen değeri bayatlıyor
+  BEKLENEN §4    beklenen=8              gerçek=9               §7 _koltuklar/ ekliyor; §4'ün beklenen değeri bayatlıyor
   GEÇTİ  §5.1    beklenen=SELFTEST OK    gerçek=SELFTEST OK   
   GEÇTİ  §7      beklenen=2              gerçek=2             
   GEÇTİ  §8      beklenen=2              gerçek=2             
-  KALDI  §9      beklenen=10             gerçek=11              §14 once-arastir becerisini ekliyor; §9'un beklenen değeri bayatlıyor
+  BEKLENEN §9    beklenen=10             gerçek=11              §14 once-arastir becerisini ekliyor; §9'un beklenen değeri bayatlıyor
   GEÇTİ  §10     beklenen=1              gerçek=1             
   GEÇTİ  §11     beklenen=9              gerçek=9             
   GEÇTİ  §12/§14 beklenen=SELFTEST OK    gerçek=SELFTEST OK   
   GEÇTİ  §14b    beklenen=1              gerçek=1             
   GEÇTİ  §15     beklenen=boş           gerçek=boş          
-  KALDI  §16     beklenen=DENETİM OK    gerçek=BAŞARISIZ      kitaba sadık, eksiksiz kurulum yeşile dönmüyor
+  BEKLENEN §16   beklenen=DENETİM OK    gerçek=BAŞARISIZ      kitaba sadık, eksiksiz kurulum yeşile dönmüyor
 
 --- §13 katalog import kontrolü (kitabın kendi komutu) ---
   docling        KURULU DEĞİL
@@ -184,7 +184,7 @@ KÖR SINAMA E — kitabın doğrulama komutları vs kitabın beklenen değerleri
   docx           KURULU DEĞİL
 
 -----------------------------------------------------------------------
-12 doğrulama · 9 geçti · 3 KALDI
+12 doğrulama · 9 geçti · 3 beklenen · 0 SİNYAL
 
   tam mekanizmalı : 0
   kısmi           : 4  (kanıtlanmış boşluklarla)
@@ -198,7 +198,7 @@ uyulan şeydir.' Ölçüm: on bir kuralın 7 tanesi baskı altında
 ================================================================================================
 KÖR SINAMA J — §19 kabul sınaması, uçtan uca
 ================================================================================================
-KALDI J-01s   KİTABA SADIK: pilot komut satırından hesaplanabiliyor mu
+BEKLENEN J-01s   KİTABA SADIK: pilot komut satırından hesaplanabiliyor mu
         beklenen: hesap çıktısı          gerçek: hesap yok
         §19 'esik.py çalıştırılır' diyor; sadık sürümde --self-test dışında giriş yok
 GEÇTİ J-01y   YAMALI: pilot komut satırından hesaplanabiliyor mu
@@ -216,7 +216,7 @@ GEÇTİ J-05    iki zorunlu başlık çıktıda var mı
         beklenen: True                   gerçek: True
 GEÇTİ J-06    doğrulama tarihi çıktıda var mı
         beklenen: True                   gerçek: True
-KALDI J-07s   KİTABA SADIK: §19'un DOĞRU cevabı kapılardan geçiyor mu
+BEKLENEN J-07s   KİTABA SADIK: §19'un DOĞRU cevabı kapılardan geçiyor mu
         beklenen: geçer (0)              gerçek: BLOKLANDI ['arastirma']
         doğru işi bloklayan kapı bir gün içinde kapatılır (§12)
 GEÇTİ J-07y   YAMALI: §19'un DOĞRU cevabı kapılardan geçiyor mu
@@ -232,7 +232,7 @@ GEÇTİ J-09    YAMALI: töreni eksiksiz ama RAKAMI yanlış cevap
         beklenen: kapılar bunu göremez   gerçek: kapılar bunu göremez
         yapısal bir sınır: kapılar biçimi denetler, muhakemeyi değil
 ------------------------------------------------------------------------------------------------
-12 vaka, 10 geçti, 2 KALDI
+12 vaka · 10 geçti · 2 beklenen · 0 SİNYAL
 
 ================================================================================================
 KÖR SINAMA K — yönlendirme, üst bilgi ve koltuk sağlaması
@@ -268,7 +268,7 @@ GEÇTİ K-14   beyansız bir koltuk dosyası GERÇEKTEN bloklanıyor mu
 GEÇTİ K-15   koltuk kapısı yöntem dosyalarını bloklamıyor
         yöntem dosyası -> çıkış 0
 ------------------------------------------------------------------------------------------------
-15 vaka, 15 geçti, 0 KALDI
+15 vaka · 15 geçti · 0 beklenen · 0 SİNYAL
 
 ================================================================================================
 KÖR SINAMA L — çapraz referans bütünlüğü
@@ -286,7 +286,7 @@ GEÇTİ L-05   izin reddi kalıpları Araç(desen) biçiminde
 GEÇTİ L-06   hafiza/ dosyalarının hepsi var
         eksik: yok
 ------------------------------------------------------------------------------------------------
-6 vaka, 6 geçti, 0 KALDI
+6 vaka · 6 geçti · 0 beklenen · 0 SİNYAL
 
 ================================================================================================
 KÖR SINAMA M — errata ↔ sınama izlenebilirliği
@@ -300,7 +300,7 @@ GEÇTİ M-03   [A] ve [B] maddelerinin atıfları sadık sistemde gerçekten kal
 GEÇTİ M-04   sadık sistemde kalan her vaka errata'da ya da raporda açıklanmış
         41 vaka kaldı · açıklanmamış: yok
 ------------------------------------------------------------------------------------------------
-4 vaka, 4 geçti, 0 KALDI
+4 vaka · 4 geçti · 0 beklenen · 0 SİNYAL
 
 ================================================================================================
 KÖR SINAMA N — raporun olumsuz iddialarının kanıtı (CLAUDE.md §2)
@@ -322,24 +322,28 @@ GEÇTİ N-07   iddia belirli alan adlarıyla sınırlı, genel değil
 GEÇTİ N-08   kanıt, üç mevzuat bulgusunu çözdüğünü İDDİA ETMİYOR
         erişimin neden yok olduğunu kanıtlamak, bulguyu kapatmaz
 ------------------------------------------------------------------------------------------------
-8 vaka, 8 geçti, 0 KALDI
+8 vaka · 8 geçti · 0 beklenen · 0 SİNYAL
 
 ###############################################################
 #  ÖZET
 ###############################################################
-  A · rekabet eşiği mantığı        7 kaldı
-  B · beş kapı / on bir kural         1 kaldı
+  A · rekabet eşiği mantığı        temiz
+  B · beş kapı / on bir kural         temiz
   C · üretim yolu (kanca JSON)         temiz
   D · denetim mutasyon sınaması       temiz
-  E · kitabın kendi beklenen değerleri 3 kaldı
+  E · kitabın kendi beklenen değerleri temiz
   F · doktrin kapsama matrisi           temiz
-  J · §19 kabul sınaması (uçtan uca) 2 kaldı
+  J · §19 kabul sınaması (uçtan uca) temiz
   K · yönlendirme ve koltuk sağlaması temiz
   L · çapraz referans bütünlüğü   temiz
   M · errata izlenebilirliği           temiz
   N · olumsuz iddia kanıtı            temiz
   ------------------------------------------------------------
-  toplam başarısız vaka               13
+  TOPLAM SİNYAL                         0
+
+  Beyan edilmiş tabanla eşleşiyor: bilinen ve gerekçeli sapmalar
+  BEKLENEN olarak raporlandı (sinama/beklenen.json), beyan edilmemiş
+  hiçbir başarısızlık ve hiçbir beklenmedik geçiş yok.
 
   G · §13 depo kataloğu       -> sinama/ks_g_depolar.md
   H · §17 kaynak doğrulaması  -> sinama/ks_h_kaynaklar.md

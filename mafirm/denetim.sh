@@ -118,6 +118,14 @@ kontrol "errata izlenebilir (her madde bir vakaya bağlı)" \
 kontrol "olumsuz iddia kanıtlı (kural 2)" \
   "python3 $M/sinama/ks_n_olumsuz.py >/dev/null 2>&1 && echo 'kanıtlı'"
 
+# NOT — burada BİLEREK bir kontrol YOK.
+# Denetime "sınama takımı beyan edilmiş tabanla eşleşiyor mu" kontrolü eklemek
+# denendi ve ÖZYİNELEME ürettti: denetim -> hepsi.sh -> D takımı (mutasyon
+# sınaması) -> denetim -> hepsi.sh -> ... Koşum 120 saniyede bitmedi.
+# Katman ihlali: denetimi denetleyen takımı denetimin kendisi çağıramaz.
+# Taban eşleşmesi hepsi.sh'in KENDİ çıkış kodudur (0 = sinyal yok) ve orada
+# kalır; denetim yalnızca kendi katmanına bakar.
+
 echo "=== kapsanmayan kurallar sesli bildirilir ==="
 adet=$(grep -cve '^[[:space:]]*#' -e '^[[:space:]]*$' "$M/hafiza/muvekkil-adlari.txt" 2>/dev/null | head -1)
 adet=${adet:-0}

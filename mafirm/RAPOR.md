@@ -37,7 +37,7 @@ Dokuz takım, 96 vaka:
 | N | **Olumsuz iddia kanıtı** — raporun kendisine olumsuz iddia kuralı | CLAUDE.md §2 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamadan ve iki
-takım eklendikten sonra **140 vaka, 13 kaldı** — ve on üçünün her biri ya
+takım eklendikten sonra **140 vaka, 0 SİNYAL** — on üç bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve BEKLENEN olarak raporlanıyor — ve on üçünün her biri ya
 kitabın davranışının bilerek bırakılmış kaydıdır ya da belgelenmiş bir
 öntanımlı boşluktur; hiçbiri yamalı sistemde çözülmemiş bir kusur değildir.
 
@@ -485,6 +485,62 @@ erişilemedi" yanlış olurdu; GitHub MCP ile on altı depo çözüldü).
 Bu kanıt üç mevzuat bulgusunu **çözmüyor**. Yalnızca neden çözülemediğini
 doğrulanabilir kılıyor — ve N-08 raporun bunu çözdüğünü iddia etmediğini
 denetliyor.
+
+---
+
+## Yedi buçuk artı beş · Takımın kendi sinyali bozuktu
+
+Beş tur boyunca her koşum "13 kaldı" dedi ve ben her seferinde "on üçünün
+tamamı hesaplı" diye kapattım. Bu, **kitabın D takımında bulunan kusurun
+aynadaki hâliydi.**
+
+Kitabın denetimi HEP YEŞİLDİ — on beş bozmadan on birini fark etmiyordu, yani
+yeşil hiçbir şey söylemiyordu. Benim takımım HEP 13-KIRMIZIYDI — ve sabit bir
+kırmızı da hiçbir şey söylemez. Yedi vaka her koşumda kırmızı olduğu için
+okuyucu kırmızıyı görmezden gelmeyi öğrenir. İkisi de aynı kusurdur: **bilgi
+taşımayan bir sinyal.**
+
+Ölçüldü. Daha önce yamalanmış bir kusuru (B-10, Türkçe küçük harf) yeniden
+enjekte ettim:
+
+```
+  toplam başarısız vaka               14        << 13'tü, 14 oldu
+```
+
+Hepsi bu. Hangi vakanın yeni olduğunu takım söylemiyor; bir insan bunu fark
+etmek için önceki koşumu hatırlamak ya da diff almak zorunda.
+
+### Beyan edilmiş taban
+
+`sinama/beklenen.json` bilinen ve gerekçeli her sapmayı **beyan eder** — her
+biri sınıfı ve nedeniyle. Üç durum ayrılır:
+
+| | anlamı | sinyal mi |
+|---|---|---|
+| **BEKLENEN** | beyan edilmiş, hâlâ başarısız | hayır |
+| **KALDI** | beyan EDİLMEMİŞ başarısızlık — regresyon | **evet** |
+| **BEKLENMEDİK GEÇİŞ** | beyan edilmiş ama artık geçiyor — beyan bayat ya da sınama çürüdü | **evet** |
+
+Aynı regresyon yeniden enjekte edildiğinde artık şöyle görünüyor:
+
+```
+  B · beş kapı / on bir kural         1 SİNYAL
+  TOPLAM SİNYAL                         1
+  SİNYAL VAR: ya beyan edilmemiş bir başarısızlık (regresyon), ya da
+  beyanlı olup artık GEÇEN bir vaka (beyan bayat / sınama çürüdü).
+```
+
+İki yön de sınandı: bir regresyon sinyal üretiyor, ve geçen bir vakayı
+"başarısız" diye beyan etmek de sinyal üretiyor (C-10 ile denendi).
+Taban eşleşmesinde takım **0 SİNYAL** ile yeşil.
+
+### Ve bunu denetime bağlamak özyineleme üretti
+
+Denetime "takım tabanla eşleşiyor mu" kontrolü eklemeyi denedim: denetim →
+`hepsi.sh` → D takımı (denetimin mutasyon sınaması) → denetim → … Koşum yüz
+yirmi saniyede bitmedi. **Denetimi denetleyen takımı denetimin kendisi
+çağıramaz** — bir katman ihlali. Kontrol kaldırıldı ve yerine gerekçesi
+yazıldı; taban eşleşmesi `hepsi.sh`'in kendi çıkış kodudur ve orada kalır.
 
 ---
 

@@ -1,0 +1,18 @@
+{
+  "_aciklama": "BEYAN EDİLMİŞ TABAN. Bu dosyada adı geçen her vaka, BİLİNEN ve GEREKÇELİ biçimde başarısızdır; takım onları KALDI değil BEKLENEN olarak raporlar. Beyan edilmemiş bir başarısızlık ya da beyan edilmişken GEÇEN bir vaka (BEKLENMEDİK GEÇİŞ) gerçek sinyaldir ve takımı kırmızıya çevirir. Gerekçe: her koşumda kırmızı gösteren bir takım, okuyucuya kırmızıyı görmezden gelmeyi öğretir — kitabın hep yeşil gösteren denetiminin aynadaki hâli.",
+  "vakalar": {
+    "A-07": {"sinif": "eski-api-kaydi", "neden": "Eski bildirilmeli() birim taşımaz; §19 pilotunda yanlış cevap verir. Kusurun KAYDI olarak bırakıldı; yeni API (degerlendir) A-08y ile doğru cevabı veriyor ve eski API artık uyarıyor."},
+    "A-09": {"sinif": "eski-api-kaydi", "neden": "Eski imza aynı işlemi iki bağlantısız biçimde ister. A-09y tek modelden doğru sonucu gösteriyor."},
+    "A-10": {"sinif": "eski-api-kaydi", "neden": "Eski imza iki değerlidir; üç değerli cevap A-10y'de."},
+    "A-11": {"sinif": "eski-api-kaydi", "neden": "Eski imza None'ı TypeError'a çevirir; yeni API BILINMIYOR'u modeller."},
+    "A-13": {"sinif": "eski-api-kaydi", "neden": "Eski imzada 'diğer taraflar' koruması yok; A-13y'de var."},
+    "A-14": {"sinif": "eski-api-kaydi", "neden": "Eski çağrı biçiminde komut satırı yok; A-14y gerçek CLI'yi gösteriyor."},
+    "A-15": {"sinif": "eski-api-kaydi", "neden": "Eski imza birleşme/devralma ayrımı taşımaz; A-15y taşıyor."},
+    "B-28": {"sinif": "ontanimli-bosluk", "neden": "Gerçek kişi adı desenle yakalanamaz; mekanizma bir KAYITTIR ve öntanımlı olarak boştur. B-34 kayıt doluyken kapının ateşlediğini kanıtlıyor; denetim boş kaydı her koşumda sesli bildiriyor."},
+    "J-01s": {"sinif": "kitaba-sadik-karsilastirma", "neden": "Kitaba sadık esik.py'nin komut satırı arayüzü yoktur. Bu vaka kitabın davranışını ÖLÇER; yamalı sürüm J-01y ile geçiyor."},
+    "J-07s": {"sinif": "kitaba-sadik-karsilastirma", "neden": "Kitaba sadık kapılar §19'un DOĞRU cevabını da bloklar. Raporun merkezi bulgusu; yamalı sürüm J-07y ile geçiyor."}
+  },
+  "kabuk_takimlari": {
+    "E": {"adet": 3, "sinif": "kitabin-bayat-degeri", "neden": "§4'ün beklenen 8 değeri (§7 _koltuklar ekleyince 9 olur), §9'un beklenen 10 değeri (§14 once-arastir ekleyince 11 olur) ve §16'nın DENETİM OK beklentisi (üç engelleyici mevzuat bulgusu açıkken kırmızıdır). Üçü de KİTABIN metnindeki kusurdur, kurulumun değil; KITAP-ERRATA.md'de düzeltmeleri yazılı."}
+  }
+}

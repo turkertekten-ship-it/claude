@@ -39,11 +39,20 @@ echo "###############################################################"
 t=0
 for i in "${!ad[@]}"; do
   printf "  %-38s %s\n" "${ad[$i]}" \
-    "$([ "${kod[$i]}" -eq 0 ] && echo 'temiz' || echo "${kod[$i]} kaldı")"
+    "$([ "${kod[$i]}" -eq 0 ] && echo 'temiz' || echo "${kod[$i]} SİNYAL")"
   t=$((t + kod[i]))
 done
 echo "  ------------------------------------------------------------"
-printf "  %-38s %s\n" "toplam başarısız vaka" "$t"
+printf "  %-38s %s\n" "TOPLAM SİNYAL" "$t"
+  echo
+  if [ "$t" -eq 0 ]; then
+    echo "  Beyan edilmiş tabanla eşleşiyor: bilinen ve gerekçeli sapmalar"
+    echo "  BEKLENEN olarak raporlandı (sinama/beklenen.json), beyan edilmemiş"
+    echo "  hiçbir başarısızlık ve hiçbir beklenmedik geçiş yok."
+  else
+    echo "  SİNYAL VAR: ya beyan edilmemiş bir başarısızlık (regresyon), ya da"
+    echo "  beyanlı olup artık GEÇEN bir vaka (beyan bayat / sınama çürüdü)."
+  fi
 echo
 echo "  G · §13 depo kataloğu       -> sinama/ks_g_depolar.md"
 echo "  H · §17 kaynak doğrulaması  -> sinama/ks_h_kaynaklar.md"

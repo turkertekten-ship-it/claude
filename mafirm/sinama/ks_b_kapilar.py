@@ -12,6 +12,10 @@ import importlib.util
 import os
 import sys
 from datetime import date
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import beklenen  # noqa: E402  — beyan edilmiş taban (XFAIL mantığı)
+
 # Kök dizin, betiğin KENDİ konumundan çözülür; sabit ~/mafirm değil.
 # [Kör sınamanın kendi bulgusu] Betikler ~/mafirm'i sabitlediği sürece bir
 # klon KENDİ ağacını değil, makinedeki kurulumu ölçer: klondaki kapi.py
@@ -164,8 +168,8 @@ def rapor():
     print("=" * 100)
     kaldi = 0
     for kod, kural, gecti, bek, ger, bulunan, metin, acik in sonuclar:
-        d = "GEÇTİ" if gecti else "KALDI"
-        if not gecti:
+        d, sinyal = beklenen.durum(kod, gecti)
+        if sinyal:
             kaldi += 1
         print("%s %-6s [kural %-11s] %s" % (d, kod, kural, metin))
         if not gecti:
@@ -173,8 +177,12 @@ def rapor():
                   % (bek, ger, sorted(bulunan) or "hiçbiri"))
             print("       %s" % acik)
     print("-" * 100)
-    print("%d vaka, %d geçti, %d KALDI" % (len(sonuclar),
-                                           len(sonuclar) - kaldi, kaldi))
+    _sinyal, _sayim = beklenen.ozet([(x[0], x[2]) for x in sonuclar])
+    print("%d vaka · %d geçti · %d beklenen · %d SİNYAL"
+          % (len(sonuclar), _sayim["GEÇTİ"], _sayim["BEKLENEN"], _sinyal))
+    if _sayim["BEKLENMEDİK GEÇİŞ"]:
+        print("  %d BEKLENMEDİK GEÇİŞ — beyan bayat ya da sınama çürüdü"
+              % _sayim["BEKLENMEDİK GEÇİŞ"])
     return kaldi
 
 

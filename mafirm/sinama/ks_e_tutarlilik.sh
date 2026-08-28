@@ -5,13 +5,31 @@
 # karşılaştırır. Kurulum kitaba SADIK yapıldı; sapma varsa kaynağı kitaptadır.
 set -u
 M="${MAFIRM:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
-gecti=0; kaldi=0
+gecti=0; kaldi=0; beklenen=0
+
+# BEYAN EDİLMİŞ TABAN — bkz. beklenen.json ve beklenen.py.
+# Bu üç sapma KİTABIN metnindeki kusurdur, kurulumun değil; her koşumda
+# kırmızı göstermek okuyucuya kırmızıyı görmezden gelmeyi öğretir.
+# Beyan edilmemiş bir sapma ya da beyanlı olup DÜZELEN bir sapma sinyaldir.
+BEYANLI="§4 §9 §16"
+
+beyanli_mi() { case " $BEYANLI " in *" $1 "*) return 0;; *) return 1;; esac; }
 
 kontrol() {   # kontrol "<bölüm>" "<beklenen>" "<gerçek>" "<not>"
   if [ "$2" = "$3" ]; then
-    printf "  GEÇTİ  %-8s beklenen=%-14s gerçek=%-14s\n" "$1" "$2" "$3"; gecti=$((gecti+1))
+    if beyanli_mi "$1"; then
+      printf "  BEKLENMEDİK GEÇİŞ %-8s beyan bayat: artık eşleşiyor\n" "$1"
+      kaldi=$((kaldi+1))
+    else
+      printf "  GEÇTİ  %-8s beklenen=%-14s gerçek=%-14s\n" "$1" "$2" "$3"; gecti=$((gecti+1))
+    fi
   else
-    printf "  KALDI  %-8s beklenen=%-14s gerçek=%-14s  %s\n" "$1" "$2" "$3" "$4"; kaldi=$((kaldi+1))
+    if beyanli_mi "$1"; then
+      printf "  BEKLENEN %-6s beklenen=%-14s gerçek=%-14s  %s\n" "$1" "$2" "$3" "$4"
+      beklenen=$((beklenen+1))
+    else
+      printf "  KALDI  %-8s beklenen=%-14s gerçek=%-14s  %s\n" "$1" "$2" "$3" "$4"; kaldi=$((kaldi+1))
+    fi
   fi
 }
 
@@ -65,5 +83,5 @@ PY
 
 echo
 echo "-----------------------------------------------------------------------"
-echo "$((gecti+kaldi)) doğrulama · $gecti geçti · $kaldi KALDI"
+echo "$((gecti+kaldi+beklenen)) doğrulama · $gecti geçti · $beklenen beklenen · $kaldi SİNYAL"
 exit "$kaldi"
