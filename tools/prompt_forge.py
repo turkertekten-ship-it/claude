@@ -177,6 +177,14 @@ PROFILES: dict[str, dict[str, str]] = {
     # Nick Saraev - goal, inputs, process steps, tools, edge cases, success
     # criteria, guardrails - which is why every one of them is an error here.
     # See docs/prompting.md for what that attribution does and does not rest on.
+    # The four parts of the "prompt contract" that third-party documentation
+    # attributes to Saraev: goal, constraints, output format, failure
+    # conditions. Nothing else is graded as an error, because nothing else is
+    # in that list. See docs/prompting.md for what the attribution rests on.
+    "contract": {
+        "ROLE": "off", "CONTEXT": "info", "TASK": "error", "CONSTRAINTS": "error",
+        "OUTPUT": "error", "ACCEPTANCE": "warn", "ESCAPE": "error",
+    },
     "directive": {
         "ROLE": "off", "CONTEXT": "error", "TASK": "error", "CONSTRAINTS": "error",
         "OUTPUT": "warn", "ACCEPTANCE": "error", "ESCAPE": "error",
@@ -506,34 +514,61 @@ NEGATION = re.compile(r"\b(do not|don'?t|never|avoid|without|rather than|instead
 # Frameworks
 # --------------------------------------------------------------------------
 
-# Lo's CLEAR framework, used here as a reporting lens over rules this
-# repository defined independently. The letters are his; the rules are not, and
-# the mapping is this repository's reading of where each rule lands. Two of his
-# five describe how you work over time rather than what a prompt contains, so a
-# static check cannot see them - that is stated rather than papered over.
-CLEAR = {
-    "letters": {
-        "C": "Concise — eliminate what does not narrow the task",
-        "L": "Logical — structure it so the relationships are visible",
-        "E": "Explicit — say the format, the scope, the bounds",
-        "A": "Adaptive — vary the formulation and adjust to what comes back",
-        "R": "Reflective — evaluate the output and feed that back into the prompt",
+# Two different frameworks share the acronym CLEAR, by different authors, with
+# three of five letters expanding differently. The tool refuses to guess which
+# one you meant: `--framework` takes `clear-lo` or `clear-saraev`, never
+# `clear`. Both are reporting lenses over rules this repository defined
+# independently; the letters are theirs, the rules are not, and the mapping is
+# this repository's reading of where each rule lands. Provenance for both, and
+# what the attribution rests on, is in docs/prompting.md.
+FRAMEWORKS = {
+    "clear-lo": {
+        "title": "CLEAR (Lo)",
+        "attribution": "Lo, 'The CLEAR path', The Journal of Academic Librarianship 49(4), 2023",
+        "letters": {
+            "C": "Concise — eliminate what does not narrow the task",
+            "L": "Logical — structure it so the relationships are visible",
+            "E": "Explicit — say the format, the scope, the bounds",
+            "A": "Adaptive — vary the formulation and adjust to what comes back",
+            "R": "Reflective — evaluate the output and feed that back into the prompt",
+        },
+        "map": {
+            "FILLER": "C", "ROLE_INFLATION": "C", "WALL": "C",
+            "NO_ROLE": "L", "NO_CONTEXT": "L", "NO_TASK": "L",
+            "CONTRADICTION": "L", "MULTI_ASK": "L", "PRONOUN_START": "L",
+            "NO_OUTPUT": "E", "NO_CONSTRAINTS": "E", "UNBOUNDED": "E", "NO_STOP": "E",
+            "VAGUE_QUALITY": "E", "VAGUE_QUANT": "E", "HEDGE": "E",
+            "PLACEHOLDER": "E", "NO_EXAMPLE": "E",
+            "NO_ACCEPTANCE": "R",
+        },
+        "unmapped": ["NO_ESCAPE", "FALSE_MEMORY", "FALSE_PREMISE"],
+        "unchecked": ["A"],
     },
-    "map": {
-        "FILLER": "C", "ROLE_INFLATION": "C", "WALL": "C",
-        "NO_ROLE": "L", "NO_CONTEXT": "L", "NO_TASK": "L",
-        "CONTRADICTION": "L", "MULTI_ASK": "L", "PRONOUN_START": "L",
-        "NO_OUTPUT": "E", "NO_CONSTRAINTS": "E", "UNBOUNDED": "E", "NO_STOP": "E",
-        "VAGUE_QUALITY": "E", "VAGUE_QUANT": "E", "HEDGE": "E",
-        "PLACEHOLDER": "E", "NO_EXAMPLE": "E",
-        "NO_ACCEPTANCE": "R",
+    "clear-saraev": {
+        "title": "CLEAR (Saraev)",
+        "attribution": "attributed to Saraev by third-party documentation; unverified at source — docs/prompting.md",
+        "letters": {
+            "C": "Clarity — precise problem definition with measurable outcomes",
+            "L": "Logic — structured thinking the model can follow",
+            "E": "Examples — specific scenarios and edge cases",
+            "A": "Adaptation — iterative refinement based on feedback",
+            "R": "Results — validation that the output matches the need",
+        },
+        "map": {
+            "NO_TASK": "C", "NO_CONSTRAINTS": "C", "UNBOUNDED": "C", "NO_STOP": "C",
+            "VAGUE_QUALITY": "C", "VAGUE_QUANT": "C", "HEDGE": "C",
+            "PLACEHOLDER": "C", "FALSE_PREMISE": "C",
+            "NO_CONTEXT": "L", "NO_ROLE": "L", "CONTRADICTION": "L",
+            "MULTI_ASK": "L", "WALL": "L", "PRONOUN_START": "L",
+            # "Examples: specific scenarios and edge cases" - an escape clause is
+            # the edge case named in the prompt, which is why NO_ESCAPE maps here
+            # under this framework and nowhere under Lo's.
+            "NO_EXAMPLE": "E", "NO_ESCAPE": "E",
+            "NO_OUTPUT": "R", "NO_ACCEPTANCE": "R",
+        },
+        "unmapped": ["FILLER", "ROLE_INFLATION", "FALSE_MEMORY"],
+        "unchecked": ["A"],
     },
-    # Rules with no CLEAR equivalent. They are the house's own additions, and
-    # they are the ones that exist because a model that cannot say "no" invents.
-    "unmapped": ["NO_ESCAPE", "FALSE_MEMORY", "FALSE_PREMISE"],
-    # Letters a static reading of one prompt cannot check.
-    "unchecked": ["A"],
-    "attribution": "CLEAR: Lo, The Journal of Academic Librarianship 49(4), 2023 — see docs/prompting.md",
 }
 
 
@@ -801,17 +836,21 @@ def cmd_lint(args) -> int:
     return worst
 
 
-def _by_clear(report: Report) -> dict[str, int | None]:
-    """Per-component scores. A component with no static check scores None, not
-    100 — reporting a perfect score for something never examined is the same
-    move as reporting a plan as a result."""
+def _by_framework(report: Report, key: str) -> dict[str, int | None]:
+    """Per-component scores under one framework.
+
+    A component with no static check scores None, not 100 — reporting a perfect
+    score for something never examined is the same move as reporting a plan as
+    a result.
+    """
+    fw = FRAMEWORKS[key]
     out: dict[str, int | None] = {
-        letter: (None if letter in CLEAR["unchecked"] else 100)
-        for letter in CLEAR["letters"]
+        letter: (None if letter in fw["unchecked"] else 100)
+        for letter in fw["letters"]
     }
     seen = set()
     for f in report.findings:
-        letter = CLEAR["map"].get(f.rule)
+        letter = fw["map"].get(f.rule)
         if letter is None or f.rule in seen:
             continue
         seen.add(f.rule)
@@ -830,17 +869,18 @@ def cmd_score(args) -> int:
         if report.score < args.min_score:
             worst = 1
 
-    if args.framework == "clear" and not args.json:
+    if args.framework and not args.json:
+        fw = FRAMEWORKS[args.framework]
         for label, r in rows:
-            print(f"{label}  [{r.profile}]  {r.score}/100 ({r.grade})")
-            for letter, score in _by_clear(r).items():
+            print(f"{label}  [{r.profile}]  {r.score}/100 ({r.grade})  — {fw['title']}")
+            for letter, score in _by_framework(r, args.framework).items():
                 shown = "n/a    " if score is None else f"{score:>3}/100"
                 mark = "  (not statically checkable)" if score is None else ""
-                print(f"  {letter}  {shown}  {CLEAR['letters'][letter]}{mark}")
-            unmapped = sorted({f.rule for f in r.findings} & set(CLEAR["unmapped"]))
+                print(f"  {letter}  {shown}  {fw['letters'][letter]}{mark}")
+            unmapped = sorted({f.rule for f in r.findings} & set(fw["unmapped"]))
             if unmapped:
-                print(f"  outside CLEAR: {', '.join(unmapped)}")
-            print(f"  {CLEAR['attribution']}")
+                print(f"  outside this framework: {', '.join(unmapped)}")
+            print(f"  {fw['attribution']}")
             print()
         return worst
 
@@ -848,8 +888,10 @@ def cmd_score(args) -> int:
         print(json.dumps([
             {"source": l, "score": r.score, "grade": r.grade, "profile": r.profile,
              "dimensions": _by_dimension(r),
-             **({"clear": _by_clear(r), "clear_attribution": CLEAR["attribution"]}
-                if args.framework == "clear" else {})}
+             **({"framework": args.framework,
+                 "components": _by_framework(r, args.framework),
+                 "attribution": FRAMEWORKS[args.framework]["attribution"]}
+                if args.framework else {})}
             for l, r in rows
         ], indent=2))
     else:
@@ -905,16 +947,17 @@ def cmd_rules(args) -> int:
             ],
         }, indent=2))
         return 0
-    if args.framework == "clear":
-        print(f"CLEAR components, and the rules this repository maps to each")
-        print(f"{CLEAR['attribution']}\n")
-        for letter, meaning in CLEAR["letters"].items():
-            mapped = sorted(r for r, l in CLEAR["map"].items() if l == letter)
+    if args.framework:
+        fw = FRAMEWORKS[args.framework]
+        print(f"{fw['title']} components, and the rules this repository maps to each")
+        print(f"{fw['attribution']}\n")
+        for letter, meaning in fw["letters"].items():
+            mapped = sorted(r for r, l in fw["map"].items() if l == letter)
             note = "  — no static check; this is a property of how you iterate" \
-                if letter in CLEAR["unchecked"] else ""
+                if letter in fw["unchecked"] else ""
             print(f"  {letter}  {meaning}{note}")
             print(f"     {', '.join(mapped) if mapped else 'no rule maps here'}")
-        print(f"\n  outside CLEAR (this repository's own): {', '.join(CLEAR['unmapped'])}")
+        print(f"\n  outside it: {', '.join(fw['unmapped'])}")
         return 0
     print(f"profile: {args.profile}\n")
     print("slots (a finding when absent)")
@@ -950,8 +993,10 @@ def build_parser() -> argparse.ArgumentParser:
     score.add_argument("files", nargs="+")
     score.add_argument("--json", action="store_true")
     score.add_argument("--min-score", type=int, default=0, help="fail below this score")
-    score.add_argument("--framework", choices=("clear",), default=None,
-                       help="also report per-component scores under a named framework")
+    score.add_argument("--framework", choices=sorted(FRAMEWORKS), default=None,
+                       help="also report per-component scores under a named framework. "
+                            "Two frameworks share the acronym CLEAR and expand it "
+                            "differently, so name the one you mean")
     score.set_defaults(func=cmd_score)
 
     comp = sub.add_parser("compile", help="restructure a prompt into the seven slots")
@@ -963,7 +1008,7 @@ def build_parser() -> argparse.ArgumentParser:
     rules = sub.add_parser("rules", help="list the rules in force")
     add_profile(rules)
     rules.add_argument("--json", action="store_true")
-    rules.add_argument("--framework", choices=("clear",), default=None,
+    rules.add_argument("--framework", choices=sorted(FRAMEWORKS), default=None,
                        help="show the mapping to a named framework's components")
     rules.set_defaults(func=cmd_rules)
     return parser

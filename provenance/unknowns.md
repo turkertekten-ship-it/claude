@@ -112,10 +112,18 @@ No personal Drive file was opened, and nothing was written to Drive.
 
 ---
 
-### U-6 — What Nick Saraev actually teaches about prompting
+### U-6 — What Nick Saraev actually teaches about prompting, in his own words
 
-**Unknown:** his method in his own words. Not one sentence he wrote or said was
-read.
+**Narrowed 2026-08-27.** The shape of his method is no longer unknown: two
+independent third-party documents, read in full, agree on a CLEAR framework
+(Clarity, Logic, Examples, Adaptation, Results), a prompt contract of goal,
+constraints, output format and failure conditions, reverse prompting, a
+definition of done, a self-annealing instruction file, and a context iceberg
+rule [src:SARAEV-REPOS-2026-08-27]. Those are built in — see
+[../docs/prompting.md](../docs/prompting.md).
+
+**Still unknown:** his own wording, and whether these third parties render him
+faithfully. Not one sentence he wrote or said was read.
 
 **Why:** the egress gateway answered 403 to CONNECT for nicksaraev.com,
 youtube.com, leftclick.ai and every other host outside `raw.githubusercontent.com`
@@ -139,19 +147,22 @@ him.
 
 ---
 
-### U-7 — What "the clear system of nick saraev" refers to
+### U-7 — What "the clear system of nick saraev" refers to — LARGELY RESOLVED
 
-**Unknown:** whether the owner means Lo's CLEAR framework as taught or used by
-Saraev, something he calls CLEAR that no search surfaced, the DOE framework
-under a remembered name, or two sources conflated.
+**Resolved 2026-08-27, in the owner's favour.** A CLEAR framework attributed to
+Saraev exists and is documented: Clarity, Logic, Examples, Adaptation, Results,
+described as his framework for writing effective prompts and directives
+[src:SARAEV-REPOS-2026-08-27]. The earlier reading — that the premise was
+mistaken and the acronym belonged only to Lo — rested on ten searches returning
+nothing [src:SARAEV-WORKFLOW-2026-08-27], which was a limit of search coverage
+rather than a fact. It is built in as `--framework clear-saraev`.
 
-**Why:** the phrase appears only in the goal string
-[src:SESSION-Y42CYG-2026-08-27]. Searches connect CLEAR to Lo and not to
-Saraev [src:WEBSEARCH-CLEAR-2026-08-27], while the framework third parties do
-attribute to him is named DOE [src:DOE-FETCHES-2026-08-27].
+**What remains open:** whether the owner met it under that expansion or another,
+and whether Saraev presents it as a named framework himself or a third party
+named it for him. The distinction matters only for attribution, not for use.
 
-**Resolves when:** the owner names the artifact — a video, a course module, a
-post — where they encountered it.
+**Resolves when:** the owner names where they met it, or a page of his is
+reachable.
 
 ---
 

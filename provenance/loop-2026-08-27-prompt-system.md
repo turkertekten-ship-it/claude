@@ -123,6 +123,44 @@ correct, label it, deliver.
 > being read adversarially, which is the whole reason the critic is a separate
 > agent rather than another rule.
 
+## Third loop — the premise was right after all
+
+The stop condition for this work said the request could not be satisfied as
+stated, because its premise did not hold: CLEAR was Lo's, and what third
+parties attributed to Saraev was DOE, an agent architecture rather than a
+prompting framework.
+
+That was wrong, and the way it was wrong is the most instructive thing here.
+
+The evidence for it was a negative result: ten searches pairing his name with
+CLEAR returned nothing [src:SARAEV-WORKFLOW-2026-08-27]. A negative result from
+one access path was allowed to stand as a fact about the world. It took one
+`add_repo` call and one `git clone` to overturn: the git proxy serves anonymous
+reads of public repositories, and had done so the whole time the egress gateway
+was refusing every website [src:EGRESS-BLOCKED-2026-08-27]. Two independent
+repositories document his method, and one of them states plainly, under its own
+heading, that CLEAR is "Saraev's framework for writing effective prompts and
+directives" — Clarity, Logic, Examples, Adaptation, Results
+[src:SARAEV-REPOS-2026-08-27].
+
+> The surprise: the failure was not in the research, which was careful and
+> graded its sources honestly. It was in treating "we looked hard and found
+> nothing" as equivalent to "there is nothing", when every search had gone
+> through a single channel that a policy wall had already narrowed. The
+> discipline that catches an unsourced claim did not catch an over-read
+> absence.
+
+There is a second correction inside the first. This repository had written down
+the escape clause as its own house addition to prompt craft. The prompt
+contract documented as his names *failure conditions* as one of four required
+parts [src:SARAEV-REPOS-2026-08-27]. The requirement was not invented here; it
+was arrived at, which is a weaker and more accurate claim.
+
+Both corrections are now in `CLAUDE.md`, `docs/prompting.md`, the observations
+and the unknowns register, and the first of them is rule 1 in the new Learned
+rules section — appended by `tools/learn_rule.py`, which implements the
+self-annealing pattern the same sources document.
+
 ## Still open
 
 `U-6`, `U-7` and `U-8` in [unknowns.md](unknowns.md): what Saraev actually

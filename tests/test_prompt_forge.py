@@ -292,35 +292,50 @@ def _content(text: str) -> list[str]:
 
 
 def test_frameworks() -> None:
-    """The CLEAR lens reports honestly, including where it cannot see."""
-    print("\nthe CLEAR lens and the directive profile")
-    clean = pf.analyse((FIXTURES / "clean_task.md").read_text())
-    scores = pf._by_clear(clean)
-    check("every CLEAR letter is reported", set(scores) == set(pf.CLEAR["letters"]), scores)
-    check("an unchecked component scores n/a rather than 100",
-          scores["A"] is None, scores["A"])
-    hazards = pf.analyse((FIXTURES / "hazards.md").read_text())
-    hz = pf._by_clear(hazards)
-    check("a vague prompt loses points on Explicit", (hz["E"] or 100) < 60, hz["E"])
-    check("the house-only rules are declared outside CLEAR",
-          set(pf.CLEAR["unmapped"]) == {"NO_ESCAPE", "FALSE_MEMORY", "FALSE_PREMISE"},
-          pf.CLEAR["unmapped"])
-    mapped = set(pf.CLEAR["map"]) | set(pf.CLEAR["unmapped"])
-    all_rules = {h.id for h in pf.HAZARDS} | {f"NO_{s.key}" for s in pf.SLOTS}
-    check("every rule is either mapped or declared unmapped",
-          all_rules <= mapped, sorted(all_rules - mapped))
+    """Both CLEAR frameworks are reported honestly, and kept apart."""
+    print("\ntwo frameworks share an acronym and are not merged")
+    check("both are offered", set(pf.FRAMEWORKS) == {"clear-lo", "clear-saraev"},
+          sorted(pf.FRAMEWORKS))
+    lo, saraev = pf.FRAMEWORKS["clear-lo"], pf.FRAMEWORKS["clear-saraev"]
+    check("their letters expand differently",
+          [lo["letters"][k][:8] for k in "CER"] != [saraev["letters"][k][:8] for k in "CER"])
+    check("each names its attribution", lo["attribution"] and saraev["attribution"])
+    check("Lo's is credited to Lo", "Lo," in lo["attribution"], lo["attribution"])
+    check("Saraev's is marked unverified at source",
+          "unverified at source" in saraev["attribution"], saraev["attribution"])
 
-    directive = pf.PROFILES["directive"]
-    for slot in ("TASK", "CONTEXT", "CONSTRAINTS", "ACCEPTANCE", "ESCAPE"):
-        check(f"the directive profile requires {slot}",
-              directive[slot] == "error", directive[slot])
-    bare = pf.analyse("Summarise the inbox.", "directive")
-    check("a bare directive fails hard", bare.score < 50, bare.score)
-    proc = run("score", "--profile", "directive", "--framework", "clear",
+    for key, fw in pf.FRAMEWORKS.items():
+        mapped = set(fw["map"]) | set(fw["unmapped"])
+        all_rules = {h.id for h in pf.HAZARDS} | {f"NO_{s.key}" for s in pf.SLOTS}
+        check(f"{key}: every rule is mapped or declared unmapped",
+              all_rules <= mapped, sorted(all_rules - mapped))
+        clean = pf.analyse((FIXTURES / "clean_task.md").read_text())
+        scores = pf._by_framework(clean, key)
+        check(f"{key}: every component is reported", set(scores) == set(fw["letters"]))
+        check(f"{key}: an unchecked component scores n/a rather than 100",
+              scores["A"] is None, scores["A"])
+
+    hazards = pf.analyse((FIXTURES / "hazards.md").read_text())
+    check("a vague prompt loses points on Lo's Explicit",
+          (pf._by_framework(hazards, "clear-lo")["E"] or 100) < 60)
+    check("and on Saraev's Clarity",
+          (pf._by_framework(hazards, "clear-saraev")["C"] or 100) < 60)
+    check("the escape clause maps under Saraev and not under Lo",
+          pf.FRAMEWORKS["clear-saraev"]["map"].get("NO_ESCAPE") == "E"
+          and "NO_ESCAPE" in pf.FRAMEWORKS["clear-lo"]["unmapped"])
+
+    proc = run("score", "--profile", "contract", "--framework", "clear-saraev",
                str(FIXTURES / "clean_task.md"))
-    check("score --framework clear runs", proc.returncode == 0, proc.stderr[:80])
-    check("it names its attribution", "Lo" in proc.stdout, proc.stdout[:80])
+    check("score --framework clear-saraev runs", proc.returncode == 0, proc.stderr[:80])
     check("it marks the unchecked component", "n/a" in proc.stdout, proc.stdout[:200])
+    ambiguous = run("score", "--framework", "clear", str(FIXTURES / "clean_task.md"))
+    check("a bare 'clear' is refused, because two frameworks answer to it",
+          ambiguous.returncode == 2, ambiguous.returncode)
+
+    contract = pf.PROFILES["contract"]
+    for slot in ("TASK", "CONSTRAINTS", "OUTPUT", "ESCAPE"):
+        check(f"the contract profile requires {slot}", contract[slot] == "error", contract[slot])
+    check("and does not require a role", contract["ROLE"] == "off", contract["ROLE"])
 
 
 def test_exit_codes() -> None:

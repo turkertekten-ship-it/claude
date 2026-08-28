@@ -26,6 +26,15 @@ Read `.claude/skills/prompt-forge/SKILL.md` first and work its four phases.
 2. **Orient.** Send the raw ask to the `prompt-critic` subagent and ask for the
    readings under which the resulting work would differ. Its report is
    second-hand — keep only the divergences you can point at in the text.
+2b. **Reverse the prompt, when the ask is thin.** If three or more slots are
+   absent and the owner is here to answer, invert the direction before
+   forging: ask up to five clarifying questions in one message, aimed at the
+   preferences they did not state, and build the prompt from the answers. Five
+   questions asked once cost a turn; a wrong reading of a thin ask costs the
+   work. Skip this entirely when nobody is there to answer — see step 3. (The
+   technique is documented as Saraev's "reverse prompting"; `docs/prompting.md`
+   says what that attribution rests on.)
+
 3. **Decide.** For each absent slot take exactly one of three moves: get the
    evidence (read the file, run the command), ask the owner one question with
    the options named, or write an escape clause into the prompt. Inventing a

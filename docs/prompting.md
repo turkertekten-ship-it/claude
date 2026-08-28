@@ -56,7 +56,11 @@ A missing slot costs differently depending on what the prompt is for.
 > attribution that turned out not to hold.
 
 The owner asked for "the clear system of nick saraev" to be researched and built
-in. Two separate things were found, neither of them quite that.
+in. The first pass concluded the premise did not hold. **That conclusion was
+wrong, and the correction is the most useful thing in this document.** There
+are two different frameworks called CLEAR, by two different authors, and three
+of their five letters expand differently. The owner was pointing at the second
+one; the first pass only found the first.
 
 ## Observed — what the sources actually say
 
@@ -64,7 +68,11 @@ in. Two separate things were found, neither of them quite that.
 - A search for that exact pairing returns a CLEAR prompt-engineering framework whose five components are Concise, Logical, Explicit, Adaptive and Reflective, and attributes it to Dr. Leo Lo — not to Nick Saraev. The same search returned no result indicating Saraev created it. [src:WEBSEARCH-CLEAR-2026-08-27]
 - The search index lists the originating article as "The CLEAR path: A framework for enhancing information literacy through prompt engineering", on ScienceDirect under PII S0099133323000599. [src:WEBSEARCH-CLEAR-2026-08-27]
 - Research subagents report that article as Leo S. Lo, *The Journal of Academic Librarianship* 49(4), 2023, article 102720, DOI 10.1016/j.acalib.2023.102720, with an open-access copy in the University of New Mexico repository — second-hand, reported by the `saraev-clear-research` workflow and not confirmed by this session. [src:SARAEV-WORKFLOW-2026-08-27]
-- Across ten searches pairing his name and properties with CLEAR, the same workflow reports finding no framework, course, video, article or post of Saraev's using that name — a negative result, second-hand, and one that rests on search-index coverage rather than on reading his sites. [src:SARAEV-WORKFLOW-2026-08-27]
+- Across ten searches pairing his name and properties with CLEAR, the research workflow reported finding no framework of Saraev's using that name. [src:SARAEV-WORKFLOW-2026-08-27]
+- **That negative result was a limit of search coverage, not a fact.** A public repository cloned through the git proxy documents a CLEAR framework and attributes it to Saraev explicitly, under the heading "The CLEAR Framework (Effective AI Communication)" and the line "Saraev's framework for writing effective prompts and directives": Clarity, Logic, Examples, Adaptation, Results. [src:SARAEV-REPOS-2026-08-27]
+- That expansion differs from Lo's in three letters of five: Clarity against Concise, Examples against Explicit, Results against Reflective. The two frameworks share an acronym and are not the same framework. [src:SARAEV-REPOS-2026-08-27]
+- A second repository, independent of the first, carries a Chinese-language reconstruction built from the subtitles of his course *AI Agents Full Course 2026* (`EsTrWCV0Ph4`). It documents a "prompt contract" — break a vague requirement into goal, constraints, output format and failure conditions before starting — and its companion "reverse prompting", in which the model first asks five clarifying questions and then generates the contract. [src:SARAEV-REPOS-2026-08-27]
+- The same source documents a "definition of done" as the thing most people leave out of an agent loop, a self-modifying instruction file whose "learned rules" section grows when the user corrects the agent, and a "context iceberg" rule against pasting a whole codebase into a prompt. [src:SARAEV-REPOS-2026-08-27]
 - Three independent third-party repositories describe a framework they call DOE — Directive, Orchestration, Execution — in the same three layers and the same order; two of them attribute it to Nick Saraev by name. These pages were fetched and read first-hand by this session. [src:DOE-FETCHES-2026-08-27]
 - In that documentation, the directive layer is defined as natural-language Markdown "specifying goal, inputs, process steps, tools, edge cases, success criteria, and guardrails". [src:DOE-FETCHES-2026-08-27]
 - No page belonging to Nick Saraev was read. The egress gateway answered 403 to CONNECT for nicksaraev.com, youtube.com and every other external host tried; only `raw.githubusercontent.com` and the search API were reachable. [src:EGRESS-BLOCKED-2026-08-27]
@@ -72,55 +80,72 @@ in. Two separate things were found, neither of them quite that.
 
 ### What that means for the request
 
-**CLEAR is real, and it is Lo's.** It is built in as a reporting lens:
+**Both CLEARs are built in, and the tool will not let you conflate them.**
+`--framework` takes `clear-lo` or `clear-saraev` and refuses a bare `clear`,
+because two frameworks answer to that name:
 
 ```bash
-python3 tools/prompt_forge.py rules  --framework clear     # the mapping
-python3 tools/prompt_forge.py score  --framework clear FILE
+python3 tools/prompt_forge.py rules --framework clear-saraev    # the mapping
+python3 tools/prompt_forge.py score --framework clear-lo FILE
 ```
 
-The letters are his; the rules under them are this repository's, and the mapping
-is this repository's reading of where each rule lands. Two of his five —
-Adaptive and Reflective — describe how you work across attempts rather than what
-a single prompt contains. Adaptive gets no static check at all, and the tool
-prints `n/a` for it rather than a score, because reporting 100/100 for something
-never examined is the same move as reporting a plan as a result.
+The letters are their authors'; the rules under them are this repository's, and
+each mapping is this repository's reading of where a rule lands. Both
+frameworks have one component a static reading cannot check — Lo's Adaptive and
+Saraev's Adaptation both describe iterating across attempts rather than what one
+prompt contains — and the tool prints `n/a` for it rather than a score, because
+reporting 100/100 for something never examined is the same move as reporting a
+plan as a result.
 
-**The Saraev material is a lead, not a source.** What can be established is that
-third parties document a DOE framework and attribute it to him. What cannot be
-established from here is anything in his own words: his sites were unreachable.
-So his name appears in this repository in exactly two places — the `directive`
-profile, whose required field list is taken from that third-party documentation,
-and this section, which says where that came from and how thin it is.
+One difference is worth naming: under Saraev's expansion, **E is "Examples —
+specific scenarios and edge cases", so the escape clause maps to it.** Under
+Lo's it maps nowhere. This repository had called the escape clause its own
+house addition. On the evidence now available that was overclaiming: a
+documented prompt contract of his names *failure conditions* as one of its four
+required parts. The requirement is the same one; the house did not invent it,
+it arrived at it.
+
+**What is built in, and what it rests on:**
+
+| Built in | From | Grade |
+|---|---|---|
+| `--framework clear-lo` | Lo's five components | attributed, author named, paper indexed |
+| `--framework clear-saraev` | Clarity/Logic/Examples/Adaptation/Results | third-party documentation, read first-hand, unverified at source |
+| `--profile contract` | goal · constraints · output format · failure conditions | as above |
+| `--profile directive` | the DOE directive field list | as above |
+| `tools/learn_rule.py` | the self-annealing "learned rules" section | as above |
+| reverse prompting in `/prompt` | five clarifying questions, then the contract | as above |
+
+"Unverified at source" means exactly this: two independent third parties, read
+first-hand, agree on the shape of his method — and no page or video of his own
+was reachable, so none of it is quotable as his wording. `youtube.com` and
+`nicksaraev.com` are still refused by this container's gateway.
 
 Nothing has been written down as his teaching. The `provenance/unknowns.md`
 entries U-6 and U-7 hold the open questions, and they are what closes if his
 actual material becomes reachable.
 
-### Leads held back, and where they are
+### Leads still held back
 
-The research workflow returned a large, carefully graded body of material
-[src:SARAEV-WORKFLOW-2026-08-27]. Its own summary of the gap is the useful part:
-what it could source of his method is a **business and scoping** method — how to
-decide what is worth automating, how to package and price it — and on prompting
-technique specifically it verified nothing in his own words. Those business
-rules are real leads with URLs, and they are outside what a prompt linter has
-any business encoding, so they stay in `provenance/raw/` and are not doctrine
-here.
+Not everything found is built in. Two categories stay out:
 
-The prompting material it found traces to one artifact: a video on his channel
-titled "$2.4M of Prompt Engineering Hacks in 53 Mins (GPT, Claude)"
-(`youtube.com/watch?v=CxbHw93oWP0`). Nobody watched it. Every technique
-circulating from it reached the workflow through a machine summary of it, and
-the summariser was independently caught inventing attributions, so not one of
-those techniques is written down here as his.
+**His business method.** The research workflow sourced a substantial set of
+rules about what is worth automating, how to package it and how to price it
+[src:SARAEV-WORKFLOW-2026-08-27]. Those are real, and they are outside what a
+prompt linter has any business encoding. They stay in `provenance/raw/`.
 
-Worth noting for whoever closes this: several of those unverified leads —
-explicit output formats, information density over length, few-shot examples —
-would land on rules this repository already has (`NO_OUTPUT`, `FILLER` and
-`WALL`, `NO_EXAMPLE`). That convergence is not evidence for either side. The
-rules were not derived from him, and they do not become his when a summary of a
-video happens to agree with them.
+**Techniques that reached us only through a machine summary.** A video titled
+"$2.4M of Prompt Engineering Hacks in 53 Mins" (`youtube.com/watch?v=CxbHw93oWP0`)
+is where his prompting material is said to live. Nobody watched it. Everything
+circulating from it arrived through a summariser that was independently caught
+inventing attributions, so none of it is written down as his. That is a
+different evidence grade from the two repositories above, which are documents
+read in full.
+
+**The lesson recorded in `CLAUDE.md` under Learned rules:** a negative result
+from search coverage is not a finding. Ten searches said there was no Saraev
+CLEAR; one `git clone` found it. The gateway that blocked every website served
+public repositories the whole time.
 
 ---
 

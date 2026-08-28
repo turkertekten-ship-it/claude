@@ -31,6 +31,7 @@ bash tests/run_all.sh        # verifier + both test suites
 | `tools/ingest_chat_archive.py` | Conversation-archive ingestion and search. |
 | `tools/prompt_forge.py` | The prompt linter and compiler. |
 | `tools/prompt_habits.py` | Scores the prompts you have already written. |
+| `tools/learn_rule.py` | Appends a learned rule to the instruction file. |
 | `tools/install_prompt_system.sh` | Installs the prompt system into `~/.claude`, for every terminal. |
 | `tests/` | Tests for every tool here, including their failure cases. |
 | `.claude/commands/` | The workflows, as slash commands. |

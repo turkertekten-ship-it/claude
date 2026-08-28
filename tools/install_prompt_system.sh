@@ -9,6 +9,7 @@
 #   ~/.claude/tools/                 prompt_forge.py and its phrase list
 #   ~/.local/bin/prompt-forge        so the command files can call it by name
 #   ~/.local/bin/prompt-habits       the corpus auditor, likewise
+#   ~/.local/bin/learn-rule          the learned-rule appender
 #
 # The installed copies of the markdown have `python3 tools/prompt_forge.py`
 # rewritten to `prompt-forge`, because outside this repository that relative
@@ -50,9 +51,11 @@ TARGETS=(
     "$PREFIX/agents/prompt-critic.md"
     "$PREFIX/tools/prompt_forge.py"
     "$PREFIX/tools/prompt_habits.py"
+    "$PREFIX/tools/learn_rule.py"
     "$PREFIX/tools/_phrases.py"
     "$BIN_DIR/prompt-forge"
     "$BIN_DIR/prompt-habits"
+    "$BIN_DIR/learn-rule"
 )
 
 if [ "$UNINSTALL" -eq 1 ]; then
@@ -101,12 +104,12 @@ install_rewritten "$REPO/.claude/commands/prompt-audit.md"     "$PREFIX/commands
 install_rewritten "$REPO/.claude/commands/prompt-habits.md"    "$PREFIX/commands/prompt-habits.md" || exit 2
 install_rewritten "$REPO/.claude/agents/prompt-critic.md"      "$PREFIX/agents/prompt-critic.md" || exit 2
 
-for tool in prompt_forge.py prompt_habits.py _phrases.py; do
+for tool in prompt_forge.py prompt_habits.py learn_rule.py _phrases.py; do
     do_it cp "$REPO/tools/$tool" "$PREFIX/tools/$tool" || exit 2
     [ "$DRY" -eq 1 ] || say "  installed $PREFIX/tools/$tool"
 done
 
-for shim in prompt-forge:prompt_forge.py prompt-habits:prompt_habits.py; do
+for shim in prompt-forge:prompt_forge.py prompt-habits:prompt_habits.py learn-rule:learn_rule.py; do
     name="${shim%%:*}"; script="${shim#*:}"
     if [ "$DRY" -eq 1 ]; then
         say "  would: write $BIN_DIR/$name"

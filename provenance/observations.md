@@ -90,7 +90,11 @@ contents were not reconstructed, summarised, or guessed at.
 > not follow from it are in [../docs/prompting.md](../docs/prompting.md). Only
 > the load-bearing findings are repeated here.
 
-- The CLEAR prompt-engineering framework — Concise, Logical, Explicit, Adaptive, Reflective — is attributed by search results to Dr. Leo Lo, and no result indicates Nick Saraev created it. [src:WEBSEARCH-CLEAR-2026-08-27]
+- The CLEAR prompt-engineering framework — Concise, Logical, Explicit, Adaptive, Reflective — is attributed by search results to Dr. Leo Lo, and no search result indicated Nick Saraev created it. [src:WEBSEARCH-CLEAR-2026-08-27]
+- That search-level absence was superseded. A cloned public repository documents a second, different CLEAR framework and attributes it to Saraev by name: Clarity, Logic, Examples, Adaptation, Results, introduced as "Saraev's framework for writing effective prompts and directives". [src:SARAEV-REPOS-2026-08-27]
+- The two frameworks share an acronym and differ in three letters of five, so they are not variants of one framework. [src:SARAEV-REPOS-2026-08-27]
+- A second, independent repository reconstructs his course *AI Agents Full Course 2026* from its subtitles and documents a "prompt contract" of goal, constraints, output format and failure conditions, plus "reverse prompting", a "definition of done", a self-modifying instruction file with a growing learned-rules section, and a "context iceberg" rule. [src:SARAEV-REPOS-2026-08-27]
+- Both repositories were reachable by `git clone` through the session's git proxy at a time when the egress gateway refused every website tried, including his own. [src:SARAEV-REPOS-2026-08-27] [src:EGRESS-BLOCKED-2026-08-27]
 - Three third-party repositories, read first-hand, document a DOE framework (Directive, Orchestration, Execution) and two attribute it to Nick Saraev by name; its directive layer specifies "goal, inputs, process steps, tools, edge cases, success criteria, and guardrails". [src:DOE-FETCHES-2026-08-27]
 - Nothing written by Saraev himself was read: the egress gateway refused every host except `raw.githubusercontent.com` and the search API. [src:EGRESS-BLOCKED-2026-08-27]
 - The 200-call web-search budget was exhausted by the research workflow, ending verification for this session. [src:WEBSEARCH-BUDGET-2026-08-27]

@@ -300,3 +300,17 @@ sources:
       were tool results and were excluded; 10 were scored. The corpus is this
       session's own traffic, so the ranking describes this session and not the
       owner's writing.
+
+  - id: SARAEV-REPOS-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T17:00Z"
+    method: "add_repo then git clone --depth 1 of Pvragon/ai-workspace-reference and A1pha3/text-matrix; files read in full"
+    evidence: provenance/raw/saraev-clear-doe-repos-2026-08-27.md
+    note: >-
+      Two public repositories, cloned through the session's git proxy after the
+      egress gateway refused every other host. Reading a cloned file is
+      first-hand as to what the file says; both remain third-party as to what
+      Saraev said, since neither is his and no video was watched. They document
+      a CLEAR framework attributed to him (Clarity, Logic, Examples,
+      Adaptation, Results - a different expansion from Lo's) and a prompt
+      contract of goal, constraints, output format and failure conditions.
