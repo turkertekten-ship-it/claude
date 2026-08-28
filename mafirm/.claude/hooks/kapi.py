@@ -481,7 +481,14 @@ def metni_cikar(nesne, toplam=None):
 # [C-05..C-07, C-09] Bash dışarı giden en geniş kanaldır: curl, git push, her
 # paket aracı. Kitabın disari kümesi onu içermiyordu ve settings.json'daki
 # matcher onu hiç çağırmıyordu.
-DISARI_ARACLAR = ("WebSearch", "WebFetch", "Bash", "BashOutput")
+# [X-02] BashOutput buradan ÇIKARILDI. Beyan edilmiş ama uygulanmayan bir
+# kural, kuralın kendisinden kötüdür: okuyucu korunduğunu sanır. BashOutput
+# kancanın matcher'ında yoktu, dolayısıyla "dışarı" beyanı hiçbir zaman
+# uygulanmıyordu. Matcher'a eklemek de yanlış olurdu: BashOutput'un girdisi
+# yalnızca bir bash_id'dir, dışarı giden bir yük taşımaz. GERÇEK koruma
+# komutun BAŞLATILDIĞI andadır — arka planda başlatılan bir curl da Bash
+# olarak denetlenir ve bloklanır. X-07 bunu davranışla sabitliyor.
+DISARI_ARACLAR = ("WebSearch", "WebFetch", "Bash")
 DISARI_BASH = re.compile(
     r"\b(curl|wget|git\s+push|git\s+remote|scp|rsync|ssh|nc|"
     r"pip\s+install|npm\s+(?:publish|install)|gh\b|aws\b|az\b|gcloud)\b", re.I)

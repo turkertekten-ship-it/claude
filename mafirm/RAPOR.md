@@ -25,7 +25,7 @@ kendi §16 denetimi yeşile dönmedi.
 3. **Denetim on beş bozmadan on birini görmüyor**; sıfır beceri, kancasız
    ayarlar ve tamamen boş bir `esik.py` taşıyan bir sistemde "DENETİM OK" diyor.
 
-**Yamalı hâlde sistem çalışıyor:** yirmi çalıştırılabilir takım — **205
+**Yamalı hâlde sistem çalışıyor:** yirmi bir çalıştırılabilir takım — **212
 vaka, 15 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15, birimler arası tutarlılık takımının
 kendi mutasyon yakalaması 10/10. Ama **üç mevzuat bulgusu ile kitabın kendi içindeki bir çelişki açık kalır**
@@ -993,6 +993,75 @@ kırmızıya döndürdü; bankayı doldurmak ikisini de doğru biçimde susturdu
 
 ---
 
+## Yedi buçuk artı on beş · Yetki bir açıklama değil, bir imkândır
+
+§10 beş alt ajan kuruyor ve her birine bir `tools:` satırı yazıyor. O satır bir
+**açıklama değil, bir yetkidir**: ajanın gerçekten yapabildiği şey. Kural 6
+(sır saklama) sistemin en yüksek sonuçlu kuralıdır ve §12'nin sır kapısıyla
+uygulanıyor — ama kapı **metin** denetler, **yetki** denetlemez. On beş tur
+boyunca hiçbir takım şunu sormadı: *her ajanın elindeki her araç, kancanın
+gerçekten izlediği bir araç mı?*
+
+İki bulgu çıktı.
+
+**Bir · Beyan edilmiş ama uygulanmayan bir "dışarı" kuralı.** Kapı
+`BashOutput`'u dışarı aracı sayıyordu; kancanın matcher'ında ise **yoktu**.
+Yani beyan hiçbir zaman uygulanmıyordu. Beyan edilmiş ama uygulanmayan bir
+kural, kuralın hiç olmamasından **kötüdür**: okuyucu korunduğunu sanır.
+
+Düzeltme matcher'a eklemek **değil**: `BashOutput`'un girdisi yalnızca bir
+`bash_id`'dir, dışarı giden bir yük taşımaz. Gerçek koruma komutun
+**başlatıldığı** andadır — arka planda başlatılan bir `curl` de Bash olarak
+denetlenir. Bunu davranışla doğruladım ve X-07 olarak sabitledim: bir gerekçe,
+yorum satırında kaldığı sürece bir iddiadır.
+
+**İki · Web yetkisi olan ajan, sır sınırını yazmıyordu.** `esik-denetcisi`
+sistemdeki iki web yetkili ajandan biri. `yaptirim-taramasi` **becerisi**
+"sorgu soyutlama kuralı burada zorunludur" diyor — ama internete gerçekten
+ulaşabilen **ajanın** metninde böyle bir satır yoktu. Kural, onu uygulayacak
+yetkinin bulunmadığı yerde yazılıydı. Ajanın metnine sorgu sınırı eklendi:
+aranan mevzuattır, işlem değil; sorgu soyutlanır; emin değilsen sorma.
+
+Davranış da sınandı, iddia değil: kod adı taşıyan bir WebSearch, WebFetch ve
+Bash çağrısının üçü de bloklanıyor (çıkış 2); meşru bir
+`rekabet.gov.tr` çağrısı bloklanmıyor (çıkış 0). Yani kapı hem canlı hem de
+doğru işi geçiriyor — on dördüncü turun ölçtüğü denge burada da tutuyor.
+
+---
+
+## Yedi buçuk artı on beş buçuk · Aynı katman ihlali, bu kez veri yolundan
+
+Vaka sayısını kendi kendine denetlesin diye denetime bir kontrol koydum:
+*"raporun vaka sayısı, son koşumun kaydıyla uyuşuyor mu."* Kayıt olarak
+`SONUC-sonra.txt` seçildi.
+
+Sonuç: `hepsi.sh` **kırmızıya döndü** — üstelik tek başına koşulduğunda yeşil
+olan D takımından. Sebep, betiğin kendisini çağırmak değildi; **yazdığı
+dosyaydı**:
+
+    hepsi.sh > SONUC-sonra.txt    (yönlendirme dosyayı BAŞTA keser)
+      └─ D takımı → denetim.sh → yarım kalmış kaydı okur → kırmızı
+           └─ D'nin taban çizgisi bozulur → 99 sinyal
+
+Denetime "takım koşuyor mu" kontrolünü koymanın özyineleme ürettiğini onuncu
+turda bulmuş ve gerekçesiyle yazmıştım. **Aynı ihlali, çağrı yolundan değil
+veri yolundan yeniden kurdum.** Bir katman kuralı, yalnızca ihlalin bilinen
+biçimine karşı yazılırsa tutmuyor.
+
+İlk düzeltme yetmedi. Kaydı ayrı ve **atomik** bir dosyaya (`SAYIM.txt`)
+taşıdım; yarım okuma bitti — ama bu kez denetim bir **önceki** koşumu
+okuyordu. Sayı değiştiğinde birinci koşum kırmızı, ikincisi yeşil oluyordu.
+**İki koşumda yakınsayan bir kontrol, okuyucuya "kırmızıysa bir daha koş"
+alışkanlığı öğretir** — bu takımın bütün amacının tersi.
+
+Doğru yer üçüncüsüydü: kontrol, gerçek toplamı **bayatlamadan bilen tek
+yere** — `hepsi.sh`'in kendi kapanışına — kondu. Orada sayı bu koşumundur,
+bir öncekinin değil. Mutasyonla doğrulandı: bayat bir sayı hem birinci hem
+ikinci koşumda kırmızı kalıyor, ve basılan toplam ile çıkış kodu artık
+birbirini tutuyor.
+
+---
+
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
 
 | Bölüm | Beklenen | Gerçek | Sebep |
@@ -1091,6 +1160,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | N · olumsuz iddia kanıtı | kanıtsızdı | **temiz** |
 | V · kapıların yanlış pozitifi | *hiç ölçülmemişti* | **temiz** — 17 meşru metin, 0 yanlış pozitif |
 | W · sessizce boş arama kaynağı | *hiç sorulmamıştı* | **temiz** — boş banka artık sesli |
+| X · yetki ↔ kapsam | *hiç sorulmamıştı* | **temiz** — beyan ile uygulama hizalandı |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -1148,8 +1218,8 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # 20 çalıştırılabilir takım:
-                                  #   205 vaka + 15 mutasyon (D)
+./sinama/hepsi.sh                 # 21 çalıştırılabilir takım:
+                                  #   212 vaka + 15 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -1210,9 +1280,10 @@ Dokuz takım, 96 vaka:
 | U | **Birimler arası tutarlılık** — bir birim ötekiyle çelişiyor mu | §4, §6, §5.3 |
 | V | **Kapıların yanlış pozitifi** — doğru iş bloklanıyor mu | §12, §14 |
 | W | **Sessizce boş arama kaynağı** — 'bulunamadı' ne demek | §2, §14, §10 |
+| X | **Alt ajan yetkisi ↔ kapı kapsamı** — yetki var, kural var mı | §10, §12, kural 6 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**205 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**212 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)

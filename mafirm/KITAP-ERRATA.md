@@ -176,6 +176,20 @@ yasaklar: *"Boş bir arama yokluğun kanıtı değildir."* → Denetim boş bank
 sesli bildirmeli ve `emsal-bulucu` "banka boş" ile "yakın emsal yok"u
 ayırmalı. *(W-02, W-03)*
 
+**[A] Web yetkisi olan ajan, sır sınırını yazmıyor.** §10 `esik-denetcisi`'ye
+`WebSearch` ve `WebFetch` veriyor — sistemdeki iki web yetkili ajandan biri.
+Sorgu soyutlama kuralı ise §9'da `yaptirim-taramasi` BECERİSİNİN metninde
+yazılı. Yani kural, onu uygulayacak yetkinin BULUNMADIĞI yerde duruyor:
+internete gerçekten ulaşabilen ajanın metninde müvekkil adı/kod adı yasağı yok.
+→ Riskli yetkisi olan her ajan sınırını kendi metninde taşımalı. *(X-06)*
+
+**[C] Beyan edilmiş ama uygulanmayan bir "dışarı" kuralı.** §14'ün genişlettiği
+sır kapısı `BashOutput`'u dışarı aracı sayıyor; §12'nin kanca matcher'ında ise
+`BashOutput` yok. Beyan hiçbir zaman uygulanmıyor. Doğru düzeltme matcher'a
+eklemek değil — `BashOutput`'un girdisi yalnızca bir `bash_id`'dir, dışarı yük
+taşımaz; gerçek koruma komutun BAŞLATILDIĞI andadır. Beyan, uygulanabilir hâle
+getirilmeli ya da kaldırılmalı. *(X-02, X-07)*
+
 ## §7 · Ortak koltukları
 
 **[B] Kitabın en yüksek itibar riskli kuralının hiçbir mekanizması yok.**

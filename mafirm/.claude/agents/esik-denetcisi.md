@@ -20,3 +20,18 @@ dosyada verilmiş bir görüşü geçersiz kılabilir.
 
 Çıktı: eşik | yereldeki değer | kaynaktaki değer | sonuç | kaynak adresi |
 çekilme tarihi.
+
+## Sorgu sınırı (işletim sözleşmesi kural 6)
+
+Bu ajan sistemdeki **web yetkisi olan iki ajandan biridir**; dolayısıyla kural
+6'nın gerçek sınırı burada geçer, becerinin metninde değil.
+
+- Aranan şey **mevzuattır**, işlem değil. Sorguya müvekkil adı, hedef adı,
+  işlem kod adı, taraf adı ya da rakam **yazılmaz**.
+- Sorgu **soyutlanır**: "2010/4 sayılı Tebliğ eşik maddesi" yazılır;
+  "Proje <kod adı> için ciro eşiği" yazılmaz. Eşik sorusu işlemden bağımsızdır
+  ve bağımsız sorulabilir.
+- Bir sorgunun soyutlanıp soyutlanamayacağından emin değilsen **sorma**;
+  soruyu yetkili avukata götür.
+- Sır kapısı bu ajanın çağrılarını da denetler ve kod adı taşıyan bir
+  WebSearch/WebFetch çağrısını **bloklar**. Kapı son çare, ilk savunma değil.

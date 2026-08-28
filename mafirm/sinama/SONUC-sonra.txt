@@ -1,5 +1,5 @@
 ###############################################################
-#  KÖR SINAMA TAKIMI — 2026-08-28T09:30:18Z
+#  KÖR SINAMA TAKIMI — 2026-08-28T09:41:38Z
 ###############################################################
 
 /root/mafirm/sinama/ks_a_esik.py:45: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
@@ -292,9 +292,9 @@ GEÇTİ L-06   hafiza/ dosyalarının hepsi var
 KÖR SINAMA M — errata ↔ sınama izlenebilirliği
 ================================================================================================
 GEÇTİ M-01   her errata maddesi bir sınama vakasına atıf yapıyor
-        53 madde · atıfsız 0: yok
+        55 madde · atıfsız 0: yok
 GEÇTİ M-02   atıf yapılan her vaka kimliği gerçekten tanımlı
-        235 tanımlı kimlik · uydurma dayanak: yok
+        243 tanımlı kimlik · uydurma dayanak: yok
 GEÇTİ M-03   [A] ve [B] maddelerinin atıfları sadık sistemde gerçekten kaldı
         sadık koşumda kalan vaka: 41 · sınanmamış ağır madde: yok
 GEÇTİ M-04   sadık sistemde kalan her vaka errata'da ya da raporda açıklanmış
@@ -393,7 +393,7 @@ KÖR SINAMA R — yön, insan onayı ve dil kuralları
 GEÇTİ R-01   rapor cevapla başlıyor, yöntemle değil
         ilk bölüm: 'Cevap' — §4: 'cevabı merak eden ilk paragrafta bulur'
 GEÇTİ R-02   yöntem bölümü bulgulardan sonra geliyor
-        yöntem 28. başlık, ilk bulgu 1. başlık
+        yöntem 30. başlık, ilk bulgu 1. başlık
 GEÇTİ R-03   iki zorunlu başlık en sonda ve doğru sırada
         son iki başlık: ['Şimdi ne yapılmalı', 'Yetkili avukat görüşü gereken konular']
 GEÇTİ R-04   raporun onay durumu açıkça yazılı (§9)
@@ -540,6 +540,26 @@ GEÇTİ W-04   boş müvekkil ad kaydı hâlâ sesli bildiriliyor
 ------------------------------------------------------------------------------------------------
 4 vaka · 4 geçti · 0 beklenen · 0 SİNYAL
 
+================================================================================================
+KÖR SINAMA X — alt ajan yetkisi ile kapı kapsamı
+================================================================================================
+GEÇTİ X-01   ajanlara verilen dışarı araçlarının hepsi kancada izleniyor
+        5 ajanın dışarı yetkisi tamamen kapsanıyor
+GEÇTİ X-02   kapının 'dışarı' saydığı her araç kancada da izleniyor
+        kapının dışarı kümesi ile kancanın matcher'ı örtüşüyor
+GEÇTİ X-03   hiçbir okuma ajanına yazma yetkisi verilmemiş
+        beş ajanın hiçbirinde yazma yetkisi yok
+GEÇTİ X-04   kod adı taşıyan dış çağrı üç araçta da bloklanıyor
+        WebSearch=2 WebFetch=2 Bash=2 (2 = blok)
+GEÇTİ X-05   meşru bir birincil kaynak çağrısı bloklanmıyor
+        çıkış 0
+GEÇTİ X-06   riskli yetkisi olan her ajan sır sınırını kendi metninde yazıyor
+        riskli yetkili ajanların hepsi sınırı yazıyor
+GEÇTİ X-07   arka planda başlatılan dış çağrı BAŞLATMA anında bloklanıyor
+        arka plan Bash çıkışı 2 (2 = blok) — BashOutput'u ayrıca izlemeye gerek bırakmayan gerekçe budur
+------------------------------------------------------------------------------------------------
+7 vaka · 7 geçti · 0 beklenen · 0 SİNYAL
+
 ###############################################################
 #  ÖZET
 ###############################################################
@@ -563,6 +583,7 @@ GEÇTİ W-04   boş müvekkil ad kaydı hâlâ sesli bildiriliyor
   U · birimler arası tutarlılık      temiz
   V · kapıların yanlış pozitifi     temiz
   W · sessizce boş arama kaynağı     temiz
+  X · alt ajan yetkisi / kapı kapsamı temiz
   ------------------------------------------------------------
   TOPLAM SİNYAL                         0
 

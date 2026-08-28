@@ -7,6 +7,15 @@ S="${MAFIRM_SINAMA:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
 declare -a ad kod
 topla() { ad+=("$1"); kod+=("$2"); }
 
+# [X · katman ihlali, ikinci kez] denetim.sh raporun vaka sayısını doğrularken
+# bir KAYIT dosyası okur. O kayıt olarak SONUC-sonra.txt kullanılınca şu döngü
+# doğdu: hepsi.sh > SONUC-sonra.txt yönlendirmesi dosyayı BAŞTA kesiyor,
+# hepsi.sh içinden koşan D takımı denetim.sh'i çağırıyor, denetim yarım kalmış
+# kaydı okuyup kırmızıya dönüyor, D'nin taban çizgisi bozuluyor. Betiğin
+# kendisini çağırmadan, yalnızca ONUN YAZDIĞI dosya üzerinden kurulan bir
+# özyineleme — aynı katman ihlalinin veri yolundan gelen hâli.
+# Çözüm: sayım, yönlendirme hedefinden AYRI bir dosyaya ve ATOMİK yazılır.
+_ana() {
 echo "###############################################################"
 echo "#  KÖR SINAMA TAKIMI — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 echo "###############################################################"
@@ -57,6 +66,8 @@ python3 "$S/ks_v_yanlis_pozitif.py"; topla "V · kapıların yanlış pozitifi" 
 echo
 python3 "$S/ks_w_bos_kaynak.py"; topla "W · sessizce boş arama kaynağı" $?
 echo
+python3 "$S/ks_x_yetki.py"; topla "X · alt ajan yetkisi / kapı kapsamı" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"
@@ -81,4 +92,45 @@ echo
 echo "  G · §13 depo kataloğu       -> sinama/ks_g_depolar.md"
 echo "  H · §17 kaynak doğrulaması  -> sinama/ks_h_kaynaklar.md"
 echo "  I · §5 mevzuat doğrulaması  -> sinama/ks_i_mevzuat.md"
-exit "$t"
+return "$t"
+}
+
+_gunluk=$(mktemp)
+_ana | tee "$_gunluk"
+_t=${PIPESTATUS[0]}
+
+# SAYIM.txt: denetimin okuduğu KAYIT. Geçici dosyaya yazılıp mv ile yerine
+# konur; hiçbir okuyucu yarım hâlini göremez.
+_toplam=$(grep -oE '^[0-9]+ vaka' "$_gunluk" | awk '{s+=$1} END {print s+0}')
+_gecici=$(mktemp)
+{
+  echo "# hepsi.sh koşum kaydı — denetim.sh bu dosyayı okur."
+  echo "# ATOMİK yazılır (mktemp + mv): yarım hâli hiçbir zaman görünmez."
+  echo "tarih: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  echo "vaka: $_toplam"
+  echo "sinyal: $_t"
+} > "$_gecici"
+mv -f "$_gecici" "$S/SAYIM.txt"
+
+# Raporun EL YAZISI vaka sayısı, BU koşumun gerçek toplamıyla karşılaştırılır.
+# Burada yapılır çünkü burası toplamı bayatlamadan bilen tek yerdir: denetime
+# konulduğunda kontrol iki koşumda yakınsıyordu ve bu, kırmızıyı görmezden
+# gelmeyi öğretir.
+_kok=$(cd "$S/.." && pwd)
+if [ -f "$_kok/RAPOR.md" ]; then
+  _iddia=$(grep -oE '\*\*[0-9]{3}$|^vaka, [0-9]+ mutasyon|[0-9]{3} vaka \+ 15 mutasyon' \
+             "$_kok/RAPOR.md" | grep -oE '[0-9]{3}' | sort -u)
+  _yanlis=""
+  for _i in $_iddia; do [ "$_i" != "$_toplam" ] && _yanlis="$_yanlis $_i"; done
+  if [ -n "$_yanlis" ]; then
+    echo
+    echo "  ------------------------------------------------------------"
+    echo "  UYARI raporun vaka sayısı bayat:$_yanlis (gerçek: $_toplam)"
+    _t=$((_t + 1))
+    printf "  %-38s %s\n" "TOPLAM SİNYAL (düzeltilmiş)" "$_t"
+    echo "  Bu satır yukarıdaki özetten SONRA hesaplanır: gerçek toplam ancak"
+    echo "  bütün takımlar koştuktan sonra bilinir. Çıkış kodu bu sayıdır."
+  fi
+fi
+rm -f "$_gunluk"
+exit "$_t"

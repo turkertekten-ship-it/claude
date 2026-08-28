@@ -152,6 +152,15 @@ if d != n:
 print('%d = %d' % (d, n))
 PYX"
 
+# [X] Raporun VAKA SAYISI kontrolü bilerek BURADA DEĞİL.
+# Denendi ve iki kez katman ihlali üretti: denetim, hepsi.sh'in yazdığı kaydı
+# okuyunca (a) yönlendirme dosyası kesilirken yarım kaydı gördü, (b) ayrı bir
+# kayda geçilince de bir ÖNCEKİ koşumu okudu — yani sayı değiştiğinde bir
+# koşum kırmızı, ikincisi yeşil oluyordu. İki koşumda yakınsayan bir kontrol,
+# okuyucuya "kırmızıysa bir daha koş" alışkanlığı öğretir; bu takımın tüm
+# amacının tersi. Kontrol, gerçek toplamı ZATEN bilen tek yere taşındı:
+# hepsi.sh'in kendi kapanışına.
+
 kontrol "her sınama takımı raporun tablosunda anılıyor" \
   "MAFIRM_KOK='$M' python3 - <<'PYX'
 import glob, os, re, sys
