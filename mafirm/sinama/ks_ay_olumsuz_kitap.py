@@ -33,6 +33,8 @@ import zipfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import beklenen  # noqa: E402
+import kitap as kitapmod  # noqa: E402
+from kitap import metin as kitap_metni_ortak  # noqa: E402
 
 _KOK_COZ = os.environ.get("MAFIRM") or os.path.dirname(
     os.path.dirname(os.path.abspath(__file__)))
@@ -51,12 +53,11 @@ def tr(s):
 
 
 def kitap():
-    if not os.path.exists(_DOCX):
-        return None
-    with zipfile.ZipFile(_DOCX) as z:
-        x = z.read("word/document.xml").decode("utf-8")
-    x = re.sub(r"</w:p>", "\n", x)
-    return html.unescape(re.sub(r"<[^>]+>", "", x))
+    """[BE/AW, 51. tur] Ortak çıkarıcı. Eski yerel sürüm Word'ün
+    yumuşak satır sonunu (<w:br/>) siliyordu ve iki yanındaki
+    sözcükleri YAPIŞTIRIYORDU; kitaba yapılan birebir aramalar bir
+    satır sonunu geçtiğinde sessizce başarısız oluyordu."""
+    return kitap_metni_ortak()
 
 
 K = kitap()
@@ -66,18 +67,11 @@ TESLIMAT = "\n".join(
     if os.path.exists(os.path.join(_KOK_COZ, d)))
 
 
-def bolumler(metin):
-    """§N -> (başlık, gövde). Kitabın kendi numaralandırması."""
-    yer = [(int(m.group(1)), m.start(), m.group(2).strip())
-           for m in re.finditer(r"(?m)^(\d{1,2})\.\s+([^\n]{4,60})$", metin)]
-    d = {}
-    for k, (n, i, ad) in enumerate(yer):
-        son = yer[k + 1][1] if k + 1 < len(yer) else len(metin)
-        d[n] = (ad, metin[i:son])
-    return d
 
-
-BOLUM = bolumler(K) if K else {}
+# [51. tur] Bölüm haritası artık metin deseninden değil, Word'ün Heading2
+# biçeminden okunuyor: yumuşak satır sonları geri gelince numaralı liste
+# maddeleri de satır başında "N." ile başladı ve desen onları başlık sandı.
+BOLUM = kitapmod.govdeler() if K else {}
 
 # Kitabın bölüm başlıkları — raporun anladığı hâliyle. Bir atıf bu haritayla
 # uyuşmuyorsa ya rapor yanlış anmıştır ya da kitap değişmiştir; ikisi de

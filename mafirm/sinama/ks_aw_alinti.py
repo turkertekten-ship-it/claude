@@ -32,6 +32,7 @@ import zipfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import beklenen  # noqa: E402
+from kitap import metin as kitap_metni_ortak  # noqa: E402
 
 _KOK_COZ = os.environ.get("MAFIRM") or os.path.dirname(
     os.path.dirname(os.path.abspath(__file__)))
@@ -64,11 +65,11 @@ def norm(s):
 
 
 def kitap_metni():
-    if not os.path.exists(_DOCX):
-        return None
-    with zipfile.ZipFile(_DOCX) as z:
-        x = z.read("word/document.xml").decode("utf-8")
-    return html.unescape(re.sub(r"<[^>]+>", "", x))
+    """[BE/AW, 51. tur] Ortak çıkarıcı. Eski yerel sürüm Word'ün
+    yumuşak satır sonunu (<w:br/>) siliyordu ve iki yanındaki
+    sözcükleri YAPIŞTIRIYORDU; kitaba yapılan birebir aramalar bir
+    satır sonunu geçtiğinde sessizce başarısız oluyordu."""
+    return kitap_metni_ortak()
 
 
 KITAP = kitap_metni()
@@ -129,6 +130,12 @@ def alintilar():
             continue
         sat = io.open(yol, encoding="utf-8").read().splitlines()
         for i, s_ in enumerate(sat):
+            # "→" ile başlayan satır ÖNERİLEN DÜZELTMEDİR: kitabın ne
+            # dediğini değil, ne demesi gerektiğini söyler. Onu alıntı
+            # saymak, düzeltmeyi kitapta aramak demektir — ve düzeltme
+            # tanımı gereği kitapta YOKTUR. [anmak ≠ atfetmek]
+            if s_.lstrip().startswith("→"):
+                continue
             if not ATIF.search(" ".join(sat[max(0, i - 2):i + 1])):
                 continue
             for m in re.findall(r'\*"([^"]{25,200})"\*', s_):

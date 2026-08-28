@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** elli üç çalıştırılabilir takım — **394
+**Yamalı hâlde sistem çalışıyor:** elli dört çalıştırılabilir takım — **399
 vaka, 27 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15 → **27/27** (mutasyon kümesi otuz
 sekizinci turda on beşten yirmi yediye çıkarıldı: 26 kontrolün dokuzu hiç
@@ -2692,7 +2692,7 @@ içinde kırmızı, koşumdan sonra yeşil görünüyordu. Onuncu ve on altınc�
 turların katman kuralı — *denetim, kendini denetleyen takımı denetleyemez* —
 **üçüncü kez**, bu kez veri yoluyla çiğnenmişti. Sayı artık durağan ölçülüyor:
 `hepsi.sh`'e bağlı her takımın kendi `BEKLENEN_VAKA` beyanı toplanıyor
-— bugün toplam 394 vaka — ve her takımın kendi sıfırıncı vakası o beyanın
+— bugün toplam 399 vaka — ve her takımın kendi sıfırıncı vakası o beyanın
 gerçeğe eşit olduğunu ayrıca güvenceye alıyor. Bozulmuş bir `SAYIM.txt` ile BB'nin çıktısı
 **birebir aynı** kalıyor; bağımsızlık ölçülerek gösterildi.
 
@@ -2818,6 +2818,72 @@ gevşetiyordu. Mutasyon birini söktüğünde öteki yakalıyordu, yani ölçüt
 Fazladan bir kemer, ölçümü güçlendirmez; ölçülemez yapar. Mekanizma teke
 indirildi ve fark artık gösterilebiliyor: normalleştirme yerindeyken karışma
 yakalanıyor, söküldüğünde kaçıyor.
+
+### Kitap da aynı hatayı yapıyor — bir kez
+
+Elli birinci tur kitaba döndü. Beş turdur ölçülen şey aparat ve teslimatlardı;
+hiç sorulmamış bir soru duruyordu: **kitap kendi bölümlerine doğru atıf yapıyor
+mu?**
+
+Yirmi bir iç atıfın hiçbiri var olmayan bir bölümü göstermiyor ve beş alt
+bölüm atfının beşi de gerçek bir maddeye çözülüyor. Ama kırk beşinci ve
+ellinci turlarda **benim** raporumda bulunan kusur, kitapta da bir kez var:
+
+> *"Müvekkil bilgisi makinede kalır (işletim sözleşmesi §6)."* — §18.1
+
+İşletim sözleşmesi kitabın **§3**'üdür; kuralları §3'ün içinde 1–11 diye
+numaralanır ve sır saklama **6. kuraldır**. Kitabın kendi geleneğinde `§N`
+ise bölümü gösterir (*"§12'deki kapı"*, *"§16'daki denetim"*). Sigili izleyen
+okuyucu **§6 "Sınır ötesi katman"a** gider. Yanlış yere gönderilen kural,
+kitabın en ağır sorumluluk kuralıdır ve maddenin konusu tam olarak müvekkil
+sırrıdır.
+
+Bu kusur **yamalanamaz**: sınanan şey kitabın kendi cümlesidir. Bu yüzden
+`KITAP-ERRATA.md` §18'e yazıldı ve `beklenen.json`'da BEYANLI taban olarak
+duruyor — kitaptaki cümle düzeltilirse vaka **BEKLENMEDİK GEÇİŞ** verir ve
+beyanın bayatladığını söyler. Mutasyonla iki yönde de gösterildi.
+
+**Ve ölçüt iki kez yanıldı; ikisi de aynı dersi verdi.** Önce §18.6 ile
+§18.9 atıflarımı *"karşılıksız"* saydı — değillerdi: §18'in maddeleri metinde
+noktadan sonra **boşluksuz** yazılmış ve çıkarıcı onları görmüyordu. Sonra
+§5.1–§5.3, §13.3, §13.7, §15.1, §15.2 atıflarını da karşılıksız saydı —
+kitap **iki ayrı numaralama biçimi** kullanıyor ve ölçüt yalnızca birini
+tanıyordu. Yedi geçerli atıf, "düzeltilmek" üzereydi. *Bir ölçüt kırmızıya
+dönünce ilk şüpheli ölçüttür* kuralı bu turda iki kez, dokuz atıfı korudu.
+
+### Ve yeni ölçüm, eski aleti bozuk buldu
+
+BE'nin bulduğu atıf kusurunu rapora yazar yazmaz **AW-01 kırmızıya döndü**:
+kitaba atfettiğim alıntı kitapta bulunamıyordu. Alıntı doğruydu; **çıkarıcı
+yanlıştı.**
+
+Word'de yumuşak satır sonu `<w:br/>` etiketiyle yazılır ve paragraf sonundan
+ayrıdır. Kitabı okuyan beş takım da yalnızca paragraf sonunu satır sonuna
+çeviriyor, yumuşak satır sonunu ise öteki etiketlerle birlikte **siliyordu.**
+Sonuç: satır sonunun iki yanındaki sözcükler birbirine yapışıyordu. Kitapta
+**1022** yumuşak satır sonu var; çıkarılan metin 1038 karakterlik ayırıcıyı
+kaybediyordu. Yani kitaba yapılan her birebir arama, bir satır sonunu geçtiği
+anda **on bir tur boyunca sessizce başarısız oluyordu** — ve hiçbir vaka bunu
+söylemedi, çünkü hepsi aynı bozuk metni okuyordu.
+
+Çıkarıcı tek bir yere alındı (`sinama/kitap.py`). Aynı kusurun beş kopyası
+beş kez düzeltilmeyi bekler ve dördü unutulur.
+
+**Düzeltme üç takımı birden kırdı — ve kırması gerekiyordu.** Metin
+düzelince "^N. Başlık" deseni artık bölüm başlığı ile numaralı liste
+maddesini ayırt edemez oldu: ikisi de satır başında `N.` ile başlıyor. O
+desen, yalnızca **bozuk metin üzerinde rastlantıyla** çalışıyordu. Yapı artık
+Word'ün kendi biçem bilgisinden okunuyor: bölümler `Heading2` (yirmi tane),
+alt bölümler `Heading3` (on sekiz tane), §18'in maddeleri de dokuz tane. Üçü
+de kitabın söylediğiyle birebir.
+
+**Ve D takımı bir mutasyonu "kaçtı" diye raporladı.** Kaçmamıştı: hedef aldığı
+metin bu turda değişmişti, yani mutasyon **hiç inmemişti.** Kırk sekizinci ve
+ellinci turların kuralı bu kez ölçüm aracının kendi içinde çıktı. `mutasyon()`
+artık kum havuzunun parmak izini mutasyondan önce ve sonra alıyor; değişmemişse
+sonucu **okumuyor**, `GEÇERSİZ` diyor. Bayat bir mutasyon sessiz bir kaçış
+kadar tehlikelidir — ve tersi de doğrudur: hiç inmemiş bir mutasyon
+*yakalandı* da görünebilir.
 
 **Ve mutasyon tarafında üç kez yanıldım — üçü de aynı biçimde.** Üç mutasyon
 "kaçtı" göründü; hiçbiri kaçmamıştı. Zorunlu başlıkların **önüne** bölüm
@@ -2961,6 +3027,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | BB · sayıların zaman indisi | *kırk yedinci turda görüldü, "Dokuz takım, 96 vaka" başlığı 53 satırlık tablonun üstünde duruyordu* | **temiz** — dört sürüklenmiş sayı düzeltildi |
 | BC · §10 terim açıklaması | *R-06 üç terimlik elle yazılmış listeyi soruyordu; iki teslimatta otuz üç açıklanmamış terim vardı* | **temiz** — hepsi ilk geçişte açıklandı |
 | BD · yayımlanan belgenin sözleşme uyumu | *artifact, kural 5'in iki zorunlu başlığını, kapsam beyanını ve kural 9 onay durumunu hiç taşımıyordu* | **temiz** — üçü de eklendi |
+| BE · kitabın kendi iç atıfları | *§18.1 bir kural numarasını bölüm sigiliyle anıyor* | **bir beyanlı taban** — kitabın metnindeki kusur, ERRATA'ya yazıldı |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -3018,8 +3085,8 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # 53 çalıştırılabilir takım:
-                                  #   394 vaka + 27 mutasyon (D)
+./sinama/hepsi.sh                 # 54 çalıştırılabilir takım:
+                                  #   399 vaka + 27 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -3053,7 +3120,7 @@ vakalardır ve hepsi geçer. Kör sınama o aklın dışında kalanı arar: bir
 hukukçunun gerçekten yazacağı cümleyi, kancanın gerçekten göreceği veriyi,
 bozulduğunda denetimin gerçekten yakalayıp yakalamadığını.
 
-Elli altı takım, 394 vaka:
+Elli yedi takım, 399 vaka:
 
 | Takım | Neyi sınar | Kaynağı |
 |---|---|---|
@@ -3113,9 +3180,10 @@ Elli altı takım, 394 vaka:
 | BB | **Sayıların zaman indisi** — teslimattaki her toplam ya bugün ölçülene eşit ya da hangi koşuma ait olduğunu söylüyor mu | §12, §19 |
 | BC | **§10 terim açıklaması** — her iki teslimatın düzyazısındaki her İngilizce/teknik terim ilk geçtiğinde açıklanmış mı (liste değil, keşif) | §10 |
 | BD | **Yayımlanan belgenin sözleşme uyumu** — artifact kural 4, 5 ve 9'a uyuyor mu; iki teslimat aynı cevabı mı veriyor | kural 4, 5, 9 |
+| BE | **Kitabın kendi iç atıfları** — her §N ve §N.M atfı var olan bir bölüme/maddeye çözülüyor mu | §3, §5, §13, §17, §18 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**394 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**399 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On üç**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)

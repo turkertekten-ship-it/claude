@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>53 çalıştırılabilir takım · 394 vaka · 0 sinyal</span>
+    <span>54 çalıştırılabilir takım · 399 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -3115,6 +3115,90 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Elli birinci tur</span>
+  <h2>Kitap da aynı hatayı yapıyor — bir kez</h2>
+  <p>Beş turdur ölçülen şey aparat ve teslimatlardı. Bu tur kitaba döndü ve
+  hiç sorulmamış bir soruyu sordu: <strong>kitap kendi bölümlerine doğru atıf
+  yapıyor mu?</strong></p>
+
+  <p>Yirmi bir iç atıfın hiçbiri var olmayan bir bölümü göstermiyor; beş alt
+  bölüm atfının beşi de gerçek bir maddeye çözülüyor. Ama daha önce
+  <em>bu raporda</em> bulunup düzeltilen kusur, kitapta da bir kez var:</p>
+
+  <blockquote>"Müvekkil bilgisi makinede kalır (işletim sözleşmesi §6)."
+  — §18.1</blockquote>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">BE-02</span>
+      <span class="pill f">Kitabın metnindeki kusur</span></div>
+    <h3>Sigil, okuyucuyu yanlış bölüme gönderiyor</h3>
+    <p>İşletim sözleşmesi kitabın <strong>§3</strong>'üdür; kuralları §3'ün
+    içinde 1–11 diye numaralanır ve sır saklama <strong>6. kuraldır</strong>.
+    Kitabın kendi geleneğinde <code>§N</code> ise bölümü gösterir
+    (<em>"§12'deki kapı"</em>, <em>"§16'daki denetim"</em>). Sigili izleyen
+    okuyucu <strong>§6 "Sınır ötesi katman"a</strong> gider. Yanlış yere
+    gönderilen kural, kitabın en ağır sorumluluk kuralıdır — ve maddenin
+    konusu tam olarak müvekkil sırrıdır.</p>
+    <p>Bu kusur <strong>yamalanamaz</strong>: sınanan şey kitabın kendi
+    cümlesidir. Errata'ya yazıldı ve beyanlı taban olarak duruyor — kitaptaki
+    cümle düzeltilirse vaka <em>beklenmedik geçiş</em> verir ve beyanın
+    bayatladığını söyler. Mutasyonla iki yönde de gösterildi.</p>
+  </div>
+
+  <div class="callout">
+    <strong>Ve ölçüt iki kez yanıldı; ikisi de aynı dersi verdi.</strong>
+    Önce §18'e yapılan iki atfı "karşılıksız" saydı — değillerdi: o bölümün
+    maddeleri metinde noktadan sonra <strong>boşluksuz</strong> yazılmış ve
+    çıkarıcı onları görmüyordu. Sonra yedi alt bölüm atfını daha karşılıksız
+    saydı — kitap <strong>iki ayrı numaralama biçimi</strong> kullanıyor ve
+    ölçüt yalnızca birini tanıyordu. Dokuz geçerli atıf "düzeltilmek"
+    üzereydi. <em>Bir ölçüt kırmızıya dönünce ilk şüpheli ölçüttür</em> kuralı
+    bu turda iki kez işe yaradı.
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Elli birinci tur · devam</span>
+  <h2>Yeni ölçüm, eski aleti bozuk buldu</h2>
+  <p>Kitaptaki atıf kusuru rapora yazılır yazılmaz, alıntı doğrulama vakası
+  <strong>kırmızıya döndü</strong>: kitaba atfedilen alıntı kitapta
+  bulunamıyordu. Alıntı doğruydu — <strong>çıkarıcı yanlıştı.</strong></p>
+
+  <div class="callout">
+    Word'de yumuşak satır sonu paragraf sonundan ayrı bir etikettir. Kitabı
+    okuyan <strong>beş takım da</strong> yalnızca paragraf sonunu satır sonuna
+    çeviriyor, yumuşak satır sonunu ise öteki etiketlerle birlikte
+    <strong>siliyordu</strong>: satır sonunun iki yanındaki sözcükler
+    birbirine yapışıyordu. Kitapta <strong>1022</strong> yumuşak satır sonu
+    var. Kitaba yapılan her birebir arama, bir satır sonunu geçtiği anda
+    <strong>on bir tur boyunca sessizce başarısız oluyordu</strong> — ve
+    hiçbir vaka bunu söylemedi, çünkü hepsi aynı bozuk metni okuyordu.
+  </div>
+
+  <p>Çıkarıcı tek bir yere alındı. Aynı kusurun beş kopyası beş kez
+  düzeltilmeyi bekler ve dördü unutulur.</p>
+
+  <p><strong>Düzeltme üç takımı birden kırdı — ve kırması gerekiyordu.</strong>
+  Metin düzelince "satır başında <em>N.</em>" deseni artık bölüm başlığı ile
+  numaralı liste maddesini ayırt edemez oldu: ikisi de öyle başlıyor. O desen
+  yalnızca <strong>bozuk metin üzerinde rastlantıyla</strong> çalışıyordu.
+  Yapı artık Word'ün kendi biçem bilgisinden okunuyor — yirmi bölüm, on sekiz
+  alt bölüm, dokuz madde; üçü de kitabın söylediğiyle birebir.</p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">D</span>
+      <span class="pill f">Mutasyon harness'ı</span></div>
+    <h3>Bir mutasyon "kaçtı" diye raporlandı; hiç inmemişti</h3>
+    <p>Hedef aldığı metin bu turda değişmişti, yani mutasyon hiç
+    uygulanmamıştı — ve harness bunu bir kaçış olarak raporladı. Artık kum
+    havuzunun parmak izi mutasyondan önce ve sonra alınıyor; değişmemişse
+    sonuç <strong>okunmuyor</strong>, <em>geçersiz</em> deniyor. Bayat bir
+    mutasyon sessiz bir kaçış kadar tehlikelidir — ve tersi de doğrudur:
+    hiç inmemiş bir mutasyon <em>yakalandı</em> da görünebilir.</p>
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -3300,7 +3384,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 53 takım · 394 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 54 takım · 399 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:

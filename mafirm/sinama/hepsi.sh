@@ -132,6 +132,8 @@ python3 "$S/ks_bc_terim.py"; topla "BC · §10 terim açıklaması (keşifle)" $
 echo
 python3 "$S/ks_bd_artifact_sozlesme.py"; topla "BD · yayımlanan belgenin sözleşme uyumu" $?
 echo
+python3 "$S/ks_be_kitap_atif.py"; topla "BE · kitabın kendi iç atıfları" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

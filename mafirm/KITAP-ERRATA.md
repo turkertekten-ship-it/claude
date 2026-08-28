@@ -803,6 +803,19 @@ sınırın kapsadığından fazlasına güvenir.
 kararını ister" biçiminde yazılmalı; §13.5'in lisans satırı düzeltilmeli.
 *(T-06, G-01)*
 
+**[C] §18.1 bir KURAL numarasını BÖLÜM sigiliyle anıyor.** Madde şöyle
+bitiyor: *"Müvekkil bilgisi makinede kalır (işletim sözleşmesi §6)."* İşletim
+sözleşmesi kitabın **§3**'üdür ve kuralları §3'ün İÇİNDE 1–11 diye
+numaralanır; sır saklama **6. kuraldır**. Kitabın kendi yazım geleneğinde
+`§N` ise BÖLÜM'ü gösterir (*"§12'deki kapı"*, *"§16'daki denetim"*). Sigili
+izleyen okuyucu §6'ya gider — **"Sınır ötesi katman"**, sır saklamayla ilgisi
+olmayan bir bölüm.
+Neden önemli: atıf, okuyucunun kuralın metnine ulaşmasının tek yoludur ve bu
+madde tam olarak müvekkil sırrıyla ilgilidir — yani yanlış yere gönderdiği
+kural, kitabın en ağır sorumluluk kuralıdır.
+→ *"işletim sözleşmesi kural 6"* yazılmalı; sigil bölüm için ayrılmalı.
+*(BE-02)*
+
 **[C] §18'in dokuz maddesinin dokuzu da OLUMSUZ İDDİADIR** ("yapmaz",
 "yoktur", "kanıt yoktur") ve kitabın kendi §2'si olumsuz iddiadan olumludan
 YÜKSEK kanıt ister. Kitap yalnızca yedinci ve sekizinci maddeleri §17 ile

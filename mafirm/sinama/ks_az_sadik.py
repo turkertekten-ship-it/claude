@@ -33,6 +33,7 @@ import zipfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import beklenen  # noqa: E402
+from kitap import metin as kitap_metni_ortak  # noqa: E402
 
 _KOK_COZ = os.environ.get("MAFIRM") or os.path.dirname(
     os.path.dirname(os.path.abspath(__file__)))
@@ -54,12 +55,11 @@ def vaka(kod, baslik, gecti, kanit=""):
 
 
 def kitap():
-    if not os.path.exists(_DOCX):
-        return None
-    with zipfile.ZipFile(_DOCX) as z:
-        x = z.read("word/document.xml").decode("utf-8")
-    x = re.sub(r"</w:p>", "\n", x)
-    return html.unescape(re.sub(r"<[^>]+>", "", x))
+    """[BE/AW, 51. tur] Ortak çıkarıcı. Eski yerel sürüm Word'ün
+    yumuşak satır sonunu (<w:br/>) siliyordu ve iki yanındaki
+    sözcükleri YAPIŞTIRIYORDU; kitaba yapılan birebir aramalar bir
+    satır sonunu geçtiğinde sessizce başarısız oluyordu."""
+    return kitap_metni_ortak()
 
 
 def duz(s):

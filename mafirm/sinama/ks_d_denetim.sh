@@ -65,7 +65,20 @@ PY
 mutasyon() {
   local ad="$1" boz="$2" hedef="$3"
   kur
+  # [51. tur] İNİŞ KANITI. Mutasyondan önce ve sonra kum havuzunun parmak
+  # izi alınır. Değişmemişse mutasyon İNMEMİŞTİR ve sonucu okumak yasaktır:
+  # bu koşumda "raporun beyan sayısını boz" mutasyonu, hedef aldığı metin
+  # bu turda değiştiği için hiç uygulanmadı ve harness onu KAÇIRDI diye
+  # raporladı. Bayat bir mutasyon, sessiz bir kaçış kadar tehlikelidir —
+  # tersi de doğrudur: hiç inmemiş bir mutasyon YAKALANDI da görünebilir.
+  local once sonra
+  once=$(find "$KUM" -type f -newermt '@0' -exec cksum {} + 2>/dev/null | cksum)
   eval "$boz" >/dev/null 2>&1
+  sonra=$(find "$KUM" -type f -newermt '@0' -exec cksum {} + 2>/dev/null | cksum)
+  if [ "$once" = "$sonra" ]; then
+    printf "  GEÇERSİZ  %-44s  << mutasyon İNMEDİ (bayat hedef)\n" "$ad"
+    kaldi=$((kaldi+1)); return
+  fi
   local out rc
   # [AC sınıfı · otuz sekizinci tur] MAFIRM kum havuzuna SABİTLENİR.
   # Ölçüldü: dışarıdan MAFIRM verilmişse (hepsi.sh ve AF öyle yapıyor) kum
@@ -155,7 +168,7 @@ mutasyon "errata'ya uydurma vaka kimliği ekle" \
   "printf '\n**[A] Uydurma madde.** Bu madde hiç var olmayan bir vakaya dayanır. *(ZZ-99)*\n\n→CEVAP: YOK — sınama mutasyonu.\n' >> $KUM/KITAP-ERRATA.md" \
   "errata izlenebilir (her madde bir vakaya bağlı)"
 mutasyon "raporun beyan sayısını boz" \
-  "sed -i 's/\*\*On iki\*\*/**On dokuz**/' $KUM/RAPOR.md" \
+  "sed -i 's/\*\*On üç\*\*/**On dokuz**/' $KUM/RAPOR.md" \
   "raporun beyan sayısı beklenen.json ile uyuşuyor"
 mutasyon "tabloda anılmayan bir takım ekle" \
   "printf 'x=1\n' > $KUM/sinama/ks_zz_uydurma.py" \

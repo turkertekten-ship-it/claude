@@ -60,6 +60,11 @@
       "sinif": "kitabin-ic-celiskisi",
       "neden": "Bulgu KİTABA SADIK metindedir: §6 mimari.md'nin kapanış öncesi koşul listesindeki 5. madde, işlemi YETKİLENDİREN organ kararı ile Ltd. Şti.'de TTK m.595/2 genel kurul onayını tek satırda topluyor. Kitabın KENDİ pay-devri.md'si ikincisini 'devri tamamlayan kurucu işlem' sayar — kurucu bir işlem, kapanışın ÖNKOŞULU olamaz; aksi hâlde kapanış günü 1. adımı ('koşulların karşılandığının teyidi') hiçbir zaman doğrulanamaz. İki tarafı da kitabın içinde olduğu için dış kaynak gerekmiyor; hangisinin doğru olduğu ise bir hukuki nitelendirmedir ve §9/§11 uyarınca yetkili bir insana aittir. Kitabın düzyazısı bu yüzden AYNEN bırakıldı. Türetilmiş dosyalar (kosul-takibi, kapanis-listesi — bu kurulumda yazılanlar) ayrımı açıkça taşır, dolayısıyla becerileri kullanan kişi doğru sırayı görür. Önerilen tek satırlık düzeltmenin U-02'yi ve U-01'i birlikte yeşile aldığı kum havuzunda gösterildi; uygulanması onay bekliyor. KITAP-ERRATA.md §6 kaydına bakınız.",
       "belirti": "İKİ LİSTEDE BİRDEN: genel kurul onayı. Kapanış günü 1. adımı 'koşulların karşılandığının teyidi'dir; koşul sayılan bir i"
+    },
+    "BE-02": {
+      "sinif": "kitabin-atif-kusuru",
+      "neden": "KİTABIN METNİNDEKİ kusur; yamalanamaz, çünkü sınanan şey kitabın kendi cümlesidir. Kitap §18'in birinci maddesinde \"Müvekkil bilgisi makinede kalır (işletim sözleşmesi §6)\" diyor. İşletim sözleşmesi kitabın §3'üdür ve kuralları §3'ün İÇİNDE 1-11 diye numaralanır; 6. kural sır saklama kuralıdır. Kitabın kendi yazım geleneğinde \"§N\" ise BÖLÜM'ü gösterir (§12'deki kapı, §16'daki denetim). Sigili izleyen okuyucu §6'ya, yani \"Sınır ötesi katman\"a gider. Düzeltme KITAP-ERRATA.md §18'de yazılı: \"işletim sözleşmesi kural 6\". Aynı kusurun RAPOR'daki karşılığı kırk beşinci ve ellinci turlarda düzeltildi; kitaptaki hâli kitabın metni olduğu için kaydedilir, değiştirilmez.",
+      "belirti": "karışma: ['§6…sır']"
     }
   },
   "kabuk_takimlari": {
