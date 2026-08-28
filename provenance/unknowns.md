@@ -224,6 +224,11 @@ was invented alongside it, and no claim about the owner's employer was derived
 from the word. If the literal reading was intended, the missing work is the
 research named in U-9, not a file in this repository.
 
+**Disposition: blocked on owner.** One word settles it, and no amount of
+searching can. Both readings are already served — the artifact reading by
+`FLEET.md`, the literal reading by U-9 — so nothing is stalled waiting for the
+answer.
+
 ---
 
 ### U-8 — What "the clear system of nick saraev" consists of
@@ -261,6 +266,10 @@ fetches of both primary sources were blocked by the egress proxy
 [src:NAMED-FIGURES-2026-08-27], so what is established here is search-result
 evidence about identity, and nothing more.
 
+**Disposition: blocked on owner, and owned elsewhere.** The identity question is
+closed. What the owner wants taken from that work is theirs to say, and the
+session holding that goal is the one to act on it.
+
 ---
 
 ### U-9 — Where the owner works, and what comparable organisations do with AI
@@ -279,6 +288,10 @@ holds no evidence about it.
 **Do not:** let `profile/OWNER-PROFILE.md` acquire a professional persona by
 inference. It grades what the owner asked for; it establishes nothing about who
 they are.
+
+**Disposition: owned elsewhere.** `claude/ai-system-research-3jpwda` holds this
+goal and has pushed work against it. Duplicating that research here would add a
+second unreviewed answer to a question one session is already answering.
 **Disposition: resolved — no action outstanding.** The origin is not
 determinable, but nothing depends on it: content from a non-user source is
 treated as data under the standing rule either way. The search was scoped
