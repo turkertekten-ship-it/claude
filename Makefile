@@ -1,3 +1,14 @@
+# NOTE — five targets below were removed rather than left advertised.
+#
+# `demo`, `index`, `query`, `eval` and `loop` all invoked `python3 -m
+# oodarag.cli`, and this tree has no `src/oodarag/cli.py`; `eval` also named
+# `evals/goldens.jsonl`, and there is no `evals/`. They came in with the
+# ingest-core root commit, where the CLI was planned and not written, and ran
+# here for the whole life of this branch as targets that could only traceback.
+#
+# A sibling branch's checker found them in 1.6 seconds. CLAUDE.md's own rule is
+# that a capability table is not evidence of capability -- a Makefile is a
+# capability table that people type.
 PY ?= python3
 export PYTHONPATH := src
 
@@ -14,21 +25,6 @@ test: ## Run the full test suite (stdlib unittest, no deps needed)
 
 lint: ## Compile-check every module
 	$(PY) -m compileall -q src
-
-demo: ## Full end-to-end demo: ingest seed corpus, index, query, eval
-	$(PY) -m oodarag.cli demo
-
-index: ## Ingest + index all configured sources
-	$(PY) -m oodarag.cli index
-
-query: ## Ask a question: make query Q="what is RAG?"
-	$(PY) -m oodarag.cli query "$(Q)"
-
-eval: ## Run the evaluation harness against evals/goldens.jsonl
-	$(PY) -m oodarag.cli eval
-
-loop: ## Run one OODA cycle
-	$(PY) -m oodarag.cli loop --cycles 1
 
 clean:
 	rm -rf .oodarag .data **/__pycache__ .pytest_cache

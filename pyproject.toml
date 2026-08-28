@@ -16,7 +16,9 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 # Deliberately empty. The whole pipeline runs on the standard library.
-# See docs/adr/0001-zero-dependency-core.md
+# The zero-dependency rule is stated in CLAUDE.md, house rules.
+# (This previously cited docs/adr/0001-zero-dependency-core.md, which
+# does not exist in this tree.)
 dependencies = []
 
 [project.optional-dependencies]

@@ -35,9 +35,28 @@ DEFAULT_UA = "oodarag/0.1 (+https://github.com/turkertekten-ship-it/claude; rese
 MAX_BYTES = 8 * 1024 * 1024  # 8 MiB: nothing useful to a text pipeline is bigger
 
 
+def safe_url(url: str) -> str:
+    """A URL with its query string and userinfo removed, for logs and errors.
+
+    An API key travels in a query string often enough that printing a raw URL
+    is a credential leak with a long tail: it reaches log files, exception
+    text, and any bug report pasted from either. The path is what identifies
+    the request; the secret is what does not need to be in the message.
+    """
+    try:
+        parts = urllib.parse.urlsplit(url)
+    except ValueError:
+        return "&lt;unparseable url&gt;"
+    host = parts.hostname or ""
+    if parts.port:
+        host = f"{host}:{parts.port}"
+    redacted = urllib.parse.urlunsplit((parts.scheme, host, parts.path, "", ""))
+    return redacted + ("?…" if parts.query else "")
+
+
 class HttpError(Exception):
     def __init__(self, status: int, url: str, body: str = "", headers: dict[str, str] | None = None):
-        super().__init__(f"HTTP {status} for {url}: {body[:300]}")
+        super().__init__(f"HTTP {status} for {safe_url(url)}: {body[:300]}")
         self.status = status
         self.url = url
         self.body = body
@@ -123,7 +142,7 @@ class HttpClient:
         handlers = [
             urllib.request.ProxyHandler(),          # reads *_PROXY / NO_PROXY from env
             urllib.request.HTTPSHandler(context=ctx),
-            _NoRedirectOnPost(),
+            _SafeRedirectHandler(),
         ]
         self._opener = urllib.request.build_opener(*handlers)
 
@@ -229,28 +248,79 @@ class HttpClient:
         return buf.getvalue()
 
 
-class _NoRedirectOnPost(urllib.request.HTTPRedirectHandler):
-    """Follow redirects for safe methods only; never silently replay a POST."""
+class _SafeRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Follow redirects for safe methods only, and never carry credentials off-origin.
+
+    Two separate rules. A POST is not silently replayed against a location the
+    caller did not choose. And an `Authorization` header is stripped when the
+    scheme, host or port changes, because urllib will otherwise hand a bearer
+    token to whatever a redirect points at — which is a credential disclosure
+    triggered by a remote server, not by anything the caller did.
+    """
+
+    #: Headers that identify the caller and must not cross an origin boundary.
+    CREDENTIAL_HEADERS = ("authorization", "proxy-authorization", "cookie")
 
     def redirect_request(self, req, fp, code, msg, headers, newurl):  # type: ignore[no-untyped-def]
         if req.get_method() not in ("GET", "HEAD"):
             return None
-        return super().redirect_request(req, fp, code, msg, headers, newurl)
+        new = super().redirect_request(req, fp, code, msg, headers, newurl)
+        if new is None:
+            return None
+        if _same_origin(req.full_url, newurl):
+            return new
+        for header in self.CREDENTIAL_HEADERS:
+            new.headers.pop(header.capitalize(), None)
+            new.headers.pop(header, None)
+            new.unredirected_hdrs.pop(header.capitalize(), None)
+            new.unredirected_hdrs.pop(header, None)
+        return new
+
+
+def _same_origin(a: str, b: str) -> bool:
+    """Scheme, host and port all equal — the boundary credentials stop at."""
+    try:
+        pa, pb = urllib.parse.urlsplit(a), urllib.parse.urlsplit(b)
+    except ValueError:
+        return False
+    return (pa.scheme, pa.hostname, pa.port) == (pb.scheme, pb.hostname, pb.port)
+
+
+#: A compressed response may not expand past this multiple of its own size.
+#: Text compresses at roughly 3-5x; a "zip bomb" is engineered for thousands.
+#: Unbounded decompression turns a small malicious response into an
+#: out-of-memory kill, which is a denial of service that needs no credentials
+#: and no unusual access — only a server willing to send the bytes.
+MAX_DECOMPRESSED_RATIO = 50
+#: A floor, so that small responses are not penalised by the ratio alone.
+MAX_DECOMPRESSED_FLOOR = 1 << 20  # 1 MiB
 
 
 def _decompress(payload: bytes, encoding: str) -> bytes:
     enc = encoding.lower().strip()
+    limit = max(MAX_DECOMPRESSED_FLOOR, len(payload) * MAX_DECOMPRESSED_RATIO)
     try:
         if enc == "gzip":
-            return gzip.decompress(payload)
+            return _bounded(zlib.decompressobj(16 + zlib.MAX_WBITS), payload, limit)
         if enc == "deflate":
             try:
-                return zlib.decompress(payload)
+                return _bounded(zlib.decompressobj(), payload, limit)
             except zlib.error:
-                return zlib.decompress(payload, -zlib.MAX_WBITS)
+                return _bounded(zlib.decompressobj(-zlib.MAX_WBITS), payload, limit)
     except (OSError, zlib.error):
         return payload  # server lied about the encoding; take the bytes as-is
     return payload
+
+
+def _bounded(decompressor, payload: bytes, limit: int) -> bytes:
+    """Decompress, stopping at `limit` bytes rather than at exhaustion."""
+    out = decompressor.decompress(payload, limit)
+    if decompressor.unconsumed_tail:
+        raise HttpError(
+            0, "&lt;decompression&gt;",
+            f"refused: response expands past {limit} bytes "
+            f"({MAX_DECOMPRESSED_RATIO}x its compressed size)")
+    return out
 
 
 def _safe_read(e: Any) -> str:

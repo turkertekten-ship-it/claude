@@ -150,12 +150,23 @@ are the part that did not exist to copy.
 Two honesty notes on that table, because both were overstated in an earlier
 draft of this file:
 
-- The playground column reads **"not documented"**, not "no". Its UI is behind
-  authentication and the Help Center article describing it is on a domain this
-  container cannot reach, so what controls it exposes is genuinely unknown —
-  recorded as `U-7` in `provenance/unknowns.md`. The retired Workbench *did*
-  ship a side-by-side output comparison mode, in July 2024, with human scoring.
-  Whether anything equivalent survives is not established here.
+- The playground column was **"not documented"** until its own shipped client
+  code settled most of it. The UI is behind authentication and the Help Center
+  article is on an unreachable domain, but `platform.claude.com` serves the
+  playground's JavaScript to a logged-out browser, and that code names the
+  request draft it edits: `model, max_tokens, temperature, thinking, speed,
+  output_config, stop_sequences, tool_choice, fallbacks, stream`, plus `system,
+  messages, tools, userBetas, container`. It implements a tool-definition
+  editor (per-tool `name`/`description`/`input_schema`), a simple/advanced view
+  split, cache-breakpoint placement, templates, and full run inspection
+  (`stopReason`, `responseHeaders`, `rawSseText`). There is **no** variable
+  templating and **no** evals — negative evidence, matching the sunset note —
+  and saved prompts exist only as browser-local versioned history, some of it
+  tagged as originating from the legacy Workbench. Batches is a separate
+  console destination, not a playground control. A token counter, a comparison
+  mode and the code-export language list were not in the logged-out bundle and
+  stay unverified. This is evidence of what the app implements, not of what the
+  screen looks like: nobody here has seen it.
 - The Claude Code column names `tool_used` because `claude plugin eval --help`
   in this container names it. The fuller grader list reported by a delegated
   research pass — `regex`, `tool_order`, `file_exists`, `baseline` — is
@@ -186,9 +197,25 @@ A prior-art sweep found that the standard tools do not do it:
 
 The reason it matters is measured. In *Judging LLM-as-a-Judge with MT-Bench and
 Chatbot Arena* ([arXiv 2306.05685](https://arxiv.org/abs/2306.05685)), judge
-consistency under a swapped presentation order — the share of pairs where the
-verdict survives the swap — was **65.0% for GPT-4, 46.2% for GPT-3.5 and 23.8%
-for Claude-v1** on the default prompt. The paper's own prescription is quoted
+consistency under a swapped presentation order was **65.0% for GPT-4, 46.2% for
+GPT-3.5 and 23.8% for Claude-v1** on the default prompt.
+
+Those figures are confirmed against the paper's own LaTeX source, and an earlier
+draft of this file quoted them with two qualifiers missing that change what they
+mean:
+
+- **They are not general swap-consistency rates.** The setup is adversarially
+  hard by construction — two deliberately similar answers per question, made by
+  calling GPT-3.5 twice at temperature 0.7. The paper says the answers are
+  "very similar and occasionally indistinguishable even to humans", and that
+  position bias is less prominent in easier cases. Quoting 23.8% as Claude-v1's
+  swap consistency in general overstates it.
+- **Claude-v1's figure is partly a *name* bias.** Renaming the assistants moves
+  it from 23.8% to 56.2%, and flips its skew from favouring the first slot to
+  favouring the second. GPT-4 barely moves. So the mitigation is not only
+  "swap the order" but "do not let the labels carry information" — which is why
+  this workbench uses bare positional labels and redacts variant identity
+  before a judge sees anything. The paper's own prescription is quoted
 verbatim: *"A conservative approach is to call a judge twice by swapping the
 order of two answers and only declare a win when an answer is preferred in both
 orders."*
@@ -210,12 +237,12 @@ Two further findings from the same paper shape the implementation:
   cannot determine whether the models exhibit a self-enhancement bias"* — so
   the workbench does not refuse a same-family judge; it warns, and says why.
 
-> Access note, recorded rather than glossed: `arxiv.org` is blocked by this
-> container's egress proxy. The MT-Bench figures above were confirmed against
-> two independent full-text mirrors on GitHub that agree exactly, and against
-> the FastChat implementation they describe. That is corroboration, not a
-> reading of the canonical PDF, and it is marked as such in
-> `provenance/sources.yaml`.
+> Access note, resolved rather than glossed: `arxiv.org` is blocked by this
+> container's egress proxy, and for most of this branch's life the MT-Bench
+> figures rested on two prose mirrors. They now rest on the paper's own arXiv
+> **LaTeX source**, retrieved byte-identical (same md5) from three unrelated
+> repositories and cross-checked against two independent PDF extractions. Every
+> figure quoted here matches the canonical text. `U-8` is closed.
 
 ## Not built, and why
 

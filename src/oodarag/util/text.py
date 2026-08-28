@@ -82,7 +82,7 @@ def estimate_tokens(text: str) -> int:
 
     Deliberately an estimate: importing a real tokenizer would break the
     zero-dependency promise, and every budget in this pipeline is a soft budget
-    with headroom. See docs/adr/0001-zero-dependency-core.md.
+    with headroom. See CLAUDE.md (house rules).
     """
     if not text:
         return 0

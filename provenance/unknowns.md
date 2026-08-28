@@ -114,47 +114,39 @@ No personal Drive file was opened, and nothing was written to Drive.
 
 ---
 
-### U-7 — What the Console playground actually offers in its UI
+### U-7 — Substantially answered from the playground's own client code
 
-**Unknown:** which affordances the current playground exposes — whether it has
-a variables panel, saved prompts, a tool-definition editor, a batch submitter,
-or a token counter.
+**What is now established.** The UI is still behind authentication and nobody
+here has seen it, but `platform.claude.com` serves the playground's JavaScript
+to a logged-out browser, and it names what the app implements: a tool-definition
+editor, a simple/advanced field split, cache-breakpoint placement, templates,
+and full run inspection. There is no variable templating and no evals —
+negative evidence agreeing with the sunset note — and saved prompts exist only
+as browser-local versioned history. [src:PLAYGROUND-CLIENT-CODE-2026-08-28]
 
-**Why:** `platform.claude.com/playground` returns the Console login page when
-fetched unauthenticated, and the Help Center article the release note points at
-is on a domain this container's egress proxy blocks. The release note's claim
-that it "supports every Messages API parameter" is a statement about
-parameters, not about controls.
+**Still unknown:** whether a token counter, a comparison mode, or a code-export
+control exists. Those were absent from the logged-out bundle, which is not the
+same as absent from the product.
 
-**Resolves when:** someone signed in to the Console describes or screenshots it,
-or the Help Center becomes reachable.
+**The distinction that keeps this open rather than closed:** shipped code is
+evidence of implementation, not of presentation. A control can exist in a store
+and never reach a screen.
 
-**Consequence:** the parity matrix in `docs/parity.md` marks the playground
-column from the release notes and the API reference, not from the UI. Rows
-about what the playground can do are therefore claims about the API it builds
-requests for.
+**Resolves when:** someone signed in describes or screenshots it, or the Help
+Center article becomes reachable.
 
----
+### U-8 — RESOLVED: the figures match the canonical paper
 
-### U-8 — Whether the MT-Bench figures match the canonical paper
+**Answered** 2026-08-28. The paper's arXiv LaTeX source was retrieved
+byte-identical from three unrelated repositories and cross-checked against two
+independent PDF extractions. Every figure this repository quotes matches.
+[src:MT-BENCH-CANONICAL-2026-08-28]
 
-**Unknown:** whether the judge-consistency, verbosity and self-preference
-numbers used to justify the blind-comparison design match arXiv 2306.05685 as
-published.
-
-**Why:** `arxiv.org` is blocked by this container's egress proxy. Two
-independent GitHub full-text mirrors agreed exactly, and the behaviour they
-describe matches the FastChat implementation, which is corroboration but not a
-reading of the canonical PDF.
-
-**Resolves when:** the paper is fetched from an unblocked network.
-
-**Consequence:** the design does not depend on the exact values. It depends on
-the direction — that position bias is large enough to matter — and on the
-paper's stated prescription, which the implementation follows. Treat the
-numbers as motivation, not as calibration constants.
-
----
+**And it corrected the framing, not the numbers.** Two qualifiers were missing:
+the consistency figures come from a deliberately hard setup rather than being
+general swap-consistency rates, and Claude-v1's 23.8% is partly a *name* bias
+that renaming moves to 56.2%. `docs/parity.md` now carries both — which is why
+"the numbers were right" was not a sufficient answer to this entry.
 
 ### U-9 — Whether the doctrine prompt's measured effect generalises
 

@@ -175,6 +175,28 @@ def flatten_content(content) -> tuple[str, list[str]]:
     return "\n".join(p for p in parts if p), kinds
 
 
+def effective_role(declared: str, kinds) -> str:
+    """Distinguish a tool result from the owner speaking.
+
+    Claude Code writes tool RESULTS as `type: "user"` with
+    `message.role: "user"`, because the result is delivered to the model in the
+    user turn. Indexing that literally files command output as the owner's own
+    words, so a search for a phrase finds it in a build log and attributes it to
+    them. Reported against this repository as KI-2.
+
+    A message whose content blocks are all `tool_result` is machine output, and
+    is filed as `tool_result` rather than `user`.
+    """
+    # `kinds` arrives as a list from flatten_content and as a comma-joined
+    # string from stored rows; accept either rather than making the caller care.
+    if isinstance(kinds, str):
+        kinds = kinds.split(",")
+    blocks = [k for k in (kinds or []) if k]
+    if declared == "user" and blocks and all(k == "tool_result" for k in blocks):
+        return "tool_result"
+    return declared
+
+
 def parse_claude_code_jsonl(path: Path, report: Report) -> list[Conversation]:
     """One transcript file may hold more than one sessionId; group by it."""
     grouped: dict[str, Conversation] = {}
@@ -216,7 +238,7 @@ def parse_claude_code_jsonl(path: Path, report: Report) -> list[Conversation]:
             Message(
                 id=f"cc:{uuid}",
                 seq=len(conv.messages),
-                role=message.get("role") or record["type"],
+                role=effective_role(message.get("role") or record["type"], kinds),
                 text=text,
                 timestamp=record.get("timestamp"),
                 block_types=",".join(kinds),

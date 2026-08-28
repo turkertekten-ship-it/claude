@@ -904,3 +904,55 @@ sources:
       branch's ingester — which held and has been fixed. Findings the delegate
       reported from those branches' own prose, including their test counts, are
       those branches' reports of their own runs and were not reproduced here.
+
+  - id: MT-BENCH-CANONICAL-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T01:30Z"
+    method: >-
+      the paper's arXiv LaTeX source retrieved from three unrelated GitHub
+      repositories (identical md5 aa6299176e6b9e09561d35743c0bb797) and
+      cross-checked against two independent PDF-extracted texts
+    evidence: >-
+      Confirmed verbatim: "GPT-4 & default & \textbf{65.0\%}", "GPT-3.5 &
+      default & 46.2\%", "Claude-v1 & default & 23.8\%"; the repetitive-list
+      attack failure rates 91.3 / 91.3 / 8.7 with the caption "for different LLM
+      judges on 23 answers"; "GPT-4 favors itself with a 10% higher win rate",
+      "Claude-v1 favors itself with a 25% higher win rate"; and the hedge "Due
+      to limited data and small differences, our study cannot determine whether
+      the models exhibit a self-enhancement bias."
+    note: >-
+      Supersedes MT-BENCH-MIRRORS-2026-08-27, which was prose mirrors and marked
+      second-hand. Every figure held. Two qualifiers were missing from how this
+      repository quoted them, and both change the meaning: the consistency
+      figures come from an adversarially hard setup — two deliberately similar
+      answers per question from one model at temperature 0.7, which the paper
+      calls "occasionally indistinguishable even to humans" — so they are not
+      general swap-consistency rates; and Claude-v1's 23.8% is partly a NAME
+      bias, since renaming the assistants moves it to 56.2% and flips which slot
+      it favours. docs/parity.md now carries both.
+
+  - id: PLAYGROUND-CLIENT-CODE-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T01:30Z"
+    method: >-
+      the 96 JavaScript chunks platform.claude.com serves to a logged-out
+      browser, plus platform.claude.com/llms-full.txt
+    evidence: >-
+      The playground store names the draft it edits: model, max_tokens,
+      temperature, thinking, speed, output_config, stop_sequences, tool_choice,
+      fallbacks, stream, plus system, messages, tools, userBetas, container. It
+      implements a tool-definition editor with per-tool name/description/
+      input_schema, a simple/advanced field split
+      (`useParamsHiddenInSimpleView`), cache-breakpoint placement
+      (`useIsPlacingBreakpoint`, `countCacheBreakpoints`), templates
+      (`applyTemplate`), and run inspection (`stopReason`, `responseHeaders`,
+      `rawSseText`). Saved prompts exist only in browser storage, keyed
+      `LSP-playground:`, versioned, some marked `origin: "legacy-workbench"`.
+      No variable-templating machinery and no evals appear in any playground
+      module. Console nav lists `batches` as a separate destination.
+    note: >-
+      Evidence of what the application implements, not of what the screen looks
+      like. Nobody in this session has seen the playground: it is behind
+      authentication and the Help Center article describing it is on a blocked
+      domain. The token counter, a comparison mode, and the code-export language
+      list were absent from the logged-out bundle and remain unverified.

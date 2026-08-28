@@ -82,7 +82,13 @@ class Finding:
         self.path, self.line, self.code, self.message = path, line, code, message
 
     def __str__(self) -> str:
-        rel = self.path.relative_to(REPO) if self.path.is_absolute() else self.path
+        # A finding on a path outside the repository is exactly when output
+        # matters most, and relative_to raises there. The guard dying while
+        # reporting is worse than the finding it was reporting.
+        try:
+            rel = self.path.relative_to(REPO) if self.path.is_absolute() else self.path
+        except ValueError:
+            rel = self.path
         return f"{rel}:{self.line}: {self.code}: {self.message}"
 
 
