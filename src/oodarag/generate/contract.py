@@ -25,7 +25,33 @@ from dataclasses import dataclass
 from oodarag.models import Citation, ScoredChunk
 from oodarag.util.text import split_sentences, summarize
 
-_MARKER_RE = re.compile(r"\[(\d{1,2})\]")
+#: A citation marker, and deliberately not an array subscript.
+#:
+#: `\[(\d{1,2})\]` matched both, and this corpus is half source code. Three
+#: things went wrong. `sys.argv[1]` counted as a citation of chunk 1, so a
+#: sentence that merely quoted code read as grounded. `chunks[7]` with seven
+#: citations unavailable was treated as a marker pointing at nothing and
+#: *deleted from the quoted code*, turning `values[12] = compute(x)` into
+#: `values = compute(x)` - an answer presenting altered code as a quotation from
+#: a document it cites. And the two-digit cap meant `[999999999999]` was neither
+#: recognised nor removed, so a marker pointing at nothing shipped as evidence,
+#: which is the one thing the cleaning step exists to prevent.
+#:
+#: The lookbehind is what separates the two: a real marker follows whitespace or
+#: punctuation, a subscript follows an identifier or a closing bracket. Digits
+#: are now unbounded so an out-of-range marker is *detected* and stripped rather
+#: than passing through unexamined.
+_MARKER_RE = re.compile(r"(?<![A-Za-z0-9_\)\]])\[(\d+)\]")
+#: Fenced code is never scanned for markers or rewritten. The lookbehind cannot
+#: save a bare list literal - `x = [12]` follows a space, exactly like a marker -
+#: and inside a fence the text is quoted source, where no marker belongs anyway.
+_FENCE_SPLIT_RE = re.compile(r"(```.*?```|~~~.*?~~~)", re.DOTALL)
+
+
+def _outside_fences(text: str):
+    """Yield (segment, is_code) so callers can skip fenced blocks."""
+    for index, segment in enumerate(_FENCE_SPLIT_RE.split(text)):
+        yield segment, index % 2 == 1
 # Sentences that carry no claim do not need a citation: a heading, a lead-in
 # line ending in a colon, a bullet marker, a very short fragment.
 _NON_CLAIM_RE = re.compile(r"^\s*(?:[-*#>]|\d+[.)])\s*|:\s*$")
@@ -66,20 +92,31 @@ def verify(text: str, available: list[Citation]) -> CitationCheck:
     used: list[int] = []
     invalid: list[int] = []
 
-    for match in _MARKER_RE.finditer(text):
-        marker = int(match.group(1))
-        if marker in valid:
-            if marker not in used:
-                used.append(marker)
-        elif marker not in invalid:
-            invalid.append(marker)
+    for segment, is_code in _outside_fences(text):
+        if is_code:
+            continue
+        for match in _MARKER_RE.finditer(segment):
+            marker = int(match.group(1))
+            if marker in valid:
+                if marker not in used:
+                    used.append(marker)
+            elif marker not in invalid:
+                invalid.append(marker)
 
     # A marker pointing at nothing is worse than no marker: it looks like
-    # evidence. Remove it from the text rather than shipping it.
-    cleaned = text
-    for marker in invalid:
-        cleaned = cleaned.replace(f"[{marker}]", "")
-    cleaned = re.sub(r"\s{2,}", " ", cleaned).strip()
+    # evidence. Remove it from the text rather than shipping it - but only
+    # outside fenced code, where the same characters are a subscript or a list
+    # literal and deleting them alters a quotation.
+    parts = []
+    for segment, is_code in _outside_fences(text):
+        if not is_code:
+            for marker in invalid:
+                segment = _MARKER_RE.sub(
+                    lambda m, want=marker: "" if int(m.group(1)) == want else m.group(0),
+                    segment)
+        parts.append(segment)
+    cleaned = "".join(parts)
+    cleaned = re.sub(r"[ \t]{2,}", " ", cleaned).strip()
 
     sentences = _attach_trailing_markers(split_sentences(cleaned))
     claims = [s for s in sentences

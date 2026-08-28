@@ -1293,3 +1293,54 @@ second and the two convergence tests with it.
    honest repair was to say what Observe does and why, not to restructure the
    loop to match the sentence. For this system the sources' current contents
    *are* the observation, and there is no way to see them without fetching.
+
+---
+
+## L37 - The citation verifier was rewriting the code it was quoting
+
+**Evidence.** Provenance is this project's second non-negotiable: citations are
+verified against retrieved chunks rather than generated. The verifier that
+enforces it recognised markers with `\[(\d{1,2})\]`, which is also the syntax of
+an array subscript - on a corpus that is half source code.
+
+Three failures, all demonstrated:
+
+    text in                                    text out
+    "sys.argv[1] reads the flag."              counted as a citation of chunk 1
+    "The loop reads chunks[7] ... [1]."        "The loop reads chunks ... [1]."
+    "values[12] = compute(x)"  (in a fence)    "values = compute(x)"
+    "the crawl [999999999999]"                 unchanged, shipped as evidence
+
+The middle two are the serious ones. An answer that presents `values = compute(x)`
+as a quotation from a document containing `values[12] = compute(x)` has altered
+its evidence - and it did so *because* of the code whose comment reads "a marker
+pointing at nothing is worse than no marker: it looks like evidence. Remove it
+from the text rather than shipping it."
+
+The first inflates grounding: a sentence quoting code read as cited when it
+cited nothing. The last is that same comment failing on its own terms - a marker
+too long for the two-digit cap was neither recognised nor removed, so the only
+markers that shipped unexamined were the ones furthest from pointing at
+anything.
+
+**The fix has two halves, and one is not enough.** A lookbehind separates a
+marker from a subscript: a real marker follows whitespace or punctuation, a
+subscript follows an identifier or a closing bracket. That handles `argv[1]` and
+`chunks[7]`. It cannot handle `x = [12]`, a list literal that follows a space
+exactly like a marker - so fenced code is skipped outright, where quoted source
+lives and no marker belongs. Digits are unbounded now, so an out-of-range marker
+is detected and stripped rather than passing through.
+
+Costs nothing: 48/54 and 18/20, citation coverage 1.0 on both, unchanged.
+
+**Rules.**
+1. **A syntax borrowed from the corpus will collide with the corpus.** Square
+   brackets round digits are citation markers in prose and subscripts in code,
+   and this system indexes both. The collision was in the design, not in an
+   edge case.
+2. Text that is *quoted* must be inviolable to any cleaning step. A verifier
+   that edits evidence to make it verifiable has inverted its own purpose.
+3. Read a bound in a pattern as a claim about the data. `\d{1,2}` claims there
+   are never more than 99 citations *and* that anything longer is not a marker -
+   the second half was silently false, and false in the direction of shipping
+   the bad case.

@@ -1461,3 +1461,80 @@ class DerivedCacheTest(unittest.TestCase):
         remaining = [row[0] for row in store.conn.execute(
             "SELECT key FROM meta WHERE key IN ('idf_table', 'surface_vocabulary')")]
         self.assertEqual(remaining, [])
+
+
+class CitationMarkerTest(unittest.TestCase):
+    """A citation marker and an array subscript are the same characters.
+
+    `\\[(\\d{1,2})\\]` matched both, on a corpus that is half source code:
+
+    * `sys.argv[1]` counted as a citation of chunk 1, so a sentence that merely
+      quoted code read as grounded;
+    * `chunks[7]`, with no seventh citation, was treated as a marker pointing at
+      nothing and deleted from the quoted code - `values[12] = compute(x)`
+      became `values = compute(x)`, an answer presenting altered code as a
+      quotation from the document it cites;
+    * the two-digit cap meant `[999999999999]` was neither recognised nor
+      removed, so a marker pointing at nothing shipped as evidence - the exact
+      thing the cleaning step exists to prevent.
+    """
+
+    def _citations(self, n=2):
+        from oodarag.models import Citation
+
+        return [Citation(marker=i, chunk_id=f"c{i}", doc_id=f"d{i}", title="t",
+                         uri=f"mem://{i}", quote="q", score=1.0)
+                for i in range(1, n + 1)]
+
+    def test_a_subscript_is_not_a_citation(self):
+        from oodarag.generate.contract import verify
+
+        check = verify("Read the flag with sys.argv[1] to start.", self._citations())
+        self.assertEqual(check.citations, [],
+                         "quoted code was counted as a citation")
+        self.assertFalse(check.grounded)
+
+    def test_an_out_of_range_subscript_is_not_deleted_from_the_text(self):
+        from oodarag.generate.contract import verify
+
+        text = "The loop reads chunks[7] for each result [1]."
+        check = verify(text, self._citations())
+        self.assertIn("chunks[7]", check.text,
+                      "the verifier altered code it was quoting")
+        self.assertEqual(check.invalid_markers, [])
+
+    def test_fenced_code_is_never_rewritten(self):
+        """The lookbehind cannot save `x = [12]` - a list literal follows a
+        space, exactly like a marker - so fences are skipped outright."""
+        from oodarag.generate.contract import verify
+
+        text = "```\nvalues[12] = compute(x)\nx = [12]\n```\nThat is the assignment [1]."
+        check = verify(text, self._citations())
+        self.assertIn("values[12] = compute(x)", check.text)
+        self.assertIn("x = [12]", check.text)
+        self.assertEqual(check.invalid_markers, [])
+
+    def test_a_marker_too_long_to_match_is_detected_and_removed(self):
+        from oodarag.generate.contract import verify
+
+        check = verify("Budgets bound the crawl [999999999999] and so on [1].",
+                       self._citations())
+        self.assertEqual(check.invalid_markers, [999999999999])
+        self.assertNotIn("999999999999", check.text,
+                         "a marker pointing at nothing was shipped as evidence")
+
+    def test_a_genuine_invalid_marker_is_still_removed(self):
+        """The fix must not have been bought by no longer cleaning anything."""
+        from oodarag.generate.contract import verify
+
+        check = verify("See the spec [3] for the grammar [1].", self._citations())
+        self.assertEqual(check.invalid_markers, [3])
+        self.assertNotIn("[3]", check.text)
+        self.assertIn("[1]", check.text)
+
+    def test_a_marker_at_the_start_of_the_text_still_counts(self):
+        """The lookbehind must not require a preceding character to exist."""
+        from oodarag.generate.contract import verify
+
+        check = verify("[1] Budgets bound the crawl.", self._citations())
+        self.assertEqual([c.marker for c in check.citations], [1])
