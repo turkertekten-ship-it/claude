@@ -4065,3 +4065,56 @@ the design and misleading about the effect: on this corpus it never adds either.
    refutation was already in the table above the probe.
 4. **"Can add" and "does add" are different claims**, and only the second tells
    you whether a component can fix a recall gap.
+
+---
+
+## L81 - The convenient explanation was mine, and it was wrong
+
+Two external cases fail for retrieval rather than abstention, and L80 had just
+shown query expansion structurally cannot reach them. The remaining story was
+attractive: `embedding/hashing.py` says of itself "it will not match a good
+neural embedder on paraphrase", the questions are visibly paraphrases
+("control what the clock returns" against freezegun's "travel through time by
+mocking the datetime module"), so the failures are the documented price of the
+zero-dependency core rather than a defect. Tidy, exculpatory, and citing an ADR.
+
+**Measured, it is false.** Share of the question's terms the answer document
+contains:
+
+    cases that pass    min 0.200  p25 0.571  median 0.714  max 1.000
+    the two that fail  0.500 and 0.667
+
+Both failures sit above the passing p25, and six passing cases have lower
+overlap than either - bcrypt passes on 0.200 against freezegun's 0.500. How much
+of the question the answer contains does not decide anything, so "paraphrase"
+was a description of how the questions read, not of why they fail.
+
+**What the same data says instead.** The missing terms are `clock`, `control`,
+`fake`, `network`, `repli` - and what remains is high-frequency vocabulary for a
+corpus of Python packages. Measuring the document frequency of the *rarest*
+shared term, which is the best hook a term-matching retriever has for picking
+one document out of 153:
+
+    cases that pass    min 1  p25 3  median 5  max 103
+    the two that fail  13 and 48
+
+Their best hook is 2.6x and 9.6x commoner than the median passing case's. That
+is a real and much stronger signal - and still not sufficient, because one
+passing case survives a hook in 103 of 153 documents. A rare term helps and is
+not required; the reranker can carry a case without one.
+
+**Why this was worth the twenty minutes.** The falsified story would have closed
+the investigation with an ADR reference and no code change, and it would have
+been believed - it is the kind of explanation that sounds like engineering
+maturity. The measurement that killed it was five lines of set arithmetic over
+files already on disk.
+
+**Rules.**
+1. **Be most suspicious of the explanation that excuses you.** "This is the
+   documented limitation of a design we chose deliberately" needs the same
+   evidence as "this is a bug", and is far less likely to get it.
+2. **A property you can see in the input is not thereby the cause.** These
+   questions *are* paraphrases; the passing ones are too, and more so.
+3. **When the first measurement refutes the hypothesis, the second is usually
+   in the same data.** The missing-terms list that disproved the paraphrase
+   story is what pointed at term rarity.
