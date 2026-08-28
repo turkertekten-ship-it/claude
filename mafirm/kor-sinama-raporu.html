@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>43 çalıştırılabilir takım · 342 vaka · 0 sinyal</span>
+    <span>44 çalıştırılabilir takım · 349 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -2510,6 +2510,61 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Otuz dokuzuncu tur</span>
+  <h2>"Pahalı olduğu için ölçmedim" bir gerekçe değildir</h2>
+  <p>Otuz sekizinci tur denetimin 26 kontrolüne <em>"her kontrolün
+  kanıtlanmış bir mutasyonu olmalı"</em> ölçütünü uyguladı. Aynı ölçüt bir
+  katman <strong>yukarıda</strong> hiç uygulanmamıştı: koşum betiğinin epilogu
+  dört kontrol taşıyor ve hiçbiri mutasyonla sınanmamıştı.</p>
+  <p>Sebebi teknikti: bir epilog kontrolünü kırmak <strong>kırk üç takımın
+  tamamını</strong> koşturmayı gerektiriyordu. Dört kontrol için dört dakika.
+  <strong>Ölçüt uygulanmadı çünkü pahalıydı</strong> — bu incelemenin baştan
+  beri kabul etmediği gerekçe.</p>
+
+  <div class="callout">
+    Çözüm kontrolü zayıflatmak değil, <strong>saf bir fonksiyona
+    çevirmekti</strong>. <code>sinama/epilog.py</code> artık
+    <code>(günlük, taban, rapor)</code> alıp uyarı üretiyor;
+    <code>hepsi.sh</code> onu hâlâ tam günlüğü bilen tek yerden çağırıyor —
+    <strong>katman korundu.</strong>
+  </div>
+
+  <table><thead><tr><th></th><th>önce</th><th>sonra</th></tr></thead><tbody>
+  <tr><td>epilog kontrollerinin sınanması</td>
+      <td>4 tam koşum ≈ <strong>4 dk</strong></td>
+      <td>7 vaka · <strong>32 ms</strong></td></tr>
+  </tbody></table>
+
+  <p>Sınanan şey bir <strong>kopya değil</strong>: üretimde koşan kodun
+  kendisi. Ve ayrıştırmanın yan faydası hemen görüldü — <strong>AE'nin desen
+  taraması o kodu hiç görmüyordu</strong>, çünkü AE <code>.py</code> tarar ve
+  kod bir <code>.sh</code> içindeydi. Dosyaya çıkar çıkmaz AE Türkçe metin
+  üzerinde <strong>çıplak <code>.lower()</code></strong> buldu — sınıfın
+  yedinci sızması, dört tur boyunca taramanın kör noktasında.</p>
+
+  <h3>Bir ölçüt kırmızı verdiğinde, önce ölçütü sına</h3>
+  <p>M-03 bu turda dört kez yanlış cevap verdi ve dördü de aynı sınıfın
+  örneği — <strong>anmak, tanımlamak değildir</strong>:</p>
+  <table><thead><tr><th>ölçüt</th><th>hata</th><th>neden</th></tr></thead><tbody>
+  <tr><td>önek listesi <code>"ABCE"</code></td><td>fazla dar</td>
+      <td>takımlar A..E iken doğruydu; bugün AU'ya gidiyor</td></tr>
+  <tr><td>tüm <code>ks_*</code> dosyalarını tara</td><td>fazla geniş</td>
+      <td>uydurma kimlik D'nin fixture'ında, AU'nun beyanında ve <strong>M'nin kendi yorumunda</strong> geçiyordu</td></tr>
+  <tr><td>her takım kendi önekini tanımlar</td><td>neredeyse doğru</td>
+      <td>J kimlikleri <strong>çalışma anında</strong> kuruyor</td></tr>
+  <tr><td>taban ekleri de tanınır</td><td>doğru</td>
+      <td><code>J-07s</code> → tabanı tanımlı; <code>ZZ-99</code> hiçbir yerde yok</td></tr>
+  </tbody></table>
+  <p>Üçüncü satır önemli: ölçüt kırmızı verdiğinde errata'daki
+  <code>J-07s</code> atfını "düzeltmeye" gidebilirdim ve <strong>gerçek bir
+  atfı bozacaktım</strong>. Bir ölçüt kırmızı verdiğinde ilk şüpheli ölçütün
+  kendisidir — özellikle onu az önce kendim değiştirdiysem.</p>
+  <p>Yorum, açıklama cümlesi, belge dizgesi, fixture, kendi yorumum — beş
+  ayrı kılıkta tek bir ders: <strong>bir şeyden söz etmek, o şey olmak
+  değildir.</strong></p>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -2627,7 +2682,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 43 takım · 342 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 44 takım · 349 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
