@@ -40,9 +40,16 @@ from oodarag.reflect.act.report import render_json, render_markdown, write_repor
 from oodarag.reflect.decide.conflicts import resolve_edit_conflicts
 from oodarag.reflect.decide.policy import Decision, PolicyConfig, PolicyEngine
 from oodarag.reflect.decide.priors import RulePriors
-from oodarag.reflect.detect.base import DetectContext, build_detectors
+from oodarag.reflect.detect.base import DetectContext, build_detectors, registry
 from oodarag.reflect.journal import Journal
-from oodarag.reflect.models import CycleReport, Finding, Outcome, Proposal, Signal
+from oodarag.reflect.models import (
+    KIND_FILE,
+    CycleReport,
+    Finding,
+    Outcome,
+    Proposal,
+    Signal,
+)
 from oodarag.reflect.sources.base import Budget, SignalSource
 from oodarag.util.logging import get_logger
 
@@ -344,6 +351,45 @@ class ReflectLoop:
             self.queue.drop(entry.fingerprint)
         return report
 
+    def retire_resolved(self, findings: list[Finding]) -> list[str]:
+        """Drop queued proposals whose finding no longer exists.
+
+        Without this the queue only grows: a proposal survives being fixed by
+        hand, so "nothing is open" becomes unreachable and the user is asked to
+        dismiss work they already did.
+
+        Retirement is restricted to rules that read *current state* rather than a
+        time window. A `docs` or `hygiene` finding that is absent tonight is
+        absent because the file changed. A `friction` finding is absent whenever
+        the day's prompts happened not to contain it, so retiring on that basis
+        would quietly discard a real suggestion the first quiet day the user has.
+
+        No outcome is journalled. The finding went away, but nothing here knows
+        whether this rule's proposal is why - and crediting a rule for someone
+        else's fix teaches the priors something false.
+        """
+        rules = registry()
+        state_only = {
+            rule_id
+            for rule_id, cls in rules.items()
+            if cls.consumes and set(cls.consumes) <= {KIND_FILE}
+        }
+        live = {f.fingerprint for f in findings}
+        retired: list[str] = []
+        for entry in self.queue.pending():
+            finding = (entry.get("proposal") or {}).get("finding") or {}
+            rule_id = finding.get("rule_id", "")
+            fingerprint = finding.get("fingerprint", "")
+            if rule_id not in state_only or not fingerprint:
+                continue
+            if fingerprint in live:
+                continue
+            self.queue.drop(entry["fingerprint"])
+            retired.append(entry["fingerprint"])
+        if retired:
+            log.info("retired resolved proposals", count=len(retired))
+        return retired
+
     def _accepted_proposals(self) -> list[Proposal]:
         out: list[Proposal] = []
         for entry in self.queue.accepted():
@@ -423,7 +469,16 @@ class ReflectLoop:
             report.findings = findings
             report.errors.extend(orient_errors)
 
+            # Anything the user fixed since last night stops being "open" here,
+            # before the queue is added to, so the report counts it correctly.
+            retired = self.retire_resolved(findings)
+
             decision = self.decide(proposals)
+            decision.notes.extend(
+                f"retired {fp[:8]}: the finding behind it no longer occurs, so it was "
+                f"resolved rather than declined"
+                for fp in retired
+            )
             report.proposals = decision.apply + decision.queue
             report.suppressed = [p.fingerprint for p in decision.suppressed]
 

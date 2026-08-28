@@ -638,3 +638,59 @@ class TestCorrectionMeaningIsPreserved(unittest.TestCase):
     def test_a_configured_marker_list_still_protects_negation(self) -> None:
         rule = FrictionCorrection({"markers": ["no,", "don't", "stop"]})
         self.assertIn("don't deploy", rule.instruction_from("no, don't deploy on fridays").lower())
+
+
+class TestImperativeMarkersNeedHeadPosition(unittest.TestCase):
+    """An ordinary imperative mid-sentence is an instruction, not a correction.
+
+    Found by the loop reading this project's own transcripts: the prompt "dive
+    deep into web and github and dont stop until all is done" was reported as a
+    correction, because "stop" is on the marker list and fell inside the
+    look-ahead window. It is a `safe`-tier proposal, so it would have written a
+    mangled convention into the memory file without anyone approving it.
+    """
+
+    def context(self, prompt: str, root) -> DetectContext:
+        now = T0
+        signals = [
+            Signal(kind=KIND_REPLY, source="chat", text="I did the thing.",
+                   ts=now - 20, session="s", ordinal=0, actor=ACTOR_ASSISTANT),
+            Signal(kind=KIND_PROMPT, source="chat", text=prompt,
+                   ts=now - 10, session="s", ordinal=1, actor=ACTOR_HUMAN),
+        ]
+        return DetectContext(signals=signals, root=root, now=now)
+
+    def fires(self, prompt: str) -> bool:
+        with TemporaryDirectory() as tmp:
+            ctx = self.context(prompt, Path(tmp))
+            return bool(FrictionCorrection().run(ctx))
+
+    def test_imperatives_mid_sentence_are_not_corrections(self) -> None:
+        for prompt in [
+            "dive deep into web and github and dont stop until all is done",
+            "run the migration, stop the server first, then deploy",
+            "add a flag so callers can undo the last write",
+            "document how to revert a release",
+        ]:
+            with self.subTest(prompt=prompt):
+                self.assertFalse(self.fires(prompt), f"not a correction: {prompt!r}")
+
+    def test_the_same_words_at_the_head_still_count(self) -> None:
+        for prompt in [
+            "don't force push - use --force-with-lease",
+            "stop using pytest fixtures here",
+            "revert that migration",
+            "undo the rename",
+        ]:
+            with self.subTest(prompt=prompt):
+                self.assertTrue(self.fires(prompt), f"is a correction: {prompt!r}")
+
+    def test_discourse_markers_still_match_anywhere_in_the_window(self) -> None:
+        """"actually" and "i meant" carry no sense other than repair."""
+        for prompt in [
+            "hmm, actually use ruff for linting",
+            "sorry, i meant the staging cluster",
+            "well that's not what I asked for, use tabs",
+        ]:
+            with self.subTest(prompt=prompt):
+                self.assertTrue(self.fires(prompt), f"is a correction: {prompt!r}")

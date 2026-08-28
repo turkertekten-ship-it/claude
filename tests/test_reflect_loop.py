@@ -368,3 +368,64 @@ class TestVerdictAccounting(LoopTestCase):
         self.assertNotIn("rule.stale", verdicts, "an already-satisfied op teaches nothing")
         self.assertEqual(verdicts.get("rule.fresh"), "applied")
         self.assertIn("Brand new thing.", (self.root / "CLAUDE.md").read_text("utf-8"))
+
+
+class TestQueueRetirement(LoopTestCase):
+    """A queue that never retires anything can never reach empty.
+
+    Fixing a finding by hand used to leave its proposal queued for ever, so the
+    user was asked to dismiss work they had already done - and "nothing is open"
+    was unreachable by construction.
+    """
+
+    def pending_rules(self, config) -> list[str]:
+        return [
+            (e.get("proposal") or {}).get("finding", {}).get("rule_id", "")
+            for e in ReviewQueue(config.queue_path).pending()
+        ]
+
+    def test_a_finding_fixed_by_hand_retires_its_proposal(self) -> None:
+        # `docs.undocumented_entrypoint` is review-tier, so it reaches the queue;
+        # `docs.broken_ref` is safe-tier and is applied instead of queued.
+        config = self.config()
+        ReflectLoop(config).run_cycle(since=0)
+        self.assertIn("docs.undocumented_entrypoint", self.pending_rules(config),
+                      "the Makefile has a target the README never mentions")
+
+        # Fix it the way a person would, outside the loop entirely.
+        readme = self.root / "README.md"
+        readme.write_text(readme.read_text("utf-8") + "\n\nRun `make ship` to publish.\n",
+                          encoding="utf-8")
+
+        ReflectLoop(config).run_cycle(since=0)
+        self.assertNotIn("docs.undocumented_entrypoint", self.pending_rules(config),
+                         "a resolved finding must stop being open")
+
+    def test_retirement_is_not_a_verdict_on_the_rule(self) -> None:
+        """Nothing here knows whether this rule's proposal is why it got fixed."""
+        config = self.config()
+        loop = ReflectLoop(config)
+        loop.run_cycle(since=0)
+        readme = self.root / "README.md"
+        readme.write_text(readme.read_text("utf-8") + "\n\nRun `make ship` to publish.\n",
+                          encoding="utf-8")
+        loop.run_cycle(since=0)
+
+        journal = Journal(config.journal_dir)
+        verdicts = [o.verdict for o in journal.outcomes(rule_id="docs.undocumented_entrypoint")]
+        self.assertNotIn("dismissed", verdicts, "retiring is not declining")
+        self.assertNotIn("applied", verdicts, "and it is not credit either")
+
+    def test_event_based_rules_are_never_retired_this_way(self) -> None:
+        """A friction finding is absent on any quiet day; retiring it would
+        discard a real suggestion the first time the user did not repeat
+        themselves."""
+        from oodarag.reflect.detect.base import registry
+
+        for rule_id, cls in registry().items():
+            if rule_id.startswith(("friction.", "terminal.")):
+                with self.subTest(rule=rule_id):
+                    self.assertNotEqual(
+                        set(cls.consumes), {"file"},
+                        "an event rule must not look like a state rule",
+                    )

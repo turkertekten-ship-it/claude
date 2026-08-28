@@ -111,17 +111,39 @@ state nobody can explain.
 
 Under active construction. See `internal/PLAN.md` for what is built and what is next.
 
-## Quick start
+## Commands
 
-```bash
-make test              # stdlib unittest, no dependencies required
-make reflect           # tonight's review, as a dry run - changes nothing
-make reflect-apply     # let it make the safe-tier changes
-make schedule          # emit a systemd timer for 22:30 (KIND=launchd|cron|github)
-```
+Everything runs from a checkout with no install step: `PYTHONPATH=src`, standard
+library only. `make help` lists these too.
 
-`make demo`, `make index` and `make query` are declared but not built yet - they
-exit with a message rather than a traceback. See `internal/PLAN.md`.
+**Working on the repo**
+
+| Command | Does |
+|---|---|
+| `make test` | The full suite on stdlib `unittest`. No dependencies, no plugins. |
+| `make lint` | Compile-checks every module. |
+| `make install` | Editable install with dev extras, if you would rather have the `ooda` entry point on your PATH. |
+| `make clean` | Removes `.oodarag/`, `.data/` and caches. |
+
+**The nightly loop** — see [The nightly loop](#the-nightly-loop) above
+
+| Command | Does |
+|---|---|
+| `make reflect` | Tonight's review as a dry run. Changes nothing. |
+| `make reflect-apply` | Runs the cycle and applies the `safe`-tier edits. |
+| `make reflect-queue` | The proposals waiting on your accept or dismiss. |
+| `make reflect-status` | What the loop has observed and learned so far. |
+| `make reflect-rules` | Every rule and the confidence it has earned from your verdicts. |
+| `make schedule` | Emits an end-of-day schedule. `KIND=systemd\|launchd\|cron\|github`, `AT=22:30`. |
+
+The `ooda reflect` CLI has more than the Makefile exposes — `accept`, `dismiss`,
+`revert <cycle-id>`, `report --list`. Run `ooda reflect --help`.
+
+**Retrieval** — declared, not yet built
+
+`make index`, `make query`, `make eval`, `make demo` and `make loop` exit with a
+message naming what is missing rather than a traceback. `internal/PLAN.md` has
+the build order.
 
 ## Design principles
 

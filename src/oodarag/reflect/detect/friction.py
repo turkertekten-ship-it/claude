@@ -875,8 +875,18 @@ class FrictionCorrection(Detector):
                     continue  # nothing was said yet, so nothing is being corrected
                 if len(words(sig.text)) > self.max_words:
                     continue
-                marker = self.marker_in(sig.text)
-                if marker is None:
+                found = self.marker_in(sig.text)
+                if found is None:
+                    continue
+                marker, opened_with_it = found
+                if marker in NON_STRIPPABLE_MARKERS and not opened_with_it:
+                    # These markers are ordinary imperatives as well as correction
+                    # cues. Mid-sentence they are the instruction itself: "don't stop
+                    # until it is done" is a request, and "stop the server first" is a
+                    # step - neither repairs the previous answer. Only at the very head
+                    # of a prompt does one of them plausibly mean "that was wrong".
+                    # The discourse markers ("no,", "actually", "i meant") carry no
+                    # other sense, so they still count anywhere in the window.
                     continue
                 instruction = self.instruction_from(sig.text)
                 if len(content_words(instruction)) < self.min_instruction_words:
