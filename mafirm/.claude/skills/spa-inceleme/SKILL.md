@@ -14,7 +14,8 @@ Olmayan bir madde bir bulgudur.
 
 1. **Kapanış öncesi koşullar**: neler, her birini kim kontrol ediyor, saati ne.
 2. **Ara dönem taahhütleri**: değer koruma mı fiilî kontrol mü? 4054 sayılı
-   Kanun madde 11 bakımından izinsiz kapanış riski doğuranları işaretle.
+   Kanun m.10 ve 2010/4 sayılı Tebliğ m.10 bakımından izinsiz kapanış
+   riski doğuranları işaretle.
 3. **Beyanlar**: kapsam, sınırlayıcılar, bilgi ve önemlilik kayıtları.
 4. **Açıklama**: veri odasının genel açıklama sayılması kabul edilmiş mi?
    Alıcıya maliyeti ne?

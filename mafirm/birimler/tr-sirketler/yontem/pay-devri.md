@@ -20,7 +20,15 @@ devir gerçekleşmez.
   senedinin **zilyetliğinin devri** ile gerçekleşir.
 - **TTK m.499**: devir, ancak **pay defterine kayıt** ile şirkete karşı hüküm
   ifade eder. Ciro ve teslim hakkı taraflar arasında geçirir; şirketin tanımak
-  zorunda olduğu şey pay defteri kaydıdır.
+  zorunda olduğu şey pay defteri kaydıdır. Kaydın yapılması için **yönetim
+  kurulu kararı** gerekir — yani kapanış günü tek başına devralanın elinde
+  olmayan bir adım vardır ve takvim buna göre kurulur.
+
+- **Zilyetliğin devri fiziksel teslim olmak zorunda değildir.** TTK m.490/2
+  "zilyetliğin geçirilmesi" der; hükmen teslim, zilyetliğin havalesi ve kısa
+  elden teslim de bu kapsamdadır. Kapanış odasında senedin elden verilmesi tek
+  yol değildir — ama seçilen yol belgeye yazılır, çünkü sonradan ispatı gereken
+  şey budur.
 - Esas sözleşme devri yönetim kurulu onayına bağlayabilir. Bağlamışsa, paylar
   tamamen ödenmiş olsa bile onay gerekir. Takvimi modellemeden önce esas
   sözleşmeyi okuyun.
@@ -32,6 +40,13 @@ devir gerçekleşmez.
 - **TTK m.595/2**: şirket sözleşmesinde aksi öngörülmedikçe devir **genel kurul
   onayına** tabidir. Onaya kadar devir askıdadır; onay, devri tamamlayan
   **kurucu** işlemdir.
+
+- **Üç ay kuralı — takvimi doğrudan belirler.** Genel kurul, başvurudan
+  itibaren **üç ay içinde açıkça reddetmezse onay vermiş sayılır**. Yani onay
+  iki yoldan gelir: açık karar ya da üç ayın dolması. Kapanış takvimi
+  kurulurken bu süre gerçek bir dış kısıttır; karşı taraf oyalayarak kapanışı
+  üç ay öteleyebilir ve SPA'daki nihai tarih buna göre yazılmazsa alıcı
+  sıkışır.
 - Pay defterine kayıt, ardından **Ticaret Sicili Müdürlüğü**'ne tescil ve
   Ticaret Sicili Gazetesi'nde ilan.
 
