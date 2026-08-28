@@ -86,8 +86,13 @@ BEYAN = json.load(io.open(os.path.join(S, "beklenen.json"),
 # göremezdi. Kontrolün kendisi hepsi.sh'in epiloguna, tam günlüğü bilen tek
 # yere taşındı (on altıncı turun dersi, üçüncü yerde). Burada kalan görev:
 # o kontrolün ORADA OLDUĞUNU sağlamak — yoksa kapsama sessizce kaybolur.
-_hepsi = oku(os.path.join(S, "hepsi.sh"))
-_var = ("beklenen.json" in _hepsi and "_gunluk" in _hepsi
+# [AU · otuz dokuzuncu tur] Epilog kontrolleri sinama/epilog.py'ye
+# taşındı (gömülü heredoc oldukları sürece mutasyonla sınanamıyorlardı).
+# Yapısal sağlama kodu TAKİP EDER: hepsi.sh onu çağırmalı, epilog.py de
+# kontrolü taşımalı. İkisinden biri kopsa kapsama sessizce kaybolurdu.
+_hepsi = oku(os.path.join(S, "hepsi.sh")) + oku(os.path.join(S, "epilog.py"))
+_cagri = "epilog.py" in oku(os.path.join(S, "hepsi.sh"))
+_var = (_cagri and "beklenen" in _hepsi and "_gunluk" in _hepsi
         and re.search(r"BEKLENEN\\s\+%s", _hepsi) is not None)
 vaka("AF-03", "beyan-koşum sağlaması tam günlüğü bilen yerde duruyor",
      _var,
@@ -108,7 +113,8 @@ vaka("AF-03", "beyan-koşum sağlaması tam günlüğü bilen yerde duruyor",
 # ayrıntıyı ister, canlı ayrıntı ise ancak TAM günlükte vardır. Burada kalan
 # görev, o karşılaştırmanın orada durduğunu sağlamaktır.
 _belirtili = sum(1 for k in BEYAN if BEYAN[k].get("belirti"))
-_var4 = ("belirti" in _hepsi and "parmak" in _hepsi and "0.6" in _hepsi)
+_var4 = (_cagri and "belirti" in _hepsi and "parmak" in _hepsi
+         and "0.6" in _hepsi)
 vaka("AF-04", "belirti karşılaştırması tam günlüğü bilen yerde duruyor",
      _var4,
      "hepsi.sh epilogunda belirti karşılaştırması bulunamadı" if not _var4

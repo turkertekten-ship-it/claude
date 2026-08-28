@@ -112,6 +112,8 @@ python3 "$S/ks_as_kapi_kapsama.py"; topla "AS · kapıların öz-sınama kapsama
 echo
 python3 "$S/ks_at_denetim_kapsama.py"; topla "AT · denetimin mutasyon kapsaması" $?
 echo
+python3 "$S/ks_au_epilog.py"; topla "AU · epilog kontrollerinin sınaması" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"
@@ -139,6 +141,7 @@ echo "  I · §5 mevzuat doğrulaması  -> sinama/ks_i_mevzuat.md"
 return "$t"
 }
 
+_kok=$(cd "$S/.." && pwd)
 _gunluk=$(mktemp)
 _ana | tee "$_gunluk"
 _t=${PIPESTATUS[0]}
@@ -157,82 +160,25 @@ _gecici=$(mktemp)
 mv -f "$_gecici" "$S/SAYIM.txt"
 
 # [AL-06 · otuzuncu tur] Beyan edilmiş her vaka koşumda BEKLENEN olarak
-# görünüyor mu? Bu kontrol ÖNCE AF-03 içindeydi ve SONUC-sonra.txt'yi
-# okuyordu — yani `hepsi.sh > SONUC-sonra.txt` yönlendirmesinin KENDİ
-# hedefini. Ölçüldü: bağımsız koşumda AF 853 satır görüyor (bir ÖNCEKİ
-# koşumun dosyası), yönlendirilmiş koşumda 690 satır (nihai dosya 832) —
-# yani AF'den SONRAKİ her takım (AG, AH, AI, AJ, AK, AL) onun görüş
-# alanının dışında. Bugün geçiyor olmasının tek sebebi beyan edilmiş her
-# vakanın erken bir takımda durması. Geç bir takımda beyanlı bir vaka
-# KAYBOLSA, kontrol bunu göremezdi: tam da en çok gerekli olduğu aralığa
-# kördü. On altıncı turun dersinin aynısı, üçüncü yerde.
-# Çözüm de aynısı: kontrol, tam ve bayatlamamış günlüğü bilen TEK yere —
-# bu epiloga — taşınır.
-if [ -f "$S/beklenen.json" ]; then
-  _kayip=$(python3 - "$S/beklenen.json" "$_gunluk" <<'PYEOF'
-import json, re, sys
-beyan = json.load(open(sys.argv[1], encoding="utf-8"))["vakalar"]
-gunluk = open(sys.argv[2], encoding="utf-8", errors="replace").read()
-
-def parmak(c):
-    return {k[:6] for k in re.findall(r"[\wçğıöşüÇĞİÖŞÜ]{4,}", c.lower())}
-
-yok, kaymis, belirtisiz = [], [], []
-for kod in sorted(beyan):
-    m = re.search(r"^BEKLENEN\s+%s\s+[^\n]*\n(?:\s{4,}([^\n]*)\n)?"
-                  % re.escape(kod), gunluk, re.M)
-    if not m:
-        yok.append(kod)
-        continue
-    belirti = beyan[kod].get("belirti")
-    if not belirti:
-        belirtisiz.append(kod)
-        continue
-    canli = (m.group(1) or "").strip()
-    if not canli:
-        continue
-    a, b = parmak(belirti), parmak(canli)
-    if a and len(a & b) / len(a) < 0.6:
-        kaymis.append(kod)
-print("|".join([" ".join(yok), " ".join(kaymis), " ".join(belirtisiz)]))
-PYEOF
-)
-  _yok=$(echo "$_kayip"     | cut -d'|' -f1)
-  _kay=$(echo "$_kayip"     | cut -d'|' -f2)
-  _bsz=$(echo "$_kayip"     | cut -d'|' -f3)
-  for _p in "beyanlı olup koşumda BEKLENEN görünmeyen vaka:$_yok:$_yok" \
-            "beyan edilen BELİRTİ artık canlı belirtiyle uyuşmuyor:$_kay:$_kay" \
-            "belirti KAYDI olmayan beyan:$_bsz:$_bsz"; do
-    _ad=${_p%%:*}; _deger=${_p##*:}
-    if [ -n "$(echo "$_deger" | tr -d '[:space:]')" ]; then
-      echo
-      echo "  ------------------------------------------------------------"
-      echo "  UYARI $_ad"
-      echo "  Tam günlük üzerinden ölçüldü (epilog): beyan bayat ya da vaka kayboldu."
-      _t=$((_t + 1))
-    fi
-  done
+# görünüyor mu, belirtisi kaymış mı, ve raporun EL YAZISI vaka sayısı bu
+# koşumun gerçek toplamıyla uyuşuyor mu? Üçü de BURADA yapılır çünkü burası
+# tam ve bayatlamamış günlüğü bilen TEK yerdir. (AF-03 önce SONUC-sonra.txt'yi
+# okuyordu — yani bu betiğin KENDİ yönlendirme hedefini, koşum sürerken:
+# bağımsızken 853 satır, yönlendirme içinde 690, nihai 832. On altıncı turun
+# katman dersi, üçüncü yerde.)
+#
+# [AU · otuz dokuzuncu tur] Kontroller artık sinama/epilog.py içinde. Gömülü
+# heredoc oldukları sürece MUTASYONLA SINANAMIYORLARDI: bir epilog kontrolünü
+# kırmak kırk üç takımın tamamını koşturmayı gerektiriyordu. Ayrıştırma katman
+# ihlali değildir — kontrol hâlâ buradan, tam günlüğü bilen yerden çağrılıyor;
+# değişen tek şey (günlük, taban) ikilisinin SAF BİR FONKSİYONU hâline gelmesi.
+_epilog=$(python3 "$S/epilog.py" "$_gunluk" "$_kok" 2>&1); _uyari=$?
+if [ -n "$_epilog" ]; then
+  echo "$_epilog"
+  _t=$((_t + _uyari))
+  echo
+  printf "  %-38s %s\n" "TOPLAM SİNYAL (düzeltilmiş)" "$_t"
 fi
 
-# Raporun EL YAZISI vaka sayısı, BU koşumun gerçek toplamıyla karşılaştırılır.
-# Burada yapılır çünkü burası toplamı bayatlamadan bilen tek yerdir: denetime
-# konulduğunda kontrol iki koşumda yakınsıyordu ve bu, kırmızıyı görmezden
-# gelmeyi öğretir.
-_kok=$(cd "$S/.." && pwd)
-if [ -f "$_kok/RAPOR.md" ]; then
-  _iddia=$(grep -oE '\*\*[0-9]{3}$|^vaka, [0-9]+ mutasyon|[0-9]{3} vaka \+ 15 mutasyon' \
-             "$_kok/RAPOR.md" | grep -oE '[0-9]{3}' | sort -u)
-  _yanlis=""
-  for _i in $_iddia; do [ "$_i" != "$_toplam" ] && _yanlis="$_yanlis $_i"; done
-  if [ -n "$_yanlis" ]; then
-    echo
-    echo "  ------------------------------------------------------------"
-    echo "  UYARI raporun vaka sayısı bayat:$_yanlis (gerçek: $_toplam)"
-    _t=$((_t + 1))
-    printf "  %-38s %s\n" "TOPLAM SİNYAL (düzeltilmiş)" "$_t"
-    echo "  Bu satır yukarıdaki özetten SONRA hesaplanır: gerçek toplam ancak"
-    echo "  bütün takımlar koştuktan sonra bilinir. Çıkış kodu bu sayıdır."
-  fi
-fi
 rm -f "$_gunluk"
 exit "$_t"

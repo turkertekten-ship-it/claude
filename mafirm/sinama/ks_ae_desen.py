@@ -98,10 +98,23 @@ vaka("AE-02", "Türkçe harf içeren her karakter sınıfı TAM",
 # --- AE-03 · Türkçe metinde çıplak .lower() kullanılıyor mu -----------
 # §12'nin B-10 kusuru: 'İ'.lower() 'i' + U+0307 verir. Çözüm tr_kucult'tur;
 # ama çözümü YAZMAK yetmez, her yerde KULLANILMASI gerekir.
+# [kendi kusurum · otuz dokuzuncu tur] Ölçüt `#` ile başlayan satırları
+# atlıyordu ama BELGE DİZGELERİNİ atlamıyordu. epilog.py'nin docstring'i bu
+# kusuru ANLATIYOR ve içinde hem ".lower()" hem "metin" geçiyor — yani AE,
+# kusurun kendisini değil kusurdan SÖZ EDEN düzyazıyı işaretledi. Yanlış
+# pozitif üreten bir kapı, bir gün içinde kapatılır (V takımının dersi).
+# AN'de yorum, AM'de açıklama cümlesi; burada belge dizgesi — aynı sınıf:
+# metinden söz etmek metnin kendisi değildir.
+def _belgesiz(kaynak):
+    return re.sub(r'("""|\'\'\')(?:.|\n)*?\1',
+                  lambda m: "\n" * m.group(0).count("\n"), kaynak)
+
+
 ciplak = []
 for rel, m in KAYNAK:
     if not rel.endswith(".py"):
         continue
+    m = _belgesiz(m)
     for satir_no, satir in enumerate(m.split("\n"), 1):
         if satir.lstrip().startswith("#") or "tr_kucult" in satir:
             continue

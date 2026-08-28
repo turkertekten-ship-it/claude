@@ -133,26 +133,79 @@ if os.path.exists(once):
 # da gerçek bir şart var, hiçbir madde şartsız kalmıyor:
 #   * takım sadık koşumda VARSA  -> atıf orada KALDI olmalı (eski güç aynen)
 #   * takım sonradan yazıldıysa  -> atıf, gerçekten TANIMLI bir vaka olmalı
+# Geçerli vaka öneki = diskteki takımların harfi (ks_<harf>_...) + tabanda
+# görülenler. Uydurma bir önek ("ZZ") hiçbirinde yoktur ve ölçüte GİRER.
+_ONEKLER = {a.split("_")[1].upper()
+            for a in os.listdir(os.path.join(_KOK_COZ, "sinama"))
+            if a.startswith("ks_") and "_" in a[3:]}
 _taban_onekleri = {k.split("-")[0] for k in kaldi_once}
+_ONEKLER |= _taban_onekleri
+# [otuz dokuzuncu tur] İlk sürüm yalnızca `.py` takımlarında tek bir
+# `vaka("XX-nn")` imzasını arıyordu. Ama vakaların bir kısmı MARKDOWN
+# takımlarında tanımlı (G, H, I) ve bazı python takımları başka bir imza
+# kullanıyor (F, V, J). Sonuç: on meşru errata atfı "böyle bir vaka tanımlı
+# değil" diye işaretlendi — onda sekizi yanlış işaretleyen bir ölçüt,
+# kırmızıyı görmezden gelmeyi öğretir (AF-04'ün dersi). Ölçüt bütün takım
+# dosyalarını (py, sh, md) tarayıp kimlik BİÇİMİNDEKİ her jetonu toplar;
+# uydurma bir kimlik (ZZ-99) hiçbirinde geçmez ve yakalanır.
 _tanimli = set()
-for _ad in sorted(os.listdir(os.path.join(_KOK_COZ, "sinama"))):
-    if _ad.startswith("ks_") and _ad.endswith(".py"):
-        _tanimli |= set(re.findall(
-            r'vaka\(\s*"([A-Z]{1,2}-\d+[a-z]?)"',
-            open(os.path.join(_KOK_COZ, "sinama", _ad),
-                 encoding="utf-8").read()))
+_sin = os.path.join(_KOK_COZ, "sinama")
+# D MUTASYON HARNESSİDİR: içinde bilerek BOZUK fixture'lar taşır — uydurma
+# bir kimlik de dâhil. Onu "tanımlı vaka" kaynağı saymak, mutasyonun kendi
+# fixture'ının mutasyonu görünmez kılması demektir. Otuzuncu turda AL-03'te
+# düştüğüm tuzağın aynısı: KANIT, ÖLÇÜME KARIŞMAMALI.
+# ANMAK, TANIMLAMAK DEĞİLDİR. Uydurma kimlik `ZZ-99` üç ayrı yerde geçiyordu:
+# D'nin mutasyon fixture'ında, AU'nun sentetik beyanında, ve bu dosyada onu
+# ANLATAN yorumda. Hepsi ölçütü tatmin ediyor ve uydurma kimlik "tanımlı"
+# sayılıyordu — yorum/prosedür, açıklama/kural, belge dizgesi/kod ayrımının
+# beşinci hâli.
+#
+# Ölçüt aparatın gerçek düzenine bağlandı: BİR TAKIM YALNIZCA KENDİ VAKALARINI
+# TANIMLAR. `ks_au_epilog.py` AU-nn tanımlar; içinde geçen ZZ-99 bir anmadır.
+# Uydurma bir önek için `ks_zz_*` dosyası hiç yoktur, dolayısıyla hiçbir yerde
+# tanımlı olamaz.
+for _ad in sorted(os.listdir(_sin)):
+    if not _ad.startswith("ks_") or "_" not in _ad[3:]:
+        continue
+    _harf = _ad.split("_")[1].upper()
+    try:
+        _m = open(os.path.join(_sin, _ad), encoding="utf-8",
+                  errors="replace").read()
+    except OSError:
+        continue
+    _tanimli |= {k for k in re.findall(r"\b([A-Z]{1,2}-\d+[a-z]?)\b", _m)
+                 if k.split("-")[0] == _harf}
 
 agir = [(b, k) for b, a, k in maddeler if a in ("A", "B") and k]
 sinanmamis = []
 for b, kimlikler in agir:
-    somut = [k for k in kimlikler if len(k) > 1 and k[0] in "ABCE"]
+    # [otuz dokuzuncu tur] Önek listesi "ABCE" diye SABİTLENMİŞTİ — takımlar
+    # yalnızca A..E iken doğruydu. Bugün takımlar AU'ya kadar gidiyor ve
+    # `ZZ-99` gibi uydurma bir kimlik ölçütün DIŞINDA kalıyordu: D'nin
+    # "errata'ya uydurma vaka kimliği ekle" mutasyonu bu yüzden kaçtı.
+    # Elle yazılmış liste, ölçtüğü şeyden ayrışır — bu oturumun üçüncü kez
+    # gördüğü sınıf. Önekler artık diskteki takımlardan türetiliyor.
+    # Ölçüt ÖNEK LİSTESİNDEN BİÇİME çevrildi. Önek listesi ("ABCE" idi, sonra
+    # diskteki takımlardan türetildi) uydurma bir kimliği ölçütün DIŞINDA
+    # bırakıyordu: `ZZ-99` bilinen bir önek taşımadığı için "vaka bile değil"
+    # sayılıp atlanıyordu — yani en çok yakalanması gereken şey muaftı.
+    # `*(...)*` içinden gelen her jeton zaten bir vaka atfı olmak üzere
+    # yazılmıştır; ölçüt kimlik BİÇİMİNİ arar ve gerisini iki dala bırakır.
+    somut = [k for k in kimlikler
+             if re.match(r"^[A-Z]{1,2}-\d+[a-z]?$", k)]
     if not somut:
         continue
     tabanda = [k for k in somut if k.split("-")[0] in _taban_onekleri]
     if tabanda:
         if not any(k in kaldi_once for k in tabanda):
             sinanmamis.append((b[:44], tabanda, "sadık koşumda kalmamış"))
-    elif not any(k in _tanimli for k in somut):
+    # J takımı kimlikleri ÇALIŞMA ANINDA kuruyor: vaka("J-07%s" % etiket).
+    # Statik tarama `J-07s`'yi göremez ama `J-07`'yi görür. Bir atfın TABANI
+    # (sondaki küçük harf ekleri atılmış hâli) tanımlıysa atıf gerçektir.
+    # Bunu doğrulamadan errata'yı "düzeltseydim" gerçek bir atfı bozacaktım —
+    # ölçüt kırmızı verdiğinde önce ÖLÇÜTÜ sınamak gerekir.
+    elif not any(k in _tanimli or re.sub(r"[a-z]+$", "", k) in _tanimli
+                 for k in somut):
         sinanmamis.append((b[:44], somut, "böyle bir vaka tanımlı değil"))
 vaka("M-03", "[A] ve [B] maddelerinin atıfları gerçek vakalara bağlı",
      not sinanmamis,

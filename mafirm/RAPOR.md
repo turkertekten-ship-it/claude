@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** kırk üç çalıştırılabilir takım — **342
+**Yamalı hâlde sistem çalışıyor:** kırk dört çalıştırılabilir takım — **349
 vaka, 27 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15 → **27/27** (mutasyon kümesi otuz
 sekizinci turda on beşten yirmi yediye çıkarıldı: 26 kontrolün dokuzu hiç
@@ -2238,6 +2238,58 @@ keşfedilir, muafiyetler beyan edilir. Muafiyet listesi küçük ve durağandır
 büyüyen taraftır. Yeni bir teslimat eklendiğinde artık hiçbir şey yapmak
 gerekmiyor — kural kendiliğinden ona da uygulanıyor.
 
+### "Pahalı olduğu için ölçmedim" bir gerekçe değildir
+
+Otuz sekizinci tur denetimin 26 kontrolüne "her kontrolün kanıtlanmış bir
+mutasyonu olmalı" ölçütünü uyguladı. Aynı ölçüt bir katman **yukarıda** hiç
+uygulanmamıştı: koşum betiğinin epilogu dört kontrol taşıyor ve hiçbiri
+mutasyonla sınanmamıştı.
+
+Sebebi teknikti ve dürüstçe adlandırmak gerekir: bir epilog kontrolünü kırmak
+**kırk üç takımın tamamını** koşturmayı gerektiriyordu (~60 sn). Dört kontrol
+için dört tam koşum — dört dakika. Ölçüt uygulanmadı çünkü **pahalıydı.** Bu,
+incelemenin baştan beri kabul etmediği gerekçedir.
+
+Çözüm kontrolü zayıflatmak değil, **saf bir fonksiyona çevirmek** oldu.
+`sinama/epilog.py` artık `(günlük, taban, rapor)` alıp uyarı üretiyor;
+`hepsi.sh` onu hâlâ tam günlüğü bilen tek yerden çağırıyor — **katman
+korundu** — ama sınama sentetik bir günlükle yapılabiliyor:
+
+| | önce | sonra |
+|---|---|---|
+| epilog kontrollerinin sınanması | 4 tam koşum ≈ **4 dk** | 7 vaka · **32 ms** |
+
+Sınanan şey bir **kopya değil**: üretimde koşan kodun kendisi. AU-07 çağrının
+yerinde durduğunu ve gömülü kopyanın kalmadığını sağlıyor — yoksa takım bir
+kopyayı sınayıp hiçbir şey kanıtlamazdı.
+
+Ve ayrıştırmanın yan faydası hemen görüldü: **AE'nin desen taraması o kodu
+hiç görmüyordu**, çünkü AE `.py` tarar ve kod bir `.sh` içindeydi. Dosyaya
+çıkar çıkmaz AE Türkçe metin üzerinde **çıplak `.lower()`** buldu — sınıfın
+yedinci sızması, dört tur boyunca taramanın kör noktasında duruyordu.
+
+### Bir ölçüt kırmızı verdiğinde, önce ölçütü sına
+
+Bu turda M-03 dört kez yanlış cevap verdi ve dördü de aynı sınıfın örneği —
+**anmak, tanımlamak değildir**:
+
+| ölçüt | hata | neden |
+|---|---|---|
+| önek listesi `"ABCE"` | fazla dar | takımlar A..E iken doğruydu; bugün AU'ya gidiyor, `ZZ-99` ölçütün dışında kaldı |
+| tüm `ks_*` dosyalarını tara | fazla geniş | uydurma kimlik **D'nin fixture'ında**, **AU'nun beyanında** ve **M'nin kendi yorumunda** geçiyordu |
+| her takım kendi önekini tanımlar | neredeyse doğru | J kimlikleri **çalışma anında** kuruyor: `vaka("J-07%s" % etiket)` |
+| taban ekleri de tanınır | doğru | `J-07s` → tabanı `J-07` tanımlı; `ZZ-99` hiçbir yerde yok |
+
+Üçüncü satır önemli: ölçüt kırmızı verdiğinde errata'daki `J-07s` atfını
+"düzeltmeye" gidebilirdim. Gerçek bir atfı bozacaktım. **Bir ölçüt kırmızı
+verdiğinde ilk şüpheli ölçütün kendisidir** — özellikle o ölçütü az önce
+kendim değiştirdiysem.
+
+Ve AE'nin kendisi de aynı sınıfa düştü: belge dizgelerini atlamadığı için
+`epilog.py`'nin kusuru **anlatan** docstring'ini kusur sandı. Yorum,
+açıklama cümlesi, belge dizgesi, fixture, kendi yorumum — beş ayrı kılıkta
+tek bir ders: **bir şeyden söz etmek, o şey olmak değildir.**
+
 ---
 
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
@@ -2361,6 +2413,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | AR · onay durumu (yedinci kapı) | *onaysız §9 çıktısı hiçbir kapıya takılmıyordu* | **temiz** — yedinci kapı eklendi |
 | AS · kapıların öz-sınama kapsaması | *yedinci kapının öz-sınama vakası yoktu* | **temiz** — dört vaka eklendi, kapsama sağlamaya bağlandı |
 | AT · denetimin mutasyon kapsaması | *26 kontrolün 9'u hiç sınanmamıştı* | **temiz** — 12 mutasyon eklendi, hedef beyanı zorunlu |
+| AU · epilog kontrollerinin sınaması | *dört epilog kontrolü hiç sınanmamıştı* | **temiz** — saf fonksiyona çevrildi, 7 vaka 32 ms |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -2419,7 +2472,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 ### Nasıl yeniden koşulur
 ```
 ./sinama/hepsi.sh                 # 34 çalıştırılabilir takım:
-                                  #   342 vaka + 27 mutasyon (D)
+                                  #   349 vaka + 27 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -2503,9 +2556,10 @@ Dokuz takım, 96 vaka:
 | AR | **Onay durumu** — onay ihtiyacının beyanı ile onayın kendisi | §9, §12 |
 | AS | **Kapıların öz-sınama kapsaması** — kitabın §14 kusurunu ben de işledim mi | §12, §14, §16 |
 | AT | **Denetimin mutasyon kapsaması** — 26 kontrolün kaçı sınanıyor | §16, §12 |
+| AU | **Epilog kontrollerinin sınaması** — koşumu bilen katman nasıl sınanır | §16, §12 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**342 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**349 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)

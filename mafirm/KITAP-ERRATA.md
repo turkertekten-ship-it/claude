@@ -792,6 +792,31 @@ yokluğun kanıtı değildir") kendisi düşer. *(G-07)*
 **[B] §15.2** izinsiz kapanış riskini "4054 sayılı Kanun madde 11"e
 dayandırıyor — bkz. §5.1, m.10 olmalı. *(I-03)*
 
+## §16 · Denetim — koşumu bilen katman sınanamıyordu
+
+**[B] Koşumun tamamını bilen kontroller, tam da bu yüzden sınanamaz hâlde
+duruyordu.**
+Kitabın §16 denetimi tek koşumluk bir betiktir; bu incelemenin koşum betiği
+ise sonuna dört kontrol ekledi (beyan/BEKLENEN eşleşmesi, belirti kayması,
+belirtisiz beyan, raporun el yazısı vaka sayısı). Bunlar **doğru katmanda**
+duruyordu — tam ve bayatlamamış günlüğü bilen tek yer orası. Ama gömülü bir
+heredoc oldukları için **mutasyonla sınanamıyorlardı**: bir tanesini kırmak
+kırk üç takımın tamamını koşturmayı gerektiriyordu (~60 sn), dördü için dört
+dakika. Ölçüt uygulanmadı çünkü **pahalıydı** — bu incelemenin baştan beri
+kabul etmediği gerekçe.
+
+Ayrıca AE'nin desen taraması onları hiç görmüyordu: AE `.py` tarar, bu kod
+bir `.sh` içindeydi. Nitekim orada Türkçe metin üzerinde **çıplak
+`.lower()`** duruyordu — sınıfın yedinci sızması, taramanın kör noktasında.
+*(AU-01…AU-07)*
+
+→CEVAP: YOK — cevabın "yamalı hâlde sistem çalışıyor" cümlesi kapsıyor:
+kontroller `sinama/epilog.py` içinde **saf bir fonksiyona** çevrildi.
+Katman korundu — hepsi.sh onları hâlâ tam günlüğü bilen yerden çağırıyor —
+ama artık sentetik bir günlükle **32 milisaniyede** sınanıyorlar. Sınanan
+şey bir kopya değil, üretimde koşan kodun kendisidir; AU-07 çağrının
+yerinde durduğunu sağlar.
+
 ## §16 · Denetim — kontrollerin mutasyon kapsaması
 
 **[B] §16'nın kontrollerinin kaçının hiç başarısız olamayacağını ölçen bir
