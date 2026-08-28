@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>39 çalıştırılabilir takım · 322 vaka · 0 sinyal</span>
+    <span>40 çalıştırılabilir takım · 327 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -2311,6 +2311,62 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Otuz beşinci tur</span>
+  <h2>Sınıf tarandı — en ağır boşluk imzayla kapanış arasındaydı</h2>
+  <p>Kök üç kez göründüğüne göre artık bir sınıftı, ve yirmi yedinci turun
+  dersi şuydu: <strong>bir örneği düzeltmek sınıfı kapatmaz.</strong> Bu
+  yüzden sistemdeki bütün kontrol noktaları tarandı.</p>
+
+  <table><thead><tr><th>kontrol</th><th>neye bağlı</th><th>hüküm</th></tr></thead><tbody>
+  <tr><td>altı <strong>kapı</strong></td><td>yazma anı</td>
+      <td><strong>doğru</strong> — saklanan sonuç yok, metni üretildiği anda denetler</td></tr>
+  <tr><td><strong>denetim</strong> (26 kontrol)</td><td>çağrılma anı</td>
+      <td><strong>doğru</strong> — yapıya bakar; yapı dış olayla bozulmaz</td></tr>
+  <tr><td>eşik · çatışma · katalog</td><td>an</td><td>31, 33, 34. turlarda yamalandı</td></tr>
+  <tr><td><code>yaptirim-taramasi</code></td><td>üç an</td>
+      <td>sonucu <strong>en hızlı</strong> bozulan kontrol</td></tr>
+  </tbody></table>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AQ-01 · AQ-02</span>
+      <span class="pill a">En ağır sonuçlu boşluk</span></div>
+    <h3>Son kontrol noktası imza; en uzun aralığı kitabın kendi kuralı yaratıyor</h3>
+    <p>Yaptırım taraması kitabın zaman sorusunu <strong>en iyi sorduğu</strong>
+    yerdir: <em>"gizlilik sözleşmesinden önce, münhasırlıktan önce, imzadan
+    önce."</em> Ama üçü de <strong>imzaya kadardır.</strong> Ve §5.1 şunu
+    yazıyor:</p>
+    <blockquote>"…Kurul açıkça ya da inceleme süresinin dolmasıyla zımnen
+    karar vermeden hukuken geçerlilik kazanmaz. <strong>İmza serbesttir;
+    kapanış değildir.</strong>"</blockquote>
+    <p>İzin beklemesi ayları bulabilir; yaptırım listelerine atama
+    <strong>haftalıktır</strong>. Kapanış kontrol listesinde yeniden tarama
+    adımı <strong>yok</strong> — liste izin yazısını ve organ kararlarını
+    teyit ediyor, tarafların <em>hâlâ temiz olup olmadığını</em> sormuyor.</p>
+    <p><strong>Yanlış bir eşik hesabı bir bildirim yükümlülüğünü etkiler; bu
+    boşluk işlemin tamamlanmasının hukuka uygun olup olmadığını
+    etkiler.</strong> Kontrol noktaları dörde çıkarıldı, kapanış listesine
+    0. adım yeniden tarama eklendi — tarama yine bir karar değil.</p>
+  </div>
+
+  <div class="callout">
+    <strong>Yakınlık tuzağı bu oturumda dördüncü kez — hep kendi ölçütümde.</strong>
+    AQ-01 başlıktan sonraki <strong>300 karaktere</strong> bakıyordu; yamanın
+    açıklama paragrafı o pencereye düşünce, mutasyonda kontrol noktası geri
+    alınsa bile vaka yeşil kalıyordu. AQ-03 ise <code>re.I</code> yüzünden bir
+    <strong>başlığa</strong> takılıyordu, kuralın kendisine değil.
+    <br><br>
+    Kural olarak yazıldı: <strong>iddiayı taşıyan en küçük sözdizimsel birimi
+    ölç — cümle ya da cümlecik — asla bir karakter penceresi. Pencere,
+    komşuyu kanıt sanar.</strong>
+    <br><br>
+    Ve mutasyonun kendisi iki kez satır kırılmasına takıldı: dosyada
+    <code>geçerlilik\nkazanmaz</code> diye bölünmüş ifadeyi ham metinde
+    aradığım için mutasyon inmedi. Takım metni düzleştirdiği için
+    <em>doğru</em> olan taraftı — yanılan ölçüm değil, mutasyondu.
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -2428,7 +2484,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 39 takım · 322 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 40 takım · 327 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
