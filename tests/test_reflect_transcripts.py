@@ -126,7 +126,9 @@ class ClaudeCodeFormatTest(unittest.TestCase):
 
     def test_metadata_and_uri(self) -> None:
         first = self.result.signals[0]
-        self.assertEqual(first.session, "S1")
+        # This fixture's file is not named after its sessionId, so the key is
+        # disambiguated by file. See TestSessionKeyDisambiguation for why.
+        self.assertEqual(first.session, "S1:aaaa-bbbb-cccc")
         self.assertEqual(first.metadata["cwd"], "/home/user/claude")
         self.assertEqual(first.metadata["project"], "-home-user-claude")
         self.assertEqual(first.metadata["file"], str(self.session))
@@ -466,3 +468,62 @@ class TestProvenanceFiltering(unittest.TestCase):
         envelope = "<command-name>/goal</command-name><command-args>do a thing</command-args>"
         self.write("proj/s.jsonl", [self.turn(envelope, isSidechain=True)])
         self.assertEqual(self.prompts(), [])
+
+
+class TestSessionKeyDisambiguation(unittest.TestCase):
+    """Two transcript files can claim the same session id.
+
+    A subagent transcript records its *parent's* sessionId. Keyed on the id
+    alone, several files collapse into one conversation - and the sequence rules
+    then read adjacency across a boundary that does not exist:
+    `friction.reformulation` comparing a prompt in one file against a prompt in
+    another, `friction.correction` treating a prompt as repairing a reply it
+    never saw. Both yield confident findings about a conversation that never
+    happened.
+
+    Reported against a sibling tool in this repository as issue #1, where the
+    same pattern caused each file to overwrite the last in storage. This source
+    stores nothing, so the symptom differs, but the key was equally wrong.
+    """
+
+    def setUp(self) -> None:
+        self.tmp = TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+
+    def tearDown(self) -> None:
+        self.tmp.cleanup()
+
+    def write(self, name: str, session_id: str, prompts: list[str]) -> None:
+        records = []
+        for text in prompts:
+            records.append({
+                "type": "user", "userType": "external", "isSidechain": False,
+                "sessionId": session_id, "timestamp": "2026-08-27T10:00:00Z",
+                "message": {"role": "user", "content": text},
+            })
+        (self.root / name).write_text(
+            "\n".join(json.dumps(r) for r in records), encoding="utf-8")
+
+    def sessions(self) -> dict[str, list[str]]:
+        result = ChatTranscriptSource(roots=[self.root]).run(since=0, budget=Budget())
+        out: dict[str, list[str]] = {}
+        for sig in result.signals:
+            out.setdefault(sig.session, []).append(sig.text)
+        return out
+
+    def test_two_files_sharing_a_session_id_stay_separate(self) -> None:
+        self.write("parent.jsonl", "S1", ["first conversation"])
+        self.write("child.jsonl", "S1", ["second conversation"])
+        sessions = self.sessions()
+        self.assertEqual(len(sessions), 2, f"collapsed into: {sorted(sessions)}")
+        self.assertEqual(sorted(sessions), ["S1:child", "S1:parent"])
+
+    def test_a_file_named_after_its_session_keeps_the_bare_id(self) -> None:
+        """The common case: Claude Code names the file for the session."""
+        self.write("S1.jsonl", "S1", ["only conversation"])
+        self.assertEqual(sorted(self.sessions()), ["S1"])
+
+    def test_a_record_without_a_session_id_falls_back_to_the_file(self) -> None:
+        (self.root / "loose.jsonl").write_text(
+            json.dumps({"role": "user", "content": "no session id here"}), encoding="utf-8")
+        self.assertEqual(sorted(self.sessions()), ["loose"])

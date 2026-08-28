@@ -437,6 +437,21 @@ def _is_envelope(text: str) -> bool:
 
 
 def _session_of(rec: dict[str, Any], path: Path) -> str:
+    """A grouping key that survives two files claiming the same session id.
+
+    Subagent transcripts record their *parent's* sessionId, so keying on the id
+    alone collapses several files into one conversation. For a store that would
+    mean each file overwriting the last; here it means the sequence rules read
+    adjacency across a boundary that does not exist - `friction.reformulation`
+    comparing a prompt in one file with a prompt in another, and
+    `friction.correction` treating a prompt as repairing a reply it never saw.
+    Both produce confident findings about a conversation that never happened.
+
+    The file name disambiguates, except where the file *is* the session, which
+    keeps the common case keyed on the id a human would recognise. Reported
+    against a sibling tool in this repository as issue #1; this source is not
+    that tool, but it shared the pattern.
+    """
     session = _first_str(
         rec.get("sessionId"),
         rec.get("session_id"),
@@ -444,7 +459,9 @@ def _session_of(rec: dict[str, Any], path: Path) -> str:
         rec.get("conversationId"),
         rec.get("conversation_id"),
     )
-    return session or path.stem
+    if not session:
+        return path.stem
+    return session if path.stem == session else f"{session}:{path.stem}"
 
 
 # -- timestamps --------------------------------------------------------------
