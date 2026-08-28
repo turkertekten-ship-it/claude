@@ -116,13 +116,14 @@ jobs:
           # abstention gate to 47/54 (L71) - a floor left where it was after an
           # improvement lets the gain erode silently.
           # Then rebased 0.85 -> 0.81 when the corpus grew again, 266 to 349
-          # pages, and the same pipeline read 45/54 instead of 47/54 (L72):
-          # widening retires a ratchet, it does not fail it.
-          # 44/54 = 0.815 passes and 43/54 = 0.796 fails, so one regression is
+          # pages (L72), and 0.81 -> 0.78 when the golden set grew 54 -> 79
+          # cases (L74). A ratchet is calibrated against a corpus *and* a
+          # question set; replacing either retires it rather than failing it.
+          # 62/79 = 0.785 passes and 61/79 = 0.772 fails, so one regression is
           # tolerated and two are not, the tightness this floor has always had.
           python -m oodarag.cli --config oodarag-external.toml eval \
             --goldens evals/goldens-external.jsonl \
-            --min-pass-rate 0.81 --out eval-external.md
+            --min-pass-rate 0.78 --out eval-external.md
 
       - uses: actions/upload-artifact@v4
         if: always()

@@ -27,7 +27,7 @@ from oodarag.pipeline import IndexPipeline
 from oodarag.retrieve.hybrid import HybridRetriever, RetrievalConfig
 from oodarag.store.sqlite_store import SqliteStore
 
-root, _, goldens_path = EXTERNAL
+root, patterns, goldens_path = EXTERNAL
 pages = sorted(pathlib.Path(root).glob("*.md"))
 goldens = load_goldens(goldens_path)
 K = 8
@@ -42,7 +42,7 @@ for target in (90, 175, 260, len(pages)):
         shutil.copy(p, staging / p.name)
     store = SqliteStore(f"{work}/i.db")
     pl = IndexPipeline(store)
-    pl.run([FilesystemConnector(str(staging), patterns=("**/*.md",), key="fs:sub")])
+    pl.run([FilesystemConnector(str(staging), patterns=patterns, key="fs:sub")])
     n = store.stats()["documents"]
     r = HybridRetriever(store, pl.embedder, RetrievalConfig())
     names = {p.name for p in keep}

@@ -19,29 +19,31 @@ MMR.
 
 The argument above is an argument. These are the numbers, from
 `scripts/ablation.py` on the external corpus (349 documents, 4,220 chunks,
-54 golden cases), each configuration differing in one thing:
+79 golden cases), each configuration differing in one thing:
 
 | configuration | pass | recall@8 | prec@8 | MRR | nDCG@8 |
 |---|---|---|---|---|---|
-| hybrid | **45/54** | **0.8953** | **0.2297** | 0.6957 | 0.7341 |
-| lexical only | 42/54 | 0.8837 | 0.2035 | **0.7256** | **0.7499** |
-| dense only | 34/54 | 0.6628 | 0.1831 | 0.5736 | 0.5868 |
-| no rerank | 39/54 | 0.7442 | 0.1453 | 0.5290 | 0.5738 |
-| no MMR | 44/54 | 0.8837 | 0.2297 | 0.6932 | 0.7304 |
+| hybrid | **63/79** | **0.8769** | 0.2692 | 0.6946 | 0.7284 |
+| lexical only | 59/79 | 0.8692 | 0.2404 | **0.7377** | **0.7566** |
+| dense only | 52/79 | 0.6846 | 0.2135 | 0.5774 | 0.5981 |
+| no rerank | 57/79 | 0.7615 | 0.1788 | 0.5563 | 0.5980 |
+| no MMR | 63/79 | 0.8692 | **0.2788** | 0.6937 | 0.7266 |
 
-Hybrid leads the lexical arm by three cases and the dense arm by eleven, and
-leads both on recall and precision. The lexical arm still puts its first correct
-result higher (MRR 0.726 against 0.696) and finds fewer of them.
+Hybrid leads the lexical arm by four cases and the dense arm by eleven, and
+leads both on recall and pass rate. The lexical arm puts its first correct
+result higher (MRR 0.738 against 0.695) and finds less of it - the same shape
+this table has shown at every corpus size where hybrid wins.
 
-**One corpus ago this table said the opposite.** At 266 documents the lexical
-arm tied hybrid on pass rate and beat it on MRR and nDCG, and this ADR recorded
-that the decision was "under pressure from its own gate". Widening to 349
-restored the margin. The lesson is not that the arm was fine all along - it is
-that a corpus of 266 documents could not tell the difference, and neither could
-the version of this ADR that trusted it.
+**Two corpus sizes ago this table said the opposite.** At 266 documents the
+lexical arm tied hybrid on pass rate and beat it on ordering, and this ADR
+recorded the decision as "under pressure from its own gate". Widening to 349 and
+enlarging the question set from 54 cases to 79 restored the margin twice over.
+The lesson is not that the arm was fine all along - it is that neither the
+corpus nor the question set was large enough to tell, and the version of this
+ADR that trusted them said so with the same confidence.
 
-The same run on the primary corpus (84 documents, 898 chunks) agrees: hybrid
-18/20, either arm alone 17/20.
+The same run on the primary corpus (84 documents, 906 chunks) agrees: hybrid
+19/20, the lexical arm 17/20, the dense arm 18/20.
 
 **This table has now been overturned seven times, and how it was wrong is the
 useful part.**

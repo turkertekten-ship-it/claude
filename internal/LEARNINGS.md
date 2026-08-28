@@ -4074,3 +4074,61 @@ than on a mechanism.
 4. **A feature's worth can be a function of corpus size in the direction that
    helps.** This one had no signal at 90 documents. Anything measured once, on
    the smallest corpus anyone had, deserves re-measuring when the corpus grows.
+
+---
+
+## L74 - Twenty-five more golden cases, and the constant I moved twice stopped mattering
+
+L73 ended by saying the abstention floor's instability was a small-sample effect
+and that the fix was more golden cases rather than a normalisation. That is a
+testable claim and the corpus had just grown by 83 pages nobody had written
+questions about.
+
+**Twenty-two answerable cases and three negatives**, written from what each
+package does rather than from its page - a question that reuses a page's wording
+measures the wording. The three negatives are absent by search rather than by
+assumption: `gantt`, `family tree` and Russia's time zones match no page, and
+the third turned out to be contaminated by a single timezone page, which is the
+detector doing its job on a negative exactly as designed. The external golden
+set is now **79 cases**, and every new expectation passes the discrimination
+check.
+
+**The floor's drama evaporated.** Combined pass count across both corpora, at 79
+external cases instead of 54:
+
+| floor | 0.01 | 0.02 | 0.03 | 0.04 | 0.06 | 0.08 | 0.09 | 0.10 | 0.11 |
+|---|---|---|---|---|---|---|---|---|---|
+| of 99 | 81 | **83** | 82 | 81 | 82 | 82 | 82 | 82 | 81 |
+
+A one-case wobble over an eleven-fold range. The 54-case set produced a
+four-case swing across the same range, and I moved the constant twice on it in a
+single session - 0.08, then 0.03, then back to 0.08 here, where the external
+corpus is indifferent and the primary one reaches its best. **Both moves were
+noise, and the second one was made while writing a learning about the first.**
+
+**What a small golden set does to a session.** Two of this session's cycles were
+spent on a knob that turns out not to matter: measuring it, shipping it,
+falsifying it, explaining the falsification, falsifying the explanation. All of
+it was honest work on a signal that a larger question set shows to be flat. The
+cost of an under-powered eval is not that it gives wrong answers - it gives
+*different* answers each time, and each one looks like a finding.
+
+The pass rate held at 80% across the enlargement (45/54 to 63/79), so the new
+questions are of comparable difficulty rather than easier ones inflating the
+number. The ablation, re-run whole on the larger set, puts hybrid four cases
+ahead of the lexical arm and eleven ahead of the dense one - the same direction
+as 349-with-54-cases and the opposite of 266-with-54-cases.
+
+**Rules.**
+1. **Grow the question set before tuning anything on it again.** 54 cases could
+   not resolve a knob that 79 shows to be flat, and nothing about the 54-case
+   measurements looked underpowered at the time.
+2. **A ratchet is calibrated against a corpus *and* a question set.** The CI
+   floor moved 0.85 -> 0.81 -> 0.78 for three different reasons this session,
+   none of them a regression.
+3. **Write golden questions from the subject, not from the page.** The wording
+   of a page is what retrieval is being tested against; borrowing it tests
+   whether the string matches itself, and the contamination detector will say so.
+4. **When a measurement keeps changing its mind, suspect the measurement.** Two
+   corpus sizes and two floors produced four different "best" values, and the
+   variance was in the instrument.

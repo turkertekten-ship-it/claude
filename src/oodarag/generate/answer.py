@@ -74,24 +74,21 @@ class AnswerConfig:
     #: that reason, and moved neither time.
     #: The abstention floor, applied to `rerank_relevance * arm agreement`.
     #:
-    #: Chosen at 0.08 on a 266-page corpus, where both corpora were flat there,
-    #: and **corrected to 0.03 within the same session** when the corpus grew to
-    #: 349 and 0.08 began refusing four answerable questions instead of two
-    #: (L72). The reason is not a scaling law: measured over four subsampled
-    #: corpora, agreement falls with N and relevance rises, and the product this
-    #: floor thresholds stays flat - 0.232 to 0.255 for answerable questions
-    #: across a corpus that quadrupled (L73). What moves is *which* few
-    #: questions sit near the floor, which is a small-sample effect that more
-    #: golden cases would fix and no normalisation will.
+    #: This number was moved twice in one session and the moves were noise. The
+    #: arc is worth keeping because it is what a golden set too small to resolve
+    #: a knob looks like from the inside:
     #:
-    #:     floor        0.02  0.03  0.04  0.06  0.08
-    #:     266 pages     +7    +7    +7    +6    +6
-    #:     349 pages     +6    +6    +4    +4    +3
+    #:     0.08   chosen on 54 cases, 266 pages - both corpora flat there (L71)
+    #:     0.03   corrected on 54 cases, 349 pages - 0.08 began over-refusing (L72)
+    #:     0.08   restored on 79 cases, 349 pages - the knob is nearly flat (L74)
     #:
-    #: (net = unanswerable questions correctly refused, minus answerable ones
-    #: wrongly refused). 0.03 is the value that survives both sizes; 0.08 was a
-    #: fit to one of them. Sweeping it is `scripts/floor_sweep.py`.
-    min_relevance: float = 0.03
+    #: With 25 more golden cases the combined pass count reads 81, 83, 82, 81,
+    #: 81, 82, 81, 82, 82, 82, 81 of 99 across floors 0.01 to 0.11 - a one-case
+    #: wobble over an eleven-fold range. The external corpus is indifferent
+    #: everywhere in that band and the primary one reaches its best only at 0.08
+    #: and above, so 0.08 maximises the worse of the two rather than the sum of
+    #: one. Sweeping it is `scripts/floor_sweep.py`.
+    min_relevance: float = 0.08
     generator: str = "auto"  # "auto" | "extractive" | "claude"
 
 

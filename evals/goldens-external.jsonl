@@ -68,3 +68,34 @@
 {"question": "Which package sends mail over SMTP?", "expect_abstain": true, "tags": ["external", "negative", "near-miss"], "notes": "Verified absent: 'smtp' matches 0 of 91 documents. 'email' matches 8, so the near-miss is real."}
 {"question": "Which library trains a convolutional neural network?", "expect_abstain": true, "tags": ["external", "negative", "near-miss"], "notes": "Verified absent: 'convolutional' matches 0 documents. 'network' is present in networkx, which is the near-miss."}
 {"question": "Which package reads and writes spreadsheet files?", "expect_abstain": true, "tags": ["external", "negative", "near-miss"], "notes": "Verified absent: 'spreadsheet' matches 0 documents; 'excel' matches 7 (pandas and friends mention it in passing), which is the near-miss."}
+
+# Added with the 266 -> 349 widening, from packages that widening brought in.
+# Written from what each package does rather than from its page: the golden set is
+# the instrument, and a question that reuses a page's wording measures the wording.
+# The three negatives are absent from the corpus by search, not by assumption -
+# 'gantt', 'family tree' and Russia's time zones match no page.
+{"question": "Which client library speaks AMQP so a program can publish to RabbitMQ?", "expect_sources": ["pika"], "tags": ["messaging"]}
+{"question": "Which package gives Python programs ZeroMQ sockets?", "expect_sources": ["pyzmq"], "tags": ["messaging"]}
+{"question": "Which library checks that a telephone number is valid and formats it for a country?", "expect_sources": ["phonenumbers"], "tags": ["validation"]}
+{"question": "Where can a program look up the ISO code for a country or a language?", "expect_sources": ["pycountry"], "tags": ["reference-data"]}
+{"question": "Which library guesses which natural language a piece of text is written in?", "expect_sources": ["langdetect"], "tags": ["text"]}
+{"question": "How can a test run against a real database that is started for it and thrown away afterwards?", "expect_sources": ["testcontainers"], "tags": ["testing"]}
+{"question": "How can a traceback be carried from a worker process back to the parent?", "expect_sources": ["tblib"], "tags": ["debugging"]}
+{"question": "Which mapping type can be looked up by value as well as by key?", "expect_sources": ["bidict"], "tags": ["data-structures"]}
+{"question": "Which library represents a URL as an object whose parts can be replaced?", "expect_sources": ["yarl"], "tags": ["http"]}
+{"question": "How can a script drive an interactive command-line program that waits for input?", "expect_sources": ["pexpect"], "tags": ["process"]}
+{"question": "How can a process change the name that ps shows for it?", "expect_sources": ["setproctitle"], "tags": ["process"]}
+{"question": "Which tool reports how much memory each line of a function uses?", "expect_sources": ["memory-profiler"], "tags": ["profiling"]}
+{"question": "Which library spells a number out in words?", "expect_sources": ["num2words"], "tags": ["text"]}
+{"question": "Which package pulls the amount and the currency out of a price written as text?", "expect_sources": ["price-parser"], "tags": ["parsing"]}
+{"question": "Which YAML parser deliberately refuses the confusing parts of the format?", "expect_sources": ["strictyaml"], "tags": ["serialization"]}
+{"question": "Which client writes time-series points into InfluxDB?", "expect_sources": ["influxdb-client"], "tags": ["database"]}
+{"question": "Which library records HTTP responses the first time a test runs and replays them afterwards?", "expect_sources": ["vcrpy"], "tags": ["testing"]}
+{"question": "Which library scores how similar two strings are when they do not match exactly?", "expect_sources": ["rapidfuzz", "fuzzywuzzy"], "tags": ["text"]}
+{"question": "Which library lets shell commands be called as though they were Python functions?", "expect_sources": ["plumbum"], "tags": ["process"]}
+{"question": "How can a program find what is still holding a reference to an object that should have been freed?", "expect_sources": ["objgraph"], "tags": ["debugging"]}
+{"question": "How can a program tell which Linux distribution it is running on?", "expect_sources": ["distro"], "tags": ["system"]}
+{"question": "Which library turns a singular noun into its plural?", "expect_sources": ["inflect"], "tags": ["text"]}
+{"question": "Which package draws a Gantt chart from a project schedule?", "expect_abstain": true, "tags": ["negative"]}
+{"question": "Which library builds a family tree from genealogy records?", "expect_abstain": true, "tags": ["negative"]}
+{"question": "How many time zones does Russia span?", "expect_abstain": true, "tags": ["negative"]}

@@ -110,7 +110,7 @@ project pages, fetched with robots checked, committed with provenance in
 repository, so it cannot contain a question *about* this repository.
 
 It is **not** contamination-free, and this file claimed it was. The detector
-reports 5 of 54 questions affected, holding out 45 distinct documents as 55
+reports 6 of 79 questions affected, holding out 45 distinct documents as 56
 holdouts. The cause is not self-reference but authorship: the golden questions
 were written from these pages, so a question can reuse enough of a page's own
 wording to match it. That is the case contamination detection exists for, and
