@@ -20,12 +20,24 @@
 | CLI | done | `preflight, index, query, eval, loop, status, journal, demo` |
 | CI | done | Three jobs: stdlib matrix, numpy path, retrieval regression gate |
 
-**Current measurements** (offline embedder, deterministic):
-197 tests passing.
-*Primary corpus* (this repository): 18/20 golden cases, 4 questions
-contaminated and quarantined.
-*External corpus* (14 PyPI pages, no self-reference): **20/20**, recall@8 0.80,
-nDCG@8 0.78, MRR 0.78, citation coverage 1.0, contamination clean.
+**Current measurements** (offline embedder, deterministic).
+204 tests passing. Retrieval metrics are over graded cases only - abstention
+cases have nothing to retrieve, and averaging their zeros in made adding a
+negative case look like a retrieval regression.
+
+| | primary (this repo) | external (14 PyPI pages) |
+|---|---|---|
+| golden cases | 18/20 | **20/20** |
+| recall@8 | 0.81 | **1.00** |
+| hit@8 | 0.88 | 1.00 |
+| MRR | 0.56 | 0.97 |
+| nDCG@8 | 0.60 | 0.98 |
+| citation coverage | 1.00 | 1.00 |
+| contamination | 4/20 quarantined | clean |
+
+The gap between the columns is the self-reference problem, not a difference in
+difficulty: the primary corpus contains the questions, so its best matches are
+the documents *about* the answer rather than the answer.
 
 ## Known limitations, deliberately not fixed
 

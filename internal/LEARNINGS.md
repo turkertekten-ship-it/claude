@@ -454,3 +454,31 @@ undocumented would mean someone enables it and quietly loses recall.
 `retrieve/expansion.py` - the module written to fix that question became a top
 result for it, and then supplied its own vocabulary as expansion terms. A
 self-referential corpus contaminates more than its evaluation.
+
+---
+
+## L20 - Check the denominator, not just the numerator
+
+**Evidence.** Reported external recall@8 was 0.80, and it looked like retrieval
+headroom worth chasing. Inspecting the cases individually showed every graded
+case fully satisfied: all 16 retrieved every expected source, most at rank 1.
+
+The metric was averaging over all 20 cases, four of which are `expect_abstain` -
+questions with nothing to retrieve, whose recall is definitionally zero.
+16 × 1.0 ÷ 20 = 0.80. **Adding a negative case to the golden set lowered
+reported recall**, with no change to retrieval at all.
+
+Correctly scoped, the same runs read: recall@8 1.00, hit@8 1.00, MRR 0.97,
+nDCG@8 0.98.
+
+**Rule.** When a metric looks off, check what it is averaged over before
+investigating what it measures. A denominator that silently includes cases the
+metric does not apply to is invisible in the aggregate and obvious in the
+per-case output - which is why the harness now reports the graded count next to
+the numbers.
+
+**Note the direction.** L14 found a recall bug that made the number too high
+(0.84 → 0.65 after fixing). This one made it too low (0.80 → 1.00). Both were
+denominator errors, both were honesty fixes, and the fact that they moved in
+opposite directions is the point: an unexamined metric is not biased in a
+convenient direction, it is simply unknown.

@@ -58,6 +58,11 @@ class CaseResult:
     latency_ms: float = 0.0
     failures: list[str] = field(default_factory=list)
     retrieved_uris: list[str] = field(default_factory=list)
+    #: True when the golden states expected sources. Retrieval metrics are
+    #: meaningless for a case that expects an abstention - there is nothing to
+    #: retrieve - and averaging their zeros in means every negative case added
+    #: to the set mechanically lowers reported recall.
+    graded: bool = False
 
 
 @dataclass
@@ -80,8 +85,12 @@ class EvalReport:
         return round(self.passed / len(self.cases), 4) if self.cases else 0.0
 
     def aggregate(self) -> dict[str, Any]:
-        positive = [c for c in self.cases if not c.abstained or c.recall > 0]
-        retrieval_cases = [c for c in self.cases if c.retrieved_uris or c.recall]
+        # Retrieval metrics over the cases that state a retrieval expectation,
+        # and citation coverage over the cases that were meant to be answered.
+        # Mixing abstention cases into either turns "we added more negative
+        # cases" into "retrieval got worse".
+        retrieval_cases = [c for c in self.cases if c.graded]
+        positive = [c for c in self.cases if c.graded and not c.abstained]
         return {
             "cases": len(self.cases),
             "passed": self.passed,
@@ -115,6 +124,9 @@ class EvalReport:
             "# Retrieval evaluation",
             "",
             f"**{self.passed}/{len(self.cases)} cases passed** ({self.pass_rate:.0%})  ",
+            (f"Retrieval metrics over {sum(1 for c in self.cases if c.graded)} graded "
+             f"cases; {sum(1 for c in self.cases if not c.graded)} abstention cases "
+             f"are excluded from them.  "),
             f"Index: {self.index_stats.get('documents', '?')} documents, "
             f"{self.index_stats.get('chunks', '?')} chunks  ",
             f"Duration: {agg['duration_s']}s",
@@ -238,6 +250,7 @@ class EvalHarness:
                 retrieved_uris=[r.citation_uri for r in answer.retrieved[:self.k]],
             )
             if golden.expect_sources:
+                case.graded = True
                 case.recall = recall_at_k(ranked, relevant_positions, self.k)
                 # Precision counts filled slots, not distinct sources: two
                 # chunks from one expected document are two useful results.

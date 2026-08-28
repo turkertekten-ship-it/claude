@@ -48,6 +48,14 @@ One number hides regressions. Recall can hold steady while nDCG collapses,
 which means the right documents are still arriving and arriving in the wrong
 order - a reranker problem, not a retrieval problem.
 
+**Retrieval metrics are computed over graded cases only** - the ones stating
+`expect_sources`. An `expect_abstain` case has nothing to retrieve, so its
+recall is definitionally zero, and averaging those zeros in means adding a
+negative case *lowers reported recall* for a reason unrelated to retrieval.
+Reported external recall@8 read 0.80 while every graded case was in fact fully
+satisfied; scoping the denominator correctly reads 1.00. The report states how
+many cases were graded so the denominator is never a guess.
+
 ## Contamination - the metric nobody reports
 
 **If the corpus contains the evaluation questions, every metric above is

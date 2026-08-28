@@ -566,3 +566,53 @@ class QueryExpansionTest(unittest.TestCase):
         results, trace = retriever.retrieve("what bounds a crawl")
         self.assertTrue(results)
         self.assertIn("expansion_ms", trace.stages)
+
+
+class GradedMetricScopeTest(unittest.TestCase):
+    """Retrieval metrics were averaged over abstention cases too.
+
+    An `expect_abstain` case has nothing to retrieve, so its recall is
+    definitionally zero. Averaging those zeros in meant that *adding a negative
+    case* lowered reported recall - the metric moved for a reason that had
+    nothing to do with retrieval. Reported external recall@8 read 0.80 while
+    every graded case was in fact fully satisfied.
+    """
+
+    def setUp(self):
+        self.store = SqliteStore(":memory:")
+        self.pipeline = IndexPipeline(self.store)
+        docs = [
+            _doc("d1", "alpha.md", "Hybrid retrieval fuses dense and lexical arms together."),
+            _doc("d2", "beta.md", "Budgets bound requests bytes depth and wall clock time."),
+        ]
+        self.store.upsert_documents(docs)
+        self.pipeline.embedder.fit([d.text for d in docs])
+        for d in docs:
+            self.store.replace_chunks(d.doc_id, chunk_document(d))
+        self.pipeline.embed_missing()
+        self.generator = AnswerGenerator(
+            HybridRetriever(self.store, self.pipeline.embedder),
+            AnswerConfig(generator="extractive"))
+        self.addCleanup(self.store.close)
+
+    def test_abstention_cases_are_excluded_from_retrieval_metrics(self):
+        satisfiable = Golden(question="how are dense and lexical arms combined?",
+                             expect_sources=["alpha.md"])
+        negative = Golden(question="what is the melting point of gallium?",
+                          expect_abstain=True)
+
+        alone = EvalHarness(self.generator, k=5).run([satisfiable])
+        with_negative = EvalHarness(self.generator, k=5).run([satisfiable, negative])
+
+        self.assertEqual(alone.aggregate()["recall@5"]["mean"],
+                         with_negative.aggregate()["recall@5"]["mean"],
+                         "adding a negative case changed reported recall")
+        self.assertEqual(with_negative.aggregate()["recall@5"]["n"], 1)
+
+    def test_only_cases_with_expectations_are_graded(self):
+        report = EvalHarness(self.generator, k=5).run([
+            Golden(question="how are dense and lexical arms combined?",
+                   expect_sources=["alpha.md"]),
+            Golden(question="what is the melting point of gallium?", expect_abstain=True),
+        ])
+        self.assertEqual([c.graded for c in report.cases], [True, False])
