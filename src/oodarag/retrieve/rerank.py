@@ -169,13 +169,30 @@ class HeuristicReranker(Reranker):
     gate_coverage_power: float | None = 1.0
     coverage_weight: float = 0.45
     phrase_weight: float = 0.25
-    #: Invisible to both eval gates, for the same reason as `recency_weight`
-    #: below: each corpus is a single filesystem source at authority 1.0, so the
-    #: factor is a constant across every candidate and cannot reorder anything.
-    #: Measured by zeroing each weight in turn - coverage, phrase and position
-    #: all move the metrics on both corpora; authority and recency move neither.
-    #: Between them that is 0.20 of the reranker's weight carried by unit tests
-    #: alone (L43).
+    #: Weak rather than inert, and the distinction took a measurement.
+    #:
+    #: It was recorded as inert on the grounds that "each corpus is a single
+    #: filesystem source at authority 1.0". That is still true of the external
+    #: corpus and **false of the primary one**, which carries four levels: 1.2
+    #: for this repository, 1.0 for reference material, 0.9 for chat, 0.68 for
+    #: a transcript-less video.
+    #:
+    #: It varies and it still does not discriminate, because the variation is
+    #: not *inside the sets that get compared*. Over the 20 primary goldens:
+    #:
+    #:   every result shares one authority   7 of 20 queries
+    #:   exactly two distinct values        11 of 20
+    #:   median spread within a result set  0.20
+    #:
+    #: and 83 of 97 documents sit at the same level. Swept 0.0 to 0.3, recall@8
+    #: is identical at every setting and pass rate never leaves 19/20; MRR and
+    #: nDCG wobble in the third decimal.
+    #:
+    #: Left at 0.12. Unlike `recency_weight` below there is nothing to switch
+    #: off - this prior is not wrong for the corpus, it simply has almost
+    #: nothing to say about it, and tuning it against a 20-case set where no
+    #: metric moves would be fitting noise. It becomes real on a corpus that
+    #: mixes sources of genuinely different trust *within the same answers*.
     authority_weight: float = 0.12
     #: **0.0, and that is a measurement rather than a default.**
     #:

@@ -2960,3 +2960,64 @@ the older test that asserted the clock *does* move the score now passes
 3. **A prior encodes an assumption about the corpus. Write the assumption down
    next to the weight**, because the weight is meaningless to anyone who does
    not know which corpora it suits.
+
+---
+
+## L62 - A feature can vary across the corpus and still never discriminate
+
+Having made `recency_weight` measurable and found it harmful (L61), the sibling
+question is `authority_weight` - the other prior L43 recorded as inert, on the
+grounds that "every document came from one source with the same trust level".
+
+**That claim is stale.** The primary corpus carries four authority levels:
+
+```
+{1.2: 83, 1.0: 1, 0.68: 8, 0.9: 5}      # 97 documents
+```
+
+1.2 for this repository, 1.0 for reference material, 0.9 for chat transcripts,
+0.68 for a video with no transcript. It varies, and has for a while.
+
+**It varies and still does not discriminate.** Swept 0.0 to 0.3 on the corpus
+where it varies: **recall@8 is identical at every setting**, pass rate never
+leaves 19/20, MRR and nDCG wobble in the third decimal.
+
+The reason is not that the input is constant - it is that the variation is not
+*inside the sets that get compared*:
+
+| | |
+| --- | --- |
+| queries where every result shares one authority | **7 of 20** |
+| queries with exactly two distinct values | 11 of 20 |
+| median spread within a result set | 0.20 |
+| corpus share at the most common level | 83/97 = **86%** |
+
+A ranking feature only ever acts on differences *within* a candidate set. Global
+variance is the wrong statistic: 86% of documents at one level means most
+comparisons are between two documents of equal authority, and the factor cancels.
+
+**This refines L43 and L50 into something more useful.** The progression was
+"constant, therefore inert" (L43), then "saturated, not constant" (L50), and now
+"varying, and still inert". All three describe a feature that cannot reorder
+anything, and only the first is about the input being uniform. The question to
+ask is not *does this feature's input vary across my data* but **does it vary
+between the items my system actually compares**.
+
+**Decision: left at 0.12.** Unlike recency there is nothing to switch off - the
+prior is not wrong for this corpus, it simply has almost nothing to say about
+it. Tuning it against a 20-case set where no metric moves would be fitting
+noise. The note on the field now says what would make it real: a corpus mixing
+sources of genuinely different trust *within the same answers*.
+
+**Rules.**
+1. **Measure a ranking feature's spread within the candidate set, not across
+   the corpus.** They are different numbers and only one of them predicts
+   whether the feature does anything.
+2. **A stale justification survives longer than a stale number**, because
+   nothing recomputes it. "Single source, one trust level" was true when
+   written and had been false for many cycles, and it was still being cited as
+   the reason not to look.
+3. **"Weak" and "inert" deserve different words and different decisions.**
+   Recency was harmful and got switched off; authority is merely quiet and was
+   left alone. Collapsing both into "does not move the metrics" would have
+   invited the same action for opposite situations.
