@@ -911,6 +911,47 @@ class PruneRemovedDocumentsTest(unittest.TestCase):
         self.assertEqual(self.store.stats()["documents"], before,
                          "the guard did not hold and the index was emptied")
 
+    def test_the_guard_fires_above_its_fraction_and_not_at_it(self):
+        """The docstring says a removal set *larger than* the fraction is
+        refused, and nothing pinned the boundary: `>` and `>=` both passed the
+        suite. Constructed from the definition rather than from a run - one of
+        four documents is exactly 25% and must prune; one of three is 33% and
+        must not."""
+        from oodarag.models import Document, IngestDelta
+
+        def prune_one_of(n: int):
+            store = SqliteStore(":memory:")
+            self.addCleanup(store.close)
+            pipeline = IndexPipeline(store)
+            for i in range(n):
+                store.upsert_documents([Document(
+                    doc_id=f"b{i}", source_system="bounded", external_id=f"e{i}",
+                    uri=f"mem://{i}", title=f"t{i}", text="body", content_hash=f"h{i}")])
+            return pipeline.prune([IngestDelta(source_key="k", removed=["e0"],
+                                               source_system="bounded")])
+
+        at_the_boundary = prune_one_of(4)
+        self.assertEqual((at_the_boundary.deleted, at_the_boundary.refused), (1, []),
+                         "exactly 25% was refused; the guard reads > as >=")
+        above_it = prune_one_of(3)
+        self.assertEqual(above_it.deleted, 0)
+        self.assertTrue(above_it.refused, "33% was pruned; the guard is not firing")
+
+    def test_a_source_with_nothing_left_in_the_index_refuses_rather_than_succeeding(self):
+        """Removals reported against a source the index holds no documents for
+        is the shape of an index restored from an older copy. Nothing would be
+        deleted either way - there is nothing to delete - so the whole
+        difference is whether the run says so. A silent `deleted=0` reads as a
+        clean prune; this must read as a refusal."""
+        from oodarag.models import IngestDelta
+
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        report = IndexPipeline(store).prune(
+            [IngestDelta(source_key="k", removed=["e0", "e1"], source_system="absent")])
+        self.assertEqual((report.deleted, report.skipped), (0, 2))
+        self.assertTrue(report.refused, "an empty source was treated as a successful prune")
+
     def test_an_explicit_bulk_prune_is_still_possible(self):
         before = self.store.stats()["documents"]
         for path in sorted(self.root.glob("*.md"))[:-1]:
@@ -1455,6 +1496,32 @@ class StaleFitTest(unittest.TestCase):
                       for i in range(6)})
         report = pipeline.run([self._connector(texts)])
         self.assertTrue(report.refit, "75% corpus growth did not trigger a refit")
+
+    def test_growth_in_count_alone_still_triggers_a_refit(self):
+        """The two triggers must be independent, and the existing growth test
+        cannot show that: adding six ordinary documents to eight moves the count
+        by 75% *and* the byte volume by about as much, so the byte rule alone
+        satisfies it. Disabling the count rule entirely survived the whole
+        suite for that reason.
+
+        Here the corpus grows 37.5% in count and under 1% in bytes - many tiny
+        documents added to a few large ones - which only the count rule can
+        see. The mirror image of the case the byte rule was added for.
+        """
+        pipeline, store = self._pipeline()
+        texts = {f"d{i}.md": f"Package {i}. " + ("filler text " * 200) for i in range(8)}
+        pipeline.run([self._connector(texts)])
+        fitted_bytes = store.get_meta("fitted_text_bytes", 0)
+        self.assertGreater(fitted_bytes, 0)
+
+        texts.update({f"tiny{i}.md": f"Stub {i}." for i in range(3)})
+        report = pipeline.run([self._connector(texts)])
+        added = sum(len(f"Stub {i}.") for i in range(3))
+        self.assertLess(added / fitted_bytes, 0.25,
+                        "the added text is large enough for the byte rule to fire, "
+                        "so this test would pass without the count rule")
+        self.assertTrue(report.refit,
+                        "the corpus grew 37.5% in document count and no refit fired")
 
 
 class StaleRerankerAnalysisTest(unittest.TestCase):

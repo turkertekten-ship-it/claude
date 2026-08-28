@@ -22,7 +22,7 @@
 | Non-negotiables | verified | All five attacked directly, not just asserted: zero-dependency walked module by module, provenance and redaction attacked with crafted inputs, degradation measured through partial and silent-empty source failures (L37-L39) |
 
 **Current measurements** (offline embedder, deterministic).
-414 tests passing. Retrieval metrics are over graded cases only - abstention
+417 tests passing. Retrieval metrics are over graded cases only - abstention
 cases have nothing to retrieve, and averaging their zeros in made adding a
 negative case look like a retrieval regression.
 

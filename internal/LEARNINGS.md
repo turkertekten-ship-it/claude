@@ -4903,3 +4903,91 @@ rather than left standing.
 4. **Writing about a failing case in a self-indexing repository makes it worse.**
    Not a reason to stop writing it down - but a reason the primary corpus is a
    smoke test and the external one is the gate.
+
+## L96 - The prune guard, mutated: three real gaps and two that could not delete
+
+`pipeline.prune` is what stands between a source that answers with nothing - an
+expired token, a truncated listing, an unmounted path - and an emptied index. It
+had never been mutation-tested. Seven mutations against full discovery:
+
+    guard inverted (small prunes refused, large ones allowed)   CAUGHT
+    guard default raised to 1.0, effectively off                CAUGHT
+    refit no longer symmetric: only growth triggers it          CAUGHT
+    guard boundary loosened from > to >=                        SURVIVED
+    empty source counts as 0% removal rather than 100%          SURVIVED
+    unscoped prune allowed when no source_system is reported    SURVIVED
+    refit count-growth branch disabled entirely                 SURVIVED
+
+**The survivors sorted into two kinds, and only by probing them.**
+
+Two are reporting-only. With `total == 0` the prune proceeds and deletes
+nothing, because there is nothing of that source to find; with no
+`source_system` the count is 0, the fraction is 1.0 and the *other* guard
+refuses it anyway. Neither can remove a document. What changes is whether the
+run says "refused, 2 skipped" or "pruned, 0 deleted" - and non-negotiable 4 is
+about the index never shrinking *silently*, so a suspicious condition reported
+as a clean success is the failure it names, one size down. Tested the empty-source
+one; left the source_system one, and said so, rather than writing a test whose
+subject cannot happen.
+
+Two are real. The `>` boundary was documented ("larger than the fraction is
+refused") and unpinned - both `>` and `>=` passed the suite, and exactly 25% is
+the value the docstring decides. And the refit's document-count trigger could
+be deleted outright with the suite green, because the existing growth test adds
+six ordinary documents to eight: the count moves 75% *and* the byte volume moves
+with it, so the byte rule alone satisfies the assertion. The count rule is only
+observable when many small documents arrive - 37.5% more documents, under 1%
+more text - which is the exact mirror of the case the byte rule was added for
+(a corpus rewritten in place, count unchanged). Two rules, each added because
+the other was blind, and only one of them tested where it is not.
+
+Three tests added, each verified failing on its mutation and passing on either
+side of it.
+
+**Rules.**
+1. **A guard with a documented threshold needs a test *at* the threshold.**
+   "Larger than 25%" and "25% or more" differ on exactly one input, and it is
+   the one the sentence is about.
+2. **Two rules that cover each other's blind spot will hide each other's
+   absence.** Test each where the other cannot see, or the pair passes with one
+   of them deleted.
+3. **A survivor that cannot change the outcome is still worth classifying.**
+   Two of these four can never delete a document; saying so is a different
+   result from "gap", and writing a test for an unreachable state would have
+   been coverage theatre.
+
+## L97 - The restore that did not restore: stale bytecode served a mutation
+
+While verifying the tests above, an ad-hoc mutate/restore loop reported this:
+
+    empty as 0%:  clean=SURVIVED   mutated=CAUGHT   restored=CAUGHT
+
+The test failed *after* the restore, with `git diff` clean. Deleting
+`__pycache__` made it pass.
+
+CPython validates a `.pyc` against the source's `(mtime, size)`, and mtime is
+compared at one-second resolution. A mutate/run/restore/run cycle completes
+inside a second, so the restored source can carry an mtime the cached bytecode
+still considers current - and the *mutated* module keeps executing. `scripts/
+mutate.py` already clears `__pycache__` after restoring, which is why the batch
+run through it was sound; the bash loop I wrote beside it did not, and was not.
+
+**The direction that matters is the one I did not see.** A stale pyc holding
+*unmutated* bytecode while the source is mutated reports **SURVIVED** - a
+mutation that was never executed, recorded as a test gap that does not exist,
+or worse, a guard declared untested and then "fixed". Every result this session
+that came out CAUGHT is safe by construction: the mutated code demonstrably ran.
+A SURVIVED produced without clearing the cache means nothing.
+
+**Rules.**
+1. **Restoring a file is not restoring a module.** Anything that edits source
+   between interpreter runs must invalidate the bytecode cache, not just the
+   file.
+2. **Sub-second edit cycles defeat timestamp invalidation.** The faster the
+   loop, the more likely the cache is wrong - the opposite of the intuition
+   that a fast loop is a tight one.
+3. **Re-check the harness you wrote in a hurry against the one you already
+   had.** `scripts/mutate.py` exists precisely because a mutation harness that
+   reports a result it did not produce is worse than no harness, and its
+   docstring says so. I wrote a second one anyway and reintroduced the same
+   class of defect it was built to prevent.
