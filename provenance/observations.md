@@ -251,6 +251,13 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - The plan is now 13 and matches the tree, and the installer's own tests still pass. [src:INSTALLER-GAP-2026-08-28]
 - A gate run reported failure in the same session; the cause was the shell's working directory resetting to the parent after a container restart, not a regression. [src:INSTALLER-GAP-2026-08-28]
 
+## Observed — a gate failure that was a race, not a regression
+
+- One gate run reported CHECKS FAILED with 6 failures in the inherited GitHub blind suite, all on the three files being edited at that moment; a rerun with no concurrent commit reported 233 tests OK and ALL CHECKS PASSED. [src:BLIND-TEST-RACE-2026-08-28]
+- Running that suite alone against a dirty working tree passes 10 of 10, which rules out uncommitted edits: it reads committed blobs via `git cat-file`, not files from disk. [src:BLIND-TEST-RACE-2026-08-28]
+- The cause is inside `setUpClass`: it captures the remote head, fetches over the network, then builds its ground-truth tree from the moving `HEAD` ref, so a commit landing during the fetch leaves the two sides describing different trees. [src:BLIND-TEST-RACE-2026-08-28]
+- Fixed by pinning the tree to the sha already captured. The same race exists in the pipeline branch's copy, which is where this suite came from. [src:BLIND-TEST-RACE-2026-08-28]
+
 ## Conclusion
 
 The request that opened this session asked to look at "all my previous claude

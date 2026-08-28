@@ -1078,3 +1078,24 @@ sources:
       shell's working directory having reset to the parent after a container
       restart - and is also why a gate run reported failure with
       "fatal: not a git repository" rather than a real regression.
+
+  - id: BLIND-TEST-RACE-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T08:30Z"
+    method: "bash tests/run_all.sh run twice — once with a commit landing mid-run, once without; then tests/test_github_blind.py run alone with a dirty working tree"
+    evidence: >-
+      One gate run reported CHECKS FAILED with 6 failures in
+      tests/test_github_blind.py, all on the three files being edited at that
+      moment. A second run on the same tree with no concurrent commit reported
+      "Ran 233 tests ... OK" and ALL CHECKS PASSED. Running the blind suite alone
+      against a DIRTY working tree passes 10 of 10, which rules out the working
+      tree as the cause: the test reads committed blobs via `git cat-file`, not
+      files from disk.
+    note: >-
+      The cause is a race inside setUpClass. It captures the remote head, fetches
+      the repository over the network, and only then builds its ground-truth tree
+      from the moving `HEAD` ref. A commit landing during the fetch leaves the two
+      sides describing different trees, which surfaces as a byte mismatch that
+      reads like a connector bug and is not one. Fixed by building the tree from
+      the sha already captured rather than from `HEAD`. Inherited from the
+      pipeline branch, so the same race exists in that branch's copy.

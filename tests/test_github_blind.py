@@ -91,7 +91,11 @@ class GitHubBlindCrossCheckTest(unittest.TestCase):
 
         # Ground truth, straight from git.
         cls.tree: dict[str, tuple[str, int]] = {}
-        for line in git("ls-tree", "-r", "-l", "HEAD").splitlines():
+        # Pin to the sha captured above, not the moving `HEAD` ref. The remote
+        # fetch between them takes seconds, and a commit landing in that window
+        # would leave the two sides describing different trees — which surfaces
+        # as a byte mismatch that looks like a connector bug and is not one.
+        for line in git("ls-tree", "-r", "-l", cls.local_head).splitlines():
             meta, _, path = line.partition("\t")
             parts = meta.split()
             if len(parts) >= 4 and parts[1] == "blob":
