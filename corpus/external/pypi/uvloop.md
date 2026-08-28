@@ -1,0 +1,112 @@
+[image: https://img.shields.io/github/actions/workflow/status/MagicStack/uvloop/tests.yml?branch=master] [image: https://img.shields.io/pypi/v/uvloop.svg] [image: PyPI - Downloads]
+
+uvloop is a fast, drop-in replacement of the built-in asyncio
+event loop. uvloop is implemented in Cython and uses libuv
+under the hood.
+
+The project documentation can be found
+here. Please also check out the
+wiki.
+
+## Performance
+
+uvloop makes asyncio 2-4x faster.
+
+ [image: https://raw.githubusercontent.com/MagicStack/uvloop/master/performance.png]
+
+The above chart shows the performance of an echo server with different
+message sizes. The sockets benchmark uses loop.sock_recv() and
+loop.sock_sendall() methods; the streams benchmark uses asyncio
+high-level streams, created by the asyncio.start_server() function;
+and the protocol benchmark uses loop.create_server() with a simple
+echo protocol. Read more about uvloop in a
+blog post
+about it.
+
+## Installation
+
+uvloop requires Python 3.8 or greater and is available on PyPI.
+Use pip to install it:
+
+```
+$ pip install uvloop
+```
+
+Note that it is highly recommended to upgrade pip before installing
+uvloop with:
+
+```
+$ pip install -U pip
+```
+
+## Using uvloop
+
+As of uvloop 0.18, the preferred way of using it is via the
+uvloop.run() helper function:
+
+```
+import uvloop
+
+async def main():
+    # Main entry-point.
+    ...
+
+uvloop.run(main())
+```
+
+uvloop.run() works by simply configuring asyncio.run()
+to use uvloop, passing all of the arguments to it, such as debug,
+e.g. uvloop.run(main(), debug=True).
+
+With Python 3.11 and earlier the following alternative
+snippet can be used:
+
+```
+import asyncio
+import sys
+
+import uvloop
+
+async def main():
+    # Main entry-point.
+    ...
+
+if sys.version_info >= (3, 11):
+    with asyncio.Runner(loop_factory=uvloop.new_event_loop) as runner:
+        runner.run(main())
+else:
+    uvloop.install()
+    asyncio.run(main())
+```
+
+## Building From Source
+
+To build uvloop, you’ll need Python 3.8 or greater:
+
+1. Clone the repository:
+
+```
+$ git clone --recursive git@github.com:MagicStack/uvloop.git
+$ cd uvloop
+``` 
+1. Create a virtual environment and activate it:
+
+```
+$ python3 -m venv uvloop-dev
+$ source uvloop-dev/bin/activate
+``` 
+1. Install development dependencies:
+
+```
+$ pip install -e .[dev]
+``` 
+1. Build and run tests:
+
+```
+$ make
+$ make test
+```
+
+## License
+
+uvloop is dual-licensed under MIT and Apache 2.0 licenses.

@@ -18,27 +18,30 @@ MMR.
 ## Measured
 
 The argument above is an argument. These are the numbers, from
-`scripts/ablation.py` on the external corpus (91 documents, 1,143 chunks,
+`scripts/ablation.py` on the external corpus (153 documents, 1,810 chunks,
 54 golden cases), each configuration differing in one thing:
 
 | configuration | pass | recall@8 | prec@8 | MRR | nDCG@8 |
 |---|---|---|---|---|---|
-| hybrid | **48/54** | **0.919** | 0.236 | **0.773** | **0.797** |
-| lexical only | 47/54 | 0.884 | 0.221 | 0.754 | 0.769 |
-| dense only | 44/54 | 0.814 | 0.233 | 0.733 | 0.746 |
-| no rerank | 40/54 | 0.779 | 0.116 | 0.695 | 0.696 |
-| no MMR | **48/54** | **0.919** | **0.250** | 0.770 | 0.796 |
+| hybrid | **47/54** | **0.872** | 0.224 | **0.730** | **0.749** |
+| lexical only | **47/54** | 0.861 | 0.215 | 0.716 | 0.731 |
+| dense only | 44/54 | 0.814 | 0.212 | 0.696 | 0.716 |
+| no rerank | 38/54 | 0.721 | 0.108 | 0.630 | 0.639 |
+| no MMR | 46/54 | 0.849 | **0.238** | 0.730 | 0.743 |
 
 Hybrid beats either arm alone on pass rate, recall, MRR and nDCG, which is the
 claim. The arms are complementary in the way predicted: **dense alone loses 0.10
 of recall, lexical alone 0.03**. Reranking is the single most load-bearing
-component (+8 cases, +0.14 recall, +0.12 precision). MMR costs 0.014 of
-precision and buys 0.003 of nDCG - it is close to neutral on this corpus, and
-earns its place on the primary one, which has more near-duplicate chunks.
+component (+9 cases, +0.15 recall, +0.12 precision). **MMR is no longer
+neutral**: at 91 documents it cost 0.014 of precision and bought 0.003 of nDCG,
+and at 153 it is worth a case and 0.023 of recall for 0.015 of precision. That
+conclusion was overturned by widening, which is the third time this table has
+moved under it.
 
-On pass rate the arms are further apart than the metrics suggest: lexical alone
-loses one case, dense alone four. The pass column reads the abstention gate and
-the metric columns do not, so the two need not move together.
+On pass rate the two arms are now level, with dense alone three cases behind on
+a corpus where every metric has room to move. The pass column reads the
+abstention gate and the metric columns do not, so the two need not move
+together.
 
 **This table has now been wrong three times, and how it was wrong is the useful
 part.**

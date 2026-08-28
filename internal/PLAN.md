@@ -15,7 +15,7 @@
 | Generation | done | Citation contract verified against retrieved chunks; extractive default, Claude optional |
 | Eval | done | recall/precision/MRR/nDCG, citation coverage, abstention, contamination detection and quarantine |
 | OODA loop | done | Five journalled phases, auditable policy rules, action budget |
-| External eval corpus | done | 91 PyPI pages with provenance and a manifest, rebuildable by `scripts/build_external_corpus.py`; 4 of 54 questions contaminated, 14 documents held out as 17 holdouts |
+| External eval corpus | done | 153 PyPI pages with provenance and a manifest, rebuildable by `scripts/build_external_corpus.py`; 5 of 54 questions contaminated, 22 documents held out as 28 holdouts |
 | Incremental deletion | done | Removals propagate to the delta, prune guarded at 25% of a source, refused entirely for a failed connector |
 | CLI | done | `preflight, index, query, eval, loop, status, journal, demo` |
 | CI | done | Three jobs: stdlib matrix, numpy path, retrieval regression gate; floors ratcheted to 0.85 primary / 0.86 external |
@@ -26,35 +26,35 @@
 cases have nothing to retrieve, and averaging their zeros in made adding a
 negative case look like a retrieval regression.
 
-| | primary (this repo) | external (91 PyPI pages) |
+| | primary (this repo) | external (153 PyPI pages) |
 |---|---|---|
-| golden cases | 18/20 | **48/54** |
-| recall@8 | 0.8125 | 0.9186 |
-| precision@8 | 0.2031 | 0.2355 |
-| hit@8 | 0.8750 | 0.9302 |
-| MRR | 0.5766 | 0.7729 |
-| nDCG@8 | 0.6126 | 0.7965 |
+| golden cases | 18/20 | **47/54** |
+| recall@8 | 0.8125 | 0.8721 |
+| precision@8 | 0.2031 | 0.2267 |
+| hit@8 | 0.8750 | 0.9070 |
+| MRR | 0.5766 | 0.7246 |
+| nDCG@8 | 0.6126 | 0.7440 |
 | citation coverage | 1.00 | 1.00 |
-| contamination | 4/20 questions, 14 documents (29 holdouts) | 4/54 questions, 14 documents (17 holdouts) |
+| contamination | 4/20 questions, 14 documents (29 holdouts) | 5/54 questions, 22 documents (28 holdouts) |
 | role | smoke test | **regression gate** |
 
 What each retrieval arm is worth, on the external set (`scripts/ablation.py`):
 
 | configuration | pass | recall@8 | prec@8 | MRR | nDCG@8 |
 |---|---|---|---|---|---|
-| hybrid | 48/54 | 0.9186 | 0.2355 | 0.7729 | 0.7965 |
-| lexical only | 47/54 | 0.8837 | 0.2209 | 0.7535 | 0.7687 |
-| dense only | 44/54 | 0.8140 | 0.2326 | 0.7326 | 0.7456 |
-| no rerank | 40/54 | 0.7791 | 0.1163 | 0.6948 | 0.6961 |
-| no mmr | 48/54 | 0.9186 | 0.2500 | 0.7702 | 0.7956 |
+| hybrid | 47/54 | 0.8721 | 0.2238 | 0.7304 | 0.7487 |
+| lexical only | 47/54 | 0.8605 | 0.2151 | 0.7157 | 0.7313 |
+| dense only | 44/54 | 0.8140 | 0.2122 | 0.6957 | 0.7163 |
+| no rerank | 38/54 | 0.7209 | 0.1076 | 0.6298 | 0.6390 |
+| no mmr | 46/54 | 0.8488 | 0.2384 | 0.7295 | 0.7430 |
 
 Reranking is the most load-bearing component by a distance, and hybrid beats
 either arm alone on every metric. That answers the question ADR 0004 had
 deferred: at 33 documents dense-only matched hybrid, and the deferral rather
 than the removal of an arm was the right call (L29).
 
-On pass rate the two arms are no longer close - lexical alone loses one case,
-dense alone loses four - while their retrieval metrics keep the older ordering.
+On pass rate the two arms are level at 153 documents, while dense alone is
+three cases behind; MMR, neutral at 91 documents, is now worth a case.
 The pass column is sensitive to the abstention gate and the metric columns are
 not, so a change to the floor moves one and leaves the other untouched.
 

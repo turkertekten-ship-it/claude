@@ -1,0 +1,66 @@
+[image: Donate via PayPal] [image: Build] [image: Coverage Status] [image: PyPI Version] [image: PyPI Downloads] [image: PyPI - Python Version] [image: License]
+
+# Soup Sieve
+
+## Overview
+
+Soup Sieve is a CSS selector library designed to be used with Beautiful Soup 4. It aims to provide selecting,
+matching, and filtering using modern CSS selectors. Soup Sieve currently provides selectors from the CSS level 1
+specifications up through the latest CSS level 4 drafts and beyond (though some are not yet implemented).
+
+Soup Sieve was written with the intent to replace Beautiful Soup's builtin select feature, and as of Beautiful Soup
+version 4.7.0, it now is :confetti_ball:. Soup Sieve can also be imported in order to use its API directly for
+more controlled, specialized parsing.
+
+Soup Sieve has implemented most of the CSS selectors up through the latest CSS draft specifications, though there are a
+number that don't make sense in a non-browser environment. Selectors that cannot provide meaningful functionality simply
+do not match anything. Some of the supported selectors are:
+
+- .classes
+- #ids
+- [attributes=value]
+- parent child
+- parent > child
+- sibling ~ sibling
+- sibling + sibling
+- :not(element.class, element2.class)
+- :is(element.class, element2.class)
+- parent:has(> child)
+- and many more
+
+## Installation
+
+You must have Beautiful Soup already installed:
+
+```
+pip install beautifulsoup4
+```
+
+In most cases, assuming you've installed version 4.7.0, that should be all you need to do, but if you've installed via
+some alternative method, and Soup Sieve is not automatically installed, you can install it directly:
+
+```
+pip install soupsieve
+```
+
+If you want to manually install it from source, first ensure that build is
+installed:
+
+```
+pip install build
+```
+
+Then navigate to the root of the project and build the wheel and install (replacing <ver> with the current version):
+
+```
+python -m build -w
+pip install dist/soupsieve-<ver>-py3-none-any.whl
+```
+
+## Documentation
+
+Documentation is found here: https://facelessuser.github.io/soupsieve/.
+
+## License
+
+MIT

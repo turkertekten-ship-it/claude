@@ -104,13 +104,13 @@ measures a progressively smaller corpus. Contamination currently affects 4 of
 a document that contaminates two questions is held out twice and is still one
 document - and that number only grows.
 
-`evals/goldens-external.jsonl` runs against `corpus/external/pypi` - 91 PyPI
+`evals/goldens-external.jsonl` runs against `corpus/external/pypi` - 153 PyPI
 project pages, fetched with robots checked, committed with provenance in
 `corpus/external/pypi-manifest.json`. That corpus has no relationship to this
 repository, so it cannot contain a question *about* this repository.
 
 It is **not** contamination-free, and this file claimed it was. The detector
-reports 4 of 54 questions affected, holding out 14 distinct documents as 17
+reports 5 of 54 questions affected, holding out 22 distinct documents as 28
 holdouts. The cause is not self-reference but authorship: the golden questions
 were written from these pages, so a question can reuse enough of a page's own
 wording to match it. That is the case contamination detection exists for, and

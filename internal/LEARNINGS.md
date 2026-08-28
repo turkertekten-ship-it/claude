@@ -2199,3 +2199,73 @@ defect verbatim, not a convenient re-spelling of it.**
 6. **A count needs its unit in the sentence that prints it.** "29 documents"
    and "29 per-question holdouts over 14 documents" are the same number and
    different facts; only one of them survives being copied somewhere else.
+
+---
+
+## L50 - The corpus widened 91 to 153, and it settled two open questions
+
+**The small-N hypothesis is falsified.** L48 measured IDF ranking the
+discriminating query term first in only 28 of 40 goldens, because a function
+word like `cannot` appears in ~1 of 91 PyPI pages and so scores as rare. The
+obvious question was whether that is an artifact of corpus size. The previous
+cycle established that subsampling cannot answer it - shrinking a corpus removes
+the documents the goldens point at, so the question set and N cannot be varied
+independently.
+
+Real documents can. At 153 documents, on the same 40-question set:
+
+| corpus | discriminating-term-first |
+| --- | --- |
+| 91 | 28/40 (70.0%) |
+| 153 | 29/40 (72.5%) |
+
+**Sixty-eight percent more documents bought one case.** The mismatch is not
+about sample size, and adding more PyPI pages never will fix it: the function
+words are absent from *that register* at any N, so every page added is more of
+the same distribution. This closes the cheapest of the three paths L48 left open.
+
+**It overturned a recorded conclusion, which is what widening is for.** ADR 0004
+said MMR "is close to neutral on this corpus" - 48/54 with and without at 91
+documents. At 153 it is worth a case and 0.023 of recall. Reranking went from +8
+cases to +9. The third time that table has moved under a widening.
+
+**And it exposed a real defect, not a stale golden.** "What is the capital of
+France?" is a negative case, and the system now answers it with confidence
+0.758. The cause, traced rather than guessed:
+
+* `chardet.md` contains the word **France**, inside a French sentence used to
+  demonstrate encoding detection;
+* `idna.md` contains the word **capital**, as in "capital letters".
+
+Two content terms, each matched once, in unrelated senses, in different
+documents. Coverage over a two-term query is 0.5 for a chunk holding either one,
+relevance is 0.3, and the 0.19 floor is cleared. Before the widening neither
+term existed in the corpus, answerability collapsed the score, and it abstained
+correctly - for the right reason, but only by luck of vocabulary.
+
+**The short-query weakness is the general form.** A fixed relevance floor is much
+easier to clear for a two-term query than a five-term one, because coverage is a
+*fraction*: one incidental match is half of two terms and a fifth of five. And a
+signal that would separate this case exists and is unused - **no single document
+contains both `capit` and `franc`**, whereas for genuinely answerable questions
+the discriminating terms co-occur. Co-occurrence is per-corpus; coverage is
+per-chunk; nothing currently reads the first.
+
+**Decided, not discovered (L23).** Pass rate 48/54 -> **47/54 = 0.870**, against
+a CI floor of 0.85. The floor is not moved and the widening is kept: the corpus
+is harder and more honest, every metric has more room (recall 0.919 -> 0.872,
+nDCG 0.797 -> 0.744), and the case that was lost was lost to a defect worth
+finding. The margin is now 0.020 rather than 0.039, and that is the cost.
+
+**Rules.**
+1. **When a hypothesis needs more data, get more data - do not simulate it by
+   removing some.** Subsampling changes two things at once here, and the answer
+   took 62 real pages and one measurement.
+2. **Widening a corpus is not a neutral operation on a golden set.** Eleven
+   abstention cases assert what the corpus *cannot* answer, so every document
+   added is a chance to invalidate one. Two broke here, and only one of the two
+   was the system's fault - which is exactly the distinction to make before
+   editing either the corpus or the goldens.
+3. **A negative case that passes because a word happens to be absent is passing
+   by luck.** It looked like a working abstention gate for as long as the
+   vocabulary happened not to collide.
