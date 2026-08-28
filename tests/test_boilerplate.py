@@ -146,3 +146,66 @@ class FilterCorpusTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class KnownTemplateTest(unittest.TestCase):
+    """Adding pages to an already-filtered corpus cannot relearn the template.
+
+    The old pages no longer contain it, so the new pages' headings appear in a
+    handful of documents out of many and fall under the threshold. Without a
+    remembered template the new pages keep the boilerplate every other page had
+    removed - a corpus inconsistent with itself, reported as "0 headings".
+    """
+
+    def _filtered_corpus(self, n: int) -> dict[str, str]:
+        return {f"old{i}.md": _doc(f"# pkg{i}", f"Description of package {i}.")
+                for i in range(n)}
+
+    def _raw_page(self, name: str) -> str:
+        return _doc(f"# {name}", f"Description of {name}.",
+                    "## File hashes", "SHA256 " + "0" * 64,
+                    "## Download files", "A table of files.")
+
+    def test_a_remembered_template_is_applied_to_new_pages(self):
+        corpus = self._filtered_corpus(30)
+        corpus["new1.md"] = self._raw_page("new1")
+        corpus["new2.md"] = self._raw_page("new2")
+        known = {"file hashes", "download files"}
+
+        without, _ = filter_corpus(dict(corpus))
+        self.assertIn("SHA256", without["new1.md"],
+                      "the premise no longer holds: relearning found the template")
+
+        with_known, report = filter_corpus(dict(corpus), known=known)
+        self.assertNotIn("SHA256", with_known["new1.md"])
+        self.assertNotIn("Download files", with_known["new2.md"])
+        self.assertIn("Description of new1.", with_known["new1.md"])
+        self.assertIn("file hashes", report.template_headings)
+
+    def test_a_document_with_no_template_heading_is_returned_unchanged(self):
+        """Byte-for-byte, including whitespace the re-emit would normalise.
+
+        Re-emitting a document the filter did not strip rewrites its blank runs
+        and its trailing newline, so its content hash changes for no reason -
+        which is how a batch that removed nothing came to report "-0.0%
+        removed", the filter having *added* bytes. The documents here carry the
+        blank-line runs and trailing whitespace that make the difference
+        visible; a tidy document round-trips whatever the code does."""
+        corpus = {
+            "a.md": "# pkg a\n\n\n\nDescription with a blank run above.\n\n\n",
+            "b.md": "# pkg b\n\nDescription with no trailing newline.",
+            "c.md": "\n\n# pkg c\n\nLeading blank lines.\n",
+        }
+        corpus.update(self._filtered_corpus(8))
+        filtered, report = filter_corpus(dict(corpus), known={"file hashes"})
+        self.assertEqual(filtered, corpus)
+        self.assertEqual(report.bytes_after, report.bytes_before)
+        self.assertEqual(report.removed_share, 0.0)
+
+    def test_a_small_batch_still_filters_when_a_template_is_known(self):
+        """The too-few-documents guard must not discard a template the caller
+        already has - that is the incremental case it exists to serve."""
+        corpus = {"new1.md": self._raw_page("new1")}
+        filtered, report = filter_corpus(corpus, known={"file hashes"})
+        self.assertFalse(report.skipped_reason)
+        self.assertNotIn("SHA256", filtered["new1.md"])

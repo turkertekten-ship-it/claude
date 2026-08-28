@@ -1,0 +1,75 @@
+[image: PyPI version] [image: Supported Python versions] [image: Build status] [image: ReadTheDocs status] [image: pre-commit.ci status] [image: Zenodo DOI]
+
+jsonschema is an implementation of the JSON Schema specification for Python.
+
+```
+>>> from jsonschema import validate
+
+>>> # A sample schema, like what we'd get from json.load()
+>>> schema = {
+...     "type" : "object",
+...     "properties" : {
+...         "price" : {"type" : "number"},
+...         "name" : {"type" : "string"},
+...     },
+... }
+
+>>> # If no exception is raised by validate(), the instance is valid.
+>>> validate(instance={"name" : "Eggs", "price" : 34.99}, schema=schema)
+
+>>> validate(
+...     instance={"name" : "Eggs", "price" : "Invalid"}, schema=schema,
+... )                                   # doctest: +IGNORE_EXCEPTION_DETAIL
+Traceback (most recent call last):
+    ...
+ValidationError: 'Invalid' is not of type 'number'
+```
+
+It can also be used from the command line by installing check-jsonschema.
+
+## Features
+
+- Full support for Draft 2020-12, Draft 2019-09, Draft 7, Draft 6, Draft 4 and Draft 3
+- Lazy validation that can iteratively report all validation errors.
+- Programmatic querying of which properties or items failed validation.
+
+## Installation
+
+jsonschema is available on PyPI. You can install using pip:
+
+```
+$ pip install jsonschema
+```
+
+### Extras
+
+Two extras are available when installing the package, both currently related to format validation:
+
+> format format-nongpl
+
+They can be used when installing in order to include additional dependencies, e.g.:
+
+```
+$ pip install jsonschema'[format]'
+```
+
+Be aware that the mere presence of these dependencies – or even the specification of format checks in a schema – do not activate format checks (as per the specification).
+Please read the format validation documentation for further details.
+
+## About
+
+I’m Julian Berman.
+
+jsonschema is on GitHub.
+
+Get in touch, via GitHub or otherwise, if you’ve got something to contribute, it’d be most welcome!
+
+If you feel overwhelmingly grateful, you can also sponsor me.
+
+And for companies who appreciate jsonschema and its continued support and growth, jsonschema is also now supportable via TideLift.
+
+## Release Information
+
+v4.26.0
+
+- Decrease import time by delaying importing of urllib.request (#1416).

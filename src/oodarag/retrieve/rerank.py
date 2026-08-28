@@ -62,21 +62,20 @@ class HeuristicReranker(Reranker):
     #: reason this one names the corpus it was taken on.
     #:
     #:   corpus    power  pass   recall  prec    MRR     nDCG
-    #:   external  1.0    33/36  0.9821  0.2812  0.8793  0.8833
-    #:   external  2.0    32/36  0.9821  0.2946  0.9092  0.9029
-    #:   external  3.0    31/36  0.9464  0.2946  0.8869  0.8900
+    #:   external  1.0    44/54  0.9186  0.2355  0.7729  0.7965
+    #:   external  2.0    45/54  0.9186  0.2529  0.7502  0.7791
+    #:   external  3.0    45/54  0.9070  0.2529  0.7223  0.7588
     #:   primary   1.0    17/20  0.8125  0.2109  0.5573  0.6032
     #:   primary   2.0    18/20  0.7500  0.2109  0.5677  0.5823
     #:   primary   3.0    18/20  0.7500  0.2031  0.5214  0.5494
     #:
-    #: 1.0 wins the two figures this project ranks highest: the external pass
-    #: rate, which is the regression gate, and primary recall, documented as the
-    #: ceiling on everything downstream. Raising the exponent buys ordering
-    #: quality on the external set (nDCG 0.8833 to 0.9029) at the cost of a case
-    #: there and 0.06 of recall on the primary set. Reproduce with
-    #: `scripts/ablation.py --sweep-coverage-power 1.0 2.0 3.0`, and re-measure
-    #: on your own corpus before moving it - on the pre-cleaning corpus this
-    #: same sweep pointed the other way.
+    #: Raising the exponent buys a case on each corpus and costs ordering
+    #: quality on both - external nDCG falls 0.7965 to 0.7791, primary recall
+    #: falls 0.06. Ordering is what the downstream stages read, so 1.0 stays.
+    #: Reproduce with `scripts/ablation.py --sweep-coverage-power 1.0 2.0 3.0`,
+    #: and re-measure on your own corpus before moving it: this sweep has now
+    #: been run on three versions of the external corpus and pointed a
+    #: different way on each (L26, L29).
     coverage_power: float = 1.0
     coverage_weight: float = 0.45
     phrase_weight: float = 0.25

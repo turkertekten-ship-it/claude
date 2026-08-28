@@ -124,3 +124,45 @@ class CanonicalTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class InterstitialTest(unittest.TestCase):
+    """An anti-bot challenge arrives with HTTP 200 and a normal content-type.
+
+    Nothing in the response says the fetch failed. Indexed, it becomes a
+    document that answers nothing - and a site serving the same one for many
+    URLs contributes identical text repeatedly, which is the worst possible
+    input to a term-frequency statistic. Observed live on pypi.org.
+    """
+
+    FASTLY = (
+        '<!DOCTYPE html><html lang="en"><head>'
+        '<link href="/_fs-ch-1T1wmsGaOgGaSxcX/assets/styles.css" rel="stylesheet" />'
+        "<title>Client Challenge</title></head><body>"
+        "<div id='loading-error'>Please enable JavaScript.</div></body></html>"
+    )
+
+    def test_a_challenge_page_is_reported_as_blocked(self):
+        page = extract(self.FASTLY, url="https://pypi.org/project/jinja2/")
+        self.assertEqual(page.blocked, "Fastly client challenge")
+
+    def test_a_cloudflare_interstitial_is_reported_too(self):
+        html = "<html><head><title>Just a moment...</title></head><body></body></html>"
+        self.assertEqual(extract(html).blocked, "Cloudflare interstitial")
+
+    def test_an_ordinary_page_is_not_blocked(self):
+        html = ("<html><head><title>blinker</title></head><body><main>"
+                "<h1>Blinker</h1><p>Blinker provides a fast dispatching system "
+                "that allows any number of interested parties to subscribe to "
+                "events, or signals.</p></main></body></html>")
+        page = extract(html)
+        self.assertEqual(page.blocked, "")
+        self.assertIn("dispatching", page.text)
+
+    def test_the_conservative_retry_does_not_resurrect_a_challenge(self):
+        """A challenge is short, so it trips the low-word-count retry - and the
+        retry would hand back the challenge page's own chrome as an article."""
+        page = extract(self.FASTLY, url="https://pypi.org/project/jinja2/")
+        self.assertTrue(page.blocked)
+        self.assertLess(page.word_count, 25,
+                        "the fallback ran and returned the challenge as content")

@@ -36,8 +36,8 @@
 # that are plausible in this domain but genuinely absent from the corpus.
 {"question": "How do I stop a token being tampered with in transit?", "expect_sources": ["itsdangerous"], "tags": ["external", "semantic-gap"]}
 {"question": "What lets me change a database schema over time without losing data?", "expect_sources": ["alembic"], "tags": ["external", "semantic-gap"]}
-{"question": "How do Python programs talk to a web server?", "expect_sources": ["werkzeug", "flask"], "tags": ["external", "semantic-gap", "multi-source"]}
-{"question": "What keeps two processes from writing the same file at once?", "tags": ["external", "negative", "thin-source"], "expect_abstain": true, "notes": "Retagged after reading the document. filelock's PyPI page is a stub - badges, 'checkout the official documentation', download links - and contains neither 'process' nor 'concurrent'. The corpus cannot answer this, so grading it as a retrieval miss would blame the retriever for a gap in the corpus. Abstention is the correct behaviour, so that is what it now asserts."}
+{"question": "Which library provides the WSGI utilities that Flask is built on?", "expect_sources": ["werkzeug"], "tags": ["external", "positive", "revised"], "notes": "Replaces 'How do Python programs talk to a web server?', which was written for a 33-document corpus where werkzeug and flask were the only plausible answers. At 91 documents, ten of them answer it - httpx, requests, urllib3, aiohttp, h11, uvicorn, starlette, gunicorn, flask, werkzeug - and it is ambiguous between the client and the server side, so it can no longer discriminate. The replacement is taken from werkzeug's own first line: 'a comprehensive WSGI web application library'. Recorded rather than quietly widened: a question that ten documents answer is not a retrieval test."}
+{"question": "What keeps two processes from writing the same file at once?", "tags": ["external", "negative"], "expect_abstain": true, "notes": "filelock's PyPI page was a stub - badges and download links - and was dropped from the corpus when the thinness check was moved to run on the stored text rather than the fetched text. The corpus now has nothing on file locking at all, so abstention is unambiguously correct; it was already the assertion when the stub was present."}
 {"question": "How does one Python library let other packages hook into it?", "expect_sources": ["pluggy"], "tags": ["external", "semantic-gap"]}
 {"question": "What runs my tests against several Python versions in clean environments?", "expect_sources": ["tox", "virtualenv"], "tags": ["external", "multi-source"]}
 {"question": "How can Python call into existing C code?", "expect_sources": ["cffi", "pycparser"], "tags": ["external", "multi-source"]}
@@ -50,3 +50,21 @@
 {"question": "Which library pins dependency hashes for reproducible installs?", "expect_abstain": true, "tags": ["external", "negative", "near-miss"]}
 {"question": "Which tool publishes a package to a private PyPI mirror?", "expect_abstain": true, "tags": ["external", "negative", "near-miss"]}
 {"question": "Which package renders Jinja templates to PDF?", "expect_abstain": true, "tags": ["external", "negative", "near-miss"]}
+{"question": "Which library detects which async framework the calling code is running under?", "expect_sources": ["sniffio"], "tags": ["external", "positive"]}
+{"question": "Which library implements HTTP/1.1 but performs no I/O of its own?", "expect_sources": ["h11"], "tags": ["external", "positive"]}
+{"question": "Which package reports when a file is created or modified on disk?", "expect_sources": ["watchdog"], "tags": ["external", "positive"]}
+{"question": "How can a test control what the clock returns?", "expect_sources": ["freezegun"], "tags": ["external", "positive"]}
+{"question": "Which library fakes HTTP replies so tests make no real network calls?", "expect_sources": ["responses"], "tags": ["external", "positive"]}
+{"question": "Which logging library treats every event as a dictionary passed through a chain of functions?", "expect_sources": ["structlog"], "tags": ["external", "positive"]}
+{"question": "Which package represents graphs and studies their structure?", "expect_sources": ["networkx"], "tags": ["external", "positive"]}
+{"question": "Which JSON library serialises dataclasses, datetimes and UUIDs without extra code?", "expect_sources": ["orjson"], "tags": ["external", "positive"]}
+{"question": "Which format exchanges data between languages as compact binary rather than text?", "expect_sources": ["msgpack"], "tags": ["external", "positive"]}
+{"question": "Which library implements RFC 7519 tokens?", "expect_sources": ["pyjwt"], "tags": ["external", "positive"]}
+{"question": "How should a password be stored so the stored form cannot be reversed?", "expect_sources": ["bcrypt"], "tags": ["external", "positive"]}
+{"question": "How can a program check that a document matches a declared schema?", "expect_sources": ["jsonschema"], "tags": ["external", "positive"]}
+{"question": "Which library converts objects to and from native Python types without assuming an ORM?", "expect_sources": ["marshmallow"], "tags": ["external", "positive"]}
+{"question": "Which library offers a friendlier replacement for handling dates and times?", "expect_sources": ["arrow"], "tags": ["external", "positive"]}
+{"question": "Which server runs an ASGI application?", "expect_sources": ["uvicorn"], "tags": ["external", "positive"]}
+{"question": "Which package sends mail over SMTP?", "expect_abstain": true, "tags": ["external", "negative", "near-miss"], "notes": "Verified absent: 'smtp' matches 0 of 91 documents. 'email' matches 8, so the near-miss is real."}
+{"question": "Which library trains a convolutional neural network?", "expect_abstain": true, "tags": ["external", "negative", "near-miss"], "notes": "Verified absent: 'convolutional' matches 0 documents. 'network' is present in networkx, which is the near-miss."}
+{"question": "Which package reads and writes spreadsheet files?", "expect_abstain": true, "tags": ["external", "negative", "near-miss"], "notes": "Verified absent: 'spreadsheet' matches 0 documents; 'excel' matches 7 (pandas and friends mention it in passing), which is the near-miss."}

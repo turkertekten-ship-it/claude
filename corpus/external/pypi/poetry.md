@@ -1,0 +1,126 @@
+# Poetry: Python packaging and dependency management made easy
+
+[image: Poetry] [image: Stable Version] [image: Pre-release Version] [image: Python Versions] [image: Download Stats] [image: Discord]
+
+Poetry helps you declare, manage and install dependencies of Python projects,
+ensuring you have the right stack everywhere.
+
+[image: Poetry Install]
+
+Poetry replaces setup.py, requirements.txt, setup.cfg, MANIFEST.in and Pipfile with a simple pyproject.toml
+based project format.
+
+```
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[project]
+name = "my-package"
+version = "0.1.0"
+description = "The description of the package"
+readme = "README.md"
+
+license = "MIT"
+license-files = ["LICENSE"]
+
+# No Python upper bound for package metadata
+requires-python = ">=3.9"
+
+authors = [
+    { name = "Sébastien Eustace", email = "sebastien@eustace.io" },
+]
+
+# Keywords (translated to tags on the package index)
+keywords = ["packaging", "poetry"]
+
+dependencies = [
+    # equivalent to ^3.8.1 with semver constraints
+    "aiohttp (>=3.8.1,<4.0.0)",
+    # dependency with extras
+    "requests[security] (>=2.28,<3.0)",
+    # version-specific dependency with prereleases allowed (see below)
+    "tomli (>=2.0.1,<3.0.0) ; python_version < '3.11'",
+    # git dependency with branch specified
+    "cleo @ git+https://github.com/python-poetry/cleo.git@main",
+]
+
+[project.urls]
+repository = "https://github.com/python-poetry/poetry"
+homepage = "https://python-poetry.org"
+
+# Scripts are easily expressed
+[project.scripts]
+my_package_cli = "my_package.console:run"
+
+[project.optional-dependencies]
+# optional dependency to be installed via 'poetry install -E my-extra'
+my-extra = ["pendulum (>=3.1.0,<4.0.0)"]
+
+[tool.poetry.dependencies]
+# Python upper bound for locking
+python = ">=3.9,<4.0"
+# Version-specific dependencies with prereleases allowed
+tomli = { allow-prereleases = true }
+
+# Dependency groups are supported for organizing your dependencies
+[dependency-groups]
+dev = ["pytest (>=7.1.2,<8.0.0)", "pytest-cov (>=3.0,<4.0)"]
+docs = ["Sphinx (>=5.1.1,<6.0.0)"]
+
+# ...and can be installed only when explicitly requested
+# via 'poetry install --with docs'
+[tool.poetry.group.docs]
+optional = true
+
+# Alternatively, you can use Poetry specific syntax
+# to specify dependency groups
+[tool.poetry.group.lint]
+optional = true
+
+[tool.poetry.group.lint.dependencies]
+ruff = ">=0.10.0"
+```
+
+## Installation
+
+Poetry supports multiple installation methods, including a simple script found at install.python-poetry.org. For full
+installation instructions, including advanced usage of the script, alternate install methods, and CI best practices, see
+the full installation documentation.
+
+## Documentation
+
+Documentation for the current version of Poetry (as well as the development branch and recently out of support
+versions) is available from the official website.
+
+## Contribute
+
+Poetry is a large, complex project always in need of contributors. For those new to the project, a list of
+suggested issues to work on in Poetry and poetry-core is available. The full contributing documentation also
+provides helpful guidance.
+
+## Resources
+
+- Releases
+- Official Website
+- Documentation
+- Issue Tracker
+- Discord
+
+## Related Projects
+
+- poetry-core: PEP 517 build-system for Poetry projects, and
+dependency-free core functionality of the Poetry frontend
+- poetry-plugin-export: Export Poetry projects/lock files to
+foreign formats like requirements.txt
+- poetry-plugin-bundle: Install Poetry projects/lock files to
+external formats like virtual environments
+- install.python-poetry.org: The official Poetry
+installation script
+- website: The official Poetry website and blog
+
+## Supporters
+
+Thanks to JetBrains for supporting us with licenses for their tools.
+
+[image: JetBrains logo.]

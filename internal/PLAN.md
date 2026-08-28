@@ -15,49 +15,45 @@
 | Generation | done | Citation contract verified against retrieved chunks; extractive default, Claude optional |
 | Eval | done | recall/precision/MRR/nDCG, citation coverage, abstention, contamination detection and quarantine |
 | OODA loop | done | Five journalled phases, auditable policy rules, action budget |
-| External eval corpus | done | 33 PyPI pages with provenance and a manifest; 1 of 36 questions contaminated, 2 documents quarantined |
+| External eval corpus | done | 91 PyPI pages with provenance and a manifest, rebuildable by `scripts/build_external_corpus.py`; 4 of 54 questions contaminated, 17 documents quarantined |
 | Incremental deletion | done | Removals propagate to the delta, prune guarded at 25% of a source, refused entirely for a failed connector |
 | CLI | done | `preflight, index, query, eval, loop, status, journal, demo` |
 | CI | done | Three jobs: stdlib matrix, numpy path, retrieval regression gate |
 
 **Current measurements** (offline embedder, deterministic).
-227 tests passing. Retrieval metrics are over graded cases only - abstention
+266 tests passing. Retrieval metrics are over graded cases only - abstention
 cases have nothing to retrieve, and averaging their zeros in made adding a
 negative case look like a retrieval regression.
 
-| | primary (this repo) | external (33 PyPI pages) |
+| | primary (this repo) | external (91 PyPI pages) |
 |---|---|---|
-| golden cases | 17/20 | **33/36** |
-| recall@8 | 0.8125 | 0.9821 |
-| precision@8 | 0.2031 | 0.2812 |
-| hit@8 | 0.8750 | 1.0000 |
-| MRR | 0.5766 | 0.8793 |
-| nDCG@8 | 0.6126 | 0.8833 |
+| golden cases | 17/20 | **44/54** |
+| recall@8 | 0.8125 | 0.9186 |
+| precision@8 | 0.2031 | 0.2355 |
+| hit@8 | 0.8750 | 0.9302 |
+| MRR | 0.5766 | 0.7729 |
+| nDCG@8 | 0.6126 | 0.7965 |
 | citation coverage | 1.00 | 1.00 |
-| contamination | 4/20 questions, 26 documents held out | 1/36 questions, 2 documents |
+| contamination | 4/20 questions, 26 documents held out | 4/54 questions, 17 documents |
 | role | smoke test | **regression gate** |
 
 What each retrieval arm is worth, on the external set (`scripts/ablation.py`):
 
 | configuration | pass | recall@8 | prec@8 | MRR | nDCG@8 |
 |---|---|---|---|---|---|
-| hybrid | 33/36 | 0.9821 | 0.2812 | 0.8793 | 0.8833 |
-| lexical only | 32/36 | 0.9464 | 0.2679 | 0.8735 | 0.8707 |
-| dense only | 33/36 | 0.9821 | 0.2991 | 0.8839 | 0.9008 |
-| no rerank | 32/36 | 0.8929 | 0.1518 | 0.8333 | 0.8169 |
-| no mmr | 33/36 | 0.9821 | 0.3125 | 0.8786 | 0.8880 |
+| hybrid | 44/54 | 0.9186 | 0.2355 | 0.7729 | 0.7965 |
+| lexical only | 43/54 | 0.8837 | 0.2209 | 0.7535 | 0.7687 |
+| dense only | 43/54 | 0.8140 | 0.2326 | 0.7326 | 0.7456 |
+| no rerank | 40/54 | 0.7791 | 0.1163 | 0.6948 | 0.6961 |
+| no mmr | 44/54 | 0.9186 | 0.2500 | 0.7702 | 0.7956 |
 
-Reranking is clearly load-bearing. **The case for the lexical arm is not**: on
-this corpus dense-only matches hybrid on pass rate and recall and beats it on
-precision, MRR and nDCG. That is a reversal - before the corpus was cleaned
-(L26) hybrid led dense-only by 0.11 of recall - and ADR 0004 now records it as
-deferred rather than settled, because 36 questions over 33 documents cannot
-settle it either way.
+Reranking is the most load-bearing component by a distance, and hybrid beats
+either arm alone on every metric. That answers the question ADR 0004 had
+deferred: at 33 documents dense-only matched hybrid, and the deferral rather
+than the removal of an arm was the right call (L29).
 
-Two metrics here are at or near their ceiling and can no longer show a
-regression: hit@8 reads 1.0, and recall@8 reads 0.9821 with a median of 1.0.
-That is the same trap as L23, and it is the strongest argument for item 2
-below.
+Nothing here is saturated any more. recall@8 was 0.9821 with a median of 1.0 on
+the 33-document corpus; it now reads 0.9186 with a minimum of 0.0.
 
 The gap between the columns is the self-reference problem, not a difference in
 difficulty: the primary corpus contains the questions, so its best matches are
@@ -91,36 +87,43 @@ its current failures are that artefact. See docs/EVALUATION.md.
    purpose - the offline embedder cannot bridge "running forever" to a corpus
    that says "never terminates".
 
-2. **A golden set drawn from a corpus this repository does not describe.** The
-   external set is that, and it is why it is the regression gate. The primary
-   set's quarantine is at 26 documents across 4 questions and rises with every
-   commit (L22). Widening the external corpus is worth more than any scoring
-   change, because it is the only lever on the failures that remain. This is
-   actionable now: `ooda preflight` has `web_pypi` **ok** (HTTP 200) while
-   wikipedia, youtube, ibm.com and arxiv are refused CONNECT by the proxy, so
-   PyPI is the reachable source and the corpus can grow without a new egress
-   path.
+2. **The abstention gate.** Now the dominant failure mode: six of the eleven
+   external failures are the gate answering a question the corpus cannot
+   answer, and its feature's AUC fell from 0.973 on 33 documents to **0.886** on
+   91 (L29). This was previously listed under "deliberately not next" on the
+   strength of the 33-document measurement, which is exactly the mistake L29 is
+   about. The candidate sweep still says no *score-shape* feature beats the one
+   in use, so the next thing to try is a different kind of signal, not another
+   arithmetic combination of the same one:
 
-3. **Multi-hop retrieval**, once single-shot recall is well characterised.
+   - a query term's presence checked **unstemmed** as well as stemmed. "What is
+     the boiling point of mercury?" is answered at 0.825 because `mercury` and
+     `mercurial` share a stem and one document mentions the version control
+     system. Absent-after-conflation is not absent, and the store does not
+     currently keep an unstemmed vocabulary to check against;
+   - whether one *document* covers the query, rather than one chunk. "Which
+     package renders Jinja templates to PDF?" scores 0.595 - the highest of any
+     unanswerable case - because jinja, template and render are all present,
+     just not with pdf.
+
+3. **Widen the corpus again.** 33 to 91 documents overturned three recorded
+   conclusions and de-saturated every metric (L29). There is no reason to think
+   91 is where that stops. `scripts/build_external_corpus.py --list` does it,
+   and `ooda preflight` has `web_pypi` **ok** while wikipedia, youtube, ibm.com
+   and arxiv are refused CONNECT, so PyPI remains the reachable source. Two
+   pages of 63 were refused by an anti-bot interstitial, which is a per-run
+   cost rather than a blocker.
+
+4. **Multi-hop retrieval**, once single-shot recall is well characterised.
    Adding a loop over a retriever with unknown recall multiplies every failure.
-   Single-shot recall is now characterised on the external set (0.9286), so the
-   precondition is close to met.
+   Single-shot recall on the external set is 0.9186.
 
 ## Deliberately not next
 
-- **Tuning the abstention gate.** Five candidate features were ranked against
-  the one in use and none beat it: AUC 0.973 for `rerank_relevance` against
-  0.77-0.80 for score-shape signals and 0.574 for match specificity
-  (`scripts/gate_features.py`, L25). The two remaining gate failures are the
-  tail of a feature that is already the best available, not a design flaw.
-  Separating "the corpus discusses these words" from "the corpus answers this
-  question" needs a judge that reads or a larger corpus - neither is a scoring
-  change.
-
-- **Raising `coverage_power`.** Measured on both corpora and left at 1.0. It
-  trades primary recall for pass rate on one corpus, and it widens the gate's
-  overlap monotonically (`scripts/gate_margin.py`). The table is in
-  `retrieve/rerank.py`.
+- **Raising `coverage_power`.** Measured on three versions of the external
+  corpus and left at 1.0 each time, for a different reason each time - which is
+  itself the finding. It currently buys a case and costs ordering quality on
+  both corpora. The table is in `retrieve/rerank.py`.
 
 - **Query expansion.** Built, measured, and off by default because it made
   retrieval worse. The table is in `retrieve/expansion.py`.

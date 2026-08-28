@@ -81,6 +81,10 @@ class ExtractedPage:
     canonical: str = ""
     published: str = ""
     jsonld: list[Any] = field(default_factory=list)
+    #: Why this page is not content, or empty if it is. An anti-bot interstitial
+    #: is served with **HTTP 200** and a normal content-type, so status is not a
+    #: success signal - see `interstitial_reason`.
+    blocked: str = ""
 
     @property
     def word_count(self) -> int:
@@ -491,6 +495,43 @@ def _collect_meta(root: Node, raw_scripts: list[tuple[dict[str, str], str]],
     return meta, title, lang, canonical, jsonld, published
 
 
+#: Markers of an anti-bot interstitial. Each is a literal that appears in the
+#: challenge page and not in an article: the title Fastly's challenge sets, the
+#: asset path it preloads from, and Cloudflare's equivalents. Matching on
+#: several is deliberate - one of them alone could plausibly appear in a page
+#: *about* bot challenges, and this corpus contains pages about web tooling.
+_INTERSTITIAL_MARKERS = (
+    ("<title>Client Challenge</title>", "Fastly client challenge"),
+    ("/_fs-ch-", "Fastly client challenge"),
+    ("<title>Just a moment...</title>", "Cloudflare interstitial"),
+    ("cf-browser-verification", "Cloudflare interstitial"),
+    ("<title>Attention Required!", "Cloudflare block page"),
+)
+
+
+def interstitial_reason(html: str) -> str:
+    """Name the anti-bot interstitial this HTML is, or return "".
+
+    These arrive with **HTTP 200**, a normal content-type and a few kilobytes of
+    markup, so nothing in the response says the fetch failed. Indexed, they
+    become a document that answers nothing, and a site that serves the same one
+    for many URLs contributes the same text over and over - which is the worst
+    possible input to a term-frequency statistic.
+
+    Observed on pypi.org: one project page returned the Fastly challenge twice
+    in a row while five others fetched seconds apart returned their content, and
+    the same URL then returned its content ten times in a row a few minutes
+    later. So it is intermittent and per-URL within a burst, and a later retry
+    may well clear it - but the response carries no signal saying so, which is
+    the point. Detecting it is what matters; whether to retry is the caller's
+    policy.
+    """
+    for marker, name in _INTERSTITIAL_MARKERS:
+        if marker in html:
+            return name
+    return ""
+
+
 def extract(html: str, url: str = "", *, aggressive: bool = True,
             min_words: int = 25, max_fallback_link_density: float = 0.35) -> ExtractedPage:
     """Extract clean markdown, links and metadata from an HTML document.
@@ -557,7 +598,15 @@ def extract(html: str, url: str = "", *, aggressive: bool = True,
             canonical=canonical, published=published, jsonld=jsonld,
         )
 
+    # Checked on the raw HTML, before the conservative retry below. An
+    # interstitial is short, so it trips that retry - and the retry would then
+    # hand back the challenge page's own chrome as if it were an article.
+    blocked = interstitial_reason(html)
+
     page = build(aggressive)
+    page.blocked = blocked
+    if blocked:
+        return page
     if aggressive and len(page.text.split()) < min_words:
         fallback = build(False)
         richer = len(fallback.text.split()) > len(page.text.split())

@@ -100,6 +100,11 @@ def strip_template(text: str, template: set[str]) -> str:
         return text
     lines = text.splitlines()
     heads = _headings(text)
+    # A document with none of the template's headings is returned untouched.
+    # Re-emitting it would rewrite whitespace and change its content hash, which
+    # made a report of a batch that removed nothing read "-0.0% removed".
+    if not any(title in template for _, title, _ in heads):
+        return text
     drop = [False] * len(lines)
     for index, (level, title, line_no) in enumerate(heads):
         if title not in template:
@@ -121,25 +126,32 @@ def strip_template(text: str, template: set[str]) -> str:
     return "\n".join(out).strip() + "\n"
 
 
-def filter_corpus(documents: dict[str, str], *,
-                  min_share: float = 0.5) -> tuple[dict[str, str], TemplateReport]:
+def filter_corpus(documents: dict[str, str], *, min_share: float = 0.5,
+                  known: set[str] | None = None) -> tuple[dict[str, str], TemplateReport]:
     """Strip the learned template from every document, and report what happened.
 
+    `known` is a template learned earlier, applied in addition to whatever this
+    set teaches. It exists because adding pages to an already-filtered corpus
+    cannot relearn the template: the old pages no longer contain it, so the new
+    pages' headings appear in a handful of documents out of many and fall under
+    the threshold. The new pages would then keep the boilerplate that every
+    other page had removed - a corpus inconsistent with itself, and no error.
+
     Returns the documents unchanged, with a stated reason, when there are too
-    few of them to learn anything - a filter that quietly does nothing is
-    indistinguishable from one that is broken.
+    few of them to learn anything *and* no template was supplied - a filter that
+    quietly does nothing is indistinguishable from one that is broken.
     """
     texts = list(documents.values())
     report = TemplateReport(documents=len(documents),
                             bytes_before=sum(len(t) for t in texts))
-    if len(documents) < MIN_DOCUMENTS:
+    if len(documents) < MIN_DOCUMENTS and not known:
         report.bytes_after = report.bytes_before
         report.skipped_reason = (
             f"{len(documents)} documents is below the {MIN_DOCUMENTS} needed to "
             f"tell a site template from a coincidence")
         return dict(documents), report
 
-    template = learn_template(texts, min_share=min_share)
+    template = learn_template(texts, min_share=min_share) | set(known or ())
     filtered = {name: strip_template(text, template) for name, text in documents.items()}
     report.template_headings = sorted(template)
     report.bytes_after = sum(len(t) for t in filtered.values())

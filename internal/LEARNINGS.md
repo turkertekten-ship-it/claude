@@ -640,6 +640,12 @@ asserting it: if FTS5 ever stops splitting on those separators, the test says so
 
 ## L25 - The gate's feature is not the problem, and five candidates proved it
 
+> **Superseded in part by L29.** The ranking below still holds - the feature in
+> use beats all five candidates - but the conclusion that its failures are "a
+> tail, not a design flaw" was measured on 33 documents and does not survive 91.
+> The AUC falls from 0.973 to 0.886 and the gate becomes the dominant failure
+> mode. Read the rule, not the verdict.
+
 **Evidence.** Two of the four remaining external failures are the gate answering
 a question the corpus cannot answer. `gate_margin.py` showed this is not a
 threshold problem: the highest unanswerable case scores 0.355 against a 0.15
@@ -847,3 +853,78 @@ finding as stated is wrong.
    corpus, cached, and not invalidated when its input changed.** The reranker's
    vocabulary, the IDF table's analyser, the embedder's fit (L27). Where this
    codebase holds derived state, that is where to look next.
+
+---
+
+## L29 - Widening the corpus overturned three conclusions, including one from this file
+
+The external corpus went from 33 documents to 91, and the golden set from 36
+questions to 54, using `scripts/build_external_corpus.py` - which did not exist
+before, so the artifact every retrieval number is measured against could not be
+rebuilt. That is now fixed and the builder uses the pipeline's own parts, so a
+defect in extraction shows up in the corpus rather than being papered over by a
+separate scraper.
+
+**What it overturned.**
+
+1. *ADR 0004's arm comparison, for the second time.* At 33 dirty documents
+   hybrid led dense-only by 0.11 of recall; cleaned (L26), dense-only matched
+   hybrid and led on ordering, and the ADR recorded the case for the lexical arm
+   as weak and **deferred** the decision rather than removing an arm on 36
+   questions. At 91 documents hybrid leads again by 0.10 of recall. The
+   deferral was right, and both small-corpus readings were artifacts.
+
+2. *L25, in this file.* It concluded that the abstention gate's feature was
+   already the best available and that its failures were "a tail, not a design
+   flaw" - AUC 0.973, roughly six misordered pairs. On 91 documents the same
+   measurement gives **0.886** over 473 pairs, the overlap between answerable
+   and unanswerable widens from -0.21 to -0.45, and six of eleven remaining
+   failures are the gate answering something it cannot answer. The feature is
+   still the best of the six candidates and is no longer good enough. **L25's
+   rule stands; its conclusion does not.**
+
+3. *Metric saturation.* Cleaning the corpus had pushed `recall@8` to 0.982 with
+   a median of 1.0, which L26 flagged as a ceiling it could no longer measure
+   from. It now reads 0.919 with a minimum of 0.0.
+
+**Three defects the widening exposed, each silent.**
+
+- *A 200 that is not a success.* pypi.org serves a Fastly anti-bot interstitial
+  with HTTP 200, a normal content-type and a few kilobytes of markup. Indexed,
+  it is a document that answers nothing - and a site serving the same one for
+  many URLs contributes identical text repeatedly, the worst possible input to a
+  term-frequency statistic. `scrape/html.interstitial_reason` names it.
+  Intermittent: one URL returned it twice while five others succeeded seconds
+  apart, then returned content ten times in a row minutes later.
+- *Writing `page.text` where the corpus needs `page.markdown`.* The template
+  filter works on headings and `text` has none, so it was a silent no-op: 60
+  documents were added carrying every byte of their boilerplate, one of them
+  305KB, while the report said "0.0% removed". It said so honestly. Nobody
+  looked. The builder now prints fetched-versus-stored words per page, because a
+  page whose two numbers are equal and a page with no template on it must not
+  look alike.
+- *A thinness guard on the wrong side of the filter.* `MIN_WORDS` was checked
+  against the fetched text, so pages that were 40 words of prose and 17,000
+  words of download table passed it and landed as eight-word documents. Checked
+  against the stored text, three of them are correctly refused.
+
+**A stemming collision, which is nobody's bug.** "What is the boiling point of
+mercury?" is answered at 0.825 because `mercury` and `mercurial` both stem to
+`mercuri`, and one document mentions Mercurial the version control system.
+SQLite's Porter agrees, so this is the algorithm working as specified.
+Answerability's premise - "a term absent from the vocabulary proves the corpus
+never discussed it" - is weaker than it reads: absent *after conflation* is not
+absent.
+
+**Rules.**
+1. A conclusion drawn on a small corpus is a hypothesis about a large one. Two
+   of the three reversals above were recorded as settled findings at the time,
+   with tables.
+2. **Deferring beats acting when the measurement cannot support the action.**
+   Removing the lexical arm on 36 questions would have been wrong, and the
+   evidence for removing it looked exactly as good as the evidence for keeping
+   it does now.
+3. When a corpus grows, the questions written for the old one may no longer be
+   questions. "How do Python programs talk to a web server?" had two plausible
+   answers at 33 documents and ten at 91; it was replaced, with its reasoning
+   recorded, rather than quietly widened to ten expected sources.
