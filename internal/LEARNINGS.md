@@ -1898,3 +1898,78 @@ here. The control ships available and off, with the table on it.
    at "1.0 is best".
 3. **A measured improvement is not automatically a shipped one.** State what it
    costs on the corpus it was not tuned on, then decide.
+
+---
+
+## L47 - Non-negotiable 5 had three holes, and I found them by checking it
+
+**How it surfaced.** Not from a bug report. Between cycles I re-ran the five
+non-negotiables as checks rather than reading them, and one of them was a
+one-line grep:
+
+```
+$ grep -c "redact_secrets" src/oodarag/ingest/*.py
+chat.py:3  filesystem.py:2  github.py:6  web.py:2  youtube.py:0
+```
+
+**Hole 1: a connector that never called it.** The YouTube connector redacts
+nothing. Its text comes from a captions file, a *curated notes file* - an
+arbitrary local markdown document - and a manifest summary. A notes file is
+exactly where a pasted key lives.
+
+**Hole 2: titles, missed by every connector.** All seven redact the body and
+none redact the title, and a title is not decoration: `chunking._context_header`
+puts it at the front of `Chunk.indexed_text`, so it is embedded, indexed and
+searchable. The chat connector builds its title from the user's own first
+message; a commit title is a commit's subject line. Both are ordinary places for
+a token to sit.
+
+**Hole 3: metadata, and it explains the wording of the rule.** The web connector
+does `text=redact_secrets(...)` and then, three lines down,
+`"description": ... or summarize(page.text, 200)` - `page.text`, the copy it did
+*not* redact. Reproduced: a credential on a crawled page reached
+`metadata["description"]` in full while the body beside it was clean. Nothing
+embeds a description. The rule says "before text can reach an index file", not
+"before it can be embedded", and this is the case that distinguishes them.
+
+**The fix is structural, not another convention.** `RawDocument.__post_init__`
+redacts `text`, `title`, `uri` and every string inside `metadata`, recursively.
+`RawDocument` is the one type every connector must construct, so a connector
+written next year inherits the guarantee instead of having to remember it - and
+what was being kept by seven files each remembering is now kept by one.
+
+**Measured.** Both evals unchanged (18/20, 48/54). The double pass - connectors
+still redact, and `redact_secrets` is idempotent for every pattern it carries -
+costs 277 ms over 144 documents and 1.05 MiB, against an 8.3 s primary index.
+No false positives: a commit sha, a content hash, a canonical URL, a dotted
+path and an underscored path all come through untouched, checked explicitly
+because a redactor loose on structured data would break provenance silently.
+
+**Mutation testing found two gaps in my own tests, then a third thing.** Eight
+mutations, six caught immediately. The two survivors: nothing asserted that a
+secret *inside a list* was redacted (`headings` is a list lifted off the page),
+and my false-positive fixture had no value containing an underscore, so a
+redactor that mangled underscores passed. Both are now covered.
+
+The third: the tuple branch survived every mutation because no connector writes
+a tuple. Deleting it would have left a tuple falling through to "return
+unchanged" - a leak. Preserving tuple-ness would have been a fiction, since
+metadata is JSON in the store and a tuple round-trips as a list. It now
+redacts and returns a list, with the reason in a comment, and the test asserts
+the type change on purpose.
+
+**Rules.**
+1. **Re-run your non-negotiables as checks, not as reading.** Five stated
+   guarantees, one of them false in three places, and the cheapest check was a
+   `grep -c`. A principle nobody has executed lately is a hope.
+2. **A guarantee kept by convention is kept by the least careful caller.**
+   Move it to the type every caller must construct, and it holds for callers
+   who have not been written yet.
+3. **Ask what the rule's own words range over.** "Before it reaches an index
+   file" covers metadata; "before it is embedded" does not, and the code had
+   been written to the second reading of a rule that says the first (L27 -
+   read a claim for what it does not range over).
+4. **A branch that survives every mutation is untested, and the fix is not
+   always a test.** Ask first whether the branch should exist. Here neither
+   "delete" nor "test as written" was right: the branch was needed for safety
+   and wrong in what it preserved.

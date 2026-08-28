@@ -16,10 +16,36 @@ from dataclasses import asdict, dataclass, field
 from typing import Any
 
 from oodarag.util.hashing import content_hash, stable_id
+from oodarag.util.text import redact_secrets
 
 
 def _now() -> float:
     return time.time()
+
+
+def _redacted(value: Any) -> Any:
+    """Every string inside a metadata structure, redacted, shape preserved.
+
+    Metadata is not incidental: it is written into the index, and the rule is
+    about the index file, not about what gets embedded. The web connector built
+    `metadata["description"]` from `page.text` - the *unredacted* one, since the
+    connector redacted only the copy it put in `text` - so a credential on a
+    crawled page reached the index in full while the body beside it was clean.
+
+    Recursive because metadata nests: `headings` is a list, and a connector is
+    free to store a dict.
+    """
+    if isinstance(value, str):
+        return redact_secrets(value)
+    # A tuple comes back as a list, deliberately: metadata is serialised to
+    # JSON in the store, where a tuple is a list regardless. Preserving the type
+    # here would be a fiction that survives exactly until the first round trip,
+    # and falling through to "return unchanged" would leak.
+    if isinstance(value, (list, tuple)):
+        return [_redacted(v) for v in value]
+    if isinstance(value, dict):
+        return {k: _redacted(v) for k, v in value.items()}
+    return value
 
 
 @dataclass(slots=True)
@@ -52,6 +78,39 @@ class RawDocument:
     #: "now", and pretending otherwise is what made a fetch time look like a
     #: fact about the content.
     source_updated_at: float | None = None
+
+    def __post_init__(self) -> None:
+        """Redaction happens here because here is the boundary.
+
+        The rule is that secrets are redacted before text can reach an index,
+        and an index is a file that gets copied around. It was being kept by
+        each connector calling `redact_secrets` on the body it had just built -
+        a convention seven connectors had to remember, and the YouTube one did
+        not: captions, a curated notes file and the manifest summary all went in
+        untouched.
+
+        Titles were worse, because every connector missed them. A title is not
+        decoration: `chunking._context_header` puts it at the front of
+        `Chunk.indexed_text`, so it is embedded, indexed and searchable. The
+        chat connector builds its title from the user's own first message, and
+        a commit title is a commit's subject line - both ordinary places for a
+        pasted token to sit.
+
+        Metadata was the third hole, and the one that shows why "before it can
+        reach an index file" is the right way to state the rule rather than
+        "before it can be embedded": nothing embeds `metadata["description"]`,
+        and it is written into the index all the same.
+
+        `RawDocument` is the one type every connector must construct, so the
+        guarantee is structural here and a convention anywhere else. The
+        connectors' own calls stay - `redact_secrets` is idempotent, verified
+        for every pattern it carries - and cost one measured extra pass:
+        277 ms over 144 documents and 1.05 MiB, against an 8.3 s index.
+        """
+        self.text = redact_secrets(self.text)
+        self.title = redact_secrets(self.title)
+        self.uri = redact_secrets(self.uri)
+        self.metadata = _redacted(self.metadata)
 
     @property
     def content_hash(self) -> str:

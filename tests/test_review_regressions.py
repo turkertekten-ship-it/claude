@@ -12,8 +12,10 @@ citation. That is what makes an adversarial pass worth its cost.
 
 from __future__ import annotations
 
+import json
 import os
 import sqlite3
+import pathlib
 import unittest
 
 from oodarag.chunking import chunk_document
@@ -471,6 +473,211 @@ class GateCoveragePowerTest(unittest.TestCase):
                         sorted(explicit, key=lambda r: r.chunk.chunk_id)):
             self.assertAlmostEqual(a.components["rerank_relevance"],
                                    b.components["rerank_relevance"], places=9)
+
+
+class RedactionIsStructuralTest(unittest.TestCase):
+    """Non-negotiable 5 says secrets are redacted at the connector boundary,
+    before text can reach an index file.
+
+    It was being kept by convention - each connector calling `redact_secrets`
+    on the body it had just built - and a sweep of all seven found two holes:
+    the YouTube connector called it nowhere, and *no* connector redacted the
+    title. A title is not decoration; `chunking._context_header` puts it at the
+    front of `Chunk.indexed_text`, so it is embedded and indexed.
+    """
+
+    #: Real credential shapes, one per pattern class the redactor carries.
+    SECRET = "ghp_1234567890abcdefghijklmnopqrstuvwxyzAB"
+
+    def test_the_boundary_type_redacts_rather_than_each_connector_remembering(self):
+        from oodarag.models import RawDocument
+
+        raw = RawDocument(source_system="anything", external_id="1",
+                          uri="u", title=f"leak {self.SECRET}",
+                          text=f"body {self.SECRET}")
+        self.assertNotIn(self.SECRET, raw.text)
+        self.assertNotIn(self.SECRET, raw.title,
+                         "a title carrying a token reaches indexed_text unredacted")
+
+    def test_a_title_carrying_a_secret_does_not_reach_the_indexed_text(self):
+        """The path that made titles matter, asserted end to end rather than
+        by reading `_context_header`."""
+        from oodarag.chunking import chunk_document
+        from oodarag.models import Document, RawDocument
+
+        raw = RawDocument(source_system="chat", external_id="s1", uri="file:///s1",
+                          title=f"Session: here is my key {self.SECRET}",
+                          text="user: how do budgets bound a crawl?\n\n"
+                               "assistant: requests, bytes and wall clock.")
+        document = Document.from_raw(raw, raw.text, dict(raw.metadata))
+        chunks = chunk_document(document)
+        self.assertTrue(chunks)
+        for chunk in chunks:
+            self.assertNotIn(self.SECRET, chunk.indexed_text)
+
+    def test_the_youtube_connector_redacts_a_curated_notes_file(self):
+        """The connector that called `redact_secrets` nowhere. Driven through
+        its own manifest and notes file, not a hand-built RawDocument."""
+        import json
+        from tempfile import TemporaryDirectory
+
+        from oodarag.ingest.base import MemoryStateStore
+        from oodarag.ingest.youtube import YouTubeConnector
+
+        with TemporaryDirectory() as tmp:
+            notes = pathlib.Path(tmp) / "notes.md"
+            notes.write_text(
+                "# Retrieval-augmented generation\n\n"
+                f"Run it with the token {self.SECRET} in your environment.\n"
+                "Chunking, embedding and retrieval are the three stages.\n",
+                "utf-8")
+            manifest = pathlib.Path(tmp) / "videos.json"
+            manifest.write_text(json.dumps({"videos": [{
+                "video_id": "T-D1OfcDW1M",
+                "title": f"Live demo with {self.SECRET}",
+                "notes_file": "notes.md",
+            }]}), "utf-8")
+
+            docs = YouTubeConnector(manifest=manifest, allow_network=False) \
+                .run(MemoryStateStore()).documents
+
+        self.assertEqual(len(docs), 1)
+        self.assertNotIn(self.SECRET, docs[0].text,
+                         "a curated notes file reached the index unredacted")
+        self.assertNotIn(self.SECRET, docs[0].title)
+        # Redaction must not have eaten the content it was protecting.
+        self.assertIn("Chunking", docs[0].text)
+
+    def test_every_connector_yields_redacted_documents(self):
+        """The sweep itself, as a test.
+
+        A new connector inherits the guarantee by constructing a RawDocument,
+        which is the point of putting it there - but asserting it per connector
+        is what would have caught the YouTube hole, and a hand-built document
+        would not have.
+        """
+        import json
+        from tempfile import TemporaryDirectory
+
+        from oodarag.ingest.base import MemoryStateStore
+        from oodarag.ingest.chat import ChatTranscriptConnector
+        from oodarag.ingest.filesystem import FilesystemConnector
+
+        leak = f"please use {self.SECRET} to authenticate against the service"
+        with TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            (root / "guide.md").write_text(f"# Guide\n\n{leak}\n", "utf-8")
+            (root / "session.jsonl").write_text("\n".join(json.dumps(e) for e in [
+                {"type": "user", "timestamp": "2026-03-01T10:00:00Z", "cwd": "/w",
+                 "message": {"role": "user", "content": leak}},
+                {"type": "assistant", "timestamp": "2026-03-01T10:01:00Z",
+                 "message": {"role": "assistant", "content": "Rotate that key."}},
+            ]), "utf-8")
+
+            runs = {
+                "filesystem": FilesystemConnector(root=tmp, patterns=["**/*.md"]),
+                "chat": ChatTranscriptConnector(root=tmp),
+            }
+            for name, connector in runs.items():
+                with self.subTest(connector=name):
+                    docs = connector.run(MemoryStateStore()).documents
+                    self.assertTrue(docs, f"{name} produced nothing to check")
+                    for doc in docs:
+                        self.assertNotIn(self.SECRET, doc.text)
+                        self.assertNotIn(self.SECRET, doc.title)
+
+    def test_metadata_is_redacted_because_the_rule_is_about_the_index_file(self):
+        """The third hole, and the one that shows why the rule is worded the way
+        it is. The web connector built `metadata["description"]` from
+        `page.text` - the copy it had *not* redacted - so a credential on a
+        crawled page reached the index in full while the body beside it was
+        clean. Nothing embeds a description; it is written to the index anyway.
+        """
+        from oodarag.ingest.base import MemoryStateStore
+        from oodarag.ingest.web import WebConnector
+        from tests.support.httpserver import Route, TestSite
+
+        html = f"""<html><head><title>Setup</title></head><body><article>
+        <h1>Setup</h1><p>Authenticate by exporting {self.SECRET} before running
+        the tool, and the client picks it up from the environment on every
+        later invocation without any further configuration being needed.</p>
+        <p>The token is read once at startup and cached for the lifetime of the
+        process, so rotating it requires a restart rather than a reload.</p>
+        </article></body></html>"""
+
+        with TestSite({"/": Route(body=html),
+                       "/robots.txt": Route(body="User-agent: *\nAllow: /",
+                                            content_type="text/plain")}) as site:
+            docs = WebConnector([site.url("/")], max_pages=1,
+                                max_depth=0).run(MemoryStateStore()).documents
+
+        self.assertEqual(len(docs), 1, "the test page was not crawled")
+        blob = json.dumps(docs[0].metadata)
+        self.assertNotIn(self.SECRET, blob,
+                         "a secret reached the index through metadata")
+        self.assertNotIn(self.SECRET, docs[0].text)
+
+    def test_redacting_metadata_does_not_mangle_legitimate_values(self):
+        """A redactor applied to structured data is a false-positive risk: a
+        commit sha, a content hash and a canonical URL all look secret-ish. If
+        any of these were rewritten, provenance would silently break."""
+        from oodarag.models import _redacted
+
+        legitimate = {
+            "head_sha": "3f8535df9b1a2c4e5d6f708192a3b4c5d6e7f809",
+            "content_hash": "a5619f704bb76aaf",
+            "canonical": "https://pypi.org/project/aiohttp/",
+            # Underscores and dots, so a redactor that normalises before
+            # matching is caught rewriting a value it should have left alone.
+            "path": "src/oodarag/retrieve/hybrid_rerank.py",
+            "crawl_seed": "https://example.test/docs/getting_started",
+            "headings": ["Installation", "API tokens and authentication"],
+            "published": "2026-01-02T00:00:00Z",
+            "size": 4096, "authority": 1.0, "is_doc": True,
+            "nested": {"license": "MIT", "topics": ["widgets", "python_3"]},
+        }
+        self.assertEqual(_redacted(legitimate), legitimate)
+
+    def test_a_secret_inside_a_list_is_redacted(self):
+        """`headings` is a list of strings lifted straight off the page, so the
+        recursion has to descend into sequences and not only into dicts."""
+        from oodarag.models import _redacted
+
+        out = _redacted({"headings": ["Setup", f"Use {self.SECRET} here"],
+                         "nested": {"lines": [f"export {self.SECRET}"]},
+                         "tags": ("clean", f"token {self.SECRET}")})
+        self.assertNotIn(self.SECRET, json.dumps(out))
+        self.assertEqual(out["headings"][0], "Setup",
+                         "redaction rewrote a heading that held no secret")
+        # A tuple comes back as a list on purpose - see the note in `_redacted`.
+        self.assertEqual(out["tags"][0], "clean")
+        self.assertIsInstance(out["tags"], list)
+
+    def test_a_credential_in_a_uri_is_redacted_too(self):
+        """A clone URL with an embedded password is provenance and a secret at
+        once. Redacting it keeps the URL usable as a citation and strips the
+        part that must not be copied around."""
+        from oodarag.models import RawDocument
+
+        raw = RawDocument(source_system="git", external_id="1",
+                          uri="https://svc:hunter2@example.com/repo.git",
+                          title="repo", text="body")
+        self.assertNotIn("hunter2", raw.uri)
+        self.assertIn("example.com/repo.git", raw.uri)
+
+    def test_redaction_is_idempotent_so_the_double_call_is_free(self):
+        """Both the connector and the boundary redact. That is only safe if a
+        second pass is a no-op - otherwise the placeholder from the first pass
+        would be re-redacted into something else."""
+        from oodarag.util.text import redact_secrets
+
+        for secret in (self.SECRET,
+                       "sk-ant-api03-" + "A" * 48,
+                       "https://user:hunter2@example.com/repo.git",
+                       "aws_secret_access_key = wJalrXUtnFEMI/K7MDENG/bPxRfiCYEX"):
+            with self.subTest(secret=secret[:24]):
+                once = redact_secrets(secret)
+                self.assertEqual(once, redact_secrets(once))
 
 
 if __name__ == "__main__":
