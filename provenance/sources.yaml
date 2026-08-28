@@ -346,3 +346,13 @@ sources:
       An inventory of what the prompts constrain, not of whether an answer met
       it. The exemplar in the skill has zero countable constraints and two
       runnable ones.
+
+  - id: RULES-BUDGET-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T19:45Z"
+    method: "python3 tools/learn_rule.py review; projection at the measured mean rule length"
+    evidence: provenance/raw/learned-rules-budget-2026-08-27.md
+    note: >-
+      Four rules, 121 words, 6% of CLAUDE.md at capture time. The projection is
+      arithmetic on the measured mean rule length, not an observation of a file
+      that exists.

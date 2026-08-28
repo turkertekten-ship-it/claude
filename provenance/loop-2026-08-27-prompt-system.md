@@ -282,6 +282,37 @@ the rule landed, and running it again was refused rather than duplicated. Rule
 4 in this repository's Learned rules arrived that way, from the trial's own
 86-word overrun.
 
+## Eighth loop — two things built from one source, fighting
+
+Observe asked what the mechanism automated one loop ago actually costs. Four
+rules, 121 words, 6% of `CLAUDE.md`. At the measured mean rule length, fifty
+rules would be 45% of the file and two hundred would be 76%
+[src:RULES-BUDGET-2026-08-27].
+
+> The surprise: two things built in this session from the same source pull
+> against each other. The **iceberg technique** says do not stuff the context —
+> keep the rules and the task above the waterline and let tools fetch the rest.
+> **Self-annealing** appends a rule to the always-loaded file on every failure,
+> and the seventh loop automated the appending. One of them is a context
+> budget; the other is an unbounded context producer, and neither knew about
+> the other.
+
+`learn_rule.py review` gives the section a budget and runs inside
+`tests/run_all.sh`, so the pressure is mechanical rather than remembered. It
+also flags rules that contradict each other — the same category, opposite mode,
+overlapping action — and rules that restate one already there, which the exact
+duplicate check could never catch.
+
+It deletes nothing. A rule exists because something went wrong once, and
+pruning it silently loses that; retiring one is an edit somebody makes on
+purpose, which is why the tool reports and stops.
+
+Both thresholds were set from measurement rather than taste. The two collisions
+this repository has actually produced sit at exactly 0.50 word overlap, and the
+four genuine rules produce no finding there [src:RULES-BUDGET-2026-08-27]. A
+threshold chosen above the real cases would have been a check that never caught
+anything.
+
 ## Still open
 
 `U-6`, `U-7` and `U-8` in [unknowns.md](unknowns.md): what Saraev actually

@@ -114,6 +114,7 @@ it arrived at it.
 | `--profile contract` | goal · constraints · output format · failure conditions | as above |
 | `--profile directive` | the DOE directive field list | as above |
 | `tools/learn_rule.py` | the self-annealing "learned rules" section | as above |
+| `learn_rule.py review` | a budget on it, because the same source warns against stuffing context | this repository's own |
 | reverse prompting in `/prompt` | five clarifying questions, then the contract | as above |
 | the `ICEBERG` rule | the context iceberg: a path beats a pasted document | as above |
 

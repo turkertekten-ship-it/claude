@@ -218,7 +218,11 @@ python3 tools/learn_rule.py add --category tests --never "claim a score you did 
 ```
 
 It refuses a rule with no `because`, because a rule whose reason is missing
-cannot be reviewed later. The pattern is documented as Saraev's self-annealing
+cannot be reviewed later. `learn_rule.py review` — part of `tests/run_all.sh` —
+reports the section's size against a budget and flags rules that contradict or
+restate each other. It deletes nothing: a rule exists because something went
+wrong, and pruning it silently loses that. Retiring one is an edit somebody
+makes on purpose. The pattern is documented as Saraev's self-annealing
 instruction file; `docs/prompting.md` says what that attribution rests on.
 
 The procedure is `.claude/skills/prompt-forge/SKILL.md`; the standard and its

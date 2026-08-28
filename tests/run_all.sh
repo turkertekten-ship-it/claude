@@ -17,6 +17,7 @@ run python3 tests/test_prompt_forge.py
 run python3 tests/test_prompt_habits.py
 run python3 tests/test_learn_rule.py
 run python3 tests/test_check_output.py
+run python3 tools/learn_rule.py review
 
 if [ "$status" -eq 0 ]; then
     echo "ALL CHECKS PASSED"

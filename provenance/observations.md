@@ -124,3 +124,9 @@ contents were not reconstructed, summarised, or guessed at.
 - The exemplar prompt in `.claude/skills/prompt-forge/SKILL.md`, documented at 100/100, has zero countable constraints; two of its seven name a command and are runnable, and five are prose for a reader to judge. [src:CONSTRAINT-GRADES-2026-08-27]
 - `tests/fixtures/prompts/clean_task.md` has one countable constraint, one runnable, and eight for a reader. [src:CONSTRAINT-GRADES-2026-08-27]
 - The first version of `check_output.py` reported the runnable constraints identically to unverifiable prose, which would have steered authors away from naming a command — the strongest form of acceptance test available. [src:CONSTRAINT-GRADES-2026-08-27]
+
+## Observed — what the self-annealing section costs
+
+- Four learned rules were appended in one session; they are 121 words, 6% of `CLAUDE.md`. [src:RULES-BUDGET-2026-08-27]
+- At the measured mean rule length, fifty rules would be about 45% of the file and two hundred about 76% — arithmetic on the measured mean, not an observed file. [src:RULES-BUDGET-2026-08-27]
+- Both collisions this repository has actually produced — one contradiction, one restatement — sit at exactly 0.50 word overlap, and the four genuine rules produce no finding at that threshold. [src:RULES-BUDGET-2026-08-27]

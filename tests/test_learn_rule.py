@@ -110,6 +110,47 @@ def main() -> int:
         full = run("list", "--file", str(path))
         check("listing prints both rules", full.stdout.count(". [") == 2, full.stdout)
 
+    print("\nreview reports without changing anything")
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "CLAUDE.md"
+        path.write_text(BASE)
+        run("add", "--file", str(path), "--category", "output",
+            "--never", "exceed a stated limit on length", "--because", "an answer ran over")
+        clean = run("review", "--file", str(path))
+        check("a single rule reviews clean", clean.returncode == 0, clean.stdout)
+        check("and the size is reported", "1 rule(s)" in clean.stdout, clean.stdout[:80])
+
+        before = path.read_text()
+        run("add", "--file", str(path), "--category", "output",
+            "--always", "exceed a stated limit on length when asked", "--because", "a reader wanted more")
+        contra = run("review", "--file", str(path))
+        check("an opposite rule in the same category is a contradiction",
+              contra.returncode == 1 and "CONTRADICTION" in contra.stdout, contra.stdout[:200])
+
+        run("add", "--file", str(path), "--category", "docs",
+            "--never", "quote a score or a count you did not re-run", "--because", "numbers drift")
+        run("add", "--file", str(path), "--category", "docs",
+            "--never", "quote a count or a score you did not re-run yourself", "--because", "they drift")
+        dup = run("review", "--file", str(path))
+        check("a restatement is a near-duplicate",
+              "NEAR-DUPLICATE" in dup.stdout, dup.stdout[:300])
+
+        budget = run("review", "--file", str(path), "--max-words", "5", "--max-share", "1")
+        check("a budget overrun fails", budget.returncode == 1, budget.returncode)
+        check("and says what the budget was",
+              "OVER BUDGET" in budget.stdout and "exceeds 5 words" in budget.stdout, budget.stdout[:200])
+        check("review deletes nothing", len(lr.read_rules(path.read_text())) == 4,
+              lr.read_rules(path.read_text()))
+
+        gone = run("review", "--file", str(Path(tmp) / "nope.md"))
+        check("a missing file exits 2", gone.returncode == 2, gone.returncode)
+
+    print("\nthe thresholds are the ones the real collisions sit at")
+    check("contradiction threshold is 0.5", lr.CONTRADICTION == 0.5, lr.CONTRADICTION)
+    check("near-duplicate threshold is 0.5", lr.NEAR_DUPLICATE == 0.5, lr.NEAR_DUPLICATE)
+    check("overlap is symmetric", lr.overlap({"a","b"}, {"b","c"}) == lr.overlap({"b","c"}, {"a","b"}))
+    check("an empty rule overlaps nothing", lr.overlap(set(), {"a"}) == 0.0)
+
     print()
     if FAILURES:
         print(f"{len(FAILURES)} case(s) failed: {', '.join(FAILURES)}")
