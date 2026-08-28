@@ -359,6 +359,41 @@ class FusionAndMmrTest(unittest.TestCase):
         self.assertEqual(components["dense_rank"], 1.0)
         self.assertEqual(components["lexical_score"], 3.0)
 
+    def test_rrf_weight_ratio_beyond_the_rank_range_silently_drops_an_arm(self):
+        """An arm weight looks like a dial and behaves like a cliff.
+
+        Every RRF contribution from a list of `n` candidates lies between
+        `weight/(k+1)` and `weight/(k+n)`, so one arm's entire range spans a
+        factor of `(k+n)/(k+1)`. Past that ratio every document the heavy arm
+        returns outscores every document only the light arm returns - measured
+        end to end, `lexical_weight=0.6` gave exactly the numbers of
+        `lexical_weight=0.0` (L65).
+
+        The threshold is recomputed from the shipped constants rather than
+        pinned at 1.64, because it moves when either constant moves and neither
+        of them lives next to the weights.
+        """
+        config = RetrievalConfig()
+        k, n = config.rrf_k, config.candidate_k
+        threshold = (k + n) / (k + 1)
+        heavy = [(f"h{i}", 1.0) for i in range(n)]
+        light = [(f"l{i}", 1.0) for i in range(n)]
+
+        def order(weight):
+            return [i for i, _, _ in reciprocal_rank_fusion(
+                [RankedList("heavy", heavy, 1.0), RankedList("light", light, weight)],
+                k=k, top_k=2 * n)]
+
+        past = order(1 / (threshold * 1.01))
+        self.assertEqual(past[:n], [i for i, _ in heavy],
+                         "past the ratio the light arm should contribute nothing")
+
+        # Just inside it, the arms interleave: the light arm's best still beats
+        # the heavy arm's worst, which is the whole point of fusing them.
+        inside = order(1 / (threshold * 0.9))
+        self.assertIn("l0", inside[:n],
+                      f"inside the ratio ({threshold:.2f}) the light arm still places")
+
     def test_mmr_keeps_the_best_result_first(self):
         candidates = [("a", 0.9), ("a2", 0.88), ("b", 0.5)]
         tokens = {"a": ["x", "y"], "a2": ["x", "y"], "b": ["p", "q"]}

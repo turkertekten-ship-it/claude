@@ -43,6 +43,10 @@ class RetrievalConfig:
     #: How deep each arm searches before fusion. Wider than top_k on purpose:
     #: fusion and reranking can only promote what they were given.
     candidate_k: int = 40
+    #: Arm weights feed RRF, where they buy far less range than they look like
+    #: they do: a ratio past `(rrf_k + candidate_k) / (rrf_k + 1)` - 1.64 at the
+    #: values below - drops the lighter arm entirely (fusion.py, L65). Use 0.0
+    #: to disable an arm and 1.0 otherwise; the values in between are a cliff.
     dense_weight: float = 1.0
     lexical_weight: float = 1.0
     rrf_k: int = 60

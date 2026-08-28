@@ -3315,3 +3315,112 @@ working copy does.
    bugs in code that is correct, which is how a good property gets thrown away.
 5. **The size of a test suite is an environment measurement.** Ten tests here
    turn on whether the branch has been pushed.
+
+---
+
+## L65 - The dense arm was starved, fixing it changed nothing, and the weights that would have fixed that are a cliff
+
+L63 swept the chunker because it was the most upstream unmeasured number.
+`dim = 768` is the next one: every embedding this project has produced has been
+hashed into 768 buckets, and the load factor says what that means - **129,072
+distinct features on the external corpus, 168 per bucket**; 85,112 and 111 per
+bucket on the primary one. Signed hashing makes collisions cancel in
+expectation. It does not make them free.
+
+`scripts/embedder_sweep.py`, external corpus:
+
+| dim | hybrid | recall@8 | dense only | recall@8 | ms/query | index MB |
+|---|---|---|---|---|---|---|
+| 192 | 48/54 | 0.8953 | 34/54 | 0.5349 | 56 | 4.5 |
+| 384 | 49/54 | 0.9302 | 40/54 | 0.7093 | 70 | 8.3 |
+| **768** | **49/54** | **0.9302** | **44/54** | **0.8023** | **95** | **12.6** |
+| 1536 | 48/54 | 0.9070 | 43/54 | 0.8140 | 144 | 17.2 |
+| 3072 | 48/54 | 0.9070 | 46/54 | 0.8605 | 239 | 28.2 |
+| 6144 | 48/54 | 0.9070 | 46/54 | 0.8488 | 441 | 49.5 |
+
+**The dense arm is collision-limited and the system is not.** Widening from 192
+to 3072 buys the dense arm **twelve cases** (34 -> 46) and 0.33 recall. Hybrid
+over the same range: 48, 49, 49, 48, 48, 48. The pipeline is not embedding-space
+limited at 768; something downstream is.
+
+**Decomposed to the one case that moves.** *"How does one Python library let
+other packages hook into it?"*, expecting `pluggy`:
+
+| dim | pluggy's rank, hybrid | pluggy's rank, dense only |
+|---|---|---|
+| 192 | 12 | not in top 30 |
+| 384 | 7 | not in top 30 |
+| 768 | **8** | not in top 30 |
+| 1536 | 12 | not in top 30 |
+| 3072 | 9 | **5** |
+| 6144 | 9 | 6 |
+
+At 3072 the dense arm has learned to find the right document and puts it fifth.
+Hybrid publishes it ninth, one place outside the window. Isolating the stage, at
+dim 3072:
+
+```
+dense only              rank 5      lexical only           rank 13
+dense only, no rerank   rank 9      hybrid, no rerank      rank 10
+                        hybrid (shipped)  rank 9
+```
+
+Fusion is the ceiling. RRF combines a rank-5 opinion with a rank-13 opinion and
+publishes rank 9 - the average, not the maximum - and the reranker, which
+promotes the document from 9 to 5 when it is alone with the dense arm, cannot
+reach past the fused ordering to do it.
+
+### So turn the weights up. They do not turn.
+
+Raising `dense_weight` or lowering `lexical_weight` should let the better arm
+through. Measured instead:
+
+| ratio | lexical_weight | pass | recall@8 | nDCG@8 |
+|---|---|---|---|---|
+| 1.00 | 1.0 | 49/54 | 0.9302 | 0.7538 |
+| 1.11 | 0.9 | 49/54 | 0.9302 | 0.7570 |
+| 1.33 | 0.75 | 49/54 | 0.9302 | 0.7628 |
+| 1.54 | 0.65 | 47/54 | 0.9070 | 0.7657 |
+| **1.67** | **0.6** | **44/54** | **0.8023** | **0.6972** |
+| 2.00 | 0.5 | 44/54 | 0.8023 | 0.6972 |
+| inf | **0.0** | **44/54** | **0.8023** | **0.6972** |
+
+**A weight of 0.6 and a weight of zero are the same system**, to four decimal
+places on three metrics. The arithmetic says exactly where that happens before
+the experiment does: every RRF contribution from a list of `n` candidates lies
+between `weight/(k+1)` and `weight/(k+n)`, so one arm's whole range spans
+
+    (k + n) / (k + 1) = (60 + 40) / 61 = 1.64
+
+and past that ratio every document the heavy arm returns outscores every
+document only the light arm returns. The predicted cliff is 1.64; the measured
+one is between 1.54 and 1.67. The knob is continuous in its type and a switch in
+its behaviour, and its cliff is set by two constants - `rrf_k` and `candidate_k` -
+that live nowhere near it.
+
+**Decisions: `dim` stays 768, both weights stay 1.0.** 768 is where hybrid pass
+rate is maximal and the dense arm is worth having as a fallback; 1536 upward
+costs 1.5x to 4.6x the query latency to lose a case. `lexical_weight=0.75` is
+tempting - same pass rate, better nDCG on the external set - and it costs a case
+on the primary one, so it is a peak on one corpus, which this repository has
+recorded as a mistake three times already.
+
+**The consequence for the plan item that is blocked on a key.** "A hosted
+embedder, measured against the offline baseline" assumes a better embedder makes
+the system better. This cycle is the measurement of that assumption's mechanism,
+and it says a twelve-case improvement in the dense arm reached the output as
+nothing. A hosted embedder must be evaluated in hybrid, not alone, and if it
+looks disappointing there, the fusion - not the model - is the thing to examine.
+
+**Rules.**
+1. **Improving a component is not improving a system.** Report the arm you
+   changed *and* the output; either alone is half the finding, and the half that
+   flatters the change is the one you will report by accident.
+2. **A knob mediated by a rank transform inherits that transform's range.**
+   Compute the range before treating the knob as continuous - it is two
+   divisions, and it predicted the cliff to within one sample here.
+3. **When two constants set a third knob's usable range, that relationship
+   belongs next to both, or in a test that recomputes it.** A pinned 1.64 goes
+   stale the first time anybody sweeps `rrf_k`.
+4. **Read the cost column before the quality column.** 6144 buckets is 4.6x the
+   latency and 3.9x the index for one case fewer.

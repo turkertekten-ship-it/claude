@@ -22,9 +22,9 @@
 | Non-negotiables | verified | All five attacked directly, not just asserted: zero-dependency walked module by module, provenance and redaction attacked with crafted inputs, degradation measured through partial and silent-empty source failures (L37-L39) |
 
 **Current measurements** (offline embedder, deterministic).
-384 tests passing - of which ten only run once the branch is pushed, because the
+385 tests passing - of which ten only run once the branch is pushed, because the
 live GitHub cross-checks skip as a module unless the local HEAD is also the
-remote head. The same tree reads 374 before a push and 384 after (L64), and CI,
+remote head. The same tree reads 375 before a push and 385 after (L64), and CI,
 which only runs pushed commits, always sees the larger number. Retrieval metrics are over graded cases only - abstention
 cases have nothing to retrieve, and averaging their zeros in made adding a
 negative case look like a retrieval regression.
@@ -141,6 +141,13 @@ its current failures are that artefact. See docs/EVALUATION.md.
    purpose - the offline embedder cannot bridge "running forever" to a corpus
    that says "never terminates".
 
+   **Measure it in hybrid, not alone, and expect the arm to outrun the system.**
+   Widening the offline embedder from 192 to 3072 buckets buys the dense arm
+   twelve cases and the pipeline none, because RRF publishes the average of the
+   two arms' opinions rather than the better one (L65). A hosted embedder that
+   disappoints in hybrid is evidence about the fusion before it is evidence
+   about the model.
+
 2. **The abstention gate**, still, though less of it. The unstemmed surface
    check is in and worth +3 cases at no measured cost (L30); the document
    coverage idea was measured and is dead (AUC 0.609, barely above a coin
@@ -210,6 +217,15 @@ its current failures are that artefact. See docs/EVALUATION.md.
 
 - **Query expansion.** Built, measured, and off by default because it made
   retrieval worse. The table is in `retrieve/expansion.py`.
+
+- **Raising the embedder's `dim`, or moving the arm weights off 1.0.** Both
+  swept over both corpora (`scripts/embedder_sweep.py`, L65). 768 is where
+  hybrid pass rate is maximal; 1536 and up cost 1.5x to 4.6x query latency to
+  lose a case. The weights are not a dial: past a ratio of
+  `(rrf_k + candidate_k) / (rrf_k + 1)` = 1.64 the lighter arm is dropped
+  entirely, and `lexical_weight=0.6` measures identical to `0.0`. The one
+  tempting setting, 0.75, is a peak on the external corpus and costs a case on
+  the primary one.
 
 - **Retuning the chunk sizes.** Swept over both corpora at last, from 96 to 640
   tokens (`scripts/chunk_sweep.py`, L63). 320 sits on a plateau that runs to

@@ -14,6 +14,23 @@ so a document ranked 1st in one list and absent from the other does not
 automatically beat a document ranked 3rd in both - which is exactly the
 behaviour you want from a hybrid retriever, since agreement across two different
 retrieval mechanisms is the strongest signal available.
+
+**The weights are a cliff, not a dial**, and the same damping is why. Across a
+list of `n` candidates every contribution lies between `weight/(k+1)` and
+`weight/(k+n)`, so one arm's whole range spans a factor of only
+
+    (k + n) / (k + 1)      = 1.64 at the shipped k=60, candidate_k=40
+
+Give one arm more than that ratio and *every* document it returns outscores
+every document the other arm returns alone: the lighter arm stops contributing
+anything but tie-breaks. Measured on the external set (L65): `lexical_weight`
+0.75 and 0.9 behave like the shipped 1.0, 0.65 loses two cases, and **0.6 is
+indistinguishable from 0.0** - 44/54, recall 0.8023, nDCG 0.6972, the same
+numbers as deleting the arm.
+
+The cliff moves when `k` or the candidate pool moves, and neither is next to the
+weights. `test_rrf_weight_ratio_beyond_the_rank_range_silently_drops_an_arm`
+recomputes the threshold from the constants rather than pinning 1.64.
 """
 
 from __future__ import annotations
