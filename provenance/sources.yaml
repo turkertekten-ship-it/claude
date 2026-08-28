@@ -704,3 +704,21 @@ sources:
       The branch head is still merge commit e7ab452 with parents e37b4c2 and
       1d7ce8f. Its copy of tools/ingest_chat_archive.py still has zero
       occurrences of the "path.stem == session" fix.
+
+  - id: CONNECTOR-FAILURE-DETECTION-2026-08-28
+    kind: filesystem
+    collected_at: "2026-08-28T08:40Z"
+    method: "reading oodarag/scrape/crawler.py; running tests/test_connectors.py against a client that raises TransportError on every request"
+    evidence: >-
+      The Crawler catches per-URL transport errors and continues, recording them
+      on CrawlReport.errors rather than propagating. A connector that reads its
+      failure verdict from control flow therefore sees no exception and no pages
+      from a completely unreachable host, and reports success. Confirmed by
+      test: with a client raising TransportError on every call, the first
+      implementation left `failures` at 0. The connector now takes its verdict
+      from the crawl report — nothing produced plus reported errors, or nothing
+      fetched at all — so CONNECTOR-DOWN can fire.
+    note: >-
+      Found by writing the failing test rather than by reading, and it is the
+      exact silent-failure class this system exists to catch: a dark feed that
+      looks like a quiet one.

@@ -1,10 +1,10 @@
 {
   "aggregate": {
     "abstention_rate": 0.1,
-    "calibration_error": 0.33515500000000004,
-    "citation_coverage": 0.7442857142857143,
-    "mrr": 0.4833333333333334,
-    "ndcg_at_5": 0.4816024061014608,
+    "calibration_error": 0.336085,
+    "citation_coverage": 0.7191666666666667,
+    "mrr": 0.45833333333333337,
+    "ndcg_at_5": 0.4689441663347503,
     "pass_rate": 0.85,
     "recall_at_5": 0.6583333333333333
   },
@@ -28,7 +28,7 @@
       "citation_coverage": 0.8,
       "confidence": 0.6096,
       "mrr": 1.0,
-      "ndcg_at_5": 0.8772153153380493,
+      "ndcg_at_5": 0.8503449055347546,
       "passed": true,
       "question": "Why is deal sourcing excluded from the design?",
       "recall_at_5": 1.0,
@@ -39,7 +39,7 @@
     },
     {
       "abstained": false,
-      "citation_coverage": 0.8333333333333334,
+      "citation_coverage": 0.8,
       "confidence": 0.6525,
       "mrr": 0.5,
       "ndcg_at_5": 0.6309297535714575,
@@ -53,7 +53,7 @@
     },
     {
       "abstained": false,
-      "citation_coverage": 0.7142857142857143,
+      "citation_coverage": 0.6666666666666666,
       "confidence": 0.4706,
       "mrr": 1.0,
       "ndcg_at_5": 1.0,
@@ -81,7 +81,7 @@
     },
     {
       "abstained": false,
-      "citation_coverage": 0.6666666666666666,
+      "citation_coverage": 0.6,
       "confidence": 0.6525,
       "mrr": 0.3333333333333333,
       "ndcg_at_5": 0.5,
@@ -95,7 +95,7 @@
     },
     {
       "abstained": false,
-      "citation_coverage": 0.8333333333333334,
+      "citation_coverage": 0.8,
       "confidence": 0.6525,
       "mrr": 0.3333333333333333,
       "ndcg_at_5": 0.3065735963827292,
@@ -123,7 +123,7 @@
     },
     {
       "abstained": false,
-      "citation_coverage": 0.5714285714285714,
+      "citation_coverage": 0.6666666666666666,
       "confidence": 0.6258,
       "mrr": 0.25,
       "ndcg_at_5": 0.43067655807339306,
@@ -137,7 +137,7 @@
     },
     {
       "abstained": false,
-      "citation_coverage": 0.8333333333333334,
+      "citation_coverage": 0.8,
       "confidence": 0.6228,
       "mrr": 0.3333333333333333,
       "ndcg_at_5": 0.5,
@@ -151,10 +151,10 @@
     },
     {
       "abstained": false,
-      "citation_coverage": 0.75,
-      "confidence": 0.5488,
-      "mrr": 1.0,
-      "ndcg_at_5": 0.6131471927654584,
+      "citation_coverage": 0.5,
+      "confidence": 0.5302,
+      "mrr": 0.5,
+      "ndcg_at_5": 0.38685280723454163,
       "passed": true,
       "question": "What happens when the obligation calendar contains unverified entries?",
       "recall_at_5": 0.5,
@@ -193,7 +193,7 @@
     },
     {
       "abstained": false,
-      "citation_coverage": 0.8333333333333334,
+      "citation_coverage": 0.8,
       "confidence": 0.6217,
       "mrr": 0.5,
       "ndcg_at_5": 0.6309297535714575,
@@ -207,7 +207,7 @@
     },
     {
       "abstained": false,
-      "citation_coverage": 0.6666666666666666,
+      "citation_coverage": 0.6,
       "confidence": 0.5725,
       "mrr": 1.0,
       "ndcg_at_5": 0.9197207891481876,
@@ -277,7 +277,7 @@
     },
     {
       "abstained": false,
-      "citation_coverage": 0.8333333333333334,
+      "citation_coverage": 0.8,
       "confidence": 0.4508,
       "mrr": 0.0,
       "ndcg_at_5": 0.0,

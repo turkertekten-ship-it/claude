@@ -48,7 +48,7 @@ about 6% real. Every metric has a `real_` twin, and the brief prints both.
 
 ```bash
 make demo        # end to end, no network, no API key
-make test        # 323 tests, stdlib unittest
+make test        # 349 tests, stdlib unittest
 ```
 
 ```bash
@@ -77,7 +77,7 @@ agents unrun. What exists is what exists:
 | `redact.py`, `answer/` — verified citations, three abstention guards | built, 40 tests |
 | `eval/` — metrics, harness, 20 goldens, regression baseline | built |
 | `cli.py` — demo, index, query, loop, brief, eval, rules, provenance, obligations | built |
-| `ingest/regulatory.py`, `ingest/marketdata.py` | **not built** |
+| `ingest/regulatory.py`, `ingest/marketdata.py` | built, 26 tests — **never run against a real host** |
 
 **Measured, not asserted.** `ooda eval` scores 17/20 on the golden set:
 recall@5 0.66, MRR 0.48, verified-citation coverage 0.74, abstention rate 0.10.
@@ -87,13 +87,25 @@ cases are still red and are documented rather than tuned away: one is a real
 retrieval weakness (the word "verify" saturates this corpus), and two are the
 harder case where the corpus discusses the subject but not the fact asked for.
 
-**No live regulatory feed.** The Observe phase is designed and its connectors
-are not written, so the loop runs on seeded signals. That is not only a
-scheduling gap: thirteen Turkish domains — including spk.gov.tr, kap.org.tr,
-resmigazete.gov.tr, tefas.gov.tr, tcmb and tuik — answer **403 to CONNECT** at
-this environment's egress gateway, an organization policy denial the proxy's own
-README says to report rather than retry. A connector written here could not be
-run against anything real.
+**No live regulatory feed, and it is not a scheduling gap.** Thirteen Turkish
+domains — spk.gov.tr, kap.org.tr, resmigazete.gov.tr, tspb.org.tr,
+tefas.gov.tr, evds2.tcmb.gov.tr, data.tuik.gov.tr among them — answer **403 to
+CONNECT** at this environment's egress gateway. That is an organization policy
+denial, and the proxy's own README says to report such denials rather than retry
+them. The connectors are written and tested against fixtures; **not one has ever
+run against its real host**, so their selectors are the part most likely to be
+wrong and the first person with real access should expect to fix them.
+
+What is not speculative is the behaviour around the fetch. A blocked source
+yields nothing, logs, and increments a failure count the `CONNECTOR-DOWN` rule
+reads. That verdict is taken from the crawl report rather than from an exception,
+because the crawler is tolerant by design — it swallows per-URL transport errors
+and keeps going, which would otherwise make a dead source look exactly like a
+quiet one and leave the loop reporting a healthy regulatory watch over a feed
+dark for a month. Market data degrades the same way: with no key and no network
+the series arrives marked `bundled`, warns on every read, and `is_bundled` is
+true if *any* point is bundled — because live history with a stale tip is the
+shape that produces a confidently wrong current figure.
 
 ## What could not be established
 

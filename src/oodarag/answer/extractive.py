@@ -87,8 +87,14 @@ class ExtractiveAnswerer:
         parts: list[str] = []
         citations: list[Citation] = []
         used = 0
-        for weight, _rank, s, text in chosen:
-            if used + len(text) > self.max_chars:
+        for i, (weight, _rank, s, text) in enumerate(chosen):
+            # The best sentence always goes in, however long it is. Dropping it
+            # for exceeding the budget empties the answer and the caller reads
+            # that as an abstention — "no evidence" when the truth is "evidence
+            # too long", which is a different and much worse claim. Truncating
+            # is not an option either: the quote has to stay verbatim or
+            # citation verification fails on the system's own output.
+            if i and used + len(text) > self.max_chars:
                 break
             marker = markers[s.chunk.chunk_id]
             parts.append(f"{text} [{marker}]")

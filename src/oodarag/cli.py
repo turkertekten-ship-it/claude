@@ -119,10 +119,13 @@ def _demo_state(profile: FirmProfile, today: date):
     numbers presented as real. The first is useless and the second is the
     failure this repository is built to prevent.
     """
-    from oodarag.domain.inflation import bundled_index
+    from oodarag.domain.inflation import PriceIndex
     from oodarag.domain.obligations import ObligationCalendar
     from oodarag.domain.valuation import NavPoint
+    from oodarag.ingest.marketdata import TuikCpiConnector
+    from oodarag.ingest.regulatory import default_connectors
     from oodarag.ooda.policy import Signal, State
+    from oodarag.redact import Redactor
 
     cal = ObligationCalendar.from_seed()
     # Two due dates set so the deadline rules have something to work on. Real
@@ -134,7 +137,25 @@ def _demo_state(profile: FirmProfile, today: date):
     if "gyf-year-end-appraisal" in cal.obligations:
         cal.set_due("gyf-year-end-appraisal", today - timedelta(days=5))
 
-    index = bundled_index()
+    # The price index comes through the connector rather than from a constant,
+    # so the bundled-data downgrade is exercised and logged on every run. With
+    # no network — the case here, since TÜİK is denied at the gateway — the
+    # series arrives marked bundled and says so.
+    cpi = TuikCpiConnector()
+    series = cpi.series("TUFE")
+    series.warn_if_bundled()
+    index = PriceIndex(series.name, series.as_index_dict(),
+                       source_uri="bundled:illustrative")
+
+    # Connector health is read from the connectors, not asserted. Each is
+    # constructed and its failure count reported; none is run against the
+    # network here, so a fresh connector reports zero and the CONNECTOR-DOWN
+    # rule stays quiet until something has actually been tried and failed.
+    redactor = Redactor()
+    connectors = default_connectors(list(profile.kap_watchlist), redactor=redactor)
+    failures = {c.key: c.failures for c in connectors}
+    if cpi.downgraded:
+        failures["tuik"] = 1
 
     nav: dict[str, list] = {}
     for code, prev, cur in (("VBR", "100.00", "132.50"),   # ~nominal drift, real ~0
@@ -168,7 +189,7 @@ def _demo_state(profile: FirmProfile, today: date):
     return State(
         now=today, profile=profile, calendar=cal, index=index,
         nav_history=nav, signals=signals,
-        connector_failures={"kap": 3},   # kap.org.tr is genuinely blocked here
+        connector_failures=failures,
         corpus_age_days={"spk": 12.0},
         citation_coverage=None,
         context={"equity_try": Decimal("30000000")},
