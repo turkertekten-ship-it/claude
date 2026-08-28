@@ -1,5 +1,10 @@
 # Birincil kaynak erişimi — OLUMSUZ İDDİANIN KANITI
 
+> **Doğrulama: 2026-08-28 · Bozulma sınıfı: OTURUM**
+>
+> Egress politikası oturuma ve kuruluş ayarına bağlıdır. Bu kanıt YALNIZCA
+> toplandığı oturum için geçerlidir; başka bir oturumda yeniden toplanmalıdır.
+
 İşletim sözleşmesi §2: *"Olumsuz iddia, olumludan daha yüksek bir kanıt eşiği
 ister; çünkü okuyucu onu tek bir aramayla doğrulayamaz. Olumsuz iddia ancak o
 yükümlülüğü getirecek olan hükmü göstererek ve nereye bakıldığını söyleyerek

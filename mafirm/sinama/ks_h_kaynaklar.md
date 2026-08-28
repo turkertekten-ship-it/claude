@@ -1,5 +1,10 @@
 # KÖR SINAMA H — §17 akademik kaynak doğrulaması
 
+> **Doğrulama: 2026-08-27 · Bozulma sınıfı: YILLIK**
+>
+> Yayımlanmış makalelerin künyesi ve bulguları kalıcıdır. Değişebilecek
+> olan tek şey erişilebilirlik ve ön baskı revizyonlarıdır.
+
 Yöntem: WebSearch. **WebFetch bu ortamda journals.sagepub.com, papers.ssrn.com,
 doi.org, api.crossref.org, api.openalex.org, arxiv.org, hbs.edu dâhil denenen
 her alan adına engellendi.** Dolayısıyla hiçbir makalenin tam metni okunamadı;

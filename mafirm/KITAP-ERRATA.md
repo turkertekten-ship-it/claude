@@ -1,5 +1,11 @@
 # Kitap için errata · Sürüm 1.0 → 1.1
 
+> **Doğrulama: 2026-08-28 · Bozulma sınıfı: KİTAP SÜRÜMÜNE BAĞLI**
+>
+> Kitabın Sürüm 1.0 metnine karşı yazıldı. Yeni bir sürümde her madde
+> yeniden sınanmalıdır; M takımı her maddenin bir vakaya bağlı kalmasını
+> denetler.
+
 Kör sınamanın bulduğu kusurların çoğu kurulumda değil, **kitabın metnindedir**.
 Aşağıda bölüm bölüm ne yazdığı, ne yazması gerektiği ve hangi sınama vakasının
 gösterdiği var. Kurulumu yapan yamalar `yamalar/DEGISIKLIKLER.md`; bu dosya
@@ -186,6 +192,16 @@ olmayan bir eşiği** ve gelecek tarihli doğrulamayı görmüyor. *(B-21…B-23
 okunamadığında kanalın dışarı gidip gitmediği bilinemez. *(C-08)*
 
 ## §13 · Depolar
+
+**[C] Tek bir doğrulama tarihi, farklı hızlarda bozulan verilere yetmiyor.**
+§13 bütün katalog için tek bir tarih veriyor ("Hepsi 27 Ağustos 2026 tarihinde
+doğrulandı"). Ama yıldız sayısı **bir gün**, lisans ve arşiv durumu **aylarca**,
+proje kimliği **yıllarca** dayanır. Tek tarih, en hızlı bozulanı en yavaşıyla
+aynı güvenilirlikte gösterir.
+→ Her doğrulanmış tablo bir tarih VE bir **bozulma sınıfı** taşımalı; ve
+bayatlayan bir tablo bayatladığını kendi başlığında söylemeli. Güncellik
+kuralının gereği "hep taze olmak" değil — o imkânsızdır — bayatlığın görünür
+olmasıdır. *(G-05, P-06)*
 
 16 deponun 16'sı çözüldü; hiçbiri uydurma değil. Dört düzeltme:
 - **[B] `freelawproject/courtlistener` lisansı "açık (depoya bakın)" değil,

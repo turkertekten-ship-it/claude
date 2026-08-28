@@ -1,5 +1,12 @@
 # KÖR SINAMA I — §5 mevzuat doğrulaması
 
+> **Doğrulama: 2026-08-27 · Bozulma sınıfı: ALTI AY**
+>
+> Türk eşikleri çoğunlukla yıllık güncellenir; kitabın kendi güncellik
+> kuralı altı ay diyor. Bu dosyanın kanıt katmanı zaten ZAYIF (birincil
+> kaynak erişilemedi), dolayısıyla tarihten bağımsız olarak insan teyidi
+> ister.
+
 ## ⚠️ ÖNCE BU: doğrulama kanalının kendisi başarısız
 
 **Bu ortamda hiçbir birincil kaynağa erişilemedi.** Ajan vekili şu alan

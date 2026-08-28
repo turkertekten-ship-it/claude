@@ -1,5 +1,5 @@
 ###############################################################
-#  KÖR SINAMA TAKIMI — 2026-08-28T08:00:18Z
+#  KÖR SINAMA TAKIMI — 2026-08-28T08:05:58Z
 ###############################################################
 
 /root/mafirm/sinama/ks_a_esik.py:45: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
@@ -274,7 +274,7 @@ GEÇTİ K-15   koltuk kapısı yöntem dosyalarını bloklamıyor
 KÖR SINAMA L — çapraz referans bütünlüğü
 ================================================================================================
 GEÇTİ L-01   belgelerdeki her yol atfının hedefi var
-        37 atıf incelendi, kırık: yok
+        38 atıf incelendi, kırık: yok
 GEÇTİ L-02   her INDEX kendi yöntem dosyalarının hepsini anıyor
         anılmayan: yok
 GEÇTİ L-03   belgelerde sabit ~/mafirm yolu kalmamış
@@ -292,9 +292,9 @@ GEÇTİ L-06   hafiza/ dosyalarının hepsi var
 KÖR SINAMA M — errata ↔ sınama izlenebilirliği
 ================================================================================================
 GEÇTİ M-01   her errata maddesi bir sınama vakasına atıf yapıyor
-        42 madde · atıfsız 0: yok
+        43 madde · atıfsız 0: yok
 GEÇTİ M-02   atıf yapılan her vaka kimliği gerçekten tanımlı
-        157 tanımlı kimlik · uydurma dayanak: yok
+        163 tanımlı kimlik · uydurma dayanak: yok
 GEÇTİ M-03   [A] ve [B] maddelerinin atıfları sadık sistemde gerçekten kaldı
         sadık koşumda kalan vaka: 41 · sınanmamış ağır madde: yok
 GEÇTİ M-04   sadık sistemde kalan her vaka errata'da ya da raporda açıklanmış
@@ -351,6 +351,24 @@ GEÇTİ O-17   normalleştirme kapının öz-sınamasını bozmadı
 ------------------------------------------------------------------------------------------------
 17 vaka · 17 geçti · 0 beklenen · 0 SİNYAL
 
+================================================================================================
+KÖR SINAMA P — raporun kendi teslimatlarına güncellik kuralı
+================================================================================================
+GEÇTİ P-01   her teslimat doğrulama tarihi VE bozulma sınıfı taşıyor
+        7 teslimat · eksik: yok
+GEÇTİ P-02   her bozulma sınıfı beyan edilmiş sözlükten
+        bilinmeyen: yok
+GEÇTİ P-03   bayatlamış her teslimat bayatlığını AÇIKÇA yazıyor
+        2 teslimat sınıfına göre bayat · sessiz bayat: yok
+GEÇTİ P-04   hiçbir teslimat gelecek tarihli değil
+        gelecek: yok
+GEÇTİ P-05   mutasyon: uyarı silinirse P-03 yakalar
+        ks_g GÜNLÜK sınıfında ve bir gün eski; uyarısı silindiğinde sessiz bayat sayılır
+GEÇTİ P-06   yıldız sayıları taşıyan dosya GÜNLÜK sınıfında
+        ks_g sınıfı: GÜNLÜK — kitabın §13'üne yönelttiğim G-05 eleştirisi buraya da uygulanır ve bu kez sınıf onu görünür kılıyor
+------------------------------------------------------------------------------------------------
+6 vaka · 6 geçti · 0 beklenen · 0 SİNYAL
+
 ###############################################################
 #  ÖZET
 ###############################################################
@@ -366,6 +384,7 @@ GEÇTİ O-17   normalleştirme kapının öz-sınamasını bozmadı
   M · errata izlenebilirliği           temiz
   N · olumsuz iddia kanıtı            temiz
   O · sır kapısı kaçırma yüzeyi   temiz
+  P · teslimatların güncelliği       temiz
   ------------------------------------------------------------
   TOPLAM SİNYAL                         0
 

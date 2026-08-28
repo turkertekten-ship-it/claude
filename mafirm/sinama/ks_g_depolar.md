@@ -1,5 +1,12 @@
 # KÖR SINAMA G — §13 depo kataloğu, bağımsız yeniden çözümleme
 
+> **Doğrulama: 2026-08-27 · Bozulma sınıfı: GÜNLÜK**
+>
+> Yıldız sayıları ve son itme tarihleri her gün değişir; lisans ve arşiv
+> durumu aylarca dayanır. Bu dosyanın SAYISAL iddiaları bir gün sonra
+> bayattır — kitabın §13'üne yönelttiğim G-05 eleştirisi bu dosyaya da
+> aynen uygulanır. Yeniden çekmeden hiçbir yıldız sayısına dayanılmaz.
+
 Yöntem: 16 girdinin tamamı GitHub MCP `search_repositories` (minimal_output:false)
 ile yeniden çözüldü; lisans dosyaları `raw.githubusercontent.com` üzerinden
 metin düzeyinde okundu; 3, 4, 8, 10, 12, 14 numaralı girdiler ayrıca depo HTML

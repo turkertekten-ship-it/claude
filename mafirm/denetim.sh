@@ -126,6 +126,9 @@ kontrol "olumsuz iddia kanıtlı (kural 2)" \
 # Taban eşleşmesi hepsi.sh'in KENDİ çıkış kodudur (0 = sinyal yok) ve orada
 # kalır; denetim yalnızca kendi katmanına bakar.
 
+kontrol "teslimatlar tarih ve bozulma sınıfı taşıyor" \
+  "python3 $M/sinama/ks_p_guncellik.py >/dev/null 2>&1 && echo 'hepsi tarihli'"
+
 echo "=== kapsanmayan kurallar sesli bildirilir ==="
 adet=$(grep -cve '^[[:space:]]*#' -e '^[[:space:]]*$' "$M/hafiza/muvekkil-adlari.txt" 2>/dev/null | head -1)
 adet=${adet:-0}

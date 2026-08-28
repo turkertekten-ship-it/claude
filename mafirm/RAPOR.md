@@ -1,5 +1,11 @@
 # Kör sınama raporu · Uluslararası M&A Hukuku Kurulum Kitabı
 
+> **Doğrulama: 2026-08-28 · Bozulma sınıfı: KURULUMA BAĞLI**
+>
+> Bulgular, sınandıkları kurulum için geçerlidir. Kitabın metni ya da
+> kurulum değişirse `sinama/hepsi.sh` yeniden koşulmalıdır: 0 SİNYAL,
+> raporun hâlâ ölçtüğü sistemi anlattığının kanıtıdır.
+
 Sürüm 1.0 · 2026-08-27 · OODA döngüsü: gözlem → yönelim → karar → eylem → döngü
 
 ## Yöntem
@@ -36,9 +42,10 @@ Dokuz takım, 96 vaka:
 | M | **Errata ↔ sınama izlenebilirliği** — raporun kendisine kanıt kuralı | CLAUDE.md §1 |
 | N | **Olumsuz iddia kanıtı** — raporun kendisine olumsuz iddia kuralı | CLAUDE.md §2 |
 | O | **Sır kapısının kaçırma yüzeyi** — Unicode | CLAUDE.md §6 |
+| P | **Teslimatların güncelliği** — raporun kendisine güncellik kuralı | CLAUDE.md §3 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamadan ve iki
-takım eklendikten sonra **157 vaka, 0 SİNYAL** — on üç bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve BEKLENEN olarak raporlanıyor — ve on üçünün her biri ya
+takım eklendikten sonra **163 vaka, 0 SİNYAL** — on üç bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve BEKLENEN olarak raporlanıyor — ve on üçünün her biri ya
 kitabın davranışının bilerek bırakılmış kaydıdır ya da belgelenmiş bir
 öntanımlı boşluktur; hiçbiri yamalı sistemde çözülmemiş bir kusur değildir.
 
@@ -580,6 +587,44 @@ denetliyor.
 
 ---
 
+## Yedi buçuk artı yedi · Eleştirdiğim şeyi ben daha kötü yapmışım
+
+§13'ü G-05 ile eleştirdim: *"tek bir doğrulama tarihi taşıyan bir tablo,
+kontrol edilmiş gibi durur."* Sonra `ks_g_depolar.md`'yi — içeriği baştan sona
+yıldız sayısı ve lisans durumu olan bir tabloyu — **hiç tarih taşımadan**
+teslim ettim. Eleştirdiğim şeyden kötüsü.
+
+Ve yalnızca o değil: yedi teslimatın **yedisi de** tarihsizdi. RAPOR.md,
+KITAP-ERRATA.md, üç dış doğrulama dosyası, egress kanıtı ve bulgu kaydı.
+İşletim sözleşmesi §3 açık: *"Bu sistemdeki HER eşik, doğrulandığı tarihi
+taşır."*
+
+### Ama düz "altı ay" kuralı bu teslimatlar için yanlış ölçüt
+
+Bir yıldız sayısı altı ay değil **bir gün** dayanır. Bir yayımlanmış makalenin
+künyesi **yıllarca** dayanır. Bir egress politikası **yalnızca o oturum** için
+geçerlidir. Tek bir eşiğe sıkıştırmak, en hızlı bozulanı en yavaşıyla aynı
+güvenilirlikte gösterir — kitabın §13'te yaptığı hatanın ta kendisi.
+
+Her teslimat artık bir tarih **ve bir bozulma sınıfı** taşıyor:
+
+| Sınıf | Ömür | Örnek |
+|---|---|---|
+| GÜNLÜK | 1 gün | yıldız sayıları (`ks_g_depolar.md`) |
+| OTURUM | o oturum | egress kanıtı |
+| ALTI AY | 183 gün | mevzuat doğrulaması |
+| YILLIK | 365 gün | akademik künye |
+| KURULUMA / KİTAP SÜRÜMÜNE BAĞLI | olaya bağlı | rapor, errata |
+
+### Ve kuralın gereği "hep taze olmak" değil
+
+Taze kalmak imkânsızdır ve altıncı turdaki "hep kırmızı" kusurunu üretir.
+Gereği şudur: **bayatlamış bir teslimat, bayatladığını söyler.** P-03 tam olarak
+bunu denetliyor — şu anda iki teslimat sınıfına göre bayat ve ikisi de bunu
+kendi başlığında yazıyor. Uyarısı silinirse P-05 yakalıyor.
+
+---
+
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
 
 | Bölüm | Beklenen | Gerçek | Sebep |
@@ -702,7 +747,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # on beş takım, 157 vaka
+./sinama/hepsi.sh                 # on altı takım, 163 vaka
 ./denetim.sh --yapisal            # mühendislik katmanı
 ./denetim.sh                      # mevzuat bulguları dâhil
 ```

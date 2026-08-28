@@ -1,5 +1,10 @@
 # Açık doğrulama bulguları
 
+> **Doğrulama: 2026-08-28 · Bozulma sınıfı: AÇIK KALDIKÇA**
+>
+> Her ENGELLEYİCİ satır, birincil kaynak açılıp teyit edilene kadar geçerli
+> kalır ve o an silinir.
+
 Kör sınama, mevzuat ve kaynak katmanında çözülmemiş bulgular bıraktı. Bunlar
 KOD hatası değildir ve bu yüzden yamalanmadılar: bir eşik değişikliği insan
 kararıdır (§11, `/esik-denetle`: "Hiçbir dosyayı düzenleme"). Ayrıca kanıt
