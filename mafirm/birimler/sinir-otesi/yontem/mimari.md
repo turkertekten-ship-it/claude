@@ -36,7 +36,7 @@ ve öyle sunulmamalıdır.
    **Döviz cinsinden bedel — belirleyici olan yerleşiklik.** Türk Parası
    Kıymetini Koruma Hakkında **32 sayılı Karar**, 13 Eylül 2018 tarihli 85
    sayılı Cumhurbaşkanı Kararı ile değiştirilerek **Türkiye'de yerleşik
-   kişiles arasındaki** belirli sözleşmelerde bedelin döviz cinsinden ya da
+   kişiler arasındaki** belirli sözleşmelerde bedelin döviz cinsinden ya da
    dövize endeksli kararlaştırılmasını yasakladı. Kapsam sonradan daraltıldı:
    **6 Mart 2025 tarihli 2025-32/72 sayılı Tebliğ** ile, taşıt satışı dışında
    kalan menkul satış sözleşmelerinde döviz yeniden serbest bırakıldı.
