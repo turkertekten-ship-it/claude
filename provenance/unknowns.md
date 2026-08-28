@@ -96,6 +96,23 @@ definition, and this session did not reach the source.
 **Resolves when:** the owner expands the term, or that session commits a
 resolved source list.
 
+**What research established.** A sibling session reported verifying a
+"Docling/Granite IBM hypothesis". Those are real IBM projects: Docling was
+initiated by IBM Research Zurich and is now hosted in the LF AI & Data
+Foundation — 65.7k stars, MIT, converting PDF/DOCX/PPTX/XLSX/HTML/EPUB into
+Markdown and JSON — and GraniteDocling is its vision-language model.
+[src:DOCLING-IBM-2026-08-27]
+
+**What research did NOT establish.** That "imb" means IBM. It is a plausible
+transposition, and the sibling's hypothesis points the same way, but the owner
+has not said so and a plausible reading is not a fact. Nothing in this
+repository depends on the expansion.
+
+**Also unreachable:** `www.youtube.com` is blocked at the proxy for both curl
+and WebFetch, so no YouTube source can be read here regardless of what "imb"
+means. [src:EGRESS-MAP-2026-08-27] This confirms first-hand what the RAG
+session had reported second-hand.
+
 ---
 
 ### U-5 — Intended relationship between the two repositories

@@ -113,6 +113,8 @@ tests/                        tests for the above
   run_all.sh                  every check, one command
 archive/                      drop conversation exports here (git-ignored)
 docs/workflows.md             how the workflows and subagents fit together
+docs/research-access.md       what this environment can actually reach
+docs/prior-art.md             related work on provenance checking
 .claude/
   settings.json               hooks
   skills/ooda/SKILL.md        the loop procedure

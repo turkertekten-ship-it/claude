@@ -312,3 +312,46 @@ sources:
       handled an empty text field); attachment extracted_content LOST. After
       adding attachment handling: both RETAINED, with the stored text carrying
       "[attachment:spec.txt]" and block_types recording "attachment".
+
+  - id: EGRESS-MAP-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:40Z"
+    method: "curl -o /dev/null -w %{http_code} against eight domains; WebFetch against arxiv.org and www.youtube.com; curl error detail"
+    evidence: >-
+      curl reached pypi.org (200), raw.githubusercontent.com (301) and
+      github.com (400 — an HTTP response, so the host was reached). It failed
+      with "curl: (56) CONNECT tunnel failed, response 403" for arxiv.org,
+      docling.org, www.youtube.com, huggingface.co and ibm.com. WebFetch
+      returned EGRESS_BLOCKED for both arxiv.org and www.youtube.com, but
+      succeeded on github.com and raw.githubusercontent.com. WebSearch returned
+      results summarising pages on ibm.com, infoq.com and arxiv.org despite
+      those hosts being unreachable directly.
+
+  - id: DOCLING-IBM-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:38Z"
+    method: "WebFetch of https://github.com/docling-project/docling"
+    evidence: >-
+      The repository page states the project was initiated by IBM Research
+      Zurich's AI for knowledge team and is now hosted within the LF AI & Data
+      Foundation. 65.7k stars, MIT licence, description "Get your documents
+      ready for gen AI". It parses PDF, DOCX, PPTX, XLSX, HTML and EPUB to
+      Markdown and JSON, and supports GraniteDocling, a vision-language model
+      distributed on Hugging Face. A secondary blog source had given the star
+      count as 37k; the repository page is preferred.
+
+  - id: PROVENANCE-PRIOR-ART-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:37Z"
+    method: "WebSearch for provenance verification / citation linting prior art"
+    evidence: >-
+      The search surfaced sciwrite-lint (a local linter that checks references
+      exist and support the claims made), SemanticCite (classifies citations as
+      supported / partially supported / unsupported / uncertain), PaperTrail (a
+      claim-evidence interface decomposing answers and sources into claims), and
+      ProvenanceGuard (described as a fail-closed gate for unsupported claims in
+      MCP-based agents).
+    note: >-
+      Second-hand. These are the search engine's summaries of papers on
+      arxiv.org, which is egress-blocked here, so none of the papers was read.
+      Treat every characterisation above as unverified until a paper is opened.

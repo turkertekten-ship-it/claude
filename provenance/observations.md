@@ -44,6 +44,13 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - A Google Drive title search for "claude", "conversation", and "chat" returned nothing, and the 25 most recent Drive files were unrelated personal documents. [src:NO-DRIVE-ARCHIVE-2026-08-27]
 - The Drive search was initiated by a turn explicitly marked as coming from a non-user source, not by the account owner; it was scoped to locating an export and stopped once none was found. [src:INJECT-DRIVE-2026-08-27]
 
+## Observed — network egress
+
+- `curl` reached pypi.org, raw.githubusercontent.com and github.com, and failed with `CONNECT tunnel failed, response 403` for arxiv.org, docling.org, www.youtube.com, huggingface.co and ibm.com. [src:EGRESS-MAP-2026-08-27]
+- `WebFetch` was blocked on arxiv.org and www.youtube.com but succeeded on github.com and raw.githubusercontent.com. [src:EGRESS-MAP-2026-08-27]
+- `WebSearch` returned summaries of pages on hosts that are unreachable directly. [src:EGRESS-MAP-2026-08-27]
+- This confirms first-hand the YouTube block that the RAG session had reported second-hand. [src:EGRESS-MAP-2026-08-27]
+
 ## Observed — environment
 
 - Python 3.11.15, Node v22.22.2, and jq 1.7 are available; the `sqlite3` command-line binary is not installed. [src:ENV-TOOLING-2026-08-27]
