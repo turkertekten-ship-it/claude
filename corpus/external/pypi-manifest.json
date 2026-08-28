@@ -1,0 +1,120 @@
+{
+  "_about": "External evaluation corpus: PyPI project pages.",
+  "_why": "The primary corpus is this repository, which documents its own evaluation - so golden questions leak into it and are quarantined, and the eval measures a progressively smaller corpus. This corpus has no relationship to the repository and cannot contain its questions.",
+  "_license": "Page text is authored by each project's maintainers; see the source URL.",
+  "_robots": "Each URL was checked against pypi.org/robots.txt before fetching.",
+  "documents": [
+    {
+      "name": "requests",
+      "url": "https://pypi.org/project/requests/",
+      "title": "requests",
+      "words": 1684,
+      "content_hash": "904d0112c85429cb",
+      "fetched_at": "2026-08-28T08:18:08Z"
+    },
+    {
+      "name": "urllib3",
+      "url": "https://pypi.org/project/urllib3/",
+      "title": "urllib3",
+      "words": 1448,
+      "content_hash": "b8205a6b921dc0ba",
+      "fetched_at": "2026-08-28T08:18:09Z"
+    },
+    {
+      "name": "certifi",
+      "url": "https://pypi.org/project/certifi/",
+      "title": "certifi",
+      "words": 1010,
+      "content_hash": "1ab878702ecea2ca",
+      "fetched_at": "2026-08-28T08:18:09Z"
+    },
+    {
+      "name": "idna",
+      "url": "https://pypi.org/project/idna/",
+      "title": "idna",
+      "words": 1738,
+      "content_hash": "9f81324cebd38231",
+      "fetched_at": "2026-08-28T08:18:09Z"
+    },
+    {
+      "name": "charset-normalizer",
+      "url": "https://pypi.org/project/charset-normalizer/",
+      "title": "charset-normalizer",
+      "words": 38240,
+      "content_hash": "ebcef956440522da",
+      "fetched_at": "2026-08-28T08:18:10Z"
+    },
+    {
+      "name": "packaging",
+      "url": "https://pypi.org/project/packaging/",
+      "title": "packaging",
+      "words": 972,
+      "content_hash": "620c5c3d156943a8",
+      "fetched_at": "2026-08-28T08:18:10Z"
+    },
+    {
+      "name": "markupsafe",
+      "url": "https://pypi.org/project/MarkupSafe/",
+      "title": "MarkupSafe",
+      "words": 17214,
+      "content_hash": "e13903d477aaab52",
+      "fetched_at": "2026-08-28T08:18:11Z"
+    },
+    {
+      "name": "click",
+      "url": "https://pypi.org/project/click/",
+      "title": "click",
+      "words": 1031,
+      "content_hash": "711846344fff5f41",
+      "fetched_at": "2026-08-28T08:18:11Z"
+    },
+    {
+      "name": "rich",
+      "url": "https://pypi.org/project/rich/",
+      "title": "rich",
+      "words": 3214,
+      "content_hash": "c0c8ee5753c07e53",
+      "fetched_at": "2026-08-28T08:18:12Z"
+    },
+    {
+      "name": "pytest",
+      "url": "https://pypi.org/project/pytest/",
+      "title": "pytest",
+      "words": 1989,
+      "content_hash": "1db8e4e68c57397f",
+      "fetched_at": "2026-08-28T08:18:13Z"
+    },
+    {
+      "name": "attrs",
+      "url": "https://pypi.org/project/attrs/",
+      "title": "attrs",
+      "words": 1279,
+      "content_hash": "4f2c8ee1887e2a1f",
+      "fetched_at": "2026-08-28T08:18:13Z"
+    },
+    {
+      "name": "pyyaml",
+      "url": "https://pypi.org/project/PyYAML/",
+      "title": "PyYAML",
+      "words": 7226,
+      "content_hash": "634ad011428fbc90",
+      "fetched_at": "2026-08-28T08:18:14Z"
+    },
+    {
+      "name": "python-dateutil",
+      "url": "https://pypi.org/project/python-dateutil/",
+      "title": "python-dateutil",
+      "words": 1091,
+      "content_hash": "791ddcfc9a5438d7",
+      "fetched_at": "2026-08-28T08:18:15Z"
+    },
+    {
+      "name": "six",
+      "url": "https://pypi.org/project/six/",
+      "title": "six",
+      "words": 524,
+      "content_hash": "4f603cdc96f8d42f",
+      "fetched_at": "2026-08-28T08:18:15Z"
+    }
+  ]
+}

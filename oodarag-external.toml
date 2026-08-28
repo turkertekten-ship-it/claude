@@ -1,0 +1,24 @@
+# Evaluation against a corpus that has nothing to do with this repository.
+#
+# The primary corpus is the repository itself, which documents its own
+# evaluation - so golden questions leak into it, get quarantined, and the eval
+# measures a progressively smaller corpus. Nothing here describes oodarag, so
+# contamination is reported clean and the numbers need no quarantine to be
+# trustworthy. See docs/EVALUATION.md.
+
+[oodarag]
+index_path   = ".oodarag/external.db"
+state_path   = ".oodarag/external-state.json"
+goldens_path = "evals/goldens-external.jsonl"
+embedder     = "hashing"
+generator    = "extractive"
+top_k        = 8
+
+[oodarag.embedder_options]
+dim = 768
+
+[[source]]
+type      = "filesystem"
+root      = "corpus/external/pypi"
+patterns  = ["**/*.md"]
+authority = 1.0

@@ -15,13 +15,17 @@
 | Generation | done | Citation contract verified against retrieved chunks; extractive default, Claude optional |
 | Eval | done | recall/precision/MRR/nDCG, citation coverage, abstention, contamination detection and quarantine |
 | OODA loop | done | Five journalled phases, auditable policy rules, action budget |
+| External eval corpus | done | 14 PyPI pages with provenance; contamination reports clean, so no quarantine is needed |
 | Incremental deletion | done | Removals propagate to the delta, prune guarded at 25% of a source, refused entirely for a failed connector |
 | CLI | done | `preflight, index, query, eval, loop, status, journal, demo` |
 | CI | done | Three jobs: stdlib matrix, numpy path, retrieval regression gate |
 
-**Current measurements** (this repository as corpus, offline embedder):
-192 tests passing · 18/20 golden cases · recall@8 0.65 · nDCG@8 0.62 ·
-citation coverage 1.0 · ~63ms per query.
+**Current measurements** (offline embedder, deterministic):
+197 tests passing.
+*Primary corpus* (this repository): 18/20 golden cases, 4 questions
+contaminated and quarantined.
+*External corpus* (14 PyPI pages, no self-reference): **20/20**, recall@8 0.80,
+nDCG@8 0.78, MRR 0.78, citation coverage 1.0, contamination clean.
 
 ## Known limitations, deliberately not fixed
 
@@ -41,8 +45,6 @@ citation coverage 1.0 · ~63ms per query.
 
 ## Next, in order of value
 
-1. **A golden set over an external corpus**, to escape the self-reference that
-   drives quarantine growth.
 2. **A hosted embedder behind the existing interface**, measured against the
    offline baseline on the same goldens. The interface and the baseline exist;
    only the comparison is missing.

@@ -85,7 +85,8 @@ class HybridRetriever:
         self.store = store
         self.embedder = embedder
         self.config = config or RetrievalConfig()
-        self.reranker = reranker or HeuristicReranker(idf=store.idf_lookup())
+        self.reranker = reranker or HeuristicReranker(
+            idf=store.idf_lookup(), vocabulary=store.vocabulary())
 
     def retrieve(self, query: str, *, top_k: int | None = None,
                  filters: dict[str, Any] | None = None) -> tuple[list[ScoredChunk], RetrievalTrace]:

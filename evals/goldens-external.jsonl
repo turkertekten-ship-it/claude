@@ -1,0 +1,31 @@
+# External golden set: PyPI project pages (corpus/external/pypi).
+#
+# Why this exists separately from goldens.jsonl: the primary corpus is this
+# repository, which documents its own evaluation. Golden questions therefore
+# leak into it, get quarantined, and the eval measures a progressively smaller
+# corpus. This corpus has no relationship to the repository and cannot contain
+# the questions asked of it - so contamination here should be clean, and if it
+# is not, that is a real finding rather than a self-reference artefact.
+#
+# Every expectation below was verified against the fetched text before it was
+# written; see corpus/external/pypi-manifest.json for provenance.
+{"question": "Which library provides Mozilla's curated collection of root certificates?", "expect_sources": ["certifi"], "expect_answer_contains": ["Mozilla"], "tags": ["external", "tls"]}
+{"question": "What does the Command Line Interface Creation Kit do?", "expect_sources": ["click"], "tags": ["external", "cli"]}
+{"question": "Which package implements PEP 440 version handling for Python packaging?", "expect_sources": ["packaging"], "tags": ["external", "packaging"]}
+{"question": "Which library smooths over differences between Python 2 and Python 3?", "expect_sources": ["six"], "tags": ["external", "compatibility"]}
+{"question": "What handles internationalized domain names in applications?", "expect_sources": ["idna"], "tags": ["external", "encoding"]}
+{"question": "Which package offers connection pooling and thread safety for HTTP?", "expect_sources": ["urllib3", "requests"], "tags": ["external", "http"]}
+{"question": "What is relativedelta used for?", "expect_sources": ["python-dateutil"], "tags": ["external", "datetime"]}
+{"question": "Which library renders tables, progress bars and syntax highlighting in the terminal?", "expect_sources": ["rich"], "tags": ["external", "terminal"]}
+{"question": "Which package relieves you from writing dunder methods by hand?", "expect_sources": ["attrs"], "tags": ["external", "classes"]}
+{"question": "Which testing framework is built around fixtures?", "expect_sources": ["pytest"], "tags": ["external", "testing"]}
+{"question": "What does IDNA 2008 support mean for domain name encoding?", "expect_sources": ["idna"], "tags": ["external", "encoding"]}
+{"question": "Which library detects the character encoding of a byte sequence?", "expect_sources": ["charset-normalizer"], "tags": ["external", "encoding"]}
+{"question": "What is used to escape strings safely for HTML templates?", "expect_sources": ["markupsafe"], "tags": ["external", "templating"]}
+{"question": "Which package parses and emits YAML in Python?", "expect_sources": ["pyyaml"], "tags": ["external", "serialization"]}
+{"question": "Which HTTP library describes itself as elegant and simple for humans?", "expect_sources": ["requests"], "tags": ["external", "http"]}
+{"question": "Which project is trusted by NASA for Mars missions?", "expect_sources": ["attrs"], "expect_answer_contains": ["Mars"], "tags": ["external", "distinctive"]}
+{"question": "What is the boiling point of mercury?", "expect_abstain": true, "tags": ["external", "negative"]}
+{"question": "Who won the 1998 FIFA World Cup final?", "expect_abstain": true, "tags": ["external", "negative"]}
+{"question": "What is the capital of France?", "expect_abstain": true, "tags": ["external", "negative"]}
+{"question": "How should I season a cast iron skillet?", "expect_abstain": true, "tags": ["external", "negative"]}

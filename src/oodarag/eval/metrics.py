@@ -50,7 +50,23 @@ def dcg(gains: Sequence[float]) -> float:
 
 
 def ndcg_at_k(retrieved: Sequence[str], relevant: set[str], k: int) -> float:
-    gains = [1.0 if item in relevant else 0.0 for item in retrieved[:k]]
+    """nDCG@k, crediting each relevant item once.
+
+    Retrieval returns chunks, and several chunks can map to the same relevant
+    document. Scoring each occurrence again makes the achieved DCG exceed the
+    ideal - the metric went above 1.0, which for a *normalised* measure is a
+    loud signal that it is not measuring what its name says. Only the first
+    appearance of a relevant item earns gain, so this answers "how high were the
+    distinct expected sources ranked", which is the question worth asking.
+    """
+    seen: set[str] = set()
+    gains: list[float] = []
+    for item in retrieved[:k]:
+        if item in relevant and item not in seen:
+            seen.add(item)
+            gains.append(1.0)
+        else:
+            gains.append(0.0)
     ideal = [1.0] * min(len(relevant), k)
     denominator = dcg(ideal)
     return dcg(gains) / denominator if denominator else 0.0

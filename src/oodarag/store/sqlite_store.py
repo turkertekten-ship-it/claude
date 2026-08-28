@@ -617,10 +617,14 @@ class SqliteStore:
             for term in set(tokenize(f"{row['context_header']} {row['text']}", stem_words=True)):
                 document_frequency[term] += 1
         total = max(1, len(rows))
+        # Singletons are kept. Dropping them made a term appearing in exactly
+        # one chunk indistinguishable from a term appearing nowhere - both fell
+        # through to the "unseen" default - so an incidental word looked as
+        # informative as one the corpus has never heard of, and the abstention
+        # gate could not tell "rare" from "absent".
         table = {
             term: round(math.log(1.0 + (total - df + 0.5) / (df + 0.5)), 4)
             for term, df in document_frequency.items()
-            if df > 1  # singletons all share the maximum idf; the default covers them
         }
         self.set_meta("idf_table", {"signature": signature, "table": table})
         log.debug("idf table built", terms=len(table), chunks=len(rows))
@@ -637,6 +641,15 @@ class SqliteStore:
     def _invalidate_idf(self) -> None:
         self.conn.execute("DELETE FROM meta WHERE key='idf_table'")
         self.conn.commit()
+
+    def vocabulary(self) -> set[str]:
+        """Every stemmed term the corpus contains.
+
+        A query term absent from this set is categorically different from a rare
+        one: it is proof the corpus has never discussed the thing being asked
+        about. See HeuristicReranker's answerability.
+        """
+        return set(self.idf_table())
 
     def idf_lookup(self):
         """A callable returning the IDF of a stemmed term.

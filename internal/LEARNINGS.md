@@ -338,3 +338,79 @@ at all, and the prune is scoped by source system because two sources can
 legitimately use the same external id. The loop decides it at priority 85 -
 below index integrity, above freshness, because a citation to deleted text is
 wrong rather than merely stale.
+
+---
+
+## L16 - A normalised metric above 1.0 is the metric telling you it is broken
+
+**Evidence.** After the recall fix (L14, defect 3), the external eval reported
+**nDCG@8 = 1.4575**. nDCG is normalised by construction; it cannot exceed 1.
+
+The cause: retrieval returns *chunks*, and several chunks map to the same
+expected *document*. Every occurrence earned gain, while the ideal DCG counted
+the document once - so achieved DCG exceeded ideal. Only the first appearance of
+a relevant item should score.
+
+**Rule.** Know each metric's range and assert it. A value outside the range is
+free evidence that the implementation and the definition have diverged, and it
+costs one line to check. The bug had been reported as a plausible-looking 0.62
+on the primary corpus; it took a corpus where documents were chunked more
+heavily to push it past 1.0 and become visible.
+
+---
+
+## L17 - `max()` over a set is not deterministic across processes
+
+**Evidence.** An abstention gate asked whether the query's most informative term
+appeared, via `max(query_set, key=idf)`. When several terms tie on IDF - common,
+since every term absent from the corpus receives the same default - `max`
+returns whichever tied element it meets first. Set iteration order for strings
+depends on hash randomisation, which Python varies **per process**.
+
+Four runs of the same question:
+
+```
+order= ['point','mercuri','boil']  max_on_tie= point
+order= ['boil','mercuri','point']  max_on_tie= boil
+order= ['point','boil','mercuri']  max_on_tie= point
+order= ['boil','mercuri','point']  max_on_tie= boil
+```
+
+"point" is in the corpus; "boil" and "mercuri" are not. So the same question
+abstained or answered depending on which run you were in, and the golden set
+moved by one case between identical invocations - indistinguishable from noise.
+
+**Rule.** Never let an ordering decision fall out of a set. Iterate a sorted
+sequence, break ties explicitly, or - better - reformulate so no arbitrary
+choice is needed. The fix here replaced "is the single best term present" with
+"how much of the query's IDF mass does the corpus contain at all", which has no
+tie to break and is a property of the query rather than of any one chunk.
+
+**Where this hides.** It only bites when values tie, so it survives every test
+written with distinct values, and it is invisible within a single process.
+
+---
+
+## L18 - Evaluate on a corpus that has never heard of you
+
+**Evidence.** The primary corpus is this repository, which documents its own
+evaluation. Contamination reached 4 of 20 questions and 25 quarantined
+documents, and grows with every commit - the eval measures a smaller corpus each
+time. A second golden set was built over fourteen PyPI project pages, which have
+no relationship to this project.
+
+The external set immediately caught **two abstention failures the primary set
+could not see**: "what is the boiling point of mercury" and "what is the capital
+of France" were both answered confidently. The primary corpus could not detect
+them, because by then it *contained* those exact phrases - written into the
+learnings file, the golden set and the tests while fixing earlier versions of
+the same bug.
+
+**Rule.** If a system is evaluated on material it also authors, keep a second
+corpus it cannot influence. It does not need to be large - fourteen pages was
+enough - only independent. Report both, and treat a disagreement between them as
+the interesting result rather than an inconvenience.
+
+**Also.** The external set found the nDCG overflow (L16) that the primary set had
+been quietly under-reporting, because its documents chunk more heavily. A second
+corpus is a second sampling of the failure space, not just a second score.

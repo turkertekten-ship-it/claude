@@ -39,6 +39,17 @@ class HeuristicReranker(Reranker):
     #: query word counts equally and coverage stops discriminating - see
     #: SqliteStore.idf_table for what that costs.
     idf: Callable[[str], float] | None = field(default=None)
+    #: Terms the corpus contains, for the answerability factor below. Leaving
+    #: it None disables that factor, which is only for A/B measurement.
+    vocabulary: set[str] | None = field(default=None)
+    #: Absence of a term is only evidence at scale. Below this vocabulary size,
+    #: a corpus is too small for "not present" to mean "not covered": a
+    #: three-document corpus lacks most ordinary English words, and its IDF
+    #: estimates are too noisy to distinguish a generic missing word from a
+    #: distinctive one. Measured on a real corpus (1,343 chunks, ~9k terms) the
+    #: factor is worth +2 golden cases; on a toy corpus it rejected a question
+    #: the corpus plainly answered.
+    min_vocabulary_for_answerability: int = 2000
     coverage_weight: float = 0.45
     phrase_weight: float = 0.25
     authority_weight: float = 0.12
@@ -47,12 +58,47 @@ class HeuristicReranker(Reranker):
     base_weight: float = 1.0
     half_life_days: float = 365.0
 
+    def _answerability(self, query_terms: set[str]) -> float:
+        """How much of the query's information the corpus contains at all.
+
+        A property of the query and the corpus, not of any chunk - so it scales
+        every candidate identically and cannot reorder them. It gates answering
+        without touching ranking.
+
+        It exists because fractional coverage hides *which* part matched: "what
+        is the boiling point of mercury" matched the word "point" in a corpus of
+        Python package pages, took a third of its coverage from that one
+        incidental word, and was answered with confidence 0.76. Neither
+        "boiling" nor "mercury" occurs anywhere in that corpus, and that is the
+        whole answer to whether the question can be answered from it.
+
+        An earlier attempt asked instead whether the query's single most
+        informative term was present. That reduced to `max(query_set, key=idf)`,
+        which picks an arbitrary element when terms tie - and since Python
+        randomises string hashing per process, set iteration order varies
+        between runs, so the same question abstained or answered depending on
+        the run. Four runs returned three different key terms. It broke this
+        pipeline's determinism (ADR 0001) silently: the eval moved by one case
+        and looked like noise.
+        """
+        if not self.vocabulary or not query_terms or self.idf is None:
+            return 1.0
+        if len(self.vocabulary) < self.min_vocabulary_for_answerability:
+            return 1.0
+        total = sum(self.idf(term) for term in query_terms)
+        if total <= 0:
+            return 1.0
+        known = sum(self.idf(term) for term in query_terms if term in self.vocabulary)
+        return known / total
+
     def rerank(self, query: str, results: list[ScoredChunk]) -> list[ScoredChunk]:
         # Stemmed, to match the FTS5 index. Raw-token coverage scores a passage
         # saying "abstained" as containing none of a query for "abstain", and
         # so demotes the exact passages the lexical arm ranked first.
         query_terms = tokenize(query, stem_words=True)
         query_set = set(query_terms)
+        # Computed once per query, not per chunk.
+        answerability = self._answerability(query_set)
         # Content tokens only. Measuring the phrase over every token lets a run
         # of stopwords score: "what is the" is three of the seven words in
         # "what is the boiling point of mercury", which scored 0.43 and carried
@@ -102,6 +148,14 @@ class HeuristicReranker(Reranker):
                 + self.recency_weight * recency
                 + self.position_weight * position
             )
+            # The query's single most informative term decides whether the
+            # corpus covers the question at all. Without this, a query whose
+            # defining terms are absent still scored a third of its coverage
+            # from one incidental common word - "what is the boiling point of
+            # mercury" matched "point" in a corpus of Python package pages and
+            # was answered with confidence 0.76. Fractional coverage hides
+            # *which* third matched, and that is the part that matters.
+
             # Relevance is kept separate from the priors on purpose. Authority,
             # recency and position are query-independent: they raise a chunk's
             # score whether or not it has anything to do with the question. Fold
@@ -110,10 +164,11 @@ class HeuristicReranker(Reranker):
             # trusted, recent source outscores the abstention floor and the
             # system answers confidently from nothing. Ordering uses the total;
             # the abstention gate uses `rerank_relevance` alone.
-            relevance = 0.6 * coverage + 0.4 * phrase_score
+            relevance = (0.6 * coverage + 0.4 * phrase_score) * answerability
 
             result.components.update({
                 "rerank_relevance": relevance,
+                "rerank_answerability": answerability,
                 "rerank_coverage": coverage,
                 "rerank_phrase": phrase_score,
                 "rerank_authority": authority_score,

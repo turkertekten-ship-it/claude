@@ -195,20 +195,27 @@ def main(argv: list[str] | None = None) -> int:
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--config", help="path to oodarag.toml")
     parser.add_argument("--version", action="version", version=f"oodarag {__version__}")
+
+    # Accepted on either side of the subcommand. `ooda index --config x.toml`
+    # is the form everyone types first, and argparse otherwise rejects it with
+    # "unrecognized arguments" - which reads like the file is wrong rather than
+    # the word order.
+    common = argparse.ArgumentParser(add_help=False)
+    common.add_argument("--config", dest="config_after", help=argparse.SUPPRESS)
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    p = subparsers.add_parser("preflight", help="probe what this environment can reach")
+    p = subparsers.add_parser("preflight", parents=[common], help="probe what this environment can reach")
     p.add_argument("--repo", action="append", help="owner/repo to probe (repeatable)")
     p.add_argument("--json", action="store_true")
     p.add_argument("--out", help="also write the markdown report here")
     p.add_argument("--strict", action="store_true", help="exit non-zero if anything is blocked")
     p.set_defaults(func=cmd_preflight)
 
-    p = subparsers.add_parser("index", help="ingest sources and build the index")
+    p = subparsers.add_parser("index", parents=[common], help="ingest sources and build the index")
     p.add_argument("--refit", action="store_true", help="refit corpus statistics")
     p.set_defaults(func=cmd_index)
 
-    p = subparsers.add_parser("query", help="ask a question")
+    p = subparsers.add_parser("query", parents=[common], help="ask a question")
     p.add_argument("question", nargs="+")
     p.add_argument("-k", type=int, default=8)
     p.add_argument("--filters", help="JSON metadata filter")
@@ -216,7 +223,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("-v", "--verbose", action="store_true", help="include retrieved chunks")
     p.set_defaults(func=cmd_query)
 
-    p = subparsers.add_parser("eval", help="run the golden set")
+    p = subparsers.add_parser("eval", parents=[common], help="run the golden set")
     p.add_argument("--goldens")
     p.add_argument("-k", type=int, default=8)
     p.add_argument("--json", action="store_true")
@@ -228,7 +235,7 @@ def main(argv: list[str] | None = None) -> int:
                         "Use for sources that record the evaluation itself, e.g. chat.")
     p.set_defaults(func=cmd_eval)
 
-    p = subparsers.add_parser("loop", help="run OODA cycles")
+    p = subparsers.add_parser("loop", parents=[common], help="run OODA cycles")
     p.add_argument("--cycles", type=int, default=1)
     p.add_argument("--interval", type=float, default=0.0, help="seconds between cycles")
     p.add_argument("--dry-run", action="store_true", help="decide but do not act")
@@ -236,20 +243,20 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_loop)
 
-    p = subparsers.add_parser("status", help="index and loop state")
+    p = subparsers.add_parser("status", parents=[common], help="index and loop state")
     p.set_defaults(func=cmd_status)
 
-    p = subparsers.add_parser("journal", help="what the loop decided, and why")
+    p = subparsers.add_parser("journal", parents=[common], help="what the loop decided, and why")
     p.add_argument("--limit", type=int, default=30)
     p.add_argument("--cycle", type=int)
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_journal)
 
-    p = subparsers.add_parser("demo", help="run the whole pipeline on this repository")
+    p = subparsers.add_parser("demo", parents=[common], help="run the whole pipeline on this repository")
     p.set_defaults(func=cmd_demo)
 
     args = parser.parse_args(argv)
-    config = Config.load(args.config)
+    config = Config.load(getattr(args, "config_after", None) or args.config)
     return args.func(args, config)
 
 

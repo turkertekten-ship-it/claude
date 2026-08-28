@@ -85,6 +85,30 @@ case. Missing contamination on a *negative* question inverts the case entirely -
 the system answers, the harness records a failure to abstain, and the reported
 cause is wrong.
 
+## Two corpora, and why
+
+`evals/goldens.jsonl` runs against this repository. That is the corpus the
+system is actually used on, so it is the one that matters - but it has a
+structural problem: **the repository documents its own evaluation.** Every
+golden question eventually appears in it, gets quarantined, and the eval
+measures a progressively smaller corpus. Contamination currently affects 4 of
+20 questions and quarantines 25 documents, and that number only grows.
+
+`evals/goldens-external.jsonl` runs against `corpus/external/pypi` - fourteen
+PyPI project pages, fetched with robots checked, committed with provenance in
+`corpus/external/pypi-manifest.json`. That corpus has no relationship to this
+repository and cannot contain the questions asked of it. Contamination there is
+reported clean, so the numbers need no quarantine to be trustworthy.
+
+```bash
+make eval           # primary: this repository
+make eval-external  # external: no self-reference
+```
+
+**Run both before believing a retrieval change.** The external set caught two
+abstention failures the primary set could not see, because the primary corpus
+contained the very words that made those questions look answerable.
+
 ## Known limitations, kept as failing cases
 
 `evals/goldens.jsonl` carries a case tagged `known-limitation` that does not

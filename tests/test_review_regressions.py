@@ -440,3 +440,65 @@ class PruneRemovedDocumentsTest(unittest.TestCase):
         self.pipeline.prune(report.deltas)
         self.assertIsNotNone(self.store.get_document("other"),
                              "the prune crossed a source boundary")
+
+
+class AnswerabilityTest(unittest.TestCase):
+    """A query using words the corpus has never seen is not answerable by it.
+
+    Fractional IDF-weighted coverage hides *which* part of a query matched. On a
+    corpus of Python package pages, "what is the boiling point of mercury"
+    matched the word "point", took a third of its coverage from that one
+    incidental word, and was answered with confidence 0.76 - while neither
+    "boiling" nor "mercury" occurs anywhere in that corpus.
+    """
+
+    def setUp(self):
+        from oodarag.retrieve.rerank import HeuristicReranker
+
+        self.reranker = HeuristicReranker(
+            idf=lambda t: {"common": 1.0}.get(t, 8.0),
+            vocabulary={"common", "chunk", "retriev", "index"},
+            min_vocabulary_for_answerability=0,
+        )
+
+    def test_a_fully_known_query_is_unpenalised(self):
+        self.assertEqual(self.reranker._answerability({"chunk", "retriev"}), 1.0)
+
+    def test_a_query_of_unknown_terms_collapses(self):
+        self.assertEqual(self.reranker._answerability({"mercuri", "boil"}), 0.0)
+
+    def test_one_incidental_known_word_does_not_carry_the_query(self):
+        # "common" is known but uninformative; the two unknown terms dominate.
+        value = self.reranker._answerability({"common", "mercuri", "boil"})
+        self.assertLess(value, 0.1, "an incidental common word carried an unanswerable query")
+
+    def test_it_is_disabled_on_a_corpus_too_small_for_absence_to_mean_anything(self):
+        from oodarag.retrieve.rerank import HeuristicReranker
+
+        small = HeuristicReranker(idf=lambda t: 8.0, vocabulary={"a", "b"},
+                                  min_vocabulary_for_answerability=2000)
+        self.assertEqual(small._answerability({"mercuri", "boil"}), 1.0)
+
+    def test_it_is_deterministic_across_processes(self):
+        """The first version of this used max(query_set, key=idf), which picks
+        an arbitrary element when terms tie - and Python randomises string
+        hashing per process, so the same question abstained or answered
+        depending on the run."""
+        import pathlib
+        import subprocess
+        import sys
+
+        script = (
+            "import sys; sys.path.insert(0, 'src');"
+            "from oodarag.retrieve.rerank import HeuristicReranker;"
+            "r = HeuristicReranker(idf=lambda t: 8.0, vocabulary={'point'},"
+            " min_vocabulary_for_answerability=0);"
+            "print(round(r._answerability({'boil', 'point', 'mercuri'}), 6))"
+        )
+        seen = {
+            subprocess.run([sys.executable, "-c", script], capture_output=True,
+                           text=True,
+                           cwd=str(pathlib.Path(__file__).resolve().parent.parent)).stdout.strip()
+            for _ in range(4)
+        }
+        self.assertEqual(len(seen), 1, f"non-deterministic across processes: {seen}")
