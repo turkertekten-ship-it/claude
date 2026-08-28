@@ -4365,3 +4365,53 @@ give different answers: 0.5 against 1.0, 1.0 against 1.63, 1.0 against 0.7654,
 3. **Check a surviving mutant is not equivalent before believing it.** Half my
    survivors here were real; the one that was not would have sent me writing a
    test for behaviour that was already covered.
+
+---
+
+## L87 - RRF's own premise was unasserted, and one "gap" was mine
+
+Continuing the mutation audit into the retrieval core and the citation
+contract. Against the modules that could plausibly catch each:
+
+    verify: unknown marker accepted as valid        CAUGHT
+    verify: invalid markers left in the text        CAUGHT
+    verify: markers inside fenced code counted      CAUGHT
+    mmr: most relevant not chosen first             CAUGHT
+    mmr: lambda ignored, pure relevance             CAUGHT
+    rrf: k dropped, top rank dominates              CAUGHT
+    rrf: rank ignored, every hit scores the same    SURVIVED
+    rrf: arm weight ignored                         SURVIVED
+
+**The fenced-code result was mine, not a gap.** It survived
+`tests.test_pipeline_core` and I nearly wrote it up as one; `test_review
+_regressions` catches it. A survivor against one module is not a survivor.
+Re-running the two RRF candidates against *full discovery* is what promoted
+them from "looks real" to real - and "looks real" is how three probe artifacts
+got as far as being reported today.
+
+**What the two real ones mean.** `contribution = ranked.weight` makes every hit
+in a list score identically, discarding rank - which is RRF's entire stated
+premise, "discarding the scores and using only the ranks". The whole suite
+passes. And `contribution = 1.0 / (k + rank)` makes `dense_weight`,
+`lexical_weight` and `expansion_weight` no-ops. That is how
+`scripts/ablation.py` turns an arm off, so ADR 0004's table - the evidence for
+the architecture - would have become a table of one number repeated, with
+nothing failing. The weights do work; today's ablation separated the arms
+49/54 against 42/54. Nothing in the suite checks that they still do.
+
+Three tests added, values computed from the definition rather than observed: at
+k=60 a rank-1 hit contributes 1/61 and a rank-2 hit 1/62; a zero-weighted arm
+contributes exactly 0.0; and agreement at rank 2 in two arms (2/62 = 0.0323)
+beats one arm's top hit (1/61 = 0.0164), which is the reason the module
+docstring gives for `k` existing at all. All three mutations now caught.
+
+**Rules.**
+1. **Scope a surviving mutant before believing it.** Run it against everything,
+   not the module you happened to pick; the difference here was one real gap
+   from becoming three claimed ones.
+2. **A component's docstring premise is a test waiting to be written.** "Uses
+   only the ranks" and "k damps the top-rank advantage" are both assertions,
+   and neither was one.
+3. **Ask what a script relies on that CI does not run.** `ablation.py` produced
+   the evidence for ADR 0004 and depends on arm weights working; it is not in
+   CI, so the dependency was invisible until a mutation pointed at it.

@@ -518,3 +518,64 @@ class RedactionTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FusionCoreIsGuardedTest(unittest.TestCase):
+    """RRF's two load-bearing behaviours, neither of which any test asserted.
+
+    Mutating `reciprocal_rank_fusion` against the *whole* suite:
+
+        contribution = ranked.weight              SURVIVED  (rank ignored)
+        contribution = 1.0 / (k + rank)           SURVIVED  (arm weight ignored)
+        contribution = ranked.weight / rank       CAUGHT    (k dropped)
+
+    The first is RRF's entire stated premise - "discarding the scores and using
+    only the ranks". The second is what `scripts/ablation.py` relies on to turn
+    an arm off, and therefore what ADR 0004's whole table rests on; the weights
+    do work today, but nothing in the suite would fail if they stopped.
+
+    Expected values are computed from the definition, not observed: at k=60 a
+    rank-1 hit contributes 1/61 and a rank-2 hit 1/62.
+    """
+
+    def test_rank_changes_the_fused_score(self):
+        from oodarag.retrieve.fusion import RankedList, reciprocal_rank_fusion
+
+        arm = RankedList("only", [("first", 9.0), ("second", 9.0), ("tenth", 9.0)], 1.0)
+        fused = dict((item, score) for item, score, _ in reciprocal_rank_fusion([arm], k=60))
+        # Identical raw scores, so any difference here comes from rank alone.
+        self.assertAlmostEqual(fused["first"], 1 / 61, places=9)
+        self.assertAlmostEqual(fused["second"], 1 / 62, places=9)
+        self.assertGreater(fused["first"], fused["second"])
+        self.assertGreater(fused["second"], fused["tenth"])
+
+    def test_arm_weight_is_honoured(self):
+        from oodarag.retrieve.fusion import RankedList, reciprocal_rank_fusion
+
+        arms = [RankedList("full", [("a", 1.0)], 1.0),
+                RankedList("half", [("b", 1.0)], 0.5),
+                RankedList("off", [("c", 1.0)], 0.0)]
+        fused = dict((item, score) for item, score, _ in reciprocal_rank_fusion(arms, k=60))
+        self.assertAlmostEqual(fused["a"], 1 / 61, places=9)
+        self.assertAlmostEqual(fused["b"], 0.5 / 61, places=9)
+        # A zero-weighted arm must contribute nothing - this is how
+        # scripts/ablation.py disables an arm, and ADR 0004's table depends on
+        # it doing so.
+        self.assertEqual(fused["c"], 0.0)
+        self.assertGreater(fused["a"], fused["b"])
+
+    def test_agreement_across_arms_beats_one_top_hit(self):
+        """The stated reason `k` exists, asserted rather than described.
+
+        The module docstring says k "damps the top-rank advantage so a document
+        ranked 1st in one list and absent from the other does not automatically
+        beat a document ranked 3rd in both". At k=60 that is 1/61 = 0.0164
+        against 2/62 = 0.0323.
+        """
+        from oodarag.retrieve.fusion import RankedList, reciprocal_rank_fusion
+
+        arms = [RankedList("x", [("solo", 1.0), ("agreed", 1.0)], 1.0),
+                RankedList("y", [("other", 1.0), ("agreed", 1.0)], 1.0)]
+        fused = dict((item, score) for item, score, _ in reciprocal_rank_fusion(arms, k=60))
+        self.assertGreater(fused["agreed"], fused["solo"],
+                           "a document both arms rank second lost to one arm's top hit")
