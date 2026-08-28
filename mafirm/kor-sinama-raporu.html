@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>27 çalıştırılabilir takım · 260 vaka · 0 sinyal</span>
+    <span>28 çalıştırılabilir takım · 265 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -1645,6 +1645,63 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Yirmi üçüncü tur</span>
+  <h2>Bir sınıfı örnek örnek düzeltmek, sınıfı kapatmaz</h2>
+  <p>Aynı kusur <strong>dört kez</strong> ayrı ayrı bulunmuştu ve her seferinde
+  yalnızca rastladığım örnek düzeltilmişti:</p>
+  <ul>
+    <li>§12 — <code>İ</code>.lower() <code>i</code> + U+0307 verir;
+    <em>"YETKİLİ" ≠ "yetkili"</em> <strong>[B-10]</strong></li>
+    <li>U-05 — Türkçe eklemeli: <em>defterine / Defterin / defteri</em> eşleşmez</li>
+    <li>AD-01 — ünlü uyumu: <em>adım<strong>lı</strong></em> ama
+    <em>bölüm<strong>lü</strong></em>; desen ikincisini atlıyordu</li>
+    <li>AA — takım adı <strong>tek harf</strong> varsayımı <strong>üç ayrı
+    bileşende</strong> gömülüydü</li>
+  </ul>
+  <p>Dördü de aynı kökten: <strong>Türkçe metni ASCII sezgisiyle okumak</strong>
+  — ve dördü de ancak o örneğe çarptığımda görüldü. Yirmi iki tur boyunca
+  <strong>sınıfın kendisini</strong> hiç taramadım. AE taradı, ve
+  <strong>üç kusur daha</strong> çıktı.</p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AE-01</span>
+      <span class="pill f">Doğru sebeple değil</span></div>
+    <h3>Yama izi deseni son dört turun kimliklerini görmüyordu</h3>
+    <p>Z-04, yeniden kurulumun yamaları geri aldığını yakalayan kontroldür ve
+    işaretleri <code>\[[A-Z]-\d{2}\]</code> ile arıyordu.
+    <code>[AA-01]</code>, <code>[AC-01]</code>, <code>[AB-03b]</code> bu desene
+    <strong>görünmüyor</strong>. Z-04 yalnızca dosyalarda eski tek harfli
+    işaretler de bulunduğu için geçiyordu — <strong>doğru sebeple değil</strong>.
+    Tek harf varsayımının <strong>dördüncü</strong> yeri; denetimin bulgu
+    sayacı da aynı şekilde tek harfliydi.</p>
+  </div>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AE-03</span>
+      <span class="pill f">B-10, kendi takımımda</span></div>
+    <h3>Büyük harfli bir ihlal, satır hiç incelenmeden atlanıyordu</h3>
+    <p>U-09 satırları <code>satir.lower()</code> ile eliyordu.
+    <code>"BEKLETİCİ".lower()</code> → <code>bekleti̇ci̇</code> (birleşen
+    noktalarla), yani <code>"bekletici" in …</code> <strong>yanlış</strong>
+    döner ve satır <strong>hiç incelenmeden</strong> atlanır. Büyük harfle
+    yazılmış bir <em>"BEKLETİCİ … FERAGAT EDİLEBİLİR"</em> ihlali — bir başlık
+    ya da vurgulanmış bir hüküm — sessizce geçiyordu.</p>
+    <p>U-09 bu takımda <strong>ikinci kez</strong> düştü: önce sabit
+    <code>True</code> yazılmıştı, şimdi de Türkçe küçültme.</p>
+  </div>
+
+  <div class="callout">
+    <strong>Dedektörü keskinleştirirken kör ettim.</strong> AE-01'in ilk hâli
+    fazla genişti: bir <strong>araç adı</strong> desenini kimlik sanıyordu.
+    Daralttım — ve <strong>fazla</strong> daralttım: mutasyon (bir kimlik
+    desenini tek harfe geri döndürmek) <strong>sağ kaldı</strong>. Yanlış
+    pozitifi kovalarken dedektörü kör etmek, on dördüncü turda <em>kapılar</em>
+    için yazdığım şeyin <em>dedektörler</em> için geçerli hâli. Ölçüt
+    sadeleştirildi; dört mutasyonun dördü de yakalanıyor.
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -1762,7 +1819,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 27 takım · 260 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 28 takım · 265 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
