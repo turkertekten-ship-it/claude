@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>18 çalıştırılabilir takım · 177 vaka · 0 sinyal</span>
+    <span>19 çalıştırılabilir takım · 201 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -1135,6 +1135,76 @@ connect_rejected  <span class="bad">www.spk.gov.tr:443</span>         gateway an
 </section>
 
 <section>
+  <span class="sec-tag">On dördüncü tur</span>
+  <h2>Kapıyı ben genişletmiştim; doğru işi bloklamaya başlamıştı</h2>
+  <p>On üç tur boyunca kapıların <strong>kaçırma</strong> yüzeyini ölçtüm — B
+  takımı neyin sızdığını, O takımı sır kapısının nasıl atlatıldığını sayıyor.
+  <strong>Aynasını hiç ölçmedim.</strong> Oysa kitap o aynayı kendisi
+  adlandırıyor ve ölümcül sayıyor:</p>
+  <p><em>"Doğru işi bloklayan bir kapı bir gün içinde kapatılır; sonra hiçbir
+  şey uygulanmaz."</em></p>
+  <p>V takımı bir Türk M&amp;A avukatının <strong>gerçekten üreteceği</strong>
+  on yedi metin yazdı — eşik değerlendirmesi, kapanış listesi, madde
+  incelemesi, kurul notu, ortaklık yapısı, dava envanteri, emsal metni,
+  yaptırım taraması — ve altı kapıyı hepsine koşturdu. Metinler kapı koduna
+  göre değil, kitabın §0 çıktı sözleşmesine göre yazıldı.</p>
+  <p><strong>Dört metinde kapı ateşledi. Üçü gerçek kusurdu ve üçü de
+  benimdi.</strong></p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">V-03 · V-08</span>
+      <span class="pill f">Yanlış pozitif</span></div>
+    <h3>"yüzde", Türkçe ticari metnin günlük kelimesidir</h3>
+    <p>Kitabın kendi <code>ESIK</code> deseni yalnızca basamak gruplu para
+    tutarını görür. Ben bunu <strong>genişlettim</strong> —
+    <code>yüzde \w+</code> ekledim — çünkü B-13..B-18 kaçırma vakalarını
+    kapatıyordum. <strong>Sonucu ölçmedim.</strong></p>
+    <p>Türkçede "yüzde" pay oranıdır, tazminat tavanıdır, sepettir, oy
+    çoğunluğudur. Genişletilmiş desen bunların hepsini bir mevzuat eşiği
+    sayıyordu: <strong>her SPA incelemesi ve her ortaklık yapısı notu</strong>
+    üç kapıyı birden ateşliyordu — doğrulanacak hiçbir mevzuat olmadığı hâlde.
+    Kitabın uyardığı kapatılma sebebinin tam kendisi, kendi elimle.</p>
+    <p><strong>Düzeltme geri alma değil.</strong> Bir yüzde, bu işleme dair bir
+    <em>olguyu</em> anlatabilir ya da bir <em>kuralı</em>; yalnızca ikincisi
+    dayanak ister. Bir yüzde artık ancak düzenleyici bir ipucuyla aynı cümlede
+    geçtiğinde eşik sayılıyor. V-24 daraltmanın <strong>delik
+    açmadığını</strong> kanıtlıyor.</p>
+  </div>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">V-01</span>
+      <span class="pill f">Kitabın iç çelişkisi</span></div>
+    <h3>Kitabın iki çıktı biçimi birbirini tanımıyordu</h3>
+    <p>Güncellik kapısı yalnızca <code>Doğrulama: &lt;tarih&gt;</code> biçimini
+    tanıyordu. Ama §14 <strong>çıktılar</strong> için başka bir biçim emrediyor:
+    <code>Kontrol edildi: &lt;kaynak&gt; (&lt;tarih&gt;)</code>. §14'ü
+    <strong>harfiyen izleyen</strong> bir hukukçunun çıktısı kapıdan
+    "doğrulama tarihi yok" diye geri dönüyordu. Aynı olgu için iki sözleşme,
+    ve kapı yalnızca birini biliyor.</p>
+  </div>
+
+  <div class="callout">
+    <strong>Ve bir kapı çöküyordu.</strong> Düzeltmeyi yazarken
+    <code>re.Match</code> yerine koyduğum asgari nesnede <code>group()</code>
+    yoktu: düzenleyici bağlamda yüzde geçen <strong>her belgede</strong> kanca
+    <code>AttributeError</code> ile düşüyordu. <strong>Çöken bir kapı, yanlış
+    ateşleyen kapıdan kötüdür</strong> — üretimde her yazmayı düşürür. V takımı
+    bunu <strong>göremedi</strong>: korpusta düzenleyici bağlamlı <em>meşru</em>
+    bir yüzde yoktu, yani sınama kendi yüzeyinin bir köşesini hiç ziyaret
+    etmemişti. Kusuru gerçek raporu kapıdan geçiren Q buldu.
+    <br><br>
+    Takımın kendi kusuru: V-17 önce <strong>yanlış listeye</strong> düştü.
+    Beklentisi boş olduğu için kapıların canlılığını ölçen V-30'un sayısını
+    sahte biçimde 4/4'ten 5/5'e çıkarıyordu. Bir yerleşim kontrolü eklendi.
+    <br><br>
+    <strong>Ve kapı bu raporu da yakaladı.</strong> Kuralı anlatan paragraf,
+    örneğini kaynaksız bir oran cümlesiyle veriyordu. Kapı haklıydı: bir
+    raporda kaynaksız duran bir oran, okuyucu için örnek değil beyandır.
+    <strong>Kapı değil cümle değişti.</strong>
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -1252,7 +1322,7 @@ connect_rejected  <span class="bad">www.spk.gov.tr:443</span>         gateway an
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 18 takım · 177 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 19 takım · 201 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
