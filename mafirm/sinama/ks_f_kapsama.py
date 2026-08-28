@@ -40,8 +40,11 @@ KURALLAR = [
      "B-21..B-23: Türkçe tarih biçimi, tarihsiz eşik ve gelecek tarihli "
      "doğrulama görünmüyor"),
     ("4",  "Yön kuralı (önce cevap)",
-     "YOK", "-",
-     "biçim kuralı; hiçbir kapı çıktı sırasına bakmıyor"),
+     "MEKANİZMA*", "R-01/R-02",
+     "KİTAPTA YOKTU: 'biçim kuralı, kapı konusu değil' diye geçilmişti. Oysa "
+     "başlık sırası makinece görülebilir: R-01 ilk bölümün cevap olmasını, "
+     "R-02 yöntemin bulgulardan sonra gelmesini denetliyor. Rapor dokuz tur "
+     "boyunca bu kuralı çiğnedi ve hiçbir şey söylemedi."),
     ("5",  "Kapsam kuralı (avukat başlığı)",
      "KISMİ", "kapsam",
      "B-02..B-06: sekiz sabit ifade dışındaki her tavsiye kipi geçiyor; "
@@ -59,11 +62,14 @@ KURALLAR = [
      "§2 hafiza/ klasörünü kuruyor ama cikar-catismasi.md dosyasını HİÇ "
      "oluşturmuyor; D mutasyonu: dosyanın yokluğu denetimden geçiyor"),
     ("9",  "İnsan onayı",
-     "YOK", "-",
-     "hiçbir mekanizma bir çıktının onaylanıp onaylanmadığını izlemiyor"),
+     "KISMİ*", "R-04/R-05",
+     "Onayın kendisi izlenemez ama ONAY DURUMUNUN BEYANI izlenebilir: R-04 "
+     "raporun onaysız olduğunu yazmasını, R-05 bunu ilk bölümde yazmasını "
+     "istiyor. Sessizlik onaylanmış gibi okunur."),
     ("10", "Dil kuralı",
-     "YOK", "-",
-     "hiçbir kapı dil ya da terim kullanımına bakmıyor"),
+     "KISMİ*", "R-06",
+     "'İlk geçtiklerinde açıklanır' şartı makinece kontrol edilebilir: R-06 "
+     "tanımlı terim listesinde ilk geçişin yakınında bir açıklama arıyor."),
     ("11", "Önce araştır, sonra cevap ver",
      "BOZUK", "arastirma",
      "C-01..C-03, C-10: üretim yolunda json.dumps satır sonlarını kaçırdığı "
@@ -95,7 +101,8 @@ def rapor():
     print("=" * 96)
     print("%-4s %-32s %-10s %s" % ("no", "kural", "durum", "kapı"))
     print("-" * 96)
-    sayim = {"MEKANİZMA": 0, "KISMİ": 0, "YOK": 0, "BOZUK": 0}
+    sayim = {"MEKANİZMA": 0, "MEKANİZMA*": 0, "KISMİ": 0,
+             "KISMİ*": 0, "YOK": 0, "BOZUK": 0}
     for no, ad, durum, kapi, kanit in KURALLAR:
         sayim[durum] += 1
         print("%-4s %-32s %-10s %s" % (no, ad, durum, kapi))
@@ -106,8 +113,10 @@ def rapor():
         print("     %s" % kanit)
     print("=" * 96)
     print("On bir kuraldan:")
-    print("  tam mekanizmalı : %d" % sayim["MEKANİZMA"])
-    print("  kısmi           : %d  (kanıtlanmış boşluklarla)" % sayim["KISMİ"])
+    print("  tam mekanizmalı : %d  (%d'ü bu raporun eklediği)"
+          % (sayim["MEKANİZMA"] + sayim["MEKANİZMA*"], sayim["MEKANİZMA*"]))
+    print("  kısmi           : %d  (kanıtlanmış boşluklarla; %d'i bu raporun)"
+          % (sayim["KISMİ"] + sayim["KISMİ*"], sayim["KISMİ*"]))
     print("  bozuk           : %d  (üretimde çalışmıyor)" % sayim["BOZUK"])
     print("  hiç kapsanmayan : %d" % sayim["YOK"])
     print()

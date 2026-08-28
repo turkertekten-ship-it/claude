@@ -8,49 +8,33 @@
 
 Sürüm 1.0 · 2026-08-27 · OODA döngüsü: gözlem → yönelim → karar → eylem → döngü
 
-## Yöntem
+## Cevap
 
-Kitap baştan sona, **kelimesi kelimesine** kuruldu: on dokuz bölüm, sekiz
-uzmanlık birimi, on beş koltuk, on bir beceri, beş alt ajan, dokuz komut, dört
-komut kütüphanesi dosyası, beş kapı, denetim betiği. Hiçbir bölüm "bağlam gibi
-göründüğü için" atlanmadı; kitabın kendi kalite çubuğu uygulandı (§0
-`<kalite_cubugu>`): her bileşen tam yazıldı, "örnek olarak" deyip kesilmedi.
+**Kitap iyi bir kitap ve harfiyen izlendiğinde çalışmıyor.** Kitaba sadık,
+eksiksiz kurulumda 85 kör sınama vakasının 56'sı başarısız oldu ve kitabın
+kendi §16 denetimi yeşile dönmedi.
 
-Sonra **kör sınama** yapıldı. Kör olmasının tanımı şu: her vaka kitabın
-DÜZYAZISINDAN türetildi, kodundan değil. Kitabın kendi öz-sınamaları
-(esik.py'de altı vaka, kapi.py'de on altı) desenleri yazan kişinin aklındaki
-vakalardır ve hepsi geçer. Kör sınama o aklın dışında kalanı arar: bir
-hukukçunun gerçekten yazacağı cümleyi, kancanın gerçekten göreceği veriyi,
-bozulduğunda denetimin gerçekten yakalayıp yakalamadığını.
+Üç cümlede sebebi:
 
-Dokuz takım, 96 vaka:
+1. **§14, §12'nin öz-sınamasını bozuyor** ve düzeltilmiyor; zincir §16'yı
+   kırmızıya, §0'ın dördüncü kuralını da kurulumu durdurmaya götürüyor. §19'daki
+   ilk dosya hiç çalışmıyor.
+2. **Kapılar biçimi denetliyor, muhakemeyi değil** — ve kitaba sadık hâlleriyle
+   §19'un DOĞRU cevabını da YANLIŞ cevabını da bloklıyorlar, yani §19'un
+   "kurulumun tamamının sebebi" dediği farkı ifade edemiyorlar.
+3. **Denetim on beş bozmadan on birini görmüyor**; sıfır beceri, kancasız
+   ayarlar ve tamamen boş bir `esik.py` taşıyan bir sistemde "DENETİM OK" diyor.
 
-| Takım | Neyi sınar | Kaynağı |
-|---|---|---|
-| A | Rekabet eşiği mantığı | `tr-esikler.md` düzyazısı |
-| B | Beş kapı, on bir doktrin kuralına karşı | `CLAUDE.md` düzyazısı |
-| C | **Üretim yolu** — gerçek kanca JSON'u, gerçek çıkış kodu | Kanca sözleşmesi |
-| D | **Mutasyon sınaması** — sistemi bozup denetimin yakalayıp yakalamadığı | §16 |
-| E | Kitabın doğrulama komutları vs kitabın beklenen değerleri | §3–§16 |
-| F | Doktrin kapsama matrisi | §12'nin kendi iddiası |
-| G | §13 deposu — 16 depo bağımsız yeniden çözüldü | GitHub API |
-| H | §17 kaynakları — dört akademik çalışma | Yayıncı kayıtları |
-| I | §5 mevzuatı — eşikler ve madde numaraları | Birincil kaynak (denendi) |
-| J | **§19 kabul sınaması** — kitabın kendi son kapısı, uçtan uca | §19 |
-| K | Yönlendirme, üst bilgi ve koltuk sağlaması | §7, §9, §10, §11 |
-| L | Çapraz referans bütünlüğü ve taşınabilirlik | §4'ün düzen gerekçesi |
-| M | **Errata ↔ sınama izlenebilirliği** — raporun kendisine kanıt kuralı | CLAUDE.md §1 |
-| N | **Olumsuz iddia kanıtı** — raporun kendisine olumsuz iddia kuralı | CLAUDE.md §2 |
-| O | **Sır kapısının kaçırma yüzeyi** — Unicode | CLAUDE.md §6 |
-| P | **Teslimatların güncelliği** — raporun kendisine güncellik kuralı | CLAUDE.md §3 |
-| Q | **Rapor kendi kapılarından geçiyor mu** | CLAUDE.md §5, §14 |
+**Yamalı hâlde sistem çalışıyor:** 170 vaka, 0 sinyal; mutasyon yakalama 4/15
+→ 15/15. Ama **üç mevzuat bulgusu açık kalır** ve bunlar kod düzeltmesiyle
+kapanmaz: ikisi bir işlemin bildirime tabi olup olmadığını değiştirir ve
+birincil kaynak erişimi olan bir insan gerektirir.
 
-**Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamadan ve iki
-takım eklendikten sonra **170 vaka, 0 SİNYAL** — on üç bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve BEKLENEN olarak raporlanıyor — ve on üçünün her biri ya
-kitabın davranışının bilerek bırakılmış kaydıdır ya da belgelenmiş bir
-öntanımlı boşluktur; hiçbiri yamalı sistemde çözülmemiş bir kusur değildir.
+**Bu rapor hukuki görüş değildir ve adı belli bir insan tarafından
+onaylanmamıştır** (işletim sözleşmesi §9). Mevzuat katmanı birincil kaynakla
+doğrulanamadı; gerekçesi `hafiza/egress-kaniti.md` içinde kanıtlıdır.
+Ayrıntı için aşağı inin; yöntem en sonda.
 
----
 
 ## Bir · Kurulum kendi denetimini geçemiyor
 
@@ -291,7 +275,10 @@ DEĞİLDİ ve yazarların kendi okuması erişim ile akıl yürütmeyi ödünle�
 tamamlayıcı sayıyor. Çalışma bir otomatik kapıyı hiç sınamadı.
 
 ### §5 · Mevzuat — üç bulgu, ikisi bildirime tabiliği değiştirir
-**Bu oturumda dört Türk birincil kaynağı alan adına HTTPS, kuruluş egress politikasıyla CONNECT aşamasında 403 ile reddedildi** (kanıt: `hafiza/egress-kaniti.md`): `mevzuat.gov.tr`,
+**Bu oturumda dört Türk birincil kaynağı alan adına HTTPS, kuruluş
+egress politikasıyla CONNECT aşamasında 403 ile reddedildi** (CONNECT: bir
+vekil üzerinden şifreli bağlantı açma isteği; ret, bağlantı kurulmadan
+önce orada verildi) (kanıt: `hafiza/egress-kaniti.md`): `mevzuat.gov.tr`,
 `resmigazete.gov.tr`, `rekabet.gov.tr`, `spk.gov.tr` — hepsi reddedildi.
 Aşağıdakiler desteklenmiş yeniden kurgudur, birincil doğrulama değildir. (Kanalın
 güvenilmezliği ölçüldü: aynı SPK eşiği için dört sorguda %50, %90 ve %98 döndü.)
@@ -475,7 +462,7 @@ Eksik olan üç şey vardı ve üçü de yapılabilirdi:
    doğru davranış onu aşmak değil, bildirmek.
 2. **Bash + curl kanalını hiç denememiştim.** WebFetch'i hukuk kaynaklarına,
    curl'ü GitHub'a denemiştim; curl'ü hukuk kaynaklarına hiç denemedim. Dördü
-   de `CONNECT tunnel failed, response 403` verdi.
+   de `CONNECT tunnel failed, response 403` (CONNECT: vekil üzerinden şifreli bağlantı açma isteği; 403 orada reddedildi) verdi.
 3. **Vekilin kendi kaydını hiç sormamıştım.** `__agentproxy/status` uç noktası
    dört reddi zaman damgasıyla ve host adıyla kaydediyor.
 
@@ -579,8 +566,8 @@ bulunmuştu: Python'un `İ`.lower() ayrışması. Kitap o kusuru düzeltmemişti
 ben düzelttim ama **sınıfı genellemedim** — tek bir örneği yamalayıp yüzeyin
 tamamını sınamadım. Altı tur sonra döndüm.
 
-Düzeltme yalnızca sır kapısında: biçim karakterlerini at, NFKC ile birleştir,
-dar bir homoglif tablosunu Latin'e katla. Diğer kapılarda uygulanmadı — aşırı
+Düzeltme yalnızca sır kapısında: biçim karakterlerini at, NFKC ile birleştir (Unicode'un uyumluluk normalleştirmesi: ayrışmış aksanları tek karaktere indirger),
+dar bir homoglif tablosunu — Latin harfe görsel olarak eşdeğer Kiril/Yunan harfleri — Latin'e katla. Diğer kapılarda uygulanmadı — aşırı
 normalleştirme yanlış pozitif üretir; ama **dışarı giden bir çağrıda fazla
 bloklamak, az bloklamaktan güvenlidir.**
 
@@ -674,6 +661,46 @@ doğrulanmadığı, adlarıyla yazılı.
 
 ---
 
+## Yedi buçuk artı dokuz · Rapor, yöntemle başlıyordu
+
+§4: *"Her çıktı cevapla başlar. Sonra gerekçe, en sonda yöntem. Yöntemi merak
+eden okuyucu aşağı iner; cevabı merak eden ilk paragrafta bulur."*
+
+Bu rapor dokuz tur boyunca **`## Yöntem` ile başlıyordu** ve cevabı 818.
+satırda tutuyordu — kuralın önlemek için var olduğu şeyin ta kendisi. Artık
+`## Cevap` ile başlıyor, yöntem bulguların sonrasına indi, ve iki zorunlu
+başlık en sonda kaldı.
+
+Aynı turda §9 ve §10 da uygulandı: raporun **onaysız olduğu ilk bölümde**
+yazılı (sessizlik onaylanmış gibi okunur), ve NFKC, CONNECT, homoglif gibi
+terimler ilk geçtiklerinde açıklandı.
+
+### Ve bu, kitapta bir kusur daha gösterdi
+
+F matrisinde §4, §9 ve §10 "hiç kapsanmayan" diye duruyordu — kitap onları
+"biçim kuralı, kapı konusu değil" diye geçmişti. Oysa üçü de kısmen makinece
+kontrol edilebilir: §4 bir başlık sırası kuralıdır, §9 onayın kendisini değil
+ama **beyanını** isteyebilir, §10 tanımlı bir terim listesi için denetlenebilir.
+Kitap, uygulanabilir olanı uygulanamaz saymış. Matris güncellendi: kapsanmayan
+kural sayısı **altıdan üçe** indi.
+
+### Ve koşum betiğimde `| wc -l` kusurunun kendisini buldum
+
+F takımı çöktü ve takım hâlâ **0 SİNYAL** dedi. Sebebi tek satırdı:
+
+```
+python3 "$S/ks_f_kapsama.py" | tail -8; topla "F · doktrin kapsama matrisi" 0
+```
+
+Çıkış kodu **elle 0 yazılmış**, üstelik boru hattının kodu zaten `tail`'inki.
+Kitabın denetiminde D takımıyla bulduğum kusurun kendi koşum betiğimdeki hâli.
+Düzeltildi ve mutasyonla doğrulandı — ama **ilk mutasyon denemem yine
+tutmadı** (`sys.exit(0)` satırından sonra eklediğim satır hiç çalışmadı) ve
+kuralımı üçüncü kez hatırlamak zorunda kaldım: *bir mutasyon sınaması,
+mutasyonun olduğunu kanıtlamadan geçerli değildir.*
+
+---
+
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
 
 | Bölüm | Beklenen | Gerçek | Sebep |
@@ -733,11 +760,15 @@ Bir sınama takımı da sınanmalıdır. Üç hata yapıldı ve üçü de düzel
    doğrulayan bir adım eklendi. Bu, D takımında bir kez daha yaşandığı için
    artık bir alışkanlık: **bir mutasyon sınaması, mutasyonun olduğunu
    kanıtlamadan geçerli değildir.**
-7. **Kapımın kendi raporumu reddettiğini gördüm ve üzerinden geçtim.**
+7. **Koşum betiğim bir takımın çıkış kodunu elle 0 yazıyordu.** F çöktüğünde
+   takım "0 SİNYAL" diyordu — kitabın denetiminde bulduğum `| wc -l` kusurunun
+   kendi betiğimdeki hâli. Ve düzeltmeyi sınarken mutasyonum yine tutmadı;
+   aynı kuralı üçüncü kez hatırladım.
+8. **Kapımın kendi raporumu reddettiğini gördüm ve üzerinden geçtim.**
    Sekizinci turda `RAPOR.md [kapsam] avukat başlığı yok` çıktısı ekrandaydı;
    okudum, başka bir şeye baktım. Bir turu bu yüzden kaybettim ve kitabın §12'de
    tarif ettiği kusuru birebir yaşadım.
-8. **İzlenebilirlik denetleyicimin ayrıştırıcısını da yanlış yazdım** —
+9. **İzlenebilirlik denetleyicimin ayrıştırıcısını da yanlış yazdım** —
    aralık atıflarını ve dinamik kimlikleri görmüyordu, yedi maddeyi haksız yere
    "dayanaksız" ilan etti. Bu, bu oturumdaki yedinci ayrıştırıcı kusurum ve
    hepsi aynı yönde: **bir dedektör, ölçtüğü şeyin gerçek biçimini görmeden
@@ -800,7 +831,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # on yedi takım, 170 vaka
+./sinama/hepsi.sh                 # on sekiz takım, 177 vaka
 ./denetim.sh --yapisal            # mühendislik katmanı
 ./denetim.sh                      # mevzuat bulguları dâhil
 ```
@@ -812,6 +843,53 @@ Ham çıktılar: `sinama/SONUC-once.txt` (kitaba sadık) ve
 `ks_h_kaynaklar.md`, `ks_i_mevzuat.md`.
 Kitabın metni için düzeltme listesi: **`KITAP-ERRATA.md`** — bölüm bölüm,
 ağırlık işaretli, her madde onu bulan sınama vakasıyla.
+
+---
+
+---
+
+## Yöntem
+
+Kitap baştan sona, **kelimesi kelimesine** kuruldu: on dokuz bölüm, sekiz
+uzmanlık birimi, on beş koltuk, on bir beceri, beş alt ajan, dokuz komut, dört
+komut kütüphanesi dosyası, beş kapı, denetim betiği. Hiçbir bölüm "bağlam gibi
+göründüğü için" atlanmadı; kitabın kendi kalite çubuğu uygulandı (§0
+`<kalite_cubugu>`): her bileşen tam yazıldı, "örnek olarak" deyip kesilmedi.
+
+Sonra **kör sınama** yapıldı. Kör olmasının tanımı şu: her vaka kitabın
+DÜZYAZISINDAN türetildi, kodundan değil. Kitabın kendi öz-sınamaları
+(esik.py'de altı vaka, kapi.py'de on altı) desenleri yazan kişinin aklındaki
+vakalardır ve hepsi geçer. Kör sınama o aklın dışında kalanı arar: bir
+hukukçunun gerçekten yazacağı cümleyi, kancanın gerçekten göreceği veriyi,
+bozulduğunda denetimin gerçekten yakalayıp yakalamadığını.
+
+Dokuz takım, 96 vaka:
+
+| Takım | Neyi sınar | Kaynağı |
+|---|---|---|
+| A | Rekabet eşiği mantığı | `tr-esikler.md` düzyazısı |
+| B | Beş kapı, on bir doktrin kuralına karşı | `CLAUDE.md` düzyazısı |
+| C | **Üretim yolu** — gerçek kanca JSON'u, gerçek çıkış kodu | Kanca sözleşmesi |
+| D | **Mutasyon sınaması** — sistemi bozup denetimin yakalayıp yakalamadığı | §16 |
+| E | Kitabın doğrulama komutları vs kitabın beklenen değerleri | §3–§16 |
+| F | Doktrin kapsama matrisi | §12'nin kendi iddiası |
+| G | §13 deposu — 16 depo bağımsız yeniden çözüldü | GitHub API |
+| H | §17 kaynakları — dört akademik çalışma | Yayıncı kayıtları |
+| I | §5 mevzuatı — eşikler ve madde numaraları | Birincil kaynak (denendi) |
+| J | **§19 kabul sınaması** — kitabın kendi son kapısı, uçtan uca | §19 |
+| K | Yönlendirme, üst bilgi ve koltuk sağlaması | §7, §9, §10, §11 |
+| L | Çapraz referans bütünlüğü ve taşınabilirlik | §4'ün düzen gerekçesi |
+| M | **Errata ↔ sınama izlenebilirliği** — raporun kendisine kanıt kuralı | CLAUDE.md §1 |
+| N | **Olumsuz iddia kanıtı** — raporun kendisine olumsuz iddia kuralı | CLAUDE.md §2 |
+| O | **Sır kapısının kaçırma yüzeyi** — Unicode | CLAUDE.md §6 |
+| P | **Teslimatların güncelliği** — raporun kendisine güncellik kuralı | CLAUDE.md §3 |
+| Q | **Rapor kendi kapılarından geçiyor mu** | CLAUDE.md §5, §14 |
+| R | **Yön, insan onayı ve dil** — raporun kendi biçimi | CLAUDE.md §4, §9, §10 |
+
+**Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamadan ve iki
+takım eklendikten sonra **177 vaka, 0 SİNYAL** — on üç bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve BEKLENEN olarak raporlanıyor — ve on üçünün her biri ya
+kitabın davranışının bilerek bırakılmış kaydıdır ya da belgelenmiş bir
+öntanımlı boşluktur; hiçbiri yamalı sistemde çözülmemiş bir kusur değildir.
 
 ---
 

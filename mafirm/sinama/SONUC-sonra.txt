@@ -1,5 +1,5 @@
 ###############################################################
-#  KÖR SINAMA TAKIMI — 2026-08-28T08:16:49Z
+#  KÖR SINAMA TAKIMI — 2026-08-28T08:25:49Z
 ###############################################################
 
 /root/mafirm/sinama/ks_a_esik.py:45: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
@@ -186,13 +186,13 @@ KÖR SINAMA E — kitabın doğrulama komutları vs kitabın beklenen değerleri
 -----------------------------------------------------------------------
 12 doğrulama · 9 geçti · 3 beklenen · 0 SİNYAL
 
-  tam mekanizmalı : 0
-  kısmi           : 4  (kanıtlanmış boşluklarla)
+  tam mekanizmalı : 1  (1'ü bu raporun eklediği)
+  kısmi           : 6  (kanıtlanmış boşluklarla; 2'i bu raporun)
   bozuk           : 1  (üretimde çalışmıyor)
-  hiç kapsanmayan : 6
+  hiç kapsanmayan : 3
 
 §12'nin iddiası: 'doktrin baskı altında uyulmayan şeydir; kapılar
-uyulan şeydir.' Ölçüm: on bir kuralın 7 tanesi baskı altında
+uyulan şeydir.' Ölçüm: on bir kuralın 4 tanesi baskı altında
 çalışan bir mekanizmaya sahip DEĞİL; kalan 4 tanesi kısmi.
 
 ================================================================================================
@@ -274,7 +274,7 @@ GEÇTİ K-15   koltuk kapısı yöntem dosyalarını bloklamıyor
 KÖR SINAMA L — çapraz referans bütünlüğü
 ================================================================================================
 GEÇTİ L-01   belgelerdeki her yol atfının hedefi var
-        45 atıf incelendi, kırık: yok
+        46 atıf incelendi, kırık: yok
 GEÇTİ L-02   her INDEX kendi yöntem dosyalarının hepsini anıyor
         anılmayan: yok
 GEÇTİ L-03   belgelerde sabit ~/mafirm yolu kalmamış
@@ -294,7 +294,7 @@ KÖR SINAMA M — errata ↔ sınama izlenebilirliği
 GEÇTİ M-01   her errata maddesi bir sınama vakasına atıf yapıyor
         45 madde · atıfsız 0: yok
 GEÇTİ M-02   atıf yapılan her vaka kimliği gerçekten tanımlı
-        170 tanımlı kimlik · uydurma dayanak: yok
+        177 tanımlı kimlik · uydurma dayanak: yok
 GEÇTİ M-03   [A] ve [B] maddelerinin atıfları sadık sistemde gerçekten kaldı
         sadık koşumda kalan vaka: 41 · sınanmamış ağır madde: yok
 GEÇTİ M-04   sadık sistemde kalan her vaka errata'da ya da raporda açıklanmış
@@ -387,6 +387,26 @@ GEÇTİ Q-07   akademik dayanak bir MEVZUAT eşiğini aklamıyor
 ------------------------------------------------------------------------------------------------
 7 vaka · 7 geçti · 0 beklenen · 0 SİNYAL
 
+================================================================================================
+KÖR SINAMA R — yön, insan onayı ve dil kuralları
+================================================================================================
+GEÇTİ R-01   rapor cevapla başlıyor, yöntemle değil
+        ilk bölüm: 'Cevap' — §4: 'cevabı merak eden ilk paragrafta bulur'
+GEÇTİ R-02   yöntem bölümü bulgulardan sonra geliyor
+        yöntem 23. başlık, ilk bulgu 1. başlık
+GEÇTİ R-03   iki zorunlu başlık en sonda ve doğru sırada
+        son iki başlık: ['Şimdi ne yapılmalı', 'Yetkili avukat görüşü gereken konular']
+GEÇTİ R-04   raporun onay durumu açıkça yazılı (§9)
+        sessizlik onaylanmış gibi okunur; rapor onaysız olduğunu söylemeli
+GEÇTİ R-05   onay durumu ilk bölümde, dipnotta değil
+        okuyucu bunu 800 satır sonra değil, ilk ekranda görmeli
+GEÇTİ R-06   teknik terimler ilk geçtiklerinde açıklanmış (§10)
+        açıklanmamış: yok
+GEÇTİ R-07   mutasyon: yöntem başa alınırsa R-01 yakalar
+        kural 4 ihlali makinece görülebilir
+------------------------------------------------------------------------------------------------
+7 vaka · 7 geçti · 0 beklenen · 0 SİNYAL
+
 ###############################################################
 #  ÖZET
 ###############################################################
@@ -404,6 +424,7 @@ GEÇTİ Q-07   akademik dayanak bir MEVZUAT eşiğini aklamıyor
   O · sır kapısı kaçırma yüzeyi   temiz
   P · teslimatların güncelliği       temiz
   Q · rapor kendi kapılarından geçiyor mu temiz
+  R · yön, onay ve dil kuralları      temiz
   ------------------------------------------------------------
   TOPLAM SİNYAL                         0
 

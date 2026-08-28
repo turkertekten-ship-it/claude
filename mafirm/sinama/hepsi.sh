@@ -21,7 +21,13 @@ bash   "$S/ks_d_denetim.sh";   topla "D · denetim mutasyon sınaması" $?
 echo
 bash   "$S/ks_e_tutarlilik.sh"; topla "E · kitabın kendi beklenen değerleri" $?
 echo
-python3 "$S/ks_f_kapsama.py" | tail -8; topla "F · doktrin kapsama matrisi" 0
+# [kendi kusurum] Bu satır F'in çıkış kodunu 0 diye SABİTLİYOR ve üstelik
+# tail'e boruluyordu — boru hattının kodu tail'inkidir. F çöktüğünde takım
+# hâlâ "0 SİNYAL" diyordu. Kitabın denetiminde bulduğum `| wc -l` kusurunun
+# kendi koşum betiğimdeki hâli. Çıktı bir dosyaya alınır, kod korunur.
+_f_cikti=$(python3 "$S/ks_f_kapsama.py" 2>&1); _f_kod=$?
+echo "$_f_cikti" | tail -8
+topla "F · doktrin kapsama matrisi" "$_f_kod"
 echo
 python3 "$S/ks_j_kabul.py";    topla "J · §19 kabul sınaması (uçtan uca)" $?
 echo
@@ -38,6 +44,8 @@ echo
 python3 "$S/ks_p_guncellik.py";  topla "P · teslimatların güncelliği" $?
 echo
 python3 "$S/ks_q_kendi_kapisi.py"; topla "Q · rapor kendi kapılarından geçiyor mu" $?
+echo
+python3 "$S/ks_r_yon.py";         topla "R · yön, onay ve dil kuralları" $?
 echo
 echo "###############################################################"
 echo "#  ÖZET"

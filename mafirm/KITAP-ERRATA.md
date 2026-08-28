@@ -211,6 +211,22 @@ zorunlu kıldığı satırın kendisi yanındaki her eşiği aklıyor.
 **[C] Bozuk olayda kapı AÇIK başarısız oluyor** (`return 0`). Araç adı
 okunamadığında kanalın dışarı gidip gitmediği bilinemez. *(C-08)*
 
+## §12 · Kapılar — kapsanabilir ama kapsanmamış kurallar
+
+**[C] §4, §9 ve §10 "kapı konusu değil" sayılmış; oysa üçü de kısmen makinece
+kontrol edilebilir.** Kitap dört (sonra beş) kapı kuruyor ve kalan yedi kuralı
+mekanizmasız bırakıyor. Ama:
+- **§4 (önce cevap, en sonda yöntem)** bir BAŞLIK SIRASI kuralıdır ve doğrudan
+  görülebilir. Bu raporun kendisi dokuz tur boyunca `## Yöntem` ile başladı ve
+  cevabı 818. satırda tuttu; hiçbir şey uyarmadı.
+- **§9 (insan onayı)** onayın kendisini izleyemez ama ONAY DURUMUNUN BEYANINI
+  isteyebilir. Sessizlik onaylanmış gibi okunur.
+- **§10 (ilk geçişte açıklama)** tanımlı bir terim listesi için kontrol
+  edilebilir.
+→ Üçü de kapı olmak zorunda değil; ama §16 denetiminde birer satır olabilirler.
+Kitap onları "biçim kuralı" diye geçmekle, uygulanabilir olanı uygulanamaz
+saymış oluyor. *(R-01, R-04, R-06)*
+
 ## §13 · Depolar
 
 **[C] Tek bir doğrulama tarihi, farklı hızlarda bozulan verilere yetmiyor.**
