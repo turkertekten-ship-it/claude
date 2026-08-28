@@ -2671,3 +2671,73 @@ defensible things to measure and only one of them is what the reranker sees.
 3. **Four falsified fixes from one diagnosis is information.** Clipping,
    widening, co-occurrence and length normalisation all fail on the same cases.
    The diagnosis keeps being confirmed and keeps not implying a lexical remedy.
+
+---
+
+## L58 - The fusion decides 3% of the ordering, and on one corpus that is right
+
+Four lexical fixes had been falsified against the same three cases, so instead
+of proposing a fifth I decomposed where those cases are actually lost. The
+answer was not where I had been looking.
+
+| expected | dense rank | lexical rank | final rank |
+| --- | --- | --- | --- |
+| structlog | - | **2** | not retrieved |
+| responses | - | **5** | not retrieved |
+| freezegun | - | - | not retrieved |
+
+**The lexical arm ranks `structlog` second for its own question, and it does not
+survive to the output.** Two of the three "retrieval failures" are not retrieval
+failures. The reranker demotes what the index found.
+
+**Measured cause.** Final score is `base_weight * fused + adjustment`, with
+`base_weight = 1.0`. Over 432 results from the 54 golden queries:
+
+| | median | range | spread |
+| --- | --- | --- | --- |
+| fused RRF score | 0.0159 | 0.0119-0.0328 | 0.0209 |
+| reranker adjustment | 0.3616 | 0.1895-0.9099 | **0.7204** |
+
+The reranker's spread is **34.5x** the fused score's. Reciprocal Rank Fusion
+decides about 3% of the ordering; the two arms function as a candidate generator
+and the heuristic reranker does the ranking. That also explains why removing the
+reranker is catastrophic (38/54) - it leaves a signal with a 0.02 spread - and
+why the reranker's known flaws (L48, L56, L57) are so consequential.
+
+**Rebalancing was the obvious fix, and the corpora want opposite things.**
+
+| base_weight | 1 | 5 | 20 | 35 | 80 |
+| --- | --- | --- | --- | --- | --- |
+| external | **49/54** | 47 | 46 | 43 | 45 |
+| primary | 16/20 | 16 | 17 | **18** | 18 |
+| primary recall@8 | 0.7812 | 0.7812 | 0.8750 | 0.8750 | 0.8750 |
+
+On the external corpus the current value is the best available and every
+increase costs cases. On the primary corpus it is the *worst* value, and raising
+it buys two cases and 0.094 of recall. The reranker dominating the ordering is
+correct on one corpus and wrong on the other.
+
+That is explicable rather than mysterious. The external corpus is short prose
+where English term coverage discriminates well; the primary corpus is source
+code, where the lexical arm matching identifiers is worth more than a coverage
+heuristic built for sentences. One global constant cannot be right for both, and
+the shipped value favours the corpus the regression gate runs on - which is the
+defensible choice, but it was never a choice anyone made.
+
+**Nothing was changed**, and this is the fifth fix measured and rejected for
+these cases. It is also the first one that failed for an interesting reason
+rather than by doing nothing.
+
+**Rules.**
+1. **When several fixes fail, stop fixing and decompose.** Four attempts at
+   "retrieval cannot find these documents" when the index ranked one of them
+   second. The decomposition took one script and reframed the problem.
+2. **Check the scales of things you add together.** Two terms combined with
+   weight 1.0 are only balanced if their ranges are comparable. Here one had
+   34.5x the spread of the other, so the smaller was decorative - and no test,
+   metric or review would show it, because both components were individually
+   correct.
+3. **A single global constant across two corpora is a compromise even when
+   nobody negotiated one.** Ours favours the gate corpus, which is right; the
+   point is that the trade existed unexamined and the other corpus was paying
+   for it.
