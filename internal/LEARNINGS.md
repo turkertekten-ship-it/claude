@@ -4664,12 +4664,12 @@ of 0.19 is already at the achievable optimum. **There is no threshold left to
 find.** Every abstention-floor sweep this project has run was searching a space
 whose best point was already occupied.
 
-The mechanism is visible in the two worst false-answers. Coverage asks how much
-of the query's IDF mass appears *somewhere* in the chunk, which a multi-clause
-question satisfies on its common clause alone: "renders Jinja templates to PDF"
-scores 0.59 against a corpus that has Jinja and no PDF renderer, because
-nothing in the feature expresses conjunction. The gate cannot tell "the corpus
-does not have this" from "the corpus has half of this".
+**A mechanism was proposed here and it was wrong. See L92**: the guess was that
+coverage, being a weighted average over query terms, is satisfied by a
+multi-clause question's common clause alone. Checking the actual top chunks
+falsified it - for two of the three worst false-answers the discriminating
+terms are all present in the chunk the gate answered from, so there is no
+missing conjunct to detect.
 
 **Rules.**
 1. **Triage failures by stage before tuning anything.** Five of these eight
@@ -4678,6 +4678,72 @@ does not have this" from "the corpus has half of this".
 2. **Before sweeping a threshold, check that a threshold exists.** One pass
    over both classes says whether the signal separates them at all. Here the
    best possible floor and the shipped floor make the same number of errors.
-3. **A weighted-average feature cannot express a conjunction**, and questions
-   are full of them. Averaging over query terms means the rare, discriminating
-   term is outvoted by the common one that any near-miss also has.
+3. **A mechanism you can state is not a mechanism you have measured.** The
+   conjunction story above was written from the numbers without looking at the
+   chunks the numbers came from, and it did not survive the first look. L92 is
+   what the chunks said.
+
+## L92 - The conjunction hypothesis, killed twice, and a golden whose premise expired
+
+L91 proposed that the gate's coverage feature fails because it averages over
+query terms and so cannot express a conjunction. Measured before building
+anything (`scripts/gate_conjunction.py`, 61 answerable / 15 abstainable across
+both golden sets):
+
+    | signal            | AUC    | best floor | errors |
+    |-------------------|--------|-----------|--------|
+    | relevance (ship)  | 0.8437 | 0.0850    | 8      |
+    | answerability     | 0.8142 | 0.3764    | 7      |
+    | gate_coverage     | 0.7923 | 0.3323    | 11     |
+    | relevance_x_top2  | 0.7967 | 0.0614    | 12     |
+    | top2_present      | 0.7186 | 0.0000    | 15     |
+    | top1_present      | 0.6530 | 0.0000    | 15     |
+    | top3_present      | 0.6672 | 0.3333    | 14     |
+    | weakest_term      | 0.5492 | 0.0000    | 15     |
+
+Every conjunction variant is worse than the signal it was meant to replace, and
+the three-valued ones (`top1/2_present`) have a best floor of 0.0 - abstaining
+on nothing beats any cut they can place. Multiplying the shipped signal by the
+conjunction makes it worse, not better: 0.8437 to 0.7967.
+
+**Then the reason, from the chunks rather than the scores.** The top chunk for
+each of the three worst false-answers:
+
+    Which package renders Jinja templates to PDF?   -> sphinx.md    0.5910
+      pdf True, jinja True, templat True, render False
+    Which package sends mail over SMTP?             -> defusedxml.md 0.7249
+      smtp True, send True, mail True
+    What is the capital of France?                  -> chardet.md    0.3303
+      franc True, capit False
+
+**There is no missing conjunct in two of the three.** The terms are all there.
+A conjunction feature cannot separate what is not separated by conjunction, and
+that is the same structural result `cooccurrence_probe.py` found at document
+level and recorded as L51 - now confirmed at chunk level, on a corpus 68%
+larger and with the held-out set included.
+
+**And one golden's own note has expired.** The SMTP case carries:
+
+    "Verified absent: 'smtp' matches 0 of 91 documents."
+
+The corpus is 153 documents now, and `smtp` matches two of them - environs.md
+(an example config) and defusedxml.md (a module list). The *label* is still
+right: neither package sends mail, so the case should abstain. What is stale is
+the note's claim, and with it the assumption that this near-miss is a distant
+one. The discriminating term went from absent to present when the corpus grew,
+and the gate's score for the case went with it. Nothing re-checked.
+
+**Rules.**
+1. **A hypothesis that names a mechanism must be tested against the objects,
+   not the scores.** One look at three chunks falsified a story built from
+   three numbers.
+2. **The same idea gets rejected twice if the first rejection is not indexed by
+   what it rules out.** L51 said term co-occurrence does not separate these
+   classes; that is exactly what the conjunction feature is, one level down.
+   The re-run was cheap and the corpus had grown, so it was not wasted - but it
+   was found by rediscovery, not by lookup.
+3. **A golden set's verification notes have a shelf life like any other
+   measurement.** "Verified absent: 0 of 91 documents" was true, is now false,
+   and no test reads it. A note recording a corpus-dependent fact should name
+   the corpus size it was checked at - this one did, which is the only reason
+   the staleness was visible.
