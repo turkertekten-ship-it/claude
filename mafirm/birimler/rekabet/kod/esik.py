@@ -35,6 +35,17 @@ HEDEF_TR = 1_000_000_000          # B eşiği: devre konu varlık / bir taraf
 HEDEF_TR_TEKNOLOJI = 250_000_000  # B eşiği: teknoloji teşebbüsü hedef
 DIGER_DUNYA = 9_000_000_000       # B eşiği: diğer taraflardan birinin dünya
 DOGRULAMA = "2026-08-27"
+# [BM · altmışıncı tur] Aracın KENDİ çıktısı, sistemin kendi kapılarından
+# geçmiyordu: kanıt, güncellik ve araştırma kapılarının üçü de bloklamıştı —
+# kitabın §19 pilotu dâhil. Sebebi, çıktının dayanağı ve tarihi kapıların
+# tanıdığı BİÇİMDE yazmamasıydı. J takımı bunu göremiyordu çünkü ELLE
+# YAZILMIŞ bir "doğru cevap" metnini sınıyordu, aracın gerçek çıktısını değil.
+DAYANAK = ("2010/4 sayılı Tebliğ'i değiştiren 2026/2 sayılı Tebliğ "
+           "(Resmî Gazete 11.02.2026, sayı 33165)")
+# Kural 1: dayanak rakamın YANINDA durur. Belgenin altındaki tek bir dayanak
+# satırı, üstteki gerekçeyi aklamaz — kanıt kapısı bunu haklı olarak
+# bloklamıştı ve gerekçe cümlesi zaten eşiği ADIYLA anıyordu.
+ATIF = "2010/4 s. Tebliğ m.7"
 
 BILINMIYOR = None
 EVET, HAYIR, BELIRSIZ = "evet", "hayır", "belirlenemiyor"
@@ -140,7 +151,7 @@ class Sonuc:
             print("Bilinmeyen ve cevabı değiştirebilecek rakamlar:")
             for e in self.eksik:
                 print("  - %s" % e)
-        print("Eşiklerin doğrulama tarihi: %s" % DOGRULAMA)
+        print("Dayanak: %s. Doğrulama: %s" % (DAYANAK, DOGRULAMA))
         if self.itiraz:
             print()
             print("AÇIK MEVZUAT SORUSU — BU CEVABI TERSİNE ÇEVİREBİLİR:")
@@ -179,6 +190,14 @@ class Sonuc:
               "olumsuz sonucun teyidi.")
         for i in self.itiraz:
             print("  - %s" % i)
+        # §14: her esaslı çıktı bu satırla biter. Aracın çıktısı da esaslı
+        # bir çıktıdır; kendi sisteminin araştırma kapısı bunu ister.
+        print()
+        print("Kontrol edildi: birimler/rekabet/yontem/tr-esikler.md (%s) · "
+              "esik.py (%s) · bulunamayan: %s"
+              % (DOGRULAMA, DOGRULAMA,
+                 "; ".join(self.eksik) if self.eksik
+                 else "yok — bütün rakamlar verildi"))
 
 
 # --- Geriye dönük uyumlu ilkel ayaklar --------------------------------------
@@ -291,9 +310,10 @@ def degerlendir(taraflar, islem_turu="devralma"):
             asanlar = [ad for ad, v in dunya_bilinen if v > DIGER_DUNYA]
             if asanlar:
                 b_var = True
-                b_gerekce = ("%s Türkiye cirosu %s > %s; %s dünya cirosu > %s"
-                             % (k.ad, _bicim(k.tr_ciro), _bicim(esik),
-                                asanlar[0], _bicim(DIGER_DUNYA)))
+                b_gerekce = ("%s Türkiye cirosu %s > %s (%s); %s dünya "
+                             "cirosu > %s (%s)"
+                             % (k.ad, _bicim(k.tr_ciro), _bicim(esik), ATIF,
+                                asanlar[0], _bicim(DIGER_DUNYA), ATIF))
                 if k.teknoloji:
                     b_gerekce += " (teknoloji teşebbüsü istisnası uygulandı)"
                     if k.yerlesik is not True:
@@ -326,14 +346,15 @@ def degerlendir(taraflar, islem_turu="devralma"):
     # ---- Birleştirme ----------------------------------------------------
     if a_var and b_var:
         return Sonuc(EVET, "her iki eşik",
-                     "A: toplam %s > %s ve iki taraf tabanı aşıyor. B: %s"
-                     % (_bicim(toplam), _bicim(BIRLESIK_TR), b_gerekce),
+                     "A: toplam %s > %s (%s) ve iki taraf tabanı aşıyor. B: %s"
+                     % (_bicim(toplam), _bicim(BIRLESIK_TR), ATIF, b_gerekce),
                      eksik, kullanilan, b_itiraz)
     if a_var:
         return Sonuc(EVET, "A eşiği (yurt içi)",
-                     "toplam Türkiye cirosu %s > %s ve %d taraf ayrı ayrı %s'yi "
-                     "aşıyor" % (_bicim(toplam), _bicim(BIRLESIK_TR), len(asan),
-                                 _bicim(IKI_TARAF_TR)),
+                     "toplam Türkiye cirosu %s > %s (%s) ve %d taraf ayrı ayrı "
+                     "%s'yi (%s) aşıyor"
+                     % (_bicim(toplam), _bicim(BIRLESIK_TR), ATIF, len(asan),
+                        _bicim(IKI_TARAF_TR), ATIF),
                      eksik, kullanilan)
     if b_var:
         return Sonuc(EVET, "B eşiği (devre konu)", b_gerekce, eksik,

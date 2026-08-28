@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>61 çalıştırılabilir takım · 435 vaka · 0 sinyal</span>
+    <span>62 çalıştırılabilir takım · 440 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -3538,6 +3538,50 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Altmışıncı tur</span>
+  <h2>Kabul sınaması, ürünü değil temsilcisini sınıyordu</h2>
+  <p>Kabul sınaması <em>"doğru cevap kapılardan geçiyor mu"</em> diye soruyor.
+  Ama sınadığı metin <strong>elle yazılmış</strong> bir örnek cevaptı —
+  kapıları geçsin diye kurulmuş bir metin. Aracın <strong>gerçekten
+  ürettiği</strong> çıktı hiç sınanmamıştı.</p>
+
+  <div class="callout">
+    Sınanınca: aracın <strong>her</strong> cevabı, sistemin <strong>kendi</strong>
+    üç kapısı tarafından bloklanıyordu — kitabın kendi pilotu dâhil.
+  </div>
+
+  <table><thead><tr><th>Kapı</th><th>Sebep</th></tr></thead>
+  <tbody>
+    <tr><td>kanıt</td><td>gerekçe eşiği adıyla anıyor, dayanak 450 karakter ötede</td></tr>
+    <tr><td>güncellik</td><td>doğrulama tarihi kapının tanıdığı biçimde değil</td></tr>
+    <tr><td>araştırma</td><td>"Kontrol edildi:" satırı hiç yok</td></tr>
+  </tbody></table>
+
+  <p>Bu, raporun kitapta bulduğu merkezî kusurun aynısıdır: <strong>bir
+  bölümün emrettiği biçim, başka bir bölümün kapısında bloklanıyordu.</strong>
+  Burada aynı şey aracın kendi çıktısında — ve kabul sınaması bunu göremedi,
+  çünkü <strong>gerçek ürünü değil onun temsilcisini</strong> sınıyordu.
+  <em>Yerine geçen bir metni sınamak, ürünü sınamak değildir.</em></p>
+
+  <p>Araç düzeltildi: dayanak artık <strong>rakamın yanında</strong>,
+  doğrulama tarihi kapının tanıdığı biçimde, ve her çıktı zorunlu
+  <code>Kontrol edildi: … · bulunamayan: …</code> satırıyla bitiyor. Beş cevap
+  biçiminin beşi de geçiyor. <strong>Eşik rakamlarına dokunulmadı</strong> —
+  değişen yalnızca dayanağın nerede durduğu.</p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">yöntem</span>
+      <span class="pill p">İki kez yanıldım</span></div>
+    <h3>Kısmen inen bir mutasyon, sınamayan bir mutasyondur</h3>
+    <p>Ölçüt önce <em>her</em> gerekçeden atıf istedi; oysa olumsuz ve
+    belirsiz cevapların gerekçesi hiçbir rakam anmaz — dayanaksız bir rakam
+    yoktur ki dayanak istensin. Sonra bir mutasyon iki atıftan
+    <strong>yalnızca birini</strong> kaldırdı ve ölçüt haklı olarak sessiz
+    kaldı.</p>
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -3723,7 +3767,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 61 takım · 435 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 62 takım · 440 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:

@@ -148,6 +148,8 @@ python3 "$S/ks_bk_atif_kapsama.py"; topla "BK · hüküm atıflarının kapsamas
 echo
 python3 "$S/ks_bl_anma_kapilari.py"; topla "BL · kapılar anma ile taşımayı ayırıyor mu" $?
 echo
+python3 "$S/ks_bm_cikti_sozlesmesi.py"; topla "BM · aracın gerçek çıktısı kendi kapılarından geçiyor mu" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

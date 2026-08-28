@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** altmış bir çalıştırılabilir takım — **435
+**Yamalı hâlde sistem çalışıyor:** altmış iki çalıştırılabilir takım — **440
 vaka, 27 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15 → **27/27** (mutasyon kümesi otuz
 sekizinci turda on beşten yirmi yediye çıkarıldı: 26 kontrolün dokuzu hiç
@@ -2692,7 +2692,7 @@ içinde kırmızı, koşumdan sonra yeşil görünüyordu. Onuncu ve on altınc�
 turların katman kuralı — *denetim, kendini denetleyen takımı denetleyemez* —
 **üçüncü kez**, bu kez veri yoluyla çiğnenmişti. Sayı artık durağan ölçülüyor:
 `hepsi.sh`'e bağlı her takımın kendi `BEKLENEN_VAKA` beyanı toplanıyor
-— bugün toplam 435 vaka — ve her takımın kendi sıfırıncı vakası o beyanın
+— bugün toplam 440 vaka — ve her takımın kendi sıfırıncı vakası o beyanın
 gerçeğe eşit olduğunu ayrıca güvenceye alıyor. Bozulmuş bir `SAYIM.txt` ile BB'nin çıktısı
 **birebir aynı** kalıyor; bağımsızlık ölçülerek gösterildi.
 
@@ -3170,6 +3170,39 @@ Sağlama artık duruyor: üç kapıdan herhangi biri düzyazı aramasına geri
 dönerse — ya da kapının kendi öz-sınamasındaki ayrım vakaları kaldırılırsa —
 takım kırmızıya döner. Mutasyon dördünü de yakaladı.
 
+### Kabul sınaması, ürünü değil temsilcisini sınıyordu
+
+J takımı §19'un kabul sınamasını koşuyor ve *"doğru cevap kapılardan geçiyor
+mu"* diye soruyor. Ama sınadığı metin **elle yazılmış** bir örnek cevaptı —
+kapıları geçsin diye benim kurduğum bir metin. `esik.py`'nin **gerçekten
+ürettiği** çıktı hiç sınanmamıştı.
+
+Sınanınca: aracın **her** cevabı, sistemin **kendi** üç kapısı tarafından
+bloklanıyordu — kitabın kendi §19 pilotu dâhil.
+
+| Kapı | Sebep |
+|---|---|
+| `kanit` | gerekçe eşiği adıyla anıyor, dayanak 450 karakter ötede |
+| `guncellik` | *"Eşiklerin doğrulama tarihi:"* kapının tanıdığı biçim değil |
+| `arastirma` | *"Kontrol edildi:"* satırı hiç yok |
+
+Bu, raporun kitapta bulduğu merkezî kusurun aynısıdır: **§14'ün emrettiği
+biçim §12'nin kapısında bloklanıyordu.** Burada aynı şey aracın kendi
+çıktısında — ve kabul sınaması bunu göremedi, çünkü **gerçek ürünü değil
+onun temsilcisini** sınıyordu. *Yerine geçen bir metni sınamak, ürünü
+sınamak değildir.*
+
+Araç düzeltildi: dayanak artık **rakamın yanında**, doğrulama tarihi kapının
+tanıdığı biçimde, ve her çıktı §14'ün `Kontrol edildi: … · bulunamayan: …`
+satırıyla bitiyor. Beş cevap biçiminin beşi de geçiyor. **Eşik rakamlarına
+dokunulmadı** — değişen yalnızca dayanağın nerede durduğu.
+
+**Ve iki kez yanıldım.** Ölçüt önce HER gerekçeden atıf istedi; oysa olumsuz
+ve belirsiz cevapların gerekçesi hiçbir rakam anmaz — dayanaksız bir rakam
+yoktur ki dayanak istensin. Sonra bir mutasyon iki atıftan **yalnızca
+birini** kaldırdı ve ölçüt haklı olarak sessiz kaldı: **kısmen inen bir
+mutasyon, sınamayan bir mutasyondur.**
+
 ---
 
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
@@ -3311,6 +3344,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | BJ · birimler arası nitelik çelişkisi | *iki yöntem dosyası m.595/2'ye birbirini dışlayan nitelik veriyordu, ikisi de sessizdi* | **temiz** — çelişki iki uçta da görünür, karar insana bırakıldı |
 | BK · hüküm atıflarının kapsaması | *BJ elle seçilmiş tek bir çelişkiye bakıyordu; I-05 hiçbir yöntem dosyasında anılmıyordu* | **temiz** — çoklu atıflar keşifle, açık sorular dosyasında işaretli |
 | BL · kapılar anma ile taşımayı ayırıyor mu | *kapsam kapısı, başlığın adını anan bir cümleyle susturulabiliyordu* | **temiz** — üç kapının üçü de ayırt ediyor, sağlama duruyor |
+| BM · aracın gerçek çıktısı | *kabul sınaması elle yazılmış bir örneği sınıyordu; aracın gerçek çıktısı üç kapıdan bloklanıyordu* | **temiz** — beş cevap biçimi de geçiyor |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -3368,8 +3402,8 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # 61 çalıştırılabilir takım:
-                                  #   435 vaka + 27 mutasyon (D)
+./sinama/hepsi.sh                 # 62 çalıştırılabilir takım:
+                                  #   440 vaka + 27 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -3403,7 +3437,7 @@ vakalardır ve hepsi geçer. Kör sınama o aklın dışında kalanı arar: bir
 hukukçunun gerçekten yazacağı cümleyi, kancanın gerçekten göreceği veriyi,
 bozulduğunda denetimin gerçekten yakalayıp yakalamadığını.
 
-Altmış dört takım, 435 vaka:
+Altmış beş takım, 440 vaka:
 
 | Takım | Neyi sınar | Kaynağı |
 |---|---|---|
@@ -3471,9 +3505,10 @@ Altmış dört takım, 435 vaka:
 | BJ | **Birimler arası nitelik çelişkisi** — iki yöntem dosyası aynı işleme farklı hukuki nitelik veriyorsa ikisi de bunu yazıyor mu | §5, §6, kural 9 |
 | BK | **Hüküm atıflarının kapsaması** — birden fazla dosyada nitelendirilen her hüküm beyanlı mı; açık nitelendirme soruları dosyasında işaretli mi | §5, §6, kural 1, kural 9 |
 | BL | **Anma/taşıma ayrımı** — her kapı, istediği şeyi TAŞIYAN metinle ondan SÖZ EDEN metni ayırt ediyor mu | §12, §14, §16 |
+| BM | **Çıktı sözleşmesi** — `esik.py`'nin GERÇEK çıktısı, sistemin kendi kapılarından geçiyor mu | §12, §14, §19, kural 1 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**435 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On üç**
+**440 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On üç**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)
