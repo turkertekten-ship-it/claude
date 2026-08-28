@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>13 takım · 132 vaka</span>
+    <span>14 takım · 140 vaka</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -332,6 +332,15 @@ footer p + p{margin-top:12px}
         <div class="db-dot a" tabindex="0" data-tip="temiz — 41 maddenin 41'i gerçek bir vakaya bağlı" style="left:3%"></div>
       </div>
       <div class="db-val">3 → 0</div>
+    </div>
+    <div class="db-row">
+      <div class="db-label"><b>N</b>olumsuz iddia kanıtı</div>
+      <div class="db-track">
+        <div class="db-bar" style="left:3%;width:15%"></div>
+        <div class="db-dot b" tabindex="0" data-tip="kanıtsız — yalnızca iki araç hatasına dayanıyordu" style="left:18%"></div>
+        <div class="db-dot a" tabindex="0" data-tip="temiz — vekilin kendi ret kaydıyla kanıtlandı" style="left:3%"></div>
+      </div>
+      <div class="db-val">? → 0</div>
     </div>
     <div class="db-row">
       <div class="db-label"><b>E</b>beklenen değerler</div>
@@ -595,8 +604,10 @@ KALDI A-07  §19 pilotu, avro çevrilmeden
   </div>
 
   <div class="note">
-    <b>Kanalın kendisi başarısız oldu.</b> Bu ortamda hiçbir birincil kaynağa
-    erişilemedi: <em class="term">mevzuat.gov.tr</em>, <em class="term">resmigazete.gov.tr</em>,
+    <b>Kanalın kendisi başarısız oldu — ve bu artık kanıtlı.</b> Bu oturumda
+    şu alan adlarına HTTPS, kuruluş egress politikasıyla CONNECT aşamasında
+    403 ile reddedildi (vekilin kendi ret kaydı,
+    <em class="term">hafiza/egress-kaniti.md</em>): <em class="term">mevzuat.gov.tr</em>, <em class="term">resmigazete.gov.tr</em>,
     <em class="term">rekabet.gov.tr</em>, <em class="term">spk.gov.tr</em> — hepsi
     reddedildi; akademik yayıncılar da öyle. Mevzuat bulguları bu yüzden
     <strong>desteklenmiş yeniden kurgudur, birincil doğrulama değildir</strong>.
@@ -701,6 +712,51 @@ KALDI A-07  §19 pilotu, avro çevrilmeden
 </section>
 
 <section>
+  <span class="sec-tag">Beşinci tur</span>
+  <h2>Raporun kendi olumsuz iddiası kanıtsızdı</h2>
+  <p>İşletim sözleşmesi §2 bu sistemdeki en sert kuraldır: <em>"Olumsuz bir
+  iddia, olumludan daha yüksek bir kanıt eşiği ister… ancak o yükümlülüğü
+  getirecek olan hükmü göstererek ve nereye bakıldığını söyleyerek
+  yazılır."</em></p>
+  <p>Kural kitabın çıktısı için yazıldı. Ama <strong>bu rapor da bir
+  çıktıdır</strong> ve şu olumsuz iddiayı taşıyordu: <em>"bu ortamda hiçbir
+  birincil kaynağa erişilemedi."</em> Dört tur boyunca o iddia yalnızca
+  <strong>iki araç hatasına</strong> dayanıyordu. Yani rapor, kitapta bulduğu
+  kusurun aynısını yapıyordu.</p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">N-02 … N-05</span>
+      <span class="pill f">Kanıtsız olumsuz iddia</span></div>
+    <h3>Üç şey eksikti ve üçü de yapılabilirdi</h3>
+    <p><strong>Ortamın kendi belgesini hiç okumamıştım.</strong>
+    <em class="term">/root/.ccr/README.md</em>, 403'ün ne olduğunu tanımlıyor:
+    <em>"The destination host is not allowed by your organization's egress
+    policy… Do not retry or route around it — report the blocked host."</em>
+    Red geçici bir arıza değil, bir politika kararı.</p>
+    <p><strong>Bash + curl kanalını hukuk kaynaklarına hiç denememiştim.</strong>
+    WebFetch'i hukuka, curl'ü GitHub'a denemiştim — bu kombinasyonu hiç.</p>
+    <p><strong>Vekilin kendi kaydını hiç sormamıştım.</strong>
+    <em class="term">__agentproxy/status</em> dört reddi zaman damgası ve host
+    adıyla kaydediyor.</p>
+<pre><span class="dim">$ curl -sS "$HTTPS_PROXY/__agentproxy/status"</span>
+connect_rejected  <span class="bad">www.mevzuat.gov.tr:443</span>     gateway answered 403 to CONNECT
+connect_rejected  <span class="bad">www.rekabet.gov.tr:443</span>     gateway answered 403 to CONNECT
+connect_rejected  <span class="bad">www.resmigazete.gov.tr:443</span> gateway answered 403 to CONNECT
+connect_rejected  <span class="bad">www.spk.gov.tr:443</span>         gateway answered 403 to CONNECT</pre>
+  </div>
+
+  <div class="note">
+    <b>N sekiz vakayla iki kaçamağı özellikle kapatıyor.</b> <b>Çalışan kanal
+    da yazılmalı</b> — WebSearch çalışıyor ve kullanıldı; döndürdüğü şey sayfa
+    metni değil arama motoru özeti, I-01…I-03'ün "desteklenmiş yeniden kurgu"
+    olmasının sebebi bu. Ve <b>iddia fazla geniş yazılmamalı</b> — "hiçbir şeye
+    erişilemedi" yanlış olurdu; GitHub MCP ile on altı depo çözüldü. N-08
+    ayrıca raporun bu kanıtla bulguları <b>çözdüğünü iddia etmediğini</b>
+    denetliyor: erişimin neden yok olduğunu kanıtlamak, bulguyu kapatmaz.
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -732,6 +788,10 @@ KALDI A-07  §19 pilotu, avro çevrilmeden
     ayrıştırıcı kusurum ve hepsi aynı yönde: <strong>bir dedektör, ölçtüğü
     şeyin gerçek biçimini görmeden yazılırsa, bulduğu şey kendi
     körlüğüdür.</strong></li>
+    <li><strong>Raporun kendi olumsuz iddiasını dört tur boyunca
+    kanıtlamadım.</strong> "Erişilemedi" demek için iki araç hatasını yeterli
+    saydım; oysa kitabın §2'si tam olarak bunu yasaklıyor ve ortam gerekli
+    kanıtı sağlıyordu. Kendi raporuma kendi ölçütümü uygulamak beş tur sürdü.</li>
     <li><strong>İki şüphem yanlış çıktı</strong> ve kitap haklıydı:
     <em class="term">fivetran/great_expectations</em> ile
     <em class="term">Open-Source-Legal/OpenContracts</em> kanonik yollardır; ve
@@ -789,7 +849,7 @@ KALDI A-07  §19 pilotu, avro çevrilmeden
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># on üç takım, 132 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># on dört takım, 140 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
