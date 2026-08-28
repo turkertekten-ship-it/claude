@@ -82,6 +82,7 @@ tekrarlanır. Esas doğru, atıf kuralın kendisini değil YAPTIRIMINI gösteriy
 rakamlarıyla çalıştırılır" diyor; `__main__` yalnızca `--self-test` tanıyor.
 Kodun varlık sebebi hesabı kafadan yapmayı önlemekti.
 → Bir komut satırı arayüzü şart. *(A-14, J-01s)*
+→CEVAP: YOK — mühendislik boşluğu; yamayla kapandı ve cevabın 'yamalı hâlde çalışıyor' cümlesi bunu kapsıyor. Cevap bir özet değil, en tehlikeli beşi.
 
 **[B] Cevap iki değerli.** §9 becerisi "evet / hayır / **belirlenemiyor**"
 istiyor; `bildirilmeli()` yalnızca True/False dönüyor. Bilinmeyen bir ciro `0`
@@ -155,6 +156,7 @@ dosyalarına `Doğrulama: <tarih>` yazdırıyor; §14 ise ÇIKTILARA
 yalnızca birincisini tanıdığı için, §14'ü HARFİYEN izleyen bir çıktı kapıdan
 "doğrulama tarihi yok" diye geri dönüyor. Kitap kendi emrettiği biçimi kendi
 kapısında bloklıyor. → Kapı her iki biçimi de tanımalı. *(V-01)*
+→CEVAP: YOK — dar bir biçim çelişkisi; müvekkile giden sonucu değiştirmiyor, kapı iki biçimi de tanıyor artık.
 
 **[B] Genişletilmiş bir eşik deseni, doğru işi bloklar.** Kitabın kendi `ESIK`
 deseni yalnızca basamak gruplu para tutarını görür ve B-13..B-18 bunun kaçırma
@@ -182,6 +184,7 @@ Sorgu soyutlama kuralı ise §9'da `yaptirim-taramasi` BECERİSİNİN metninde
 yazılı. Yani kural, onu uygulayacak yetkinin BULUNMADIĞI yerde duruyor:
 internete gerçekten ulaşabilen ajanın metninde müvekkil adı/kod adı yasağı yok.
 → Riskli yetkisi olan her ajan sınırını kendi metninde taşımalı. *(X-06)*
+→CEVAP: 4
 
 **[C] Beyan edilmiş ama uygulanmayan bir "dışarı" kuralı.** §14'ün genişlettiği
 sır kapısı `BashOutput`'u dışarı aracı sayıyor; §12'nin kanca matcher'ında ise
@@ -202,6 +205,8 @@ tutarken §2 yükleme rampasını açık bırakıyor.
 izlenen sürüm olarak yalnızca ŞABLON bırakılmalı. Dikkat: bir yolu
 `.gitignore`'a eklemek, o yol ZATEN izleniyorsa hiçbir şey yapmaz —
 `git rm --cached` şarttır. *(Y-02, Y-03)*
+→CEVAP: 4
+
 
 **[A] Kurulum idempotent değil ve kitap bunu hiçbir yerde söylemiyor.**
 §2'nin `printf ... > .gitignore` adımı ile §5, §12 ve §16'nın "yazılır"
@@ -212,6 +217,8 @@ bir sürüm işareti, ne "bu dosya değiştirilmiş" kontrolü, ne de güvenli b
 yeniden kurulum yordamı var. → §2 bir "yeniden kurulum" bölümü taşımalı:
 hangi dosyaların üzerine yazıldığı, önce neyin yedekleneceği, ve yeniden
 kurulumdan sonra denetimin ZORUNLU koşulması. *(Z-02, Z-03)*
+→CEVAP: 5
+
 
 **[A] Denetim kendi bütünlüğünü doğrulayamaz.** §16'nın `denetim.sh`'i de
 "yazılır" dosyalarından biridir. Kitaba sadık hâli geri konduğunda tüm ek
@@ -219,6 +226,8 @@ kontroller kaybolur ve betik "DENETİM OK" der — kural 6 koruması silinmiş o
 bile. Yani denetçiyi ezmek, denetçinin yapacağı bütün kontrolleri devre dışı
 bırakır ve uygulayıcı korumasız bir sisteme YEŞİL bir denetimle bakar.
 Doğrulama, ezilen dosyanın DIŞINDA bir katmanda durmalıdır. *(Z-07, Z-08)*
+→CEVAP: 5
+
 
 **[A] Arıza politikası yalnızca ayrıştırmayı kapsıyor; gerisi AÇIK düşüyor.**
 §12'nin C-08 gerekçesi doğrudur — ayrıştırılamayan bir olayda kanal bilinmez,
@@ -230,6 +239,7 @@ dışı bırakır. → İç arıza da politikaya tabi olmalı: kanal dışarıys
 yerelse uyar ve sürdür. Ayrıca geçerli JSON'un NESNE olduğu doğrulanmalı
 (`[1,2,3]` ve `null` ayrıştırılır ama `.get()` çağrısında çöker).
 *(AA-01g, AA-01k, AA-01l, AA-02)*
+→CEVAP: 4
 
 **[C] Kapsam kapısının deseni genişletilirse kanca donuyor — kitabın kusuru
 değil, kitabı izleyenin düşeceği tuzak.** Kitabın kapsam kapısı sekiz sabit ifade arar. Türkçe kip
@@ -332,6 +342,7 @@ veriyor; kanca `json.dumps(tool_input)` veriyor ve bu, satır sonlarını iki
 karakterlik `\n` dizisine çevirir. Satır başı çapası olan her desen iki yolda
 farklı davranır. **Bir kapının öz-sınaması, kapının gerçekte çalıştığı yolda
 koşmalıdır.** *(C-10)*
+→CEVAP: 1
 
 **[B] Türkçe küçük harf.** `metin.lower()` ile aranan avukat başlığı, BÜYÜK
 harfle yazıldığında bulunamaz: Python'da `"YETKİLİ".lower()` → `"yetki̇li̇"`
@@ -477,12 +488,15 @@ kanıtlıyor; kalan yedisi için kanıt sunmuyor.
 **[A] `^Kontrol edildi:` çapası üretimde asla eşleşmez.** JSON'da gerçek satır
 sonu yoktur. Kapı, eşik rakamı ya da GitHub adresi içeren her yazmayı
 bloklar — kitabın kendi §5.1 dosyası dâhil. *(C-01…C-03, C-10)*
+→CEVAP: 1
+
 
 **[A] Yeni kapı eklenirken §12'nin dokuz beklenen kümesi güncellenmiyor.**
 İkisi eşik rakamı içerdiği ve "Kontrol edildi" satırı taşımadığı için yeni kapı
 onlarda ateşliyor: `SELFTEST HATA 2`. Zincir: §14 kırmızı → §16 kırmızı →
 §0'ın dördüncü kuralı kurulumu durduruyor → §19 hiç çalışmıyor.
 **Kitabın kendi talimatları izlendiğinde yeşil denetim üretilemiyor.** *(E)*
+→CEVAP: 1
 
 **[C] Belgelenen biçim, kapının reddettiği biçim.** `once-arastir` çıktı
 satırını dört boşluk girintili gösteriyor; `^Kontrol edildi:` sütun sıfır
@@ -517,6 +531,7 @@ on üçü silinmiş — ve **tamamen boş bir `esik.py`**.
 2. Boş bir Python dosyası `--self-test` ile 0 döner.
 3. `test -z "$(grep -rL ...)"` hiç dosya yokken geçer.
 → Her kontrol bir **eşik** doğrulamalı, bir sayı yazdırmamalı. *(D takımı)*
+→CEVAP: 3
 
 **[C] Denetim kendi yol çözümlemesini denetlemiyor.** §16 betiği yolları
 `~/mafirm` olarak sabitliyor. Sonuç: betik BAŞKA bir ağaca kopyalandığında
@@ -555,6 +570,8 @@ dâhil. Üç aktarım hatası:
 `esik.py`'nin komut satırı arayüzü yok, avro çevirisi modellenmemiş, ve §14
 sonrası öz-sınama kırmızı olduğu için §0 kurala göre buraya hiç gelinmiyor.
 *(A-14, A-07, J-01s)*
+→CEVAP: 1
+
 
 **[A] Ve asıl mesele:** §19 "bu iki cevabın arasındaki fark, kurulumun
 tamamının sebebidir" diyor. Ölçüldü — kitaba sadık kapılarda **doğru cevap da
@@ -562,6 +579,7 @@ yanlış cevap da bloklanıyor**. Kapı sistemi, kurulumun sebebi olarak göster
 farkı ifade edemiyor. *(J-07s, J-08s)*
 
 ---
+→CEVAP: 2
 
 ## Kapıların yapısal sınırı — errata değil, yazılması gereken bir sınır
 

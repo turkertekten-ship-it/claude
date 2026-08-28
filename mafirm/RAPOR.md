@@ -14,7 +14,7 @@ Sürüm 1.0 · 2026-08-27 · OODA döngüsü: gözlem → yönelim → karar →
 eksiksiz kurulumda 85 kör sınama vakasının 56'sı başarısız oldu ve kitabın
 kendi §16 denetimi yeşile dönmedi.
 
-Üç cümlede sebebi:
+Beş cümlede sebebi:
 
 1. **§14, §12'nin öz-sınamasını bozuyor** ve düzeltilmiyor; zincir §16'yı
    kırmızıya, §0'ın dördüncü kuralını da kurulumu durdurmaya götürüyor. §19'daki
@@ -24,8 +24,17 @@ kendi §16 denetimi yeşile dönmedi.
    "kurulumun tamamının sebebi" dediği farkı ifade edemiyorlar.
 3. **Denetim on beş bozmadan on birini görmüyor**; sıfır beceri, kancasız
    ayarlar ve tamamen boş bir `esik.py` taşıyan bir sistemde "DENETİM OK" diyor.
+4. **Sır kuralı, kapının bakmadığı yerlerden sızıyor.** §12'nin sır kapısı
+   metni denetler; ama §2 kurulumu bir **sürüm deposu** yapar ve canlı iş
+   dosyalarını dışlamaz (`git push` veriyi makineden çıkarır — kural 6'nın
+   yasakladığı şey), kancadaki her **çökme** kapıyı sessizce AÇIK bırakır
+   (2 dışında her çıkış kodu "bloklamayan hata"dır), ve web yetkisi olan
+   ajanın metninde sorgu sınırı yoktur. Üçü de §12'nin dışında kalır.
+5. **Kitabı ikinci kez izlemek her yamayı geri alır** — denetim betiği dâhil.
+   Denetçiyi ezmek, denetçinin yapacağı bütün kontrolleri devre dışı bırakır
+   ve uygulayıcı korumasız bir sisteme **yeşil** bir denetimle bakar.
 
-**Yamalı hâlde sistem çalışıyor:** otuz çalıştırılabilir takım — **275
+**Yamalı hâlde sistem çalışıyor:** otuz bir çalıştırılabilir takım — **280
 vaka, 15 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15, birimler arası tutarlılık takımının
 kendi mutasyon yakalaması 10/10. Ama **üç mevzuat bulgusu ile kitabın kendi içindeki bir çelişki açık kalır**
@@ -1522,6 +1531,48 @@ artıktır.
 
 ---
 
+## Yedi buçuk artı yirmi beş · Cevap doğru yerde duruyordu, yanlış şeyi söylüyordu
+
+§4 **"önce cevap"** der ve R takımı bunu **yapı** düzeyinde ölçer: ilk bölüm
+cevap mı, yöntem sona mı kalmış. Yirmi beş tur boyunca geçti. Ama bir cevap,
+**doğru yerde durup yanlış şey söyleyebilir.**
+
+"Cevap" bölümü yedinci turda yazıldı ve **üç** sebep sayıyordu. Bugün on üç
+**[A]** ağırlıklı bulgu var — ve dördü cevapta **hiç geçmiyordu**:
+
+- **kural 6'nın depodan sızması** (§2 kurulumu bir sürüm deposu yapar; canlı
+  iş dosyaları ve müvekkil ad kaydı izleniyordu),
+- **kapının çöktüğünde AÇIK düşmesi** (2 dışında her çıkış kodu "bloklamayan
+  hata"dır; her çökme kural 6'yı sessizce kapatıyordu),
+- **web yetkili ajanın sorgu sınırının olmaması**,
+- **yeniden kurulumun denetçiyi ezmesi** (yeşil bir denetim, korumasız bir
+  sistem).
+
+İlk ekranı okuyan bir kişi — yani raporun asıl okuyucusu — **en tehlikeli
+şeyin ne olduğunu yanlış öğreniyordu.** Bu, §4'ün lafzına değil **ruhuna**
+aykırı: cevap ilk sıradaydı ama güncel değildi.
+
+Cevap iki madde ile güncellendi. **Beş** sebep sayıyor ve dördüncü madde
+kapının **bakmadığı** üç yeri, beşinci madde yeniden kurulumun denetçiyi
+ezmesini anlatıyor.
+
+### Ölçütü seçerken bir kez daha aynı tuzağa girmedim
+
+İlk aklıma gelen, [A] bulgularının başlıklarıyla cevabı **kelime örtüşmesiyle**
+kıyaslamaktı. Denedim: on üç bulgunun **on birini** işaretledi — çünkü cevap
+bulguları **parafraz eder** (*"öz-sınama üretim yolunu koşturmuyor"* →
+*"§14, §12'nin öz-sınamasını bozuyor"*). AF-04'te tam olarak bu araçla aynı
+hatayı yapmış ve düzeltmiştim; bu kez **kullanmadan önce** ölçtüm.
+
+Onun yerine her [A] bulgusu, kendisini temsil eden cevap noktasını
+**açıkça beyan ediyor** (`→CEVAP: 4`) ya da **neden temsil edilmediğini**
+yazıyor. İki bulgu için gerekçeli *"YOK"* yazılı: **cevap bir özet değildir,
+en tehlikeli beştir.** Beyanı sürdürmek, yeni bir ağır bulgunun cevaba girip
+girmediğini fark etmeye **zorlar** — mutasyonda beyansız bir [A] eklemek
+AH-03'ü, cevaptan bir sebep silmek AH-02 ile AH-04'ü kırmızıya çeviriyor.
+
+---
+
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
 
 | Bölüm | Beklenen | Gerçek | Sebep |
@@ -1630,6 +1681,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | AE · desen sınıfı | *örnek örnek düzeltiliyordu* | **temiz** — sınıf tarandı, üç kusur çıktı |
 | AF · aparatın iddiaları | *15 takım korumasızdı* | **temiz** — koruma geriye dolduruldu |
 | AG · kitaba sadık taban | *iki özgün eksikti* | **temiz** — kitabın metninden yeniden kuruldu |
+| AH · cevabın güncelliği | *dört ağır bulgu cevapta yoktu* | **temiz** — cevap güncellendi, eşleme beyanlı |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -1687,8 +1739,8 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # 30 çalıştırılabilir takım:
-                                  #   275 vaka + 15 mutasyon (D)
+./sinama/hepsi.sh                 # 31 çalıştırılabilir takım:
+                                  #   280 vaka + 15 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -1759,9 +1811,10 @@ Dokuz takım, 96 vaka:
 | AE | **Desen sınıfı taraması** — Türkçeyi ve kendi kimliklerini okumak | §12, B-10, U-05, AD-01 |
 | AF | **Aparatın kendi iddiaları** — ölçen şeyi kim ölçüyor | §16, beklenen.json |
 | AG | **Kitaba sadık taban** — kıyas ölçütü eksiksiz mi | yamalar/, §2, §5 |
+| AH | **Cevabın güncelliği** — ilk ekran en tehlikeliyi söylüyor mu | §4, KITAP-ERRATA |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**275 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**280 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)
