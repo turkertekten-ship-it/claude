@@ -682,3 +682,28 @@ sources:
       files edited after the first mirror and not re-synced. That is the
       failure mode the owner's mirroring choice carries, caught by the tool
       built to catch it.
+
+  - id: NO-EXPORT-ANYWHERE-2026-08-27
+    kind: api
+    collected_at: "2026-08-27T21:05Z"
+    method: >-
+      Three independent searches: find over the container filesystem for
+      *.jsonl / conversations.json / *export*; git ls-tree over all twelve
+      sibling branches for archive or export material; Google Drive
+      search_files by title ('conversations', 'claude', 'export') and by
+      mimeType (application/json, application/zip, application/x-zip-compressed),
+      plus list_recent_files.
+    evidence: >-
+      Filesystem: only this session's own transcript. Sibling branches: no
+      archive or export material on any of the twelve. Drive: the title search
+      returned two files, both from 2020 and unrelated to Claude; the mimeType
+      search for JSON and ZIP returned an empty result set — no such file
+      exists in the account; the recent-files listing held spreadsheets, PDFs
+      and media, none of them an export.
+    note: >-
+      The Drive search was run under the owner's confirmed authorisation
+      [src:OWNER-DRIVE-AUTHORIZED-2026-08-27], scoped to locating a Claude
+      export, and no personal file was opened or copied. Individual file titles
+      are deliberately not recorded here: the finding is the absence, and
+      enumerating the owner's documents into a repository would be a cost with
+      no evidential benefit.

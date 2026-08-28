@@ -154,6 +154,11 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - "The book" that several sessions are installing is M&A closing material — the transaction and closing documentation set. [src:OWNER-BOOK-IS-MA-2026-08-27]
 - That last answer settles what the corpus will actually be, and it is not documentation: the retrievable unit of a contract is the clause, not the section, and nothing here has been built for that yet. [src:OWNER-BOOK-IS-MA-2026-08-27]
 
+## Observed — the search for a conversation export, concluded
+
+- No Claude conversation export exists anywhere reachable. The container holds only this session's own transcript; none of the twelve sibling branches carries one; and the owner's Drive, searched under confirmed authorisation by both title and MIME type, contains no JSON or ZIP file at all. [src:NO-EXPORT-ANYWHERE-2026-08-27]
+- That closes the search rather than the question. The export is a file only the owner can produce, so U-2 stays open as a fact about what exists rather than as work left undone. [src:NO-EXPORT-ANYWHERE-2026-08-27]
+
 ## Conclusion
 
 The honest answer to "look through all my previous claude chats" is bounded:

@@ -38,7 +38,7 @@ still shows what a session built, never what it was asked or why it chose.
 
 ---
 
-### U-2 — Any Claude conversation history predating 2026-08-27
+### U-2 — Any Claude conversation history predating 2026-08-27 — EXHAUSTED HERE
 
 **Unknown:** whether the account has earlier conversations at all, and what is
 in them.
@@ -50,6 +50,25 @@ threads exists on this container or in the connected Drive.
 **Resolves when:** the owner exports their data from claude.ai (Settings →
 Privacy → Export data) and drops `conversations.json` into `archive/`.
 `tools/ingest_chat_archive.py` reads that format directly.
+
+**Every place it could be has now been checked, and it is in none of them.**
+The container filesystem holds only this session's own transcript; none of the
+twelve sibling branches carries archive or export material; and Google Drive —
+searched under the owner's now-confirmed authorisation, by title and by MIME
+type — contains no JSON or ZIP file at all.
+[src:NO-EXPORT-ANYWHERE-2026-08-27]
+
+**This entry stays open, and that is the correct state.** It is a fact about
+what exists, not a task left undone: the export is a file only the owner can
+produce, and no amount of further searching creates one. An unknowns register
+with a live entry in it is this doctrine working rather than failing — the
+alternative is inventing an answer, which is the thing the register exists to
+prevent.
+
+**The one action that closes it:** claude.ai → Settings → Privacy → Export
+data, then drop `conversations.json` into `archive/`. Everything that consumes
+it is built and now exercised against real data rather than fixtures. At least
+two other sessions are waiting on the same file.
 
 **Partially advanced.** The index is no longer empty: this session's own Claude
 Code transcript is ingested — 620 messages, 0 unparseable, searchable with
