@@ -845,3 +845,31 @@ sources:
       blocked here, and the reachable first-party documentation does not confirm
       them. The docs' own qualitative warning is the stronger citation and is
       now used as such.
+
+  - id: CHERNY-X-SWEEP-2026-08-28
+    kind: repo_state
+    collected_at: "2026-08-28T08:35Z"
+    method: >-
+      GIT_LFS_SKIP_SMUDGE=1 git clone --depth 1 --filter=blob:none
+      https://github.com/wxyz-claw/clawd-pages; scanned all 183 JSON digests
+      under x-digest/ for records whose author.username is "bcherny";
+      deduplicated by post id and written verbatim to provenance/raw/
+    evidence: provenance/raw/cherny/x-posts-2026-03-to-08-bcherny.json
+    note: >-
+      13 unique posts spanning 2026-03-13 to 2026-08-22, recovered through a
+      third-party scrape mirrored on GitHub while x.com itself stays blocked.
+      The latest is five days before this capture, so the corpus is no longer
+      four months stale. Load-bearing entries: 2026-05-11 "The best way to level
+      up from 1 agent => many agents. No more cycling between terminal tabs";
+      2026-06-09, in which he says he uninstalled his IDE after Opus 4.5 "when I
+      realized that I'd been doing 100% of my coding in a terminal for a few
+      weeks", and praises a model for "taking measurements and adding logs then
+      verifying that it truly fixed the issue before declaring victory. There's
+      nothing in claude code's prompting telling the model to do that";
+      2026-08-22 "People are sleeping on using Opus to hill climb. We use it for
+      optimizing CPU and memory, optimizing CI times, improving frame rates,
+      reducing latency, any other kind of problem in the shape of 'iterate on X
+      with a profiler and dataset until it hits Y'"; and 2026-06-28, a five-
+      archetype model of product roles (Prototyper, Builder, Sweeper, Grower,
+      Maintainer). SECOND-HAND: a scraper's capture, carrying per-post ids,
+      timestamps and engagement counts, not checked against x.com.

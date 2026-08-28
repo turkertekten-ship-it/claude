@@ -11,7 +11,7 @@ entry, move the resolved fact into `observations.md` with a new source id.
 
 ## Status at 2026-08-28
 
-Ten entries. Six have moved; four cannot move from here.
+Ten entries. Seven have moved; three cannot move from here.
 
 | Entry | Status |
 |---|---|
@@ -24,13 +24,15 @@ Ten entries. Six have moved; four cannot move from here.
 | U-7 "borris churney" | **blocked on the owner** — one word confirms or corrects it |
 | U-8 tip fidelity | **closed** — all 60 checked against screenshots |
 | U-9 prompt engineering | answered second-hand; underlying talks unreachable |
-| U-10 post-April material | partly closed; the May post recovered, Threads still out |
+| U-10 post-April material | **closed for X** through 2026-08-22; Threads still out |
 
-The four blocked entries are not blocked by effort. U-2 needs a file only the
-owner can export; U-6 needs a fact only they hold; U-7 needs one word from
-them; and the residue of U-1 needs a transcript no tool here exposes. Every
-route this container can take has been taken, and the honest end state of this
-loop is that these four stay open with the exact question written down.
+The blocked entries are not blocked by effort. U-2 needs a file only the owner
+can export; U-6 needs a fact only they hold; U-7 needs one word from them; and
+the residue of U-1 needs a transcript no tool here exposes. Every route this
+container can take has been taken — web search, the reachable documentation,
+five cloned repositories, 183 mirrored digests, 65 screenshots and all 24 fleet
+branches — and the honest end state is that these stay open with the exact
+question written down rather than closed with a plausible answer.
 
 ---
 
@@ -213,23 +215,22 @@ resolved only to the standard of second-hand reporting.
 
 ---
 
-### U-10 — Cherny material published after 2026-04-16 — **PARTLY CLOSED**
+### U-10 — Cherny material published after 2026-04-16 — **CLOSED for X, open for Threads**
 
-**Resolved in part 2026-08-27.** One of the two leads was recovered: the
-2026-05-24 post is in hand, via a mirrored X digest on GitHub after `x.com`
-itself stayed blocked. Its content — that his "#1 tip" is now auto mode, as the
-enabler of multi-clauding — is recorded in `observations.md`.
-[src:CHERNY-X-2026-05-24]
+**Resolved 2026-08-28.** A sweep of 183 mirrored X digests on GitHub recovered
+13 of his posts spanning 2026-03-13 to **2026-08-22** — five days before this
+capture. The corpus is no longer stale, and the recovered material is recorded
+in `observations.md` and the corpus. [src:CHERNY-X-SWEEP-2026-08-28]
 
-**Still unknown:** the Threads post of 2025-12-27 cited second-hand as claiming
-"259 PRs in 30 days" was not recovered; `threads.com` is blocked and no mirror
-of it was found. Anything he has published after 2026-05-24 is also unchecked —
-the digest that supplied the May post covers a single day.
+**Still open, narrowly:** the Threads post of 2025-12-27 claiming 259 PRs in 30
+days was not recovered. `threads.com` is blocked, no mirror of it was found, and
+a tertiary source quotes it as verbatim without this session being able to check
+that. [src:LOOP-ENGINEERING-KB-2026-08-28]
 
-**Why it stays open:** the recovery route was a third-party scrape, not the
-source. It carries structured metadata (author id, timestamps, engagement
-counts, a quoted-tweet object) consistent with a real capture, but it has not
-been checked against x.com and cannot be from here.
+**Grading, unchanged:** everything recovered came through third-party scrapes
+mirrored on GitHub, not from x.com. The records carry per-post ids, timestamps
+and engagement counts consistent with real captures, and the two independent
+mirrors agree with the bundled screenshots wherever all three were compared —
+but none of it has been checked against the source.
 
-**Resolves when:** `x.com` or `threads.com` become reachable, or an export is
-placed in `archive/`.
+**Resolves fully when:** `x.com` or `threads.com` become reachable.

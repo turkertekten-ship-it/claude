@@ -182,6 +182,28 @@ Asked what his biggest tip is, he answers: "These days my #1 tip is: use auto mo
 
 Two days earlier he noted auto mode had reached the Pro plan and gained Sonnet 4.6 support alongside Opus 4.7. [src:CHERNY-X-2026-05-24]
 
+A sweep of 183 mirrored digests recovered 13 of his posts spanning 2026-03-13 to **2026-08-22** — five days before this corpus was assembled, so it is current rather than four months stale. [src:CHERNY-X-SWEEP-2026-08-28]
+
+The most recent one is a practice, and it is the verification loop again in a new shape: "People are sleeping on using Opus to hill climb. We use it for optimizing CPU and memory, optimizing CI times, improving frame rates, reducing latency, any other kind of problem in the shape of 'iterate on X with a profiler and dataset until it hits Y'". [src:CHERNY-X-SWEEP-2026-08-28]
+
+> That last clause is the reusable part. "Iterate on X with a profiler and
+> dataset until it hits Y" is a template for turning any measurable property
+> into a closed loop — the check is the profiler, the target is Y, and the
+> agent runs until the check passes. It is the same rule as the spine, applied
+> to performance rather than correctness.
+
+On parallelism his framing sharpened in May: "The best way to level up from 1 agent => many agents. No more cycling between terminal tabs" — a move away from the numbered-tabs setup he described in January. [src:CHERNY-X-SWEEP-2026-08-28]
+
+In June he reported having uninstalled his IDE after Opus 4.5, "when I realized that I'd been doing 100% of my coding in a terminal for a few weeks". [src:CHERNY-X-SWEEP-2026-08-28]
+
+The same post makes an observation that bears directly on this corpus's spine: he singles out a model for "taking measurements and adding logs then verifying that it truly fixed the issue before declaring victory", and adds "There's nothing in claude code's prompting telling the model to do that". [src:CHERNY-X-SWEEP-2026-08-28]
+
+> Read that against the corpus's central rule and it cuts both ways. The
+> behaviour he is praising is exactly what the verification loop is built to
+> force — and his point is that a good enough model now does it unprompted.
+> That is an argument for the loop mattering less over time, made by the person
+> who said it mattered most. It is recorded here rather than resolved.
+
 > Note what moved. In January, March and April his headline was verification.
 > By May the headline is auto mode — but read the reason: auto mode is offered
 > as the enabler of *parallelism*, not as a replacement for verification. The

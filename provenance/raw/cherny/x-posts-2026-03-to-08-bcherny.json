@@ -1,0 +1,93 @@
+[
+  {
+    "id": "2040206440556826908",
+    "createdAt": "Fri Apr 03 23:14:55 +0000 2026",
+    "text": "Starting tomorrow at 12pm PT, Claude subscriptions will no longer cover usage on third-party tools like OpenClaw.\n\nYou can still use these tools with your Claude login via extra usage bundles (now available at a discount), or with a Claude API key.",
+    "likeCount": 7313,
+    "conversationId": "2040206440556826908"
+  },
+  {
+    "id": "2032514807388123255",
+    "createdAt": "Fri Mar 13 17:51:07 +0000 2026",
+    "text": "\ud83c\udf81 Happy Friday - Opus 4.6 1M is now the default Opus model for Claude Code users on Max, Team, and Enterprise plans.\n\nPro and Sonnet users can opt in with /extra-usage.",
+    "likeCount": 2857,
+    "conversationId": "2032514807388123255"
+  },
+  {
+    "id": "2053982327123132846",
+    "createdAt": "Mon May 11 23:35:22 +0000 2026",
+    "text": "The best way to level up from 1 agent =&gt; many agents. No more cycling between terminal tabs",
+    "likeCount": 3298,
+    "conversationId": "2053982327123132846"
+  },
+  {
+    "id": "2091308045284585724",
+    "createdAt": "Sat Aug 22 23:34:27 +0000 2026",
+    "text": "@scaling01 Agree. People are sleeping on using Opus to hill climb. We use it for optimizing CPU and memory, optimizing CI times, improving frame rates, reducing latency, any other kind of problem in the shape of \u201citerate on X with a profiler and dataset until it hits Y\u201d",
+    "likeCount": 1510,
+    "conversationId": "2091299018521350422"
+  },
+  {
+    "id": "2053178445480526118",
+    "createdAt": "Sat May 09 18:21:02 +0000 2026",
+    "text": "@a16z \ud83d\udc4b Guessing you're looking at npm-only data. We switched to a native installer a few months back, so the majority of installs aren't captured here.\n\nThursday was the second-highest Claude Code signup day we've ever had (15x growth since Jan 1). Ask Claude to debug your SQL?",
+    "likeCount": 2532,
+    "conversationId": "2053159332230181245"
+  },
+  {
+    "id": "2071379474277613732",
+    "createdAt": "Sun Jun 28 23:45:25 +0000 2026",
+    "text": "As engineering, product, design, DS, etc. melt into a new kind of role, I was reflecting on what roles might look like in the future. For example, when I look at the Claude Code team I see what I think is five archetypes:\n\n1. Prototyper: comes up with brand new ideas; churns out many ideas, most of which don't ship\n2. Builder: quickly turns a prototype/idea into production-grade product/infra\n3. Sweeper: cleans up the UI, simplifies the code and system, unships, optimizes performance\n4. Grower: takes a product that has been built and iterates on it to improve Product-Market Fit\n5. Maintainer: owns a mature system to make it secure, reliable, fast, and efficient as it scales\n\nMany people span across 2 roles, and sometimes 3 roles. I also notice that these roles are not really tied to job function -- eg. across Anthropic, some designers match category 1, some 2, some 3; same for engineers, PM, DS.\n\nA healthy team needs a mix of these, depending on the product:\n\n- A product that is new and pre-PMF needs people that are strong at 1+2+3\n- A product that is growing and has found PMF needs 2+3+4 and some 5\n- A product that has strong PMF needs 3+4+5 and some 2\n\nMaybe product roles of the future will look more like this, and less like the domain-specific roles of today?",
+    "likeCount": 14115,
+    "conversationId": "2071379474277613732"
+  },
+  {
+    "id": "2058519809214607704",
+    "createdAt": "Sun May 24 12:05:42 +0000 2026",
+    "text": "People often ask what my biggest tip is for getting the most out of Claude Code.\n\nThese days my #1 tip is: use auto mode\n\nAuto mode means no more permission prompts. It is the key building block for multi-clauding: start a session, then while it runs, work on another session in parallel.",
+    "likeCount": 3657,
+    "conversationId": "2058519809214607704"
+  },
+  {
+    "id": "2044847848035156457",
+    "createdAt": "Thu Apr 16 18:38:13 +0000 2026",
+    "text": "Dogfooding Opus 4.7 the last few weeks, I've been feeling incredibly productive. Sharing a few tips to get more out of 4.7 \ud83e\uddf5",
+    "likeCount": 10831,
+    "conversationId": "2044847848035156457"
+  },
+  {
+    "id": "2047375800945783056",
+    "createdAt": "Thu Apr 23 18:03:24 +0000 2026",
+    "text": "We\u2019ve been looking into recent reports around Claude Code quality issues, and just published a post-mortem on what we found.",
+    "likeCount": 1852,
+    "conversationId": "2047375800945783056"
+  },
+  {
+    "id": "2041605852382351666",
+    "createdAt": "Tue Apr 07 19:55:41 +0000 2026",
+    "text": "Mythos is very powerful, and should feel terrifying. I am proud of our approach to responsibly preview it with cyber defenders, rather than generally releasing it into the wild.\n\nModel card here: https://t.co/HjhknJcRKQ",
+    "likeCount": 3569,
+    "conversationId": "2041605852382351666"
+  },
+  {
+    "id": "2064431111154053187",
+    "createdAt": "Tue Jun 09 19:35:06 +0000 2026",
+    "text": "Fable 5 is the biggest step up I\u2019ve felt in our models since Opus 4.5 back in November. After 4.5 came out I uninstalled my IDE when I realized that I\u2019d been doing 100% of my coding in a terminal for a few weeks. With Fable, it\u2019s felt like Claude has stepped up from being a coding agent to a thought and design partner in building the product. Fable has judgement, taste, and dimensionality in a way that previous models didn\u2019t, leading me to trust it more with the most complex work.\n\nI think the first time I had this realization was when I asked Fable to debug something. It is the first model I have used that was so methodical and precise, taking measurements and adding logs then verifying that it truly fixed the issue before declaring victory.\n\nThere\u2019s nothing in claude code\u2019s prompting telling the model to do that, it\u2019s just part of its personality. It really has this \u201cbig model smell\u201d that I haven\u2019t felt before.",
+    "likeCount": 4004,
+    "conversationId": "2064431111154053187"
+  },
+  {
+    "id": "2039421575422980329",
+    "createdAt": "Wed Apr 01 19:16:08 +0000 2026",
+    "text": "Today we're excited to announce NO_FLICKER mode for Claude Code in the terminal\n\nIt uses an experimental new renderer that we're excited about. The renderer is early and has tradeoffs, but already we've found that most internal users prefer it over the old renderer. It also supports mouse events (yes, in a terminal).\n\nTry it: CLAUDE_CODE_NO_FLICKER=1 claude",
+    "likeCount": 10058,
+    "conversationId": "2039421575422980329"
+  },
+  {
+    "id": "2054617810253615147",
+    "createdAt": "Wed May 13 17:40:33 +0000 2026",
+    "text": "The UK AISI found Mythos Preview is the first model to solve both their cyber ranges end-to-end. No model had ever solved the AISI\u2019s \u201cCooling Tower\u201d cyber range before.\n\nWe're getting it to defenders as fast as we responsibly can. More to come on our Glasswing work soon.",
+    "likeCount": 641,
+    "conversationId": "2054617810253615147"
+  }
+]

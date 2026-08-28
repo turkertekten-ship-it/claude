@@ -67,6 +67,17 @@ reviews your PR better than you re-reading it.
 - A subagent's report is second-hand. Verify anything load-bearing yourself
   before you write it down as fact.
 
+## Anything measurable can become a loop
+
+For a property you can measure — CPU, memory, CI time, frame rate, latency,
+bundle size — the shape is always the same: *iterate on X with a profiler and a
+dataset until it hits Y*. Name the metric, name the target, hand over the tool
+that measures it, and let the agent run until the number moves.
+
+This is the verification rule applied to performance instead of correctness,
+and it is worth reaching for more often than people do: the profiler is already
+the check, so the loop costs almost nothing to close.
+
 ## Large multi-step work gets a checklist, not a bigger prompt
 
 For migrations, "fix all 100 lint errors", or any exhaustive sweep: have the
