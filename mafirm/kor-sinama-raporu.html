@@ -451,7 +451,9 @@ test -z "$(grep -rL Doğrulama: bos/*.md)" <span class="bad">çıkış: 0</span>
     <p>Dahası para birimi modeli yok, ve bu kitabın kendi §19 pilotunu ters çeviriyor:
     dünya cirosu <strong>2,4 milyar avro</strong> olan Alman alıcı, hedefi Türkiye
     cirosu 1,4 milyar TL olan bir şirket. B eşiği "dünya cirosunun
-    <strong>9.000.000.000 TL</strong>'yi aşması" diyor — eşik TL cinsinden.</p>
+    <strong>9.000.000.000 TL</strong>'yi aşması" diyor — eşik TL cinsinden
+    (2010/4 sayılı Tebliğ'i değiştiren 2026/2 sayılı Tebliğ m.7, Resmî Gazete
+    11.02.2026 sayı 33165).</p>
 <pre><span class="dim">2.400.000.000 &lt; 9.000.000.000</span>
 KALDI A-07  §19 pilotu, avro çevrilmeden
      beklenen : bildirime tabi (B eşiği)
@@ -612,8 +614,10 @@ KALDI A-07  §19 pilotu, avro çevrilmeden
     <em class="term">rekabet.gov.tr</em>, <em class="term">spk.gov.tr</em> — hepsi
     reddedildi; akademik yayıncılar da öyle. Mevzuat bulguları bu yüzden
     <strong>desteklenmiş yeniden kurgudur, birincil doğrulama değildir</strong>.
-    Kanalın güvenilmezliği ölçüldü: aynı SPK eşiği için dört sorguda %50, %90 ve %98
-    döndü. Ayrıca §14'ün önerdiği <em class="term">curl https://api.github.com/…</em>
+    Kanalın güvenilmezliği ölçüldü: aynı SPK eşiği (II-26.1 sayılı Tebliğ m.12
+    yönetim kontrolü eşiği) için dört sorguda %50, %90 ve %98 döndü — bunlar
+    mevzuat değil, arama kanalının <strong>ölçülmüş sapmasıdır</strong>
+    (ölçüm kaydı: <em class="term">hafiza/egress-kaniti.md</em>, 2026-08-28). Ayrıca §14'ün önerdiği <em class="term">curl https://api.github.com/…</em>
     komutu burada 403 dönüyor — beceri, kendi belgelediği yöntemle çalıştırıldığında
     boş döner.
   </div>
@@ -3294,11 +3298,11 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
   <table><thead><tr><th>Okuma</th><th>A ayağının ikinci bacağı</th><th>Cevap</th></tr></thead>
   <tbody>
-    <tr><td>Kitabın yazdığı</td><td>iki taraf <em>ayrı ayrı</em> 1 milyar TL;
-    hedef 300 milyon → karşılanmaz</td><td><b>HAYIR</b></td></tr>
-    <tr><td>Kayıtlı alternatif okuma</td><td>teknoloji indirimi (250 milyon)
-    A ayağına da uygulanır; 300 milyon → karşılanır</td><td><b>EVET, bildirime
-    tabi</b></td></tr>
+    <tr><td>Kitabın yazdığı</td><td>iki taraf <em>ayrı ayrı</em> 1 milyar TL
+    (2010/4 s. Tebliğ m.7); hedef 300 milyon → karşılanmaz</td><td><b>HAYIR</b></td></tr>
+    <tr><td>Kayıtlı alternatif okuma</td><td>teknoloji indirimi 250 milyon
+    (2010/4 s. Tebliğ m.7) A ayağına da uygulanır; 300 milyon → karşılanır</td>
+    <td><b>EVET, bildirime tabi</b></td></tr>
   </tbody></table>
 
   <div class="callout">
@@ -3342,10 +3346,10 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
   <table><thead><tr><th>Okuma</th><th>Uygulanan eşik</th><th>Cevap</th></tr></thead>
   <tbody>
-    <tr><td>Kitabın yazdığı</td><td>teknoloji istisnası → 250 milyon TL;
-    hedef 400 milyon</td><td><b>EVET, bildirime tabi</b></td></tr>
+    <tr><td>Kitabın yazdığı</td><td>teknoloji istisnası → 250 milyon TL
+    (2010/4 s. Tebliğ m.7); hedef 400 milyon</td><td><b>EVET, bildirime tabi</b></td></tr>
     <tr><td>Kayıtlı alternatif okuma</td><td>hedef yerleşik değilse istisna
-    yok → 1 milyar TL</td><td><b>HAYIR</b></td></tr>
+    yok → 1 milyar TL (2010/4 s. Tebliğ m.7)</td><td><b>HAYIR</b></td></tr>
   </tbody></table>
 
   <div class="finding">
@@ -3582,6 +3586,45 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Altmış birinci tur</span>
+  <h2>Yayımlanan belge, kapı listesinde hiç yoktu</h2>
+  <p>Bir vaka <em>"hiçbir teslimat kendi kapılarını ateşlemiyor"</em> diye
+  sınıyor ve sekiz teslimat sayıyordu. <strong>Bu sayfa listede yoktu</strong>
+  — yani okuyucunun açtığı ve paylaşabildiği belge, sistemin kendi
+  kapılarından hiç geçirilmemişti.</p>
+
+  <table><thead><tr><th>Kapı</th><th>Ne eksikti</th></tr></thead>
+  <tbody>
+    <tr><td>kanıt</td><td>pilotun rakamları ve iki karşılaştırma tablosu
+    <b>dayanaksızdı</b></td></tr>
+    <tr><td>güncellik</td><td>belgede <b>hiçbir doğrulama tarihi yoktu</b> —
+    tanınan hiçbir biçimde</td></tr>
+  </tbody></table>
+
+  <div class="callout">
+    İkincisi ağır olanıdır ve kuralın kendi sözü onu anlatıyor:
+    <em>"eskimiş bir eşik, hiç olmamasından kötüdür: kontrol edilmiş gibi
+    durur."</em> Bu sayfa, Türk birleşme denetimi eşiklerini <strong>ne zaman
+    doğrulandıklarını söylemeden</strong> taşıyordu.
+  </div>
+
+  <p>Dayanak ve doğrulama kaydı eklendi, tablo rakamları dayanaklandırıldı, ve
+  belge kapı listesine <strong>kalıcı olarak</strong> girdi — HTML teslimatlar
+  için düzyazı çıkarımıyla, çünkü kapıların yapı okumasını etiketler bozar ama
+  okuyucunun gördüğü şey düzyazıdır.</p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">kural 1</span>
+      <span class="pill p">Ölçüm mü, mevzuat mı</span></div>
+    <h3>Bir yüzde, hangi türden olduğunu söylemelidir</h3>
+    <p>Bir cümlede arama kanalının sapması yüzdelerle veriliyordu ve kapı
+    bunları düzenleyici bir eşik sanıp mevzuat atfı istedi. Haksız değildi:
+    o rakamlar bir <strong>ölçümdür</strong>, mevzuat değil — ve metin bunu
+    söylemiyordu. Cümle artık ikisini ayırıyor.</p>
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -3695,6 +3738,23 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
   <p>Aynı kitap §17.1'de bunun ölçülmüş karşılığını da veriyor: en yetenekli kol, en
   çok uyduran koldu. Bir sistemin kendinden emin olması, doğru olmasıyla aynı şey
   değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.</p>
+</section>
+
+<section id="dogrulama-kaydi">
+  <span class="sec-tag">kural 1 · kural 3</span>
+  <h2>Bu belgedeki mevzuat rakamları ne zaman doğrulandı</h2>
+  <p>Bu sayfada geçen bütün Türk birleşme denetimi eşikleri
+  <strong>2010/4 sayılı Tebliğ'i değiştiren 2026/2 sayılı Tebliğ</strong>
+  (Resmî Gazete 11.02.2026, sayı 33165) m.7 hükmünden alınmıştır.
+  <strong>Doğrulama: 2026-08-27.</strong> Güncellik kuralı altı aydan eskisini
+  bayat sayar; bu tarihten sonra dayanılmadan önce yeniden çekilmelidir.
+  Eşiklerin birebir Resmî Gazete metni <strong>okunamadı</strong> — kuruluş
+  egress politikası reddi — ve bu, üç engelleyici bulgunun açık kalma
+  sebebidir.</p>
+  <p class="sub">Kontrol edildi: rekabet.gov.tr arama sonuçları (2026-08-27) ·
+  birimler/rekabet/yontem/tr-esikler.md (2026-08-27) ·
+  bulunamayan: 4054 sayılı Kanun ile 2026/2 sayılı Tebliğ'in birebir Resmî
+  Gazete metni (kuruluş egress politikası reddi)</p>
 </section>
 
 <section id="simdi-ne-yapilmali">

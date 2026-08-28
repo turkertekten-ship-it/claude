@@ -19,6 +19,7 @@ Bu takım, raporun kendi sistemine tabi kalmasını kalıcı hâle getirir.
 import glob
 import importlib.util
 import os
+import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -39,7 +40,12 @@ def vaka(kod, baslik, gecti, ayrinti=""):
     sonuclar.append((kod, baslik, gecti, ayrinti))
 
 
-TESLIMAT = (["RAPOR.md", "KITAP-ERRATA.md",
+# [Altmış birinci tur] Yayımlanan belge listede YOKTU. Okuyucunun açtığı ve
+# paylaştığı teslimat oydu, ve kapılardan geçirilince kural 1 ile kural 3'ü
+# birden çiğnediği görüldü: eşik rakamları dayanaksız, ve belgede hiçbir
+# doğrulama tarihi yoktu. Kuralın kendi sözüyle: bayat bir eşik hiç
+# olmamasından kötüdür, çünkü kontrol edilmiş gibi durur.
+TESLIMAT = (["RAPOR.md", "KITAP-ERRATA.md", "kor-sinama-raporu.html",
              "hafiza/dogrulama-bulgulari.md", "hafiza/egress-kaniti.md",
              "hafiza/cikar-catismasi.md"]
             + sorted(os.path.relpath(p, _KOK_COZ)
@@ -47,12 +53,23 @@ TESLIMAT = (["RAPOR.md", "KITAP-ERRATA.md",
                                                      "sinama/ks_[ghi]_*.md"))))
 
 
+def _duzyazi(metin, rel):
+    """HTML teslimatın DÜZYAZISI. Etiketler kapıların yapı okumasını bozar;
+    okuyucunun gördüğü şey ise düzyazıdır ve kural 1/3 ona uygulanır."""
+    if not rel.endswith(".html"):
+        return metin
+    metin = re.sub(r"<style.*?</style>|<script.*?</script>", " ", metin,
+                   flags=re.S)
+    return re.sub(r"<[^>]+>", " ", metin)
+
+
 def kapilar(rel):
     p = os.path.join(_KOK_COZ, rel)
     if not os.path.exists(p):
         return None
+    ham = open(p, encoding="utf-8").read()
     return sorted({a for a, _ in kapi.denetle(
-        open(p, encoding="utf-8").read(), disari=False, yol=rel)})
+        _duzyazi(ham, rel), disari=False, yol=rel)})
 
 
 # --- Q-01: hiçbir teslimat kendi kapılarını ateşlemiyor -----------------

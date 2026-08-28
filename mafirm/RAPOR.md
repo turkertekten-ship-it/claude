@@ -3203,6 +3203,35 @@ yoktur ki dayanak istensin. Sonra bir mutasyon iki atıftan **yalnızca
 birini** kaldırdı ve ölçüt haklı olarak sessiz kaldı: **kısmen inen bir
 mutasyon, sınamayan bir mutasyondur.**
 
+### Yayımlanan belge, kapı listesinde hiç yoktu
+
+Q takımı *"hiçbir teslimat kendi kapılarını ateşlemiyor"* diye sınıyor ve
+sekiz teslimat sayıyordu. **Artifact listede yoktu** — yani okuyucunun açtığı
+ve paylaşabildiği belge, sistemin kendi kapılarından hiç geçirilmemişti.
+Geçirilince iki kural birden çiğnendiği görüldü:
+
+| Kapı | Ne eksikti |
+|---|---|
+| `kanit` | §19 pilotunun rakamları ve iki karşılaştırma tablosu **dayanaksızdı** |
+| `guncellik` | belgede **hiçbir doğrulama tarihi yoktu** — tanınan hiçbir biçimde |
+
+İkincisi ağır olanıdır ve kuralın kendi sözü onu anlatıyor: *"eskimiş bir
+eşik, hiç olmamasından kötüdür: kontrol edilmiş gibi durur."* Yayımlanan
+belge, Türk birleşme denetimi eşiklerini **ne zaman doğrulandıklarını
+söylemeden** taşıyordu.
+
+Artifact'e dayanak ve doğrulama kaydı eklendi, tablo rakamları
+dayanaklandırıldı, ve belge Q'nun teslimat listesine **kalıcı olarak**
+girdi — HTML teslimatlar için düzyazı çıkarımıyla, çünkü kapıların yapı
+okumasını etiketler bozar ama okuyucunun gördüğü şey düzyazıdır.
+
+**Bir ölçüm ayrımı da netleşti.** Bir cümlede *"aynı SPK eşiği için dört
+sorguda %50, %90 ve %98 döndü"* yazıyordu; kapı bunu düzenleyici bir eşik
+sanıp mevzuat atfı istedi. Haksız değildi — o rakamlar bir **ölçümdür**,
+mevzuat değil, ve metin bunu söylemiyordu. Cümle artık ikisini ayırıyor:
+hangi hükmün sorgulandığı yazılı, ve rakamların **arama kanalının ölçülmüş
+sapması** olduğu açıkça belirtiliyor.
+
 ---
 
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
