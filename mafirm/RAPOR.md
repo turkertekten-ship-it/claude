@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** otuz beş çalıştırılabilir takım — **302
+**Yamalı hâlde sistem çalışıyor:** otuz altı çalıştırılabilir takım — **307
 vaka, 15 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15, birimler arası tutarlılık takımının
 kendi mutasyon yakalaması 10/10. Ama **üç mevzuat bulgusu ile kitabın kendi içindeki bir çelişki açık kalır**
@@ -1803,6 +1803,62 @@ bir gözcü iş parçacığı korunan dosyaları yüksek frekansla örnekler ve
 **koşum sırasında hiçbir an değişmediğini** gösterir. Kanıt olarak alınan
 örnek sayısı yazılır, yani vakuum değildir.
 
+### Eşik değişti — hangi müvekkile artık yanlış olan bir şey söyledik?
+
+Otuzuncu tura kadar ölçülen her şey **aparata** dairdi. Otuz birinci tur iş
+ürününe bakıyor: bir eşik değişince, o eşiğe dayanarak verilmiş görüşe ne
+oluyor?
+
+Kitap riski **kendi sözleriyle** adlandırıyor. §11'in `/esik-denetle` komutu:
+
+> "Hiçbir dosyayı düzenleme — bir eşik değişikliği insan kararıdır, çünkü
+> **canlı bir dosyada verilmiş bir görüşü geçersiz kılabilir.**"
+
+ve şöyle bitiyor:
+
+> "Şununla bitir: kaç eşik kontrol edildi, kaçı bayat ve şu anda **hangi
+> dosyalar** bayat bir rakama dayanıyor."
+
+Ama prosedürünün birinci adımı yalnızca `birimler/*/yontem/` altını tarıyor.
+Ve §2 kitabın kendi sözlüğünü kuruyor: *"`dosyalar/` **canlı işleri** …
+tutar."* Yani **kapanış cümlesinin vaadi canlı işler üzerinde; prosedür o
+dizini hiç açmıyor.** Komut, doktrindeki rakamın bayatladığını söyleyebilir;
+o rakama dayanarak müvekkile ne söylendiğini söyleyemez.
+
+İkinci yol da kapalıydı: `dosyalar/` kural 6 gereği `.gitignore`'dadır, yani
+sürüm geçmişinden de sorulamaz. Sorunun iki cevap yolu vardı, **ikisi de
+kapalıydı** — ve bu, otuzuncu turun §2 bulgusunun ikinci yüzüdür: aynı
+gizlilik mekanizması orada **dayanıklılığı**, burada **geriye dönük erişimi**
+feda ediyor.
+
+Yama, komutu kendi vaadine eşitler: canlı iş katmanı eklendi, bir dosyanın
+değişmiş eşiğe dayanması **ETKİLENEN**, hangi sürüme dayandığını hiç
+yazmamış olması **SÜRÜMSÜZ** olarak işaretlenir. "Hiçbir dosyayı düzenleme"
+aynen korundu — §11 uyarınca eşik değişikliği insan kararıdır — ve tablonun
+makinede kalması kural 6 gereği açıkça yazıldı.
+
+**Haksız suçlama yapılmadı.** AM-02 olumlu kontroldür: kitapta bayatlığı
+fark eden bir mekanizma **vardır**. Bulgu "mekanizma yok" değil,
+**"mekanizmanın erişimi eksik"**. AM-04 de temiz çıktı: §3'ün "altı ay"ı,
+komutun "altı aydan eski"si ve kapının `BAYAT_GUN = 183`'ü aynı süreyi
+söylüyor.
+
+### Bu turda takım iki kez kendi kusurunu gösterdi
+
+1. **AM-01 önce vakum geçti.** Ölçüt vaadi `hangi dosyalar[^\n]*bayat` diye
+   arıyordu; komutun kapanış cümlesi tam da o iki kelimenin **arasında satır
+   kırıyor**. Desen eşleşmedi, vaka yeşile döndü. Yirmi dokuzuncu turda AI-02
+   aynı tuzağı yakalamıştı: satır kırılması bir metnin anlamını değiştirmez,
+   ölçütün ona duyarlı olması bir **ölçüm kusurudur**.
+2. **Sonra ölçüt yorumla tatmin oluyordu.** Yamayı açıklayan HTML yorumu
+   `dosyalar/` sözcüğünü içeriyordu; mutasyonda prosedürün tamamı silinse
+   bile vaka yeşil kalıyordu — yani ölçüt **prosedürü değil, prosedürden söz
+   eden bir cümleyi** ölçüyordu. AF-02'nin sınıfı. Yorumlar ölçüm dışına
+   alındı; mutasyon o zaman yakalandı.
+
+İkisi de aynı şeyi söylüyor: **bir ölçüt, ölçtüğünü sandığı şeyi ölçtüğünü
+ancak mutasyon gösterdiğinde bilir.**
+
 ---
 
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
@@ -1918,6 +1974,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | AJ · çalışan kanalın kullanımı | *kanal 27 tur kullanılmadı* | **temiz** — üç bulgunun kanıtı yükseltildi |
 | AK · bulgu statüsü | *dokuz bulgu doğrulanmamıştı* | **temiz** — dördü doğrulandı, üçü yetkili kaynağından |
 | AL · takımların yan etkisi / bağımsızlık | *B-34 canlı ad kaydını yok ediyor, AF-03 kendi koşumunu okuyor* | **temiz** — iki yan etki kapatıldı, sağlama epiloga taşındı |
+| AM · kararın hukuki sürümü | *eşik denetimi canlı dosyaları hiç açmıyor* | **temiz** — tarama kapsamı vaadine eşitlendi |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -1976,7 +2033,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 ### Nasıl yeniden koşulur
 ```
 ./sinama/hepsi.sh                 # 34 çalıştırılabilir takım:
-                                  #   302 vaka + 15 mutasyon (D)
+                                  #   307 vaka + 15 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -2052,9 +2109,10 @@ Dokuz takım, 96 vaka:
 | AJ | **Çalışan kanalın kullanımı** — açık bulgu neyle ilerletilebilirdi | §2, §11 |
 | AK | **Bulgu statüsü ve kanıt türü** — neyi neyle kapatabilirsin | §1, §9, §13 |
 | AL | **Takımların yan etkisi ve bağımsızlığı** — takım kendi ölçtüğü ağacı kirletiyor mu | §8, kural 6, §12 |
+| AM | **Kararın hukuki sürümü** — eşik değişince verilmiş görüşe ne oluyor | §3, §5.1, §11 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**302 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**307 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)

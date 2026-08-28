@@ -380,6 +380,33 @@ olur. *(E)*
 — ama bunu bir kural olarak yazmıyor. Kitabı izleyen biri kalan dokuz beceriyi
 negatif sınırsız yazar ve yanlış yönlendirme kaçınılmaz olur. *(K-06)*
 
+## §11 · Komutlar
+
+**[A] `/esik-denetle` kendi vaadini tutamıyor: riski doğru adlandırıyor,
+sonra yanlış dizini tarıyor.**
+Komut gerekçesini kendi sözleriyle yazıyor — *"bir eşik değişikliği insan
+kararıdır, çünkü **canlı bir dosyada verilmiş bir görüşü geçersiz
+kılabilir**"* — ve kapanışı *"şu anda **hangi dosyalar** bayat bir rakama
+dayanıyor"* diye bitiyor. Ama prosedürünün birinci adımı yalnızca
+`birimler/*/yontem/` altını tarıyor. §2 kitabın kendi sözlüğünü kuruyor:
+*"`dosyalar/` **canlı işleri** … tutar"*. Yani kapanış cümlesinin vaadi canlı
+işler üzerinde; prosedür o dizini **hiç açmıyor**. Komut, doktrin
+katmanındaki rakamın bayatladığını söyleyebilir; o rakama dayanarak
+müvekkile ne söylendiğini söyleyemez.
+
+İkinci yol da kapalı: `dosyalar/` kural 6 gereği `.gitignore`'dadır (Y-02),
+yani sürüm geçmişinden de sorulamaz. *"Eşik değişti — hangi müvekkile artık
+yanlış olan bir şey söyledik?"* sorusunun sistemde iki cevap yolu vardı ve
+**ikisi de kapalıydı**. Bu, §2 maddesinin ikinci yüzüdür: gizlilik
+mekanizması orada dayanıklılığı, burada geriye dönük erişimi feda ediyor.
+*(AM-01, AM-03)*
+
+→CEVAP: YOK — cevabın "yamalı hâlde sistem çalışıyor" cümlesi bunu kapsıyor:
+tarama kapsamı komutun kendi vaadine eşitlendi (canlı iş katmanı eklendi,
+ETKİLENEN ve SÜRÜMSÜZ işaretleri tanımlandı), "hiçbir dosyayı düzenleme"
+kuralı aynen korundu ve tablonun makinede kalması kural 6 gereği açıkça
+yazıldı. Kitaba sadık sürüm `yamalar/kitaba-sadik/esik-denetle.md`.
+
 ## §12 · Kapılar
 
 **[A] Öz-sınama üretim yolunu koşturmuyor.** Öz-sınama fonksiyona ham dize

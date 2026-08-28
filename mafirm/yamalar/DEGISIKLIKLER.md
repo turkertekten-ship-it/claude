@@ -58,6 +58,7 @@ eski yola karşı bırakıldı: kusurun kaydı olarak dururlar.
 | 19 | **D-01..D-15** | Mutasyon sınaması kitaba sadık sürümde 15 bozmadan 11'inin fark edilmediğini gösterdi. Üç mekanizma: (a) `... \| wc -l` boru hattının çıkış kodu daima `wc`'nindir, yani 0; (b) BOŞ bir Python dosyası `--self-test` ile 0 döner; (c) `test -z "$(grep -rL ...)"` hiç dosya yokken geçer. Her kontrol artık bir EŞİK doğruluyor: `enaz()` ve `oz_sinama()` yardımcıları. |
 | 20 | yeni | Eklenen kontroller: her birimin INDEX.md'si, koltuk sayısı, kancanın settings.json'da GERÇEKTEN kayıtlı olması, matcher'ın Bash'i kapsaması, çıkar çatışması dosyasının varlığı, müvekkil ad kaydının doluluğu. |
 | 21 | yeni | `--yapisal` bayrağı: mühendislik katmanını mevzuat bulgularından ayırır. Bayraksız koşumda ENGELLEYİCİ mevzuat bulguları denetimi kırmızıda tutar. |
+| 22 | **`/esik-denetle`** | Komut kapanışta "hangi dosyalar bayat bir rakama dayanıyor" diye bitiyor ama yalnızca `birimler/*/yontem/` tarıyordu; §2'de canlı işleri tutan `dosyalar/` hiç açılmıyordu. Canlı iş katmanı (B) eklendi, ETKİLENEN ve SÜRÜMSÜZ işaretleri tanımlandı. "Hiçbir dosyayı düzenleme" korundu; tablonun makinede kalması kural 6 gereği yazıldı. |
 
 ## Eklenen dosyalar
 - `hafiza/cikar-catismasi.md` — §2 `hafiza/` klasörünü kuruyordu ama bu dosyayı

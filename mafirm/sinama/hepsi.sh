@@ -96,6 +96,8 @@ python3 "$S/ks_ak_bulgu_statu.py"; topla "AK · bulgu statüsü ve kanıt türü
 echo
 python3 "$S/ks_al_yan_etki.py"; topla "AL · takımların yan etkisi / bağımsızlık" $?
 echo
+python3 "$S/ks_am_surum.py"; topla "AM · kararın hukuki sürümü" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"
