@@ -314,3 +314,15 @@ sources:
       a CLEAR framework attributed to him (Clarity, Logic, Examples,
       Adaptation, Results - a different expansion from Lo's) and a prompt
       contract of goal, constraints, output format and failure conditions.
+
+  - id: FORGE-AB-TRIAL-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T18:00Z"
+    method: "Workflow forge-ab-trial (run wf_057c0dd0-44b): 4 tasks x 2 arms x 1 blind judge, 12 agents"
+    evidence: provenance/raw/forge-ab-trial-2026-08-27.md
+    note: >-
+      Blind only in the judging: the judge saw both outputs under neutral
+      labels with the order alternating, and was un-blinded after scoring. The
+      tasks and both arms were written by the same session, which favours the
+      forged arm by construction; the capture says so. Four tasks, one run
+      each - an indication, not a measurement.

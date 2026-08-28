@@ -150,6 +150,43 @@ public repositories the whole time.
 
 ---
 
+## Does forging a prompt actually help?
+
+The repository asserted that it did before it had any reason to. That claim is
+now replaced by one trial, with its limits stated.
+
+Four tasks, each attempted twice — once from a realistic sloppy ask, once from
+the same intent written into the seven slots. A separate judge scored both
+outputs against five criteria fixed in advance, saw them under neutral labels
+with the order alternating, and was not told which arm was which until after
+scoring.
+
+## Observed — the A/B trial
+
+- Across four tasks and twenty criteria, the forged prompts met 19 and the raw asks met 13. The forged arm won three tasks and tied one; it never lost. [src:FORGE-AB-TRIAL-2026-08-27]
+- On the refactoring task the raw ask scored 5 of 5: the model's default reading of "clean up this function" matched the intent exactly, and the forging bought nothing. [src:FORGE-AB-TRIAL-2026-08-27]
+- The largest gap was the test-writing task, 2 against 5, where the raw arm chose pytest and wrote happy-path tests — the two decisions the asker cared about, both unstated in the raw ask and both guessed wrong. [src:FORGE-AB-TRIAL-2026-08-27]
+- A stated constraint was still missed: the forged summary was given an 80-word limit and returned 86 words. [src:FORGE-AB-TRIAL-2026-08-27]
+
+### What the trial does not establish
+
+> Framing, not a claim. Four tasks, one run each, one judge each: no
+> repetition, no variance estimate, an indication rather than a measurement.
+> The tasks and both arms were written by the same session, which chose
+> ambiguities knowing which slots would resolve them — that favours the forged
+> arm by construction, and the tied task is the only evidence that the effect
+> is not total. Part of the result is near-tautological, since stating a
+> requirement makes it likelier to be met; the number that is not tautological
+> is the raw arm's 13 of 20, because that is how often the default guess was
+> already right, and it is what the extra words are being bought against.
+
+The honest form of the claim is therefore narrower than the one this repository
+started with. Writing the slots does not make the model comply — the 86-word
+summary is the counter-example sitting inside the winning arm. It makes
+non-compliance **visible**, because a criterion that was written down is a
+criterion that can be checked afterwards. That is the whole mechanism, and it
+is smaller and more durable than "better prompts get better answers".
+
 ## What the linter cannot check
 
 Stated plainly, because a guard whose limits are unstated gets trusted past

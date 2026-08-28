@@ -161,6 +161,42 @@ and the unknowns register, and the first of them is rule 1 in the new Learned
 rules section — appended by `tools/learn_rule.py`, which implements the
 self-annealing pattern the same sources document.
 
+## Fourth loop — measuring the thing instead of asserting it
+
+Observe found nothing new to find: the two cloned repositories held exactly two
+Saraev files between them, and the GitHub API refused search outright — a
+policy denial, not a wall to climb around. That thread is closed until the
+owner supplies a source or the network changes.
+
+So the loop turned on the system itself, and found a claim sitting at its
+centre with nothing under it. `docs/prompting.md` and the skill both said the
+forged prompt "is the one that gets a usable answer on the first turn". Nobody
+had ever run one. In a repository whose whole apparatus exists to stop exactly
+that, the unsourced claim was the one asserting the apparatus works.
+
+Four tasks were run twice each — once from a sloppy ask, once from the same
+intent in the seven slots — and scored by a judge that saw both outputs under
+neutral labels, order alternating, un-blinded only afterwards. Forged prompts
+met 19 of 20 criteria; the raw asks met 13 [src:FORGE-AB-TRIAL-2026-08-27].
+
+> The surprise is in the two results that did not fit the story. On the
+> refactoring task the raw ask scored full marks — the model's default reading
+> of `clean up this function` already matched the intent, and every extra word
+> of forging was waste. And the *winning* arm broke a constraint it had been
+> given in writing, returning 86 words against an 80-word limit. Both are
+> deflating, and both are more useful than the headline: the slots do not make
+> a model comply, and they are not always needed.
+
+The claim in the documents is now the narrower one that survives: writing a
+requirement down does not make it happen, it makes the failure to do it
+visible, because a criterion that was written can be checked afterwards. That
+is smaller than "better prompts get better answers" and it is the part that is
+actually true.
+
+The trial's own weakness is recorded with it rather than corrected for: the
+tasks and both arms were written by the session that ran them, which chose
+ambiguities knowing which slots would resolve them.
+
 ## Still open
 
 `U-6`, `U-7` and `U-8` in [unknowns.md](unknowns.md): what Saraev actually

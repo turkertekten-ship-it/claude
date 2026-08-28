@@ -20,7 +20,7 @@ Read `.claude/skills/prompt-forge/SKILL.md` first and work its four phases.
 1. **Observe.** If `$ARGUMENTS` is a path, lint that file directly. Otherwise
    write the ask verbatim to a scratch file outside the repository — do not
    tidy it on the way in, since the untidiness is the data. Then
-   `python3 tools/prompt_forge.py lint --profile <task|build|research|system|chat|directive> <file>`
+   `python3 tools/prompt_forge.py lint --profile <task|build|research|system|chat|directive|contract> <file>`
    and record which slots are absent and which hazards fired. No interpreting
    yet.
 2. **Orient.** Send the raw ask to the `prompt-critic` subagent and ask for the

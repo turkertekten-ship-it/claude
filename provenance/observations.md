@@ -105,3 +105,10 @@ contents were not reconstructed, summarised, or guessed at.
 - Indexing this container's transcripts yields 966 messages across 11 conversations; of 433 user-role turns, 421 are tool results rather than typed prompts. [src:PROMPT-HABITS-RUN-2026-08-27]
 - After excluding tool results, harness text and repeats, 10 prompts remained to score, and they are this session's own subagent briefs plus the owner's single goal message — not a sample of the owner's writing. [src:PROMPT-HABITS-RUN-2026-08-27]
 - The ratio matters for the tool's design: an auditor that did not filter on `block_types` would have reported 369 "prompts" and described the harness under the owner's name. [src:PROMPT-HABITS-RUN-2026-08-27]
+
+## Observed — whether the standard earns its cost
+
+- A blind-judged A/B trial over four tasks found forged prompts meeting 19 of 20 fixed criteria against the raw asks' 13. [src:FORGE-AB-TRIAL-2026-08-27]
+- The forged arm won three tasks and tied one, and on the tied task the raw ask scored full marks, so the forging bought nothing there. [src:FORGE-AB-TRIAL-2026-08-27]
+- Stating a constraint did not guarantee it was met: the forged summary exceeded the 80-word limit it was given, at 86 words. [src:FORGE-AB-TRIAL-2026-08-27]
+- The trial's tasks and both arms were written by the same session that ran it, so the design favours the forged arm; this is recorded with the result rather than corrected for. [src:FORGE-AB-TRIAL-2026-08-27]

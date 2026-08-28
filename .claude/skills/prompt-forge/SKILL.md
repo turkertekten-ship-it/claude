@@ -53,8 +53,10 @@ it belongs there.
 Profiles: `task` (default) · `build` (an acceptance test is mandatory) ·
 `research` (bounds are mandatory) · `system` (a role is mandatory) · `chat`
 (lightest) · `directive` (a standing instruction file an agent executes:
-context, constraints and acceptance all mandatory). `rules --profile P` prints
-the grading in force.
+context, constraints and acceptance all mandatory) · `contract` (the four parts
+of the prompt contract documented as Saraev's: goal, constraints, output
+format, failure conditions). `rules --profile P` prints the grading in force,
+and it is the authority — this list is prose and can fall behind it.
 
 ### 2. Orient — find the readings, name the surprise
 
@@ -141,8 +143,13 @@ Forged:
 > **If you cannot.** If the failure does not reproduce, stop and report what
 > you actually saw rather than changing code to fit the description.
 
-**Score 100/100.** The second prompt is longer, and it is the one that gets a
-usable answer on the first turn.
+**Score 100/100.** The second prompt is longer. Whether that buys anything is a
+question this repository now has one measurement of rather than an opinion: in
+a blind trial of four tasks, prompts written this way met 19 of 20 stated
+criteria against the raw asks' 13 [src:FORGE-AB-TRIAL-2026-08-27]. On one of
+the four the raw ask scored full marks and the forging bought nothing. See
+`docs/prompting.md` for what that trial does and does not establish — it is
+four tasks, run once.
 
 Both numbers are pinned in `tests/test_prompt_forge.py` against the fixtures in
 `tests/fixtures/prompts/`, because they were wrong once: this section quoted 34
