@@ -66,6 +66,47 @@ def render(number: int, category: str, mode: str, action: str, because: str) -> 
     return f"{number}. [{category.strip()}] {mode} {action}, because {because}."
 
 
+SUPERSEDED = re.compile(r"\s+—\s+superseded by rule \d+\.?$")
+
+
+def can_supersede(path: Path, number: int) -> tuple[int, str]:
+    """Whether rule `number` is there and not already replaced.
+
+    Checked before anything is written: the first version appended the new rule
+    and then discovered the target did not exist, leaving an orphan behind.
+    """
+    for rule in read_rules(path.read_text(encoding="utf-8")):
+        m = RULE.match(rule)
+        if m and int(m.group(1)) == number:
+            if SUPERSEDED.search(rule):
+                return 1, f"learn_rule: rule {number} is already superseded"
+            return 0, ""
+    return 1, f"learn_rule: no rule numbered {number} in {path}"
+
+
+def mark_superseded(path: Path, number: int, by: int) -> tuple[int, str]:
+    """Mark a rule as replaced without deleting it.
+
+    A rule that turns out to be wrong still records that something went wrong
+    once, and the reason it was written is often the useful part. Removing it
+    loses that; leaving it active is worse, because a later reader follows it.
+    So it stays, marked, and the new rule says what replaced it. This was the
+    missing operation: rules were append-only, so a wrong one could only be
+    corrected by hand-editing the file the tool owns.
+    """
+    text = path.read_text(encoding="utf-8")
+    lines = text.splitlines()
+    for i, line in enumerate(lines):
+        m = RULE.match(line.strip())
+        if m and int(m.group(1)) == number:
+            if SUPERSEDED.search(line):
+                return 1, f"learn_rule: rule {number} is already superseded"
+            lines[i] = line.rstrip().rstrip(".") + f". — superseded by rule {by}"
+            path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+            return 0, f"learn_rule: rule {number} marked superseded by rule {by}"
+    return 1, f"learn_rule: no rule numbered {number} in {path}"
+
+
 def add_rule(path: Path, category: str, mode: str, action: str, because: str,
              dry_run: bool) -> tuple[int, str]:
     if not path.exists():
@@ -159,7 +200,10 @@ def review(path: Path, max_words: int, max_share: int) -> tuple[int, list[str]]:
         lines.append("  same thing, and retire any whose `because` no longer describes a risk")
         lines.append("  this repository still runs — by editing the file, deliberately.")
 
-    parsed = [(i, r, *parts_of(r)) for i, r in enumerate(rules)]
+    retired = [r for r in rules if SUPERSEDED.search(r)]
+    if retired:
+        lines.append(f"  {len(retired)} superseded, kept for their reasons and still costing context")
+    parsed = [(i, r, *parts_of(r)) for i, r in enumerate(rules) if not SUPERSEDED.search(r)]
     for i, (_, rule_a, cat_a, mode_a, words_a) in enumerate(parsed):
         for _, rule_b, cat_b, mode_b, words_b in parsed[i + 1:]:
             if not words_a or not words_b:
@@ -198,6 +242,16 @@ def main(argv: list[str]) -> int:
                      help="what went wrong, so a later reader can judge whether it still applies")
     add.add_argument("--dry-run", action="store_true")
 
+    sup = sub.add_parser("supersede", help="replace a rule that turned out to be wrong")
+    sup.add_argument("number", type=int, help="the rule number being replaced")
+    sup.add_argument("--file", default=str(DEFAULT_FILE))
+    sup.add_argument("--category", required=True)
+    supgroup = sup.add_mutually_exclusive_group(required=True)
+    supgroup.add_argument("--always", metavar="ACTION")
+    supgroup.add_argument("--never", metavar="ACTION")
+    sup.add_argument("--because", required=True)
+    sup.add_argument("--dry-run", action="store_true")
+
     listing = sub.add_parser("list", help="print the rules already recorded")
     listing.add_argument("--file", default=str(DEFAULT_FILE))
 
@@ -208,6 +262,30 @@ def main(argv: list[str]) -> int:
 
     args = parser.parse_args(argv[1:])
     path = Path(args.file).expanduser()
+
+    if args.command == "supersede":
+        if not path.exists():
+            print(f"learn_rule: no such file: {path}", file=sys.stderr)
+            return 2
+        code, message = can_supersede(path, args.number)
+        if code:
+            print(message, file=sys.stderr)
+            return code
+        existing = read_rules(path.read_text(encoding="utf-8"))
+        new_number = len(existing) + 1
+        mode = "Always" if args.always else "Never"
+        code, message = add_rule(path, args.category, mode, args.always or args.never,
+                                 args.because, args.dry_run)
+        if code:
+            print(message, file=sys.stderr)
+            return code
+        print(message)
+        if args.dry_run:
+            print(f"learn_rule: would mark rule {args.number} superseded by rule {new_number}")
+            return 0
+        code, message = mark_superseded(path, args.number, new_number)
+        print(message, file=sys.stderr if code else sys.stdout)
+        return code
 
     if args.command == "review":
         if not path.exists():

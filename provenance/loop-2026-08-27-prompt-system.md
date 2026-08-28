@@ -608,6 +608,41 @@ mechanism that does work already exists — loop sixteen's register re-runs the
 command and compares exactly. It was reverted, and rule 8 records why, so the
 next session does not rebuild it.
 
+## Eighteenth loop — a rule that condemned a guard that works
+
+Rule 8, written in the previous loop, said never to ship a guard that
+pattern-matches English prose for an assertion. `verify_provenance.py` has
+shipped exactly that all session: the false-memory list, thirteen fixed
+phrases matched in prose.
+
+Observe measured it rather than arguing about it. Across the forty-four files
+in this repository it has fired wrongly **not once** — and on constructed
+probes it does misfire, reading "Recall that you can pass `--json`" as a claim
+of shared history.
+
+> The distinction rule 8 missed is not prose versus structure. `FALSE_MEMORY`
+> matches a **closed set of fixed idioms**, and those idioms do not appear
+> innocently in this kind of writing. `UNDATED_STATE` tried to match a
+> **semantic category** — "an assertion about mutable state" — whose surface
+> forms are unbounded and which needs tense, reference and conditionals to be
+> read correctly. One is a lookup; the other is comprehension.
+
+Rule 8 was therefore too broad, and correcting it exposed the gap that matters:
+the learned-rules file was **append-only**. There was no way to retire a rule
+short of hand-editing the file the tool owns, and `review` compares rules only
+against each other — a rule contradicting the shipped code is invisible to it,
+which is exactly how rule 8 sat there.
+
+`learn_rule.py supersede N` marks the old rule and appends the replacement. The
+old one stays with its reason, because what went wrong is still worth knowing;
+it is excluded from the contradiction checks, since a retired rule is history
+rather than a competing instruction; and the review reports how many are
+retired, because they still cost context in a file every prompt loads.
+
+Its first version appended the new rule and only then discovered the target did
+not exist, leaving an orphan. The test caught it, and the check now runs before
+anything is written.
+
 ## Still open
 
 `U-6`, `U-7` and `U-8` in [unknowns.md](unknowns.md): what Saraev actually

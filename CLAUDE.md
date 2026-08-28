@@ -229,7 +229,11 @@ python3 tools/learn_rule.py add --category tests --never "claim a score you did 
 ```
 
 It refuses a rule with no `because`, because a rule whose reason is missing
-cannot be reviewed later. `learn_rule.py review` — part of `tests/run_all.sh` —
+cannot be reviewed later. When a rule turns out to be wrong,
+`learn_rule.py supersede N` marks it and appends the replacement: the old rule
+stays, because the thing that went wrong is still worth knowing, and a later
+reader can see it was retired rather than followed. `learn_rule.py review` —
+part of `tests/run_all.sh` —
 reports the section's size against a budget and flags rules that contradict or
 restate each other. It deletes nothing: a rule exists because something went
 wrong, and pruning it silently loses that. Retiring one is an edit somebody
@@ -282,4 +286,5 @@ reader decide whether it still applies. Written by `tools/learn_rule.py`.
 5. [install] Never overwrite a path in a shared directory without checking who wrote it, because the installer clobbered a user command in ~/.claude and the uninstaller then deleted it, and neither was visible in a container where that directory was empty.
 6. [provenance] Never state a measured number in a document without registering the command that produced it, because four of six scores quoted in observations.md had silently stopped reproducing after fifteen loops of rule corrections.
 7. [docs] Never assert changeable state in prose when a command can report it, because the README claimed the chat index held nothing, the documented ingest command made that false, and it stood for thirteen loops.
-8. [guards] Never ship a guard that pattern-matches English prose for an assertion, because an UNDATED_STATE rule took four narrowings and was still wrong on four of nine cases, while the measurement register catches the same class exactly.
+8. [guards] Never ship a guard that pattern-matches English prose for an assertion, because an UNDATED_STATE rule took four narrowings and was still wrong on four of nine cases, while the measurement register catches the same class exactly. — superseded by rule 9
+9. [guards] Never pattern-match an open-ended semantic category in prose, as opposed to a closed set of fixed idioms, because rule 8 was too broad: it condemned the false-memory guard, which matches thirteen fixed phrases and has fired wrongly on none of 44 files, while the rule it was written from tried to recognise 'an assertion about mutable state' and could not be made precise.

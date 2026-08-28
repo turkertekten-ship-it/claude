@@ -145,6 +145,44 @@ def main() -> int:
         gone = run("review", "--file", str(Path(tmp) / "nope.md"))
         check("a missing file exits 2", gone.returncode == 2, gone.returncode)
 
+    print("\na wrong rule is superseded, not deleted")
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "CLAUDE.md"
+        path.write_text(BASE)
+        run("add", "--file", str(path), "--category", "guards",
+            "--never", "ship a guard that matches prose", "--because", "it misfired")
+        r = run("supersede", "1", "--file", str(path), "--category", "guards",
+                "--never", "ship a guard that matches an open category in prose",
+                "--because", "the first version condemned a guard that works")
+        check("supersede exits 0", r.returncode == 0, r.stdout + r.stderr)
+        rules = lr.read_rules(path.read_text())
+        check("the old rule is still there", len(rules) == 2, rules)
+        check("and is marked", "superseded by rule 2" in rules[0], rules[0])
+        check("its reason survives", "it misfired" in rules[0], rules[0])
+        check("the new rule is plain", "superseded" not in rules[1], rules[1])
+
+        review = run("review", "--file", str(path))
+        check("the pair is not reported as a contradiction",
+              "CONTRADICTION" not in review.stdout, review.stdout)
+        check("nor as a near-duplicate, though they overlap heavily",
+              "NEAR-DUPLICATE" not in review.stdout, review.stdout)
+        check("the superseded one is counted and named",
+              "1 superseded" in review.stdout, review.stdout)
+
+        again = run("supersede", "1", "--file", str(path), "--category", "guards",
+                    "--never", "do a third thing", "--because", "a third reason")
+        check("superseding it twice is refused",
+              again.returncode == 1 and "already superseded" in again.stderr, again.stderr[:100])
+        gone = run("supersede", "99", "--file", str(path), "--category", "x",
+                   "--never", "y", "--because", "z")
+        check("superseding a rule that does not exist is refused",
+              gone.returncode == 1 and "no rule numbered" in gone.stderr, gone.stderr[:100])
+
+        before = path.read_text()
+        dry = run("supersede", "2", "--file", str(path), "--category", "x",
+                  "--never", "y", "--because", "z", "--dry-run")
+        check("--dry-run writes nothing", path.read_text() == before and dry.returncode == 0)
+
     print("\nthe thresholds are the ones the real collisions sit at")
     check("contradiction threshold is 0.5", lr.CONTRADICTION == 0.5, lr.CONTRADICTION)
     check("near-duplicate threshold is 0.5", lr.NEAR_DUPLICATE == 0.5, lr.NEAR_DUPLICATE)
