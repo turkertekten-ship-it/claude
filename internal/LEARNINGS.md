@@ -4314,3 +4314,54 @@ problem.
 3. **A finished audit is worth recording as a table**, including the rows that
    were already fine. Next time the question is which of the five changed, not
    all five from scratch.
+
+---
+
+## L86 - The instrument that produced every number was unguarded in four places
+
+L85's rule was to audit the tests of a guarantee rather than its
+implementation. Applied to the eval harness, which L28 already identified as
+deserving adversarial attention first because every conclusion is conditional on
+it - and which gates CI and produced every retrieval figure in this session.
+
+Mutating `eval/metrics.py`:
+
+    recall counts hits against k, not what exists   CAUGHT
+    recall ignores k entirely                       SURVIVED
+    mrr returns rank rather than its reciprocal     CAUGHT
+    mrr credits the last hit instead of the first   CAUGHT
+    dcg without the log discount                    CAUGHT
+    ndcg credits repeats (dedup removed)            SURVIVED
+    ndcg ideal not truncated to k                   SURVIVED
+    ndcg ignores k in the retrieved list            SURVIVED
+
+**The `k` in recall@k and nDCG@k was not tested at all.** Every number this
+session reported is a recall@8 or an nDCG@8; had the truncation regressed,
+nothing would have broken - every figure would simply have moved. And the second
+survivor is the exact bug `ndcg_at_k`'s own docstring records as fixed: "the
+metric went above 1.0, which for a *normalised* measure is a loud signal that it
+is not measuring what its name says." The fix was made, explained at length, and
+left with nothing to stop it coming back.
+
+**One survivor was mine, not the suite's.** My first ndcg mutation added
+`_ = seen`, which changes no behaviour - an equivalent mutant whose SURVIVED
+said nothing about the tests. Re-run with a mutation that actually removes the
+dedup, it survived for real. An equivalent mutant reports a test gap that is not
+there, in the one tool whose job is finding gaps that are.
+
+Four tests added, expectations derived from the definitions rather than copied
+from a passing run, each input chosen so the correct and broken implementations
+give different answers: 0.5 against 1.0, 1.0 against 1.63, 1.0 against 0.7654,
+0.0 against 0.5. All four mutations now caught.
+
+**Rules.**
+1. **Write the regression test for the bug you *did* close.** L26 says to test
+   the leak you decided not to close; this is its sibling, and the docstring
+   explaining a past fix in detail is the strongest possible signal that the
+   fix has no test.
+2. **A parameter in a metric's *name* is a claim to be tested.** `recall_at_k`
+   and `ndcg_at_k` promise truncation in their names, and neither had a case
+   with a relevant item beyond k.
+3. **Check a surviving mutant is not equivalent before believing it.** Half my
+   survivors here were real; the one that was not would have sent me writing a
+   test for behaviour that was already covered.

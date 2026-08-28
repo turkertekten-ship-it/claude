@@ -673,3 +673,57 @@ class EmptyIndexIsNotAQualityCollapseTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TheMeasuringInstrumentIsItselfMeasuredTest(unittest.TestCase):
+    """The metrics that gate CI, mutation-tested and found unguarded.
+
+    L28 says whatever produces your numbers deserves adversarial attention
+    first, because every conclusion is conditional on it. Mutating
+    `eval/metrics.py` found four corruptions the suite did not notice:
+
+        recall ignores k entirely                 SURVIVED
+        ndcg credits repeats (dedup removed)      SURVIVED
+        ndcg ideal not truncated to k             SURVIVED
+        ndcg ignores k in the retrieved list      SURVIVED
+
+    The second is the exact bug `ndcg_at_k`'s docstring records as fixed - "the
+    metric went above 1.0, which for a *normalised* measure is a loud signal" -
+    with no test to stop it coming back. Every retrieval number in this project
+    is a recall@8 or an nDCG@8, so a silent regression here would not break a
+    build; it would move every reported figure.
+
+    Expected values are derived from the definitions, not copied from a passing
+    run, and each is chosen so the correct and broken implementations differ.
+    """
+
+    def test_recall_counts_only_the_first_k(self):
+        from oodarag.eval.metrics import recall_at_k
+
+        # Two relevant items, one inside k and one past it. Truncating gives
+        # 1/2; ignoring k gives 2/2.
+        retrieved = ["a"] + [f"filler{i}" for i in range(8)] + ["b"]
+        self.assertEqual(recall_at_k(retrieved, {"a", "b"}, 8), 0.5)
+
+    def test_ndcg_credits_a_repeated_item_once(self):
+        from oodarag.eval.metrics import ndcg_at_k
+
+        # dcg([1,0])/dcg([1]) = 1.0; crediting the repeat gives 1.63, and a
+        # normalised measure above 1.0 is the signal the docstring names.
+        score = ndcg_at_k(["a", "a"], {"a"}, 2)
+        self.assertLessEqual(score, 1.0, "nDCG exceeded 1.0; the dedup is gone")
+        self.assertAlmostEqual(score, 1.0, places=6)
+
+    def test_ndcg_ideal_is_truncated_to_k(self):
+        from oodarag.eval.metrics import ndcg_at_k
+
+        # Three relevant, only two slots: a perfect top-2 must score 1.0.
+        # Against an untruncated ideal it scores 0.7654.
+        self.assertAlmostEqual(ndcg_at_k(["a", "b"], {"a", "b", "c"}, 2), 1.0, places=6)
+
+    def test_ndcg_ignores_hits_beyond_k(self):
+        from oodarag.eval.metrics import ndcg_at_k
+
+        # The only relevant item sits at rank 3 with k=2, so nothing is found.
+        # Without truncation it would score 0.5.
+        self.assertEqual(ndcg_at_k(["a", "b", "c"], {"c"}, 2), 0.0)
