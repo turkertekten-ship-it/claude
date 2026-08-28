@@ -5,10 +5,11 @@ Dayanak: 4857 sayılı İş Kanunu madde 6; 1475 sayılı İş Kanunu madde 14
 Sözleşmesi Kanunu.
 Doğrulama: 2026-08-27.
 
-Kontrol edildi: kurulum kitabı §4 birim tanımı (2026-08-27) · bulunamayan:
-mevzuat.gov.tr birincil metni ve GÜNCEL KIDEM TAZMİNATI TAVANI — ağ çıkışı
-engelli. Madde numaraları ve aşağıdaki her tutar BİRİNCİL KAYNAKTAN TEYİT
-EDİLMEDİ.
+Kontrol edildi: kurulum kitabı §4 birim tanımı (2026-08-27) · kıdem tazminatı
+tavanı için Çalışma ve Sosyal Güvenlik Bakanlığı Çalışma Genel Müdürlüğü
+duyurusu ve uygulamacı kaynakları, web araması (2026-08-27) · bulunamayan:
+mevzuat.gov.tr birincil kanun metni — ağ çıkışı engelli; madde numaraları
+BİRİNCİL KAYNAKTAN OKUNMADI.
 
 ## Neden en sık yanlış fiyatlanan kalem
 
@@ -23,8 +24,16 @@ sorusudur: varlık devri seçildiğinde bu yük, "seçmediğimiz" sanılan bir
 - Mevcut iş sözleşmeleri **bütün hak ve borçlarıyla** devralana geçer. Devir
   başlı başına fesih sebebi değildir.
 - İşçinin **kıdemi devralan yanında sürer**; kıdem, devirle sıfırlanmaz.
-- Devirden önce doğmuş borçlardan devreden ile devralan **birlikte sorumludur**;
-  devredenin sorumluluğu kanunun öngördüğü süreyle sınırlıdır.
+- Devirden önce doğmuş ve devir tarihinde ödenmesi gereken borçlardan devreden
+  ile devralan **müteselsilen sorumludur**; **devredenin** sorumluluğu devir
+  tarihinden itibaren **iki yılla** sınırlıdır.
+
+- **Kıdem tazminatı bu iki yıllık sınırın DIŞINDADIR.** İki yıllık süre
+  sınırlaması kıdem tazminatı bakımından işlemez; devreden, kendi dönemi ve
+  devir tarihindeki son ücretle sınırlı olmak üzere sorumlu kalır. Fiyatlamada
+  sonucu şudur: alıcı, "iki yıl sonra bu yük düşer" diye modelleyemez —
+  kıdem tarafında düşmez, yalnızca devredenin payı kendi dönemiyle sınırlanır.
+  Bu ayrım, satıcının sorumluluk tavanı müzakere edilirken doğrudan konuşulur.
 
 Pay devrinde işveren tüzel kişiliği değişmez; işçiler zaten aynı işverendedir.
 Bu, yükün yok olduğu anlamına gelmez — yalnızca devir hükümlerinin
@@ -35,11 +44,26 @@ tetiklenmediği anlamına gelir. Yük hedefin içinde durmaya devam eder.
 Hesap için gereken üç girdi: her işçinin kıdem süresi, giydirilmiş brüt ücreti
 ve yürürlükteki **kıdem tazminatı tavanı**.
 
-> **Eşik doğrulanamadı.** Kıdem tazminatı tavanı altı ayda bir güncellenir ve bu
-> kurulumda güncel tutar birincil kaynaktan çekilemedi. Bu dosyaya bir rakam
-> YAZILMAMIŞTIR. Herhangi bir hesap yapılmadan önce yürürlükteki tavan
-> çekilmeli ve doğrulama tarihiyle birlikte kullanılmalıdır. Bayat bir tavan,
-> tavan olmamasından kötüdür: kontrol edilmiş gibi durur.
+### Kıdem tazminatı tavanı — doğrulandı
+
+| Dönem | Yıllık tavan |
+|---|---|
+| 1 Ocak – 30 Haziran 2026 | **64.948,77 TL** |
+| **1 Temmuz – 31 Aralık 2026** | **73.729,87 TL** |
+
+Doğrulama: 2026-08-27. Bugün itibarıyla yürürlükte olan **73.729,87 TL**'dir.
+
+Tavan, memur maaş katsayısının değişmesine bağlı olarak **her yıl Ocak ve
+Temmuz** aylarında yeniden belirlenir. Yani bu rakamın raf ömrü en çok altı
+aydır ve **1 Ocak 2027'de kesin olarak değişir**. Bir hesapta kullanılmadan
+önce dönem kontrol edilir: yanlış dönemin tavanı, tavan olmamasından kötüdür,
+çünkü kontrol edilmiş gibi durur.
+
+Tavan bir üst sınırdır: her işçinin kıdem tazminatı, giydirilmiş brüt
+ücretinin çalıştığı yıl sayısıyla çarpımıdır ama yıllık tutar bu tavanı
+aşamaz. Yüksek ücretli kadroda gerçek yük, tavan nedeniyle bordronun
+çağrıştırdığından düşük çıkar; düşük ücretli geniş kadroda ise tavan hiç
+devreye girmez ve yük tam hesaplanır.
 
 Fiyatlamada tekrar eden kusurlar:
 - Yalnızca çıplak ücretin kullanılması. Kıdem tazminatı **giydirilmiş** ücret
