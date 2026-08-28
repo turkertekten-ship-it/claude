@@ -571,6 +571,63 @@ mekanizmasız bırakıyor. Ama:
 Kitap onları "biçim kuralı" diye geçmekle, uygulanabilir olanı uygulanamaz
 saymış oluyor. *(R-01, R-04, R-06)*
 
+## §13 · Depolar — katalog kurulumda hiç yok
+
+**[A] §13'ün bütün araç kararları yalnızca KİTAPTA yaşıyor; kurulum hiçbir
+katalog bırakmıyor.**
+§13 altı depo için lisans, yıldız, son güncelleme ve bir **Karar** yazıyor
+("Kullan", "Lisans kararı verilmeden kurulmaz", "Yöntemi için okunur") ve
+"Hepsi 27 Ağustos 2026 tarihinde GitHub API'siyle doğrulandı" diyor. Ama §2
+kurulumu yalnızca `birimler`, `emsal`, `hafiza`, `dosyalar`, `cikti`
+klasörlerini açıyor ve hiçbiri araç kataloğu için değil. Kurulumu yapan
+hukukçunun elinde:
+
+* hangi aracın incelendiğine dair **yerel bir kayıt yok**,
+* eskiyecek bir **doğrulama tarihi yok**,
+* §16 denetiminin ya da herhangi bir komutun bakabileceği **bir şey yok**.
+
+Karar yazılı, kararın dayandığı olgular bozuluyor ve ikisi arasındaki bağ
+kurulumda hiç yok. Bu, otuz üçüncü turda adlandırılan kökün üçüncü örneğidir
+— *kitap kontrolleri olaylara değil anlara bağlıyor* — bir farkla: burada
+kontrol **kurulmuyor bile**. *(AP-01)*
+
+→CEVAP: YOK — cevabın "yamalı hâlde sistem çalışıyor" cümlesi kapsıyor:
+`hafiza/arac-katalogu.md` kuruldu. Her satır BİZİM doğrulama tarihimizi
+taşır — kitabın beyan ettiği tarih bizim doğrulamamız sayılmaz — ve
+doğrulanmamış bir satır "temiz" değil **kontrol edilmedi** demektir (§14'ün
+ikinci tuzağı). Bir katalog satırını değiştirmek bir araç kararını
+değiştirebileceği için dosya kendiliğinden düzenlenmez; §9 uyarınca insana
+sorulur.
+
+**[A] Tazeleme becerisi, kararı değiştiren iki alanı hiç okumuyor.**
+§14'ün `once-arastir` becerisi GitHub API'sinden dört alan okuyor:
+`full_name`, `license.spdx_id`, `stargazers_count`, `pushed_at`.
+
+* **`archived` yok.** `pushed_at` bir vekildir, olgu değil. Salt okunur bir
+  depo hata düzeltmesi de güvenlik yaması da almaz. Ölçüldü: §13.4'ün
+  `google/diff-match-patch` için yazdığı *"eskime burada bozulma değildir"*
+  gerekçesi, deponun **5 Ağustos 2024'te arşivlendiği bilinmeden**
+  yazılmıştır. Kitabın kendi tazeleme aracı çalıştırılsaydı bile bunu
+  göremezdi.
+* **Veri lisansı yok.** API'nin `license` alanı yalnızca KOD lisansını
+  döndürür. `opensanctions` kodu MIT iken **verisi CC BY-NC 4.0'dır ve
+  ticari kullanıma kapalıdır** — kitap bu aracı ticari bir hukuk pratiği
+  için öneriyor. Tek "Lisans" sütunu bu ayrımı yapısal olarak taşıyamaz.
+
+*(AP-02, AP-03)*
+
+→CEVAP: YOK — cevabın "yamalı hâlde sistem çalışıyor" cümlesi kapsıyor:
+`once-arastir` beş alanı okuyacak ve veri lisansını kod lisansından ayrı
+soracak biçimde genişletildi.
+
+→CEVAP: YOK — cevabın "yamalı hâlde sistem çalışıyor" cümlesi kapsıyor:
+`hafiza/arac-katalogu.md` kuruldu (her satır BİZİM doğrulama tarihimizi
+taşır; kitabın beyanı bizim doğrulamamız sayılmaz ve doğrulanmamış satır
+"temiz" değil "kontrol edilmedi" demektir), ve `once-arastir` beş alanı
+okuyup veri lisansını ayrıca soracak biçimde genişletildi. Bir katalog
+satırını değiştirmek bir araç kararını değiştirebileceği için dosya
+kendiliğinden düzenlenmez; §9 uyarınca insana sorulur.
+
 ## §13 · Depolar
 
 **[C] Tek bir doğrulama tarihi, farklı hızlarda bozulan verilere yetmiyor.**

@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** otuz sekiz çalıştırılabilir takım — **317
+**Yamalı hâlde sistem çalışıyor:** otuz dokuz çalıştırılabilir takım — **322
 vaka, 15 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15, birimler arası tutarlılık takımının
 kendi mutasyon yakalaması 10/10. Ama **üç mevzuat bulgusu ile kitabın kendi içindeki bir çelişki açık kalır**
@@ -1977,6 +1977,65 @@ mutasyon (beceriden müvekkil aramasını çıkar) yakalandı.
 ("eşleşme varsa —hangi yönde olursa olsun— DUR") ölçütün aradığı dizgeyi
 bozdu. Ölçüt bir *cümleyi* değil bir *anlamı* sınamalıydı; öyle yapıldı.
 
+### Kök üçüncü kez göründü — ve bu kez kontrol kurulmuyordu bile
+
+Otuz üçüncü tur bir kök adlandırdı: **kitap kontrolleri olaylara değil
+anlara bağlıyor.** İki örneği vardı (§11 eşikler, §8 çatışma). Kök mü,
+tesadüf mü? Üçüncü bir yere bakıldı: §13 araç kataloğu — kaydettiği her alan
+(lisans, yıldız, son güncelleme) zamanla bozulur ve kitabın **Karar** sütunu
+onlara dayanır.
+
+Ölçüm beklediğimden ağır çıktı. **§13'ün kataloğu kurulumda hiçbir dosya
+bırakmıyor.** §2 yalnızca `birimler`, `emsal`, `hafiza`, `dosyalar`, `cikti`
+klasörlerini açıyor; hiçbiri araç kataloğu için değil. Kitap "Hepsi 27
+Ağustos 2026 tarihinde GitHub API'siyle doğrulandı" diyor — ama o cümle
+**kitapta**, kurulan sistemde değil. Kurulumu yapan hukukçunun elinde hangi
+aracın incelendiğine dair yerel bir kayıt, eskiyecek bir doğrulama tarihi ve
+§16'nın bakabileceği bir şey yok. Karar yazılı; kararın dayandığı olgular
+bozuluyor; ikisi arasındaki bağ kurulumda hiç yok.
+
+**Ve kitabın kendi tazeleme aracı, kararı değiştiren iki alanı hiç
+okumuyor.** `once-arastir` API'den dört alan alıyor:
+
+| alan | var mı | neden önemli |
+|---|---|---|
+| `license.spdx_id` | ✓ | yalnızca **kod** lisansı |
+| `stargazers_count` | ✓ | — |
+| `pushed_at` | ✓ | bakımın **vekili** |
+| `archived` | **yok** | bakımın **olgusu** |
+| veri lisansı | **yok** | ticari kullanımı yasaklayabilir |
+
+İkisi de varsayımsal değil, yirmi dokuzuncu turda ölçüldü. §13.4'ün
+`google/diff-match-patch` için yazdığı *"eskime burada bozulma değildir"*
+gerekçesi, deponun **5 Ağustos 2024'te arşivlendiği bilinmeden** yazılmış —
+ve kitabın kendi aracı çalıştırılsaydı **bile** bunu göremezdi, çünkü
+`archived` alanını okumuyor. `opensanctions` ise kodu MIT iken **verisi
+CC BY-NC 4.0**: ticari kullanıma kapalı, ve kitap onu ticari bir hukuk
+pratiği için öneriyor. Tek "Lisans" sütunu bu ayrımı **yapısal olarak**
+taşıyamaz.
+
+Yama `hafiza/arac-katalogu.md` dosyasını kuruyor. Kuralı şu: her satır
+**bizim** doğrulama tarihimizi taşır — kitabın beyanı bizim doğrulamamız
+sayılmaz — ve doğrulanmamış bir satır "temiz" değil **kontrol edilmedi**
+demektir. `once-arastir` beş alanı okuyacak ve veri lisansını ayrıca soracak
+biçimde genişletildi.
+
+### Kendi yamalarım ölçümü kirletiyordu
+
+AP-01 ilk koşumda **yeşil** verdi ve yakaladığı dosya
+`hafiza/dogrulama-bulgulari.md` idi — yani *benim* kör sınama sırasında
+ürettiğim bir teslimat, kitabın kurduğu bir şey değil. **Kendi yamalarım
+ağaçta dururken kitabı ölçmek, ikisini birbirine karıştırır ve kitabı
+olduğundan iyi gösterir.** Ölçüt §13'ün kendi yapısına indirildi: bir
+katalog, satır satır her depoyu bir lisansla ve bir kararla eşleştirir; açık
+bulguları anlatan bir düzyazı dosyası bunu yapmaz.
+
+Ve takım yazıldığı turda iki kez daha yakalandı: **AE-03** yeni takımdaki
+çıplak `.lower()`'ı buldu — sınıfın altıncı sızması, ve "depo adları ASCII,
+bu örnek zararsız" muhakemesi tam olarak sınıfı dört kez besleyen
+muhakemedir; **AH-03** ise iki `[A]` maddesinden birinin cevap beyanı
+taşımadığını gösterdi.
+
 ---
 
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
@@ -2095,6 +2154,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | AM · kararın hukuki sürümü | *eşik denetimi canlı dosyaları hiç açmıyor* | **temiz** — tarama kapsamı vaadine eşitlendi |
 | AN · yamanın kabul sınaması | *yamanın tablosu kapıya görünmüyordu* | **temiz** — sır kapısına canlı iş yolu kuralı eklendi |
 | AO · çatışmanın yönü ve zamanı | *kontrol tek yönlü ve yalnız açılışta* | **temiz** — iki yönlü ve geriye dönük hâle getirildi |
+| AP · araç kataloğunun kurulumdaki hâli | *katalog kurulumda hiç yok; arşiv ve veri lisansı okunmuyor* | **temiz** — katalog kuruldu, iki alan eklendi |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -2153,7 +2213,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 ### Nasıl yeniden koşulur
 ```
 ./sinama/hepsi.sh                 # 34 çalıştırılabilir takım:
-                                  #   317 vaka + 15 mutasyon (D)
+                                  #   322 vaka + 15 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -2232,9 +2292,10 @@ Dokuz takım, 96 vaka:
 | AM | **Kararın hukuki sürümü** — eşik değişince verilmiş görüşe ne oluyor | §3, §5.1, §11 |
 | AN | **Yamanın kabul sınaması** — eklenen katman gerçekten karar verdiriyor mu | §15.1, kural 6 |
 | AO | **Çıkar çatışmasının yönü ve zamanı** — kontrol simetrik mi, geriye bakıyor mu | §8, §9, §18.9 |
+| AP | **Araç kataloğunun kurulumdaki hâli** — §13'ün kararları nerede yaşıyor | §13, §14, §3 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**317 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**322 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)
