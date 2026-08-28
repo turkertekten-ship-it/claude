@@ -27,9 +27,36 @@ class AnswerConfig:
     #: Below this citation coverage the answer is flagged, and in strict mode
     #: replaced by an abstention. Ungrounded fluency is the failure this whole
     #: pipeline exists to prevent.
+    #: Never fired on either golden set either, for a different reason: the
+    #: extractive generator emits only sentences it can cite, so citation
+    #: coverage is 1.000 at the *minimum* across all 74 questions. This is
+    #: unreachable in *this configuration* rather than structurally - the Claude
+    #: generator can produce a sentence it cannot attribute, which is exactly
+    #: what this exists to refuse. Distinguishing the two mattered: one of these
+    #: guards should be labelled dead and the other should not (L65).
     min_coverage: float = 0.5
     strict: bool = True
     #: Retrieval scores below this mean nothing was retrieved at all.
+    #:
+    #: **Structurally unreachable on a non-empty result list, and kept anyway.**
+    #: The reranker's total carries two query-independent priors that are
+    #: present whatever the chunk says: `authority_weight * (1.0/1.5) = 0.080`
+    #: for a chunk whose metadata omits authority, and `position_weight = 0.150`
+    #: at ordinal 0. A chunk matching *nothing at all* therefore scores 0.230 -
+    #: 46x this floor - and 0.089 even at ordinal 100. Measured across both
+    #: golden sets: the smallest top score observed is 0.2541 (external) and
+    #: 0.5099 (primary), 51x and 102x above it, and the guard has never fired.
+    #:
+    #: That is the failure `rerank.py` describes above `rerank_relevance`: a
+    #: total with priors folded in cannot answer "is this relevant at all". The
+    #: check beside this one, `min_relevance`, does the job correctly by reading
+    #: relevance alone, and subsumes this entirely.
+    #:
+    #: Not deleted. It costs one comparison, an empty result list is handled
+    #: earlier, and it becomes live again the moment the query-independent
+    #: weights are zeroed - which `authority_weight` at 0.0 would do. A cheap
+    #: guard that is dead under today's weights and alive under a plausible
+    #: configuration is worth keeping and worth labelling (L65).
     min_top_score: float = 0.005
     #: Query-term relevance floor, measured independently of source priors.
     #: This is the gate that actually catches an out-of-corpus question: a

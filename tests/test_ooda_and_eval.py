@@ -523,5 +523,43 @@ class QuarantineCountsSayWhatTheyCountTest(unittest.TestCase):
         self.assertNotIn("Quarantined", self._report_with({}))
 
 
+class GuardReachabilityTest(unittest.TestCase):
+    """Two abstention guards that have never fired, for different reasons.
+
+    "I could not make it fire" and "it cannot fire" are different claims, and
+    only the second justifies calling a safety check dead (L25). These compute
+    the bound rather than sampling for it.
+    """
+
+    def test_a_chunk_matching_nothing_still_clears_min_top_score(self):
+        """So `min_top_score` cannot fire on a non-empty result list.
+
+        Derived from the weights, not observed: the query-independent priors are
+        present whatever the chunk says.
+        """
+        from oodarag.generate.answer import AnswerConfig
+        from oodarag.retrieve.rerank import HeuristicReranker
+
+        r = HeuristicReranker()
+        authority_of_a_chunk_with_no_metadata = 1.0 / 1.5
+        floor = (r.authority_weight * authority_of_a_chunk_with_no_metadata
+                 + r.position_weight * 1.0)
+        self.assertGreater(floor, AnswerConfig().min_top_score * 10,
+                           "min_top_score is now within reach, so it is no longer "
+                           "dead and its docstring is wrong")
+
+    def test_zeroing_the_query_independent_priors_brings_it_back_to_life(self):
+        """The condition under which the guard stops being dead, asserted so
+        the claim in its docstring is checked rather than believed."""
+        from oodarag.generate.answer import AnswerConfig
+        from oodarag.retrieve.rerank import HeuristicReranker
+
+        r = HeuristicReranker(authority_weight=0.0, position_weight=0.0)
+        floor = r.authority_weight * (1.0 / 1.5) + r.position_weight * 1.0
+        self.assertLess(floor, AnswerConfig().min_top_score,
+                        "with no query-independent priors a chunk matching "
+                        "nothing should fall under the floor")
+
+
 if __name__ == "__main__":
     unittest.main()

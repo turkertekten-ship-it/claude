@@ -3147,3 +3147,64 @@ that weighting, and anything that fixed the underlying ordering would collect it
 3. **A monotone trend inside a sweep is a finding even when you do not act on
    it.** "Ordering improves as coverage's share falls" names a cost the current
    design is paying and tells the next cycle what a fix would be worth.
+
+---
+
+## L65 - Two guards that never fire, for two different reasons
+
+`AnswerConfig` has two thresholds nobody had measured: `min_top_score = 0.005`
+and `min_coverage = 0.5`. Across all 74 golden questions on both corpora,
+**neither has ever fired.**
+
+| | smallest observed | floor | margin |
+| --- | --- | --- | --- |
+| top score, external | 0.2541 | 0.005 | 51x |
+| top score, primary | 0.5099 | 0.005 | 102x |
+| citation coverage, both | **1.000** | 0.5 | never below |
+
+L25 says "I could not make it fire" and "it cannot fire" are different claims,
+and only the second justifies calling a safety check dead. So I computed the
+bound instead of sampling for it - and the two guards turn out to be dead in
+*different senses*, which is the finding.
+
+**`min_top_score` is structurally unreachable.** The reranker's total carries
+two query-independent priors present whatever the chunk says:
+
+```
+authority_weight * (1.0/1.5)  = 0.080   # metadata omits authority -> default 1.0
+position_weight  * 1.0        = 0.150   # ordinal 0
+                                0.230   # a chunk matching NOTHING scores this
+```
+
+46x the floor, and still 0.089 at ordinal 100. No chunk in a non-empty result
+list can fall under 0.005.
+
+This is exactly the failure `rerank.py` warns about four lines above the code
+that produces the number: *"Fold them into one number and the total stops being
+usable as an 'is this relevant at all' signal."* `min_top_score` reads the
+total, so it cannot do its stated job; `min_relevance` beside it reads relevance
+alone and subsumes it entirely.
+
+**`min_coverage` is unreachable in this configuration, not structurally.** The
+extractive generator emits only sentences it can cite, so citation coverage is
+1.000 at the minimum across all 74 questions. The Claude generator can produce a
+sentence it cannot attribute - which is precisely what this guard exists to
+refuse. It is live under a configuration the evals do not exercise.
+
+**Neither was deleted, and the distinction is why.** One is dead under today's
+weights and becomes live the moment `authority_weight` and `position_weight` are
+zeroed - a plausible configuration, and one this project has swept. The other is
+dead under today's *generator* and live under one that ships in the same
+repository. Both cost a comparison. What they lacked was a label, and a test that
+computes the bound rather than trusting the docstring.
+
+**Rules.**
+1. **Compute a guard's bound, do not sample for it.** Seventy-four questions
+   never firing is weak evidence; a floor of 0.230 against a threshold of 0.005
+   settles it, and took arithmetic rather than a corpus.
+2. **"Never fires" has several causes and they need different responses.**
+   Structurally impossible, impossible under this configuration, and merely
+   untriggered look identical in a test run and imply different actions.
+3. **A guard that reads the wrong quantity is worse than a missing one**,
+   because it occupies the place where the real check would go. This one has sat
+   beside the check that does its job for as long as both have existed.
