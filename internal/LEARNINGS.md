@@ -2324,3 +2324,64 @@ corpus are not reachable by cheaper term statistics.
    Co-occurrence explains the France case exactly and separates nothing over 54.
    The measurement that would have justified building it took twenty lines and
    ran before any code was written.
+
+---
+
+## L52 - A stale number in a decision record keeps a feature switched off
+
+L49 was about stale numbers in reports: a table wrong in one column, a count
+that had lost its unit. This is the same defect one level up, and it costs more.
+
+`retrieve/expansion.py` implements pseudo-relevance feedback and is **off by
+default**, on the strength of a measurement block in its own docstring:
+
+> | external | off | 20/20 | 0.800 | 0.7815 |
+> | primary  | on  | 17/20 | 0.600 | 0.4642 |
+>
+> No corpus improved; the primary corpus got measurably worse.
+
+"External 20/20" dates it: the external set has held 54 cases for a long time,
+and the corpus has gone 33 to 91 to 153 documents since. Re-run today
+(`scripts/expansion_ab.py`):
+
+| corpus | expansion | pass | recall@8 | MRR | nDCG@8 |
+| --- | --- | --- | --- | --- | --- |
+| external | off | 47/54 | 0.8721 | 0.7304 | 0.7487 |
+| external | on | 47/54 | **0.8837** | 0.7246 | 0.7485 |
+| primary | off | 16/20 | 0.7812 | 0.6354 | 0.6442 |
+| primary | on | 16/20 | **0.8125** | **0.6375** | **0.6582** |
+
+**Both of the old claims are false now.** Primary does not get worse - it
+improves on every metric. And a corpus does improve: recall rises on both.
+
+**It still stays off, and the new reason is the interesting part.** The pass
+rate does not move on either corpus, at any of four settings (4, 8, 12 terms;
+weight 0.25 and 0.5). The recall gain is real and *inframarginal* - it lands on
+cases that already passed or still fail, and converts none. Measured cost: 20%
+of query latency, 99.0 ms to 118.8 ms mean. Better recall for no additional
+answered question, at a fifth more latency, is not a default.
+
+So the decision is unchanged and every reason for it is different. That is the
+point: had the numbers stayed stale, the feature would have remained off for a
+reason that was no longer true, and the next person to reach for it would have
+read a table telling them not to bother.
+
+**Why this is worse than L49.** A stale number in a report misleads whoever
+reads it. A stale number in a decision record *acts*: it holds a switch in a
+position nobody has re-justified. The docstring was doing its job - "kept, off,
+with the numbers above, so the next person starts from the measurement instead
+of repeating it" - and that is exactly the mechanism that made it load-bearing
+once it aged.
+
+**Rules.**
+1. **A measurement that justifies a default has a shelf life.** Re-run it when
+   the thing it was measured on changes - the corpus, the golden set, the
+   analyser. Anything that says "we tried this and it did not work" is a
+   candidate to re-try, and the older it is the better a candidate.
+2. **Record what a decision would take to reverse.** "Off because it does not
+   help" ages badly; "off because the pass rate does not move at four settings
+   and it costs 20% latency" tells the next person exactly which number to
+   watch.
+3. **Re-measuring can leave the decision alone and still be worth the time.**
+   Same switch, entirely different justification, and the difference between
+   those two states is whether anyone can trust the switch.

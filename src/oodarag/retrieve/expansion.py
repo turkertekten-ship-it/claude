@@ -27,27 +27,38 @@ the same. Three things bound it:
 
 ## Measured result: OFF by default
 
-It was implemented to fix one documented case and did not fix it. A/B on the
-golden sets, everything else identical:
+**These numbers were re-measured after the corpora grew, and the earlier
+conclusion did not survive** - see the note below. Current A/B, everything else
+identical, at 153 external documents / 54 cases and 228 primary documents / 20
+cases (`scripts/expansion_ab.py`):
 
-| corpus   | expansion | pass  | recall@8 | nDCG@8 |
-|----------|-----------|-------|----------|--------|
-| external | off       | 20/20 | 0.800    | 0.7815 |
-| external | on        | 20/20 | 0.800    | 0.7815 |
-| primary  | off       | 17/20 | 0.625    | 0.4729 |
-| primary  | on        | 17/20 | 0.600    | 0.4642 |
+| corpus   | expansion | pass  | recall@8 | MRR    | nDCG@8 |
+|----------|-----------|-------|----------|--------|--------|
+| external | off       | 47/54 | 0.8721   | 0.7304 | 0.7487 |
+| external | on        | 47/54 | 0.8837   | 0.7246 | 0.7485 |
+| primary  | off       | 16/20 | 0.7812   | 0.6354 | 0.6442 |
+| primary  | on        | 16/20 | 0.8125   | 0.6375 | 0.6582 |
 
-No corpus improved; the primary corpus got measurably worse. The target case -
-"What stops a crawl from running forever?" - expanded to *"neither candid
-markdown below model wrong eval rather"*, drawn from the same wrong results the
-unexpanded query returned. Textbook drift, and the three bounds above limited
-the damage without preventing it.
+It stays off, for a different reason than before. **The pass rate does not move
+on either corpus, at any of four settings** (4, 8 and 12 terms; weight 0.25 and
+0.5). Recall improves on both - primary by 0.031, and primary improves on every
+metric - but not one case converts, so the gain is real and inframarginal. It
+costs 20% of query latency, measured: 99.0 ms to 118.8 ms mean on the external
+set. Better recall for no additional answered question, at a fifth more latency,
+is not a default.
 
-The technique is sound and helps on many corpora; it does not help on this one,
-where the embedder already does subword matching and the corpus is small. It is
-kept, off, with the numbers above, so the next person to reach for it starts
-from the measurement instead of repeating it. Turn it on only with an A/B on
-your own corpus.
+**What the earlier version of this block said, and why it was wrong.** It
+recorded "external 20/20 ... primary 17/20 off, 17/20 on" and concluded "no
+corpus improved; the primary corpus got measurably worse." That measurement was
+taken against an external corpus roughly a third of its current size and a
+golden set a third its current length, and both of its claims are now false:
+primary improves on every metric, and external improves on recall. A stale
+number in a *decision* record is worse than a stale number in a report, because
+it does not merely mislead a reader - it keeps a feature switched off (L52).
+
+The documented drift case still reproduces in spirit: the technique is sound,
+helps on many corpora, and is bounded here by the three limits above. Turn it on
+only with an A/B on your own corpus - and re-run this one before trusting it.
 """
 
 from __future__ import annotations
