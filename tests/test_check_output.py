@@ -127,6 +127,45 @@ def main() -> int:
     check("and it is the one about the numbers",
           any("numbers" in u.lower() for u in r.unchecked), r.unchecked)
 
+    print("\na failure becomes a rule, not a spent correction")
+    r = co.check(SLOTTED, " ".join(["word"] * 86))
+    suggestions = co.suggested_rules(r)
+    check("a failure yields one command", len(suggestions) == 1, suggestions)
+    cmd = suggestions[0] if suggestions else ""
+    check("it invokes learn_rule", "learn_rule.py add" in cmd, cmd)
+    check("the reason carries both measurements",
+          "80 words" in cmd and "86 words" in cmd, cmd)
+    check("the reason states only what was measured",
+          "because" in cmd and "probably" not in cmd and "seems" not in cmd, cmd)
+    check("a clean report suggests nothing",
+          co.suggested_rules(co.check(SLOTTED, " ".join(["word"] * 20))) == [])
+
+    print("\nthe emitted command actually runs")
+    import shlex
+    sys.path.insert(0, str(REPO / "tools"))
+    import learn_rule as lr
+    with tempfile.TemporaryDirectory() as tmp:
+        target = Path(tmp) / "CLAUDE.md"
+        target.write_text("# Doctrine\n\nSome rules.\n")
+        argv = shlex.split(cmd)
+        argv[0] = "learn_rule"                       # drop the interpreter
+        argv[1] = str(REPO / "tools" / "learn_rule.py")
+        argv = [argv[1]] + argv[2:] + ["--file", str(target)]
+        code = lr.main(argv)
+        check("it exits 0", code == 0, code)
+        rules_written = lr.read_rules(target.read_text())
+        check("the rule landed", len(rules_written) == 1, rules_written)
+        check("with the measurement in it",
+              rules_written and "86 words" in rules_written[0], rules_written)
+        check("running it twice is refused, not duplicated",
+              lr.main(argv) == 1 and len(lr.read_rules(target.read_text())) == 1)
+
+    print("\nquoting survives an awkward constraint")
+    weird = co.check("## CONSTRAINTS\nNo \"please\".", "Please do it.")
+    for line in co.suggested_rules(weird):
+        parts = shlex.split(line)
+        check("the emitted command parses as a shell command", len(parts) > 4, line)
+
     print("\nexit codes")
     with tempfile.TemporaryDirectory() as tmp:
         pp, op = Path(tmp) / "p.md", Path(tmp) / "o.txt"
@@ -148,6 +187,10 @@ def main() -> int:
         payload = json.loads(js.stdout)
         check("--json carries checks and unchecked",
               "checks" in payload and "unchecked" in payload, sorted(payload))
+        js2 = subprocess.run([sys.executable, str(TOOL), str(pp), str(op), "--json", "--suggest-rule"],
+                             capture_output=True, text=True, timeout=60)
+        check("--json --suggest-rule carries the rules",
+              json.loads(js2.stdout).get("suggested_rules"), js2.stdout[:120])
 
     print()
     if FAILURES:

@@ -228,6 +228,15 @@ Two further design decisions are worth stating, because both are refusals:
   silently skipped would be worse than no checker, so the unchecked constraints
   are printed alongside the ones that passed.
 
+`--suggest-rule` turns each failure into the `learn_rule.py` command that would
+record it, with the measurement in the `because` and nothing else. Detection and
+learning were built as separate tools and left unconnected for two loops, which
+meant a correction the checker found was still spent unless somebody retyped it
+— the exact gap the self-annealing pattern names when it says the last step
+updates the instruction file "to warn future instances"
+[src:SARAEV-REPOS-2026-08-27]. Rule 4 in this repository's own Learned rules
+was appended that way.
+
 Run against this repository's own trial data it finds the 86-word overrun that
 the model judge found by reading [src:CHECK-OUTPUT-TRIAL-2026-08-27]. That is
 the whole argument for it: the constraint was written down, and until now

@@ -257,6 +257,31 @@ through to whole-prompt scanning and reported its own ROLE and TASK sentences
 as unchecked constraints. Word-number limits ("at most two sentences") were
 invisible to it as well.
 
+## Seventh loop — closing the circuit
+
+Observe asked a question with a one-line answer: does anything connect the
+checker to the learned-rules file? Nothing did. `grep` found no reference in
+either direction.
+
+> The surprise is what that means about the previous two loops. The pattern
+> this repository documents as Saraev's self-annealing loop ends with a step
+> that updates the instruction file "to warn future instances"
+> [src:SARAEV-REPOS-2026-08-27]. Both halves had been built — a checker that
+> catches a violation, a tool that records a rule — and the step between them
+> was left to a human retyping. A loop documented in `docs/prompting.md` as
+> built in had a gap in the middle of it, and nothing noticed because each
+> half worked.
+
+`check_output.py --suggest-rule` emits, per failure, the exact `learn_rule.py`
+command that records it, with the measurement in the `because` and nothing
+else — a reason that speculated about *why* an answer went wrong would be
+invention appended to the file every future prompt loads.
+
+The falsifier was end-to-end rather than notional: the emitted command was run,
+the rule landed, and running it again was refused rather than duplicated. Rule
+4 in this repository's Learned rules arrived that way, from the trial's own
+86-word overrun.
+
 ## Still open
 
 `U-6`, `U-7` and `U-8` in [unknowns.md](unknowns.md): what Saraev actually

@@ -198,9 +198,14 @@ in, check it against the prompt that asked for it:
 python3 tools/check_output.py forged-prompt.md answer.txt
 ```
 
-It checks the countable constraints — limits, formats, forbidden tokens — and
-lists every one it could not interpret, because most of what a prompt
-constrains is prose no machine can verify. In this repository's own trial the
+It sorts the constraints into three grades — countable (checked here), runnable
+(the command is printed, never executed) and prose (listed for a reader) —
+because most of what a prompt constrains no machine can verify, and a checker
+that reported "all clear" over the rest would be worse than none.
+
+`--suggest-rule` closes the loop: each failure comes back as the exact
+`learn_rule.py` command that would record it, so a correction is not spent on
+one answer. In this repository's own trial the
 winning answer broke a written 80-word limit by six words
 [src:CHECK-OUTPUT-TRIAL-2026-08-27]; nothing was reading the limit back.
 
@@ -253,3 +258,4 @@ reader decide whether it still applies. Written by `tools/learn_rule.py`.
 1. [attribution] Never record a negative result from search coverage alone as settled, because 'no evidence Saraev uses CLEAR' was overturned by cloning one public repository.
 2. [research] Always clone a public repository when the fetch tool is refused, because the git proxy serves anonymous reads of hosts the egress gateway blocks, and that is where the answer was.
 3. [docs] Never quote a score, count, or date you did not just re-run, because the worked example carried two invented numbers into the procedure that teaches the rule against them.
+4. [output] Never exceed a stated limit on length, because an answer to a prompt demanding at most 80 words came back with 86, and nothing was reading the limit back.

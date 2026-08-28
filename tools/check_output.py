@@ -31,6 +31,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import shlex
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -310,6 +311,50 @@ def render(report: Report, quiet: bool = False) -> str:
     return "\n".join(lines)
 
 
+# Catch -> Diagnose -> Rewrite. The pattern this repository documents as
+# Saraev's self-annealing loop ends by updating the instruction file "to warn
+# future instances". Detection and learning were built as separate tools and
+# never connected, so a correction the checker found was still spent unless
+# somebody retyped it. These are the retyping.
+RULE_TEMPLATES = {
+    "MAX_COUNT": ("output", "exceed a stated limit on length"),
+    "EXACT_COUNT": ("output", "miss a stated exact count"),
+    "ONE_PARAGRAPH": ("format", "break a one-paragraph instruction into several"),
+    "NO_LISTS": ("format", "use list markup when the prompt forbids it"),
+    "NO_HEADINGS": ("format", "add headings when the prompt forbids them"),
+    "NO_BOLD_LABELS": ("format", "open lines with bold labels when the prompt forbids them"),
+    "ONE_CODE_BLOCK": ("format", "return more than one code block when one was asked for"),
+    "VALID_JSON": ("format", "return JSON that does not parse"),
+    "NO_EXCLAMATION": ("tone", "use exclamation marks when the prompt forbids them"),
+    "NO_EMOJI": ("tone", "use emoji when the prompt forbids them"),
+    "FORBIDDEN_WORD": ("tone", "use a word the prompt forbids"),
+    "NO_PREAMBLE": ("format", "open with a preamble when the prompt forbids one"),
+}
+
+
+def suggested_rules(report: Report) -> list[str]:
+    """One ready-to-run `learn_rule.py add` per failure.
+
+    The `--because` carries the measurement and nothing else. A reason that
+    speculates about why the answer went wrong would be exactly the invention
+    this repository exists to prevent, and it would be appended to the file
+    every future prompt loads.
+    """
+    out = []
+    for check in report.failed:
+        category, action = RULE_TEMPLATES.get(
+            check.rule, ("output", f"violate a stated {check.rule.lower().replace('_', ' ')} constraint")
+        )
+        because = f"an answer to a prompt demanding {check.demand} came back with {check.detail}"
+        out.append(
+            "python3 tools/learn_rule.py add"
+            f" --category {shlex.quote(category)}"
+            f" --never {shlex.quote(action)}"
+            f" --because {shlex.quote(because)}"
+        )
+    return out
+
+
 def read(name: str) -> str:
     if name == "-":
         return sys.stdin.read()
@@ -329,6 +374,9 @@ def main(argv: list[str]) -> int:
     parser.add_argument("output", help="the answer, or - for stdin")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--quiet", action="store_true", help="omit the unchecked list")
+    parser.add_argument("--suggest-rule", action="store_true",
+                        help="for each failure, print the learn_rule command that would "
+                             "record it, so the correction is not spent on one answer")
     args = parser.parse_args(argv[1:])
 
     try:
@@ -340,12 +388,22 @@ def main(argv: list[str]) -> int:
     if args.json:
         print(json.dumps({
             "scoped": report.scoped,
+            **({"suggested_rules": suggested_rules(report)} if args.suggest_rule else {}),
             "checks": [vars(c) for c in report.checks],
             "runnable": [{"command": c, "sentence": s} for c, s in report.runnable],
             "unchecked": report.unchecked,
         }, indent=2))
     else:
         print(render(report, args.quiet))
+        if args.suggest_rule:
+            rules = suggested_rules(report)
+            print()
+            if rules:
+                print("  to keep this from being spent on one answer, record it:")
+                for line in rules:
+                    print(f"    {line}")
+            else:
+                print("  nothing failed, so there is nothing to record.")
     return 1 if report.failed else 0
 
 
