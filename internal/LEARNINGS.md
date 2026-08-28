@@ -1249,3 +1249,47 @@ one is worth fixing even when both are technically red.
    codebase, and the first time I introduced it myself.
 3. A `while True` needs a written argument for why it terminates, in the
    docstring, next to the loop. Writing that argument is what exposed this one.
+
+---
+
+## L36 - The Observe phase acts, the docstring denied it, and I nearly deleted a live rule over it
+
+**Evidence.** `OodaLoop.observe` began: *"Gather evidence. Nothing is changed
+here except the journal."* The next statement is `self.pipeline.run(...)`, which
+ingests documents, writes chunks, refits the embedder and writes vectors. In a
+loop whose entire structure is the separation of looking from acting, that is
+not a small inaccuracy.
+
+The consequence is real and was measured. Three chunks were written without
+vectors; by the time Decide ran, `embedding_coverage` read **1.0** and the
+decided action was `run_eval`. With **no connectors at all**, the same thing:
+three missing vectors became zero during Observe. So the policy rules that look
+like they govern ingestion do not - Observe has already brought about the
+situation Decide is shown.
+
+**The mistake I nearly made.** On that evidence I concluded the priority-100
+`embed_missing` rule was unreachable and was ready to delete it as dead policy.
+It is not dead. It fires when a connector *raises*, leaving chunks without
+vectors that the ingest never got to - which is exactly the case a repair rule
+is for. I had tested four scenarios, all of them healthy, and generalised from
+them.
+
+Deleting it would have removed a safety rule that fires only when something has
+already gone wrong, which is the worst possible thing to prove absent by testing
+the happy path. Both halves are now pinned: `embed_missing` must appear when a
+connector raises, and must not appear when the loop is healthy. Deleting the
+rule fails the first; a threshold that fires on a healthy corpus fails the
+second and the two convergence tests with it.
+
+**Rules.**
+1. **A rule that only fires when something is broken cannot be shown dead by
+   exercising the paths where nothing is broken.** Enumerate the conditions from
+   the rule's own text and construct each one, rather than sampling scenarios
+   and generalising.
+2. When a docstring states an invariant, check the code under it before
+   trusting the invariant elsewhere - this one had been read and believed while
+   reasoning about which rules could fire.
+3. "Observe changes nothing" is worth wanting but was never true here, and the
+   honest repair was to say what Observe does and why, not to restructure the
+   loop to match the sentence. For this system the sources' current contents
+   *are* the observation, and there is no way to see them without fetching.

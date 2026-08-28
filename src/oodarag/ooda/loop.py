@@ -99,7 +99,25 @@ class OodaLoop:
     # ------------------------------------------------------------------ phases
 
     def observe(self) -> dict[str, Any]:
-        """Gather evidence. Nothing is changed here except the journal."""
+        """Gather evidence - by pulling from the sources, which changes the index.
+
+        The previous version of this line said "nothing is changed here except
+        the journal", directly above a call that ingests documents, writes
+        chunks, refits the embedder and writes vectors. That is not a small
+        inaccuracy in a loop whose whole structure is the separation of looking
+        from acting.
+
+        The ingest belongs here, and the reason is worth stating rather than
+        assuming: for this system, "what is the world like now" *is* what the
+        sources currently hold, and there is no way to observe that without
+        fetching. The consequence is that the situation the Decide phase sees is
+        the one Observe has already brought about - so the policy rules that
+        look like they govern ingestion do not. They govern the case where the
+        ingest could not do its job: `embed_missing` fires when a connector
+        raised and left chunks without vectors, which is measured in
+        `test_a_failed_ingest_leaves_work_the_policy_picks_up`, not when the
+        loop is healthy.
+        """
         observations: dict[str, Any] = {"at": time.time()}
 
         if self.config.probe_access:

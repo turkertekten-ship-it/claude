@@ -208,6 +208,39 @@ class LoopTest(unittest.TestCase):
             repeated,
             f"these actions did not clear the condition that triggered them: {repeated}")
 
+    def test_a_failed_ingest_leaves_work_the_policy_picks_up(self):
+        """`embed_missing` looks unreachable and is not, which is why this is
+        here rather than only in the policy unit tests.
+
+        Observe ingests, and ingesting embeds, so on every healthy path the
+        condition is already cleared before Decide runs - measured directly:
+        three chunks without vectors go in, and the situation Decide sees
+        reports coverage 1.0. The rule earns its place in the one case where the
+        ingest could not do its job. Concluding it was dead from the healthy
+        paths alone would have deleted a live safety rule.
+        """
+        class _Failing(Connector):
+            key = "bad"
+            source_system = "bad"
+
+            def fetch(self, cursor):
+                raise RuntimeError("source unavailable")
+
+        loop = self._loop([_Failing()])
+        kinds = set()
+        for _ in range(2):
+            kinds |= {a.kind for a in loop.cycle().actions}
+        self.assertIn("embed_missing", kinds,
+                      f"a failed ingest produced no repair action: {sorted(kinds)}")
+
+    def test_the_healthy_path_never_needs_the_repair_action(self):
+        """The other half of the same claim. If this ever fails, either the
+        ingest stopped embedding or the coverage threshold moved."""
+        loop = self._loop([StubConnector("stub", CORPUS)])
+        report = loop.cycle()
+        self.assertEqual(report.situation["embedding_coverage"], 1.0)
+        self.assertNotIn("embed_missing", {a.kind for a in report.actions})
+
     def test_cycle_numbers_increment_and_persist(self):
         loop = self._loop([StubConnector("stub", CORPUS)])
         loop.cycle()
