@@ -145,6 +145,29 @@ class HeuristicReranker(Reranker):
     #: +2 cases, +0.058 recall, nDCG *up* on both corpora, primary unchanged on
     #: pass, recall and MRR. The only cost is 0.018 of external MRR.
     #:
+    #: **Re-verified after this session's chunking fixes** (1,810 -> 1,802
+    #: chunks, the five over-ceiling ones split), and the external curve that
+    #: chose 2.0 is gone: external is now flat at 49/54 and recall 0.9302 for
+    #: every power from 1.0 to 3.0, with MRR declining monotonically as the
+    #: power rises (.7741 .7696 .7643 .7539 .7411). Read alone, external now
+    #: says 1.0.
+    #:
+    #: Primary says the opposite, and it is what holds the default
+    #: (`scripts/reranker_reverify.py`, 2,537 chunks / 20 cases):
+    #:
+    #:   power      1.0     1.5     2.0     2.5     3.0
+    #:   pass       18/20   18/20   18/20   18/20   18/20
+    #:   MRR        0.6766  0.6766  0.7078  0.7078  0.7078
+    #:   nDCG@8     0.6988  0.6981  0.7212  0.7212  0.7212
+    #:
+    #: 2.0 is the lowest power on primary's upper step, and taking it costs
+    #: external 0.010 MRR; taking 1.0 instead would cost primary 0.031 MRR and
+    #: 0.022 nDCG to buy that back. So the value stands and its justification
+    #: does not - the external peak that chose it no longer exists, and the
+    #: default now rests on primary alone. Fifth time the two corpora have
+    #: wanted opposite things (L58 base_weight, L75 MMR, the abstention floor,
+    #: L80 expansion).
+    #:
     #: This does not repair the register mismatch L48 measured - IDF still ranks
     #: the discriminating query term first in only 29 of 40 goldens. Sharpening
     #: a partly-wrong ordering works here because the gate no longer moves with
@@ -311,17 +334,29 @@ class HeuristicReranker(Reranker):
     #: a changelog. That is a property of the corpus, and the same holds for
     #: source files, whose first chunk carries the module docstring.
     #:
-    #: Swept on both (`pass / recall@8 / MRR / nDCG@8`):
+    #: Swept on both, and re-measured after this session's chunking fixes
+    #: (`scripts/reranker_reverify.py`; `pass / recall@8 / MRR / nDCG@8`):
     #:
     #:   weight     0.0                    0.05                   0.15
-    #:   external   46 .8837 .6909 .7284   49 .9302 .7122 .7538   49 .9302 .7651 .7944
-    #:   primary    16 .7812 .5350 .5885   16 .7812 .6042 .6327   17 .8125 .7312 .7246
+    #:   external   46 .8837 .6857 .7254   49 .9535 .7231 .7684   49 .9302 .7643 .7958
+    #:   primary    16 .7812 .5521 .6008   17 .8750 .6036 .6588   18 .8750 .7078 .7212
     #:
-    #: 0.15 is best or joint-best on every metric on both corpora, and sits in a
-    #: plateau rather than on a peak - external holds 49/54 from 0.05 to 0.3,
-    #: primary 17/20 from 0.15 to 0.3. Above 0.3 both decline: ordering keeps
-    #: improving on external while recall falls, which is the shape of a
-    #: position prior starting to answer from the top of the wrong document.
+    #:   weight     0.3                    0.5
+    #:   external   49 .9186 .7969 .8087   49 .9302 .7930 .8068
+    #:   primary    17 .7812 .7000 .6829   17 .8438 .7318 .7168
+    #:
+    #: 0.15 survives on both: joint-best on external pass, and on primary the
+    #: outright peak on pass and nDCG and joint-best on recall. Unlike
+    #: `coverage_power` above, this one is a peak rather than a plateau, and it
+    #: sharpened - primary used to hold 17/20 from 0.15 to 0.3 and now tops out
+    #: at 0.15 alone.
+    #:
+    #: Above 0.15, external ordering keeps climbing (MRR .7969 at 0.3 against
+    #: .7643 here) while recall falls, on both corpora. That is a position
+    #: prior beginning to answer from the top of the wrong document, and the
+    #: held-out set is where the cost surfaces: 19/22 everywhere except 0.5,
+    #: which drops to 18/22 while looking like an improvement on external
+    #: ordering alone.
     position_weight: float = 0.15
     base_weight: float = 1.0
     half_life_days: float = 365.0

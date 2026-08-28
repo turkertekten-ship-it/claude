@@ -4468,3 +4468,49 @@ mutations caught.
    working tree. Any automation that reacts to a dirty tree will see corruption
    as work; the harness's restore is what makes the method safe, and the
    dirty-tree signal must be read, not obeyed.
+
+## L89 - Re-measurement dissolved a default's evidence without moving the default
+
+This session's chunking fixes took the external corpus from 1,810 chunks to
+1,802 by splitting the five that sat over the ceiling. Eight chunks is a
+rounding error in count and not in kind - the ones that moved were the largest
+in the corpus, which is where coverage and position behave differently - so the
+reranker's two documented sweep tables were re-run rather than assumed
+(`scripts/reranker_reverify.py`, both corpora).
+
+**`coverage_power`. The table that chose 2.0 no longer exists.** It recorded
+external pass rising and falling across the range - 47, 48, 49, 48, 47 - a peak
+at 2.0. Today external is *flat*: 49/54 and recall 0.9302 at every power from
+1.0 to 3.0, with MRR declining monotonically as the power rises. Read alone,
+external now says 1.0.
+
+Primary says the opposite and is what holds the default:
+
+    power      1.0     1.5     2.0     2.5     3.0
+    pass       18/20   18/20   18/20   18/20   18/20
+    MRR        0.6766  0.6766  0.7078  0.7078  0.7078
+    nDCG@8     0.6988  0.6981  0.7212  0.7212  0.7212
+
+2.0 is the lowest power on primary's upper step. Keeping it costs external
+0.010 MRR; moving to 1.0 would cost primary 0.031 MRR and 0.022 nDCG to buy
+that back. So the value stands and its justification does not.
+
+**`position_weight`. A peak, and it sharpened.** 0.15 is joint-best on external
+pass and the outright peak on primary pass and nDCG. Primary used to hold 17/20
+across 0.15 to 0.3 and now tops out at 0.15 alone. Above it, external ordering
+keeps climbing (MRR .7969 at 0.3 against .7643 at 0.15) while recall falls on
+both corpora, and the held-out set - 19/22 everywhere else - drops to 18/22 at
+0.5. The one place the cost surfaces is the set that was never tuned against.
+
+**Rules.**
+1. **A default can survive a re-measurement that destroys the evidence for it.**
+   The check is not "is the shipped value still best" but "does the reason
+   still hold". Here the answer was no, and the value is now resting on a
+   different corpus than the docstring said.
+2. **The two corpora have now wanted opposite things five times** (L58
+   `base_weight`, L75 MMR, the abstention floor, L80 expansion, this). Treat a
+   single-corpus optimum as a hypothesis, never a decision.
+3. **A curve that flattens is a finding, not a null result.** External stopped
+   discriminating on `coverage_power` entirely, which says the sharpening was
+   compensating for something the chunking fix removed.
+
