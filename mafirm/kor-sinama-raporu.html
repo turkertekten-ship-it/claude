@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>14 takım · 140 vaka · 0 sinyal</span>
+    <span>15 takım · 157 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -808,6 +808,42 @@ connect_rejected  <span class="bad">www.spk.gov.tr:443</span>         gateway an
 </section>
 
 <section>
+  <span class="sec-tag">Yedinci tur</span>
+  <h2>Kapı, düzyazının biçimine güveniyordu</h2>
+  <p>B takımındaki her vaka bir hukukçunun gerçekten <em>yazacağı</em> cümleydi.
+  Ama sır kapısı bir <strong>güvenlik denetimidir</strong> ve güvenlik denetimi
+  yalnızca iyi niyetli girdiyle sınanmaz. Altı tur boyunca hiç sınamamıştım.</p>
+  <p>Ve bu kuramsal bir tehdit modeli değil: üç yüzeyin üçü de <strong>kaza
+  olarak oluşur.</strong> PDF ya da Word'den kopyala yapıştır rutin olarak
+  yumuşak tire, sıfır genişlikli karakter ve ayrışmış aksan üretir. Bir müvekkil
+  kod adı veri odası belgesinden kopyalanıp bir web aramasına yapıştırıldığında
+  kapının onu görmesi gerekir. Görmüyordu:</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Yüzey</th><th>Örnek</th><th>Kapı</th></tr></thead>
+    <tbody>
+      <tr><td class="rule-no">NFD ayrışması</td><td class="ev"><em class="term">A.Ş.</em> → <em class="term">A.S</em> + U+0327</td><td class="st"><span class="pill f">kaçırdı</span></td></tr>
+      <tr><td class="rule-no">Sıfır genişlikli boşluk</td><td class="ev"><em class="term">Proje·U+200B·Şahin</em></td><td class="st"><span class="pill f">kaçırdı</span></td></tr>
+      <tr><td class="rule-no">Homoglif</td><td class="ev">Kiril <em class="term">о</em> ile <em class="term">Prоje</em></td><td class="st"><span class="pill f">kaçırdı</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p style="margin-top:20px">Kitabın §12'si <strong>zaten aynı sınıftan</strong>
+  bir kusur taşıyordu ve ikinci turda bulunmuştu: Python'un
+  <em class="term">İ.lower()</em> ayrışması. Kitap onu düzeltmemişti; ben
+  düzelttim ama <strong>sınıfı genellemedim</strong> — tek bir örneği yamalayıp
+  yüzeyin tamamını sınamadım. Altı tur sonra döndüm.</p>
+  <div class="note">
+    Düzeltme <b>yalnızca sır kapısında</b>: biçim karakterlerini at, NFKC ile
+    birleştir, dar bir homoglif tablosunu Latin'e katla. Diğer kapılarda
+    uygulanmadı — aşırı normalleştirme yanlış pozitif üretir; ama <b>dışarı
+    giden bir çağrıda fazla bloklamak, az bloklamaktan güvenlidir.</b> On yedi
+    vakanın dördü negatif kontrol: kapı masum metinde, mevzuat metninde ve
+    Türkçe aksanlı olağan cümlede susuyor.
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -839,6 +875,10 @@ connect_rejected  <span class="bad">www.spk.gov.tr:443</span>         gateway an
     ayrıştırıcı kusurum ve hepsi aynı yönde: <strong>bir dedektör, ölçtüğü
     şeyin gerçek biçimini görmeden yazılırsa, bulduğu şey kendi
     körlüğüdür.</strong></li>
+    <li><strong>Bir kusur sınıfını genellemedim.</strong> İkinci turda Python'un
+    <em class="term">İ.lower()</em> ayrışmasını buldum ve yamaladım — ama aynı
+    sınıfın geri kalanını (NFD, görünmez karakter, homoglif) altı tur boyunca
+    sınamadım. Tek örneği düzeltmek, yüzeyi kapatmak değildir.</li>
     <li><strong>Takımın sinyalini beş tur boyunca bozuk bıraktım.</strong>
     Her koşum "13 kaldı" diyordu ve ben bunu bir sonuç sanıyordum; oysa sabit
     bir kırmızı, kitabın hep yeşil denetimiyle aynı kusurdur. Ayrıca düzeltmeyi
@@ -904,7 +944,7 @@ connect_rejected  <span class="bad">www.spk.gov.tr:443</span>         gateway an
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># on dört takım, 140 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># on beş takım, 157 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
