@@ -1854,3 +1854,83 @@ class ChunkFenceTest(unittest.TestCase):
         self.assertEqual(offenders, [],
                          f"{len(offenders)} of {total} chunks have an unbalanced "
                          f"fence: {offenders[:5]}")
+
+
+class GoldenDiscriminationTest(unittest.TestCase):
+    """The harness checked whether the corpus leaks the answer, and not whether
+    the expectation picks anything out.
+
+    `expect_sources` entries are substrings matched against a document's uri and
+    title. Every uri in a filesystem corpus shares a directory, so an
+    expectation of `"pypi"` matches all 91 documents and the case passes with
+    recall 1.0 whatever retrieval returns - a test that cannot fail, inside the
+    instrument every other measurement is taken with.
+
+    The opposite is as bad and quieter: an expectation matching nothing makes a
+    case that can never pass, which reads as a retrieval failure for ever.
+    """
+
+    def _store(self):
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        docs = [_doc(f"d{i}", f"pkg{i}.md", f"Package {i} does something distinct.")
+                for i in range(10)]
+        for i, d in enumerate(docs):
+            d.uri = f"file:///corpus/external/pypi/pkg{i}.md"
+            d.title = f"pkg{i}"
+        store.upsert_documents(docs)
+        return store
+
+    def test_an_expectation_matching_the_whole_corpus_is_reported(self):
+        from oodarag.eval.discrimination import check
+
+        report = check(self._store(), [Golden(question="q?", expect_sources=["pypi"])])
+        self.assertFalse(report.clean)
+        self.assertEqual(report.findings[0].matched, 10)
+        self.assertIn("without discriminating", report.findings[0].describe())
+
+    def test_an_expectation_matching_nothing_is_reported(self):
+        """Different failure, same cause: nobody checked the expectation
+        against the corpus."""
+        from oodarag.eval.discrimination import check
+
+        report = check(self._store(), [Golden(question="q?", expect_sources=["nonesuch"])])
+        self.assertFalse(report.clean)
+        self.assertEqual(report.findings[0].matched, 0)
+        self.assertIn("never pass", report.findings[0].describe())
+
+    def test_a_specific_expectation_is_clean(self):
+        from oodarag.eval.discrimination import check
+
+        report = check(self._store(), [Golden(question="q?", expect_sources=["pkg3"])])
+        self.assertTrue(report.clean, report.summary())
+
+    def test_an_abstention_golden_has_nothing_to_check(self):
+        from oodarag.eval.discrimination import check
+
+        report = check(self._store(), [Golden(question="q?", expect_abstain=True)])
+        self.assertTrue(report.clean)
+
+    def test_the_real_external_golden_set_discriminates(self):
+        """Measured against the corpus in the repository, because that is the
+        set the regression gate is read from. If a future golden is written too
+        broadly, this is where it surfaces."""
+        import pathlib
+
+        from oodarag.eval.discrimination import check
+        from oodarag.eval.harness import load_goldens
+        from oodarag.ingest.filesystem import FilesystemConnector
+        from oodarag.pipeline import IndexPipeline
+
+        root = pathlib.Path(__file__).resolve().parent.parent
+        corpus = root / "corpus/external/pypi"
+        goldens = root / "evals/goldens-external.jsonl"
+        if not corpus.exists() or not goldens.exists():
+            self.skipTest("external corpus or golden set not present")
+
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        IndexPipeline(store).run(
+            [FilesystemConnector(str(corpus), patterns=("**/*.md",), key="fs:disc")])
+        report = check(store, load_goldens(str(goldens)))
+        self.assertTrue(report.clean, report.summary())

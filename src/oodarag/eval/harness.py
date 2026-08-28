@@ -24,6 +24,8 @@ from typing import Any
 
 from oodarag.eval.metrics import hit_at_k, mrr, ndcg_at_k, recall_at_k, summarize
 from oodarag.eval.contamination import ContaminationReport, detect
+from oodarag.eval.discrimination import DiscriminationReport
+from oodarag.eval.discrimination import check as check_discrimination
 from oodarag.generate.answer import AnswerGenerator
 from oodarag.util.logging import get_logger
 
@@ -72,6 +74,7 @@ class EvalReport:
     duration_s: float = 0.0
     index_stats: dict[str, Any] = field(default_factory=dict)
     contamination: ContaminationReport | None = None
+    discrimination: DiscriminationReport | None = None
     excluded_sources: tuple[str, ...] = ()
     #: question -> document ids hidden from retrieval for that question only.
     quarantined: dict[str, list[str]] = field(default_factory=dict)
@@ -115,6 +118,8 @@ class EvalReport:
             "excluded_sources": list(self.excluded_sources),
             "quarantined": self.quarantined,
             "contamination": self.contamination.as_dict() if self.contamination else None,
+            "discrimination": (self.discrimination.as_dict()
+                               if self.discrimination else None),
             "cases": [asdict(c) for c in self.cases],
         }
 
@@ -134,6 +139,7 @@ class EvalReport:
             (f"Excluded sources: {', '.join(self.excluded_sources)}  "
              if self.excluded_sources else ""),
             (self.contamination.summary() if self.contamination else ""),
+            (self.discrimination.summary() if self.discrimination else ""),
             (f"Quarantined {sum(len(d) for d in self.quarantined.values())} contaminated "
              f"document(s) across {len(self.quarantined)} question(s)."
              if self.quarantined else ""),
@@ -195,6 +201,14 @@ class EvalHarness:
             store, [g.question for g in goldens],
             negative_questions={g.question for g in goldens if g.expect_abstain},
         )
+        # The other half of "is this golden set measuring anything?".
+        # Contamination asks whether the corpus gives the answer away;
+        # this asks whether the expectation picks a document out at all.
+        report.discrimination = check_discrimination(store, goldens)
+        if not report.discrimination.clean:
+            log.warn("golden expectations do not discriminate",
+                     summary=report.discrimination.summary()[:220])
+
         quarantine: dict[str, set[str]] = {}
         if not report.contamination.clean:
             log.warn("golden set contamination detected",

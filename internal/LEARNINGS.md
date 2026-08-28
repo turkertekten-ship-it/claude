@@ -1496,3 +1496,51 @@ the actual claim.
 3. Measure the claim on the corpus, not on a fixture. Three fixture cases passed
    while 20 real chunks were broken, and the corpus test is what regresses if
    the packing changes.
+
+---
+
+## L41 - The harness checked the corpus for leaks and never checked the goldens
+
+**Evidence.** Every number in this file comes from the eval harness, so it is
+the one component whose defects are invisible - a wrong measurement does not
+look wrong, it looks like a result. Attacking it turned up one gap, in the
+place the harness was already thinking hardest.
+
+`Golden.expect_sources` entries are **substrings**, matched against a document's
+uri and title. That is deliberate and documented: `"pluggy"` rather than a full
+path. It also means an expectation can be satisfied by documents it was never
+meant to name, and every uri in a filesystem corpus shares a directory:
+
+    "pypi"    matches 91 of 91 documents
+    "claude"  matches 91 of 91
+    "s"       matches 91 of 91
+
+A golden expecting any of those passes with recall 1.0 whatever retrieval
+returns. That is a test that cannot fail, inside the instrument every other
+measurement is taken with - and this session has spent a lot of effort on tests
+that cannot fail in ordinary code, while the harness went unexamined.
+
+The mirror case is quieter: an expectation matching *nothing* makes a case that
+can never pass, which reads for ever as a retrieval failure rather than as a
+broken golden.
+
+**The current golden set is clean** - all 54 expectations match exactly one
+document each, checked before writing any code, so nothing measured this session
+is affected. The guard is for the next golden, and there is a test that runs it
+against the real set so a too-broad one surfaces where it is written.
+
+Contamination detection already asks *does the corpus give the answer away*.
+This asks the other half - *does the expectation pick anything out* - and both
+are reported, never silently corrected. Rewriting a golden because it looks too
+broad is how an eval starts agreeing with the system.
+
+**Rules.**
+1. **Attack the measuring instrument, and attack it early.** A defect there does
+   not produce a failure, it produces a number, and every conclusion downstream
+   inherits it. This one was reached after forty learnings about everything else.
+2. Substring matching is convenient at the point of writing and unbounded at the
+   point of evaluation. If a config accepts substrings, something has to check
+   what they actually match against real data.
+3. A validity check has two directions here too - too broad and too narrow - and
+   the too-narrow one is worse for being plausible: an impossible golden looks
+   exactly like a system that keeps failing one case.
