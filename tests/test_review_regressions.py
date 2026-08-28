@@ -12,6 +12,7 @@ citation. That is what makes an adversarial pass worth its cost.
 
 from __future__ import annotations
 
+import os
 import sqlite3
 import unittest
 
@@ -1998,3 +1999,114 @@ class GoldenDiscriminationTest(unittest.TestCase):
             [FilesystemConnector(str(corpus), patterns=("**/*.md",), key="fs:disc")])
         report = check(store, load_goldens(str(goldens)))
         self.assertTrue(report.clean, report.summary())
+
+
+class PipelineDeterminismTest(unittest.TestCase):
+    """ADR 0001 calls this pipeline deterministic. Measured end to end, across
+    processes with different hash seeds, two things are true and they are easy
+    to confuse:
+
+    * the **ranking** is identical - same chunks, same order, and the coverage,
+      relevance and abstention decisions match to the last digit;
+    * the **scores** differ by around 1e-8, and they differ between two runs with
+      the *same* seed as well. It is not hash order, it is `time.time()` in the
+      recency factor: a document's age is recomputed against a clock that moved
+      between the runs.
+
+    The first version of this investigation reported "retrieval is not
+    deterministic across processes" on the strength of four different digests,
+    which was true of the digest and wrong about the cause. Running the same
+    seed twice is what separated them.
+    """
+
+    FROZEN = 1_700_000_000.0
+
+    def _index(self):
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        pipeline = IndexPipeline(store)
+        docs = [_doc(f"d{i}", f"{i}.md", text) for i, text in enumerate([
+            "Reciprocal rank fusion combines a dense arm and a lexical arm by rank.",
+            "Budgets bound requests, bytes, depth and wall clock time for a crawl.",
+            "Citation markers are verified against the chunks actually retrieved.",
+            "Porter stemming is applied by the FTS5 index and by the reranker.",
+            "Contextual headers are embedded with each chunk of a document.",
+        ])]
+        # The recency factor only applies to a chunk that carries an age; with
+        # none it falls back to "neither fresh nor stale" and the clock cannot
+        # matter. Without this the test would pass for the wrong reason.
+        for doc in docs:
+            doc.updated_at = self.FROZEN - 86_400 * 30
+        store.upsert_documents(docs)
+        pipeline.embedder.fit([d.text for d in docs])
+        for d in docs:
+            store.replace_chunks(d.doc_id, chunk_document(d))
+        pipeline.embed_missing()
+        return store, pipeline
+
+    def _retrieve(self, store, pipeline, clock=None):
+        retriever = HybridRetriever(store, pipeline.embedder)
+        if clock is not None:
+            retriever.reranker.clock = clock
+        results, _ = retriever.retrieve("how are dense and lexical arms combined")
+        return ([r.chunk.chunk_id for r in results],
+                [round(r.score, 15) for r in results])
+
+    def test_a_frozen_clock_makes_scores_bit_identical(self):
+        store, pipeline = self._index()
+        first = self._retrieve(store, pipeline, clock=lambda: self.FROZEN)
+        second = self._retrieve(store, pipeline, clock=lambda: self.FROZEN)
+        self.assertEqual(first, second)
+
+    def test_the_clock_is_what_moves_the_score(self):
+        """Not hash order. A day later, the same query scores differently -
+        which is the recency factor doing its job, and the whole reason a score
+        cannot be asserted exactly against the wall clock."""
+        store, pipeline = self._index()
+        now = self._retrieve(store, pipeline, clock=lambda: self.FROZEN)
+        later = self._retrieve(store, pipeline, clock=lambda: self.FROZEN + 86_400 * 120)
+        self.assertEqual(now[0], later[0], "the clock changed the ranking, not just the score")
+        self.assertNotEqual(now[1], later[1], "the clock had no effect at all")
+
+    def test_the_ranking_is_identical_across_processes(self):
+        """Run in subprocesses with different hash seeds, because that is the
+        only way to exercise Python's per-process string hashing."""
+        import json
+        import pathlib
+        import subprocess
+        import sys
+
+        script = (
+            "import sys, json; sys.path.insert(0, 'src');"
+            "from oodarag.chunking import chunk_document;"
+            "from oodarag.models import Document;"
+            "from oodarag.pipeline import IndexPipeline;"
+            "from oodarag.retrieve.hybrid import HybridRetriever;"
+            "from oodarag.store.sqlite_store import SqliteStore;"
+            "s = SqliteStore(':memory:'); p = IndexPipeline(s);"
+            "ts = ['Reciprocal rank fusion combines a dense arm and a lexical arm.',"
+            " 'Budgets bound requests, bytes, depth and wall clock time.',"
+            " 'Citation markers are verified against retrieved chunks.',"
+            " 'Porter stemming is applied by the index and by the reranker.'];"
+            "ds = [Document(doc_id=f'd{i}', source_system='t', external_id=f'd{i}',"
+            " uri=f'mem://{i}', title=f'{i}.md', text=t, content_hash=f'h{i}',"
+            " metadata={}, created_at=0.0, updated_at=0.0) for i, t in enumerate(ts)];"
+            "s.upsert_documents(ds); p.embedder.fit([d.text for d in ds]);"
+            "[s.replace_chunks(d.doc_id, chunk_document(d)) for d in ds];"
+            "p.embed_missing();"
+            "r = HybridRetriever(s, p.embedder); r.reranker.clock = lambda: 1700000000.0;"
+            "res, _ = r.retrieve('how are dense and lexical arms combined');"
+            "print(json.dumps([[c.chunk.chunk_id for c in res],"
+            " [round(c.score, 12) for c in res]]))"
+        )
+        cwd = str(pathlib.Path(__file__).resolve().parent.parent)
+        outputs = set()
+        for seed in ("0", "1", "42", "999"):
+            env = {**os.environ, "PYTHONHASHSEED": seed}
+            done = subprocess.run([sys.executable, "-c", script], capture_output=True,
+                                  text=True, cwd=cwd, env=env)
+            self.assertEqual(done.returncode, 0, done.stderr[-400:])
+            outputs.add(done.stdout.strip().splitlines()[-1])
+        self.assertEqual(len(outputs), 1,
+                         f"retrieval differed across hash seeds: {outputs}")
+        self.assertTrue(json.loads(outputs.pop())[0], "the subprocess retrieved nothing")

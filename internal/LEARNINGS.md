@@ -1561,3 +1561,50 @@ eval is loosened until it agrees; the case still passes at 18/20.
 3. A validity check has two directions here too - too broad and too narrow - and
    the too-narrow one is worse for being plausible: an impossible golden looks
    exactly like a system that keeps failing one case.
+
+---
+
+## L42 - "Not deterministic across processes", and the correction that mattered
+
+**Evidence.** ADR 0001 calls this pipeline deterministic, so the claim was
+measured: run the same three queries over the same index in four subprocesses
+with `PYTHONHASHSEED` set to 0, 1, 42 and 999, and digest the whole result.
+
+Four different digests. The first reading was "end-to-end retrieval is not
+deterministic across processes", which is what the digests say and is wrong
+about why.
+
+Comparing the components rather than the digest: the chunk ids matched, the
+order matched, coverage, relevance, the abstention decision and
+`best_relevance` all matched to fifteen digits. Only the raw scores differed,
+by a **constant** 7.185e-09 across every result. A constant offset is not what
+hash-order non-determinism looks like.
+
+**The decisive test was running the same seed twice.** Same delta. It is
+`time.time()` in the recency factor: a document's age is recomputed against a
+clock that moved between the two runs. The embedder was never implicated - it
+uses BLAKE2 rather than Python's `hash()`, and its vectors, idf state and
+fingerprint are byte-identical across seeds.
+
+**What changed as a result.** The clock is now injectable. With it frozen, the
+whole pipeline is bit-reproducible across hash seeds - four seeds, one digest -
+and an eval can assert a score exactly instead of only a ranking. Against the
+wall clock it cannot: two runs of the same eval differ in the last decimal, so
+a real score regression is indistinguishable from the seconds it took to get
+there.
+
+The fixture for the clock test needed fixing too. `_doc` sets no `updated_at`,
+and the recency factor only applies to a chunk that carries an age - with none
+it returns a constant and the clock cannot matter. The test passed for the wrong
+reason until the documents were given a date.
+
+**Rules.**
+1. **A digest tells you *that* something differs, never *what*.** Comparing the
+   components took one extra run and turned a wrong conclusion into a correct
+   one. Digest to detect, decompose to diagnose.
+2. When something varies across processes, **run it twice in the same process
+   before blaming the process.** Hash seeds are the interesting explanation and
+   the clock is the boring one; the boring one was right.
+3. A constant delta across every element is a signal in itself. Hash-order
+   effects are erratic; a fixed offset points at something shared, and here it
+   pointed straight at the clock.

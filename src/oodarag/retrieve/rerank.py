@@ -93,6 +93,15 @@ class HeuristicReranker(Reranker):
     position_weight: float = 0.05
     base_weight: float = 1.0
     half_life_days: float = 365.0
+    #: Source of "now" for the recency factor. Injectable so a run can be made
+    #: reproducible: with the wall clock, two runs of the same query over the
+    #: same index return the same *ranking* but scores that differ by around
+    #: 1e-8, because a document's age is recomputed against a clock that moved
+    #: between them. That is correct behaviour and it makes a score impossible
+    #: to assert exactly, so an eval cannot tell a real score regression from
+    #: the seconds it took to get there. Freeze it and the whole pipeline is
+    #: bit-reproducible.
+    clock: Callable[[], float] = time.time
 
     def _query_set(self, query_terms: list[str]) -> set[str]:
         """Query terms for coverage, with unmatchable compounds broken up.
@@ -230,7 +239,7 @@ class HeuristicReranker(Reranker):
         # an out-of-corpus question past the abstention floor on its own.
         # Stopword adjacency is not evidence of anything.
         phrase_terms = tokenize(query, stem_words=True)
-        now = time.time()
+        now = self.clock()
 
         for result in results:
             chunk = result.chunk
