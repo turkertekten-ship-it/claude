@@ -721,6 +721,38 @@ hand-edited. `review` now reports the split:
 That line is the honest status of the self-annealing loop. It produces rules
 faster than it produces enforcement, and now says so.
 
+## Twenty-second loop — where an unenforceable rule should live
+
+Loop twenty-one counted six enforced rules and five advisory ones. Observe
+asked whether the five could be enforced at all.
+
+None of them can. One is judgement (when does an absence count as a finding),
+two are procedure (what to try when a fetch is refused; how to run a falsifier
+without losing the work), one was attempted as a guard and backed out in loop
+seventeen, and one is a rule about how to design guards — there is no artifact
+to inspect until somebody writes the next one. Forcing a check onto any of them
+would reproduce exactly the failure of loop seventeen.
+
+> The surprise was in the OODA skill rather than in the rules. Rule 2 says to
+> try a second route when a fetch is refused — the lesson that cost this
+> session thirteen loops, since the git proxy was serving public repositories
+> the whole time the gateway refused every website. The skill that governs the
+> Observe phase said nothing about it. The most expensive lesson learned here
+> was recorded in a numbered list at the back and absent from the procedure it
+> was about.
+
+So an unenforceable rule is now **routed** rather than merely recorded: into
+the document read at the moment it applies. The Observe phase gained "before
+writing down that something is not there, try a second route" and "a negative
+result carries its method"; the Act phase gained "commit the work before you
+break it"; the house rules gained "guard structure, not meaning" and "do not
+assert changeable state in prose".
+
+`--routed-to` is verified exactly like `--enforced-by`, because a claim that a
+rule lives somewhere is a claim. The review now reads:
+
+    11 live: 6 enforced by a guard, 5 routed to where they are read, 0 in this list only
+
 ## Still open
 
 `U-6`, `U-7` and `U-8` in [unknowns.md](unknowns.md): what Saraev actually

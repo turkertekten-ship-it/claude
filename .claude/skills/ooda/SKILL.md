@@ -32,6 +32,16 @@ List what is actually there. No conclusions in this phase.
   the exact command, and the evidence. Bulky output goes in `provenance/raw/`.
 - Note explicitly what you *could not* reach and why. That belongs in
   `provenance/unknowns.md`, not in a silence.
+- **Before writing down that something is not there, try a second route.** A
+  refusal is a fact about one path, not about the world. In this environment
+  the egress gateway refused every website while the git proxy served public
+  repositories the whole time, and ten searches concluded a framework did not
+  exist that one `git clone` then found. Ask what else could hold the answer:
+  a clone rather than a fetch, a file on disk rather than an API, the thing
+  itself rather than an index of it.
+- **A negative result carries its method.** "Ten searches found nothing" is a
+  statement about search coverage. Write it that way, so the next reader knows
+  what would overturn it.
 
 Stop when you can state what exists and what does not without hedging.
 
@@ -69,7 +79,12 @@ different work, this is where you ask — not after building the wrong thing.
 ### 4. Act — and capture the result
 
 Do it. Then capture what happened as new evidence, which opens the next
-Observe. Run `python3 tools/verify_provenance.py` before you call the loop
+Observe.
+
+**Commit the work before you break it.** A falsifier usually means damaging
+something on purpose — a bad input, a removed file, a reverted fix — and undoing
+that damage with a blunt instrument takes uncommitted work with it. Commit
+first, break second, restore with `git checkout --` rather than `reset --hard`. Run `python3 tools/verify_provenance.py` before you call the loop
 closed; if it fails, the loop is not closed.
 
 ## Anti-patterns

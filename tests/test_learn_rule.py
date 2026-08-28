@@ -176,14 +176,32 @@ def main() -> int:
         check("annotate verifies the guard exists too", fake.returncode == 1, fake.stderr[:80])
 
         review = run("review", "--file", str(path))
-        check("the review reports the split",
-              "2 of 2 live rule(s) name a guard" in review.stdout, review.stdout[:200])
+        check("the review counts what is enforced",
+              "2 enforced by a guard" in review.stdout, review.stdout[:220])
 
         run("add", "--file", str(path), "--category", "misc", "--never",
             "forget things", "--because", "memory fades")
         review2 = run("review", "--file", str(path))
-        check("an advisory rule is counted as such",
-              "1 are advisory" in review2.stdout, review2.stdout[:200])
+        check("a rule with neither is counted as list-only",
+              "1 in this list only" in review2.stdout, review2.stdout[:240])
+        check("and the report says why that is weak",
+              "weakest place a rule can live" in review2.stdout, review2.stdout[:300])
+
+        print("\na rule that cannot be enforced can still be routed")
+        routed = run("annotate", "3", "--file", str(path),
+                     "--routed-to", ".claude/skills/ooda/SKILL.md")
+        check("routing to a real document is accepted", routed.returncode == 0, routed.stderr[:120])
+        check("and is recorded", "[routed to: .claude/skills/ooda/SKILL.md]" in path.read_text())
+        review3 = run("review", "--file", str(path))
+        check("the review counts it as routed, not enforced",
+              "1 routed to where they are read" in review3.stdout and
+              "0 in this list only" in review3.stdout, review3.stdout[:240])
+        nowhere = run("annotate", "3", "--file", str(path), "--routed-to", "docs/imaginary.md")
+        check("routing to a document that does not exist is refused",
+              nowhere.returncode == 1, nowhere.returncode)
+        both = run("annotate", "3", "--file", str(path),
+                   "--routed-to", "CLAUDE.md", "--enforced-by", "githooks/pre-push")
+        check("naming both a guard and a route at once is refused", both.returncode == 2, both.returncode)
 
     print("\na wrong rule is superseded, not deleted")
     with tempfile.TemporaryDirectory() as tmp:

@@ -56,11 +56,17 @@ def read_rules(text: str) -> list[str]:
 
 def normalise(rule: str) -> str:
     """Compare rules by their content, not their numbering or spacing."""
-    stripped = ENFORCED_BY.sub("", re.sub(r"^\d+\.\s*", "", rule)).strip().lower()
+    stripped = TAG.sub("", re.sub(r"^\d+\.\s*", "", rule)).strip().lower()
     return re.sub(r"\s+", " ", stripped).rstrip(".")
 
 
-ENFORCED_BY = re.compile(r"\s*\[enforced by: ([^\]]+)\]\s*$")
+ENFORCED_BY = re.compile(r"\s*\[enforced by: ([^\]]+)\]")
+# A rule that cannot be enforced is not therefore homeless. Judgement and
+# procedure belong in the document read at the moment they apply - the Observe
+# phase of a loop, not twelfth in a list at session start - and where a rule
+# was routed is recorded so it can be checked rather than assumed.
+ROUTED_TO = re.compile(r"\s*\[routed to: ([^\]]+)\]")
+TAG = re.compile(r"\s*\[(enforced by|routed to): [^\]]+\]")
 
 
 def render(number: int, category: str, mode: str, action: str, because: str,
@@ -91,26 +97,28 @@ def can_supersede(path: Path, number: int) -> tuple[int, str]:
     return 1, f"learn_rule: no rule numbered {number} in {path}"
 
 
-def annotate(path: Path, number: int, enforced_by: str) -> tuple[int, str]:
+def annotate(path: Path, number: int, enforced_by: str | None = None,
+             routed_to: str | None = None) -> tuple[int, str]:
     """Record which guard catches a breach of an existing rule.
 
     Rules written before enforcement existed for them would otherwise have to
     be hand-edited, in the one file this tool owns.
     """
-    named = enforced_by.split("(")[0].split("+")[0].strip()
+    label, value = ("enforced by", enforced_by) if enforced_by else ("routed to", routed_to)
+    named = value.split("(")[0].split("+")[0].strip()
     if not (REPO / named).exists():
-        return 1, (f"learn_rule: --enforced-by names {named!r}, which does not exist.\n"
-                   "A claim that something is enforced is itself a claim.")
+        return 1, (f"learn_rule: names {named!r}, which does not exist.\n"
+                   "A claim that a rule is enforced or routed somewhere is itself a claim.")
     text = path.read_text(encoding="utf-8")
     lines = text.splitlines()
     for i, line in enumerate(lines):
         m = RULE.match(line.strip())
         if m and int(m.group(1)) == number:
-            if ENFORCED_BY.search(line):
-                return 1, f"learn_rule: rule {number} already names a guard"
-            lines[i] = line.rstrip() + f" [enforced by: {enforced_by.strip()}]"
+            if (ENFORCED_BY if enforced_by else ROUTED_TO).search(line):
+                return 1, f"learn_rule: rule {number} already names a {label.split()[0]}"
+            lines[i] = line.rstrip() + f" [{label}: {value.strip()}]"
             path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-            return 0, f"learn_rule: rule {number} is enforced by {enforced_by.strip()}"
+            return 0, f"learn_rule: rule {number} {label} {value.strip()}"
     return 1, f"learn_rule: no rule numbered {number} in {path}"
 
 
@@ -237,9 +245,15 @@ def review(path: Path, max_words: int, max_share: int) -> tuple[int, list[str]]:
 
     live = [r for r in rules if not SUPERSEDED.search(r)]
     enforced = [r for r in live if ENFORCED_BY.search(r)]
+    routed = [r for r in live if ROUTED_TO.search(r) and not ENFORCED_BY.search(r)]
+    loose = len(live) - len(enforced) - len(routed)
     if live:
-        lines.append(f"  {len(enforced)} of {len(live)} live rule(s) name a guard; "
-                     f"{len(live) - len(enforced)} are advisory and rely on being remembered")
+        lines.append(f"  {len(live)} live: {len(enforced)} enforced by a guard, "
+                     f"{len(routed)} routed to where they are read, "
+                     f"{loose} in this list only")
+        if loose:
+            lines.append("  a rule in this list only is read at session start and nowhere else,")
+            lines.append("  which is the weakest place a rule can live")
     retired = [r for r in rules if SUPERSEDED.search(r)]
     if retired:
         lines.append(f"  {len(retired)} superseded, kept for their reasons and still costing context")
@@ -298,7 +312,9 @@ def main(argv: list[str]) -> int:
     ann = sub.add_parser("annotate", help="name the guard that enforces an existing rule")
     ann.add_argument("number", type=int)
     ann.add_argument("--file", default=str(DEFAULT_FILE))
-    ann.add_argument("--enforced-by", required=True)
+    anngroup = ann.add_mutually_exclusive_group(required=True)
+    anngroup.add_argument("--enforced-by", help="the guard that catches a breach")
+    anngroup.add_argument("--routed-to", help="the document read when the rule applies")
 
     listing = sub.add_parser("list", help="print the rules already recorded")
     listing.add_argument("--file", default=str(DEFAULT_FILE))
@@ -315,7 +331,7 @@ def main(argv: list[str]) -> int:
         if not path.exists():
             print(f"learn_rule: no such file: {path}", file=sys.stderr)
             return 2
-        code, message = annotate(path, args.number, args.enforced_by)
+        code, message = annotate(path, args.number, args.enforced_by, args.routed_to)
         print(message, file=sys.stderr if code else sys.stdout)
         return code
 
