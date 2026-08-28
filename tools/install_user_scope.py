@@ -50,6 +50,14 @@ BEGIN = "<!-- BEGIN managed by turkertekten-ship-it/claude -->"
 END = "<!-- END managed by turkertekten-ship-it/claude -->"
 
 #: Files copied wholesale into ~/.claude/. Source is relative to the repo root.
+#:
+#: Every command here is repo-coupled — they reference provenance/sources.yaml,
+#: tools/verify_provenance.py, FLEET.md or archive/. That is deliberate: at user
+#: scope they surface in any directory, and running one outside the doctrine
+#: repository fails loudly with a missing path rather than silently doing
+#: something wrong. The alternative, installing only the repo-independent
+#: subset, would mean the commands the owner actually asked for are the ones
+#: that go missing.
 COPY: list[tuple[str, str]] = [
     (".claude/skills/ooda/SKILL.md", "skills/ooda/SKILL.md"),
     (".claude/agents/observer.md", "agents/observer.md"),
@@ -61,6 +69,8 @@ COPY: list[tuple[str, str]] = [
     (".claude/commands/fact-check.md", "commands/fact-check.md"),
     (".claude/commands/source.md", "commands/source.md"),
     (".claude/commands/ultrareview.md", "commands/ultrareview.md"),
+    (".claude/commands/fleet-sync.md", "commands/fleet-sync.md"),
+    (".claude/commands/ingest-chats.md", "commands/ingest-chats.md"),
 ]
 
 

@@ -245,6 +245,12 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - The substrate branch's new `UNSUPPORTED_QUANTITY` check found a real defect here: a claim asserted a duration derived from two timestamps rather than present in its evidence. [src:QUANTITY-CHECK-FALSE-POSITIVE-2026-08-28]
 - It also misread the digit in an identifier as an asserted quantity; identifier vocabularies are now stripped before extraction, and the check was re-tested in three directions afterwards. [src:QUANTITY-CHECK-FALSE-POSITIVE-2026-08-28]
 
+## Observed — the installer had drifted from the tree
+
+- The installer planned 11 writes while `.claude/` held 4 agents and 7 commands; `fleet-sync` and `ingest-chats` were missing from its hand-maintained list. [src:INSTALLER-GAP-2026-08-28]
+- The plan is now 13 and matches the tree, and the installer's own tests still pass. [src:INSTALLER-GAP-2026-08-28]
+- A gate run reported failure in the same session; the cause was the shell's working directory resetting to the parent after a container restart, not a regression. [src:INSTALLER-GAP-2026-08-28]
+
 ## Conclusion
 
 The request that opened this session asked to look at "all my previous claude

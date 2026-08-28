@@ -1059,3 +1059,22 @@ sources:
       Treated as a defect in the check rather than as the price of rigour, on
       the rule already written into .claude/hooks/README.md: a checker that
       fires on legitimate work is one the next person switches off.
+
+  - id: INSTALLER-GAP-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T08:20Z"
+    method: "python3 tools/install_user_scope.py dry run, compared against ls of .claude/agents and .claude/commands"
+    evidence: >-
+      The installer planned 11 writes while .claude/ held 4 agents and 7
+      commands. Two commands, fleet-sync and ingest-chats, were absent from its
+      COPY list - an omission rather than a decision, since they are no more
+      repository-coupled than the five that were included. The plan is now 13
+      writes and matches the tree; tests/test_install_user_scope.py still passes.
+    note: >-
+      Found by re-running the installer after adding agents and commands to the
+      repository, which is the check that catches a hand-maintained list
+      drifting from the directory it is supposed to mirror. The same dry run
+      appeared to show a missing .claude/ entirely, which turned out to be the
+      shell's working directory having reset to the parent after a container
+      restart - and is also why a gate run reported failure with
+      "fatal: not a git repository" rather than a real regression.
