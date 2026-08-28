@@ -22,7 +22,7 @@ from oodarag.retrieve.rerank import _longest_common_run
 from oodarag.store.sqlite_store import SqliteStore
 from oodarag.store.vectors import VectorIndex, pack, unpack
 from oodarag.util.stemming import stem
-from oodarag.util.text import redact_secrets, tokenize
+from oodarag.util.text import estimate_tokens, redact_secrets, tokenize
 
 CORPUS = {
     "rag.md": ("# Retrieval augmented generation\n\n"
@@ -144,6 +144,80 @@ class ChunkingTest(unittest.TestCase):
         chunks = chunk_document(doc, ChunkConfig(min_tokens=40))
         self.assertTrue(all(c.token_estimate >= 20 for c in chunks),
                         [c.token_estimate for c in chunks])
+
+    def test_an_oversized_unit_behind_a_heading_is_still_split(self):
+        """The ceiling has to hold when the big unit is not the section's first.
+
+        `_pack_units` only handled an oversized unit when nothing was buffered,
+        and a markdown section opens with its own heading line - so the guard
+        never fired on real input and five corpus chunks ran past the ceiling,
+        the largest at 2.1x. The heading here is what makes this a regression
+        test rather than a restatement: without it the old code passes.
+        """
+        config = ChunkConfig()
+        # No sentence punctuation and no blank lines, so `split_sentences`
+        # returns the whole list as one unit - the shape that reaches the
+        # oversized branch. Sized from the config, not from a passing run.
+        items = "\n".join(f"- entry {i} fixing the widget subsystem" for i in range(400))
+        # The blank line after the heading is load-bearing: `_SENT_RE` breaks on
+        # a blank line, so it is what makes the heading its own unit and leaves
+        # the buffer non-empty when the list arrives. Written first with a
+        # single newline, the heading merged into the list, the buffer was empty
+        # and the pre-fix guard passed the test - which is the shape of the bug
+        # and would have shipped a regression test that never regressed. Copied
+        # from corpus/external/pypi/pydantic.md, which has exactly this.
+        text = f"# Changelog\n\n#### Fixes\n\n{items}\n"
+        doc = Document.from_raw(
+            RawDocument("fs", "cl", "file:///cl.md", "changelog.md", text), text, {})
+        chunks = chunk_document(doc, config)
+        self.assertGreater(len(chunks), 1, "the oversized unit was emitted whole")
+        oversized = [c.token_estimate for c in chunks
+                     if c.token_estimate > config.hard_max_tokens]
+        self.assertEqual(oversized, [], f"chunks past the ceiling: {oversized}")
+
+    def test_a_single_unsplittable_line_is_still_emitted_whole(self):
+        """The branch's original case must survive the fix that generalised it.
+
+        One line with no internal boundary cannot be cut anywhere principled, so
+        it is emitted intact even though it breaks the ceiling. Asserting the
+        fallback's *output*, not just that it triggered: the point is that the
+        text arrives complete rather than truncated.
+        """
+        config = ChunkConfig()
+        line = " ".join(f"tok{i}" for i in range(3000))
+        self.assertGreater(estimate_tokens(line), config.hard_max_tokens)
+        text = f"# One\n\n#### Sub\n{line}\n"
+        doc = Document.from_raw(
+            RawDocument("fs", "min", "file:///m.md", "m.md", text), text, {})
+        bodies = [c.text for c in chunk_document(doc, config)]
+        self.assertTrue(any(line in b for b in bodies),
+                        "the unsplittable line was cut or dropped")
+
+    def test_a_leading_runt_is_merged_forward(self):
+        config = ChunkConfig()
+        text = ("# Doc\n\n[image: badge]\n\n# Real section\n\n"
+                + ("content " * 200) + "\n")
+        doc = Document.from_raw(
+            RawDocument("fs", "lr", "file:///lr.md", "lr.md", text), text, {})
+        chunks = chunk_document(doc, config)
+        self.assertTrue(all(c.token_estimate >= config.min_tokens for c in chunks),
+                        [c.token_estimate for c in chunks])
+        self.assertIn("[image: badge]", chunks[0].text)
+
+    def test_a_leading_runt_is_left_alone_when_merging_would_breach_the_ceiling(self):
+        """The refusal path, which is why two runts survive on the primary corpus.
+
+        A floor that quietly overrides the ceiling would be the worse bug, so
+        this asserts the guard actually declines rather than assuming it does.
+        """
+        config = ChunkConfig()
+        big = "word " * (config.hard_max_tokens + 200)
+        text = f"# Doc\n\ntiny\n\n# Section\n\n{big}\n"
+        doc = Document.from_raw(
+            RawDocument("fs", "lr2", "file:///lr2.md", "lr2.md", text), text, {})
+        chunks = chunk_document(doc, config)
+        self.assertLess(chunks[0].token_estimate, config.min_tokens,
+                        "the runt was merged despite breaching the ceiling")
 
     def test_ordinals_are_contiguous_after_merging(self):
         text = CORPUS["rag.md"] + "\n\n# Tail\n\nx.\n"

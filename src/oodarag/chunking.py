@@ -63,10 +63,44 @@ CODE_LANGUAGES = frozenset(_DEF_PATTERNS) | {
 class ChunkConfig:
     """Sizes are in estimated tokens (see util.text.estimate_tokens).
 
-    `target` is what most chunks will be. `hard_max` is the ceiling a chunk may
-    not exceed even if that means splitting a structural unit; `min_tokens`
-    stops the tail of a section becoming a two-word chunk that matches
-    everything and means nothing.
+    `target` is the size packing aims for, **not** the size most chunks are: a
+    prose section at or under `hard_max` is emitted whole, so target governs
+    only the sections above it. On the external corpus that is 31 sections of
+    2,486 - though they are the big ones, and they yield about a quarter of all
+    chunks, which is why sweeping target is not the no-op the section count
+    suggests. The measured distribution at these defaults is median **109**
+    tokens, p75 198, p90 314: a third of target, and the docstring used to
+    claim the opposite.
+
+    `hard_max` is the ceiling a chunk may not exceed even if that means
+    splitting a structural unit. That became true only recently; five chunks
+    exceeded it, the largest at 2.1x. See `_pack_units`.
+
+    `min_tokens` stops the tail of a section becoming a two-word chunk that
+    matches everything and means nothing. It is a floor with one deliberate
+    exception: a runt whose only neighbour is large enough that merging would
+    breach `hard_max` is left alone, because the ceiling wins.
+
+    Both sizes were swept against the gate and held-out sets and the defaults
+    sit on a plateau, so they are measured rather than merely inherited:
+
+        target_tokens  |  96  160  224  320*  448  640
+        gate pass /54  |  46   47   48   49    49   48
+        held pass /22  |  18   19   19   19    19   18
+
+        hard_max_tokens| 160  224  320  448  640*  960
+        gate pass /54  |  48   49   49   49   49    49
+        held pass /22  |  19   19   19   19   19    18
+
+        overlap_tokens |   0   16   32   64*   96   128
+        gate pass /54  |  49   49   49   49    48   48
+        held pass /22  |  19   19   19   19    18   19
+
+    Nothing was changed: every shipped value is at or tied for the best row on
+    both sets. The useful finding is the flatness - retrieval is robust to
+    chunk size across a 2-3x range, so the retrieval parameters tuned earlier
+    are not artifacts of this particular chunking. Only the extremes move
+    anything (`scripts/chunk_size_sweep.py`).
     """
 
     target_tokens: int = 320
@@ -229,9 +263,47 @@ def _pack_units(
 
     for index, (unit_text, offset) in enumerate(units):
         unit_tokens = estimate_tokens(unit_text)
-        if unit_tokens > ceiling and not buffer:
-            # A single oversized unit (a minified line, a huge paragraph):
-            # emit it whole rather than cutting it at an arbitrary point.
+        if unit_tokens > ceiling:
+            # The guard here used to be `and not buffer`, which meant an
+            # oversized unit was only ever handled when it was a section's
+            # *first* unit - and a markdown section almost always opens with its
+            # own heading line, so the buffer was never empty by the time the
+            # big unit arrived. All five of the corpus's over-ceiling chunks sat
+            # behind a two-token `#### Fixes`. Flush what is buffered and handle
+            # the unit on its own instead (L71).
+            if buffer:
+                out.append((joiner.join(t for t, _, _ in buffer),
+                            buffer[0][1], buffer[0][2]))
+                buffer = []
+                size = 0
+            # A unit over the ceiling is usually not one unit at all.
+            # `split_sentences` breaks on sentence punctuation or a *blank*
+            # line, and a markdown bullet list and a fenced code block have
+            # neither - so pydantic's 54-entry changelog list arrives here as a
+            # single 1,330-token "sentence" and psutil's `>>>` example as a
+            # 1,283-token one, with 133 newlines and no `. ` between them.
+            #
+            # Emitting those whole was the old behaviour, and it is why five
+            # chunks exceeded a ceiling documented as one a chunk "may not
+            # exceed" - the largest at 2.1x. It also made one retrieval unit out
+            # of 54 unrelated changelog entries, so a query matching any single
+            # bullet dragged in the other 53.
+            #
+            # Lines are the natural boundary in exactly the blocks that reach
+            # here, so re-split on them rather than cutting at an arbitrary
+            # point. A single line still over the ceiling - a minified file, the
+            # case this branch was written for - is still emitted whole.
+            lines: list[tuple[str, int]] = []
+            cursor = offset
+            for line in unit_text.split("\n"):
+                if line.strip():
+                    lines.append((line, cursor))
+                cursor += len(line) + 1
+            if len(lines) > 1:
+                for packed, line_offset, _ in _pack_units(
+                        lines, config, joiner="\n", max_tokens=ceiling):
+                    out.append((packed, line_offset, index))
+                continue
             out.append((unit_text, offset, index))
             continue
         if size + unit_tokens > config.target_tokens and buffer:
@@ -413,6 +485,28 @@ def _merge_runt_pieces(pieces: list[tuple[str, int, dict]],
                           _merge_meta(previous_meta, meta))
             continue
         merged.append((text, start, dict(meta)))
+    # Backwards only leaves one runt unreachable: the first piece has nothing
+    # before it to fold into. That is not a corner - it is *every* runt the
+    # corpus has. 22 of the 153 external documents began with a chunk under
+    # `min_tokens` and no document had a runt anywhere else, because the
+    # backward pass already caught those. They are badge lines (`[image: Black
+    # Logo]`, 4 tokens) and lead paragraphs stranded away from their section
+    # (mccabe's 27-token "Ned's script to check McCabe complexity"), and either
+    # way a chunk that small has almost no term statistics.
+    #
+    # Measured neutral on retrieval - gate 49/54 and held-out 19/22 both
+    # unchanged, held-out identical to four decimals - so this is here to make
+    # `min_tokens` the floor it is documented to be, not for a score.
+    if (len(merged) > 1
+            and estimate_tokens(merged[0][0]) < config.min_tokens
+            and estimate_tokens(merged[0][0]) + estimate_tokens(merged[1][0])
+            <= config.hard_max_tokens):
+        text, start, meta = merged[0]
+        follow_text, _follow_start, follow_meta = merged[1]
+        # The runt's own offset, since it is now where the chunk begins.
+        merged[1] = (f"{text}\n\n{follow_text}", start,
+                     _merge_meta(meta, follow_meta))
+        del merged[0]
     return merged
 
 

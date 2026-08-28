@@ -3479,3 +3479,84 @@ rather than the ordering.
 3. **`$?` after a pipeline is the last command's status.** Two of this
    session's confident measurements have been of the wrong object; this one
    claimed a fresh exit code that was `tail`'s.
+
+---
+
+## L70 - A guard that only fires as a section's first unit never fires
+
+`_pack_units` had a branch for a unit bigger than the ceiling: emit it whole
+rather than cut it at an arbitrary point. The guard was
+`if unit_tokens > ceiling and not buffer`.
+
+`not buffer` is the whole bug. A markdown section opens with its own heading
+line, so by the time the oversized unit arrives the buffer already holds a
+two-token `#### Fixes` and the branch is skipped. Every one of the five
+over-ceiling chunks in the external corpus sat behind such a heading. The
+largest was 1,332 estimated tokens against a `hard_max_tokens` of 640 - 2.1x a
+ceiling whose docstring said a chunk "may not exceed" it.
+
+**What was actually in them.** Not minified files, which is what the branch was
+written for. `split_sentences` breaks on sentence punctuation or a blank line,
+and a markdown bullet list has neither: pydantic's 54-entry changelog list came
+through as one 1,330-token "sentence" with 40 newlines and zero occurrences of
+`. `, and psutil's `>>>` example block as a 1,283-token one with 133 newlines.
+So one retrieval unit held 54 unrelated changelog entries, and a query matching
+any single bullet dragged in the other 53.
+
+The fix is two changes, and the first is the one that mattered: drop `not
+buffer` and flush what is buffered, then re-split the oversized unit on line
+boundaries - the natural boundary in exactly the blocks that reach here - with
+a genuinely unsplittable single line still emitted whole. External corpus:
+5 over-ceiling chunks -> 0.
+
+**It measured as nothing, and that is the honest result.** Gate 49/54 and
+held-out 19/22, every metric identical to four decimals. Checked rather than
+assumed: `pydantic`, `psutil` and `autopep8` are the expected answer to zero of
+the 76 golden questions across both sets. So this is *unmeasurable here*, not
+*ineffective* - the distinction the protocol asks for, and the reason to record
+it as a correctness fix rather than dress it up as an improvement.
+
+**Rules.**
+1. **A guard conditioned on "nothing else has happened yet" fires only on
+   synthetic input.** Real documents have preambles, headings and front matter.
+2. **A fallback needs its output checked, not just its trigger.** "Emit it
+   whole" fired correctly for years and produced a 1,332-token chunk; nothing
+   looked at what came out.
+3. **A splitter named for one structure returns garbage on another.**
+   `split_sentences` is a sentence splitter and a bullet list is not sentences;
+   the repair belongs where the bound is enforced, not in the splitter.
+
+---
+
+## L71 - The regression test passed against the bug
+
+Having fixed L70 I wrote the regression test for it, ran the mutation harness,
+and it reported **SURVIVED** for restoring the exact `and not buffer` guard.
+The test could not catch the bug it was named after.
+
+The fixture was `#### Fixes\n{items}`. `_SENT_RE` breaks on a blank line, and a
+single newline is not one - so the heading and the list arrived as *one* unit,
+the buffer was empty, and the pre-fix guard handled it correctly. The real file
+has a blank line after the heading, which is precisely what makes the heading
+its own unit. My test comment claimed "the heading here is what makes this a
+regression test"; the heading was there and did nothing.
+
+One character of whitespace separated a test that pins the fix from a test that
+would have gone green forever on broken code.
+
+**Also in this cycle, the same shape twice.** The first patch I wrote for L70
+changed only the branch body and left `not buffer` alone. Re-running the probe
+showed the external corpus unchanged at 1,827 chunks and 5 violations - and
+because the protocol says *unchanged is ineffective, already correct or
+unmeasurable - say which*, I went looking instead of moving on. The answer was
+"the code never ran".
+
+**Rules.**
+1. **Copy the fixture's shape from the input that produced the bug**, whitespace
+   included. A fixture written from memory tests the code you imagined.
+2. **Mutation-test a regression test against the specific line it exists to
+   pin**, not against a general mutant. "The suite catches something" is not
+   "this test catches this".
+3. **Re-measure after every patch, including the obvious one.** Two patches this
+   cycle looked right and did nothing; both were caught by re-running a probe
+   that took four seconds.
