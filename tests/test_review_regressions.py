@@ -1243,6 +1243,52 @@ class GhostCompoundTest(unittest.TestCase):
         self.assertGreater(repaired, with_ghost)
 
 
+class ConfidenceScaleTest(unittest.TestCase):
+    """Confidence collapsed to a constant when a weight two modules away moved.
+
+    `_confidence` divided the top *total* score by 0.6, and `base_weight` sets
+    that score's scale. Raising it 1.0 -> 5.0 pinned the strength term at 1.0 for
+    all 48 answered goldens - 32 reported >= 0.99 - and the measure's ability to
+    separate right answers from wrong ones fell from AUC 0.665 to 0.519. Every
+    existing test asserted a floor that a saturated value still clears (L69).
+    """
+
+    def _results(self, relevances, score=0.3):
+        from oodarag.models import Chunk, ScoredChunk
+
+        out = []
+        for i, rel in enumerate(relevances):
+            chunk = Chunk(chunk_id=f"c{i}", doc_id="d", ordinal=i, text=f"chunk {i}")
+            scored = ScoredChunk(chunk=chunk, score=score - 0.01 * i)
+            scored.components["rerank_relevance"] = rel
+            out.append(scored)
+        return out
+
+    def test_confidence_does_not_move_when_the_score_scale_does(self):
+        """The property that broke: every input is bounded 0..1, so multiplying
+        the ranking scores by any factor leaves the reported number alone."""
+        from oodarag.generate.answer import _confidence
+
+        relevances = [0.62, 0.5, 0.4, 0.3, 0.2]
+        base = _confidence(self._results(relevances, score=0.3), coverage=1.0)
+        for factor in (5.0, 40.0, 0.1):
+            scaled = self._results(relevances, score=0.3 * factor)
+            self.assertEqual(_confidence(scaled, coverage=1.0), base,
+                             f"confidence moved when scores were scaled by {factor}")
+
+    def test_confidence_separates_a_strong_match_from_a_weak_one(self):
+        """A reported number that is the same for everything is not a signal.
+        Asserts the spread, which a floor assertion cannot see."""
+        from oodarag.generate.answer import _confidence
+
+        strong = _confidence(self._results([0.62, 0.2, 0.15, 0.1, 0.05]), coverage=1.0)
+        weak = _confidence(self._results([0.08, 0.07, 0.07, 0.06, 0.06]), coverage=1.0)
+        self.assertGreater(strong - weak, 0.25,
+                           f"strong {strong} and weak {weak} are barely distinguishable")
+        self.assertLessEqual(strong, 1.0)
+        self.assertGreaterEqual(weak, 0.0)
+
+
 class StaleChunkTest(unittest.TestCase):
     """A chunker change left the index serving chunks from the old chunker.
 

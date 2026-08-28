@@ -22,9 +22,9 @@
 | Non-negotiables | verified | All five attacked directly, not just asserted: zero-dependency walked module by module, provenance and redaction attacked with crafted inputs, degradation measured through partial and silent-empty source failures (L37-L39) |
 
 **Current measurements** (offline embedder, deterministic).
-385 tests passing - of which ten only run once the branch is pushed, because the
+389 tests passing - of which ten only run once the branch is pushed, because the
 live GitHub cross-checks skip as a module unless the local HEAD is also the
-remote head. The same tree reads 375 before a push and 385 after (L64), and CI,
+remote head. The same tree reads 379 before a push and 389 after (L64), and CI,
 which only runs pushed commits, always sees the larger number. Retrieval metrics are over graded cases only - abstention
 cases have nothing to retrieve, and averaging their zeros in made adding a
 negative case look like a retrieval regression.

@@ -29,7 +29,10 @@ class AnswerConfig:
     #: pipeline exists to prevent.
     min_coverage: float = 0.5
     strict: bool = True
-    #: Retrieval scores below this mean nothing was retrieved at all.
+    #: Retrieval scores below this mean nothing was retrieved at all. Read off
+    #: the total score, so it is scale-dependent like everything else that was -
+    #: currently 200x below the smallest score any golden query produces, which
+    #: is the margin a "nothing at all" floor should have (L69).
     min_top_score: float = 0.005
     #: Query-term relevance floor, measured independently of source priors.
     #: This is the gate that actually catches an out-of-corpus question: a
@@ -192,9 +195,33 @@ def _confidence(results: list[ScoredChunk], coverage: float) -> float:
     Three signals, none of them a probability and none pretending to be: how
     strong the best match was, how much better it was than the fifth (a flat
     distribution means nothing stood out), and how well the answer is cited.
+
+    **Every term is bounded 0..1 by construction**, which is the repair rather
+    than a nicety. The first two used to be read off `ScoredChunk.score`, whose
+    scale is set by `HeuristicReranker.base_weight`: when that moved 1.0 -> 5.0
+    every top score landed above the 0.6 the strength term divided by, so
+    strength was pinned at 1.0 for **all 48** answered goldens, 32 of them
+    reported >= 0.99, and the measure's ability to separate right answers from
+    wrong ones collapsed from AUC 0.665 to **0.519** - a coin flip (L69).
+
+    `rerank_relevance` cannot do that: it is a coverage-times-answerability
+    product in [0, 1] regardless of any weight. Measured over 35 right and 13
+    wrong answers on the external corpus (`scripts/confidence_ab.py`):
+
+        current, from the total score            AUC 0.519
+        relevance only                           AUC 0.703
+        relevance, relevance margin, coverage    AUC 0.665   <- this
+        relevance, margin as share of top        AUC 0.673
+
+    The relevance-based forms are indistinguishable from one another at this
+    sample size and all of them beat the incumbent by a wide margin. This one is
+    chosen because it is the only one whose every input is scale-free *and*
+    keeps the three signals the docstring promises, so the next weight change
+    cannot silently retire it.
     """
-    top = results[0].score
-    margin = top - results[min(4, len(results) - 1)].score
-    strength = min(1.0, top / 0.6)
+    relevance = [r.components.get("rerank_relevance", 0.0) for r in results]
+    top = max(relevance, default=0.0)
+    margin = top - relevance[min(4, len(relevance) - 1)] if relevance else 0.0
+    strength = min(1.0, top / 0.5)
     separation = min(1.0, margin / 0.25) if len(results) > 1 else 0.5
     return round(0.5 * strength + 0.2 * separation + 0.3 * coverage, 4)

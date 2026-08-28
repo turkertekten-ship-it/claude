@@ -3720,3 +3720,82 @@ tight ratchet.
 4. **A knob that improves monotonically on one corpus with no plateau is
    measuring that corpus.** Stop at the principled value and write down what the
    ramp was telling you.
+
+---
+
+## L69 - The reported confidence became a constant, and the code that broke it was mine
+
+L68's own rule 2 says a knob that scales one term of a sum changes what every
+other term means. It found the two tie-breaker priors that way. It missed one,
+two files downstream, and the miss was visible in the first query I ran
+afterwards:
+
+```
+$ ooda query "What is the capital of France?"
+... confidence=1.0  generator=extractive  coverage=1.0
+```
+
+Confidence 1.0 for a question a corpus of PyPI pages cannot answer.
+
+**`_confidence` divides by constants that assume a score scale.** It reads
+`ScoredChunk.score`, whose size is set by `HeuristicReranker.base_weight`:
+
+    strength   = min(1, top / 0.6)
+    separation = min(1, (top - fifth) / 0.25)
+
+At `base_weight` 1.0 the top score sat around 0.2-0.4 and both terms varied. At
+5.0 the smallest top score over 48 answered goldens is **1.146**, so strength is
+pinned at 1.0 for every case. Measured:
+
+| | before the rescale | after |
+|---|---|---|
+| confidence range | 0.30 - 1.00 | 0.87 - 1.00 |
+| cases reporting >= 0.99 | a handful | **32 of 48** |
+| AUC, right vs wrong answers | 0.665 | **0.519** |
+
+An 0.519 AUC is a coin flip. The number was still being printed, still being
+stored in the journal, and no test noticed, because every test that asserts
+confidence asserts a floor it still clears.
+
+**The fix is not a recalibration.** Re-tuning 0.6 and 0.25 to the new scale
+would work until the next weight change, which is the same bug on a timer.
+`rerank_relevance` is a coverage-times-answerability product, bounded 0..1 by
+construction whatever any weight does, and the gate has always used it for
+exactly that reason. Measured over 35 right and 13 wrong answers
+(`scripts/confidence_ab.py`):
+
+| formulation | AUC | best TPR-FPR |
+|---|---|---|
+| current, from the total score | 0.519 | 0.097 |
+| relevance only | 0.703 | 0.435 |
+| swap top -> relevance, keep the raw margin | 0.691 | 0.455 |
+| **relevance, relevance margin, coverage** | **0.665** | **0.455** |
+| relevance, margin as a share of top, coverage | 0.673 | 0.426 |
+
+The relevance-based forms are indistinguishable from one another at this sample
+size and all of them beat the incumbent by 0.15 of AUC. **Shipped: relevance,
+relevance margin, coverage** - the only one whose every input is scale-free
+*and* keeps the three signals the docstring promises. Confidence now spans
+0.508 to 1.000 over 33 distinct values, and the capital of France reports 0.70.
+
+**L60 predicted this and aimed at the wrong trigger.** It found the same
+inconsistency - the gate uses relevance, the reported confidence uses the total -
+measured it inert, and wrote that it "would bite on a corpus with mixed
+authority or real age spread, which is exactly what the priors were built for".
+It bit on neither. It bit because someone changed a weight in a different file.
+
+**Rules.**
+1. **A constant that divides a score is a claim about that score's scale.**
+   Grep for the divisors when a scoring weight moves: `/ 0.6` two modules away
+   is not something a test failure will find for you.
+2. **Prefer a bounded input to a calibrated constant.** `rerank_relevance` is
+   0..1 by construction; anything built on it survives a rescale, and the
+   alternative is a recalibration due every time a weight moves.
+3. **A signal nobody gates on gets no test that can fail.** Confidence is
+   printed, journalled and returned to callers, and its collapse to a constant
+   was invisible to 387 tests. Assert the *spread* of a reported number, not
+   just its floor.
+4. **When a prediction names the trigger, the trigger is the weakest part of
+   it.** L60 was right that the inconsistency would bite and wrong about what
+   would set it off, which cost nothing here only because the fix is the same
+   either way.
