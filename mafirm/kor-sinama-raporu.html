@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>18 takım · 177 vaka · 0 sinyal</span>
+    <span>19 takım · 182 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -970,6 +970,33 @@ connect_rejected  <span class="bad">www.spk.gov.tr:443</span>         gateway an
 </section>
 
 <section>
+  <span class="sec-tag">On birinci tur</span>
+  <h2>Ölçüm, ölçtüğü kusuru gizliyordu</h2>
+  <p>Dokuz tur boyunca <em>"kaynak ≡ klon"</em> diye doğruladım. O karşılaştırma
+  bir şeyi <strong>yapısal olarak göremez</strong>: her iki ağaç da diskte
+  dururken, klondan bir dosya kaynağa uzansa bile iki koşum aynı sonucu verir.
+  Ölçüm, ölçtüğü kusuru gizliyordu.</p>
+  <p>Kaynak ağacı geçici olarak kaldırıp klonu <strong>tek başına</strong>
+  koşturunca çıktı:</p>
+<pre><span class="bad">DENETİM BAŞARISIZ: 1</span></pre>
+  <p style="margin-top:16px"><em class="term">denetim.sh</em> içindeki iki gömülü
+  Python parçacığı kökü kendi başına <em class="term">expanduser('~/mafirm')</em>
+  ile çözüyordu. Kaynak ağaç yokken denetim var olmayan bir ağaca uzanıyor ve
+  yanlış yere kırmızı veriyordu. <strong>Ve takım hâlâ 0 SİNYAL diyordu</strong>,
+  çünkü hiçbir vaka denetimin kendi yol çözümlemesine bakmıyordu.</p>
+  <div class="note">
+    <b>Bu, aynı sınıfın üçüncü tekrarı.</b> <em class="term">kapi.py</em>'nin ad
+    kaydı, <em class="term">ks_b</em>'nin ad kaydı, şimdi
+    <em class="term">denetim.sh</em>'in gömülü parçacıkları — <b>iddia ettiği
+    şeyin dışına uzanan bir kontrol.</b> Kitabın D takımıyla bulduğum kusurun
+    tam karşılığı, üç ayrı yerde, benim elimden. S takımı bunu kalıcı kılıyor:
+    statik olarak hiçbir dosyanın kökü sabitlemediğini, dinamik olarak da
+    denetimin ve kapının <b>sahte bir HOME altında</b> yeşil kaldığını
+    doğruluyor.
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -1001,6 +1028,11 @@ connect_rejected  <span class="bad">www.spk.gov.tr:443</span>         gateway an
     ayrıştırıcı kusurum ve hepsi aynı yönde: <strong>bir dedektör, ölçtüğü
     şeyin gerçek biçimini görmeden yazılırsa, bulduğu şey kendi
     körlüğüdür.</strong></li>
+    <li><strong>Doğrulama yöntemim, aradığı kusuru göremeyecek biçimde
+    kuruluydu.</strong> "Kaynak ≡ klon" karşılaştırması, her iki ağaç da
+    diskteyken bir dosyanın yanlış ağaca uzanmasını yapısal olarak gizler.
+    Kaynağı kaldırıp klonu yalnız koşturana kadar üç ayrı sabit yol fark
+    edilmedi.</li>
     <li><strong>Koşum betiğim bir takımın çıkış kodunu elle 0 yazıyordu.</strong>
     F çöktüğünde takım "0 SİNYAL" diyordu — kitapta bulduğum kusurun kendi
     betiğimdeki hâli. Ve düzeltmeyi sınarken mutasyonum yine tutmadı; aynı
@@ -1082,7 +1114,7 @@ connect_rejected  <span class="bad">www.spk.gov.tr:443</span>         gateway an
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># on sekiz takım, 177 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># on dokuz takım, 182 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
