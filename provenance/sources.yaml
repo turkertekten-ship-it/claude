@@ -271,7 +271,7 @@ sources:
     note: >-
       Establishes the firm's legal name, Istanbul/Teşvikiye location, 2022
       founding, and that it manages GSYF and GYF for qualified investors.
-      Fund names, fund sizes and AUM were NOT established — see U-7.
+      Fund names, fund sizes and AUM were NOT established — see AIR-1.
 
   - id: EGRESS-BLOCKED-WAM-KAP-2026-08-27
     kind: tool_output
@@ -312,7 +312,7 @@ sources:
       Reported by Turkish financial press (yatirimx.com.tr, paraajansi.com.tr)
       as an SPK decision dated 23 July 2026 with a 31 July 2026 compliance
       date. The SPK bulletin itself was not retrieved; treat the exact scope
-      and wording as unconfirmed — see U-8.
+      and wording as unconfirmed — see AIR-2.
 
   - id: TCMB-MACRO-2026-08
     kind: tool_output
@@ -409,7 +409,7 @@ sources:
       This is the authorisation for researching the owner and his employer in
       this session, including the Google Drive read recorded under
       DRIVE-WORKFILES-2026-08-27. It is a request to research him; it is not a
-      statement of what his working week actually contains — see U-9.
+      statement of what his working week actually contains — see AIR-3.
 
   - id: WAM-OWNERSHIP-2026-08-27
     kind: tool_output
@@ -439,7 +439,7 @@ sources:
       Gayrimenkul Yatırım Fonu, GYF) and WQQ (KAP Finansal Rapor and İhraç
       Belgesi filings; full name not recovered). URL slugs are reliable for
       names because the host builds them from the fund's registered title.
-      Fund SIZES and HOLDINGS remain unestablished — see U-7.
+      Fund SIZES and HOLDINGS remain unestablished — see AIR-1.
 
   - id: SUBAGENT-PROFILE-2026-08-27
     kind: tool_output
@@ -496,7 +496,7 @@ sources:
       third-party PDF of the tebliğ; the SPK's own published text was not
       opened. The applicability of the residency clause to a portföy yönetim
       şirketi specifically, and any exception regime, are NOT established —
-      see U-10.
+      see AIR-4.
 
   - id: SPK-FUND-TMS29-EXEMPTION
     kind: tool_output
@@ -510,7 +510,7 @@ sources:
       İlkeleri; other SPK-regulated entities applied TMS 29 from the period
       ending 31.12.2023. Re-run first-hand after a delegated agent reported it.
       Whether the exemption still stands for 2026 was NOT established — the
-      2024 decision is what is sourced. See U-11.
+      2024 decision is what is sourced. See AIR-5.
 
   - id: DELEGATED-RECON-2026-08-27
     kind: tool_output
@@ -528,3 +528,179 @@ sources:
       and are cited to SPK-DATA-RESIDENCY-VII-128-10 and
       SPK-FUND-TMS29-EXEMPTION instead. Everything else in those four documents
       remains a delegated report and is not promoted to established fact.
+
+  - id: EGRESS-POLICY-DENIAL-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T07:43Z"
+    method: 'curl -sS "$HTTPS_PROXY/__agentproxy/status"; curl to 13 hosts; WebFetch(https://spk.gov.tr/spk-bultenleri/2026-yili-spk-bultenleri)'
+    evidence: provenance/raw/subject-research-2026-08-27.md
+    note: >-
+      Thirteen hosts denied at the egress gateway with 403 to CONNECT, kind
+      connect_rejected: spk.gov.tr, www.spk.gov.tr, kap.org.tr, www.kap.org.tr,
+      www.resmigazete.gov.tr, mevzuat.gov.tr, tspb.org.tr, www.tefas.gov.tr,
+      evds2.tcmb.gov.tr, data.tuik.gov.tr, fonbul.halkyatirim.com.tr,
+      fonanaliz.marbas.com.tr and fintables.com. This is an organization policy
+      denial, not a transient failure or a missing certificate: the proxy's own
+      README instructs that 403/407 denials be reported rather than retried, and
+      no further attempts were made. Every Turkish primary source this system
+      would read is inside that set, which is why AIR-1, AIR-2, AIR-4 and AIR-5 stay
+      open from this container.
+
+  - id: SPK-BULLETIN-45-1359-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T07:44Z"
+    method: 'WebSearch(query="SPK bülten 2026/38 OR \"45/1359\" 23 Temmuz 2026 GYF GSYF katılma payı değerleme kararı")'
+    evidence: provenance/raw/subject-research-2026-08-27.md
+    note: >-
+      Names the decision as 23/07/2026 no. 45/1359, carried in SPK bulletin
+      2026/38, with a 31/07/2026 compliance date, and gives the stated rationale
+      — exchange prices on low-volume GYF/GSYF units do not reflect the funds'
+      true value. Advances AIR-2 from press paraphrase to a cited decision and
+      bulletin number, but the bulletin PDF itself remains unread: spk.gov.tr is
+      denied at the gateway. [src:EGRESS-POLICY-DENIAL-2026-08-28]
+
+  - id: SPK-VII-128-10-SCOPE-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T07:45Z"
+    method: 'WebSearch(query="VII-128.10 bilgi sistemleri tebliği kapsam portföy yönetim şirketleri hangi kurumlar uygulanacak yürürlük tarihi")'
+    evidence: provenance/raw/subject-research-2026-08-27.md
+    note: >-
+      The tebliğ's stated scope includes "sermaye piyasası kurumları" (capital
+      markets institutions) alongside Borsa İstanbul, Takasbank, MKK, portfolio
+      custodians, listed companies, TSPB, TDUB and crypto-asset service
+      providers. SPK's own site places portföy yönetim şirketleri in the sermaye
+      piyasası kurumları category, so the tebliğ reaches a PYŞ. This narrows
+      AIR-4 without closing it: the residency article's own wording, and whether
+      any size-based exception applies, were not read.
+
+  - id: WAM-FUND-DATA-UNOBTAINABLE-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T07:46Z"
+    method: 'two WebSearch queries for WQQ/VBR/VBI/VIK fund size, portfolio value and investor counts'
+    evidence: provenance/raw/subject-research-2026-08-27.md
+    note: >-
+      Neither query surfaced any fund-level figure; both search summaries
+      identified kap.org.tr, spk.gov.tr and tefas.gov.tr as where the data
+      lives, and all three are denied at the gateway. Recorded as a negative
+      result so the next session does not repeat the search: AIR-1 is not
+      resolvable from this container by search, only by access or by the owner
+      supplying the numbers. Market context that did surface: Turkish investment
+      funds at roughly 13.8 trillion TL across about 10.7 million investors by
+      May 2026.
+
+  - id: FLEET-DOCTRINE-DRIFT-2026-08-28
+    kind: repo_state
+    collected_at: "2026-08-28T08:10Z"
+    method: "git for-each-ref; diff of CLAUDE.md at 4049525 against this branch's HEAD; wc -l on husv9h:CLAUDE.md"
+    evidence: provenance/raw/subject-research-2026-08-27.md
+    note: >-
+      The `claude` remote carries 14 branches and `claude-ai` 10. This branch's
+      CLAUDE.md was SEVEN LINES BEHIND commit 4049525, not equal to it as this
+      session had assumed: the layout entries for KNOWN_ISSUES.md,
+      ingest_chat_archive.py and fleet_snapshot.py were missing, as was the
+      house rule "Ship self-checks with anything the fleet may copy". Both files
+      have since been taken across at 4049525 parity. The newest doctrine in the
+      fleet is on origin/claude/reverse-engineer-chat-setup-husv9h at 288 lines;
+      it was NOT adopted here, because it references profile/, prompts/ and
+      subagent files this branch does not carry, and importing a doctrine whose
+      own references dangle would be worse than lagging it.
+
+  - id: FLEET-UNKNOWN-ID-COLLISION-2026-08-28
+    kind: repo_state
+    collected_at: "2026-08-28T08:12Z"
+    method: "git show <branch>:provenance/unknowns.md across every ref on origin, grepping the U-7/U-8/U-10/U-11 headers"
+    evidence: provenance/raw/subject-research-2026-08-27.md
+    note: >-
+      Six sibling branches use U-7, U-8 and U-10 for entirely unrelated
+      questions — the Console playground UI, whether "borris churney" designates
+      Boris Cherny, what "firms" means, YouTube API keys, MT-Bench figures.
+      Merging two such registers appends rather than conflicting, so two
+      unrelated questions silently share an id. This branch's five unknowns were
+      renamed U-7..U-11 to AIR-1..AIR-5 across 47 references in 12 files;
+      U-1..U-6, which came across with the doctrine, keep their ids.
+
+  - id: FLEET-U9-ASSIGNED-TO-THIS-BRANCH-2026-08-28
+    kind: repo_state
+    collected_at: "2026-08-28T08:11Z"
+    method: "git show origin/claude/reverse-engineer-chat-setup-husv9h:provenance/unknowns.md"
+    evidence: provenance/raw/subject-research-2026-08-27.md
+    note: >-
+      That branch's U-9, "Where the owner works, and what comparable
+      organisations do with AI", names claude/ai-system-research-3jpwda as its
+      owner, states plainly that it holds no evidence of its own, and says it
+      resolves when this session pushes its findings. Those findings are pushed:
+      docs/research/02-subject-profile.md and docs/DESIGN.md. This branch is the
+      fleet's answer to that question, and no sibling evidence on it exists.
+
+  - id: FLEET-SYNC-REPORT-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T08:05Z"
+    method: "Agent(general-purpose) read-only fleet sync over 24 refs on both remotes; 47 tool calls"
+    evidence: >-
+      Reported: no sibling branch holds any evidence on WAM Portföy, GSYF, GYF,
+      TMS 29, VII-128.10 or kap.org.tr (zero grep hits outside this branch); no
+      session has got past the egress block, and r.jina.ai, web.archive.org,
+      piped.video and yewtu.be were tried and also refused; egress is a property
+      of a (source, path) pair, so WebSearch reaching a host says nothing about
+      fetch and vice versa; the fleet's WebSearch budget is capped at 200 calls
+      per session; no source-id in this branch's ledger collides with any
+      sibling's.
+    note: >-
+      SECOND-HAND. The three load-bearing claims — the doctrine drift, the
+      unknown-id collisions, and husv9h's U-9 assignment — were re-run
+      first-hand and are cited to their own ids. The rest is another process's
+      report and is not promoted.
+
+  - id: WEBSEARCH-UNRELIABLE-ON-TR-REGULATION-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T08:05Z"
+    method: "reported by the fleet-sync agent from origin/claude/blind-testing-ooda-5o3s67:mafirm/sinama/ks_i_mevzuat.md"
+    evidence: >-
+      "Çalışan tek kanal WebSearch idi ve o da sayfaların metnini değil arama
+      motoru özetlerini döndürür. Kanalın güvenilmezliği ölçüldü: aynı SPK eşiği
+      için art arda dört sorguda %50, %90 ve %98 döndü." — the only working
+      channel was WebSearch, which returns search-engine summaries rather than
+      page text; asked for the same SPK threshold four times in a row it
+      returned 50%, 90% and 98%.
+    note: >-
+      SECOND-HAND, and a calibration this session has adopted. A sibling working
+      the same regulatory domain graded WebSearch-derived SPK figures
+      "desteklenmiş yeniden kurgu" — supported reconstruction — never verified.
+      AIR-2, AIR-4 and AIR-5 are held to that standard here: search advanced
+      them and did not close them.
+
+  - id: EVAL-BASELINE-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T08:20Z"
+    method: "PYTHONPATH=src python3 -m oodarag.cli eval over evals/goldens.jsonl (20 goldens, 4 abstention cases)"
+    evidence: provenance/raw/subject-research-2026-08-27.md
+    note: >-
+      17/20 passed. pass_rate 0.85, recall@5 0.6583, MRR 0.4833, nDCG@5 0.4816,
+      verified-citation coverage 0.7443, abstention_rate 0.1000, calibration
+      error 0.3352. The first run scored abstention_rate 0.0000: the answerer
+      answered all four unanswerable questions, which is the defect the
+      abstention cases exist to catch. Three cases remain red and are documented
+      rather than tuned away.
+
+  # Carried across verbatim with KNOWN_ISSUES.md from commit 4049525, which cites
+  # them. Not this session's observations: they belong to
+  # origin/claude/review-chat-archive-zrynr4 and are reproduced unchanged.
+
+  - id: KI1-ISSUE-2026-08-27
+    kind: api
+    collected_at: "2026-08-27T15:20Z"
+    method: "mcp__github__list_issues then mcp__github__issue_write(method=create) on turkertekten-ship-it/claude"
+    evidence: >-
+      The repository had zero issues before this. Creating the KI-1 advisory
+      returned id 5269104237 at
+      https://github.com/turkertekten-ship-it/claude/issues/1. Issues are the
+      only durable channel to sessions that cannot be messaged directly.
+
+  - id: PARITY-UNMOVED-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T15:16Z"
+    method: "git fetch --all --prune; git log --oneline origin/claude/code-playground-parity-xw0snj; grep for the fix in its tools/ingest_chat_archive.py"
+    evidence: >-
+      The branch head is still merge commit e7ab452 with parents e37b4c2 and
+      1d7ce8f. Its copy of tools/ingest_chat_archive.py still has zero
+      occurrences of the "path.stem == session" fix.

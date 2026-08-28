@@ -230,3 +230,135 @@ Query: `SPK yatırım fonları enflasyon muhasebesi TMS 29 uygulanmayacak karar 
 
 Result URLs: erdem-erdem.av.tr, nazaligundem.com, vizyongrubu.com,
 spk.gov.tr/data/65b2beba8f95db1f44c2b15a/2024-6.pdf, prmfinans.com.
+
+# Second pass — 2026-08-28
+
+## Agent proxy status — organization egress denial — 2026-08-28T07:43Z
+
+`curl -sS "$HTTPS_PROXY/__agentproxy/status"` reported `enabled: true`,
+`selective: false`, `toolScoped: false`, and 13 `recentRelayFailures`, every one
+of kind `connect_rejected` with detail:
+
+> "gateway answered 403 to CONNECT (policy denial or upstream failure)"
+
+Hosts denied, all on :443 —
+data.tuik.gov.tr, evds2.tcmb.gov.tr, fintables.com, fonanaliz.marbas.com.tr,
+fonbul.halkyatirim.com.tr, kap.org.tr, mevzuat.gov.tr, spk.gov.tr, tspb.org.tr,
+www.kap.org.tr, www.resmigazete.gov.tr, www.spk.gov.tr, www.tefas.gov.tr.
+
+WebFetch on https://spk.gov.tr/spk-bultenleri/2026-yili-spk-bultenleri returned
+`{"error_type":"EGRESS_BLOCKED","domain":"spk.gov.tr"}`.
+
+/root/.ccr/README.md states: "do not retry organization policy denials (403/407)
+— report them instead." No further attempts were made against these hosts.
+
+## WebSearch — SPK bulletin and decision number — 2026-08-28
+
+Query: `SPK bülten 2026/38 OR "45/1359" 23 Temmuz 2026 GYF GSYF katılma payı değerleme kararı`
+
+> On July 23, 2026, with decision number 45/1359, the SPK ... restructured the
+> valuation method for participation shares of Real Estate Investment Funds
+> (GYF) and Venture Capital Investment Funds (GSYF).
+> ... investment funds' portfolios containing traded GYF and GSYF participation
+> shares will no longer be valued based on the last transaction price on the
+> stock exchange, but rather on the most current unit share value announced by
+> the founding portfolio management companies ...
+> SPK requested that investment funds currently using stock exchange prices as
+> the basis for valuation adapt to the new system by July 31, 2026.
+> ... this is related to SPK Bulletin 2026/38 ...
+
+Stated rationale: exchange prices in low-volume GYF/GSYF participation shares do
+not fully reflect the funds' true value.
+
+## WebSearch — VII-128.10 scope — 2026-08-28
+
+Query: `VII-128.10 bilgi sistemleri tebliği kapsam portföy yönetim şirketleri hangi kurumlar uygulanacak yürürlük tarihi`
+
+> The regulation applies to: Borsa İstanbul A.Ş., exchanges and market operators
+> with organized other market places, pension investment funds, İstanbul
+> Settlement and Custody Bank A.Ş., Central Registry Institution A.Ş., portfolio
+> custodian institutions, Capital Markets Licensing Registration and Training
+> Institution A.Ş., **capital markets institutions**, publicly traded companies,
+> Turkish Capital Markets Association, Turkish Appraisers Association, and Crypto
+> Asset Service Providers.
+
+Read together with the earlier SPK page stating that portföy yönetim şirketleri
+sit in the sermaye piyasası kurumları (capital markets institutions) category,
+the tebliğ's scope reaches a PYŞ. The residency article's own wording and any
+size-based exception were NOT read.
+
+## WebSearch — fund-level data, two attempts — 2026-08-28
+
+Queries: `"WQQ" WAM girişim sermayesi yatırım fonu toplam değer fon portföy büyüklüğü katılma payı`
+and `WAM Portföy VBR VIK VBI fon toplam portföy değeri milyon TL yatırımcı sayısı 2026`
+
+Neither returned any fund-level figure. Both search summaries stated the data
+sits on kap.org.tr, spk.gov.tr and tefas.gov.tr — all three denied at the
+gateway. Market context that did surface: Turkish investment funds reached about
+13.8 trillion TL by May 2026 across roughly 10.7 million investors.
+
+## git — fleet state read first-hand — 2026-08-28
+
+`git for-each-ref refs/remotes/origin` on `claude` returned 14 branches; on
+`claude-ai`, 10.
+
+Doctrine drift, `diff <(git show 4049525:CLAUDE.md) <(git show HEAD:CLAUDE.md)`
+— seven lines present at 4049525 and absent from this branch:
+
+    KNOWN_ISSUES.md               defects that may have spread to other branches
+      ingest_chat_archive.py      chat-archive ingestion, search, and selfcheck
+      fleet_snapshot.py           regenerates the FLEET.md roster from live refs
+    - **Ship self-checks with anything the fleet may copy.** A branch that merges
+      your code freezes it at that instant; when you fix a bug afterwards, nothing
+      tells the copy. A `selfcheck` subcommand travels with the code and lets any
+      inherited copy test itself. Prefer that to a note nobody will read.
+
+`git show origin/claude/reverse-engineer-chat-setup-husv9h:CLAUDE.md | wc -l`
+returned 288.
+
+Unknown-id collisions, from `git show <branch>:provenance/unknowns.md`:
+
+    code-playground-parity-xw0snj   U-7  What the Console playground actually offers in its UI
+    code-playground-parity-xw0snj   U-8  Whether the MT-Bench figures match the canonical paper
+    code-playground-parity-xw0snj   U-10 RESOLVED: the operating prompt does not measurably reduce fabrication
+    great-euler-6tx6y6              U-7  Whether "borris churney" designates Boris Cherny
+    great-euler-6tx6y6              U-8  Fidelity of the tip compilation to Cherny's original posts
+    great-euler-6tx6y6              U-10 Cherny material published after 2026-04-16
+    personal-skills-repos-dxmflq    U-7  Whether a YouTube Data API key is available to this account
+    research-skill-mastery-mwjs01   U-7  Whether a valid API key reaches caption metadata — RESOLVED
+    reverse-engineer-chat-husv9h    U-7  What "firms" means in this session's goal
+    reverse-engineer-chat-husv9h    U-8  What "the clear system of nick saraev" consists of
+    session-y42cyg                  U-7  What "the clear system of nick saraev" refers to
+
+`git show origin/claude/reverse-engineer-chat-setup-husv9h:provenance/unknowns.md`,
+entry U-9, verbatim — its two `[src:]` tags are shown as inline code because
+they cite that branch's ledger, not this one's, and asserting them here would
+be a citation this repository cannot honour:
+
+> ### U-9 — Where the owner works, and what comparable organisations do with AI
+> **Unknown:** the owner's employer, industry, and how successful organisations in
+> it implement AI.
+> **Why:** one goal asks for exactly this research `[src:GOALS-2026-08-27]`. It is
+> owned by `AI system research and implementation`
+> (`claude/ai-system-research-3jpwda`), which had pushed nothing at 15:04Z
+> `[src:BRANCHES-2026-08-27T15-04Z]`. This session did not perform that research and
+> holds no evidence about it.
+> **Resolves when:** that session pushes its findings, or the owner states it.
+
+## Evaluation run — first-hand — 2026-08-28
+
+`PYTHONPATH=src python3 -m oodarag.cli eval` over 20 goldens, 4 of them
+abstention cases:
+
+    17/20 cases passed
+    pass_rate 0.8500 · recall_at_5 0.6583 · mrr 0.4833 · ndcg_at_5 0.4816
+    citation_coverage 0.7443 · abstention_rate 0.1000 · calibration_error 0.3352
+
+The first run, before the guards existed, scored abstention_rate 0.0000 — the
+answerer answered all four unanswerable questions.
+
+Threshold measurement over the same corpus, plain content-term coverage of the
+question in the retrieved text: answerable questions ranged 0.750-1.000;
+unanswerable ones 0.556, 0.700, 0.889 and 0.900. IDF-weighted coverage computed
+over the retrieved set scored answerable questions as low as 0.38 and did not
+separate at all.

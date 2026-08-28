@@ -48,7 +48,7 @@ about 6% real. Every metric has a `real_` twin, and the brief prints both.
 
 ```bash
 make demo        # end to end, no network, no API key
-make test        # 283 tests, stdlib unittest
+make test        # 323 tests, stdlib unittest
 ```
 
 ```bash
@@ -56,6 +56,7 @@ PYTHONPATH=src python3 -m oodarag.cli rules        # every rule, and why its thr
 PYTHONPATH=src python3 -m oodarag.cli provenance   # which configured facts nobody has confirmed
 PYTHONPATH=src python3 -m oodarag.cli obligations  # the calendar, unverified entries marked
 PYTHONPATH=src python3 -m oodarag.cli brief        # the Monday-morning page
+PYTHONPATH=src python3 -m oodarag.cli eval         # score retrieval against 20 goldens
 ```
 
 Exit codes are the house rule: `0` clean, `1` findings, `2` could not run. The
@@ -72,32 +73,40 @@ agents unrun. What exists is what exists:
 | `chunk/`, `embed/`, `index/`, `retrieve/` | built, 169 tests |
 | `config.py` — the firm as graded data | built, 28 tests |
 | `domain/` — money, inflation, obligations, valuation | built, 57 tests |
-| `ooda/` — signals, policy, rules, act | built, 29 tests |
-| `cli.py` — demo, index, query, loop, brief, rules, provenance, obligations | built |
+| `ooda/` — signals, policy, 17 rules, act | built, 29 tests |
+| `redact.py`, `answer/` — verified citations, three abstention guards | built, 40 tests |
+| `eval/` — metrics, harness, 20 goldens, regression baseline | built |
+| `cli.py` — demo, index, query, loop, brief, eval, rules, provenance, obligations | built |
 | `ingest/regulatory.py`, `ingest/marketdata.py` | **not built** |
-| `redact.py`, `answer/` (incl. citation verification) | **not built** |
-| `eval/` — the retrieval quality harness | **not built** |
 
-Consequences, stated rather than implied. There is **no live regulatory feed**:
-the Observe phase is designed and specified, and its connectors do not exist, so
-today the loop runs on seeded signals. There is **no redaction layer**, so this
-must not be pointed at documents containing personal data yet. There is **no
-answering layer**, so `query` returns retrieved passages with their sources and
-synthesises nothing. And retrieval quality is **unmeasured** — `ooda eval` exits
-2 and says so rather than printing a placeholder.
+**Measured, not asserted.** `ooda eval` scores 17/20 on the golden set:
+recall@5 0.66, MRR 0.48, verified-citation coverage 0.74, abstention rate 0.10.
+The first run scored an abstention rate of **0.00** — it answered all four
+unanswerable questions — which is the defect those cases exist to catch. Three
+cases are still red and are documented rather than tuned away: one is a real
+retrieval weakness (the word "verify" saturates this corpus), and two are the
+harder case where the corpus discusses the subject but not the fact asked for.
+
+**No live regulatory feed.** The Observe phase is designed and its connectors
+are not written, so the loop runs on seeded signals. That is not only a
+scheduling gap: thirteen Turkish domains — including spk.gov.tr, kap.org.tr,
+resmigazete.gov.tr, tefas.gov.tr, tcmb and tuik — answer **403 to CONNECT** at
+this environment's egress gateway, an organization policy denial the proxy's own
+README says to report rather than retry. A connector written here could not be
+run against anything real.
 
 ## What could not be established
 
 `wamportfoy.com` and `kap.org.tr` are both blocked by this environment's egress
 proxy, so the firm's own filings were never read. Fund sizes, holdings and AUM
-are unknown (U-7); every fund-level figure the demo prints is a labelled
+are unknown (AIR-1); every fund-level figure the demo prints is a labelled
 fixture. The 30 seeded obligations come from research that could not reach a
 primary source and all load `UNVERIFIED`. The load-bearing assumption — that
 VII-128.10's data-residency rule binds, which is what makes building rather
-than buying correct here — rests on legal commentary, not the tebliğ (U-10).
+than buying correct here — rests on legal commentary, not the tebliğ (AIR-4).
 
 Open questions live in [`provenance/unknowns.md`](provenance/unknowns.md), and
-the largest of them is U-9: nobody has asked the owner what his week actually
+the largest of them is AIR-3: nobody has asked the owner what his week actually
 contains.
 
 ## Verifying the claims

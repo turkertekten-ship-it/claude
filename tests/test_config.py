@@ -68,7 +68,7 @@ class TestDefaultProfile(unittest.TestCase):
         self.assertIn("base_currency", report)
         self.assertIn("WQQ", report)
         # The hard gap must be stated, not implied by absence.
-        self.assertIn("U-7", report)
+        self.assertIn("AIR-1", report)
         self.assertIn("fund sizes", report.lower())
 
     def test_profile_has_no_field_inviting_a_fund_size_guess(self) -> None:

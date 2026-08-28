@@ -43,6 +43,8 @@ DEFAULT_HOME = Path(".oodarag")
 
 def _local_corpus(root: Path) -> list[RawDocument]:
     """This repository's own documents. Real text, no network, no invention."""
+    from oodarag.redact import Redactor
+    redactor = Redactor()
     docs: list[RawDocument] = []
     for pattern in ("docs/**/*.md", "CLAUDE.md", "README.md",
                     "provenance/*.md", "config/*.toml"):
@@ -57,6 +59,9 @@ def _local_corpus(root: Path) -> list[RawDocument]:
             if not text.strip():
                 continue
             rel = str(path.relative_to(root))
+            # Redaction happens here, at the boundary, not at display: anything
+            # indexed is on disk, and a leak that reaches disk has happened.
+            text = redactor(text)
             docs.append(RawDocument(
                 source_system="repo", external_id=rel, uri=f"file://{rel}",
                 title=path.stem.replace("-", " "), text=text,
@@ -109,7 +114,7 @@ def _demo_state(profile: FirmProfile, today: date):
     """A worked example over seeded data. Never a reading of the real book.
 
     The NAV points below are invented, and say so. Fund sizes and unit values
-    were not obtainable for this firm (unknown U-7), so the alternative to
+    were not obtainable for this firm (unknown AIR-1), so the alternative to
     clearly-labelled fixtures is either no demonstration at all or invented
     numbers presented as real. The first is useless and the second is the
     failure this repository is built to prevent.
@@ -257,7 +262,7 @@ def _brief_text(profile: FirmProfile, actions: list) -> str:
         as_of=date.today(), firm=str(profile.short_name), actions=actions,
         notes=[
             "NAV figures in this brief are demo fixtures, not real unit values: the "
-            "firm's own filings were unreachable from this container (unknown U-7).",
+            "firm's own filings were unreachable from this container (unknown AIR-1).",
             "The price index is an illustrative series, not TÜİK's published one.",
         ],
     ))
@@ -270,6 +275,8 @@ def cmd_index(args: argparse.Namespace) -> int:
 
 
 def cmd_query(args: argparse.Namespace) -> int:
+    from oodarag.answer.extractive import ExtractiveAnswerer
+    from oodarag.answer.verify import coverage, verify_citations
     from oodarag.index.store import Store
     from oodarag.retrieve.hybrid import HybridRetriever
     home = Path(args.home)
@@ -279,17 +286,24 @@ def cmd_query(args: argparse.Namespace) -> int:
     store = Store(home / "index.db")
     try:
         hits = HybridRetriever.from_store(store).retrieve(args.question, k=args.k)
-        if not hits:
-            print("No hits. The honest answer is that this corpus does not cover it.")
+        answer = verify_citations(ExtractiveAnswerer().answer(args.question, hits), hits)
+        print()
+        print(answer.text)
+        if answer.abstained:
+            print("\nAbstention is a result, not a failure: the corpus does not "
+                  "support an answer, and saying so beats inventing one.")
             return EXIT_FINDINGS
-        for i, h in enumerate(hits, 1):
-            comp = " ".join(f"{k}={v:.3f}" for k, v in sorted(h.components.items())
-                            if isinstance(v, (int, float)))
-            print(f"\n[{i}] {h.citation_title}  ({h.citation_uri})")
-            print(f"    score {h.score:.4f}  [{comp}]")
-            print("    " + h.chunk.text.strip()[:400].replace("\n", "\n    "))
-        print("\nRetrieved passages with their sources. No answer is synthesised: the "
-              "\nanswering and citation-verification layer was not built in this session.")
+        print(f"\nconfidence {answer.confidence:.2f} · verified-citation coverage "
+              f"{coverage(answer):.0%} · {answer.metrics.get('citations_dropped', 0)} dropped")
+        print("\nSources — every quote above was checked against these:")
+        # Several sentences can come from one chunk and share a marker; list
+        # each source once, in marker order.
+        seen: set[int] = set()
+        for c in sorted(answer.citations, key=lambda x: x.marker):
+            if c.marker in seen:
+                continue
+            seen.add(c.marker)
+            print(f"  [{c.marker}] {c.title}  ({c.uri})")
         return EXIT_OK
     finally:
         store.close()
@@ -353,11 +367,41 @@ def cmd_obligations(args: argparse.Namespace) -> int:
 
 
 def cmd_eval(args: argparse.Namespace) -> int:
-    print("The evaluation harness was not built in this session: the agent that owned")
-    print("it did not run. Retrieval quality is therefore UNMEASURED, and the honest")
-    print("report is that number's absence rather than a placeholder for it.",
-          file=sys.stderr)
-    return EXIT_ERROR
+    from oodarag.eval.harness import EvalHarness, compare
+    from oodarag.index.store import Store
+    from oodarag.retrieve.hybrid import HybridRetriever
+    home, root = Path(args.home), Path(args.root).resolve()
+    goldens = EvalHarness.load(args.goldens)
+    if not goldens:
+        print(f"no goldens at {args.goldens}", file=sys.stderr)
+        return EXIT_ERROR
+    if not (home / "index.db").exists():
+        _build_index(root, home, quiet=True)
+    store = Store(home / "index.db")
+    try:
+        report = EvalHarness(HybridRetriever.from_store(store)).run(goldens)
+        print(report.to_markdown())
+        baseline_path = Path(args.baseline)
+        if args.save_baseline:
+            baseline_path.parent.mkdir(parents=True, exist_ok=True)
+            baseline_path.write_text(report.to_json(), encoding="utf-8")
+            print(f"\nbaseline written to {baseline_path}")
+            return EXIT_OK
+        if baseline_path.exists():
+            import json as _json
+            drops = compare(report, _json.loads(baseline_path.read_text("utf-8")))
+            if drops:
+                print("\nREGRESSION against the baseline:", file=sys.stderr)
+                for d in drops:
+                    print(f"  {d}", file=sys.stderr)
+                return EXIT_FINDINGS
+            print("\nNo material regression against the baseline.")
+        else:
+            print(f"\nNo baseline at {baseline_path}. Run with --save-baseline to set one; "
+                  "until then a change cannot be told from a regression.")
+        return EXIT_OK if report.passed == len(report.cases) else EXIT_FINDINGS
+    finally:
+        store.close()
 
 
 def _profile(args: argparse.Namespace) -> FirmProfile:
@@ -404,7 +448,12 @@ def build_parser() -> argparse.ArgumentParser:
                    ).set_defaults(func=cmd_provenance)
     sub.add_parser("obligations", help="print the calendar, unverified ones marked"
                    ).set_defaults(func=cmd_obligations)
-    sub.add_parser("eval", help="retrieval quality (not built)").set_defaults(func=cmd_eval)
+    ev = sub.add_parser("eval", help="score retrieval against the golden set")
+    ev.add_argument("--goldens", default="evals/goldens.jsonl")
+    ev.add_argument("--baseline", default="evals/baseline.json")
+    ev.add_argument("--save-baseline", action="store_true",
+                    help="write this run as the baseline future runs are compared to")
+    ev.set_defaults(func=cmd_eval)
     return p
 
 

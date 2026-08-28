@@ -158,8 +158,8 @@ obtainable.
 
 ## Still open
 
-U-7 (what WAM actually manages), U-8 (the operative text of the 23 July 2026
-SPK decision) and U-9 (whether a system of this shape is wanted at all) are
+AIR-1 (what WAM actually manages), AIR-2 (the operative text of the 23 July 2026
+SPK decision) and AIR-3 (whether a system of this shape is wanted at all) are
 unresolved and registered. The third is the one that matters: everything here
 is inference from a public record and a file listing, and nobody has asked him
 what his week contains or what he has already tried and abandoned.

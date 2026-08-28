@@ -31,7 +31,7 @@
 # ---------------------------------------------------------------------------
 # Funds. Four codes were recovered from KAP-derived URLs; three carried their
 # registered names, one did not. Nothing about their size or holdings was
-# obtainable — qualified-investor vehicles do not publish it. See U-7.
+# obtainable — qualified-investor vehicles do not publish it. See AIR-1.
 #
 # Add a [[funds]] block per fund. Blocks match existing funds on `code`, so you
 # can correct one without restating the others.

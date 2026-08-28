@@ -34,7 +34,7 @@ provenance: enforced
 
 > The firm's fund names, fund sizes, portfolio holdings, AUM, shareholders and
 > the rest of its board are therefore **unestablished**. That is registered as
-> U-7, and it has a hard consequence: every fund-level number produced by the
+> AIR-1, and it has a hard consequence: every fund-level number produced by the
 > system built on this branch is a worked example over seeded data. Nothing may
 > present it as a reading of the real book.
 
@@ -59,7 +59,7 @@ provenance: enforced
 > The fund codes matter for a duller reason: they turn a generic regulatory
 > monitor into a specific one. VPG, VBR, VBI, VIK and WQQ are a real KAP
 > watchlist, not a placeholder, and they are what the Observe phase is pointed
-> at. Fund sizes and holdings stay unestablished (U-7) — qualified-investor
+> at. Fund sizes and holdings stay unestablished (AIR-1) — qualified-investor
 > vehicles do not publish them, and KAP is blocked here.
 
 ## Observed — what the working files show
@@ -111,13 +111,13 @@ provenance: enforced
 > days from publication to compliance is not a timescale a quarterly review
 > catches. It is the worked example for why the Observe phase watches the
 > regulator continuously. Its exact scope is press-reported rather than read
-> from the bulletin, which is registered as U-8.
+> from the bulletin, which is registered as AIR-2.
 
 ## What was not established
 
-Named in full in `provenance/unknowns.md`: what WAM actually manages (U-7), the
-operative text of the SPK decision (U-8), and whether a system of this shape is
-wanted at all (U-9). The third is the important one. Everything here is
+Named in full in `provenance/unknowns.md`: what WAM actually manages (AIR-1), the
+operative text of the SPK decision (AIR-2), and whether a system of this shape is
+wanted at all (AIR-3). The third is the important one. Everything here is
 inference from a public career record, a firm profile and a file listing.
 Nobody has asked him what his week contains, what he already runs, or what he
 has tried and abandoned.

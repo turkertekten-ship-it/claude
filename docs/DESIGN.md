@@ -54,7 +54,7 @@ buildable surface narrows to something one numerate person can own.
 
 **This is the load-bearing assumption of the whole design, and it is not
 settled.** It rests on legal commentary rather than the SPK's own text, and is
-registered as U-10. If counsel reads VII-128.10 and says it binds narrowly or
+registered as AIR-4. If counsel reads VII-128.10 and says it binds narrowly or
 not at all, a meaningful part of this document should be replaced by a
 purchase order. That is the honest position, and it is the first question to
 resolve.
@@ -138,7 +138,7 @@ roughly a third per year of divergence, in the flattering direction.
 So every monetary value in the system carries its **restatement basis** and the
 **period** it is stated in. Adding two amounts on different bases raises. There
 is no default and no inference — because whether the fund exemption still holds
-in 2026 was not established (U-11), and a system that guesses that would be
+in 2026 was not established (AIR-5), and a system that guesses that would be
 guessing the invariant.
 
 The second invariant is smaller and just as sharp. **A nominal return is not a
@@ -212,7 +212,7 @@ Deterministic, `Decimal`, and provenance-carrying throughout.
 - **PriceIndex** — the TÜFE series. Refuses to interpolate a missing month
   rather than inventing one.
 - **Fund** — `code`, `kind`, and nothing else the firm has not confirmed.
-  `FundRef` has no `size` or `aum` field, because none was obtainable (U-7) and
+  `FundRef` has no `size` or `aum` field, because none was obtainable (AIR-1) and
   there should be nowhere to put a guess.
 - **Obligation** — authority, cadence, **due rule**, owner, severity, evidence
   URI, and a `verify` flag carried through from low-confidence research. An
@@ -286,7 +286,7 @@ Ordered by what fails cheapest.
 
 **Tripwires — stop if any of these is true.**
 
-- Counsel reads VII-128.10 and it does not bind as assumed (U-10). Buy instead.
+- Counsel reads VII-128.10 and it does not bind as assumed (AIR-4). Buy instead.
 - The brief goes unopened for three consecutive weeks. It is not useful; find
   out what he actually opens.
 - Any rule fires more than twice a week without a human acting on it. Raise its
@@ -321,7 +321,7 @@ tebliğ text. The delegated research was explicit that these are second-hand
 than to look authoritative.
 
 And the largest limit: **nobody has asked him what his week actually contains**
-(U-9). This is designed from a public career record, a shareholder table and a
+(AIR-3). This is designed from a public career record, a shareholder table and a
 file listing. The adoption sequence is a proposal, not an agreed plan, and the
 first conversation should be about what he already runs and what he has already
 tried and abandoned — because the research is unambiguous that the systems that

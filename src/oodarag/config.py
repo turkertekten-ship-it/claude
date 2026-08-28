@@ -19,7 +19,7 @@ assumed threshold should say so when it fires.
 The defaults describe WAM Gayrimenkul ve Girişim Sermayesi Portföy Yönetimi
 A.Ş. What could be established about it is recorded in
 ``docs/research/02-subject-profile.md`` and backed by ``provenance/sources.yaml``.
-What could not — fund sizes, holdings, AUM — is registered as unknown U-7,
+What could not — fund sizes, holdings, AUM — is registered as unknown AIR-1,
 because the firm's own site and its KAP record are both unreachable from this
 container. Supply them with :func:`load`; do not invent them here.
 """
@@ -251,7 +251,7 @@ class FirmProfile:
             lines.append("  No unconfirmed fields.")
         lines.append("")
         lines.append("  NOT established anywhere: fund sizes, holdings, unit counts, AUM.")
-        lines.append("  See provenance/unknowns.md U-7. Supply via config.load(); never guess.")
+        lines.append("  See provenance/unknowns.md AIR-1. Supply via config.load(); never guess.")
         return "\n".join(lines)
 
 
@@ -319,7 +319,7 @@ _TR_SOURCES: tuple[SourceRef, ...] = (
         base_url="https://www.kap.org.tr/",
         authority=0.95,
         kind="disclosure",
-        note="The firm's and the funds' own filings. Blocked by egress here; see U-7.",
+        note="The firm's and the funds' own filings. Blocked by egress here; see AIR-1.",
     ),
     SourceRef(
         key="tspb",

@@ -118,7 +118,27 @@ entry stays open on that question. [src:USER-GOAL-RESEARCH-2026-08-27]
 
 ---
 
-### U-7 — What WAM Portföy actually manages
+## Why the ids below jump from U-6 to AIR-1
+
+U-1 to U-6 came across with the doctrine from
+`origin/claude/review-chat-archive-zrynr4` and keep their ids.
+
+Everything this branch opened is prefixed `AIR-` (AI system Research), because
+plain `U-n` is not unique across the fleet. Reading the other branches' registers
+directly showed `U-7` in use for *What the Console playground actually offers*,
+*Whether "borris churney" designates Boris Cherny*, *What "firms" means in this
+session's goal*, and *Whether a YouTube Data API key is available*; `U-8` and
+`U-10` are similarly overloaded, and one branch carries two different `U-6`
+entries in a single file. [src:FLEET-UNKNOWN-ID-COLLISION-2026-08-28]
+
+A merge of two such registers does not conflict — it appends, and two unrelated
+questions end up sharing an id. The register then reads as though someone
+answered a question nobody asked. Prefixing is the cheapest fix that survives a
+merge, and it costs nothing to adopt.
+
+---
+
+### AIR-1 — What WAM Portföy actually manages
 
 **Unknown:** the names, codes, sizes and portfolios of the GSYF and GYF funds
 WAM Gayrimenkul ve Girişim Sermayesi Portföy Yönetimi A.Ş. founds and manages;
@@ -143,7 +163,7 @@ firm's founding date.
 
 ---
 
-### U-8 — The exact text of the 23 July 2026 SPK valuation decision
+### AIR-2 — The exact text of the 23 July 2026 SPK valuation decision
 
 **Unknown:** the decision's bulletin number, its precise scope, and its
 operative wording.
@@ -165,7 +185,7 @@ counsel confirms the scope.
 
 ---
 
-### U-9 — Whether any of this is wanted
+### AIR-3 — Whether any of this is wanted
 
 **Unknown:** whether the owner wants a system of this shape at all, which of
 its parts he would actually use, and what his current manual routine really is.
@@ -181,7 +201,7 @@ whose answers would change the build.
 
 ---
 
-### U-10 — Whether the VII-128.10 residency rule binds a portföy yönetim şirketi, and how
+### AIR-4 — Whether the VII-128.10 residency rule binds a portföy yönetim şirketi, and how
 
 **Unknown:** whether the requirement that primary and secondary information
 systems sit inside Turkey applies to a PYŞ of WAM's size, what counts as an
@@ -205,7 +225,7 @@ which of the firm's systems are in scope.
 
 ---
 
-### U-11 — Whether the fund TMS 29 exemption still holds for 2026
+### AIR-5 — Whether the fund TMS 29 exemption still holds for 2026
 
 **Unknown:** whether SPK decision 16.02.2024 no. 11/255, exempting investment
 funds from inflation accounting, is still in force for the 2026 reporting
