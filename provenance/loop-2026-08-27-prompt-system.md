@@ -617,8 +617,8 @@ phrases matched in prose.
 
 Observe measured it rather than arguing about it. Across the forty-four files
 in this repository it has fired wrongly **not once** — and on constructed
-probes it does misfire, reading "Recall that you can pass `--json`" as a claim
-of shared history.
+probes it does misfire, treating `Recall that you` inside an ordinary
+instruction as a claim of shared history.
 
 > The distinction rule 8 missed is not prose versus structure. `FALSE_MEMORY`
 > matches a **closed set of fixed idioms**, and those idioms do not appear
