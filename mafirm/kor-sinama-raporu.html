@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>47 çalıştırılabilir takım · 364 vaka · 0 sinyal</span>
+    <span>48 çalıştırılabilir takım · 368 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -2731,6 +2731,51 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Kırk üçüncü tur</span>
+  <h2>On iki atıf, bir kural numarasını bölüm numarası sanıyordu</h2>
+  <p>AW alıntıları, AX sayıları sınadı. Üçüncü kardeş en tehlikelisiydi:
+  raporun kitabın <strong>ne söylemediğine</strong> dair iddiaları. Kitabın
+  kendi 2. kuralı olumsuz iddiadan daha yüksek bir kanıt eşiği ister.</p>
+
+  <div class="callout">
+    <strong>Birinci bulgu: çürütücü, iddianın kapsamında aranmalı.</strong>
+    <em>"§11'in eşik denetimi <code>dosyalar/</code> taramıyor"</em> iddiasını
+    kitabın <strong>tamamında</strong> arayınca <code>dosyalar/*/</code>
+    bulundu ve iddia çürümüş göründü. Oysa o dize §2'nin
+    <code>.gitignore</code> satırında, §11'in komut metninde değil.
+    <strong>İddia ayakta — ama ölçüt yanlış yerde arıyordu.</strong>
+  </div>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AY-02</span>
+      <span class="pill a">Sistematik atıf hatası</span></div>
+    <h3>Kural numarası, bölüm numarası gibi yazılmış</h3>
+    <table><thead><tr><th>işletim sözleşmesi kuralı</th><th>rapor onu şöyle anıyordu</th><th>kitapta o numara gerçekte</th></tr></thead><tbody>
+    <tr><td>çıkar çatışması <em>(kural 8)</em></td><td>bölüm sekiz</td><td><strong>İşlem el kitapları</strong></td></tr>
+    <tr><td>insan onayı <em>(kural 9)</em></td><td>bölüm dokuz</td><td><strong>Beceriler</strong></td></tr>
+    <tr><td>kanıt kuralı <em>(kural 1)</em></td><td>bölüm bir</td><td><strong>Ne kuruyoruz</strong></td></tr>
+    <tr><td>yön / başlık sırası <em>(kural 4)</em></td><td>bölüm dört</td><td><strong>Uzmanlık birimleri</strong></td></tr>
+    </tbody></table>
+    <p>Bu kurallar <strong>işletim sözleşmesinin</strong> kurallarıdır ve
+    sözleşme kitabın <strong>§3</strong>'ünde durur. Rapor zaten "kural 6" ve
+    "kural 2" diye doğru yazıyordu — <strong>gösterim vardı, tek tip
+    uygulanmamıştı.</strong></p>
+  </div>
+
+  <div class="callout">
+    <strong>AX-05 bunu göremezdi, ve sebebi öğretici.</strong> AX-05 anılan
+    bölümün kitapta <em>var olduğunu</em> sınıyor. §8 ve §9 gerçekten var —
+    sadece iddia edilen konuda değil. <strong>Var olmak, o konuda olmak
+    değildir</strong> — kırkıncı turun sınıfının atıf tarafındaki hâli.
+    AY-03 artık bölüm haritasını başlıklarıyla sınıyor.
+    <br><br>
+    Anlatı da yanlış biçimi <em>kullanmak</em> yerine <em>adlandıracak</em>
+    şekilde yeniden yazıldı: bir hatayı göstermek onu yapmak değildir — ama
+    ölçüt ikisini ayırt edemiyorsa, metin ayırt etmelidir.
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -2848,7 +2893,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 47 takım · 364 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 48 takım · 368 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
