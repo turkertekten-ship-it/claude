@@ -236,7 +236,14 @@ def parse_claude_code_jsonl(path: Path, report: Report) -> list[Conversation]:
         uuid = record.get("uuid") or f"{key}:{lineno}"
         conv.messages.append(
             Message(
-                id=f"cc:{uuid}",
+                # Scoped by conversation key, not the bare uuid. The messages
+                # primary key was the uuid alone while store() clears stale rows
+                # by conversation_id, so the same uuid arriving under a second
+                # conversation MOVED the row: the first conversation kept its
+                # message_count and lost its message, and messages_fts gathered
+                # a duplicate row per move. Reproduced -- one message, two
+                # conversations claiming it, two search hits -- before fixing.
+                id=f"cc:{key}:{uuid}",
                 seq=len(conv.messages),
                 role=effective_role(message.get("role") or record["type"], kinds),
                 text=text,
@@ -338,6 +345,9 @@ def store(conn: sqlite3.Connection, conversations: list[Conversation], report: R
                 (msg.id, conv.id, msg.seq, msg.role, msg.text,
                  msg.timestamp, msg.block_types, msg.source_file),
             )
+            # Belt and braces: an id that somehow survives the delete above
+            # must not leave a stale full-text row behind it.
+            conn.execute("DELETE FROM messages_fts WHERE message_id = ?", (msg.id,))
             conn.execute(
                 "INSERT INTO messages_fts (text, message_id) VALUES (?,?)",
                 (msg.text, msg.id),

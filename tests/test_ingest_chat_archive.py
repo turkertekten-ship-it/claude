@@ -151,6 +151,45 @@ def selfcheck_cases() -> None:
           "path.stem" in bad.stderr, bad.stderr[:160])
 
 
+def message_identity_cases() -> None:
+    """A message belongs to one conversation, and search counts it once.
+
+    The messages primary key was the record uuid alone, while store() clears
+    stale rows by conversation_id. So the same uuid arriving under a second
+    conversation MOVED the row: the first conversation kept its message_count
+    and lost the message, and messages_fts accumulated a duplicate per move --
+    one message, two search hits. Reproduced before fixica.
+    """
+    print("message identity")
+    import tempfile
+
+    def conv(cid: str, mid: str):
+        c = ica.Conversation(id=cid, kind="claude_code", title=None, source_file="f.jsonl")
+        c.messages.append(ica.Message(id=mid, seq=0, role="user",
+                                      text="the same message body", timestamp=None,
+                                      block_types="text", source_file="f.jsonl"))
+        return c
+
+    with tempfile.TemporaryDirectory() as tmp:
+        conn = ica.connect(Path(tmp) / "t.db")
+        report = ica.Report()
+        ica.store(conn, [conv("cc:A", "cc:A:u1")], report)
+        ica.store(conn, [conv("cc:B", "cc:B:u1")], report)
+        rows = conn.execute("SELECT id, conversation_id FROM messages").fetchall()
+        check("both conversations keep their own message", len(rows) == 2, str(len(rows)))
+        counts = dict(conn.execute("SELECT id, message_count FROM conversations").fetchall())
+        check("neither conversation claims a message it lost",
+              counts == {"cc:A": 1, "cc:B": 1}, str(counts))
+        hits = conn.execute("SELECT count(*) FROM messages_fts WHERE messages_fts "
+                            "MATCH 'same'").fetchone()[0]
+        check("search returns one hit per message", hits == 2, str(hits))
+
+        ica.store(conn, [conv("cc:A", "cc:A:u1")], report)
+        hits = conn.execute("SELECT count(*) FROM messages_fts WHERE messages_fts "
+                            "MATCH 'same'").fetchone()[0]
+        check("re-ingesting a conversation does not duplicate it", hits == 2, str(hits))
+
+
 def main() -> int:
     subagent_transcript_cases()
     selfcheck_cases()
@@ -232,6 +271,8 @@ def main() -> int:
         check("re-ingesting does not duplicate messages", again == 5, again)
         check("re-ingesting does not duplicate the search index", fts == 5, fts)
         conn.close()
+
+    message_identity_cases()
 
     print()
     if FAILURES:

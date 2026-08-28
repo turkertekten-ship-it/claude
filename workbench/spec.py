@@ -263,9 +263,10 @@ def load_suite(path: str | Path) -> Suite:
         vid = merged.get("id")
         if not vid:
             raise SpecError(f"{where}: missing `id`")
+        vid = str(vid)          # compare what is stored — see the case-id note
         if vid in seen_variant_ids:
             raise SpecError(f"{where}: duplicate variant id {vid!r}")
-        seen_variant_ids.add(str(vid))
+        seen_variant_ids.add(vid)
 
         system = merged.get("system")
         if merged.get("system_file"):
@@ -321,9 +322,14 @@ def load_suite(path: str | Path) -> Suite:
         cid = rc.get("id")
         if not cid:
             raise SpecError(f"{where}: missing `id`")
+        # Compare what is STORED, not the raw scalar. YAML types `01` as an int
+        # and `"01"` as a string, so testing the scalar for membership while
+        # storing str() let two cases load with identical ids -- silently
+        # halving what compare() and the McNemar table measure.
+        cid = str(cid)
         if cid in seen_case_ids:
             raise SpecError(f"{where}: duplicate case id {cid!r}")
-        seen_case_ids.add(str(cid))
+        seen_case_ids.add(cid)
 
         prompt = rc.get("prompt")
         if rc.get("prompt_file"):

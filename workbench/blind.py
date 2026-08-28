@@ -269,20 +269,37 @@ def identical_pair_control(backend: Backend, criterion: str, text: str,
     """
     w1, r1, c1 = _ask(backend, criterion, text, text, model, repeat=0)
     w2, r2, c2 = _ask(backend, criterion, text, text, model, repeat=1)
-    passed = w1 == "TIE" and w2 == "TIE"
-    return {
-        "control": "identical-pair",
-        "passed": passed,
-        "verdicts": [w1, w2],
-        "reasons": [r1[:300], r2[:300]],
-        "cost_usd": c1 + c2,
-        "detail": (
-            "the judge tied two identical candidates, as it must"
-            if passed else
+    # An unreadable verdict is not a failed control. `_ask` returns "ERROR"
+    # rather than coercing one into a tie, and reporting that as "the judge
+    # picked a winner between two identical candidates" would assert a
+    # measured blinding leak that was never measured -- inventing a finding out
+    # of a transport failure, in the one function whose job is to catch the
+    # judge being untrustworthy.
+    errored = [w for w in (w1, w2) if w == "ERROR"]
+    passed = not errored and w1 == "TIE" and w2 == "TIE"
+    if errored:
+        detail = (
+            f"the control could not be evaluated: {len(errored)} of 2 judge "
+            f"calls returned an unreadable verdict ({w1}/{w2}). This says "
+            f"nothing about whether blinding leaked — it says the judge did not "
+            f"answer. Re-run the control before reading this run's comparisons."
+        )
+    elif passed:
+        detail = "the judge tied two identical candidates, as it must"
+    else:
+        detail = (
             f"the judge picked a winner ({w1}/{w2}) between two IDENTICAL "
             f"candidates. Blinding is leaking or the judge is reading position. "
             f"Do not trust this run's comparisons."
-        ),
+        )
+    return {
+        "control": "identical-pair",
+        "passed": passed,
+        "errored": bool(errored),
+        "verdicts": [w1, w2],
+        "reasons": [r1[:300], r2[:300]],
+        "cost_usd": c1 + c2,
+        "detail": detail,
     }
 
 

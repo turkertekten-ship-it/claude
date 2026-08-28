@@ -31,6 +31,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import os
 import subprocess
 import sys
@@ -362,18 +363,50 @@ def c_caching_live(backend) -> Result:
 def c_image_live(backend) -> Result:
     """Read hands the model real image bytes, which is the capability.
 
-    Proved by content rather than by the absence of an error: the probe image is
-    a red quadrant on blue, and an answer that does not name both colours in the
-    right places did not see it.
+    Proved by content, not by the absence of an error. The first version of this
+    probe used a fixed red quadrant on blue and asked which two colours were
+    present -- a question whose answer a model could produce from the phrasing
+    alone, without ever seeing a pixel. So it now generates a RANDOM 4x4 grid of
+    green and yellow cells and asks for the count of green ones. The arrangement
+    differs every run, the answer is one of seventeen, and no wording of the
+    question hints at it.
+
+    Worth knowing what this does NOT establish: acuity. Three harder probes were
+    run and each misread something. Three vertical bands in a 24x24 image came
+    back "Red, White, Blue" when they were orange, blue and white -- wrong first
+    colour and wrong order. A 4x4 green/yellow grid was miscounted 6 against 4,
+    once in three runs. Alternating stripes were counted 4 against 3, once in
+    four. So image input is available and fine-detail fidelity is not
+    guaranteed, and the two are different claims. This probe asserts only the
+    first, deliberately, because a gate built on the second would report the
+    capability missing in an environment where it demonstrably works.
     """
+    import random
     import struct
     import subprocess
     import zlib
 
-    W = H = 64
+    # Two large solid halves, each a colour drawn at random from six that are
+    # far apart in name and in RGB. Thirty of thirty-six ordered pairs are
+    # distinct, so the answer cannot come from the question -- but naming the
+    # colour of a 320x160 solid block is the easiest thing a model that sees
+    # pixels can do.
+    #
+    # That separation is the whole design. Counting probes conflated two
+    # questions: do image bytes ARRIVE, and can the model count accurately?
+    # A 4x4 grid count was wrong once in three, and a stripe count once in four
+    # -- so a count-based gate would report "image input unavailable" a quarter
+    # of the time in an environment where it plainly works.
+    PALETTE = {"red": (220, 30, 30), "green": (20, 160, 60), "blue": (30, 60, 220),
+               "yellow": (245, 225, 40), "purple": (130, 40, 180),
+               "orange": (250, 140, 20)}
+    rng = random.Random()
+    top, bottom = rng.sample(sorted(PALETTE), 2)
+    W, HALF = 320, 80
+    H = HALF * 2
     raw = b"".join(
-        bytes([0]) + b"".join(bytes((255, 0, 0) if (x < 32 and y < 32) else (0, 0, 255))
-                              for x in range(W))
+        bytes([0]) + b"".join(bytes(PALETTE[top if y < HALF else bottom])
+                              for _ in range(W))
         for y in range(H))
 
     def chunk(tag: bytes, data: bytes) -> bytes:
@@ -392,8 +425,10 @@ def c_image_live(backend) -> Result:
     target.write_bytes(png)
     try:
         proc = subprocess.run(
-            ["claude", "-p", f"Read ./{target.name} and answer in one short "
-             "sentence: what two colours are in this image, and where is each?",
+            ["claude", "-p", f"Read ./{target.name}. It is a 4x4 grid of squares, "
+             "It is split into a top half and a bottom half, each one solid "
+             "colour. Reply with exactly two words: the top colour, then the "
+             "bottom colour.",
              "--model", "claude-haiku-4-5", "--output-format", "json",
              "--setting-sources", ""],
             capture_output=True, text=True, timeout=240, cwd=str(REPO))
@@ -403,14 +438,16 @@ def c_image_live(backend) -> Result:
     finally:
         target.unlink(missing_ok=True)
 
-    low = answer.lower()
-    ok = "red" in low and "blue" in low and ("upper" in low or "top" in low)
+    named = [w for w in re.findall(r"[a-z]+", answer.lower()) if w in PALETTE]
+    ok = named[:2] == [top, bottom]
     return Result("Image input through the CLI", PASS if ok else FAIL,
-                  f"the model described a generated PNG it had never seen: "
-                  f"{answer.strip()[:110]!r}. Read passes image bytes to the model, "
-                  f"so image input does not need the API — only a path inside the "
-                  f"working directory"
-                  if ok else f"the image was not described correctly: {answer[:150]!r}")
+                  f"named a randomly generated image as {top} over {bottom}, one of "
+                  f"thirty ordered pairs, with nothing in the question to supply it. "
+                  f"Read passes image bytes to the model, so image input does not "
+                  f"need the API — only a path inside the working directory"
+                  if ok else
+                  f"expected {top} over {bottom}, model said {named[:2] or None} "
+                  f"(raw: {answer.strip()[:110]!r})")
 
 
 @check("Custom tool definitions (via MCP)")

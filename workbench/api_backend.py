@@ -269,7 +269,34 @@ class AnthropicAPIBackend(Backend):
                         delta = event.get("delta") or {}
                         if envelope["content"]:
                             block = envelope["content"][-1]
-                            block["text"] = block.get("text", "") + delta.get("text", "")
+                            dt = delta.get("type")
+                            if dt == "input_json_delta":
+                                # Tool arguments stream as partial JSON. Only
+                                # `text` was accumulated, so every tool call made
+                                # over a streaming request arrived with input={}
+                                # -- the arguments silently discarded.
+                                block["_partial_json"] = (
+                                    block.get("_partial_json", "") + (delta.get("partial_json") or ""))
+                            elif dt == "thinking_delta":
+                                block["thinking"] = (
+                                    block.get("thinking", "") + (delta.get("thinking") or ""))
+                            elif dt == "signature_delta":
+                                block["signature"] = (
+                                    block.get("signature", "") + (delta.get("signature") or ""))
+                            else:
+                                block["text"] = block.get("text", "") + (delta.get("text") or "")
+                    elif kind == "content_block_stop":
+                        # Parse the accumulated tool arguments once the block
+                        # closes; a partial fragment is not valid JSON.
+                        if envelope["content"]:
+                            block = envelope["content"][-1]
+                            raw_json = block.pop("_partial_json", None)
+                            if raw_json is not None:
+                                try:
+                                    block["input"] = json.loads(raw_json) if raw_json.strip() else {}
+                                except json.JSONDecodeError:
+                                    block["input"] = {}
+                                    block["_unparsed_input"] = raw_json[:500]
                     elif kind == "message_delta":
                         envelope.update(event.get("delta") or {})
                         envelope["usage"].update(event.get("usage") or {})

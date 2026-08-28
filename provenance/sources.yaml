@@ -1268,3 +1268,30 @@ sources:
       the full re-run, because the previous attempt cost $7.73 and produced
       nothing usable. Six cases at one repeat cannot show that attrition is
       gone across all forty; it shows the mechanism was the one diagnosed.
+
+  - id: VISION-ACUITY-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T21:30Z"
+    method: >-
+      four probe images generated locally and read through the CLI's Read tool
+      (claude -p --allowedTools Read), each checked against the generator's own
+      record of what it drew; then tools/parity_check.py run repeatedly.
+    evidence: >-
+      Pixels do reach the model: a randomly seeded 4x4 green/yellow grid was
+      counted correctly at 7 of 16, and the redesigned two-halves probe named
+      the right ordered colour pair on 4 of 4 consecutive runs (yellow/green,
+      red/yellow, orange/blue, orange/blue). Fine detail is less reliable: a
+      24x24 image of three vertical bands - orange, blue, white - came back
+      "Red, White, Blue", wrong in both the first colour and the order; the 4x4
+      grid count was wrong on 1 of 3 runs (6 against 4); and an alternating
+      stripe count was wrong on 1 of 4 (4 against 3).
+    note: >-
+      Two different claims, and the parity row asserts only the first. The
+      original probe used a fixed red-quadrant-on-blue image and asked which
+      two colours were present - answerable from the question's own phrasing
+      without seeing a pixel. The count-based replacements were unguessable but
+      failed 25-33% of the time, which would have reported the capability
+      missing in an environment where it demonstrably works. Naming two large
+      solid halves is unguessable at 1 in 30 and easy for anything that sees.
+      The acuity limits are recorded in the probe's docstring rather than
+      gated on.

@@ -26,7 +26,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
-from workbench import backend, graders, runner, spec, stats, validity  # noqa: E402
+from workbench import backend, blind, graders, runner, spec, stats, validity  # noqa: E402
 from workbench.backend import Completion, EchoBackend, Request  # noqa: E402
 from workbench.blind import (  # noqa: E402
     Candidate, blind_text, identical_pair_control, identity_tokens, judge_pair,
@@ -1184,6 +1184,76 @@ def test_answer_rate_control() -> None:
     check("comparable arms pass the control", validity.answer_rates(fine).passed)
 
 
+def test_medium_review_findings() -> None:
+    """The medium-severity findings from the same review, each reproduced."""
+    print("\nmedium review findings")
+
+    # spec.py compared the raw YAML scalar for membership but stored str(id),
+    # so `1` and `"1"` loaded as two cases with the same id -- silently halving
+    # what compare() and the McNemar table measure.
+    import tempfile
+    from workbench.errors import SpecError
+
+    def loads(text: str) -> bool:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "s.yaml"
+            path.write_text(text, encoding="utf-8")
+            try:
+                spec.load_suite(str(path))
+                return True
+            except SpecError:
+                return False
+
+    check("case ids 1 and \"1\" are refused as duplicates", not loads(
+        'name: t\nvariants:\n- {id: a, system: s}\n'
+        'cases:\n- {id: 1, prompt: p}\n- {id: "1", prompt: q}\n'))
+    check("variant ids 1 and \"1\" are refused as duplicates", not loads(
+        'name: t\nvariants:\n- {id: 1, system: s}\n- {id: "1", system: t}\n'
+        'cases:\n- {id: c, prompt: p}\n'))
+    check("distinct ids still load", loads(
+        'name: t\nvariants:\n- {id: a, system: s}\n'
+        'cases:\n- {id: c1, prompt: p}\n- {id: c2, prompt: q}\n'))
+
+    # blind.py reported an unreadable judge verdict as a FAILED blinding
+    # control -- asserting a leak it had not measured, in the one function
+    # whose job is to catch the judge being untrustworthy.
+    class DeadJudge:
+        name, charges_money = "dead", False
+        def available(self): return True, ""
+        def complete(self, request):
+            return backend.Completion(text="not json at all", model="m")
+
+    control = blind.identical_pair_control(DeadJudge(), "criterion", "text", "judge")
+    check("an unreadable control verdict is reported as unevaluated",
+          control.get("errored") is True and "says nothing about" in control["detail"],
+          control["detail"][:120])
+
+    # contains_any/contains_all iterated a bare string character by character.
+    from workbench.graders import GraderError
+    ctx = graders.GradingContext(
+        completion=backend.Completion(text="the quick brown fox", model="m"),
+        case_id="c", variant_id="v")
+    for gtype in ("contains_any", "contains_all"):
+        try:
+            graders.run_grader(spec.Grader(type=gtype, config={"values": "hello"}), ctx)
+            check(f"{gtype} refuses a scalar `values`", False, "it was accepted")
+        except GraderError:
+            check(f"{gtype} refuses a scalar `values`", True)
+
+    # A truncated cache entry raised out of complete() forever.
+    with tempfile.TemporaryDirectory() as tmp:
+        cached = backend.CachingBackend(backend.EchoBackend(), cache_dir=tmp)
+        req = backend.Request(prompt="hello", model="m")
+        cached.complete(req)
+        entry = next(Path(tmp).rglob("*.json"))
+        entry.write_text('{"text": "trunca', encoding="utf-8")
+        try:
+            again = cached.complete(req)
+            check("a corrupt cache entry is a miss, not a crash", bool(again.text))
+        except Exception as exc:  # noqa: BLE001
+            check("a corrupt cache entry is a miss, not a crash", False, repr(exc))
+
+
 def main() -> int:
     test_render()
     test_spec()
@@ -1206,6 +1276,7 @@ def main() -> int:
     test_registry_kinds()
     test_review_findings()
     test_answer_rate_control()
+    test_medium_review_findings()
 
     print()
     if FAILURES:
