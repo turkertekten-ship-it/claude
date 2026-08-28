@@ -498,6 +498,47 @@ self-verification refused to install a linter that crashed on import, the
 target-count assertion from loop eleven noticed a target added without a test,
 and the consistency check named the missing module.
 
+## Fifteenth loop — three defects behind one property
+
+Loop fourteen found its bug by testing a property rather than an example, so
+Observe asked what other properties should hold. The sharpest: **filling a gap
+must never lower the score**, or the tool punishes doing what it just asked for.
+
+Monotonicity held. What it exposed was two steps where filling a slot changed
+nothing, and behind those, three defects.
+
+**A statement of fact satisfied the acceptance slot.** The cue matched any
+mention of passing, verifying or green, so "the suite currently passes" — a
+fact about today, sitting in a CONTEXT section — was read as the test on the
+answer. `NO_ACCEPTANCE` therefore never fired on any prompt with decent
+context. That is the damaging direction of error: a false *present* lets a
+prompt through, where a false absent merely nags.
+
+**Cues broke across line wraps.** Eighty-six of these alternatives are phrases,
+every prompt in this repository is wrapped at eighty columns, and
+`accepted only when` straddling a break was simply not seen. A slot could be
+reported absent because of where the text happened to wrap.
+
+**`^` was never a line anchor.** The cues compiled without `re.MULTILINE`, so
+"an imperative at the start of a line" only ever matched the start of the whole
+prompt. It had been working by accident, through the alternative that fires
+after a full stop.
+
+> The surprise: the second and third had been true for the entire session. Every
+> score in every loop was computed with slot detection that depended on where
+> lines happened to break. The numbers moved only slightly when it was fixed,
+> which is luck rather than vindication.
+
+Fixing the first two collided with loop fourteen's fix: a heading supplies no
+slot, but the format this system recommends puts the framing in the heading
+(`## ACCEPTANCE TEST`) and the substance on the line below, so together they
+rejected a well-formed acceptance test. A labelled section now supplies its slot
+when it has content under it — neither half alone.
+
+Four properties are now tests: filling a slot never lowers the score, a fact is
+not a test, a line break does not hide a slot, and structure alone earns
+nothing.
+
 ## Still open
 
 `U-6`, `U-7` and `U-8` in [unknowns.md](unknowns.md): what Saraev actually

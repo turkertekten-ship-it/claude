@@ -81,7 +81,7 @@ class Slot:
 
 
 def _c(pattern: str) -> re.Pattern:
-    return re.compile(pattern, re.I)
+    return re.compile(pattern, re.I | re.M)
 
 
 SLOTS: tuple[Slot, ...] = (
@@ -121,9 +121,22 @@ SLOTS: tuple[Slot, ...] = (
     ),
     Slot(
         "ACCEPTANCE", "ACCEPTANCE TEST",
-        _c(r"\bdone when\b|\bsuccess (is|means|criteria)\b|\bacceptance\b|\bcriteri(a|on)\b|\bmust pass\b|\bpasses?\b|\bverif(y|ied|ication)\b|\bcheck that\b|\bprove\b|\bfalsif\w*\b|\bdefinition of done\b|\bcorrect (if|when)\b|\bit works when\b|\bso that i can\b|\bjudged? (by|on)\b"
-           r"|\b(right|correct|valid|accepted|complete|done) only (if|when)\b|\bonly if\b"
-           r"|\bexits? (0|zero|non-?zero)\b|\bgreen\b"),
+        _c(r"\bdone when\b|\bsuccess (is|means|criteria)\b|\bacceptance\b|\bcriteri(a|on)\b"
+           r"|\bdefinition of done\b|\bit works when\b|\bso that i can\b|\bjudged? (by|on)\b"
+           r"|\bcorrect (if|when)\b|\bthe check that\b"
+           r"|\b(right|correct|valid|accepted|complete|done) only (if|when)\b"
+           # Weak words need a criterion around them. "The suite currently
+           # passes" is a fact about today; "must pass" is a condition on the
+           # answer, and only the second is an acceptance test. Crediting the
+           # first silently retired this slot on any prompt with good context.
+           r"|\b(must|should|has to|have to|needs? to|will) (pass|be green|stay green|exit|return|match|hold)\b"
+           r"|\b(verify|check|confirm|prove) that\b|\b(stays?|remains?) green\b"
+           r"|\bexits? (0|zero|non-?zero)\b|\buntil (it|they) pass\b|\bmust pass\b"
+           # "A failure means your write-up is not done" states a criterion by
+           # naming what failing it costs. Common, and missed by every other
+           # alternative here.
+           r"|\b(a failure|failure|non-?zero|red|any finding) means\b"
+           r"|\bmeans (you are|it is|the \w+ is|your \w+ is) not (done|finished|ready)\b"),
         "the check that decides whether the answer is right, written before the answer exists",
         "A prompt with no acceptance test cannot be failed, so it cannot be improved either.",
     ),
@@ -714,6 +727,40 @@ class Report:
 BLOCKQUOTE = re.compile(r"^\s*>")
 
 
+# A slot label as written maps onto one of the seven keys.
+SECTION_ALIASES = {
+    "ROLE": "ROLE", "CONTEXT": "CONTEXT", "BACKGROUND": "CONTEXT", "TASK": "TASK",
+    "CONSTRAINT": "CONSTRAINTS", "CONSTRAINTS": "CONSTRAINTS",
+    "OUTPUT": "OUTPUT", "OUTPUT CONTRACT": "OUTPUT",
+    "ACCEPTANCE": "ACCEPTANCE", "ACCEPTANCE TEST": "ACCEPTANCE",
+    "ACCEPTANCE TESTS": "ACCEPTANCE", "SUCCESS CRITERIA": "ACCEPTANCE",
+    "IF YOU CANNOT": "ESCAPE", "ESCAPE": "ESCAPE",
+}
+
+
+def sections_with_content(lines: list[str]) -> dict[str, list[str]]:
+    """Slot sections that actually have something under them.
+
+    A heading alone supplies nothing — that was the fourteenth loop's finding —
+    but a heading with a line beneath it supplies its slot, because the label
+    frames what the line says. `## ACCEPTANCE TEST` over `` `run_all.sh` passes ``
+    is an acceptance test; either half on its own is not.
+    """
+    out: dict[str, list[str]] = {}
+    current: str | None = None
+    for line in lines:
+        labelled = slot_of(line)
+        if labelled:
+            name, rest = labelled
+            current = SECTION_ALIASES.get(name.upper())
+            if current and rest.strip():
+                out.setdefault(current, []).append(rest)
+            continue
+        if current and line.strip():
+            out.setdefault(current, []).append(line)
+    return out
+
+
 def strip_fences(text: str) -> str:
     """Drop what the prompt is displaying rather than saying.
 
@@ -743,12 +790,24 @@ def analyse(text: str, profile: str = DEFAULT_PROFILE, source: str = "-") -> Rep
     unlabelled = "\n".join(
         "" if (slot_of(line) and not slot_of(line)[1]) else line for line in lines
     )
+    # Every prompt in this repository is wrapped at eighty columns, and most of
+    # these cues are phrases. "accepted only when" straddling a line break was
+    # simply not seen, so a slot was reported absent because of where the text
+    # happened to wrap. Both forms are searched: the collapsed one finds a
+    # phrase across a break, the line-structured one keeps the `^` anchors that
+    # recognise an imperative at the start of a line.
+    collapsed = re.sub(r"\s+", " ", unlabelled)
+    filled_sections = sections_with_content(lines)
     report = Report(source=source, profile=profile, words=len(re.findall(r"\w+", prose)))
 
     # Absent slots.
     grading = PROFILES[profile]
     for slot in SLOTS:
-        present = bool(slot.cue.search(unlabelled))
+        present = bool(
+            slot.cue.search(unlabelled)
+            or slot.cue.search(collapsed)
+            or filled_sections.get(slot.key)
+        )
         report.slots_present[slot.key] = present
         severity = grading.get(slot.key, "warn")
         if present or severity == "off":

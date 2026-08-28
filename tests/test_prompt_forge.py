@@ -269,6 +269,77 @@ def test_escape_is_required_everywhere() -> None:
 # --------------------------------------------------------------------------
 
 
+def test_filling_a_gap_never_lowers_the_score() -> None:
+    """Following the tool's own advice must not be punished.
+
+    If adding the section a finding asked for could lower the score, the tool
+    would sometimes penalise doing what it just told you to do.
+    """
+    print("\nfilling a slot never costs you")
+    additions = [
+        "You are a release engineer.",
+        "The repository is Python 3.11 and the suite currently passes.",
+        "Write the parser at src/p.py.",
+        "Do not add dependencies. Keep it under 40 lines.",
+        "Return one unified diff and nothing else.",
+        "Done when `bash tests/run_all.sh` exits 0.",
+        "If the file is absent, say so and stop.",
+    ]
+    for profile in sorted(pf.PROFILES):
+        text, previous = "", None
+        for addition in additions:
+            text = (text + "\n" + addition).strip()
+            score = pf.analyse(text, profile).score
+            if previous is not None:
+                check(f"{profile}: adding a slot did not lower the score",
+                      score >= previous, f"{previous} -> {score} after {addition[:30]!r}")
+            previous = score
+        check(f"{profile}: a fully filled prompt scores at least 90", previous >= 90, previous)
+
+
+def test_a_statement_of_fact_is_not_an_acceptance_test() -> None:
+    """The slot cue was satisfied by any mention of passing or verifying.
+
+    "The suite currently passes" is a fact about today. Crediting it as the
+    acceptance test meant NO_ACCEPTANCE silently never fired on any prompt with
+    decent context — the damaging direction, because it lets a prompt through.
+    """
+    print("\na fact about today is not a test on the answer")
+    for fact in ("Write it. The suite currently passes.",
+                 "Write it. The build is green today.",
+                 "Write it. We verified the data last week."):
+        check(f"{fact[9:40]!r} does not supply one",
+              "NO_ACCEPTANCE" in rules_for(fact), rules_for(fact))
+    for test in ("Write it. Acceptance: `run_all.sh` passes.",
+                 "Write it. A failure means your write-up is not done.",
+                 "Write it. Non-zero means you are not done.",
+                 "Write it. Done when the suite exits 0.",
+                 "Write it. It must pass the linter.",
+                 "Write it. Verify that the count matches."):
+        check(f"{test[9:40]!r} does",
+              "NO_ACCEPTANCE" not in rules_for(test), rules_for(test))
+
+
+def test_line_breaks_do_not_hide_a_slot() -> None:
+    """Every prompt here is wrapped at eighty columns.
+
+    Most cues are phrases, so a slot could be reported absent purely because of
+    where the text happened to wrap — and `^` matched only the start of the
+    whole prompt, so "an imperative at the start of a line" never fired either.
+    """
+    print("\nwhere a line breaks does not change the reading")
+    check("a phrase split across a break is still found",
+          "NO_ACCEPTANCE" not in rules_for("Write it.\nThe audit is accepted\nonly when the suite passes."))
+    check("the same phrase on one line is too",
+          "NO_ACCEPTANCE" not in rules_for("Write it. The audit is accepted only when the suite passes."))
+    check("an imperative opening a line is found without prior punctuation",
+          "NO_TASK" not in rules_for("Context: the repo is Python\nWrite the parser at src/p.py."))
+    check("a labelled section supplies its slot",
+          "NO_ACCEPTANCE" not in rules_for("Write it.\n\n## ACCEPTANCE TEST\n`run_all.sh` passes.\n"))
+    check("but the label alone does not",
+          "NO_ACCEPTANCE" in rules_for("Write it.\n\n## ACCEPTANCE TEST\n\n## OUTPUT CONTRACT\n"))
+
+
 def test_structure_alone_never_raises_a_score() -> None:
     """Compiling a prompt must not improve it. Only content can.
 
@@ -527,6 +598,9 @@ def main() -> int:
     test_slots()
     test_profiles_grade_differently()
     test_escape_is_required_everywhere()
+    test_filling_a_gap_never_lowers_the_score()
+    test_a_statement_of_fact_is_not_an_acceptance_test()
+    test_line_breaks_do_not_hide_a_slot()
     test_structure_alone_never_raises_a_score()
     test_compile_preserves_every_line()
     test_compile_adds_nothing_else()
