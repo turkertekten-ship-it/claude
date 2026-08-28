@@ -1973,3 +1973,82 @@ the type change on purpose.
    always a test.** Ask first whether the branch should exist. Here neither
    "delete" nor "test as written" was right: the branch was needed for safety
    and wrong in what it preserved.
+
+---
+
+## L48 - IDF measures rarity in the corpus, and the question is in a different register
+
+**The case.** "How should a password be stored so the stored form cannot be
+reversed?" is one of the six external failures, and it is not a retrieval
+failure: `bcrypt.md` comes back at **rank 0**. The abstention floor throws it
+away. The arithmetic reproduces exactly:
+
+| query stem | IDF | documents containing it (of 91) |
+| --- | --- | --- |
+| revers | 5.79 | ~0 |
+| cannot | 4.79 | ~1 |
+| password | **4.60** | ~1 |
+| store | 4.37 | ~1 |
+| form | 4.07 | ~2 |
+
+`4.5999 / 23.6204 = 0.1947` coverage, `0.6 x 0.1947 = 0.1168` relevance, against
+a 0.19 floor. The one term that identifies the answer carries **19.5%** of the
+query's weight; four scaffolding words carry 80.5%.
+
+**Why IDF cannot help here.** The coverage factor weights by IDF on the stated
+theory that "matching a term that appears everywhere is not evidence, matching a
+rare one is". That theory needs terms that appear everywhere. These do not
+appear everywhere - they appear almost nowhere. A PyPI project page is not
+written in the register a question is written in, so `cannot`, `reversed`, `my`,
+`let` and `lose` are *rare in this corpus* and score above `password`, `hook`
+and `schema`.
+
+**Measured, not asserted** (`scripts/idf_discrimination.py`). Over the 40
+goldens with an expected source and at least one discriminating query term -
+where "discriminating" is derived from the corpus as "appears in the expected
+document and in at most 20% of documents" - IDF's top-ranked query term is the
+discriminating one in **28 of 40 (70%)**. The twelve failures are all register
+mismatches:
+
+```
+let    (4.30) beats hook           <- the pluggy eval failure
+revers (5.79) beats password       <- the bcrypt eval failure
+my     (4.69) beats execut, measur
+lose   (6.64) beats databas, schema
+program(4.37) beats schema
+```
+
+**Two of the six external eval failures are in that list.** The mechanism is
+confirmed end to end rather than hypothesised.
+
+**It also explains L46.** Sharpening `coverage_power` made the pass rate
+monotonically worse (48 -> 43), which was recorded there as a fact without a
+cause. This is the cause: if the IDF ordering is right only 70% of the time,
+raising the exponent amplifies a partly *anti*-informative ordering. Two
+findings from different cycles turn out to be one.
+
+**A fix derived from the mechanism, and falsified**
+(`scripts/idf_ceiling_sweep.py`). If no single rare-in-corpus word should
+dominate a query, clipping the weight should recover the cases:
+
+| ceiling | none | 6.0 | 5.5 | 5.0 | 4.5 | 4.0 | 3.5 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| pass | 48/54 | 48 | 48 | 48 | 48 | 47 | 45 |
+
+Flat, then worse. Clipping compresses *magnitudes* and leaves the *ordering*
+alone, and the ordering is the defect: capped at 5.0, `revers` is 5.0 against
+`password` at 4.60 - still the wrong way round. Nothing was shipped.
+
+**Rules.**
+1. **A term-weighting scheme inherits the register of the text it was fitted
+   on.** IDF over documents answers "rare in these documents", and a query
+   written by a person asking a question is not a sample from that
+   distribution. On a specialised corpus the two diverge enough to invert the
+   ranking on 30% of queries.
+2. **Diagnose before fixing, and keep them separate when the fix fails.** The
+   diagnosis here is measured and survives; the first fix derived from it does
+   not. Recording the falsified fix is what stops the next cycle spending an
+   hour on the same idea.
+3. **When one cause explains two previously separate findings, prefer it.** The
+   monotone `coverage_power` result had been written down as a fact with no
+   mechanism. It had one, in another cycle's notes.

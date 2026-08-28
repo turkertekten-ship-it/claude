@@ -124,6 +124,16 @@ class HeuristicReranker(Reranker):
     #: `_surface_factor`. A reranker built without a `surface_vocabulary` simply
     #: does not apply it.
     use_surface_answerability: bool = True
+    #: The exponent on IDF in the coverage factor. 1.0, and sharpening it makes
+    #: the external pass rate monotonically worse (48/54 at 1.0 down to 43/54 at
+    #: 4.0) even though recall@8 peaks at 2.5 - see `gate_coverage_power` for
+    #: that split, and L48 for why sharpening cannot help here.
+    #:
+    #: The short version: IDF over this corpus ranks the *discriminating* query
+    #: term first in only 28 of 40 goldens (`scripts/idf_discrimination.py`),
+    #: because a PyPI page is not written in the register a question is written
+    #: in - `let` outscores `hook`, `revers` outscores `password`. Raising the
+    #: exponent amplifies an ordering that is wrong 30% of the time.
     coverage_power: float = 1.0
     #: The power the *abstention gate* weights coverage by, when it should
     #: differ from the ranking one. None means "the same", which is the default
