@@ -18,33 +18,71 @@ MMR.
 ## Measured
 
 The argument above is an argument. These are the numbers, from
-`scripts/ablation.py` on the external corpus (153 documents, 1,810 chunks,
+`scripts/ablation.py` on the external corpus (153 documents, 1,802 chunks,
 54 golden cases), each configuration differing in one thing:
 
 | configuration | pass | recall@8 | prec@8 | MRR | nDCG@8 |
 |---|---|---|---|---|---|
-| hybrid | **47/54** | **0.872** | 0.224 | **0.730** | **0.749** |
-| lexical only | **47/54** | 0.861 | 0.215 | 0.716 | 0.731 |
-| dense only | 44/54 | 0.814 | 0.212 | 0.696 | 0.716 |
-| no rerank | 38/54 | 0.721 | 0.108 | 0.630 | 0.639 |
-| no MMR | 46/54 | 0.849 | **0.238** | 0.730 | 0.743 |
+| hybrid | **49/54** | **0.9302** | 0.2471 | **0.7643** | **0.7958** |
+| lexical only | **49/54** | 0.9186 | 0.2442 | 0.7581 | 0.7839 |
+| dense only | 42/54 | 0.7209 | 0.2122 | 0.6860 | 0.6831 |
+| no rerank | 39/54 | 0.6977 | 0.1134 | 0.6196 | 0.6258 |
+| no MMR | **49/54** | **0.9302** | **0.2587** | 0.7620 | 0.7945 |
 
-Hybrid beats either arm alone on pass rate, recall, MRR and nDCG, which is the
-claim. The arms are complementary in the way predicted: **dense alone loses 0.10
-of recall, lexical alone 0.03**. Reranking is the single most load-bearing
-component (+9 cases, +0.15 recall, +0.12 precision). **MMR is no longer
-neutral**: at 91 documents it cost 0.014 of precision and bought 0.003 of nDCG,
-and at 153 it is worth a case and 0.023 of recall for 0.015 of precision. That
-conclusion was overturned by widening, which is the third time this table has
-moved under it.
+The decision stands, and the case for it is narrower than it was. **Hybrid no
+longer beats either arm alone on pass rate** - it ties lexical-only at 49/54,
+and leads only on recall (+0.012), MRR (+0.006) and nDCG (+0.012). The pass
+column reads the abstention gate and the metric columns do not, so the two need
+not move together; what carries the decision now is ordering and recall, not
+cases.
 
-On pass rate the two arms are now level, with dense alone three cases behind on
-a corpus where every metric has room to move. The pass column reads the
-abstention gate and the metric columns do not, so the two need not move
-together.
+The arms are no longer close to complementary in the way first predicted:
+**dense alone is 0.21 of recall behind**, up from 0.10, while lexical alone
+gives up 0.012. Reranking remains the single most load-bearing component
+(+10 cases, +0.23 recall, +0.13 precision).
 
-**This table has now been wrong three times, and how it was wrong is the useful
+**MMR has now reversed a fourth time - on this corpus.** On external it is back
+to costing more than it buys: identical pass rate, identical recall, +0.0013 of
+nDCG, for **-0.0116 of precision**. On the primary corpus, run in the same
+sweep, it earns a case and 0.0625 of recall (19/20 and 0.8750 with, 18/20 and
+0.8125 without) and gains precision as well.
+
+So MMR is not simply neutral, harmful or helpful: it is corpus-dependent, and the same
+is true of the arms' balance (L58 found the two corpora wanting opposite
+`base_weight` values). Quoting the external row alone - the habit this table
+encourages, since external is the gate - would have recorded "MMR costs
+precision for nothing" as a general fact about the component. It is a fact about
+one corpus.
+
+Nothing about MMR itself changed. `candidate_k` was halved to 20, leaving less
+redundancy in the candidate set for it to remove, which fits both directions:
+external's candidates were already diverse, primary's are not.
+
+The dense arm's fall from 44/54 to 42/54 has the same likely cause and is worth
+naming as a hypothesis rather than a finding: halving `candidate_k` takes the
+most from the weaker arm, which needs more candidates to land a hit. Nobody has
+measured that; it is the obvious next question this table raises.
+
+For the primary corpus (84 documents, 868 chunks, 20 cases), same run:
+
+| configuration | pass | recall@8 | prec@8 | MRR | nDCG@8 |
+|---|---|---|---|---|---|
+| hybrid | **19/20** | **0.8750** | **0.2422** | **0.6219** | **0.6483** |
+| lexical only | **19/20** | 0.8438 | 0.2188 | 0.6036 | 0.6316 |
+| dense only | 18/20 | 0.7812 | 0.2188 | 0.5755 | 0.5896 |
+| no rerank | 16/20 | 0.7500 | 0.1797 | 0.5714 | 0.5450 |
+| no MMR | 18/20 | 0.8125 | 0.2266 | 0.6172 | 0.6313 |
+
+**This table has now been wrong four times, and how it was wrong is the useful
 part.**
+
+The fourth time cost nothing because it was found by re-running the command
+rather than by trusting the file: six retrieval parameters and two chunking
+defects had changed underneath it since the numbers above were last taken, and
+every row moved. Two readings inverted - hybrid's pass-rate lead over lexical
+disappeared, and MMR went from earning a case to costing precision for nothing.
+A decision record whose measurements are stale argues for its decision with
+evidence that no longer exists.
 
 At 33 documents and 2,615 chunks, 90.9% of them PyPI download boilerplate,
 hybrid led dense-only by 0.11 of recall - but that lead was largely the lexical

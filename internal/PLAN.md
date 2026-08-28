@@ -42,19 +42,25 @@ What each retrieval arm is worth, on the external set (`scripts/ablation.py`):
 
 | configuration | pass | recall@8 | prec@8 | MRR | nDCG@8 |
 |---|---|---|---|---|---|
-| hybrid | 47/54 | 0.8721 | 0.2238 | 0.7304 | 0.7487 |
-| lexical only | 47/54 | 0.8605 | 0.2151 | 0.7157 | 0.7313 |
-| dense only | 44/54 | 0.8140 | 0.2122 | 0.6957 | 0.7163 |
-| no rerank | 38/54 | 0.7209 | 0.1076 | 0.6298 | 0.6390 |
-| no mmr | 46/54 | 0.8488 | 0.2384 | 0.7295 | 0.7430 |
+| hybrid | 49/54 | 0.9302 | 0.2471 | 0.7643 | 0.7958 |
+| lexical only | 49/54 | 0.9186 | 0.2442 | 0.7581 | 0.7839 |
+| dense only | 42/54 | 0.7209 | 0.2122 | 0.6860 | 0.6831 |
+| no rerank | 39/54 | 0.6977 | 0.1134 | 0.6196 | 0.6258 |
+| no mmr | 49/54 | 0.9302 | 0.2587 | 0.7620 | 0.7945 |
 
-Reranking is the most load-bearing component by a distance, and hybrid beats
-either arm alone on every metric. That answers the question ADR 0004 had
+Reranking is the most load-bearing component by a distance. Hybrid no longer
+beats either arm alone on *every* metric: it ties lexical-only on pass rate and
+leads on recall, MRR and nDCG only. MMR is corpus-dependent - it costs
+precision for nothing here and earns a case on the primary corpus. See ADR 0004
+for both tables and the fourth time this one went stale. That answers the question ADR 0004 had
 deferred: at 33 documents dense-only matched hybrid, and the deferral rather
 than the removal of an arm was the right call (L29).
 
 On pass rate the two arms are level at 153 documents, while dense alone is
-three cases behind; MMR, neutral at 91 documents, is now worth a case.
+seven cases behind - a gap that widened from three when `candidate_k` was
+halved, which is the ADR's leading hypothesis and not yet measured. MMR has
+been neutral, then worth a case, and is now corpus-dependent: it costs 0.0116
+of precision here and earns a case on the primary corpus.
 The pass column is sensitive to the abstention gate and the metric columns are
 not, so a change to the floor moves one and leaves the other untouched.
 

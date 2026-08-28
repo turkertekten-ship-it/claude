@@ -22,7 +22,17 @@ paraphrase. What it does give, which matters more for the *pipeline*, is:
 Two design details do most of the work:
 
 *Signed hashing.* Each feature gets a deterministic +1/-1 sign, so collisions
-cancel in expectation instead of accumulating into a systematic bias.
+cancel in expectation instead of accumulating into a systematic bias. In
+expectation - the variance still grows with load, and the load is high: the
+153-document external corpus has 126,791 distinct features (tokens plus 4-grams)
+in 768 buckets, so **165 features per bucket** and not one bucket empty. That
+reads like an obvious ceiling and is not one. Swept 256 -> 6144, a 24x change in
+crowding, gate pass rate goes 48, 49, 48, 48, 49 and the held-out set sits at
+19/22 for every value: non-monotone and one case wide, which is noise rather
+than a trend (L72). 6144 costs 50% more index time and 8x the vector storage to
+buy it. The default stays at 768, and the honest reason is that dimension is not
+a lever here - not that 768 was found optimal, since every other retrieval
+parameter was tuned at it. `scripts/embed_dim_sweep.py`.
 
 *Character n-grams.* Subword features give robustness to morphology and typos
 ("chunking" near "chunked") without a learned vocabulary, and they are what

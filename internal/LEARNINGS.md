@@ -3560,3 +3560,118 @@ unmeasurable - say which*, I went looking instead of moving on. The answer was
 3. **Re-measure after every patch, including the obvious one.** Two patches this
    cycle looked right and did nothing; both were caught by re-running a probe
    that took four seconds.
+
+---
+
+## L72 - 165 features per bucket, and relieving the crowding made it worse
+
+`HashingEmbedder` projects tokens and character 4-grams into `dim` buckets by
+signed feature hashing. Its docstring says signed hashing makes collisions
+"cancel in expectation instead of accumulating into a systematic bias" - which
+is true of the expectation and silent about the variance, and nobody had ever
+measured the load it was talking about.
+
+The external corpus has **126,791 distinct features** and `dim` is 768:
+**165 features per bucket**, with not one bucket empty at any dimension tried
+up to 12,288. Every coordinate of every document vector is a signed sum of
+about 165 unrelated features. That looks like an obvious, unexamined ceiling on
+the dense arm, and the prediction was that raising `dim` would help.
+
+It does not, and the shape of the non-result is the point:
+
+    dim            |  256   768*  1536  3072  6144
+    features/bucket|  495   165    83    41    21
+    gate pass /54  |   48    49    48    48    49
+    gate MRR       | .7566 .7643 .7566 .7461 .7674
+    gate nDCG@8    | .7831 .7958 .7841 .7766 .7981
+    held pass /22  |   19    19    19    19    19
+    index time     | 3.2s  3.4s  3.5s  3.8s  5.1s
+
+**I wrote this entry up with the first four rows and had to correct it.** With
+`6144` still running, the table read as a clean monotone decline and I recorded
+"768 is the peak and every larger dimension is worse". Then 6144 came in at the
+top of the table. Down, down, down, up is not a trend; it is noise at a
+resolution of one case in 54, and the four-row version had a mechanism ready to
+explain it.
+
+**What this establishes.** The collision-load argument is falsified: relieving
+crowding 24-fold moves gate pass by one case in a direction that does not hold,
+and held-out sits at exactly 19/22 across the whole 24x range. **Dimension is
+not a lever here**, and 6144 costs 50% more index time and eight times the
+vector storage for it. It also does not establish that 768 is optimal in any
+deep sense: every other retrieval parameter in this project was tuned *at* 768,
+so part of what any peak here measures is the rest of the system being fitted
+to it.
+
+The hypothesis the four-row table invited - that collisions act as an accidental
+smoothing, since character n-grams exist to blur "chunking" into "chunked" - is
+exactly the kind of story a noisy monotone trend attracts. It may still be true;
+this measurement neither supports nor refutes it, and testing it would mean
+varying `ngram_size` and `use_ngrams` against `dim`, which has not been done.
+
+**Rules.**
+1. **A load factor nobody has measured is not evidence of a bottleneck, and
+   measuring it is not either.** 165:1 is a real number and pointed the wrong
+   way; only the sweep settled it.
+2. **Do not read a trend off a partial sweep.** Three points fell in a line, I
+   named the peak and reached for a mechanism, and the fourth point landed
+   above the peak. Wait for the last row, especially the slow one - it is slow
+   because it is the extreme, which is where a trend is confirmed or broken.
+3. **Non-monotone is the tell for noise.** Where a parameter has a real effect
+   the effect has a direction; alternating 48/49/48/48/49 is a ruler that
+   cannot resolve what is being asked of it.
+4. **A parameter that looks untouched may still be load-bearing through
+   everything tuned around it.** "Best in the sweep" and "optimal" come apart
+   when the sweep moves one knob and six others were fitted at its current
+   value - say which one you measured.
+
+---
+
+## L73 - The decision record argued from evidence that no longer existed
+
+ADR 0004 decides for hybrid retrieval and backs it with an ablation table. The
+table already carried an unusual amount of self-knowledge - it opens "this table
+has now been wrong three times" and explains each. It was wrong a fourth time,
+and I found it only because the dense-dimension sweep (L72) made me look at what
+the arms were currently worth.
+
+Six retrieval parameters and two chunking defects had changed underneath it.
+Every row moved, and two readings inverted:
+
+| configuration | was | now |
+|---|---|---|
+| hybrid | 47/54, recall 0.872 | 49/54, recall 0.9302 |
+| lexical only | 47/54, recall 0.861 | 49/54, recall 0.9186 |
+| dense only | 44/54, recall 0.814 | 42/54, recall 0.7209 |
+| no rerank | 38/54 | 39/54 |
+| no MMR | 46/54, prec 0.238 | 49/54, prec **0.2587** |
+
+The ADR's headline sentence - "hybrid beats either arm alone on pass rate,
+recall, MRR and nDCG" - is now false in its first clause: hybrid ties
+lexical-only at 49/54 and leads only on the metric columns. And MMR, which the
+previous refresh had found "worth a case and 0.023 of recall", now costs 0.0116
+of precision on external and buys 0.0013 of nDCG.
+
+**The part I nearly got wrong.** I wrote "MMR has reversed a fourth time and is
+back to costing more than it buys" from the external table, which is the gate
+and therefore the table one reads. The same run's primary-corpus table has MMR
+earning a case *and* recall *and* precision (19/20 and 0.8750 against 18/20 and
+0.8125). MMR is not harmful; it is corpus-dependent, exactly as `base_weight`
+turned out to be (L58). Publishing the external row alone would have recorded a
+fact about one corpus as a fact about the component.
+
+The likely mechanism for both reversals is one parameter: `candidate_k` was
+halved to 20 this session. Less redundancy reaches MMR, and the weaker arm has
+fewer candidates in which to land a hit. That is a hypothesis - it has not been
+measured, and it is now the obvious next question.
+
+**Rules.**
+1. **A measurement that justifies a decision has a shelf life, and a decision
+   record is where staleness does the most damage** - the numbers are there
+   precisely so the decision is not re-argued, so nobody re-checks them.
+2. **Re-run the ablation after changing anything it ablates.** Six parameter
+   changes each looked local; together they moved every row of the table that
+   justifies the architecture.
+3. **When two corpora are measured, quote both or quote neither.** The gate
+   corpus is the one in front of you, and a component's behaviour there is not
+   the component's behaviour.
