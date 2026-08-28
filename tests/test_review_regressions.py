@@ -429,8 +429,14 @@ class GateCoveragePowerTest(unittest.TestCase):
     QUERY = "rare common plain"
 
     def test_sharpening_the_shared_power_moves_the_gate_as_well_as_the_order(self):
-        flat = self._results(self.TEXTS, self.QUERY, coverage_power=1.0)
-        sharp = self._results(self.TEXTS, self.QUERY, coverage_power=3.0)
+        """The behaviour the decoupling exists to prevent. `gate_coverage_power`
+        is passed as None explicitly: sharing is no longer the default (it is
+        1.0 since the corpus widened), so relying on the default here would test
+        the shipped configuration rather than the one being argued against."""
+        flat = self._results(self.TEXTS, self.QUERY,
+                             coverage_power=1.0, gate_coverage_power=None)
+        sharp = self._results(self.TEXTS, self.QUERY,
+                              coverage_power=3.0, gate_coverage_power=None)
         by_id = lambda rs: {r.chunk.chunk_id: r.components["rerank_relevance"] for r in rs}
         self.assertNotEqual(by_id(flat)["c0"], by_id(sharp)["c0"],
                             "the shared power left the gate's number untouched, "
@@ -462,11 +468,21 @@ class GateCoveragePowerTest(unittest.TestCase):
             expected = 8.0 ** power / (8.0 ** power + 2 * 1.0 ** power)
             self.assertAlmostEqual(by_id(results)["c0"], expected, places=9)
 
-    def test_none_means_the_shared_behaviour_and_is_the_default(self):
+    def test_none_means_the_shared_behaviour_and_the_default_is_decoupled(self):
+        """None still means "share", and the shipped default no longer does.
+
+        The default moved to 1.0 with the ranker at 2.0 when the corpus widened
+        to 153 documents: rank 2.0 is worth +2 cases with the gate held and
+        nothing without it. Asserting the shipped pair here means a silent
+        revert to the shared behaviour fails a test rather than a metric.
+        """
         from oodarag.retrieve.rerank import HeuristicReranker
 
-        self.assertIsNone(HeuristicReranker().gate_coverage_power)
-        shared = self._results(self.TEXTS, self.QUERY, coverage_power=3.0)
+        reranker = HeuristicReranker()
+        self.assertEqual(reranker.coverage_power, 2.0)
+        self.assertEqual(reranker.gate_coverage_power, 1.0)
+        shared = self._results(self.TEXTS, self.QUERY,
+                               coverage_power=3.0, gate_coverage_power=None)
         explicit = self._results(self.TEXTS, self.QUERY,
                                  coverage_power=3.0, gate_coverage_power=3.0)
         for a, b in zip(sorted(shared, key=lambda r: r.chunk.chunk_id),
@@ -976,10 +992,22 @@ class CoveragePowerTest(unittest.TestCase):
     table in rerank.py.
     """
 
-    def test_the_default_is_plain_idf_weighting(self):
+    def test_the_default_sharpens_ranking_while_the_gate_stays_flat(self):
+        """The pair is the shipped configuration and only makes sense together.
+
+        Ranking sharpens to 2.0; the abstention gate is pinned at 1.0 so a fixed
+        floor is not silently recalibrated by it. Measured at 153 documents:
+        rank 2.0 with the gate shared is 47/54, with the gate held it is 49/54.
+        Pinning both numbers means a revert of either half fails here rather
+        than quietly costing cases.
+        """
         from oodarag.retrieve.rerank import HeuristicReranker
 
-        self.assertEqual(HeuristicReranker().coverage_power, 1.0)
+        reranker = HeuristicReranker()
+        self.assertEqual(reranker.coverage_power, 2.0)
+        self.assertEqual(reranker.gate_coverage_power, 1.0)
+        self.assertNotEqual(reranker.coverage_power, reranker.gate_coverage_power,
+                            "the two powers are equal, so the decoupling is inert")
 
     def test_raising_it_concentrates_weight_on_the_rare_term(self):
         from oodarag.retrieve.rerank import HeuristicReranker

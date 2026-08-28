@@ -124,49 +124,49 @@ class HeuristicReranker(Reranker):
     #: `_surface_factor`. A reranker built without a `surface_vocabulary` simply
     #: does not apply it.
     use_surface_answerability: bool = True
-    #: The exponent on IDF in the coverage factor. 1.0, and sharpening it makes
-    #: the external pass rate monotonically worse (48/54 at 1.0 down to 43/54 at
-    #: 4.0) even though recall@8 peaks at 2.5 - see `gate_coverage_power` for
-    #: that split, and L48 for why sharpening cannot help here.
+    #: The exponent on IDF in the coverage factor, for *ranking*. The gate uses
+    #: `gate_coverage_power` below, and the two must not be conflated: sharpening
+    #: this number is free for a relative ordering and silently recalibrates a
+    #: fixed abstention floor.
     #:
-    #: The short version: IDF over this corpus ranks the *discriminating* query
-    #: term first in only 28 of 40 goldens (`scripts/idf_discrimination.py`),
-    #: because a PyPI page is not written in the register a question is written
-    #: in - `let` outscores `hook`, `revers` outscores `password`. Raising the
-    #: exponent amplifies an ordering that is wrong 30% of the time.
-    coverage_power: float = 1.0
-    #: The power the *abstention gate* weights coverage by, when it should
-    #: differ from the ranking one. None means "the same", which is the default
-    #: and what shipped before this field existed.
+    #: Was 1.0. Raised to 2.0 after the corpus widened to 153 documents (L50),
+    #: which reversed the measurement it had been held at 1.0 by
+    #: (`scripts/gate_power_sweep.py`, external / 54 cases):
+    #:
+    #:   rank power   1.0     1.5     2.0     2.5     3.0
+    #:   pass (gate shared)  47/54  47/54  47/54  43/54  42/54
+    #:   pass (gate at 1.0)  47/54  48/54  49/54  48/54  47/54
+    #:   recall@8            0.8721 0.9070 0.9302 0.9070 0.8953
+    #:   nDCG@8              0.7487 0.7476 0.7538 0.7395 0.7328
+    #:
+    #: At 91 documents the best cell was rank 2.5 for +1 case, and it cost 0.039
+    #: MRR, 0.022 nDCG and 0.031 of primary recall - a trade, and it was declined
+    #: as an overfit. At 153 the optimum moved to 2.0 and stopped being a trade:
+    #: +2 cases, +0.058 recall, nDCG *up* on both corpora, primary unchanged on
+    #: pass, recall and MRR. The only cost is 0.018 of external MRR.
+    #:
+    #: This does not repair the register mismatch L48 measured - IDF still ranks
+    #: the discriminating query term first in only 29 of 40 goldens. Sharpening
+    #: a partly-wrong ordering works here because the gate no longer moves with
+    #: it, not because the ordering got better.
+    coverage_power: float = 2.0
+    #: The power the *abstention gate* weights coverage by. None means "the same
+    #: as `coverage_power`", which is what shipped before this field existed and
+    #: is no longer the default.
     #:
     #: They are separable because they answer different questions. Ranking asks
     #: which of these candidates is best; the gate asks whether the best one is
     #: good enough to answer from at all, against a fixed floor. Raising
     #: `coverage_power` sharpens the first and silently recalibrates the second,
-    #: because `relevance` is computed from the same number - which is why the
-    #: power sweep moves recall and pass rate in opposite directions.
+    #: because `relevance` is computed from the same number.
     #:
-    #: Measured on the external corpus, holding the gate at 1.0 while the ranker
-    #: sharpens (`scripts/gate_power_sweep.py`):
-    #:
-    #:     rank  gate=shared  gate=1.0   recall@8
-    #:     1.0      48/54      48/54      0.9186
-    #:     2.0      47/54      48/54      0.9186
-    #:     2.5      47/54      49/54      0.9419
-    #:     3.0      44/54      47/54      0.9070
-    #:
-    #: The recovery grows with the sharpening, which is the mechanism showing
-    #: itself rather than one lucky cell: the harder ranking is sharpened, the
-    #: more the shared knob decalibrates the floor.
-    #:
-    #: The default is None - the shared behaviour - deliberately. Setting the
-    #: ranker to 2.5 buys that 49th external case and 0.023 recall, and costs
-    #: 0.039 external MRR and 0.031 primary recall (0.8125 -> 0.7812). Tuning a
-    #: global default on one corpus's pass rate against another's recall is the
-    #: overfit this project has paid for before, so the control ships available
-    #: and off. On the primary corpus decoupling changes nothing at any power,
-    #: which is what "no behaviour change by default" should look like.
-    gate_coverage_power: float | None = None
+    #: Held at 1.0 while the ranker runs at 2.0. The recovery from decoupling
+    #: grows with the sharpening, which is the mechanism rather than one cell of
+    #: a grid - at 153 documents, gate shared vs gate at 1.0: 47 vs 47 at rank
+    #: 1.0, 47 vs 48 at 1.5, 47 vs 49 at 2.0, 43 vs 48 at 2.5, 42 vs 47 at 3.0.
+    #: Without it, rank 2.0 would be worth nothing and rank 2.5 would cost four
+    #: cases.
+    gate_coverage_power: float | None = 1.0
     coverage_weight: float = 0.45
     phrase_weight: float = 0.25
     #: Invisible to both eval gates, for the same reason as `recency_weight`

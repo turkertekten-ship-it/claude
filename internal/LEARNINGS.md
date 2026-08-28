@@ -2440,3 +2440,62 @@ an over-refusal. The safety argument is simply not available here any more.
 3. **A stale decision table is worse than no table**, because it converts a
    reader's diligence into a wrong move. Anyone following this one would have
    changed the floor on the strength of a cell that had gone stale.
+
+---
+
+## L54 - The corpus widening reversed a decision I had made this session
+
+Two cycles ago I measured `gate_coverage_power`, found the best external number
+this project had produced, and **declined to ship it**: rank power 2.5 with the
+gate held at 1.0 gave 49/54, and it cost 0.039 external MRR, 0.022 nDCG and
+0.031 of primary recall. Tuning a global default on one corpus's pass rate
+against another corpus's recall is the overfit already recorded twice here, so
+it shipped available and off.
+
+That was right on the evidence available. The evidence changed.
+
+Applying L52's rule - a measurement that justifies a default has a shelf life -
+to my own decision, I re-ran the sweep at 153 documents. **The optimum moved
+from 2.5 to 2.0, and stopped being a trade.**
+
+| | rank 1.0 (was) | rank 2.0 (now) |
+| --- | --- | --- |
+| external pass | 47/54 | **49/54** |
+| external recall@8 | 0.8721 | **0.9302** |
+| external nDCG@8 | 0.7487 | **0.7538** |
+| external MRR | 0.7304 | 0.7122 |
+| primary pass | 16/20 | 16/20 |
+| primary recall@8 | 0.7812 | 0.7812 |
+| primary nDCG@8 | 0.6442 | **0.6558** |
+
+At 91 documents this idea cost nDCG on both corpora and recall on primary. At
+153 nDCG rises on both, primary is unchanged on pass, recall and MRR, and the
+only cost is 0.018 of external MRR. The reason it was declined no longer exists.
+
+**Shipped, and measured end to end through the real configs** rather than the
+sweep harness: primary **18/20 -> 19/20**, external **47/54 -> 48/54**. Both
+corpora gain a case. External recall 0.8721 -> 0.9070, primary 0.8125 -> 0.8438.
+
+**What did not happen.** This does not repair the register mismatch of L48: IDF
+still ranks the discriminating query term first in only 29 of 40 goldens.
+Sharpening a partly-wrong ordering helps here *because the gate no longer moves
+with it*, not because the ordering improved. The three falsified fixes of L51
+stay falsified.
+
+**The sequence is the lesson.** A corpus widening (L50) invalidated a
+measurement (L52's expansion table), which suggested re-running a second one
+(L53's abstention floor), which suggested re-running a third - and the third
+reversed a decision made four cycles earlier in the same session. None of these
+were found by review. Each was found by re-running a command whose output was
+already written down.
+
+**Rules.**
+1. **Re-measure your own recent decisions after the data changes, not just old
+   ones.** I trusted a number I had produced myself two hours earlier because it
+   felt current. Its corpus was 40% smaller.
+2. **"Declined as an overfit" is a conclusion about a dataset, not about an
+   idea.** Record what would reverse it. Here the note said the cost was 0.031
+   of primary recall; when that cost went to zero, the decision was obvious.
+3. **One stale measurement is rarely alone.** Widening the corpus aged four
+   documented conclusions at once, and they were only found because the first
+   one prompted a sweep of the others.

@@ -28,12 +28,12 @@ negative case look like a retrieval regression.
 
 | | primary (this repo) | external (153 PyPI pages) |
 |---|---|---|
-| golden cases | 18/20 | **47/54** |
-| recall@8 | 0.8125 | 0.8721 |
-| precision@8 | 0.2031 | 0.2267 |
-| hit@8 | 0.8750 | 0.9070 |
-| MRR | 0.5766 | 0.7246 |
-| nDCG@8 | 0.6126 | 0.7440 |
+| golden cases | **19/20** | **48/54** |
+| recall@8 | 0.8438 | 0.9070 |
+| precision@8 | 0.2031 | 0.2471 |
+| hit@8 | 0.9375 | 0.9302 |
+| MRR | 0.6224 | 0.7089 |
+| nDCG@8 | 0.6463 | 0.7460 |
 | citation coverage | 1.00 | 1.00 |
 | contamination | 4/20 questions, 14 documents (29 holdouts) | 5/54 questions, 22 documents (28 holdouts) |
 | role | smoke test | **regression gate** |
