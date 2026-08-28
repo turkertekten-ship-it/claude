@@ -220,7 +220,10 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - `.claude/settings.json` carried hooks but no permissions block and no env, so every make target and every tool invocation prompted; a wildcard allowlist and `PYTHONPATH=src` were added. [src:GITHUB-PRACTICE-SURVEY-2026-08-27]
 - CLAUDE.md was 288 lines against a collected budget of 200; it is now 208, with every named rule verified present after the rewrite. [src:CLAUDEMD-TRIMMED-2026-08-27]
 - The subagent format already matched the convention used by the largest public collections — name, description written as a trigger, a minimal tool set, and a model — so no change was needed there. [src:GITHUB-PRACTICE-SURVEY-2026-08-27]
-- `rerank` now has unit tests, including the control that proves the diversity case measures diversity rather than incidental reordering; seven of eleven pipeline stages now have unit tests. [src:RERANK-TESTED-2026-08-27]
+- `rerank` now has unit tests, including the control that proves the diversity case measures diversity rather than incidental reordering. [src:RERANK-TESTED-2026-08-27]
+- Ten of the eleven pipeline stages now have unit tests, up from five; only `cli` remains, and `make demo` exercises every subcommand path it has. [src:COVERAGE-CLOSED-2026-08-27]
+- The eval harness's arithmetic was checked against hand-computed textbook values for RR, recall@k, DCG, nDCG and URI matching, so the retrieval numbers reported elsewhere in this file are sound as arithmetic. [src:COVERAGE-CLOSED-2026-08-27]
+- One assertion failed first and was wrong rather than finding a bug: content-free input embeds to a zero vector by design, and cosine returns 0.0 for it rather than dividing by zero. [src:COVERAGE-CLOSED-2026-08-27]
 
 ## Conclusion
 
