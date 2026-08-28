@@ -37,6 +37,7 @@ from .errors import SpecError
 from .graders import GradingContext, Verdict, grade
 from .render import render
 from .spec import Case, Suite, Variant
+from .validity import answer_rates
 
 Reporter = Callable[[str], None]
 
@@ -414,6 +415,14 @@ def execute(suite: Suite, backend: Backend, report: Reporter,
         if hits is not None:
             result.cache_hits += hits
             result.cache_misses += getattr(candidate, "misses", 0)
+
+    # Did both arms actually answer? A comparison between an arm that answered
+    # and one that emitted tool calls measures the wrong thing entirely, and
+    # nothing else in this pipeline would notice: the graders score what is
+    # there, and a fragment that says nothing also takes no bait.
+    rates = answer_rates(result.runs)
+    result.controls.append(rates.to_dict())
+    report(f"  control answer-rate: {'PASS' if rates.passed else 'FAIL'} — {rates.detail[:160]}")
 
     result.duration_s = time.time() - started
     return result

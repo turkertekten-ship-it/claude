@@ -52,6 +52,32 @@ def stratum_of(note: str) -> str:
     return "heldout" if "stratum:heldout" in note else "tuned"
 
 
+def attrition_check(payload: dict, threshold: float = 0.10) -> str:
+    """Warn if the arms did not answer at comparable rates. Empty when fine.
+
+    Imported from the workbench rather than reimplemented, so the analysis and
+    the runner cannot drift into disagreeing about what counts as an answer.
+    """
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+        from workbench.validity import AnswerRates, unanswered
+    except ImportError:                                   # pragma: no cover
+        return ""
+    counts: dict[str, list[int]] = {}
+    for run in payload.get("runs", []):
+        slot = counts.setdefault(run["variant_id"], [0, 0])
+        slot[1] += 1
+        if unanswered(run.get("output") or ""):
+            slot[0] += 1
+    rates = AnswerRates({v: (u, t) for v, (u, t) in counts.items()}, threshold)
+    if rates.passed:
+        return ""
+    return ("THIS RUN IS NOT A VALID COMPARISON.\n\n" + rates.detail +
+            "\n\nThe numbers below are printed because refusing to print them "
+            "would hide\nthe evidence, not because they mean anything. Do not "
+            "quote them.")
+
+
 def strata_for(payload: dict, case_ids) -> dict[str, str]:
     """Label each case tuned or heldout, and never guess silently.
 
@@ -207,6 +233,18 @@ def main(argv: list[str]) -> int:
     print("=" * 72)
     print("Estimand: mean paired difference in per-case fabrication rate.")
     print("Negative favours the operating prompt. Clustered by trap family.")
+
+    # Before any number: did both arms answer? A paired comparison where one
+    # arm produced no answer in a large share of runs is not a weak result, it
+    # is not a result. This is printed first and loudly, because the numbers
+    # below are computed either way and look exactly like a finding.
+    payload = json.loads((run_dir / "result.json").read_text(encoding="utf-8"))
+    verdict = attrition_check(payload)
+    if verdict:
+        print()
+        print("!" * 72)
+        print(verdict)
+        print("!" * 72)
 
     results = [report(rates, families, strata, "ALL CASES")]
     present = sorted(set(strata.values()))

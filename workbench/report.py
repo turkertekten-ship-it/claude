@@ -206,10 +206,34 @@ def markdown(result: RunResult) -> str:
             f"off-diagonal cells do.")
         add("")
 
-    if result.controls:
+    # The answer-rate check is reported on its own, above the blinding control,
+    # because it invalidates a comparison more completely than a leaky judge
+    # does: a judge reading position still saw two answers.
+    attrition = [c for c in result.controls if c.get("control") == "answer-rate"]
+    for control in attrition:
+        if control["passed"]:
+            continue
+        add("## Did both arms answer?")
+        add("")
+        add(f"- **FAIL** — {control['detail']}")
+        add("")
+        add("| Variant | Runs with no answer | Total | Rate |")
+        add("| --- | ---: | ---: | ---: |")
+        for vid, row in sorted(control["per_variant"].items()):
+            add(f"| `{vid}` | {row['unanswered']} | {row['total']} | {row['rate']:.0%} |")
+        add("")
+        add("> **This run is not a valid comparison and nothing below should be "
+            "quoted as one.** A run that answers with an attempted tool call, or "
+            "with nothing, has not been measured for fabrication — and it is "
+            "often scored as a pass, because a fragment that asserts nothing "
+            "also invents nothing. Fix the cause and re-run.")
+        add("")
+
+    blinding = [c for c in result.controls if c.get("control") != "answer-rate"]
+    if blinding:
         add("## Blinding control")
         add("")
-        for control in result.controls:
+        for control in blinding:
             mark = "PASS" if control["passed"] else "**FAIL**"
             add(f"- {mark} — {control['control']}: {control['detail']}")
         add("")
@@ -218,7 +242,7 @@ def markdown(result: RunResult) -> str:
             "picks a winner, it is reading position or residual identity rather "
             "than content.")
         add("")
-        if any(not c["passed"] for c in result.controls):
+        if any(not c["passed"] for c in blinding):
             add("> **The blinding control failed. Every comparison below is "
                 "unsafe to quote.** Fix the leak or change the judge before "
                 "reading anything into the win rates.")
