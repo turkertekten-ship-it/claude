@@ -17,6 +17,7 @@ set -u
 # Kök dizin betiğin KENDİ konumundan çözülür (MAFIRM ile geçersiz kılınabilir).
 M="${MAFIRM:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
 hata=0
+export MAFIRM_KOK="$M"   # gömülü Python parçacıkları köke buradan ulaşır
 YAPISAL_SADECE=0
 [ "${1:-}" = "--yapisal" ] && YAPISAL_SADECE=1
 
@@ -86,14 +87,14 @@ kontrol "her koltuk kaynak beyanı taşıyor" \
 kontrol "koltuk kapısı gerçekten bloklıyor" \
   "python3 -c \"import json,subprocess,sys,os
 o={'tool_name':'Write','tool_input':{'file_path':'birimler/_koltuklar/x.md','content':'# X'}}
-r=subprocess.run([sys.executable,os.path.expanduser('~/mafirm/.claude/hooks/kapi.py')],input=json.dumps(o),capture_output=True,text=True)
+r=subprocess.run([sys.executable,os.path.join(os.environ['MAFIRM_KOK'],'.claude/hooks/kapi.py')],input=json.dumps(o),capture_output=True,text=True)
 assert r.returncode==2, 'beyansız koltuk bloklanmadı'
 print('bloklanıyor')\""
 
 kontrol "engelleyici bulgular yerinde işaretli" \
   "python3 - <<'PYX'
 import os,re,sys
-kok=os.environ.get('MAFIRM') or os.path.expanduser('~/mafirm')
+kok=os.environ['MAFIRM_KOK']
 kayit=os.path.join(kok,'hafiza','dogrulama-bulgulari.md')
 eksik=[]
 for satir in open(kayit,encoding='utf-8'):

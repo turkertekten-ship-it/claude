@@ -289,6 +289,16 @@ on üçü silinmiş — ve **tamamen boş bir `esik.py`**.
 3. `test -z "$(grep -rL ...)"` hiç dosya yokken geçer.
 → Her kontrol bir **eşik** doğrulamalı, bir sayı yazdırmamalı. *(D takımı)*
 
+**[C] Denetim kendi yol çözümlemesini denetlemiyor.** §16 betiği yolları
+`~/mafirm` olarak sabitliyor. Sonuç: betik BAŞKA bir ağaca kopyalandığında
+kendi ağacını değil, makinedeki kurulumu ölçer — ve bu, "iki kopya aynı sonucu
+veriyor" karşılaştırmasıyla **yapısal olarak görülemez**, çünkü her iki ağaç da
+diskteyken sonuçlar zaten aynı çıkar.
+→ Kök, betiğin kendi konumundan çözülmeli (`BASH_SOURCE`, `__file__`) ve bir
+ortam değişkeniyle geçersiz kılınabilmeli; gömülü Python parçacıkları da o
+kökü kabuktan devralmalı. Denetim, kaynak ağaç YOKKEN de yeşil olmalı.
+*(S-01, S-02)*
+
 **[C] Denetimin bakmadığı şeyler:** kancanın `settings.json`'da gerçekten
 kayıtlı olup olmadığı, matcher'ın kapsamı, `hafiza/cikar-catismasi.md`'nin
 varlığı (§2 klasörü kuruyor ama dosyayı hiç oluşturmuyor), koltuk sayısı ve

@@ -1,5 +1,5 @@
 ###############################################################
-#  KÖR SINAMA TAKIMI — 2026-08-28T08:25:49Z
+#  KÖR SINAMA TAKIMI — 2026-08-28T08:31:12Z
 ###############################################################
 
 /root/mafirm/sinama/ks_a_esik.py:45: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
@@ -292,9 +292,9 @@ GEÇTİ L-06   hafiza/ dosyalarının hepsi var
 KÖR SINAMA M — errata ↔ sınama izlenebilirliği
 ================================================================================================
 GEÇTİ M-01   her errata maddesi bir sınama vakasına atıf yapıyor
-        45 madde · atıfsız 0: yok
+        46 madde · atıfsız 0: yok
 GEÇTİ M-02   atıf yapılan her vaka kimliği gerçekten tanımlı
-        177 tanımlı kimlik · uydurma dayanak: yok
+        182 tanımlı kimlik · uydurma dayanak: yok
 GEÇTİ M-03   [A] ve [B] maddelerinin atıfları sadık sistemde gerçekten kaldı
         sadık koşumda kalan vaka: 41 · sınanmamış ağır madde: yok
 GEÇTİ M-04   sadık sistemde kalan her vaka errata'da ya da raporda açıklanmış
@@ -393,7 +393,7 @@ KÖR SINAMA R — yön, insan onayı ve dil kuralları
 GEÇTİ R-01   rapor cevapla başlıyor, yöntemle değil
         ilk bölüm: 'Cevap' — §4: 'cevabı merak eden ilk paragrafta bulur'
 GEÇTİ R-02   yöntem bölümü bulgulardan sonra geliyor
-        yöntem 23. başlık, ilk bulgu 1. başlık
+        yöntem 24. başlık, ilk bulgu 1. başlık
 GEÇTİ R-03   iki zorunlu başlık en sonda ve doğru sırada
         son iki başlık: ['Şimdi ne yapılmalı', 'Yetkili avukat görüşü gereken konular']
 GEÇTİ R-04   raporun onay durumu açıkça yazılı (§9)
@@ -406,6 +406,21 @@ GEÇTİ R-07   mutasyon: yöntem başa alınırsa R-01 yakalar
         kural 4 ihlali makinece görülebilir
 ------------------------------------------------------------------------------------------------
 7 vaka · 7 geçti · 0 beklenen · 0 SİNYAL
+
+================================================================================================
+KÖR SINAMA S — yalıtım: klon gerçekten yalnız mı
+================================================================================================
+GEÇTİ S-01   hiçbir çalıştırılabilir dosya kökü sabitlemiyor
+        sabitleyen: yok
+GEÇTİ S-02   denetim sahte bir HOME ile yapısal olarak yeşil
+        çıkış 0 · son satır: ['DENETİM OK']
+GEÇTİ S-03   kapı öz-sınaması sahte HOME ile geçiyor
+        ['SELFTEST OK (20 vaka)']
+GEÇTİ S-04   her takım kökü kendi konumundan çözüyor
+        çözmeyen: yok
+GEÇTİ S-05   mutasyon: sabit yol eklenirse desen yakalar
+------------------------------------------------------------------------------------------------
+5 vaka · 5 geçti · 0 beklenen · 0 SİNYAL
 
 ###############################################################
 #  ÖZET
@@ -425,6 +440,7 @@ GEÇTİ R-07   mutasyon: yöntem başa alınırsa R-01 yakalar
   P · teslimatların güncelliği       temiz
   Q · rapor kendi kapılarından geçiyor mu temiz
   R · yön, onay ve dil kuralları      temiz
+  S · yalıtım (klon yalnız mı)      temiz
   ------------------------------------------------------------
   TOPLAM SİNYAL                         0
 

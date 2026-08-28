@@ -701,6 +701,35 @@ mutasyonun olduğunu kanıtlamadan geçerli değildir.*
 
 ---
 
+## Yedi buçuk artı on · Ölçüm, ölçtüğü kusuru gizliyordu
+
+Dokuz tur boyunca "kaynak ≡ klon" diye doğruladım. O karşılaştırma bir şeyi
+**yapısal olarak göremez**: her iki ağaç da diskte dururken, klondan bir dosya
+kaynağa uzansa bile iki koşum aynı sonucu verir. Ölçüm, ölçtüğü kusuru
+gizliyordu.
+
+Kaynak ağacı geçici olarak kaldırıp klonu **tek başına** koşturunca çıktı:
+
+```
+DENETİM BAŞARISIZ: 1
+```
+
+`denetim.sh` içindeki iki gömülü Python parçacığı kökü kendi başına
+`expanduser('~/mafirm')` ile çözüyordu. Kaynak ağaç yokken denetim var olmayan
+bir ağaca uzanıyor ve yanlış yere kırmızı veriyordu. **Ve takım hâlâ 0 SİNYAL
+diyordu**, çünkü hiçbir vaka denetimin kendi yol çözümlemesine bakmıyordu.
+
+Bu, bu oturumda aynı sınıfın **üçüncü** tekrarı — `kapi.py`'nin ad kaydı,
+`ks_b`'nin ad kaydı, şimdi `denetim.sh`'in gömülü parçacıkları: *iddia ettiği
+şeyin dışına uzanan bir kontrol.* Kitabın D takımıyla bulduğum kusurun tam
+karşılığı, üç ayrı yerde, benim elimden.
+
+S takımı bunu kalıcı kılıyor: statik olarak hiçbir çalıştırılabilir dosyanın
+kökü sabitlemediğini, dinamik olarak da denetimin ve kapının **sahte bir HOME
+altında** yeşil kaldığını doğruluyor.
+
+---
+
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
 
 | Bölüm | Beklenen | Gerçek | Sebep |
@@ -831,7 +860,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # on sekiz takım, 177 vaka
+./sinama/hepsi.sh                 # on dokuz takım, 182 vaka
 ./denetim.sh --yapisal            # mühendislik katmanı
 ./denetim.sh                      # mevzuat bulguları dâhil
 ```
@@ -885,9 +914,10 @@ Dokuz takım, 96 vaka:
 | P | **Teslimatların güncelliği** — raporun kendisine güncellik kuralı | CLAUDE.md §3 |
 | Q | **Rapor kendi kapılarından geçiyor mu** | CLAUDE.md §5, §14 |
 | R | **Yön, insan onayı ve dil** — raporun kendi biçimi | CLAUDE.md §4, §9, §10 |
+| S | **Yalıtım** — klon gerçekten yalnız mı | §16'nın taşınabilirliği |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamadan ve iki
-takım eklendikten sonra **177 vaka, 0 SİNYAL** — on üç bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve BEKLENEN olarak raporlanıyor — ve on üçünün her biri ya
+takım eklendikten sonra **182 vaka, 0 SİNYAL** — on üç bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve BEKLENEN olarak raporlanıyor — ve on üçünün her biri ya
 kitabın davranışının bilerek bırakılmış kaydıdır ya da belgelenmiş bir
 öntanımlı boşluktur; hiçbiri yamalı sistemde çözülmemiş bir kusur değildir.
 

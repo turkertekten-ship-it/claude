@@ -47,6 +47,8 @@ python3 "$S/ks_q_kendi_kapisi.py"; topla "Q · rapor kendi kapılarından geçiy
 echo
 python3 "$S/ks_r_yon.py";         topla "R · yön, onay ve dil kuralları" $?
 echo
+python3 "$S/ks_s_yalitim.py";     topla "S · yalıtım (klon yalnız mı)" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"
