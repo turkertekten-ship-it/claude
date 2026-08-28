@@ -3234,3 +3234,84 @@ the eval on a developer's machine is measuring something no other machine has.
    by the corpus and stops separating a right answer from a wrong one. Check it
    by counterfactual - remove the expected sources and see whether the answer
    still contains the term - not by how the case is currently scoring.
+
+---
+
+## L64 - The offsets said where the chunk came from, and 45% of them were wrong
+
+L63 filed this as the next cycle's lead: `char_start` failed to locate its own
+chunk for 206 of 831 primary chunks. Split by kind, it is not a general drift -
+it is one stage:
+
+| | located by `char_start` |
+|---|---|
+| code | **333 of 606 (55.0%)** |
+| prose | 1818 of 1822 (99.8%) |
+
+**Three mechanisms, all the same shape: something moved and the offset did
+not.**
+
+1. `_split_code` built its line units as `[(line, 0) for line in ...]` and then
+   discarded the offsets the packer returned, filing every piece at the
+   enclosing definition's start. A definition too large for one chunk therefore
+   produced pieces that all claimed the same position - one of them 3,151
+   characters from where its text actually is - and the two branches for files
+   with no recognised definitions filed *everything* at 0.
+2. `chunk_document` strips each piece before storing it, which moves where the
+   text begins by however much whitespace came off. For a packed code body that
+   is a whole indent, so even a correct piece offset pointed just before the
+   text rather than at it.
+3. `_split_transcript` filed each cue at the start of its *line*, while the unit
+   text had the leading whitespace and the `[00:04:12]` marker removed. The
+   offset pointed at the timestamp, not at the words the chunk contains.
+
+Fixing all three: **code 55.0% -> 100%**, prose unchanged at 99.8%. The four
+remaining prose chunks are ones where `_balance_fences` prepends a synthetic
+fence marker, so their text genuinely does not exist in the document - explained,
+not broken.
+
+**Nothing in the fix changes what is retrieved, and that is checkable rather
+than assumed.** Chunked over a frozen snapshot of the tree, before and after:
+606 chunks both times, all 606 chunk ids equal, all 606 lengths equal, 273
+offsets different. Splitting and rejoining on the same separator is lossless, so
+carrying real offsets is invisible to everything downstream. The external gate
+reads 48/54, recall 0.907, nDCG 0.746 before and after.
+
+**Why this lived so long: nothing reads the field.** `char_start` is computed,
+stored, selected back and never consumed - no citation, no deep link, no
+snippet. A field with no reader gets no test and no bug report, so the error had
+no way to surface; it was wrong in every index this project has ever built. That
+is the cheap moment to fix it, and the expensive moment is the first feature
+that trusts it.
+
+**The property test had to be written to the data, not to the wish.** The first
+version asserted that the document at `char_start` begins with the chunk's first
+24 characters, and it failed on *correct* prose: chunk text is a reconstruction -
+units joined with a space where the document had a blank line - so only a
+whitespace-collapsed prefix is locatable. The strict version would have reported
+a bug in the one path that never had one. Against the old chunker the test now
+fails with `pieces share an offset: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]`.
+
+**And the suite grew by ten tests with no code change.** 367 at the start of the
+session, 372 after this work, 382 for the *same commit* an hour later. The live
+GitHub cross-checks skip as a module unless the local HEAD is also the remote
+head - `push first`, says the skip message - so pushing the branch is what
+enabled them. A test count is a property of the environment as much as of the
+tree, and CI, which only ever runs pushed commits, runs a larger suite than a
+working copy does.
+
+**Rules.**
+1. **A field nobody reads is not a field nobody can get wrong - it is a field
+   nobody can notice being wrong.** Test provenance where it is written, because
+   there is no reader to complain.
+2. **An offset argument of `0` is a lie the type checker accepts.** Every one of
+   the three defects passed a syntactically fine number that meant "I do not
+   know where this is".
+3. **Every transformation after an offset is computed moves what it points at** -
+   a strip, a marker removed, a prefix added. The offset is part of the
+   transformation, not a fact recorded before it.
+4. **Write the property test to what the data can be, not to what would be
+   tidy.** Chunk text is a reconstruction; asserting a verbatim slice reports
+   bugs in code that is correct, which is how a good property gets thrown away.
+5. **The size of a test suite is an environment measurement.** Ten tests here
+   turn on whether the branch has been pushed.

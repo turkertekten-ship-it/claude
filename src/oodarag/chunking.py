@@ -178,6 +178,10 @@ def chunk_document(doc: Document, config: ChunkConfig | None = None) -> list[Chu
 
     chunks: list[Chunk] = []
     for ordinal, (text, start, meta) in enumerate(pieces):
+        # The strip moves where the chunk begins, so the offset moves with it.
+        # Without this the span points at the whitespace before the text - by a
+        # whole indent for a packed code body, which is most of them (L64).
+        start += len(text) - len(text.lstrip())
         text = _balance_fences(text.strip())
         if not text:
             continue
@@ -396,6 +400,24 @@ def _split_prose(doc: Document, config: ChunkConfig) -> list[tuple[str, int, dic
     return pieces or [(doc.text, 0, {})]
 
 
+def _line_units(text: str, base: int) -> list[tuple[str, int]]:
+    """Lines paired with where each one actually starts in the document.
+
+    The offsets used to be `0` for every line, and the packed pieces' offsets
+    were then thrown away in favour of the enclosing definition's start. Every
+    piece of a split definition therefore claimed the same `char_start` - 202 of
+    606 code chunks pointed somewhere they were not, one by 3,151 characters
+    (L64). Splitting and rejoining on "\n" is lossless, so carrying the real
+    offsets changes no chunk text and no chunk id.
+    """
+    units: list[tuple[str, int]] = []
+    cursor = base
+    for line in text.split("\n"):
+        units.append((line, cursor))
+        cursor += len(line) + 1
+    return units
+
+
 def _split_code(doc: Document, config: ChunkConfig) -> list[tuple[str, int, dict]]:
     """Code: one chunk per top-level definition, with the file's preamble kept.
 
@@ -405,34 +427,37 @@ def _split_code(doc: Document, config: ChunkConfig) -> list[tuple[str, int, dict
     language = (doc.metadata.get("language") or "").lower()
     pattern = _DEF_PATTERNS.get(language)
     text = doc.text
-    if pattern is None:
-        units = [(line, 0) for line in text.split("\n")]
-        return [(chunk, offset, {}) for chunk, offset, _ in
-                _pack_units(units, config, joiner="\n", max_tokens=config.code_max_tokens)]
-
     boundaries = [(m.start(), next(g for g in m.groups() if g) if m.groups() else "")
-                  for m in pattern.finditer(text)]
+                  for m in pattern.finditer(text)] if pattern else []
     if not boundaries:
-        units = [(line, 0) for line in text.split("\n")]
         return [(chunk, offset, {}) for chunk, offset, _ in
-                _pack_units(units, config, joiner="\n", max_tokens=config.code_max_tokens)]
+                _pack_units(_line_units(text, 0), config, joiner="\n",
+                            max_tokens=config.code_max_tokens)]
 
     pieces: list[tuple[str, int, dict]] = []
-    preamble = text[: boundaries[0][0]].strip()
+    raw_preamble = text[: boundaries[0][0]]
+    preamble = raw_preamble.strip()
     for index, (start, symbol) in enumerate(boundaries):
         end = boundaries[index + 1][0] if index + 1 < len(boundaries) else len(text)
         body = text[start:end].rstrip()
+        units = _line_units(body, start)
         if index == 0 and preamble:
+            # The preamble is joined on to the first definition, so the chunk's
+            # text spans a gap in the document. Its lines still carry their own
+            # offsets; the blank line between the two is filed at the end of the
+            # preamble, which is where it would be if it were real.
+            lead = len(raw_preamble) - len(raw_preamble.lstrip())
+            gap = lead + len(preamble)
+            units = _line_units(preamble, lead) + [("", gap)] + units
             body = f"{preamble}\n\n{body}"
-            start = 0
+            start = lead
         meta = {"symbol": symbol, "language": language}
         if estimate_tokens(body) <= config.code_max_tokens:
             pieces.append((body, start, meta))
             continue
-        units = [(line, 0) for line in body.split("\n")]
-        for packed, _, _ in _pack_units(units, config, joiner="\n",
-                                        max_tokens=config.code_max_tokens):
-            pieces.append((packed, start, dict(meta)))
+        for packed, offset, _ in _pack_units(units, config, joiner="\n",
+                                             max_tokens=config.code_max_tokens):
+            pieces.append((packed, offset, dict(meta)))
     return pieces
 
 
@@ -448,12 +473,18 @@ def _split_transcript(doc: Document, config: ChunkConfig) -> list[tuple[str, int
     offset = 0
     for line in lines:
         stripped = line.strip()
+        # Where the cue's *text* starts, not where its line does: the leading
+        # whitespace and the timestamp marker are removed from the unit, so an
+        # offset that ignores them points at "[00:04:12] " rather than at the
+        # words the chunk actually contains (L64).
+        start = offset + len(line) - len(line.lstrip())
         if stripped:
             if match := _TIMESTAMP_RE.match(stripped):
                 stamps[len(units)] = match.group(1)
+                start += match.end()
                 stripped = stripped[match.end():]
             if stripped:
-                units.append((stripped, offset))
+                units.append((stripped, start))
         offset += len(line) + 1
 
     pieces: list[tuple[str, int, dict]] = []

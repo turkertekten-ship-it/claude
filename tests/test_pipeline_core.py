@@ -7,6 +7,7 @@ is the same pipeline that runs in production, not a mock of it.
 
 from __future__ import annotations
 
+import re
 import unittest
 
 from oodarag.chunking import ChunkConfig, chunk_document
@@ -87,6 +88,11 @@ class StemmingTest(unittest.TestCase):
     def test_tokenize_stems_only_when_asked(self):
         self.assertIn("abstained", tokenize("it abstained"))
         self.assertIn("abstain", tokenize("it abstained", stem_words=True))
+
+
+def _squash(text: str) -> str:
+    """Collapse whitespace runs: packing replaces the document's newlines."""
+    return re.sub(r"\s+", " ", text).strip()
 
 
 class ChunkingTest(unittest.TestCase):
@@ -203,6 +209,67 @@ class ChunkingTest(unittest.TestCase):
         self.assertEqual(widest.token_estimate,
                          estimate_tokens(widest.indexed_text))
         self.assertGreater(estimate_tokens(widest.context_header), 0)
+
+    def test_every_chunk_span_locates_its_own_text(self):
+        """`char_start` is provenance: it says where in the document this text
+        was found. It was wrong for 273 of 606 code chunks - every piece of a
+        split definition claimed the definition's start, one of them off by
+        3,151 characters - and nothing read the field, so nothing complained
+        (L64).
+
+        The probe is a short prefix, compared with whitespace collapsed, on
+        purpose. Chunk text is a *reconstruction* - units joined with a space or
+        a newline where the document had a blank line - so only its beginning is
+        located, and only up to the whitespace the packer replaced.
+        """
+        config = ChunkConfig(target_tokens=60, hard_max_tokens=120, overlap_tokens=12)
+        big = "\n".join(f"    step_{j} = compute({j}) + offset" for j in range(30))
+        corpus = {
+            "code": ("import os\n\n" + "\n\n".join(
+                f"def fn_{i}(x):\n{big}" for i in range(4)),
+                {"language": "python"}, "gh"),
+            "prose": ("# Title\n\n" + "\n\n".join(
+                f"## Section {i}\n\n" + " ".join(
+                    f"Sentence {j} of section {i} says something." for j in range(30))
+                for i in range(4)), {}, "fs"),
+            "transcript": ("\n".join(
+                f"[00:{i:02d}:00] Speaker explains point {i} at some length here."
+                for i in range(40)), {"kind": "transcript"}, "youtube"),
+            "chat": ("\n\n".join(
+                f"user: question {i}?\n\nassistant: answer {i} explained at length."
+                for i in range(20)), {"kind": "chat_session"}, "chat"),
+        }
+        for name, (text, meta, system) in corpus.items():
+            doc = Document.from_raw(
+                RawDocument(system, name, f"mem://{name}", name, text), text, meta)
+            chunks = chunk_document(doc, config)
+            self.assertGreater(len(chunks), 1, f"{name} produced nothing to check")
+            for chunk in chunks:
+                prefix = _squash(chunk.text[:60])[:40]
+                window = _squash(doc.text[chunk.char_start:chunk.char_start + 160])
+                self.assertTrue(window.startswith(prefix),
+                                f"{name} chunk {chunk.ordinal} claims {chunk.char_start}, "
+                                f"where the document reads {window[:40]!r} and the "
+                                f"chunk reads {prefix!r}")
+
+    def test_a_split_definition_reports_where_each_piece_starts(self):
+        """The specific defect: one definition too big for a single chunk. The
+        pieces used to share the enclosing definition's offset, so every piece
+        after the first pointed at text it does not contain."""
+        config = ChunkConfig(target_tokens=50, hard_max_tokens=100, overlap_tokens=10,
+                             code_max_tokens=100)
+        body = "\n".join(f"    value_{j} = compute({j})" for j in range(60))
+        code = f"import os\n\n\ndef alpha(x):\n{body}\n"
+        doc = Document.from_raw(
+            RawDocument("gh", "big.py", "file:///big.py", "big.py", code), code,
+            {"language": "python"})
+        chunks = chunk_document(doc, config)
+
+        self.assertGreater(len(chunks), 2, "the definition was not split")
+        starts = [c.char_start for c in chunks]
+        self.assertEqual(len(set(starts)), len(starts),
+                         f"pieces share an offset: {starts}")
+        self.assertEqual(starts, sorted(starts), "pieces are not in document order")
 
     def test_ordinals_are_contiguous_after_merging(self):
         text = CORPUS["rag.md"] + "\n\n# Tail\n\nx.\n"

@@ -22,7 +22,10 @@
 | Non-negotiables | verified | All five attacked directly, not just asserted: zero-dependency walked module by module, provenance and redaction attacked with crafted inputs, degradation measured through partial and silent-empty source failures (L37-L39) |
 
 **Current measurements** (offline embedder, deterministic).
-372 tests passing. Retrieval metrics are over graded cases only - abstention
+384 tests passing - of which ten only run once the branch is pushed, because the
+live GitHub cross-checks skip as a module unless the local HEAD is also the
+remote head. The same tree reads 374 before a push and 384 after (L64), and CI,
+which only runs pushed commits, always sees the larger number. Retrieval metrics are over graded cases only - abstention
 cases have nothing to retrieve, and averaging their zeros in made adding a
 negative case look like a retrieval regression.
 
@@ -30,10 +33,10 @@ negative case look like a retrieval regression.
 |---|---|---|
 | golden cases | **18/20** | **48/54** |
 | recall@8 | 0.7812 | 0.9070 |
-| precision@8 | 0.2109 | 0.2471 |
+| precision@8 | 0.2031 | 0.2471 |
 | hit@8 | 0.8750 | 0.9302 |
-| MRR | 0.5714 | 0.7089 |
-| nDCG@8 | 0.6048 | 0.7460 |
+| MRR | 0.5729 | 0.7089 |
+| nDCG@8 | 0.6063 | 0.7460 |
 | citation coverage | 1.00 | 1.00 |
 | contamination | 4/20 questions, 10 documents (20 holdouts) | 5/54 questions, 22 documents (28 holdouts) |
 | role | smoke test | **regression gate** |
@@ -181,15 +184,12 @@ its current failures are that artefact. See docs/EVALUATION.md.
    Adding a loop over a retriever with unknown recall multiplies every failure.
    Single-shot recall on the external set is 0.9070.
 
-5. **Chunk offsets do not locate their chunk.** Measured this cycle while
-   checking something else: `char_start` fails to point at the chunk's own text
-   for **206 of 831** primary chunks and 39 of 1,822 external ones. Nothing
-   reads it today - it is stored, round-tripped and never consumed - so this is
-   provenance that is wrong before anyone depends on it rather than a live
-   defect, which is the cheapest moment to fix it. The likely sources are the
-   merge path, which keeps the first piece's offset, and unit offsets recovered
-   by `find` rather than tracked. Fixing it needs a property test that asserts
-   every chunk's span against its document, which does not exist.
+5. **Give `char_start` a reader.** Fixed and pinned in L64 - code chunks went
+   from 55% to 100% located, with chunk ids and lengths byte-identical - but the
+   field is still written and never consumed. It is now correct enough to build
+   on: a citation that quotes the exact span, or a snippet that shows a match in
+   its document rather than the whole chunk. Until something reads it, the
+   property test is the only thing keeping it honest.
 
 ## Deliberately not next
 
