@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>26 çalıştırılabilir takım · 254 vaka · 0 sinyal</span>
+    <span>27 çalıştırılabilir takım · 260 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -1595,6 +1595,56 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Yirmi ikinci tur</span>
+  <h2>Komutların iddiaları doğruydu; hiçbiri korunmuyordu</h2>
+  <p>§15 dokuz komut kurar ve her biri <strong>başka bileşenler hakkında
+  iddiada bulunur</strong>: <em>"<code>spa-inceleme</code> becerisindeki
+  <strong>sekiz adımlı</strong> sırayı uygula"</em>, <em>"<code>kurul-notu</code>
+  becerisindeki <strong>beş bölümlü</strong> sırayı uygula"</em>, <em>"tarih
+  <strong>altı aydan</strong> eskiyse bayat"</em>. L takımı komutların
+  <strong>atıflarını</strong> kontrol ediyordu; <strong>söylediklerini</strong>
+  hiçbir şey kontrol etmiyordu.</p>
+
+  <div class="callout">
+    <strong>Bu turda canlı bir kusur çıkmadı ve bunu olduğu gibi yazıyorum.</strong>
+    Beceri gerçekten sekiz adımlı, gerçekten beş bölümlü,
+    <code>BAYAT_GUN = 183</code> gerçekten altı ay. Dokuz komutun andığı her
+    beceri ve ajan mevcut. Riskli ajan dağıtan komutların hepsi sır sınırını
+    yazıyor — <em class="term">tara.md</em> bunu, on altıncı turda
+    <em class="term">esik-denetcisi</em>'ne eklediğimden <strong>daha
+    önce</strong> yapıyormuş.
+  </div>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AD-01 · AD-03</span>
+      <span class="pill w">Korunmayan doğruluk</span></div>
+    <h3>El yazısı bir sayı, ölçtüğü şeyden bağımsız yaşar</h3>
+    <p>Bulunan şey kusurun değil, <strong>kusurun yokluğunu koruyan hiçbir
+    şeyin olmadığıdır</strong>. Ve bu, raporun defalarca belgelediği sınıf:</p>
+    <ul>
+      <li>§9'un "10 beceri" beklentisi, §14 on birinciyi ekleyince bayatladı.</li>
+      <li>Bu raporun "on üç beyan" satırı, gerçek <strong>on birken</strong> yazılıydı.</li>
+      <li>F matrisi üç kuralda "mekanizma yok" diyordu; <strong>üçünün de</strong> vardı.</li>
+    </ul>
+    <p>Bugün doğru olması, yarın doğru kalacağı anlamına gelmiyor — bu üç
+    örnekte de tam olarak öyle olmadı. AD her sayısal ve yapısal iddiayı
+    <strong>kontrol edilen bir iddiaya</strong> çeviriyor; mutasyon beşte beş.</p>
+  </div>
+
+  <div class="callout">
+    <strong>Takımın kusuru: Türkçe ünlü uyumu.</strong> AD-01'in ilk hâli iki
+    iddiadan <strong>birini</strong> doğrulayıp "doğrulandı" diyordu. Desen
+    <code>(adım|bölüm|alan)l[ıi]</code> arıyordu; Türkçe
+    <em>adım<strong>lı</strong></em>, <em>bölüm<strong>lü</strong></em> verir ve
+    "beş bölümlü" sessizce atlandı. <strong>Kapsadığını sanan bir dedektör,
+    kapsamadığını söylemez.</strong>
+    <br><br>
+    §12'nin İ/ı tuzağı, U-05'in ek çekimi, ve şimdi bu: <strong>Türkçe metni
+    desenle okuyan her şey, üçüncü kez aynı yerden sızdı.</strong>
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -1712,7 +1762,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 26 takım · 254 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 27 takım · 260 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
