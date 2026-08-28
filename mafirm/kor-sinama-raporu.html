@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>40 çalıştırılabilir takım · 327 vaka · 0 sinyal</span>
+    <span>41 çalıştırılabilir takım · 332 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -2367,6 +2367,50 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Otuz altıncı tur</span>
+  <h2>Onay ihtiyacının beyanı, onayın kendisi değildir</h2>
+  <p>Otuz beşinci turun taraması her kontrolü <em>neye bağlı</em> diye
+  sınıfladı. Sormadığı soru şuydu: bir kontrol, <strong>onay gerektiğini
+  söylemekle onayın verildiğini kaydetmeyi</strong> ayırt edebiliyor mu?</p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AR-01 · AR-02</span>
+      <span class="pill a">§9'un hiçbir karşılığı yok</span></div>
+    <h3>Başlık, onayın kaydı değil; onay ihtiyacının beyanıdır</h3>
+    <p>§9 açık: <em>"Şu çıktılar <strong>adı belli bir insan onaylamadan
+    kullanılmaz</strong>…"</em> §12'nin kapsam kapısı ise <em>"Yetkili avukat
+    görüşü gereken konular"</em> <strong>başlığının</strong> varlığını arıyor
+    — ve o başlık onay <strong>ihtiyacının beyanıdır</strong>. Tam tersi.</p>
+    <p>Ölçüldü, iddia edilmedi:</p>
+    <table><thead><tr><th>metin</th><th>ateşleyen kapı</th></tr></thead><tbody>
+    <tr><td>müvekkile giden, başlıklı, <strong>onaysız</strong></td>
+        <td><strong>hiçbiri</strong></td></tr>
+    </tbody></table>
+    <p>Kitap onay verecek kişinin <strong>adını</strong> kaydediyor
+    (KAPSAM.md'de "İnsan onayı verecek kişi"). Sistem <strong>kimin
+    onaylayacağını</strong> biliyor; <strong>onayladığını</strong> hiçbir
+    yerde kaydetmiyor.</p>
+  </div>
+
+  <div class="callout">
+    <strong>Yedinci kapı eklendi — kuralı dikkatle seçildi.</strong> Kusur
+    onayın <em>yokluğu</em> değildir: bir taslak taslak olduğunu söyleyebilir,
+    bir inceleme onaylanmadığını yazabilir. <strong>Kusur, onay durumu
+    hakkındaki sessizliktir</strong> — onaylanmış gibi görünen sessizlik. Kapı
+    ya bir onay kaydı (<code>Onay: &lt;ad soyad&gt; · &lt;YYYY-AA-GG&gt;</code>)
+    ya da açık bir durum beyanı (<code>TASLAK</code> /
+    <code>onaylanmamıştır</code>) ister.
+    <br><br>
+    Ayrım keyfî değil: <strong>bu rapor onaylanmamıştır ve bunu açıkça
+    yazar</strong>, dolayısıyla kapıdan geçer. Kuralı kendi teslimatını haksız
+    yere bloklayacak biçimde yazmak da, ona muafiyet tanıyacak biçimde yazmak
+    da yanlış olurdu. AR-04 raporun bu beyanı taşımaya devam ettiğini her
+    koşumda sınar; AR-05 ise ters yönü tutar — kapıyı fazla geniş yapan bir
+    mutasyon onaylı metinde ateşleyince kırmızıya döner.
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -2484,7 +2528,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 40 takım · 327 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 41 takım · 332 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
