@@ -4,7 +4,7 @@
 Düzenleyici devlet adamlığı: kurallar nereye gidiyor.
 
 ## Kaynak durumu
-Belgelenmiş: Microsoft başkanı; "Tools and Weapons" kitabı ve teknoloji
+Belgelenmiş: Microsoft başkanı; Carol Ann Browne ile ortak yazdığı "Tools and Weapons" (2019) kitabı ve teknoloji
 düzenlemesi üzerine kapsamlı kamuya açık konuşma ve yazı kaydı vardır.
 
 ## Bu koltuğa ne sorulur

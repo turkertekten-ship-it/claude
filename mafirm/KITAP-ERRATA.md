@@ -324,6 +324,17 @@ model sakinken uyulur.
 → Her koltuk dosyası zorunlu bir **`## Kaynak durumu`** bölümü taşımalı ve
 altıncı bir kapı beyansız koltuğu bloklamalı. *(K-14, K-15)*
 
+**[B] §7 koltuk provenansını en yüksek itibar riski sayıyor ama dayanağın
+DOĞRULANMASINI istemiyor.** Kural "bir koltuğun ağzına belgelenmiş görüşüyle
+çelişen söz konmaz" der; mekanizma (bu kurulumda eklenen altıncı kapı) beyanın
+VARLIĞINI görür. Beyan ise adı geçen ESERLERE dayanır — ve o eserlerin gerçekten
+var olup olmadığı, doğru kişiye ait olup olmadığı hiçbir yerde sorulmaz. On üç
+koltuk gerçek ve çoğu yaşayan hukukçuların adını taşıdığı için bu, §1'in kanıt
+kuralının en çok gerektiği yerde uygulanmaması demektir. Bu kurulumda altı eserin
+altısı da doğrulandı ve kayda bağlandı; biri (ortak yazarlı bir kitap tek kişiye
+atfediliyordu) düzeltildi. → Koltuk beyanındaki her eser, doğrulama kaydına
+girmeli ve bir sonuç taşımalı. *(AI-02, AI-03, AI-04)*
+
 ## §9 · Beceriler
 
 **[C] Beklenen değer bayat:** "10" yazıyor, §14 `once-arastir` ekleyince **11**

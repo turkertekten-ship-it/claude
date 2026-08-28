@@ -106,3 +106,33 @@ taşıyabileceğinden fazlasını taşıyor.
 Künye ve olumsuz bulgular sağlam; kitap makaleyi gerçekten okumuş. Hatalar
 uydurma değil AKTARIM hatası: iki etki büyüklüğü yanlış (H-03, H-04), bir birim
 yanlış (H-06) ve bir çıkarım fazla geniş (H-10).
+
+---
+
+## Koltuk dayanakları — §7 (yirmi yedinci turda eklendi)
+
+§7 koltuk provenansını sistemin **en yüksek itibar riski** sayar. K-15 kapısı
+her koltuğun bir `## Kaynak durumu` beyanı taşımasını zorunlu kılar. Ama beyan
+**adı geçen eserlere** dayanır ve o eserlerin gerçekten var olup olmadığı,
+doğru kişiye ait olup olmadığı **yirmi altı tur boyunca hiç doğrulanmadı** —
+yani §1'in kanıt kuralı, §7'nin en çok önemsediği iddialara uygulanmamıştı.
+
+Doğrulama: 2026-08-28 · yöntem: web araması, yayıncı ve kütüphane kayıtları.
+
+| # | Eser | Atfedilen | Doğrulama |
+|---|---|---|---|
+| H-20 | *A Manual of Style for Contract Drafting* | Kenneth A. Adams | **Doğrulandı** — ABA yayını; 1. baskı 2004, 5. baskı 2023. |
+| H-21 | *Anatomy of a Merger* (1975) | James C. Freund | **Doğrulandı** — 1975; yazar Skadden, Arps'ta. Koltuktaki **1975 tarihi doğru**. |
+| H-22 | *Smart Negotiating* | James C. Freund | **Doğrulandı** — Simon & Schuster, 1992. |
+| H-23 | *The Inside Counsel Revolution* | Ben W. Heineman, Jr. | **Doğrulandı** — yazar GE baş hukuk müşaviri 1987–2003; koltuktaki "uzun süreli baş hukuk müşaviri" ifadesi doğru. |
+| H-24 | *Tools and Weapons* (2019) | Brad Smith | **Doğrulandı** — Penguin Press; yazar Microsoft başkanı. **Not:** eser Carol Ann Browne ile **ortak yazarlıdır**; koltuk ortak yazarı anmıyor. |
+| H-25 | "Zehir hapı"nı 1982'de tasarlayan kişi | Martin Lipton | **Doğrulandı** — Wachtell, Lipton, Rosen & Katz kurucu ortağı; pay sahibi hakları planını 1982'de geliştirdi. |
+| H-26 | *The Future of Privacy* (2013) | Eduardo Ustaran | **Doğrulandı** — DataGuidance, 2013; yazar Hogan Lovells veri koruma ortağı. |
+
+Kontrol edildi: yayıncı ve kitapçı kayıtları (2026-08-28) · Microsoft ve
+Hogan Lovells kurumsal sayfaları (2026-08-28) · Harvard Law School Forum on
+Corporate Governance (2026-08-28) · bulunamayan: yok
+
+**Kalan kusur:** H-24'te ortak yazar anılmıyor. Bir koltuğun dayanağı
+ORTAK YAZARLI bir eserse, mercek tek bir kişiye atfedilirken bu söylenmelidir;
+aksi hâlde koltuk, kitabın tamamını tek kişinin görüşü gibi sunar.

@@ -88,6 +88,8 @@ python3 "$S/ks_ag_referans.py"; topla "AG · kitaba sadık taban" $?
 echo
 python3 "$S/ks_ah_cevap.py"; topla "AH · cevabın güncelliği" $?
 echo
+python3 "$S/ks_ai_koltuk_dayanak.py"; topla "AI · koltuk dayanakları" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

@@ -34,7 +34,7 @@ Beş cümlede sebebi:
    Denetçiyi ezmek, denetçinin yapacağı bütün kontrolleri devre dışı bırakır
    ve uygulayıcı korumasız bir sisteme **yeşil** bir denetimle bakar.
 
-**Yamalı hâlde sistem çalışıyor:** otuz bir çalıştırılabilir takım — **280
+**Yamalı hâlde sistem çalışıyor:** otuz iki çalıştırılabilir takım — **285
 vaka, 15 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15, birimler arası tutarlılık takımının
 kendi mutasyon yakalaması 10/10. Ama **üç mevzuat bulgusu ile kitabın kendi içindeki bir çelişki açık kalır**
@@ -1573,6 +1573,48 @@ AH-03'ü, cevaptan bir sebep silmek AH-02 ile AH-04'ü kırmızıya çeviriyor.
 
 ---
 
+## Yedi buçuk artı yirmi altı · Gerçek kişilerin ağzına konan mercek neye dayanıyordu
+
+§7, koltuk provenansını sistemin **en yüksek itibar riski** sayar ve kuralı
+kendisi yazar: *"Bir koltuğun ağzına, o kişinin belgelenmiş görüşüyle çelişen
+bir söz asla konmaz."* K-14 bu kuralın hiçbir mekanizması olmadığını buldu;
+K-15 altıncı kapıyı ekledi ve her koltuk artık bir `## Kaynak durumu` beyanı
+taşımak zorunda.
+
+**Kapı beyanın VARLIĞINI görür.** Beyanın kendisi ise adı geçen **eserlere**
+dayanır — *Anatomy of a Merger* (1975), *A Manual of Style for Contract
+Drafting*, *Tools and Weapons*. On üç koltuk, **gerçek ve çoğu yaşayan**
+hukukçuların adını taşıyor.
+
+Yirmi altı tur boyunca hiç kimse o eserlerin **var olup olmadığını** sormadı.
+§1'in kanıt kuralı — *"dayanağı olmayan bir iddia yazılmaz"* — §7'nin en çok
+önemsediği iddialara **uygulanmamıştı**: gerçek kişilerin ağzına konan bir
+mercek, **doğrulanmamış bir bibliyografyaya** dayanıyordu.
+
+**Altısı da doğrulandı** (2026-08-28, `ks_h_kaynaklar.md` H-20..H-26) ve
+hepsi gerçek çıktı: Adams'ın ABA kılavuzu, Freund'un 1975 tarihli *Anatomy of a
+Merger*'ı (koltuktaki **tarih doğru**), Freund'un *Smart Negotiating*'i,
+Heineman'ın *The Inside Counsel Revolution*'ı, Smith'in *Tools and Weapons*'ı,
+Ustaran'ın *The Future of Privacy*'si — ve Lipton'ın 1982'de zehir hapını
+tasarladığı iddiası.
+
+**Bir kusur çıktı:** *Tools and Weapons* **ortak yazarlıdır** (Carol Ann
+Browne) ve koltuk ortak yazarı anmıyordu. Bir merceği tek kişiye atfederken
+kaynağın ortak yazarlı olduğunu söylememek, §7'nin "belgelenmiş görüş"
+ölçütünü sessizce genişletir. Koltuk düzeltildi ve AI-04 bunu kalıcı olarak
+ölçüyor.
+
+> Ve takım **kendi kaydımdaki bir eksiği** yakaladı: aramada *The Future of
+> Privacy*'yi doğruladım ama tabloya **yazmayı unuttum**. Doğrulamak ile
+> doğrulamayı KAYDETMEK ayrı işlerdir; kaydedilmeyen bir doğrulama, bir sonraki
+> okuyucu için yapılmamıştır.
+
+Mutasyon dörtte dört. En anlamlısı dördüncüsü: **boş bırakılan bir koltuğu akla
+yatkın bir metinle doldurmak** — §7'nin *"bu sistemin yapabileceği en tehlikeli
+çıktı"* dediği şey — artık AI-05 ile kırmızıya dönüyor.
+
+---
+
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
 
 | Bölüm | Beklenen | Gerçek | Sebep |
@@ -1682,6 +1724,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | AF · aparatın iddiaları | *15 takım korumasızdı* | **temiz** — koruma geriye dolduruldu |
 | AG · kitaba sadık taban | *iki özgün eksikti* | **temiz** — kitabın metninden yeniden kuruldu |
 | AH · cevabın güncelliği | *dört ağır bulgu cevapta yoktu* | **temiz** — cevap güncellendi, eşleme beyanlı |
+| AI · koltuk dayanakları | *hiç doğrulanmamıştı* | **temiz** — altı eser doğrulandı, kayda bağlandı |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -1739,8 +1782,8 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # 31 çalıştırılabilir takım:
-                                  #   280 vaka + 15 mutasyon (D)
+./sinama/hepsi.sh                 # 32 çalıştırılabilir takım:
+                                  #   285 vaka + 15 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -1812,9 +1855,10 @@ Dokuz takım, 96 vaka:
 | AF | **Aparatın kendi iddiaları** — ölçen şeyi kim ölçüyor | §16, beklenen.json |
 | AG | **Kitaba sadık taban** — kıyas ölçütü eksiksiz mi | yamalar/, §2, §5 |
 | AH | **Cevabın güncelliği** — ilk ekran en tehlikeliyi söylüyor mu | §4, KITAP-ERRATA |
+| AI | **Koltuk dayanakları** — gerçek kişilerin ağzına konan mercek neye dayanıyor | §7, §1 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**280 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**285 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)
