@@ -62,6 +62,44 @@ def main() -> int:
         "UNSOURCED_CLAIM" not in codes_for("unenforced.md"),
     )
 
+    print("quantity cases")
+    ledger = {
+        "T-INLINE": {"id": "T-INLINE", "kind": "tool_output",
+                     "collected_at": "2026-08-27", "method": "ran it",
+                     "evidence": "the run reported 127 messages across 1 conversation"},
+        "T-FILE": {"id": "T-FILE", "kind": "filesystem",
+                   "collected_at": "2026-08-27", "method": "read it",
+                   "evidence": "provenance/raw/sessions-2026-08-27T14-27Z.json"},
+    }
+
+    def q(line, led=ledger):
+        return vp.check_quantities(line, led)
+
+    check("a digit present in the evidence passes",
+          q("Indexed 127 messages. [src:T-INLINE]") == [], q("Indexed 127 messages. [src:T-INLINE]"))
+    check("a digit absent from the evidence is caught",
+          q("Indexed 999 messages. [src:T-INLINE]") == ["999"], q("Indexed 999 messages. [src:T-INLINE]"))
+    check("only the unsupported figure is reported",
+          q("127 of 999 kept. [src:T-INLINE]") == ["999"], q("127 of 999 kept. [src:T-INLINE]"))
+    check("a spelled-out count is not flagged",
+          q("There were three commits. [src:T-INLINE]") == [],
+          q("There were three commits. [src:T-INLINE]"))
+    check("thousands separators are normalised",
+          q("Saw 127 items. [src:T-INLINE]") == [])
+    check("a digit inside inline code is not treated as a claim",
+          q("Run `--limit 999` on it. [src:T-INLINE]") == [],
+          q("Run `--limit 999` on it. [src:T-INLINE]"))
+    check("a line with no source tag is not checked",
+          q("Some number 999 with no tag.") == [])
+    check("evidence naming a capture file is read, not just its path",
+          q("Sessions began at 14:07Z. [src:T-FILE]") == [],
+          q("Sessions began at 14:07Z. [src:T-FILE]"))
+    check("an unsupported digit is still caught through a capture file",
+          q("Saw 987654 sessions. [src:T-FILE]") == ["987654"],
+          q("Saw 987654 sessions. [src:T-FILE]"))
+    check("an unknown source id contributes no evidence but does not crash",
+          q("Saw 42 things. [src:NOPE]", {}) == [], q("Saw 42 things. [src:NOPE]", {}))
+
     print("ledger cases")
     known, findings = vp.load_sources()
     check("real ledger parses cleanly", not findings, [str(f) for f in findings])

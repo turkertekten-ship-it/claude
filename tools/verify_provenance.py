@@ -13,7 +13,13 @@ Checks
      not need to resolve, and it does not satisfy check 3.
   3. In files whose front matter says `provenance: enforced`, every claim line
      inside an `## Observed...` section carries a `[src:` tag.
-  4. No file uses a false-memory phrase (of the "as we discussed" family).
+  4. In enforced files, every number a claim writes IN DIGITS appears
+     somewhere in the evidence it cites (the capture file itself, when the
+     entry points at one). This is the part of "does the source actually
+     support this?" that can be settled deterministically. It deliberately
+     ignores spelled-out counts, which evidence usually supports by
+     enumeration rather than by stating a figure.
+  5. No file uses a false-memory phrase (of the "as we discussed" family).
      Those phrases assert a shared history that this repository has no record
      of, which is the exact failure mode being guarded against. A phrase
      wrapped in `inline code` is quoted rather than asserted, and is allowed.
@@ -47,6 +53,17 @@ FRONT_MATTER = re.compile(r"\A---\n(.*?)\n---\n", re.S)
 HEADING = re.compile(r"^(#{1,6})\s+(.*)$")
 FENCE = re.compile(r"^\s*(```|~~~)")
 INLINE_CODE = re.compile(r"`[^`]*`")
+# Bare digit runs on both sides. Anything cleverer trips over ISO timestamps
+# ("...T14:07"), identifiers, and decimals, producing false alarms about
+# formatting rather than real findings. A screening check must be quiet enough
+# that a hit means something.
+NUMBER = re.compile(r"\d+")
+
+# Deliberately NOT expanding spelled-out numbers. "the three later commits" is
+# supported by evidence that names three commits without ever writing "3", so
+# expanding it only produces findings about prose style. Counting enumerated
+# items is semantic work this check does not claim to do — that is the
+# fact-checker's job.
 
 # Phrases that assert a conversation history this repository cannot show.
 FALSE_MEMORY = [
@@ -164,8 +181,58 @@ def claim_lines(text: str):
         yield i, line
 
 
-def scan_markdown(path: Path, known: set[str]) -> list[Finding]:
+def evidence_text(entry: dict) -> str:
+    """All text backing one ledger entry.
+
+    When `evidence` names a capture under provenance/, the capture itself is
+    the evidence — comparing against the file *path* would check nothing.
+    """
+    parts = [str(entry.get(field, "")) for field in ("evidence", "method", "note", "collected_at")]
+    raw = str(entry.get("evidence", "")).strip()
+    if raw.startswith("provenance/"):
+        capture = REPO / raw
+        if capture.exists() and capture.is_file():
+            parts.append(capture.read_text(encoding="utf-8", errors="replace"))
+    return " ".join(parts)
+
+
+def numbers_in(text: str) -> set[str]:
+    """Digits appearing in text, with thousands separators normalised away."""
+    return set(NUMBER.findall(text.replace(",", "")))
+
+
+def check_quantities(line: str, known: dict[str, dict]) -> list[str]:
+    """Report numbers asserted in a claim that its own sources do not contain.
+
+    The verifier is otherwise syntactic: it checks a tag resolves, never that
+    the evidence supports the sentence. Numbers are the one part of that gap
+    that can be closed deterministically — a count, a date, or a size either
+    appears in the cited evidence or it does not.
+    """
+    bare = INLINE_CODE.sub("", line)
+    tags = SRC_TAG.findall(bare)
+    if not tags:
+        return []
+
+    claimed = numbers_in(SRC_TAG.sub("", bare))
+    if not claimed:
+        return []
+
+    resolved = [known[t] for t in tags if t in known]
+    if not resolved:
+        # Nothing resolves, so there is no evidence to compare against. The
+        # UNKNOWN_SOURCE finding is the real one; adding a quantity complaint
+        # for every digit on the line would just bury it.
+        return []
+
+    evidence = " ".join(evidence_text(entry) for entry in resolved)
+    supported = numbers_in(evidence)
+    return sorted(claimed - supported)
+
+
+def scan_markdown(path: Path, ledger: dict[str, dict]) -> list[Finding]:
     findings: list[Finding] = []
+    known = set(ledger)
     text = path.read_text(encoding="utf-8", errors="replace")
 
     for i, raw in enumerate(text.splitlines(), start=1):
@@ -189,6 +256,11 @@ def scan_markdown(path: Path, known: set[str]) -> list[Finding]:
 
     if is_enforced(text):
         for i, line in claim_lines(text):
+            for missing in check_quantities(line, ledger):
+                findings.append(
+                    Finding(path, i, "UNSUPPORTED_QUANTITY",
+                            f"claim asserts {missing!r}, absent from its cited evidence")
+                )
             if "[src:" not in INLINE_CODE.sub("", line):
                 findings.append(
                     Finding(path, i, "UNSOURCED_CLAIM", f"claim without a source tag: {line.strip()[:70]!r}")
@@ -210,7 +282,7 @@ def main(argv: list[str]) -> int:
     targets = [Path(a).resolve() for a in argv[1:]] or [REPO]
     known, findings = load_sources()
     for path in markdown_files(targets):
-        findings.extend(scan_markdown(path, set(known)))
+        findings.extend(scan_markdown(path, known))
 
     if not findings:
         scanned = len(list(markdown_files(targets)))

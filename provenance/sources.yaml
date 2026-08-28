@@ -355,3 +355,18 @@ sources:
       Second-hand. These are the search engine's summaries of papers on
       arxiv.org, which is egress-blocked here, so none of the papers was read.
       Treat every characterisation above as unverified until a paper is opened.
+
+  - id: QUANTITY-CHECK-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:50Z"
+    method: "iterative runs of python3 tools/verify_provenance.py over this repository while developing the UNSUPPORTED_QUANTITY check"
+    evidence: >-
+      First implementation reported 20 violations. Reading the cited entries
+      showed the check compared against the evidence *path* rather than the
+      capture file; resolving the file dropped it to 17. A regex using
+      lookarounds refused to match digits after a word character, so it missed
+      the hour in ISO stamps like T14:07; replacing it with bare digit runs
+      dropped it to 3. All 3 remaining were spelled-out counts ("the three
+      later commits") whose evidence enumerated the items without ever writing
+      a digit. Removing spelled-out expansion left 0 violations, with the tests
+      confirming an absent digit is still caught.

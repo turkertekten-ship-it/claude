@@ -41,7 +41,8 @@ python3 tests/test_verify_provenance.py
 ```
 
 It rejects unsourced claims in enforced files, source ids that do not resolve,
-malformed ledger entries, and false-memory phrases such as `as we discussed`
+malformed ledger entries, digits a claim asserts that appear nowhere in the
+evidence it cites, and false-memory phrases such as `as we discussed`
 or `you previously said` — phrases that assert a shared history this repository
 has no record of. Quoting such a phrase in `inline code`, as here, is allowed;
 asserting it in prose is not.

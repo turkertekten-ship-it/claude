@@ -38,9 +38,30 @@ So the split is deliberate. The verifier is fast, deterministic, and runs on
 every edit. The semantic pass is slower, fallible, and runs before publishing.
 Neither replaces the other.
 
-## If this gets extended
+## What was built from this
 
-The obvious next step is a check that a claim's cited evidence contains the
-specific numbers or names appearing in the claim — cheap, deterministic, and it
-would have caught both of the fact-checker's findings mechanically. That is a
-concrete piece of work, not a research problem.
+The next step named here — checking that a claim's cited evidence contains the
+numbers the claim asserts — is now implemented as `UNSUPPORTED_QUANTITY` in the
+verifier. Building it taught more than reading about it would have.
+
+### Observed — what developing the check found
+
+- The first implementation reported 20 violations against this repository, all traceable to the check comparing against an entry's evidence *path* instead of the capture file it names; resolving the file dropped it to 17. [src:QUANTITY-CHECK-2026-08-27]
+- A regex using lookarounds silently refused to match digits following a word character, missing the hour in ISO stamps like `T14:07`; bare digit runs dropped it to 3. [src:QUANTITY-CHECK-2026-08-27]
+- All 3 survivors were spelled-out counts whose evidence enumerated the items without ever writing a figure; dropping spelled-out expansion left 0. [src:QUANTITY-CHECK-2026-08-27]
+
+### Reading
+
+Every one of those 20 was a defect in the checker, not in the documents. That is
+the useful lesson: a claim-verification tool's first output is mostly a report
+on its own assumptions, and shipping it without reading the findings one by one
+would have meant either 20 pointless rewrites or a disabled check.
+
+The scope is now deliberately narrow. It compares **digits to digits** and does
+not expand spelled-out counts, because "the three later commits" is supported by
+evidence naming three commits without ever writing "3" — flagging that would
+produce findings about prose style, not about truth. Counting enumerated items
+is semantic work, and semantic work stays with the `fact-checker` subagent.
+
+A guard that is quiet enough for a hit to mean something is worth more than one
+that catches everything and is therefore ignored.
