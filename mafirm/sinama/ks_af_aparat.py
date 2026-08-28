@@ -78,14 +78,21 @@ vaka("AF-02", "her python takımı kaybolan vaka korumasını taşıyor",
 # --- AF-03 · beyan edilmiş her vaka koşumda BEKLENEN olarak görünüyor -
 BEYAN = json.load(io.open(os.path.join(S, "beklenen.json"),
                           encoding="utf-8"))["vakalar"]
-KOSUM = oku(os.path.join(S, "SONUC-sonra.txt"))
-kayip = [k for k in sorted(BEYAN)
-         if not re.search(r"^BEKLENEN\s+%s\b" % re.escape(k), KOSUM, re.M)]
-vaka("AF-03", "beyan edilmiş her vaka koşumda BEKLENEN olarak görünüyor",
-     not kayip,
-     ("koşumda BEKLENEN olarak görünmeyen: %s — beyan bayat ya da vaka "
-      "kayboldu" % ", ".join(kayip)) if kayip
-     else "%d beyanın hepsi koşumda yerinde" % len(BEYAN))
+# [AL-06 · otuzuncu tur] Bu vaka ÖNCE SONUC-sonra.txt'yi okuyordu — yani
+# `hepsi.sh > SONUC-sonra.txt` yönlendirmesinin KENDİ hedefini, koşum daha
+# sürerken. Ölçüldü: bağımsızken 853 satır (bir ÖNCEKİ koşum), yönlendirilmiş
+# koşumun içindeyken 690 satır (nihai 832) — AF'den sonraki altı takım onun
+# görüş alanının dışındaydı. Geç bir takımda beyanlı bir vaka kaybolsa
+# göremezdi. Kontrolün kendisi hepsi.sh'in epiloguna, tam günlüğü bilen tek
+# yere taşındı (on altıncı turun dersi, üçüncü yerde). Burada kalan görev:
+# o kontrolün ORADA OLDUĞUNU sağlamak — yoksa kapsama sessizce kaybolur.
+_hepsi = oku(os.path.join(S, "hepsi.sh"))
+_var = ("beklenen.json" in _hepsi and "_gunluk" in _hepsi
+        and re.search(r"BEKLENEN\\s\+%s", _hepsi) is not None)
+vaka("AF-03", "beyan-koşum sağlaması tam günlüğü bilen yerde duruyor",
+     _var,
+     "hepsi.sh epilogunda beyan/BEKLENEN sağlaması bulunamadı"
+     if not _var else "%d beyan epilogda tam günlükle sınanıyor" % len(BEYAN))
 
 # --- AF-04 · beyan edilen BELİRTİ hâlâ aynı mı ----------------------
 # İLK SÜRÜM YANLIŞTI: beyan METNİ ile canlı ayrıntıyı kelime örtüşmesiyle
@@ -97,32 +104,16 @@ vaka("AF-03", "beyan edilmiş her vaka koşumda BEKLENEN olarak görünüyor",
 # Doğru mekanizma: beyan anında görülen ayrıntı BELİRTİ olarak KAYDEDİLİR;
 # her koşumda canlı ayrıntı o belirtiyle karşılaştırılır. Böylece "vaka hâlâ
 # düşüyor" değil, "vaka HÂLÂ AYNI SEBEPLE düşüyor" ölçülür.
-def _parmak(c):
-    return {k[:6] for k in re.findall(r"[\wçğıöşüÇĞİÖŞÜ]{4,}", c.lower())}
-
-
-kaymis, belirtisiz = [], []
-for kod in sorted(BEYAN):
-    belirti = BEYAN[kod].get("belirti")
-    m = re.search(r"^BEKLENEN\s+%s\s+[^\n]*\n(?:\s{4,}([^\n]*)\n)?"
-                  % re.escape(kod), KOSUM, re.M)
-    canli = (m.group(1) or "").strip() if m else ""
-    if not belirti:
-        belirtisiz.append(kod)
-        continue
-    if not canli:
-        continue
-    a, b = _parmak(belirti), _parmak(canli)
-    if not a:
-        continue
-    ortusme = len(a & b) / len(a)
-    if ortusme < 0.6:
-        kaymis.append("%s (%%%d örtüşme)" % (kod, ortusme * 100))
-vaka("AF-04", "beyan edilen belirti hâlâ canlı belirtiyle aynı",
-     not kaymis and not belirtisiz,
-     ("BELİRTİ KAYMASI: %s" % ", ".join(kaymis) if kaymis else "")
-     + ("  belirtisiz beyan: %s" % ", ".join(belirtisiz) if belirtisiz else "")
-     or "%d beyanın belirtisi değişmemiş" % len(BEYAN))
+# Aynı sebeple bu vaka da epiloga taşındı: belirti karşılaştırması canlı
+# ayrıntıyı ister, canlı ayrıntı ise ancak TAM günlükte vardır. Burada kalan
+# görev, o karşılaştırmanın orada durduğunu sağlamaktır.
+_belirtili = sum(1 for k in BEYAN if BEYAN[k].get("belirti"))
+_var4 = ("belirti" in _hepsi and "parmak" in _hepsi and "0.6" in _hepsi)
+vaka("AF-04", "belirti karşılaştırması tam günlüğü bilen yerde duruyor",
+     _var4,
+     "hepsi.sh epilogunda belirti karşılaştırması bulunamadı" if not _var4
+     else "%d/%d beyan belirti kaydı taşıyor, epilogda sınanıyor"
+          % (_belirtili, len(BEYAN)))
 
 # --- AF-05 · raporun ÖLÇÜM iddiaları canlı çıktıyla uyuşuyor ---------
 RAPOR = oku(os.path.join(KOK, "RAPOR.md"))

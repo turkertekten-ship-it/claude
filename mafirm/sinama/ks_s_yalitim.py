@@ -21,6 +21,7 @@ import os
 import re
 import subprocess
 import sys
+import shutil
 import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -92,7 +93,15 @@ vaka("S-04", "her takım kökü kendi konumundan çözüyor",
      not coz, "çözmeyen: %s" % (coz or "yok"))
 
 # --- S-05: MUTASYON — sabit yol eklenirse S-01 yakalar ---------------
-gecici = os.path.join(_KOK_COZ, "sinama", "_yalitim_mutasyon.py")
+# [AL-04 · otuzuncu tur] Bu fixture ÖNCE canlı sinama/ dizinine bir .py
+# bırakıyordu ve yalnızca finally ile siliyordu. finally SIGKILL'de koşmaz.
+# Ölçüldü: kalıntı kaldığında BİR SONRAKİ koşumda S-01 KALDI veriyor —
+# sistemde hiçbir şey değişmemişken uydurma bir regresyon. Üstelik dosya
+# sinama/*.py sayan her şeye 34. takım gibi görünüyor. Fixture'ın bu
+# dizinde olması hiç gerekmiyordu: S-01 desenin BİR DOSYANIN SATIRLARINDA
+# eşleşmesini ölçüyor, dosyanın nerede durduğunu değil.
+_kum_s = tempfile.mkdtemp(prefix="ks_s_mutasyon-")
+gecici = os.path.join(_kum_s, "_yalitim_mutasyon.py")
 try:
     with open(gecici, "w", encoding="utf-8") as f:
         f.write("import os\nyol = os.path.expanduser('~/mafirm/x')\n")
@@ -101,8 +110,7 @@ try:
         for l in open(gecici, encoding="utf-8").read().splitlines())
     vaka("S-05", "mutasyon: sabit yol eklenirse desen yakalar", bulundu)
 finally:
-    if os.path.exists(gecici):
-        os.remove(gecici)
+    shutil.rmtree(_kum_s, ignore_errors=True)
 
 
 # [AF-02] Kaybolan bir vaka, kırmızı bir vakadan kötüdür: kimse aramaz.

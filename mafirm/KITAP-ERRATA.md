@@ -16,6 +16,40 @@ Ağırlık: **[A]** kurulumu durdurur · **[B]** sonucu değiştirir ·
 
 ---
 
+## §2 · Klasör ve depo
+
+**[A] Gizlilik ile dayanıklılık §2'de AYNI mekanizmadır; birini seçmek
+ötekini feda eder ve kitap bunu hiç söylemiyor.**
+§2 tek adımda iki şey kuruyor: `git init` — kitabın TEK dayanıklılık aracı
+(geri alma, kaza kurtarma, "dün ne yazmıştım") — ve `.gitignore` — kitabın
+TEK gizlilik aracı. İkisi aynı mekanizmanın iki yönüdür. Kural 6 ("müvekkil
+kimliği makineden çıkmaz") kimlik taşıyan her yolu `.gitignore`'a girmeye
+zorlar; o yol depodan çıktığı anda **hiçbir kurtarma yolu kalmaz**. Oysa
+`hafiza/` klasörünün §2'de yazılı varlık sebebi "oturumdan sağ çıkan
+doğrulanmış tespitleri tutmak" — yani dayanıklılığın ta kendisi. Kimlik
+taşıyan parçalar tam olarak var oluş sebeplerini kaybediyor. Kitap ikinci
+bir dayanıklılık aracı önermiyor: ne yedek, ne kopya, ne "üzerine yazmadan
+önce yedekle" cümlesi.
+
+Bu, kâğıt üstünde bir itiraz değil; sonucu bu turda ÖLÇÜLDÜ. Sıradan bir
+araç (kör sınama takımımın kendisi) korunan dosyalardan birini yerinde
+yeniden yazıyor, aslını yalnızca bir DEĞİŞKENDE tutuyor ve `finally` ile
+geri koyuyordu. `finally` SIGKILL'de koşmaz. Süreç o pencerede öldürüldü:
+dosyanın 274 baytlık içeriği gitti, `.gitignore`'da olduğu için
+`git checkout` ile dönülemedi, tek kopya ölen sürecin belleğindeydi.
+Üstelik `denetim.sh` geriye kalan sınama artığını "1 ad" sayıp
+`UYARI müvekkil ad kaydı BOŞ — kural 6'nın gerçek kişi ayağı kapsanmıyor`
+satırını `ok müvekkil ad kaydı 1 ad` hâline getirdi: **koruma bozulurken
+alarm da kapandı.** *(AL-01, AL-02, AL-05)*
+
+→CEVAP: 6 — cevabın "sistem yamalı hâlde çalışıyor" cümlesi bu maddeyi
+kapsamıyor, çünkü mesele bir kusur değil bir TASARIM BOŞLUĞU: kitabın
+mimarisinde gizli olan hiçbir şey kurtarılabilir değildir. Pratiğe kurulum
+yapan kişi bunu bilerek kurmalı ve `hafiza/`nın kimlik taşıyan dosyaları
+için depodan bağımsız bir yedek yolu (şifreli disk kopyası, ayrı bir özel
+depo) kendisi kurmalıdır. Kitabın §2'si bunu söylemediği sürece her
+kurulum, sessiz ve geri alınamaz bir veri kaybına açıktır.
+
 ## §3 · İşletim sözleşmesi
 
 **[C] Kural 11 iki kez veriliyor ve hangisinin geçerli olduğu belirsiz.**

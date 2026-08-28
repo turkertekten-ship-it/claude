@@ -94,6 +94,8 @@ python3 "$S/ks_aj_kanal.py"; topla "AJ · çalışan kanalın kullanımı" $?
 echo
 python3 "$S/ks_ak_bulgu_statu.py"; topla "AK · bulgu statüsü ve kanıt türü" $?
 echo
+python3 "$S/ks_al_yan_etki.py"; topla "AL · takımların yan etkisi / bağımsızlık" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"
@@ -137,6 +139,64 @@ _gecici=$(mktemp)
   echo "sinyal: $_t"
 } > "$_gecici"
 mv -f "$_gecici" "$S/SAYIM.txt"
+
+# [AL-06 · otuzuncu tur] Beyan edilmiş her vaka koşumda BEKLENEN olarak
+# görünüyor mu? Bu kontrol ÖNCE AF-03 içindeydi ve SONUC-sonra.txt'yi
+# okuyordu — yani `hepsi.sh > SONUC-sonra.txt` yönlendirmesinin KENDİ
+# hedefini. Ölçüldü: bağımsız koşumda AF 853 satır görüyor (bir ÖNCEKİ
+# koşumun dosyası), yönlendirilmiş koşumda 690 satır (nihai dosya 832) —
+# yani AF'den SONRAKİ her takım (AG, AH, AI, AJ, AK, AL) onun görüş
+# alanının dışında. Bugün geçiyor olmasının tek sebebi beyan edilmiş her
+# vakanın erken bir takımda durması. Geç bir takımda beyanlı bir vaka
+# KAYBOLSA, kontrol bunu göremezdi: tam da en çok gerekli olduğu aralığa
+# kördü. On altıncı turun dersinin aynısı, üçüncü yerde.
+# Çözüm de aynısı: kontrol, tam ve bayatlamamış günlüğü bilen TEK yere —
+# bu epiloga — taşınır.
+if [ -f "$S/beklenen.json" ]; then
+  _kayip=$(python3 - "$S/beklenen.json" "$_gunluk" <<'PYEOF'
+import json, re, sys
+beyan = json.load(open(sys.argv[1], encoding="utf-8"))["vakalar"]
+gunluk = open(sys.argv[2], encoding="utf-8", errors="replace").read()
+
+def parmak(c):
+    return {k[:6] for k in re.findall(r"[\wçğıöşüÇĞİÖŞÜ]{4,}", c.lower())}
+
+yok, kaymis, belirtisiz = [], [], []
+for kod in sorted(beyan):
+    m = re.search(r"^BEKLENEN\s+%s\s+[^\n]*\n(?:\s{4,}([^\n]*)\n)?"
+                  % re.escape(kod), gunluk, re.M)
+    if not m:
+        yok.append(kod)
+        continue
+    belirti = beyan[kod].get("belirti")
+    if not belirti:
+        belirtisiz.append(kod)
+        continue
+    canli = (m.group(1) or "").strip()
+    if not canli:
+        continue
+    a, b = parmak(belirti), parmak(canli)
+    if a and len(a & b) / len(a) < 0.6:
+        kaymis.append(kod)
+print("|".join([" ".join(yok), " ".join(kaymis), " ".join(belirtisiz)]))
+PYEOF
+)
+  _yok=$(echo "$_kayip"     | cut -d'|' -f1)
+  _kay=$(echo "$_kayip"     | cut -d'|' -f2)
+  _bsz=$(echo "$_kayip"     | cut -d'|' -f3)
+  for _p in "beyanlı olup koşumda BEKLENEN görünmeyen vaka:$_yok:$_yok" \
+            "beyan edilen BELİRTİ artık canlı belirtiyle uyuşmuyor:$_kay:$_kay" \
+            "belirti KAYDI olmayan beyan:$_bsz:$_bsz"; do
+    _ad=${_p%%:*}; _deger=${_p##*:}
+    if [ -n "$(echo "$_deger" | tr -d '[:space:]')" ]; then
+      echo
+      echo "  ------------------------------------------------------------"
+      echo "  UYARI $_ad"
+      echo "  Tam günlük üzerinden ölçüldü (epilog): beyan bayat ya da vaka kayboldu."
+      _t=$((_t + 1))
+    fi
+  done
+fi
 
 # Raporun EL YAZISI vaka sayısı, BU koşumun gerçek toplamıyla karşılaştırılır.
 # Burada yapılır çünkü burası toplamı bayatlamadan bilen tek yerdir: denetime

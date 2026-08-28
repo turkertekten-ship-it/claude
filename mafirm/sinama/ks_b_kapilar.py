@@ -149,17 +149,40 @@ vaka("B-33", "11 araştır",
 
 # B-34: [B-28]'in mekanizma sınaması. Gerçek kişi adı desenle yakalanamaz;
 # tek dürüst çözüm bir KAYITTIR. Kayıt DOLUYKEN kapı ateşlemeli.
+#
+# [AL-02 · otuzuncu tur] Bu vaka fixture'ı ÖNCE CANLI kayda yazıyordu ve
+# aslını yalnızca bir değişkende tutup finally ile geri koyuyordu. finally
+# SIGKILL'de koşmaz. Ölçüldü: süreç pencerede öldürüldüğünde canlı kayıt
+# "Ayşe Yılmaz" ile kalıyor, dosya .gitignore'da olduğu için sürüm
+# denetiminden de geri alınamıyor, ve denetim.sh o kalıntıyı 1 ad sayıp
+# "kural 6'nın gerçek kişi ayağı kapsanmıyor" UYARISINI SUSTURUYOR.
+# Yani koruma bozulurken alarm da kapanıyordu.
+#
+# Doğru yol zaten elimizdeydi: kapi.py ad kaydının yolunu ÇAĞRI ANINDA
+# MAFIRM'den çözüyor (kapi.py:358). Fixture bir kum havuzuna yazılır,
+# kapıya o kök gösterilir; canlı dosyaya hiç dokunulmaz. D ve Z takımları
+# bu disiplini baştan beri uyguluyordu — B ve S uygulamıyordu.
+import shutil
 import tempfile
-_kayit = os.path.join(_KOK_COZ, "hafiza", "muvekkil-adlari.txt")
-_yedek = open(_kayit, encoding="utf-8").read() if os.path.exists(_kayit) else ""
+_kum = tempfile.mkdtemp(prefix="ks_b_ad_kaydi-")
 try:
-    with open(_kayit, "w", encoding="utf-8") as f:
+    os.makedirs(os.path.join(_kum, "hafiza"))
+    with open(os.path.join(_kum, "hafiza", "muvekkil-adlari.txt"),
+              "w", encoding="utf-8") as f:
         f.write("# sınama\nAyşe Yılmaz\n")
-    vaka("B-34", "6 sır", "Müvekkilimiz Ayşe Yılmaz'ın payları devredilecek.",
-         True, "sir", "ad KAYDI doluyken gerçek kişi adı yakalanmalı", disari=True)
+    _onceki = os.environ.get("MAFIRM")
+    os.environ["MAFIRM"] = _kum
+    try:
+        vaka("B-34", "6 sır", "Müvekkilimiz Ayşe Yılmaz'ın payları devredilecek.",
+             True, "sir", "ad KAYDI doluyken gerçek kişi adı yakalanmalı",
+             disari=True)
+    finally:
+        if _onceki is None:
+            os.environ.pop("MAFIRM", None)
+        else:
+            os.environ["MAFIRM"] = _onceki
 finally:
-    with open(_kayit, "w", encoding="utf-8") as f:
-        f.write(_yedek)
+    shutil.rmtree(_kum, ignore_errors=True)
 
 
 # [AF-02] Kaybolan bir vaka, kırmızı bir vakadan kötüdür: kimse aramaz.

@@ -14,7 +14,7 @@ Sürüm 1.0 · 2026-08-27 · OODA döngüsü: gözlem → yönelim → karar →
 eksiksiz kurulumda 85 kör sınama vakasının 56'sı başarısız oldu ve kitabın
 kendi §16 denetimi yeşile dönmedi.
 
-Beş cümlede sebebi:
+Altı cümlede sebebi:
 
 1. **§14, §12'nin öz-sınamasını bozuyor** ve düzeltilmiyor; zincir §16'yı
    kırmızıya, §0'ın dördüncü kuralını da kurulumu durdurmaya götürüyor. §19'daki
@@ -33,8 +33,19 @@ Beş cümlede sebebi:
 5. **Kitabı ikinci kez izlemek her yamayı geri alır** — denetim betiği dâhil.
    Denetçiyi ezmek, denetçinin yapacağı bütün kontrolleri devre dışı bırakır
    ve uygulayıcı korumasız bir sisteme **yeşil** bir denetimle bakar.
+6. **Gizlilik ile dayanıklılık §2'de aynı mekanizmadır**, dolayısıyla biri
+   seçilince öteki feda edilir — ve kitap bunu söylemez. §2 tek adımda hem
+   `git init` (kitabın tek geri alma aracı) hem `.gitignore` (tek gizlilik
+   aracı) kurar. Kural 6, müvekkil kimliği taşıyan her yolu `.gitignore`'a
+   girmeye zorlar; o yol o anda **kurtarılamaz** hâle gelir. Oysa `hafiza/`
+   klasörünün §2'de yazılı varlık sebebi "oturumdan sağ çıkan tespitleri
+   tutmak", yani dayanıklılığın kendisidir. Ölçüldü: bu dosyalardan birini
+   yerinde yeniden yazan sıradan bir araç öldürüldüğünde içerik gitti,
+   `git checkout` ile dönülemedi — ve `denetim.sh` geriye kalan artığı
+   "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
+   sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** otuz dört çalıştırılabilir takım — **295
+**Yamalı hâlde sistem çalışıyor:** otuz beş çalıştırılabilir takım — **302
 vaka, 15 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15, birimler arası tutarlılık takımının
 kendi mutasyon yakalaması 10/10. Ama **üç mevzuat bulgusu ile kitabın kendi içindeki bir çelişki açık kalır**
@@ -1701,6 +1712,97 @@ bulgusunun ikincil kaynakla **kapatılmamasını** ölçüyor. Mutasyonda I-02'y
 "DOĞRULANDI" yapmak AK-04'ü kırmızıya çeviriyor — yani kanıtın türünü
 karıştırmak artık sessiz kalamıyor.
 
+### Ölçen şey, ölçtüğü şeyi kirletiyordu
+
+Yirmi dokuzuncu turun sonunda adlandırılan eksen şuydu: otuz dört takım aynı
+yardımcıyı, aynı beyan tabanını ve aynı koşum betiğini paylaşıyor — her biri
+KENDİ başına mı düşüyor? Takımlar ayrı süreçler olduğu için sıra
+bağımlılığının **tek kanalı dosya sistemidir**. Ölçüldü: o kanal açıktı.
+
+**B-34 canlı ad kaydını yok ediyordu.** Vaka, kural 6'nın gerçek kişi ayağını
+sınamak için `hafiza/muvekkil-adlari.txt` dosyasına bir fixture yazıyor,
+aslını yalnızca bir DEĞİŞKENDE tutuyor ve `finally` ile geri koyuyordu.
+`finally` SIGKILL'de koşmaz. Süreç o pencerede öldürüldü: dosyanın 274 baytı
+gitti. Dosya `.gitignore`'da olduğu için `git checkout` ile dönülemedi —
+**tek kopya ölen sürecin belleğindeydi.**
+
+Ve arkasından gelen şey daha kötüydü. `denetim.sh` kalan sınama artığını
+"1 ad" sayıyor:
+
+| kayıt | denetimin dediği |
+|---|---|
+| gerçek içerik | `UYARI müvekkil ad kaydı BOŞ — kural 6'nın gerçek kişi ayağı kapsanmıyor` |
+| sınama artığı | `ok    müvekkil ad kaydı    1 ad` |
+
+**Koruma bozulurken alarm da kapandı.** Bu, kitabın §2'sindeki bir tasarım
+boşluğunun ilk ölçülmüş sonucudur: gizlilik (`.gitignore`) ile dayanıklılık
+(`git`) aynı mekanizmadır, biri seçilince öteki feda edilir, ve kitap bunu
+söylemez. Errata'ya §2 maddesi olarak yazıldı; cevabın **altıncı** sebebi.
+
+**S-05 canlı `sinama/` dizinine bir `.py` bırakıyordu.** Kalıntı kalınca bir
+sonraki koşumda S-01 KALDI veriyor — sistemde hiçbir şey değişmemişken
+uydurma bir regresyon; üstelik `sinama/*.py` sayan her şeye 34. takım gibi
+görünüyor.
+
+Doğru desen zaten ailede vardı: D `${TMPDIR}/ks_d_kum`, Z `mkdtemp` kullanıp
+her şeyi kum havuzunda bozuyor. Kusur disiplinin YOKLUĞU değil, **tek tip
+uygulanmamasıydı** — yirmi yedinci (AE) ve yirmi sekizinci (AF) turlarda
+adlandırılan sınıfın aynısı: bir örneği düzeltmek sınıfı kapatmaz.
+
+### Ve AL kendi kurduğu kapıdan bir bulgu daha çıkardı
+
+AL-06 ("hiçbir takım başka bir takımın koşum kaydını okumuyor") ilk koşumda
+iki bağ buldu. Biri meşru çıktı: M-03'ün okuduğu `SONUC-once.txt` **donmuş
+bir arşivdir** — yamalardan önceki sadık koşumun ham çıktısı, hiçbir koşucu
+onu yazmaz. Muafiyet tanındı ama **sınanmadan değil**: AL-07 tam olarak o
+iddiayı ölçer (yirmi altıncı turda U-10'da sınanmamış bir muafiyetle
+düştüğüm tuzak).
+
+İkincisi gerçek ihlaldi. **AF-03, `hepsi.sh > SONUC-sonra.txt`
+yönlendirmesinin kendi hedefini okuyordu** — koşum sürerken. Ölçüldü:
+
+| AF nasıl koştu | gördüğü satır | nihai dosya |
+|---|---|---|
+| bağımsız | 853 (bir ÖNCEKİ koşum) | — |
+| yönlendirmenin içinde | **690** | 832 |
+
+Yani AF'den sonraki altı takım (AG, AH, AI, AJ, AK, AL) onun görüş alanının
+dışındaydı. Bugün geçiyor olmasının tek sebebi beyan edilmiş her vakanın
+erken bir takımda durması. **Geç bir takımda beyanlı bir vaka kaybolsa AF-03
+bunu göremezdi** — tam da en çok gerekli olduğu aralığa kördü. On altıncı
+turun ders ettiği katman ihlalinin veri yolundan gelen hâli, üçüncü yerde.
+Çözüm de aynısı: hem beyan/BEKLENEN sağlaması hem belirti karşılaştırması
+tam ve bayatlamamış günlüğü bilen tek yere — `hepsi.sh`'in epiloguna —
+taşındı; AF-03 ve AF-04 o kontrolün orada DURDUĞUNU sağlar.
+
+### Mutasyon sınaması iki kez kendi aparatımı yakaladı
+
+Yedi vakanın yedisi de mutasyonu yakalıyor. Ama yolda iki ders çıktı:
+
+1. **AL-01 ilk sürümde KAÇTI.** Ölçüt tam göreli yolu (`hafiza/muvekkil-
+   adlari.txt`) arıyordu; kod yolu `os.path.join(_KOK_COZ, "hafiza",
+   "muvekkil-adlari.txt")` diye **bileşen bileşen** kuruyor ve o dizge hiç
+   geçmiyor. Ölçüt dosya adına indirildi.
+2. **AL-03 sahte bir GEÇTİ verdi — sebebi ölçüm değil, benim kanıtımdı.**
+   Mutasyonun indiğini kanıtlamak için T takımını koşturdum; T de mutasyon
+   gereği ağaca `AL_KIRLET.txt` yazdı. Böylece dosya AL'in "önce"
+   anlık görüntüsüne de girdi ve fark yok oldu. **Mutasyonun indiğini
+   kanıtlama eylemi, ölçülecek farkı yok etmişti.** Kanıt ile ölçüm ayrı kum
+   havuzlarına alındı; AL-03 mutasyonu yakaladı.
+
+İkincisi, "mutasyon indiğini kanıtlamadan okuma" kuralının bir adım
+ilerisidir: **kanıtın kendisi de ölçüme karışmamalıdır.**
+
+### AL-02 şansa bağlıydı, ölçüme çevrildi
+
+İlk tasarım takımı 0.05/0.12/0.25/0.40 saniyede öldürüp korunan dosyaya
+bakıyordu. Pencere birkaç milisaniye olduğu için vuruş şansa kalıyordu — ve
+mutasyonda B-34 canlı kayda döndürüldüğünde **AL-02 kırmızıya dönmedi**.
+Şansa bağlı bir vaka, vaka değildir. Yeni tasarım daha güçlü bir şey ölçer:
+bir gözcü iş parçacığı korunan dosyaları yüksek frekansla örnekler ve
+**koşum sırasında hiçbir an değişmediğini** gösterir. Kanıt olarak alınan
+örnek sayısı yazılır, yani vakuum değildir.
+
 ---
 
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
@@ -1815,6 +1917,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | AI · koltuk dayanakları | *hiç doğrulanmamıştı* | **temiz** — altı eser doğrulandı, kayda bağlandı |
 | AJ · çalışan kanalın kullanımı | *kanal 27 tur kullanılmadı* | **temiz** — üç bulgunun kanıtı yükseltildi |
 | AK · bulgu statüsü | *dokuz bulgu doğrulanmamıştı* | **temiz** — dördü doğrulandı, üçü yetkili kaynağından |
+| AL · takımların yan etkisi / bağımsızlık | *B-34 canlı ad kaydını yok ediyor, AF-03 kendi koşumunu okuyor* | **temiz** — iki yan etki kapatıldı, sağlama epiloga taşındı |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -1873,7 +1976,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 ### Nasıl yeniden koşulur
 ```
 ./sinama/hepsi.sh                 # 34 çalıştırılabilir takım:
-                                  #   295 vaka + 15 mutasyon (D)
+                                  #   302 vaka + 15 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -1948,9 +2051,10 @@ Dokuz takım, 96 vaka:
 | AI | **Koltuk dayanakları** — gerçek kişilerin ağzına konan mercek neye dayanıyor | §7, §1 |
 | AJ | **Çalışan kanalın kullanımı** — açık bulgu neyle ilerletilebilirdi | §2, §11 |
 | AK | **Bulgu statüsü ve kanıt türü** — neyi neyle kapatabilirsin | §1, §9, §13 |
+| AL | **Takımların yan etkisi ve bağımsızlığı** — takım kendi ölçtüğü ağacı kirletiyor mu | §8, kural 6, §12 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**295 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**302 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)
