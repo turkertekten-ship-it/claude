@@ -685,8 +685,41 @@ class SqliteStore:
         A query term absent from this set is categorically different from a rare
         one: it is proof the corpus has never discussed the thing being asked
         about. See HeuristicReranker's answerability.
+
+        The proof is weaker than it reads, which is what `surface_vocabulary`
+        is for: absent *after conflation* is not absent.
         """
         return set(self.idf_table())
+
+    def surface_vocabulary(self) -> set[str]:
+        """Every term the corpus contains, unstemmed.
+
+        Stemming conflates, and a conflation makes an absent word look present:
+        "mercury" and "mercurial" share the stem `mercuri`, so a corpus that
+        mentions the version control system reports the chemical element as
+        known - and the question "What is the boiling point of mercury?" was
+        answered with confidence 0.83 on that basis. SQLite's Porter agrees with
+        ours here, so this is the algorithm working as specified rather than a
+        defect to fix in the stemmer.
+
+        Cached beside the IDF table and keyed on the same signature, which
+        includes the analyser (L28) - this set is its output too.
+        """
+        signature = self._corpus_signature()
+        cached = self.get_meta("surface_vocabulary")
+        if cached and cached.get("signature") == signature:
+            return set(cached["terms"])
+
+        from oodarag.util.text import expand_compounds, tokenize
+
+        terms: set[str] = set()
+        for row in self.conn.execute("SELECT text, context_header FROM chunks"):
+            surface = tokenize(f"{row['context_header']} {row['text']}")
+            terms.update(expand_compounds(surface))
+        self.set_meta("surface_vocabulary",
+                      {"signature": signature, "terms": sorted(terms)})
+        log.debug("surface vocabulary built", terms=len(terms))
+        return terms
 
     def term_frequency(self):
         """Callable giving a term's corpus-wide document frequency as a share.

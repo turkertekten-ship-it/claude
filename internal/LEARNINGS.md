@@ -928,3 +928,78 @@ absent.
    questions. "How do Python programs talk to a web server?" had two plausible
    answers at 33 documents and ten at 91; it was replaced, with its reasoning
    recorded, rather than quietly widened to ten expected sources.
+
+---
+
+## L30 - The stemmed vocabulary was the wrong place to ask "does the corpus know this word?"
+
+**Evidence.** L29 left the abstention gate as the dominant failure mode: six of
+eleven external failures were the gate answering a question the corpus cannot
+answer, and its feature's AUC had fallen from 0.973 on 33 documents to 0.886 on
+91.
+
+`gate_features.py` ranked two new candidates against the four already rejected:
+
+    relevance x surface            0.896
+    rerank_relevance (in use)      0.886
+    relevance x top-gap            0.886
+    surface answerability          0.877
+    relevance x matched idf        0.865
+    top1 - top2 score              0.799
+    top1 - mean score              0.776
+    document coverage              0.742
+    chunk minus document coverage  0.609
+    max idf of matched terms       0.555
+
+Two things came out of that table, and the second is the useful one.
+
+**The document-coverage hypothesis is dead.** "Which package renders Jinja
+templates to PDF?" scores highest of all unanswerable cases because jinja,
+template and render are all present and pdf is only ever elsewhere - so the
+obvious signal was "a *document* covers the query while no *chunk* does". It
+ranks 0.609, barely above a coin flip, and plain document coverage is worse than
+what is already in use. `pdf` is in the corpus; the query's terms are simply
+never together. Confirmed by inspection, not just by the number.
+
+**Answerability was asking the wrong vocabulary.** It treats a query term absent
+from the corpus vocabulary as proof the corpus never discussed the thing. That
+vocabulary is stemmed, and stemming conflates: `mercury` and `mercurial` share
+`mercuri`, so one page mentioning the version control system made the chemical
+element read as known, and "What is the boiling point of mercury?" was answered
+at 0.83. SQLite's Porter agrees with ours, so the stemmer is right and the
+*question being asked of it* was wrong. **Absent after conflation is not
+absent.** The store now keeps an unstemmed vocabulary and the gate multiplies in
+the share of the query's idf mass whose surface form the corpus actually holds.
+
+**Measured end to end, everything else held constant:**
+
+    corpus    surface  pass   recall  prec    MRR     nDCG
+    external  off      44/54  0.9186  0.2355  0.7729  0.7965
+    external  on       47/54  0.9186  0.2355  0.7729  0.7965
+    primary   off      17/20  0.8125  0.2109  0.5594  0.6041
+    primary   on       17/20  0.8125  0.2109  0.5594  0.6041
+
+Three cases gained, none lost, and **every retrieval metric identical to four
+decimal places** - the property to check rather than assume, and asserted by a
+test: the factor is a function of the query and the corpus, not of any chunk, so
+it scales every candidate equally and cannot reorder them.
+
+**Rules.**
+1. **AUC ranks pairs; a case is decided by whether it crosses a fixed floor.**
+   The winning candidate beat the incumbent by 0.010, about five pairs of 473,
+   which reads as noise - and was worth three cases end to end. Rank candidates
+   by AUC to decide what to *try*; decide what to *ship* on the metric the
+   system is judged by.
+2. When a derived structure answers a question badly, check whether it is the
+   question you meant to ask. Nothing was wrong with the stemmer, the
+   vocabulary, or the code that consulted it. The premise attached to the answer
+   was wrong.
+3. **A guard that exists for one feature usually applies to its sibling.**
+   Switching this on without `min_vocabulary_for_answerability` made a
+   five-document corpus abstain from everything - relevance 0.06 against a 0.15
+   floor - and the suite caught it. A small corpus lacks most *surface forms* of
+   the words it does discuss, even more sharply than it lacks stems.
+4. A feature computed and never applied passes every test written about the
+   feature. The mutation that removed the multiply from `rerank()` passed four
+   of five new tests; only an end-to-end one caught it. This is the third time
+   this session (L23, L28).

@@ -1272,3 +1272,133 @@ class ScanBudgetTest(unittest.TestCase):
         for sql in selects:
             self.assertIn("LIMIT", sql.upper(),
                           f"the budget never reached SQLite: {sql!r}")
+
+
+class SurfaceAnswerabilityTest(unittest.TestCase):
+    """Stemming conflates, so "absent from the corpus" was not proof of absence.
+
+    "mercury" and "mercurial" share the stem `mercuri`. A corpus mentioning the
+    version control system reported the chemical element as known, and "What is
+    the boiling point of mercury?" was answered with confidence 0.83 on that
+    basis. The surface check asks the same question of the unstemmed vocabulary.
+    """
+
+    def _reranker(self, surface, **kw):
+        # The small-corpus guard is switched off here on purpose: these tests
+        # are about the arithmetic, and a three-word vocabulary would otherwise
+        # (correctly) make the factor decline to have an opinion.
+        kw.setdefault("min_vocabulary_for_answerability", 0)
+        return HeuristicReranker(
+            idf=lambda t: 2.0 if t in {"point", "mercuri"} else 8.0,
+            vocabulary={"point", "mercuri", "boil"},
+            surface_vocabulary=surface, **kw)
+
+    def test_a_conflated_term_is_not_counted_as_present(self):
+        """Derived, not copied. The query stems to boil/point/mercuri with idf
+        8/2/2, so the total is 12. The corpus holds "boiling" and "point" by
+        surface form but only "mercurial", never "mercury" - so 10 of 12, and
+        the missing 2 is exactly the term stemming had hidden."""
+        reranker = self._reranker({"mercurial", "point", "boiling"})
+        factor = reranker._surface_factor("What is the boiling point of mercury?")
+        self.assertAlmostEqual(factor, 10.0 / 12.0, places=4)
+        # And the stemmed check, on its own, sees nothing wrong.
+        self.assertEqual(reranker._answerability({"boil", "point", "mercuri"}), 1.0)
+
+    def test_a_query_the_corpus_really_holds_is_not_penalised(self):
+        reranker = self._reranker({"mercury", "point", "boiling"})
+        self.assertAlmostEqual(
+            reranker._surface_factor("What is the boiling point of mercury?"),
+            1.0, places=4)
+
+    def test_no_surface_vocabulary_means_no_opinion(self):
+        """A reranker built without one must not silently gate everything."""
+        reranker = self._reranker(None)
+        self.assertEqual(reranker._surface_factor("boiling point of mercury"), 1.0)
+
+    def test_the_flag_turns_it_off(self):
+        reranker = self._reranker({"mercurial"}, use_surface_answerability=False)
+        self.assertEqual(reranker._surface_factor("boiling point of mercury"), 1.0)
+
+    def test_a_small_corpus_gets_no_opinion(self):
+        """A corpus lacking most surface forms of the words it does discuss
+        would be gated to silence. This is the guard that stopped it, and it is
+        here because turning the factor on without it failed a suite test that
+        answers from a five-document corpus."""
+        reranker = self._reranker({"mercurial", "point", "boiling"},
+                                  min_vocabulary_for_answerability=2000)
+        self.assertEqual(
+            reranker._surface_factor("What is the boiling point of mercury?"), 1.0)
+
+    def test_the_factor_actually_reaches_the_gate(self):
+        """A feature computed and never applied passes every test about the
+        feature. Asserted end to end: the corpus mentions Mercurial the version
+        control system and nothing else in the query, so the question must be
+        refused - and with the flag off, it is not."""
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        pipeline = IndexPipeline(store)
+        # Every *stem* of the question is present - "mercurial" gives `mercuri`,
+        # "boiled" gives `boil`, "point" gives `point` - so the stemmed check has
+        # no objection. Not one *surface form* the question uses is here: no
+        # "mercury", no "boiling".
+        #
+        # The two conflated terms are confined to a single document so their idf
+        # is high, as it is in the corpus this came from. A corpus that repeats
+        # them everywhere makes them worthless and the factor has nothing to
+        # remove - which is how the first version of this test passed while
+        # proving nothing.
+        docs = [_doc(f"d{i}", f"{i}.md",
+                     f"Chunking splits a document at a structural point, note {i}. "
+                     f"Retrieval fuses two arms and reranks what they return.")
+                for i in range(8)]
+        docs.append(_doc("d8", "8.md",
+                         "Mercurial is a distributed version control system. The "
+                         "kettle boiled at a point during the demonstration."))
+        store.upsert_documents(docs)
+        pipeline.embedder.fit([d.text for d in docs])
+        for d in docs:
+            store.replace_chunks(d.doc_id, chunk_document(d))
+        pipeline.embed_missing()
+
+        question = "What is the boiling point of mercury?"
+        answers = {}
+        for flag in (False, True):
+            retriever = HybridRetriever(store, pipeline.embedder)
+            retriever.reranker.use_surface_answerability = flag
+            retriever.reranker.min_vocabulary_for_answerability = 0
+            generator = AnswerGenerator(retriever, AnswerConfig(generator="extractive"))
+            answers[flag] = generator.answer(question)
+        self.assertFalse(answers[False].abstained,
+                         "the premise is gone: the stemmed check now refuses this")
+        self.assertTrue(answers[True].abstained,
+                        f"the surface factor never reached the gate: "
+                        f"{answers[True].text[:120]}")
+
+    def test_it_gates_without_reordering(self):
+        """The property that makes it safe: a function of the query and the
+        corpus scales every candidate equally, so it cannot change the ranking.
+        Asserted rather than assumed - the whole point of separating the gate
+        from the ranking is lost if this is false."""
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        pipeline = IndexPipeline(store)
+        docs = [_doc(f"d{i}", f"{i}.md", text) for i, text in enumerate([
+            "Reciprocal rank fusion combines a dense arm and a lexical arm.",
+            "Budgets bound requests, bytes, depth and wall clock time.",
+            "Citation markers are verified against the chunks retrieved.",
+            "Mercurial and git are both distributed version control systems.",
+        ])]
+        store.upsert_documents(docs)
+        pipeline.embedder.fit([d.text for d in docs])
+        for d in docs:
+            store.replace_chunks(d.doc_id, chunk_document(d))
+        pipeline.embed_missing()
+
+        order = {}
+        for flag in (False, True):
+            retriever = HybridRetriever(store, pipeline.embedder)
+            retriever.reranker.use_surface_answerability = flag
+            results, _ = retriever.retrieve("how are dense and lexical arms combined")
+            order[flag] = [r.chunk.chunk_id for r in results]
+        self.assertEqual(order[False], order[True],
+                         "the surface factor reordered the results")

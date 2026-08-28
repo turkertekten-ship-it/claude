@@ -99,7 +99,8 @@ class HybridRetriever:
         self.embedder = embedder
         self.config = config or RetrievalConfig()
         self.reranker = reranker or HeuristicReranker(
-            idf=store.idf_lookup(), vocabulary=store.vocabulary())
+            idf=store.idf_lookup(), vocabulary=store.vocabulary(),
+            surface_vocabulary=store.surface_vocabulary())
         #: Whether this retriever owns the reranker's corpus statistics. An
         #: injected reranker is the caller's to keep current; the default one is
         #: ours, and it must not outlive the corpus it was built from.
@@ -131,6 +132,7 @@ class HybridRetriever:
             return
         self.reranker.idf = self.store.idf_lookup()
         self.reranker.vocabulary = self.store.vocabulary()
+        self.reranker.surface_vocabulary = self.store.surface_vocabulary()
         self._analysis_signature = signature
         log.debug("refreshed reranker corpus statistics",
                   terms=len(self.reranker.vocabulary or ()))

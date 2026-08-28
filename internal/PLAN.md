@@ -21,13 +21,13 @@
 | CI | done | Three jobs: stdlib matrix, numpy path, retrieval regression gate |
 
 **Current measurements** (offline embedder, deterministic).
-266 tests passing. Retrieval metrics are over graded cases only - abstention
+273 tests passing. Retrieval metrics are over graded cases only - abstention
 cases have nothing to retrieve, and averaging their zeros in made adding a
 negative case look like a retrieval regression.
 
 | | primary (this repo) | external (91 PyPI pages) |
 |---|---|---|
-| golden cases | 17/20 | **44/54** |
+| golden cases | 17/20 | **47/54** |
 | recall@8 | 0.8125 | 0.9186 |
 | precision@8 | 0.2031 | 0.2355 |
 | hit@8 | 0.8750 | 0.9302 |
@@ -87,24 +87,24 @@ its current failures are that artefact. See docs/EVALUATION.md.
    purpose - the offline embedder cannot bridge "running forever" to a corpus
    that says "never terminates".
 
-2. **The abstention gate.** Now the dominant failure mode: six of the eleven
-   external failures are the gate answering a question the corpus cannot
-   answer, and its feature's AUC fell from 0.973 on 33 documents to **0.886** on
-   91 (L29). This was previously listed under "deliberately not next" on the
-   strength of the 33-document measurement, which is exactly the mistake L29 is
-   about. The candidate sweep still says no *score-shape* feature beats the one
-   in use, so the next thing to try is a different kind of signal, not another
-   arithmetic combination of the same one:
+2. **The abstention gate**, still, though less of it. The unstemmed surface
+   check is in and worth +3 cases at no measured cost (L30); the document
+   coverage idea was measured and is dead (AUC 0.609, barely above a coin
+   flip). Three of the seven remaining failures are still the gate:
 
-   - a query term's presence checked **unstemmed** as well as stemmed. "What is
-     the boiling point of mercury?" is answered at 0.825 because `mercury` and
-     `mercurial` share a stem and one document mentions the version control
-     system. Absent-after-conflation is not absent, and the store does not
-     currently keep an unstemmed vocabulary to check against;
-   - whether one *document* covers the query, rather than one chunk. "Which
-     package renders Jinja templates to PDF?" scores 0.595 - the highest of any
-     unanswerable case - because jinja, template and render are all present,
-     just not with pdf.
+   - "Which tool publishes a package to a private PyPI mirror?" (0.658) and
+     "Which package renders Jinja templates to PDF?" (0.602) are near-misses
+     where every query term is in the corpus and only their *combination* is
+     absent. No single-chunk or single-document coverage measure separates
+     these, because the terms genuinely are there.
+   - "What keeps two processes from writing the same file at once?" (0.768) is a
+     question made entirely of ordinary words, which is the case
+     `gate_features.py` showed match specificity cannot detect (AUC 0.555).
+
+   What is left needs a signal about term *co-occurrence*, or a judge that
+   reads. Both are larger than a scoring tweak, and the honest next step is to
+   say so rather than to try a seventh arithmetic combination of the same
+   features.
 
 3. **Widen the corpus again.** 33 to 91 documents overturned three recorded
    conclusions and de-saturated every metric (L29). There is no reason to think

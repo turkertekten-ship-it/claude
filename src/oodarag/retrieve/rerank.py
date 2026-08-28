@@ -76,6 +76,15 @@ class HeuristicReranker(Reranker):
     #: and re-measure on your own corpus before moving it: this sweep has now
     #: been run on three versions of the external corpus and pointed a
     #: different way on each (L26, L29).
+    #: Unstemmed corpus vocabulary, for the surface check below. Optional: the
+    #: reranker works without it and simply does not apply the factor.
+    surface_vocabulary: set[str] | None = field(default=None)
+    #: Multiply answerability by the share of the query's idf mass whose
+    #: *surface form* the corpus holds. On: measured at +3 golden cases with
+    #: every retrieval metric unchanged to four decimal places. See the table in
+    #: `_surface_factor`. A reranker built without a `surface_vocabulary` simply
+    #: does not apply it.
+    use_surface_answerability: bool = True
     coverage_power: float = 1.0
     coverage_weight: float = 0.45
     phrase_weight: float = 0.25
@@ -113,6 +122,66 @@ class HeuristicReranker(Reranker):
             parts = [p for p in expand_compounds([term], stem_words=True) if p != term]
             expanded.update(parts or [term])
         return expanded
+
+    def _surface_factor(self, query: str) -> float:
+        """How much of the query the corpus holds *unstemmed*.
+
+        Answerability treats a query term absent from the vocabulary as proof
+        the corpus never discussed it. Stemming conflates, so the proof is
+        weaker than it reads: "mercury" and "mercurial" share the stem
+        `mercuri`, and a corpus mentioning the version control system reported
+        the chemical element as known. "What is the boiling point of mercury?"
+        was answered with confidence 0.83 on that basis.
+
+        Weighted by the idf of each term's stem, because that is what says how
+        much of the question a term carries. Returns 1.0 - no opinion - when
+        there is no surface vocabulary or the query has no content terms.
+
+        Measured end to end, everything else held constant:
+
+            corpus    surface  pass   recall  prec    MRR     nDCG
+            external  off      44/54  0.9186  0.2355  0.7729  0.7965
+            external  on       47/54  0.9186  0.2355  0.7729  0.7965
+            primary   off      17/20  0.8125  0.2109  0.5594  0.6041
+            primary   on       17/20  0.8125  0.2109  0.5594  0.6041
+
+        Three cases gained, none lost, and **every retrieval metric identical to
+        four decimal places** - which is the property to check rather than
+        assume: the factor is a function of the query and the corpus, not of any
+        chunk, so it scales every candidate equally and cannot reorder them. It
+        gates without touching ranking, exactly as `_answerability` does.
+
+        The cases it fixes are "What is the boiling point of mercury?" (the
+        conflation above), "Which library pins dependency hashes for
+        reproducible installs?" and "Which package reads and writes spreadsheet
+        files?" - all three questions the corpus cannot answer and was answering.
+
+        Ranked as a gate feature by AUC over 473 pairs it scored 0.896 against
+        0.886 for relevance alone: about five pairs, which read as noise. The end
+        to end measurement is worth three cases. AUC ranks pairs; what decides a
+        case is whether it crosses a fixed floor, and those are not the same
+        question.
+        """
+        if not self.use_surface_answerability or not self.surface_vocabulary:
+            return 1.0
+        # The same reasoning as `min_vocabulary_for_answerability`, and needed
+        # more sharply here: a small corpus lacks most *surface forms* of the
+        # words it does discuss, so this factor would gate almost everything.
+        # Turning it on without this guard failed a suite test that answers from
+        # a five-document corpus - relevance 0.06 against a 0.15 floor.
+        if len(self.surface_vocabulary) < self.min_vocabulary_for_answerability:
+            return 1.0
+        raw = tokenize(query)
+        stems = tokenize(query, stem_words=True)
+        if not raw or len(raw) != len(stems):
+            return 1.0
+        total = sum(self.idf(stem) for stem in stems)
+        if total <= 0:
+            return 1.0
+        known = sum(idf for surface, idf in
+                    ((r, self.idf(s)) for r, s in zip(raw, stems))
+                    if surface in self.surface_vocabulary)
+        return known / total
 
     def _answerability(self, query_terms: set[str]) -> float:
         """How much of the query's information the corpus contains at all.
@@ -154,7 +223,7 @@ class HeuristicReranker(Reranker):
         query_terms = tokenize(query, stem_words=True)
         query_set = self._query_set(query_terms)
         # Computed once per query, not per chunk.
-        answerability = self._answerability(query_set)
+        answerability = self._answerability(query_set) * self._surface_factor(query)
         # Content tokens only. Measuring the phrase over every token lets a run
         # of stopwords score: "what is the" is three of the seven words in
         # "what is the boiling point of mercury", which scored 0.43 and carried
