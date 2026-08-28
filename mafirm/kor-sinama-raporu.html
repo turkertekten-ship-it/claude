@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>23 çalıştırılabilir takım · 225 vaka · 0 sinyal</span>
+    <span>24 çalıştırılabilir takım · 243 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -1431,6 +1431,70 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">On dokuzuncu tur</span>
+  <h2>Kapı çöktüğünde AÇIK yöne düşüyordu</h2>
+  <p>Kanca her Write, Edit, Bash, WebSearch ve WebFetch çağrısının önünde
+  durur. §12 çıkış kodunu yazar: <strong>2 bloklar</strong>. PreToolUse
+  sözleşmesinde 2 <strong>dışında</strong> her sıfırdan farklı kod
+  "bloklamayan hata"dır — araç çağrısı <strong>devam eder</strong>.</p>
+  <p>Bunun anlamı, on sekiz tur boyunca yazmadığım şey: <strong>kancadaki
+  işlenmemiş her istisna sessizce AÇIK yönde çözülür.</strong> Kural 6
+  uygulanmaz ve kimse görmez.</p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AA-01 · AA-02</span>
+      <span class="pill f">Fail-open</span></div>
+    <h3>İki kez oldu; ikisinde de yönünü ölçmedim</h3>
+    <p>On dördüncü turda <code>bugun</code> dizge geldiğinde
+    <code>TypeError</code>, on yedincide <code>_Bulgu.group()</code> yokluğunda
+    <code>AttributeError</code>. İkisi de <strong>düzenleyici bağlamda yüzde
+    geçen her belgede</strong> kapıyı devre dışı bıraktı. O turlarda "çöken
+    kapı kötüdür" diye yazdım — ama <strong>yönünü ölçmedim</strong>.
+    Ölçseydim, "kötü"nün <em>kural 6 sessizce uygulanmıyor</em> demek olduğunu
+    görürdüm.</p>
+    <p>§12'nin C-08 arıza politikası doğru ve iyi gerekçelendirilmişti — ama
+    <strong>yalnızca ayrıştırmayı</strong> kapsıyordu. <strong>Bu, kitabın
+    kusurudur:</strong> kitaba sadık <em class="term">kapi.py</em> üzerinde AA
+    dört vakada kırmızı, ve sonuç ayrıca ölçülüp
+    <em class="term">SONUC-once.txt</em>'ye yazıldı.</p>
+  </div>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AA-03</span>
+      <span class="pill f">Hiç bitmemek</span></div>
+    <h3>Boşluksuz 40 KB kapıyı donduruyordu</h3>
+    <p>Bloklayan da olsa açan da olsa, <strong>dönmeyen bir kapı pratiği
+    durdurur</strong> — ve bunu hiç ölçmemiştim.</p>
+    <table><thead><tr><th>girdi</th><th>önce</th><th>sonra</th></tr></thead>
+    <tbody>
+    <tr><td>boşluksuz 20 000 karakter</td><td>6 186 ms</td><td><strong>62 ms</strong></td></tr>
+    <tr><td>boşluksuz 40 000 karakter</td><td><strong>25 s+ (bitmedi)</strong></td><td>~90 ms</td></tr>
+    <tr><td>boşluksuz 200 000 karakter</td><td>ölçülemedi</td><td><strong>330 ms</strong></td></tr>
+    <tr><td>400 KB gerçek düzyazı</td><td>433 ms</td><td>406 ms</td></tr>
+    </tbody></table>
+    <p>Sebep <code>TAVSIYE</code> desenindeki üç <code>\w+</code> dalıydı — ve
+    bu desen <strong>kitabın değil, benim</strong>: kitabın kapsam kapısı sekiz
+    sabit ifade arar ve AA-03 kitaba sadık kapıda <strong>geçiyor</strong>.
+    base64 bir blok, küçültülmüş bir dosya ya da boşluksuz çıkarılmış PDF
+    metni pratiği durdururdu.</p>
+  </div>
+
+  <div class="callout">
+    <strong>İkinci kez aynı hata.</strong> On dördüncü turda kaçırma yüzeyini
+    kapatmak için <code>ESIK</code>'i genişlettim ve <strong>yanlış
+    pozitif</strong> yüzeyi açtım. Burada <code>TAVSIYE</code>'yi genişlettim ve
+    <strong>sınırsız süre</strong> yüzeyi açtım. Bir kapıyı genişletmek tek bir
+    eksende iyileştirme değildir; <strong>ölçülmeyen her eksende bir
+    borçtur.</strong>
+    <br><br>
+    Ve tek harfli takım adı varsayımı <strong>üç ayrı bileşende</strong>
+    gömülüydü — denetimin takım listesi deseni, izlenebilirlik takımının beş
+    kimlik deseni. <strong>Alfabe bitip iki harfli bir takım eklenene kadar
+    hiçbiri görünmedi</strong>, ve üçü de "kapsıyorum" diyordu.
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -1548,7 +1612,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 23 takım · 225 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 24 takım · 243 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
