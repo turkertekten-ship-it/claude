@@ -15,7 +15,7 @@
 | Generation | done | Citation contract verified against retrieved chunks; extractive default, Claude optional |
 | Eval | done | recall/precision/MRR/nDCG, citation coverage, abstention, contamination detection and quarantine |
 | OODA loop | done | Five journalled phases, auditable policy rules, action budget |
-| External eval corpus | done | 91 PyPI pages with provenance and a manifest, rebuildable by `scripts/build_external_corpus.py`; 4 of 54 questions contaminated, 17 documents quarantined |
+| External eval corpus | done | 91 PyPI pages with provenance and a manifest, rebuildable by `scripts/build_external_corpus.py`; 4 of 54 questions contaminated, 14 documents held out as 17 holdouts |
 | Incremental deletion | done | Removals propagate to the delta, prune guarded at 25% of a source, refused entirely for a failed connector |
 | CLI | done | `preflight, index, query, eval, loop, status, journal, demo` |
 | CI | done | Three jobs: stdlib matrix, numpy path, retrieval regression gate; floors ratcheted to 0.85 primary / 0.86 external |

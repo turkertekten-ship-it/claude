@@ -2128,6 +2128,26 @@ claim about whether the gate's own numbers can be trusted.
 4. **Refresh a living table; do not rewrite a dated record.** The same
    "fourteen pages" figure appears in this file and is correct there, because
    these entries describe a moment. `EVALUATION.md` describes the present.
+
+**Hand-fixing the same number in a third file was the signal to stop.**
+`tests/test_documented_numbers.py` now asserts the claims that are free to
+check - the external corpus size, the golden-set sizes, and that the provenance
+manifest lists exactly the documents on disk - against the files themselves.
+The expensive ones are left out and said to be left out: the ablation pass
+rates and the contamination counts both need a built index, and a test that
+pretends to cover them would be worse than the gap.
+
+**Its first version missed the exact defect it was written for.** The regex was
+`(\d+) PyPI`, and the defect was "**fourteen** PyPI project pages" - spelled
+out in words. Every mutation I tried was caught except the one that mattered,
+and only because I mutated the *original* defect rather than a paraphrase of
+it. The test now reads spelled-out numbers, and four variants of that mutation
+are caught.
+
+That is the whole argument for mutation testing in one case: the test passed,
+covered the file, named the right claim, and could not have caught the bug it
+was written for. Re-reading it would not have shown that. **Mutate the original
+defect verbatim, not a convenient re-spelling of it.**
 5. **Refresh a measurement table whole, never a column.** Different columns have
    different sensitivities, so a change can move one and leave the rest exactly
    right - which is the state that looks most trustworthy and is not.
