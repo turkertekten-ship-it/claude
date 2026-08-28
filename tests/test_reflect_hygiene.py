@@ -360,12 +360,43 @@ class UntestedModuleTests(HygieneTestCase):
         ]
         self.assertEqual(HygieneUntestedModule().run(self.context(signals)), [])
 
-    def test_a_test_that_merely_names_the_stem_suppresses_it(self) -> None:
+    def test_prose_naming_the_stem_does_not_suppress_it(self) -> None:
+        """A comment is not a test, and the bare stem is far too loose a match.
+
+        This rule previously suppressed on any word-boundary hit anywhere in any
+        test file. On this repository the HTML scraper read as covered because
+        an unrelated HTTP test contained a "text/html" content type, and the web
+        connector because its stem is an ordinary English word - so the rule
+        fell silent about exactly the modules it exists to find, with nothing to
+        show that it had.
+
+        Note the shape of this docstring: naming a module in its qualified form
+        would itself suppress the finding for that module, since prose in a test
+        file is still a mention. That is a real limit of the heuristic, so the
+        examples above are deliberately written without a path.
+        """
         signals = [
             self.module(),
             file_signal("tests/test_bundle.py", "# exercises the thing module end to end\n"),
         ]
-        self.assertEqual(HygieneUntestedModule().run(self.context(signals)), [])
+        self.assertEqual(len(HygieneUntestedModule().run(self.context(signals))), 1)
+
+    def test_an_unrelated_path_sharing_the_stem_does_not_suppress_it(self) -> None:
+        """The case that was really happening: a content type is not a module."""
+        signals = [
+            self.module(),
+            file_signal("tests/test_other.py", 'headers = {"content-type": "text/thing"}\n'),
+        ]
+        self.assertEqual(len(HygieneUntestedModule().run(self.context(signals))), 1)
+
+    def test_a_qualified_reference_does_suppress_it(self) -> None:
+        for reference in ("pkg.thing", "pkg/thing", "src/pkg/thing.py"):
+            with self.subTest(reference=reference):
+                signals = [
+                    self.module(),
+                    file_signal("tests/test_bundle.py", f"# covers {reference}\n"),
+                ]
+                self.assertEqual(HygieneUntestedModule().run(self.context(signals)), [])
 
     def test_a_stem_inside_a_longer_word_does_not_suppress_it(self) -> None:
         signals = [

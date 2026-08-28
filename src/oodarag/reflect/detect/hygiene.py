@@ -613,7 +613,7 @@ class HygieneUntestedModule(Detector):
             rel = rel_path(sig)
             stem = path_stem(rel)
             import_path = self._import_path(rel)
-            if self._is_mentioned(blob, stem, import_path):
+            if self._is_mentioned(blob, rel, stem, import_path):
                 continue
             lines = line_count(sig)
             if lines < self.min_lines:
@@ -675,18 +675,44 @@ class HygieneUntestedModule(Detector):
             return ""
         return ".".join(parts)
 
-    def _is_mentioned(self, blob: str, stem: str, import_path: str) -> bool:
+    def _is_mentioned(self, blob: str, rel: str, stem: str, import_path: str) -> bool:
+        """Whether any test file refers to *this module*, rather than to its name.
+
+        A bare word-boundary search for the stem is far too loose, and fails in
+        the direction that makes the rule useless: `html.py` was reported as
+        covered because an unrelated HTTP test contained the string
+        "text/html", and `web.py` because "web" is an ordinary English word.
+        The rule then falls silent about exactly the modules it exists to find,
+        with nothing to show that it did.
+
+        So a mention has to look like a reference: the dotted import path, the
+        file path, or the stem qualified by the package directory that contains
+        it. `scrape/html` and `scrape.html` are references; `text/html` is not.
+        """
         if not stem:
             return True  # no name to look for: stay quiet rather than guess
         if not blob:
             # A tree with no tests in it mentions nothing, and that is the case
             # this rule exists for - not the one it should fall silent on.
             return False
-        if import_path and import_path.lower() in blob:
-            return True
-        return bool(
-            re.search(rf"(?<![a-z0-9_]){re.escape(stem.lower())}(?![a-z0-9_])", blob)
-        )
+        for needle in self._needles(rel, stem, import_path):
+            if needle and needle in blob:
+                return True
+        return False
+
+    def _needles(self, rel: str, stem: str, import_path: str) -> list[str]:
+        """Every spelling a test could plausibly use to name this module."""
+        rel = rel.lower().replace("\\", "/")
+        stem = stem.lower()
+        out = [rel, rel.removesuffix(".py")]
+        if import_path:
+            out.append(import_path.lower())
+        parent = rel.rsplit("/", 2)[-2] if rel.count("/") >= 1 else ""
+        if parent:
+            # The qualified tail is what an import or a patch target looks like.
+            out.append(f"{parent}/{stem}")
+            out.append(f"{parent}.{stem}")
+        return out
 
     def _churn(self, ctx: DetectContext) -> dict[str, list[Signal]]:
         """Paths touched by commits in the window.
