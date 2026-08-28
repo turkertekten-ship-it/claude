@@ -125,16 +125,39 @@ kaldi_once = set()
 if os.path.exists(once):
     kaldi_once = set(re.findall(r"^KALDI\s+([A-Z]{1,2}-\d+[a-z]?)", 
                                 open(once, encoding="utf-8").read(), re.M))
+# [otuz ikinci tur] Ölçüt eskiden HER ağır maddenin atfının sadık koşumda
+# KALDI olmasını istiyordu. Sadık koşum yamalardan ÖNCEKİ ham çıktıdır ve o
+# sırada var olmayan bir takımın vakası orada hiç görünemez — yani sonraki
+# turlarda bulunan bir kusuru DOĞRU kimliğiyle anmak imkânsızlaşıyor, madde
+# yanlış bir vakaya bağlanmaya itiliyordu. Ölçüt ikiye ayrıldı; her iki dalda
+# da gerçek bir şart var, hiçbir madde şartsız kalmıyor:
+#   * takım sadık koşumda VARSA  -> atıf orada KALDI olmalı (eski güç aynen)
+#   * takım sonradan yazıldıysa  -> atıf, gerçekten TANIMLI bir vaka olmalı
+_taban_onekleri = {k.split("-")[0] for k in kaldi_once}
+_tanimli = set()
+for _ad in sorted(os.listdir(os.path.join(_KOK_COZ, "sinama"))):
+    if _ad.startswith("ks_") and _ad.endswith(".py"):
+        _tanimli |= set(re.findall(
+            r'vaka\(\s*"([A-Z]{1,2}-\d+[a-z]?)"',
+            open(os.path.join(_KOK_COZ, "sinama", _ad),
+                 encoding="utf-8").read()))
+
 agir = [(b, k) for b, a, k in maddeler if a in ("A", "B") and k]
 sinanmamis = []
 for b, kimlikler in agir:
     somut = [k for k in kimlikler if len(k) > 1 and k[0] in "ABCE"]
-    if somut and not any(k in kaldi_once for k in somut):
-        sinanmamis.append((b[:44], somut))
-vaka("M-03", "[A] ve [B] maddelerinin atıfları sadık sistemde gerçekten kaldı",
+    if not somut:
+        continue
+    tabanda = [k for k in somut if k.split("-")[0] in _taban_onekleri]
+    if tabanda:
+        if not any(k in kaldi_once for k in tabanda):
+            sinanmamis.append((b[:44], tabanda, "sadık koşumda kalmamış"))
+    elif not any(k in _tanimli for k in somut):
+        sinanmamis.append((b[:44], somut, "böyle bir vaka tanımlı değil"))
+vaka("M-03", "[A] ve [B] maddelerinin atıfları gerçek vakalara bağlı",
      not sinanmamis,
-     "sadık koşumda kalan vaka: %d · sınanmamış ağır madde: %s"
-     % (len(kaldi_once), sinanmamis or "yok"))
+     "sadık koşumda kalan: %d · tanımlı vaka: %d · bağsız madde: %s"
+     % (len(kaldi_once), len(_tanimli), sinanmamis or "yok"))
 
 # --- M-04 ters kapsama ---------------------------------------------------
 anilan = set()

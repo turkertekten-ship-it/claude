@@ -249,6 +249,21 @@ SIR_KALIPLARI = (
      "şirket unvanı"),
     (r"(?:bedel|fiyat|değer)[^.\n]{0,40}?\d{1,3}(?:[.,]\d{3}){1,}\s?" + PARA,
      "işlem bedeli"),
+    # [AN-05 · otuz ikinci tur] Otuz birinci turun yaması `/esik-denetle`ye
+    # canlı iş katmanı ekledi; ürettiği tablonun satırları MÜVEKKİL DOSYA
+    # ADLARINI taşıyor. Kabul sınaması sordu: o tablo dışarı giden bir çağrıya
+    # konursa kapı yakalar mı? YAKALAMIYORDU. `dosyalar/Acme-Gida-devralma/`
+    # gibi bir yol ASCII'ye katlanmış, tirelenmiş ve "A.Ş." eki taşımıyor —
+    # ad kaydında da yok. Yani yama, kapının göremediği YENİ bir dışarı
+    # sızma yüzeyi açmıştı. On dördüncü, on dokuzuncu ve yirmi birinci
+    # turlarda adlandırılan sınıf: bir kaçırmayı kapatmak ölçülmemiş bir
+    # eksen açar. Bu kez yama gönderilmeden ÖNCE kendi kabul sınamasında
+    # yakalandı.
+    # §2 sözlüğünde `dosyalar/` CANLI İŞLERİ tutar; altındaki somut bir ad
+    # tanımı gereği müvekkil kimliğidir. Yer tutucular (`dosyalar/`,
+    # `dosyalar/*/`, `dosyalar/<is>/`) ateşlemez — belgeler onları kullanır.
+    (r"\bdosyalar/(?![*<{])[\wçğıöşüÇĞİÖŞÜ][\wçğıöşüÇĞİÖŞÜ.\-]{1,}",
+     "müvekkil dosya adı (canlı iş yolu)"),
 )
 
 # Yerel başvuru malzemesi ile müvekkile giden çıktı ayrımı.

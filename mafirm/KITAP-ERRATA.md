@@ -407,6 +407,36 @@ ETKİLENEN ve SÜRÜMSÜZ işaretleri tanımlandı), "hiçbir dosyayı düzenlem
 kuralı aynen korundu ve tablonun makinede kalması kural 6 gereği açıkça
 yazıldı. Kitaba sadık sürüm `yamalar/kitaba-sadik/esik-denetle.md`.
 
+## §12 · Kapılar — sır kapısının görmediği yol
+
+**[A] Sır kapısı müvekkil ADINI arıyor ama müvekkil DOSYA YOLUNU görmüyor.**
+§12'nin sır kapısı üç kalıba ve bir ad kaydına bakıyor: işlem kod adı,
+şirket unvanı (`A.Ş.`, `Ltd. Şti.` ekleriyle) ve işlem bedeli. Ama §2
+kurulumun ikinci adımında `dosyalar/` dizinini kuruyor ve §9'un `dosya-ac`
+becerisi her iş için `dosyalar/<ad>/` klasörünü **müvekkilin/hedefin adıyla**
+açıyor; çıktılar da `dosyalar/<ad>/cikti/` altına yazılıyor. Yani sıradan bir
+oturum, doğal olarak şu biçimde metin üretir:
+
+    dosyalar/Acme-Gida-devralma/cikti/esik-notu.md
+
+Bu yol **tanımı gereği müvekkil kimliğidir** — §2 sözlüğünde `dosyalar/`
+canlı işleri tutar — ama kapının hiçbir kalıbına uymaz: ASCII'ye katlanmış,
+tirelenmiş, `A.Ş.` eki yok ve ad kaydında böyle yazılmıyor. Ölçüldü:
+`disari=True` ile gönderilen böyle bir satırda **hiçbir kapı ateşlemiyordu.**
+
+Bulgu, otuz birinci turun yamasının kabul sınamasında ortaya çıktı: yama
+`/esik-denetle`ye satırları dosya adlarını taşıyan bir tablo ekliyor ve
+"bu tablo makinede kalır" diyor. O cümlenin kapıya sorulması gerekiyordu —
+soruldu, kapı görmüyordu. **Ama boşluk yamanın açtığı bir boşluk değil;
+yamadan önce de oradaydı ve kitabın kendi klasör düzeninden doğuyor.**
+*(AN-05)*
+
+→CEVAP: YOK — cevabın "yamalı hâlde sistem çalışıyor" cümlesi kapsıyor:
+kapıya somut canlı iş yolu kuralı eklendi. Yer tutucular (`dosyalar/`,
+`dosyalar/*/`, `dosyalar/<is>/`) ateşlemez — belgeler ve kitabın kendi metni
+onları kullanır; yalnızca somut bir ad ateşler. Otuz yedi takımın hiçbirinde
+yanlış pozitif üretmedi.
+
 ## §12 · Kapılar
 
 **[A] Öz-sınama üretim yolunu koşturmuyor.** Öz-sınama fonksiyona ham dize

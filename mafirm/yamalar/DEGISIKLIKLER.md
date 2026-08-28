@@ -59,6 +59,7 @@ eski yola karşı bırakıldı: kusurun kaydı olarak dururlar.
 | 20 | yeni | Eklenen kontroller: her birimin INDEX.md'si, koltuk sayısı, kancanın settings.json'da GERÇEKTEN kayıtlı olması, matcher'ın Bash'i kapsaması, çıkar çatışması dosyasının varlığı, müvekkil ad kaydının doluluğu. |
 | 21 | yeni | `--yapisal` bayrağı: mühendislik katmanını mevzuat bulgularından ayırır. Bayraksız koşumda ENGELLEYİCİ mevzuat bulguları denetimi kırmızıda tutar. |
 | 22 | **`/esik-denetle`** | Komut kapanışta "hangi dosyalar bayat bir rakama dayanıyor" diye bitiyor ama yalnızca `birimler/*/yontem/` tarıyordu; §2'de canlı işleri tutan `dosyalar/` hiç açılmıyordu. Canlı iş katmanı (B) eklendi, ETKİLENEN ve SÜRÜMSÜZ işaretleri tanımlandı. "Hiçbir dosyayı düzenleme" korundu; tablonun makinede kalması kural 6 gereği yazıldı. |
+| 23 | **`.claude/hooks/kapi.py` · sır kapısı** | Kapı müvekkil adını arıyor ama `dosyalar/<ad>/` biçimindeki müvekkil DOSYA YOLUNU görmüyordu; §9'un `dosya-ac` becerisi bu klasörleri müvekkil adıyla açtığı için sıradan bir oturum doğal olarak böyle metin üretir. Somut canlı iş yolu kuralı eklendi; yer tutucular ateşlemez. |
 
 ## Eklenen dosyalar
 - `hafiza/cikar-catismasi.md` — §2 `hafiza/` klasörünü kuruyordu ama bu dosyayı

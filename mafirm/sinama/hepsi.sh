@@ -98,6 +98,8 @@ python3 "$S/ks_al_yan_etki.py"; topla "AL · takımların yan etkisi / bağıms�
 echo
 python3 "$S/ks_am_surum.py"; topla "AM · kararın hukuki sürümü" $?
 echo
+python3 "$S/ks_an_kabul.py"; topla "AN · yamanın kabul sınaması" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

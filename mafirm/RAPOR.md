@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** otuz altı çalıştırılabilir takım — **307
+**Yamalı hâlde sistem çalışıyor:** otuz yedi çalıştırılabilir takım — **312
 vaka, 15 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15, birimler arası tutarlılık takımının
 kendi mutasyon yakalaması 10/10. Ama **üç mevzuat bulgusu ile kitabın kendi içindeki bir çelişki açık kalır**
@@ -1859,6 +1859,78 @@ söylüyor.
 İkisi de aynı şeyi söylüyor: **bir ölçüt, ölçtüğünü sandığı şeyi ölçtüğünü
 ancak mutasyon gösterdiğinde bilir.**
 
+### Yamanın kendi kabul sınaması, yamanın açtığı deliği buldu
+
+Bir yama, işe yaradığı **gösterilene** kadar bir iddiadır. Otuz birinci turun
+yaması `/esik-denetle`'ye canlı iş katmanı ekledi; otuz ikinci tur onu
+sınadı — ve önce bir hipotez **çürüttü**.
+
+**Çürüyen hipotez de bir ölçümdür.** Hipotez şuydu: *"belki hiçbir çıktı
+hangi rakama dayandığını yazmıyor; o hâlde SÜRÜMSÜZ her zaman doğru olurdu
+ve yama boş bir tespit üretirdi."* Kitabın kendi çıktı sözleşmesi (§15.1)
+bunu çürütüyor — çıktı *"kullanılan rakamlar ve her birinin nereden geldiği"*
+ile doğrulama tarihini istiyor. Yama boşluğa değil, kitabın kendi
+sözleşmesine dayanıyor. Kitabı haksız yere suçlamamak, onu doğru yerde
+suçlamak kadar işin parçasıdır.
+
+Asıl bulgu ikinci soruda çıktı. Yama, satırları **müvekkil dosya adlarını**
+taşıyan bir tablo üretiyor ve "bu tablo makinede kalır" diyor. O cümle
+kapıya sorulmalıydı. Soruldu:
+
+| dışarı giden metin | kapı ne yaptı |
+|---|---|
+| `dosyalar/Acme-Gida-devralma/ ETKİLENEN` | **hiçbir kapı ateşlemedi** |
+
+§12'nin sır kapısı işlem kod adına, `A.Ş.`/`Ltd. Şti.` ekli şirket unvanına,
+işlem bedeline ve ad kaydına bakıyor. Bir dosya yolu bunların hiçbirine
+uymaz: ASCII'ye katlanmış, tirelenmiş, eksiz. Oysa §2 sözlüğünde
+`dosyalar/` **canlı işleri** tutar — altındaki somut bir ad, tanımı gereği
+müvekkil kimliğidir.
+
+**Ve boşluk yamanın açtığı bir boşluk değildi.** §9'un `dosya-ac` becerisi
+her işi `dosyalar/<ad>/` klasörüyle açıyor ve çıktıları
+`dosyalar/<ad>/cikti/` altına yazıyor; yani sıradan bir oturum bu biçimde
+metni **zaten** üretiyor. Yama yalnızca boşluğun üstüne bir ışık tuttu.
+Kapıya somut canlı iş yolu kuralı eklendi; yer tutucular (`dosyalar/`,
+`dosyalar/*/`, `dosyalar/<is>/`) ateşlemez — kitabın kendi metni ve bu rapor
+onları kullanıyor — ve otuz yedi takımın hiçbirinde yanlış pozitif üretmedi.
+
+**On dördüncü, on dokuzuncu ve yirmi birinci turların sınıfı, dördüncü kez:**
+bir kaçırmayı kapatmak ölçülmemiş bir eksen açar. Fark şu ki bu kez eksen,
+yama hiçbir yere gitmeden önce **kendi kabul sınamasında** yakalandı.
+
+### Ve errata izlenebilirliği yeni bir bulguyu anmayı imkânsız kılıyordu
+
+Yeni §12 maddesi kusuru bulan vakayı — AN-05 — anınca **M-03 kırmızıya
+döndü**. Sebebi haklı bir kuralın fazla dar hâliydi: M-03, her ağır errata
+maddesinin atfının **kitaba sadık koşumda** KALDI olmasını istiyordu. Ama
+sadık koşum yamalardan önceki ham çıktıdır; o sırada var olmayan bir takımın
+vakası orada hiç görünemez. Yani kural, sonraki turlarda bulunan bir kusuru
+**doğru kimliğiyle anmayı** imkânsız kılıyor ve maddeyi yanlış bir vakaya
+bağlamaya itiyordu.
+
+Ölçüt ikiye ayrıldı — ve iki dalda da gerçek bir şart var, hiçbir madde
+şartsız kalmıyor:
+
+| takım sadık koşumda | şart |
+|---|---|
+| **vardı** | atıf orada KALDI olmalı *(eski güç aynen)* |
+| **sonradan yazıldı** | atıf, gerçekten **tanımlı** bir vaka olmalı |
+
+Mutasyon ikisini de sınıyor: uydurma bir kimlik (`AN-99`) anmak kırmızı
+veriyor; sadık koşumda **geçmiş** bir taban vakası (`B-01`) anmak da kırmızı
+veriyor. Bir kuralı gevşetmek, onu ölçmez hâle getirmez.
+
+### Fixture'ın kendisi bir kez yanılttı
+
+AN-02 ilk koşumda kırmızıydı ve sebebi sistem değildi: "eski" örnek dosyaya
+gerçekçi görünen eşik rakamları yazmıştım ve ikisi de **hâlâ yürürlükteki**
+sabitlere denk geldi, dolayısıyla "artık geçerli olmayan rakam" kümesi boş
+çıktı. Rakamlar açıkça uydurma olanlarla değiştirildi — çünkü sınanan şey
+karşılaştırmanın **yapılabilirliğidir**, belirli tarihsel eşiklerin
+doğruluğu değil; gerçek bir tarihsel rakam yazmak §11'in mevzuat katmanına
+birincil kaynaksız bir iddia sokardı.
+
 ---
 
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
@@ -1975,6 +2047,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | AK · bulgu statüsü | *dokuz bulgu doğrulanmamıştı* | **temiz** — dördü doğrulandı, üçü yetkili kaynağından |
 | AL · takımların yan etkisi / bağımsızlık | *B-34 canlı ad kaydını yok ediyor, AF-03 kendi koşumunu okuyor* | **temiz** — iki yan etki kapatıldı, sağlama epiloga taşındı |
 | AM · kararın hukuki sürümü | *eşik denetimi canlı dosyaları hiç açmıyor* | **temiz** — tarama kapsamı vaadine eşitlendi |
+| AN · yamanın kabul sınaması | *yamanın tablosu kapıya görünmüyordu* | **temiz** — sır kapısına canlı iş yolu kuralı eklendi |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -2033,7 +2106,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 ### Nasıl yeniden koşulur
 ```
 ./sinama/hepsi.sh                 # 34 çalıştırılabilir takım:
-                                  #   307 vaka + 15 mutasyon (D)
+                                  #   312 vaka + 15 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -2110,9 +2183,10 @@ Dokuz takım, 96 vaka:
 | AK | **Bulgu statüsü ve kanıt türü** — neyi neyle kapatabilirsin | §1, §9, §13 |
 | AL | **Takımların yan etkisi ve bağımsızlığı** — takım kendi ölçtüğü ağacı kirletiyor mu | §8, kural 6, §12 |
 | AM | **Kararın hukuki sürümü** — eşik değişince verilmiş görüşe ne oluyor | §3, §5.1, §11 |
+| AN | **Yamanın kabul sınaması** — eklenen katman gerçekten karar verdiriyor mu | §15.1, kural 6 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**307 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**312 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)
