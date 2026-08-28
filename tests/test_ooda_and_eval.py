@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import tempfile
+import pathlib
 import unittest
 from pathlib import Path
 
@@ -559,6 +560,60 @@ class GuardReachabilityTest(unittest.TestCase):
         self.assertLess(floor, AnswerConfig().min_top_score,
                         "with no query-independent priors a chunk matching "
                         "nothing should fall under the floor")
+
+
+class EmptyIndexIsNotAQualityCollapseTest(unittest.TestCase):
+    """An eval against an empty index reported 22 failing cases and every metric
+    at 0.0 - identical to the retriever having failed completely.
+
+    It happened in CI: a new eval step was ordered before the step that builds
+    its index, and the run read as a catastrophic regression rather than a
+    workflow mistake. "Empty" is *blocked*, *filtered* or *absent*, and a report
+    that cannot say which is a report that misleads (L69).
+    """
+
+    def _config(self, path):
+        from oodarag.config import Config
+
+        return Config(index_path=str(path), state_path=str(path) + ".state",
+                      goldens_path="evals/goldens-heldout.jsonl")
+
+    def test_it_refuses_rather_than_reporting_every_case_as_a_failure(self):
+        import argparse
+        from tempfile import TemporaryDirectory
+
+        from oodarag.cli import cmd_eval
+
+        with TemporaryDirectory() as tmp:
+            args = argparse.Namespace(goldens="evals/goldens-heldout.jsonl", k=8,
+                                      exclude_source=(), json=False, out=None,
+                                      min_pass_rate=0.0)
+            code = cmd_eval(args, self._config(pathlib.Path(tmp) / "empty.db"))
+        self.assertEqual(code, 2,
+                         "an empty index must not exit 0, and must not exit 1 "
+                         "either - 1 is a quality regression and this is not one")
+
+    def test_a_populated_index_still_evaluates(self):
+        """The refusal must not fire on a real index, or it is just an outage."""
+        import argparse
+        from tempfile import TemporaryDirectory
+
+        from oodarag.cli import cmd_eval
+        from oodarag.ingest.filesystem import FilesystemConnector
+        from oodarag.pipeline import IndexPipeline
+        from oodarag.store.sqlite_store import SqliteStore
+
+        with TemporaryDirectory() as tmp:
+            db = pathlib.Path(tmp) / "full.db"
+            store = SqliteStore(str(db))
+            IndexPipeline(store).run([FilesystemConnector(
+                "corpus/external/pypi", patterns=["**/*.md"], key="fs:e")])
+            store.close()
+            args = argparse.Namespace(goldens="evals/goldens-heldout.jsonl", k=8,
+                                      exclude_source=(), json=False, out=None,
+                                      min_pass_rate=0.0)
+            code = cmd_eval(args, self._config(db))
+        self.assertEqual(code, 0, "the refusal fired on a populated index")
 
 
 if __name__ == "__main__":

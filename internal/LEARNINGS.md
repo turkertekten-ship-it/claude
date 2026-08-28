@@ -3432,3 +3432,50 @@ about credentials, and worth knowing rather than discovering.
 3. **Pair an absence assertion with a presence assertion.** "Nothing leaked"
    needs "and there was something to leak", or the test measures the corpus
    rather than the code.
+
+---
+
+## L69 - An empty index and a total quality collapse produce identical reports
+
+The commit that added the held-out set turned CI red, and the report looked
+alarming: **22 of 22 cases failing, every metric 0.0, "unexpected abstention"**
+on each one. That reads as the retriever having stopped working entirely.
+
+It was a workflow mistake. I had added the held-out eval as a step *before* the
+step that builds the index it evaluates - the external `index` command runs
+inside the "Evaluate against the external corpus" step, further down. So the
+eval ran against an index that did not exist.
+
+**The two are indistinguishable in the output**, and that is the defect worth
+fixing. `none of ['tqdm'] retrieved; got []` is exactly what a missing index and
+a broken retriever both produce, and nothing in the report says which. The
+latency gave it away - 0.07ms per query, no work done - and only because I
+happened to look.
+
+`cmd_eval` now refuses: it checks the chunk count first and exits **2** with
+`refusing to evaluate: ... holds no chunks. Run 'index' first`. Two rather than
+one on purpose - **1 is the exit code for a quality regression**, and a missing
+prerequisite reported as a regression is the same conflation one level up. All
+three mutations are caught, including "exit 1 instead of 2".
+
+This is the project's own rule about empty results arriving in the tool that
+reports on everything else: *empty is blocked, filtered, deduplicated or
+genuinely absent - say which.* The eval harness had been unable to say.
+
+**Two smaller things from the same half hour, both mine.** Checking the new exit
+code I wrote `cmd ... | tail -2` then `echo $?`, which reports `tail`'s status
+and printed a confident `exit code: 0` for a command that had exited 2. And the
+CI step I added created this failure precisely because a barely-gated
+observational step still runs in a sequence, and I had thought about the floor
+rather than the ordering.
+
+**Rules.**
+1. **Distinguish "the input was missing" from "the answer was wrong" in the
+   output, not just in the exit code.** They are the same shape - nothing came
+   back - and only one of them means what the report says.
+2. **Use a distinct exit code for a broken precondition.** Sharing one with a
+   quality failure guarantees the two get confused by whoever reads CI next,
+   which was me, ten minutes later.
+3. **`$?` after a pipeline is the last command's status.** Two of this
+   session's confident measurements have been of the wrong object; this one
+   claimed a fresh exit code that was `tail`'s.

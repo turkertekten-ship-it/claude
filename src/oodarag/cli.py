@@ -97,6 +97,19 @@ def cmd_eval(args, config: Config) -> int:
     from oodarag.eval.harness import EvalHarness, load_goldens
 
     store, pipeline = _build(config)
+    # An empty index is a missing prerequisite, not a quality collapse, and the
+    # two are indistinguishable in a report: every case comes back "none
+    # retrieved; got []" with every metric at 0.0, which reads exactly like the
+    # retriever having failed completely. That happened in CI - an eval step
+    # ordered before the step that builds its index - and the run looked like a
+    # catastrophic regression rather than a workflow mistake (L69).
+    chunks = store.stats().get("chunks", 0)
+    if not chunks:
+        print(f"refusing to evaluate: {config.index_path} holds no chunks. "
+              f"Run `index` first - an empty index reports every case as a "
+              f"retrieval failure and that is not what it means.", file=sys.stderr)
+        store.close()
+        return 2
     goldens = load_goldens(args.goldens or config.goldens_path)
     report = EvalHarness(_generator(config, pipeline), k=args.k,
                          exclude_sources=tuple(args.exclude_source or ())).run(goldens)

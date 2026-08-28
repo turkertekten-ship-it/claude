@@ -92,16 +92,6 @@ jobs:
             --exclude-source chat \
             --min-pass-rate 0.85 \
             --out eval-report.md
-      - name: Evaluate against the held-out set
-        run: |
-          # Reported, deliberately barely gated. This set exists to detect
-          # overfitting in the *other* gates, and a tight floor here would turn
-          # it into one more thing to tune against - which is exactly what it
-          # was built not to be (LEARNINGS L67). The floor catches catastrophe
-          # and nothing finer.
-          PYTHONPATH=src python3 -m oodarag.cli --config oodarag-external.toml eval \
-            --goldens evals/goldens-heldout.jsonl --min-pass-rate 0.6
-
       - name: Evaluate against the external corpus
         # No self-reference, so contamination is clean and the numbers need no
         # quarantine. This set catches abstention failures the primary corpus
@@ -117,6 +107,15 @@ jobs:
           python -m oodarag.cli --config oodarag-external.toml eval \
             --goldens evals/goldens-external.jsonl \
             --min-pass-rate 0.86 --out eval-external.md
+          # The held-out set, in this step because it shares the index the line
+          # above builds - it was first added as a step of its own *before* that
+          # index existed, and every case failed with "got []" (L69).
+          #
+          # Deliberately barely gated: this set exists to detect overfitting in
+          # the other gates, and a tight floor would make it one more thing to
+          # tune against, which is what it was built not to be (L67).
+          python -m oodarag.cli --config oodarag-external.toml eval \
+            --goldens evals/goldens-heldout.jsonl --min-pass-rate 0.6
 
       - uses: actions/upload-artifact@v4
         if: always()
