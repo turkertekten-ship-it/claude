@@ -55,12 +55,14 @@ DROP_ROLES = frozenset("navigation banner contentinfo complementary search dialo
 #: too, and documents the intent.
 SKIP_HREF_PREFIXES = ("javascript:", "mailto:", "tel:", "#", "data:", "about:", "blob:")
 
-#: Start tags whose closing tag is optional in HTML, and what an opening one
-#: implicitly closes. Real pages leave every one of these out: without the rule,
-#: `<td>a<td>b` nests the second cell inside the first and the row collapses to
-#: a single column. `p` is in every set because a paragraph cannot span a cell
-#: or a list item boundary.
+#: Start tags whose closing tag is optional (or, for `a`, whose nesting is
+#: illegal), and what an opening one implicitly closes. Real pages leave every
+#: one of these out: without the rule `<td>a<td>b` nests the second cell inside
+#: the first and the row collapses to a single column, and a missing `</a>`
+#: makes one link swallow the text of every link after it. `p` is in most sets
+#: because a paragraph cannot span a cell or a list item boundary.
 IMPLICIT_CLOSE = {
+    "a": frozenset({"a"}),
     "p": frozenset({"p"}),
     "li": frozenset({"li", "p"}),
     "dt": frozenset({"dt", "dd", "p"}),

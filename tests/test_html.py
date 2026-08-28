@@ -205,6 +205,12 @@ class TextExtractionTestCase(unittest.TestCase):
         self.assertIn("| cell a | cell b |", page.markdown)
         self.assertIn("| c | d |", page.markdown)
 
+    def test_unclosed_anchor_does_not_swallow_the_next_link(self) -> None:
+        doc = '<body><a href="/one">first<a href="/two">second</a></body>'
+        page = extract(doc, "https://e.com/")
+        self.assertEqual([(link.url, link.text) for link in page.links],
+                         [("https://e.com/one", "first"), ("https://e.com/two", "second")])
+
     def test_unclosed_definition_list_items(self) -> None:
         page = extract("<body><dl><dt>term one<dd>meaning<dt>term two<dd>other</dl></body>")
         self.assertEqual(page.text.split("\n\n"), ["term one", "meaning", "term two", "other"])
@@ -333,6 +339,16 @@ class BoilerplateTestCase(unittest.TestCase):
         page = extract(doc, "https://e.com/")
         for i in range(4):
             self.assertIn(f"Paragraph {i}.", page.text)
+
+    def test_head_text_is_never_dragged_into_the_body(self) -> None:
+        # A CSS string containing `</style>` closes the element early - browsers
+        # do the same - and leaves its tail loose in <head>. Widening the
+        # selection must stop at <body> rather than adopt it.
+        doc = ('<head><style>.a::after { content: "</style>"; }</head>'
+               f"<body>{paragraphs(3)}</body>")
+        page = extract(doc, "https://e.com/")
+        self.assertTrue(page.text.startswith("Paragraph 0."), page.text[:40])
+        self.assertIn("Paragraph 2.", page.text)
 
     def test_main_element_wins_over_everything_else(self) -> None:
         doc = f"<body><div class=topbar>{anchors(8)}</div><main>{paragraphs(3)}</main></body>"
@@ -482,6 +498,10 @@ class LinkExtractionTestCase(unittest.TestCase):
     def test_link_text_is_flattened_to_one_line(self) -> None:
         page = extract('<body><a href="/x">foo<br>bar <b>baz</b></a></body>', "https://e.com/")
         self.assertEqual(page.links[0].text, "foo bar baz")
+
+    def test_without_a_document_url_only_absolute_links_resolve(self) -> None:
+        doc = '<body><a href="/rel">r</a><a href="https://e.com/abs">a</a></body>'
+        self.assertEqual([link.url for link in extract(doc).links], ["https://e.com/abs"])
 
     def test_link_text_survives_in_the_prose(self) -> None:
         page = extract(f'<body><p>read <a href="/x">the docs</a> now. {PARA}</p></body>',
@@ -711,13 +731,12 @@ class DegradationTestCase(unittest.TestCase):
             page = extract(f"<body>{paragraphs(2)}</body>", "https://e.com/")
         self.assertEqual(page.text, "")
 
-    def test_pages_do_not_share_their_link_list(self) -> None:
-        # The fallback build reuses the collected links; handing both pages the
-        # same list object would let a caller mutate the other one's.
-        doc = f"<body><nav><a href='/n'>n</a>{anchors(3)}</nav></body>"
-        page = extract(doc, "https://e.com/")
-        page.links.clear()
-        self.assertEqual(len(extract(doc, "https://e.com/").links), 4)
+    def test_the_thin_page_fallback_still_carries_the_links(self) -> None:
+        # This document only survives via the conservative retry; the retry
+        # builds a second page, and it must not come back link-less.
+        page = extract(f"<body><nav>{anchors(3)}</nav></body>", "https://e.com/")
+        self.assertEqual(len(page.links), 3)
+        self.assertIn("Section number 1", page.text)
 
 
 # --------------------------------------------------------------- page methods
