@@ -856,3 +856,22 @@ sources:
       sender/role/author) and reports what it cannot map rather than guessing -
       and that hedge is now the right call on evidence rather than on caution.
       The schema resolves when a real export lands in archive/, not before.
+
+  - id: CLI-CONTRACT-TESTED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T17:55Z"
+    method: "tests/test_cli_contract.py run under PYTHONPATH=src python3 -m unittest"
+    evidence: >-
+      8 cases, all passing, driving the failure paths rather than the success
+      path (which make demo already covers end to end). No arguments, an unknown
+      subcommand, `query` with no question, and `stats` or `query` against a
+      non-existent index all return a non-zero exit code with no "Traceback" in
+      either stream and a non-empty diagnosis. `--help` exits 0 and lists every
+      subcommand the Makefile invokes, and the Makefile is checked to invoke
+      only subcommands that exist. All eleven pipeline stages now have unit
+      tests.
+    note: >-
+      Complete stage coverage is not evidence of retrieval quality. The corpus
+      is nine documents and the golden set 26 questions, so the end-to-end
+      signal remains thin; internal/PLAN.md states this as the pipeline being
+      well specified and only thinly evaluated.

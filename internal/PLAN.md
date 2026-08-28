@@ -81,40 +81,30 @@ retrieval does. Treat it as a regression baseline and nothing more; the number
 that would mean something comes from a corpus nobody wrote the questions
 against.
 
-**2. One of the eleven stages has no unit tests.** Only `cli` is covered solely by the end-to-end demo,
-which asserts nothing — it prints. A bug that degrades ranking without breaking
-it produces a demo that looks identical.
-
-Five stages now have unit tests, and three of the five suites were written
-because something had already gone wrong in them:
+**2. Coverage is complete; that is not the same as being well tested.** All
+eleven stages now have unit tests, up from two when this file was written. The
+suites were written to the invariants CLAUDE.md names rather than to a coverage
+target, and three of them exist because something had already gone wrong:
 
 | Stage | Suite | Why it exists |
 |---|---|---|
-| ingest, scrape | `test_{github_offline,github_blind,crawler_blind,robots,html_extract,http_client}.py` | Inherited from the pipeline branch; 72 tests against a local stub server |
+| ingest, scrape | `test_{github_offline,github_blind,crawler_blind,robots,html_extract,http_client}.py` | Inherited; 72 tests against a local stub server |
+| normalize, embed | `test_normalize_embed.py` | Normalization is the redaction gate that does not depend on every future connector remembering |
 | chunk | `test_chunk_invariants.py` | Offsets and fence atomicity are what every citation rests on |
-| index / store | `test_store.py` | Found a connection leak on a refused open — a caller catching the error kept a handle it could not reach |
-| index / bm25 | `test_bm25_small_corpus.py` | A clamped IDF silenced the whole lexical arm on a small corpus; the dense arm kept answering and every number stayed plausible |
-| generate | `test_generate_invariants.py` | Citation verification and abstention are the last gate before a fabrication reaches a caller |
-| loop | `test_ooda_invariants.py` | `decide()` purity and dry-run side-effect freedom are claims that erode silently |
+| index / store | `test_store.py` | Found a connection leak on a refused open |
+| index / bm25 | `test_bm25_small_corpus.py` | A clamped IDF silenced the lexical arm; the dense arm kept answering and every number stayed plausible |
+| retrieve | `test_fusion_invariant.py` | Aggregate scores said fusion was dead weight; per class it beats both arms on noisy input |
+| rerank | `test_rerank_invariants.py` | Diversity is invisible to any aggregate relevance metric |
+| generate | `test_generate_invariants.py` | The last gate before a fabrication reaches a caller |
+| evaluate | `test_eval_metrics.py` | Every other retrieval claim here is a number this module produced |
+| loop | `test_ooda_invariants.py` | `decide()` purity and dry-run side-effect freedom erode silently |
+| cli | `test_cli_contract.py` | A traceback reaching the terminal is what `make demo` shows a user |
 
-**retrieve** and **rerank** are both covered now, which closes what were the two
-worst of the six. `test_fusion_invariant.py` asserts the property the second
-index exists to provide — on noisy queries the fused ranking beats its best
-single arm — and pins the clean-query loss so it cannot quietly grow.
-`test_rerank_invariants.py` builds the degenerate case reranking exists for
-(three near-duplicates crowding out a diverse chunk) and includes the control
-that proves it measures diversity rather than incidental reordering.
-
-**evaluate** was the one that mattered most, because the harness is what every
-other retrieval claim in this repository is scored by — a bug in it would have
-made every number here wrong in the same direction rather than merely noisy.
-`test_eval_metrics.py` checks `reciprocal_rank`, `recall_at_k`, `dcg`,
-`ndcg_at_k` and URI matching against values computed by hand from the standard
-definitions, including that URI matching is not a bare substring test. It passes,
-so the numbers above can be trusted as arithmetic.
-
-What remains for `cli` is genuinely thin: `make demo` exercises every subcommand
-path end to end, and what a unit test would add is argument-parsing edge cases.
+**What coverage still does not buy.** The corpus is nine hand-written documents
+and the golden set is 26 questions. Unit tests pin behaviour; they say nothing
+about whether retrieval is good on a corpus nobody wrote the questions against,
+and gap 1 above still stands. The honest summary is that the pipeline is now
+well *specified* and only thinly *evaluated*.
 
 **3. Deletions never propagate.** `Connector.run` records vanished documents in
 `cursor["removed_last_run"]` and `Store.delete_document` is implemented, but
