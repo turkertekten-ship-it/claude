@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>19 çalıştırılabilir takım · 201 vaka · 0 sinyal</span>
+    <span>20 çalıştırılabilir takım · 205 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -1205,6 +1205,52 @@ connect_rejected  <span class="bad">www.spk.gov.tr:443</span>         gateway an
 </section>
 
 <section>
+  <span class="sec-tag">On beşinci tur</span>
+  <h2>Boş bir dolap, yokluğun kanıtı değildir</h2>
+  <p>§14 kuralı kendisi yazıyor: <em>"Boş bir GitHub araması yokluğun kanıtı
+  değildir. Kayıtlara bak."</em> Kitap bunu <strong>dış</strong> arama için
+  söylüyor — ve aynı tuzağı <strong>kendi dosya düzeninde</strong> kuruyor.</p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">W-02 · W-03</span>
+      <span class="pill f">Sessiz boşluk</span></div>
+    <h3>Bir madde bankası, üç tüketici, sıfır madde</h3>
+    <p>§2 <em class="term">emsal/</em> dizinini açar ve ona bir ad verir:
+    <strong>onaylı madde bankası</strong>. §4 her birim altında
+    <em class="term">birimler/&lt;birim&gt;/emsal/</em> açar. §10
+    <em class="term">emsal-bulucu</em> alt ajanını <strong>yalnızca orayı
+    aramak</strong> üzere görevlendirir. §14 <em class="term">once-arastir</em>'ın
+    üçüncü adımını oraya yönlendirir. <strong>Ve bankayı hiç doldurmaz.</strong></p>
+    <p>Banka boşken ajan <em>"yeterince yakın emsal yok"</em> der. Okuyucu bunu
+    <strong>dünyaya</strong> dair bir tespit sanır; oysa <strong>boş bir
+    dolaba</strong> dairdir. İkisi aynı cümleyle yazıldığında §2 çiğnenir —
+    olumsuz iddia, kanıtsız — ve bir ajanın tek işi <strong>sessizce</strong>
+    yapılamaz olur.</p>
+    <p>Kusurun bir örneği daha önce kapatılmıştı: boş müvekkil ad kaydı
+    denetimde her koşumda sesli bildiriliyor. İkincisini on dört tur boyunca
+    görmedim, çünkü hiçbir takım <em>"bir bileşenin aradığı yer dolu mu"</em>
+    diye sormamıştı.</p>
+  </div>
+
+  <div class="callout">
+    <strong>Ters mutasyon, düz mutasyonun göremediğini buldu.</strong>
+    W-02'nin ilk hâli <em class="term">emsal/</em> ile
+    <em class="term">birimler/*/emsal/</em>'i <strong>ayrı</strong> kaynak
+    sayıyor, denetimin duyurusunu ise "emsal" alt dizgesiyle arıyordu. Denetim
+    ikisini <strong>tek bir banka</strong> olarak sayar ve duyuruyu "madde
+    bankası" diye etiketler. Bankayı doldurup duyuru sustuğunda takım hâlâ
+    kırmızı kalıyordu: <strong>ölçtüğüm şeyin tanımı, ölçenin tanımıyla aynı
+    değildi.</strong> Bunu kusuru geri getiren mutasyon değil,
+    <strong>düzeltmeyi uygulayan</strong> mutasyon ortaya çıkardı.
+    <br><br>
+    W-03 de ilkin <em class="term">once-arastir</em>'ı <strong>doğru sebeple
+    değil</strong> geçiriyordu: anahtar kelime araması, becerinin GitHub'a dair
+    uyarısını yakalıyordu. Ölçüt yakınlığa bağlandı; beceri şimdi §14'ün
+    <code>bulunamayan:</code> alanı sayesinde geçiyor.
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -1322,7 +1368,7 @@ connect_rejected  <span class="bad">www.spk.gov.tr:443</span>         gateway an
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 19 takım · 201 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 20 takım · 205 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
