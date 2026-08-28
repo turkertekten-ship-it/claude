@@ -293,8 +293,20 @@ class SqliteStore:
             "SELECT COUNT(*) AS n FROM documents WHERE source_system = ?", (source_system,)
         ).fetchone()["n"]
 
-    def all_documents(self) -> list[Document]:
-        return [_row_to_document(r) for r in self.conn.execute("SELECT * FROM documents")]
+    def all_documents(self, limit: int | None = None) -> list[Document]:
+        """Every document, or the first `limit` of them.
+
+        The limit is pushed into SQL on purpose. A caller slicing the result
+        afterwards has already read every document's full text into memory, so
+        its budget bounds the output and not the work - the thing this project
+        does not do (LEARNINGS L5).
+        """
+        sql = "SELECT * FROM documents"
+        params: tuple = ()
+        if limit is not None:
+            sql += " LIMIT ?"
+            params = (int(limit),)
+        return [_row_to_document(r) for r in self.conn.execute(sql, params)]
 
     def delete_document(self, doc_id: str) -> None:
         with self.conn:
@@ -544,8 +556,14 @@ class SqliteStore:
                     clauses.append(f"c.doc_id NOT IN ({','.join('?' * len(values))})")
                     params.extend(values)
             elif key == "uri_prefix":
-                clauses.append("d.uri LIKE ?")
-                params.append(f"{value}%")
+                # `%` and `_` are LIKE wildcards, and a URI is full of both:
+                # "file:///home/my_docs" silently also matched "myXdocs". A
+                # filter that includes more than it was asked for is worse than
+                # one that errors.
+                escaped = (str(value).replace("\\", "\\\\")
+                           .replace("%", "\\%").replace("_", "\\_"))
+                clauses.append("d.uri LIKE ? ESCAPE '\\'")
+                params.append(f"{escaped}%")
             elif key == "updated_after":
                 clauses.append("d.updated_at >= ?")
                 params.append(float(value))
@@ -640,12 +658,22 @@ class SqliteStore:
         return self._corpus_signature()
 
     def _corpus_signature(self) -> str:
-        """Cheap fingerprint of the chunk corpus: count plus a hash of hashes."""
+        """Fingerprint of the chunk corpus *and* the analyser that reads it.
+
+        The analyser belongs in the key because the cached IDF table's terms are
+        its output, not the corpus's. Without it, changing the stemmer leaves an
+        index serving vocabulary in the old term space while queries arrive in
+        the new one, so every query term looks absent from the corpus - and an
+        absent term gets the maximum weight. Same failure the FTS table's schema
+        version already guards against, on the Python side.
+        """
+        from oodarag.util.text import analysis_fingerprint
+
         row = self.conn.execute(
             "SELECT COUNT(*) AS n, COALESCE(group_concat(content_hash), '') AS h "
             "FROM (SELECT content_hash FROM chunks ORDER BY chunk_id)"
         ).fetchone()
-        return f"{row['n']}:{content_hash(row['h'])}"
+        return f"{row['n']}:{content_hash(row['h'])}:{analysis_fingerprint()}"
 
     def _invalidate_idf(self) -> None:
         self.conn.execute("DELETE FROM meta WHERE key='idf_table'")

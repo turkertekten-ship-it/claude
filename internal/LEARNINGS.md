@@ -781,3 +781,69 @@ not a measurement.
 3. Build the same thing twice, once incrementally and once from scratch, and
    compare. Any difference is a bug, and it is a class of bug no unit test on
    either path alone can find.
+
+---
+
+## L28 - What an adversarial review found that 249 passing tests did not
+
+An independent reviewer was given the retrieval and evaluation path and asked
+for defects that produce wrong results silently, with a reproduction for each.
+The suite was green throughout. Six of its seven findings held up; the seventh
+did not, which is the second lesson here.
+
+**Held up, in severity order.**
+
+1. *The reranker's corpus statistics were captured once.* `HybridRetriever`
+   took `store.idf_lookup()` and `store.vocabulary()` in its constructor. The
+   first closes over a dict, the second returns a set - neither ever saw a later
+   index run. A retriever built before indexing kept an **empty** vocabulary for
+   life, and `_answerability` returns 1.0 on an empty vocabulary because that is
+   the guard for a corpus too small to judge absence. `ooda loop` builds its
+   generator before the ACT phase indexes, so this was every loop run: the gate
+   stopped abstaining and nothing said so.
+2. *Porter step 4 removed two suffixes.* "ion" sat outside the loop as an
+   unconditional rule, so "additionally" lost "al" and then "ion" - "addit"
+   against SQLite's "addition". Measured against SQLite's own tokenizer through
+   `fts5vocab` over 5,145 word types, disagreement was 18 types; it is now 8.
+   The `if suffix in ("ion",)` guard inside the loop was unreachable, because
+   "ion" was not in the list it iterated.
+3. *The IDF cache was keyed on corpus content but not on the analyser.* The
+   table's terms are the analyser's output. Change the stemmer and an index
+   serves the old term space while queries arrive in the new one - so every
+   query term reads as absent, and absent means maximum weight. The FTS table
+   has guarded against this with a schema version all along.
+4. *Contamination excerpts were sliced out of the wrong string.* The offset
+   indexed the stemmed token text and then sliced the raw document, so the
+   evidence field of a report whose purpose is to justify quarantining a
+   document showed unrelated text. It also re-searched for the question's
+   *first* words, though the matched run may start anywhere.
+5. *`Expansion.weights` was computed and never read*, while the module docstring
+   described expansion terms "weighted below the original query". The weighting
+   did not exist.
+6. Three small ones: a `uri_prefix` filter whose `%` and `_` acted as wildcards,
+   a precision metric that deduplicated its numerator but not its denominator,
+   and a scan budget applied by slicing a fully materialised document list.
+
+**Did not hold up.** The report said `dense_weight` was a control that changes
+nothing - 0 of 56 queries affected by setting it to 0 or to 50 - because the
+reranker's adjustment swamps the fused score. Re-measured on the current code:
+`dense_weight=0` changes the returned list on **34 of 36** queries and
+`dense_weight=50` changes the **top-1** result on 15 of 36. A weaker version is
+true and worth knowing - `dense_weight=0` changes top-1 on 0 of 36, so the dense
+arm's fusion weight moves the tail and never the head on this corpus - but the
+finding as stated is wrong.
+
+**Rules.**
+1. A green suite is evidence about the paths it exercises. Every defect above
+   was in a path with tests; none of the tests asked the question that exposed
+   it. Adversarial review is not redundant with testing, and the two find
+   different things.
+2. **Verify a finding before acting on it, including one that arrives with a
+   reproduction.** The reproduction can be correct and the conclusion wrong, or
+   the code can have moved underneath it. Re-running the measurement cost
+   minutes; changing the fusion weights on a false premise would have cost a
+   regression nobody could explain.
+3. The three most severe findings are all one shape: **a value derived from the
+   corpus, cached, and not invalidated when its input changed.** The reranker's
+   vocabulary, the IDF table's analyser, the embedder's fit (L27). Where this
+   codebase holds derived state, that is where to look next.

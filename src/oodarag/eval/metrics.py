@@ -29,9 +29,17 @@ def recall_at_k(retrieved: Sequence[str], relevant: set[str], k: int) -> float:
 
 
 def precision_at_k(retrieved: Sequence[str], relevant: set[str], k: int) -> float:
-    if not retrieved[:k]:
+    """Share of the *distinct* retrieved items that are relevant.
+
+    Both sides of the ratio deduplicate. Counting duplicates in the denominator
+    while the numerator credited each relevant item once meant a list containing
+    the same chunk twice scored below one that did not - reporting a precision
+    loss for a diversity problem, which is a different bug with a different fix.
+    """
+    window = list(dict.fromkeys(retrieved[:k]))
+    if not window:
         return 0.0
-    return len(set(retrieved[:k]) & relevant) / len(retrieved[:k])
+    return len(set(window) & relevant) / len(window)
 
 
 def hit_at_k(retrieved: Sequence[str], relevant: set[str], k: int) -> float:

@@ -8,14 +8,18 @@ feature-hashing embedder can bridge that.
 
 Pseudo-relevance feedback bridges it with the corpus itself: run the query, take
 the terms that distinguish the top results from the corpus at large, and search
-again with those added. No external resource, no model, and the vocabulary comes
+again with those. No external resource, no model, and the vocabulary comes
 from the corpus being searched rather than from a general thesaurus.
 
 **The risk is query drift**, and it is not hypothetical: if the initial results
 are wrong, their terms are wrong, and expansion confidently retrieves more of
 the same. Three things bound it:
 
-* expansion terms are weighted below the original query, never replacing it;
+* the expanded search is a third arm fused *below* the dense and lexical arms
+  at `expansion_weight`, so it can add candidates but never evict what the
+  original query found. Within that arm every term counts alike, which is the
+  mechanism behind the regression measured below: one drift term is weighted
+  the same as a good one;
 * the expanded results are a *third* ranked list fused with the other two, so
   expansion can add candidates but cannot evict what the original query found;
 * terms are selected by how much more common they are in the feedback set than
@@ -60,11 +64,19 @@ from oodarag.util.text import tokenize
 @dataclass(slots=True)
 class Expansion:
     terms: list[str]
-    weights: dict[str, float]
     source_chunks: list[str]
 
     @property
     def query(self) -> str:
+        """The expansion terms alone.
+
+        Not the original query plus these. The expansion arm is fused *beside*
+        the original arms rather than replacing them, so the original query is
+        still searched - by the dense and lexical arms - and this arm exists to
+        contribute what they could not find. A per-term weight was computed here
+        and never read by anything; it is gone rather than left to imply a
+        weighting that was never applied.
+        """
         return " ".join(self.terms)
 
 
@@ -86,7 +98,7 @@ def expand(
     """
     original = set(tokenize(query, stem_words=True))
     if not feedback:
-        return Expansion([], {}, [])
+        return Expansion([], [])
 
     counts: Counter[str] = Counter()
     for chunk in feedback:
@@ -111,6 +123,4 @@ def expand(
 
     scored.sort(reverse=True)
     chosen = [term for _, term in scored[:max_terms]]
-    total = sum(weight for weight, term in scored[:max_terms]) or 1.0
-    weights = {term: weight / total for weight, term in scored[:max_terms]}
-    return Expansion(chosen, weights, [c.chunk_id for c in feedback])
+    return Expansion(chosen, [c.chunk_id for c in feedback])

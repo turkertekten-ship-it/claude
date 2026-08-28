@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import re
 import unicodedata
+from functools import lru_cache
 
 # Words, numbers, and code identifiers. Keeps `snake_case` and `dotted.paths`
 # together as single tokens, which matters a lot when the corpus is half code.
@@ -116,6 +117,42 @@ def expand_compounds(tokens: list[str], stem_words: bool = False) -> list[str]:
                 seen.add(part)
                 expanded.append(part)
     return expanded
+
+
+#: Words chosen to exercise each stemming step, the stopword list, the token
+#: regex's compound handling and the length floor. Behaviour, not source text:
+#: a comment change must not invalidate a cached table, and a rule change must.
+_ANALYSIS_PROBE = (
+    "additionally intentionally nation station relational agreed feed "
+    "caresses ponies caress cats troubled sized hopping tanned falling "
+    "hissing fizzed failing filing happy sky relational conditional "
+    "rational valenci hesitanci digitizer conformabli radicalli differentli "
+    "vileli analogousli in-process oodarag.util.text read-only the and of a "
+    "ss sses ies eed assembly technology invisibly"
+)
+
+
+@lru_cache(maxsize=1)
+def analysis_fingerprint() -> str:
+    """A digest of what this module's analysis *does*, for cache keys.
+
+    An IDF table and a vocabulary are functions of the corpus **and** of the
+    analyser that tokenized it. Keying a cached table on corpus content alone
+    means changing the stemmer leaves an index serving terms in the old term
+    space while queries arrive in the new one - and a query term that is
+    "absent from the corpus" gets the maximum weight, which is the input the
+    coverage denominator and the abstention gate both read. The FTS table
+    already defends against exactly this with a schema version; this is the
+    same guard for the Python side, computed rather than hand-maintained so
+    that it cannot be forgotten.
+
+    Cached: the analyser cannot change inside a running process, and this sits
+    on the per-query path through `_corpus_signature`. A test that patches a
+    stemming rule must call `analysis_fingerprint.cache_clear()`.
+    """
+    from oodarag.util.hashing import content_hash
+
+    return content_hash(" ".join(tokenize(_ANALYSIS_PROBE, stem_words=True)))
 
 
 def tokenize_all(text: str) -> list[str]:

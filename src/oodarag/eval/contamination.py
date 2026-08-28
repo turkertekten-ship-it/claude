@@ -26,7 +26,6 @@ Two signals, because they fail differently:
 
 from __future__ import annotations
 
-import re
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
@@ -84,19 +83,6 @@ class ContaminationReport:
                 f"questions or the results measure the leak, not the retriever.")
 
 
-def _normalize(text: str) -> str:
-    """Lowercase, strip punctuation, and collapse the resulting whitespace.
-
-    The collapse is not cosmetic. Replacing a punctuation run with a space
-    leaves the space that was already beside it, so "work, exactly" becomes
-    "work  exactly" - while the question side, built from tokens, has single
-    spaces. The two sides then never match, and a question quoted verbatim in
-    the corpus is reported clean. Any golden question containing a comma was
-    invisible to the verbatim check.
-    """
-    return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9 ]+", " ", text.lower())).strip()
-
-
 def detect(store: SqliteStore, questions: list[str], *,
            negative_questions: set[str] | None = None,
            verbatim_threshold: float = 0.85,
@@ -127,7 +113,7 @@ def detect(store: SqliteStore, questions: list[str], *,
     # a document sharing a question's rare terms is discussing that question; one
     # sharing only its common words is not.
     idf = store.idf_lookup()
-    documents = store.all_documents()[:max_docs_scanned]
+    documents = store.all_documents(limit=max_docs_scanned)
     prepared = [
         (doc, " ".join(tokenize(doc.text, stem_words=True)),
          set(tokenize(doc.text, stem_words=True)))
@@ -140,7 +126,6 @@ def detect(store: SqliteStore, questions: list[str], *,
                           else verbatim_threshold)
         overlap_floor = (negative_overlap_threshold if is_negative
                          else overlap_threshold)
-        q_norm = _normalize(question)
         q_terms = set(tokenize(question, stem_words=True))
         # Content tokens, stemmed - the same analysis the document side gets.
         # Counting stopwords lets "who won the" score 0.5 against an unrelated
@@ -153,11 +138,16 @@ def detect(store: SqliteStore, questions: list[str], *,
         for doc, doc_norm, doc_terms in prepared:
             excerpt = ""
             # 1. verbatim: the whole question, or a long contiguous run of it.
-            longest = _longest_run(q_words, doc_norm)
+            longest, run = _longest_run_span(q_words, doc_norm)
             if longest >= verbatim_floor:
-                position = doc_norm.find(" ".join(q_words[: max(2, int(len(q_words) * longest))]))
+                # Quoted from `doc_norm`, the string actually searched. The
+                # offset used to index `doc_norm` and then slice `doc.text`,
+                # which are different strings of different lengths - so every
+                # excerpt in a report whose whole purpose is to justify
+                # quarantining a document showed unrelated text.
+                position = doc_norm.find(run)
                 if position >= 0:
-                    excerpt = doc.text[max(0, position - 60):position + 160]
+                    excerpt = doc_norm[max(0, position - 60):position + 160]
                 # Fatal only for a question the corpus is supposed to be unable
                 # to answer. On a positive golden, a document matching the
                 # question's terms *is the answer* - quarantining it would
@@ -193,17 +183,31 @@ def detect(store: SqliteStore, questions: list[str], *,
     return report
 
 
-def _longest_run(words: list[str], haystack: str, min_run: int = 2) -> float:
-    """Longest contiguous run of `words` present in `haystack`, as a fraction.
+def _longest_run_span(words: list[str], haystack: str,
+                      min_run: int = 2) -> tuple[float, str]:
+    """Longest contiguous run of `words` present in `haystack`: fraction and run.
 
     `words` and `haystack` must both be stemmed content tokens, and the run is
-    padded so it cannot match the tail of a longer token.
+    padded so it cannot match the tail of a longer token. Because both sides are
+    built from `tokenize`, the punctuation-and-whitespace hazard that used to
+    need a separate normalizer cannot arise: a question containing a comma has
+    no comma left by the time it gets here, on either side.
+
+    The run is returned because the caller needs to quote it. Locating it by
+    re-searching for the question's *first* n words assumes the match starts at
+    the question's beginning, and it need not.
     """
     if len(words) < min_run:
-        return 0.0
+        return 0.0, ""
     padded = f" {haystack} "
     for length in range(len(words), min_run - 1, -1):
         for start in range(0, len(words) - length + 1):
-            if f" {' '.join(words[start:start + length])} " in padded:
-                return length / len(words)
-    return 0.0
+            run = " ".join(words[start:start + length])
+            if f" {run} " in padded:
+                return length / len(words), run
+    return 0.0, ""
+
+
+def _longest_run(words: list[str], haystack: str, min_run: int = 2) -> float:
+    """The fraction alone. See `_longest_run_span`."""
+    return _longest_run_span(words, haystack, min_run)[0]

@@ -17,7 +17,7 @@ import unittest
 
 from oodarag.chunking import chunk_document
 from oodarag.ingest.base import Connector
-from oodarag.eval.contamination import _longest_run, _normalize, detect
+from oodarag.eval.contamination import _longest_run, _longest_run_span, detect
 from oodarag.eval.harness import EvalHarness, Golden
 from oodarag.generate.answer import AnswerConfig, AnswerGenerator
 from oodarag.models import Chunk, Document, RawDocument
@@ -157,9 +157,45 @@ class ContaminationAnalysisTest(unittest.TestCase):
         for k, v in docs.items():
             self.store.replace_chunks(k, chunk_document(_doc(k, k, v)))
 
-    def test_normalize_collapses_whitespace(self):
-        self.assertEqual(_normalize("How does RRF work, exactly and completely?"),
-                         "how does rrf work exactly and completely")
+    def test_the_excerpt_quotes_what_was_actually_matched(self):
+        """The excerpt is the evidence for quarantining a document, and it used
+        to be sliced from the wrong string: the offset indexed the stemmed token
+        text and then sliced the raw document, so every excerpt showed unrelated
+        content. It also re-searched for the question's *first* words, assuming
+        the run began at the question's start."""
+        question = "Who won the 1998 World Cup final?"
+        filler = "Padding sentence about chunking and budgets. " * 20
+        self._index({"leak.md": f"{filler}A transcript line: {question} And the reply."})
+        report = detect(self.store, [question], negative_questions={question})
+        excerpts = [f.excerpt for f in report.findings if f.excerpt]
+        self.assertTrue(excerpts, "a verbatim finding carried no excerpt")
+        for excerpt in excerpts:
+            self.assertIn("world cup", excerpt.lower(),
+                          f"excerpt does not contain the matched run: {excerpt!r}")
+
+    def test_an_excerpt_is_produced_when_the_run_starts_late(self):
+        """The old code re-searched for the question's *first* words. When the
+        matched run begins later in the question that search fails, and a
+        verbatim finding was reported with no evidence attached at all."""
+        question = "Who won the 1998 World Cup final?"
+        # The document quotes the tail of the question, never its opening words.
+        self._index({"leak.md": "Coverage of the world cup final is discussed here."})
+        report = detect(self.store, [question], negative_questions={question})
+        verbatim = [f for f in report.findings if f.excerpt]
+        self.assertTrue(verbatim,
+                        "a run matching the end of the question produced no excerpt")
+        for finding in verbatim:
+            self.assertIn("world cup final", finding.excerpt.lower())
+
+    def test_the_matched_run_is_returned_even_when_it_starts_late(self):
+        """`_longest_run` may match a run beginning anywhere in the question."""
+        words = tokenize("unrelated preamble reciprocal rank fusion", stem_words=True)
+        haystack = " ".join(tokenize("the paper describes reciprocal rank fusion",
+                                     stem_words=True))
+        fraction, run = _longest_run_span(words, haystack)
+        self.assertGreater(fraction, 0.0)
+        self.assertIn("reciproc", run)
+        self.assertNotIn("preambl", run)
 
     def test_a_question_with_a_comma_is_still_detected(self):
         question = "How does RRF work, exactly and completely?"
@@ -1086,3 +1122,153 @@ class StemmerStepFourTest(unittest.TestCase):
                 terms = [row[0] for row in conn.execute("SELECT term FROM v")]
                 self.assertEqual(terms, [stem(word)],
                                  f"{word!r}: the reranker and the index disagree")
+
+
+class AnalyserCacheKeyTest(unittest.TestCase):
+    """The cached IDF table was keyed on corpus content but not on the analyser.
+
+    The table's *terms* are the analyser's output, not the corpus's. Change the
+    stemmer and an existing index keeps serving vocabulary in the old term space
+    while queries arrive in the new one - so every query term reads as absent
+    from the corpus, and an absent term gets the maximum weight, which is the
+    input the coverage denominator and the abstention gate both read. The FTS
+    table already guards against this with a schema version.
+    """
+
+    def test_the_signature_changes_when_the_analyser_changes(self):
+        from oodarag.util import stemming
+        from oodarag.util.text import analysis_fingerprint
+
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        store.upsert_documents([_doc("d1", "a.md", "Additionally the crawl stops.")])
+        store.replace_chunks("d1", chunk_document(_doc("d1", "a.md",
+                                                       "Additionally the crawl stops.")))
+        before = store.corpus_signature()
+
+        original = list(stemming._STEP4)
+        stemming._STEP4.remove("ion")
+        analysis_fingerprint.cache_clear()
+        self.addCleanup(analysis_fingerprint.cache_clear)
+        self.addCleanup(lambda: stemming._STEP4.__setitem__(slice(None), original))
+        after = store.corpus_signature()
+
+        self.assertNotEqual(before, after,
+                            "a stemming rule changed and the cache key did not")
+
+    def test_the_signature_is_stable_when_nothing_changes(self):
+        """A key that changes on its own defeats the cache it protects."""
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        store.upsert_documents([_doc("d1", "a.md", "Budgets bound requests and bytes.")])
+        store.replace_chunks("d1", chunk_document(_doc("d1", "a.md",
+                                                       "Budgets bound requests and bytes.")))
+        self.assertEqual(store.corpus_signature(), store.corpus_signature())
+
+    def test_a_stale_table_is_rebuilt_rather_than_served(self):
+        from oodarag.util import stemming
+        from oodarag.util.text import analysis_fingerprint
+
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        text = ("Additionally the transactional relationality of a national "
+                "organisation is occasionally provisional.")
+        store.upsert_documents([_doc("d1", "a.md", text)])
+        store.replace_chunks("d1", chunk_document(_doc("d1", "a.md", text)))
+        before = store.vocabulary()
+
+        original = list(stemming._STEP4)
+        stemming._STEP4.remove("ion")
+        analysis_fingerprint.cache_clear()
+        self.addCleanup(analysis_fingerprint.cache_clear)
+        self.addCleanup(lambda: stemming._STEP4.__setitem__(slice(None), original))
+        # The corpus is untouched; only the analyser moved. A cache keyed on
+        # corpus content alone hands back the terms of the old term space.
+        self.assertNotEqual(before, store.vocabulary(),
+                            "the vocabulary was served from a table built by a "
+                            "different analyser")
+
+
+class FilterAndMetricEdgeTest(unittest.TestCase):
+    """Three findings from an independent review, each small and each silent."""
+
+    def test_a_uri_prefix_does_not_match_more_than_it_was_asked_for(self):
+        """`%` and `_` are LIKE wildcards and a URI is full of both, so
+        "file:///home/my_docs" also matched "file:///home/myXdocs"."""
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        wanted = _doc("d1", "a.md", "Text in the intended directory.")
+        wanted.uri = "file:///home/my_docs/a.md"
+        other = _doc("d2", "b.md", "Text in a directory that merely looks alike.")
+        other.uri = "file:///home/myXdocs/b.md"
+        store.upsert_documents([wanted, other])
+        for doc in (wanted, other):
+            store.replace_chunks(doc.doc_id, chunk_document(doc))
+
+        allowed = store.filter_chunk_ids({"uri_prefix": "file:///home/my_docs"})
+        uris = {store.get_chunks([cid])[cid].chunk_id for cid in allowed}
+        self.assertTrue(allowed)
+        docs = {store.get_chunks([cid])[cid].doc_id for cid in allowed}
+        self.assertEqual(docs, {"d1"},
+                         "an underscore in the prefix acted as a wildcard")
+
+    def test_precision_deduplicates_both_sides_of_the_ratio(self):
+        """The numerator credited a relevant item once and the denominator
+        counted duplicates, so a repeated chunk read as a precision loss."""
+        from oodarag.eval.metrics import precision_at_k
+
+        self.assertEqual(precision_at_k(["a", "a", "b"], {"a"}, 3), 0.5)
+        self.assertEqual(precision_at_k(["a", "b"], {"a"}, 3), 0.5)
+        self.assertEqual(precision_at_k([], {"a"}, 3), 0.0)
+
+    def test_the_mmr_guard_against_an_uncomparable_score_actually_fires(self):
+        """`if best_id is None: break` looked unreachable - `remaining` is
+        non-empty - but a NaN relevance makes every comparison false. A guard
+        that has never fired is untested, so this fires it."""
+        from oodarag.retrieve.mmr import mmr_select
+
+        scored = [("a", float("nan")), ("b", float("nan")), ("c", float("nan"))]
+        selected = mmr_select(scored, similarity=lambda x, y: 0.0, k=3, lambda_=0.7)
+        self.assertEqual(len(selected), 1,
+                         "the loop kept going on scores it could not compare")
+
+
+class ScanBudgetTest(unittest.TestCase):
+    """The contamination scan's budget bounded its output, not its work.
+
+    `all_documents()[:max_docs_scanned]` reads every document's full text out of
+    SQLite and then throws most of it away. On the corpus that motivated the
+    limit - session transcripts - the discarded part is the large part.
+    """
+
+    def test_the_limit_reaches_the_query(self):
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        store.upsert_documents([_doc(f"d{i}", f"{i}.md", f"Document number {i}.")
+                                for i in range(12)])
+        self.assertEqual(len(store.all_documents(limit=5)), 5)
+        self.assertEqual(len(store.all_documents()), 12)
+
+    def test_the_scan_reads_no_more_documents_than_its_budget(self):
+        """Counts rows actually returned by SQLite, not documents examined
+        afterwards - the distinction the fix is about."""
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        docs = [_doc(f"d{i}", f"{i}.md", f"Document number {i} about budgets.")
+                for i in range(12)]
+        store.upsert_documents(docs)
+        for doc in docs:
+            store.replace_chunks(doc.doc_id, chunk_document(doc))
+
+        statements: list[str] = []
+        store.conn.set_trace_callback(statements.append)
+        self.addCleanup(store.conn.set_trace_callback, None)
+        detect(store, ["What is the boiling point of mercury?"], max_docs_scanned=4)
+
+        # Observed from SQLite rather than asserted about the caller: the
+        # statement it actually ran must carry the bound.
+        selects = [sql for sql in statements if "FROM documents" in sql]
+        self.assertTrue(selects, "the scan never read the documents table")
+        for sql in selects:
+            self.assertIn("LIMIT", sql.upper(),
+                          f"the budget never reached SQLite: {sql!r}")
