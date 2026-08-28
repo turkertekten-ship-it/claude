@@ -90,6 +90,8 @@ python3 "$S/ks_ah_cevap.py"; topla "AH · cevabın güncelliği" $?
 echo
 python3 "$S/ks_ai_koltuk_dayanak.py"; topla "AI · koltuk dayanakları" $?
 echo
+python3 "$S/ks_aj_kanal.py"; topla "AJ · çalışan kanalın kullanımı" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

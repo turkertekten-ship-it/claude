@@ -34,7 +34,7 @@ Beş cümlede sebebi:
    Denetçiyi ezmek, denetçinin yapacağı bütün kontrolleri devre dışı bırakır
    ve uygulayıcı korumasız bir sisteme **yeşil** bir denetimle bakar.
 
-**Yamalı hâlde sistem çalışıyor:** otuz iki çalıştırılabilir takım — **285
+**Yamalı hâlde sistem çalışıyor:** otuz üç çalıştırılabilir takım — **290
 vaka, 15 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15, birimler arası tutarlılık takımının
 kendi mutasyon yakalaması 10/10. Ama **üç mevzuat bulgusu ile kitabın kendi içindeki bir çelişki açık kalır**
@@ -1615,6 +1615,53 @@ yatkın bir metinle doldurmak** — §7'nin *"bu sistemin yapabileceği en tehli
 
 ---
 
+## Yedi buçuk artı yirmi yedi · Çalıştığını bildiğim kanalı yirmi yedi tur kullanmadım
+
+Üç ENGELLEYİCİ mevzuat bulgusu yirmi yedi turdur açık. Gerekçe her seferinde
+aynıydı: *birincil kaynağa erişilemiyor.* O olumsuz iddia §2 uyarınca kanal
+kanal kanıtlanmıştı ve tablonun son satırı şunu yazıyordu:
+
+    | WebSearch | aynı alan adları | **çalışıyor** |
+
+**Kayıt doğruydu. Ben yanlış okudum.** Yanındaki "arama motoru özeti
+döndürür" notunu *"işe yaramaz"* diye anladım ve üç bulguyu, çalıştığı
+**kayıtlı** olan bir kanalı hiç zorlamadan açık tuttum. Yirmi yedinci turda
+koltuk dayanaklarını doğrulamak için o kanalı kullandım — ve o an fark ettim
+ki aynı kanal, yirmi yedi turdur bekleyen üç bulgu için hiç denenmemişti.
+
+Bu turda üçünde de sistematik olarak kullanıldı. **Üç hipotezin üçü de
+bağımsız meslek kaynaklarınca doğrulandı:**
+
+| Bulgu | Kitabın yazdığı | Kaynakların yazdığı |
+|---|---|---|
+| **I-01** | 250M eşiği yalnızca **B ayağına** | *"…birleşme işlemleri **ile** bu nitelikteki teşebbüslerin devralınmasında…"* — **her iki ayak** |
+| **I-02** | "faaliyet gösteren ya da Ar-Ge yapan" | *"istisnanın uygulaması **'Türkiye'de yerleşik'** teşebbüslerle **sınırlanmış**"* |
+| **I-03** | bekletici etki **m.11** | m.10 = *"Birleşme ve Devralmaların Kurula Bildirilmesi"* (askıya alma + 30 gün); m.11 = *"…Bildirilmemesi"* |
+
+I-03 artık yalnızca **şüpheli değil, pozitif olarak çelişilmiş**: madde
+başlıkları iki bağımsız kaynakta okundu.
+
+### Ve üçü de KAPATILMADI
+
+İkincil kaynak birincil metnin yerine geçmez. Doğrudan çekme dört Türk alan
+adında hâlâ `EGRESS_BLOCKED` veriyor; birebir Tebliğ ve Kanun metni
+okunamadı. Bir eşik ya da madde numarası düzeltmesi §9 uyarınca **insan
+kararıdır**. Üçü de ENGELLEYİCİ kalıyor ve denetim hâlâ **3** ile kırmızı —
+AJ-04 bir yükseltmenin statüyü düşürmesini, AJ-05 denetimin kırmızı kalmasını
+ölçüyor.
+
+Değişen şey **kanıt katmanıdır**: "doğrulanamadı" idi, artık "bağımsız meslek
+kaynaklarınca doğrulandı, birincil metin bekleniyor". Bulguyu insana götüren
+kişi için bu fark, "belki" ile "büyük olasılıkla, şu cümleyle" arasındaki
+farktır.
+
+> **Ders, kaydın yanlış olması değil — kaydın DOĞRU olması ve okunmaması.**
+> Bir olumsuz iddiayı kanal kanal kanıtlamak yetmiyor; **çalıştığı işaretlenen
+> her kanalın açık bulguları ne kadar ileri götürdüğü de ölçülmeli.** Ben
+> kanalı sınıflandırdım ve geçtim. AJ-02 bunu artık her koşumda soruyor.
+
+---
+
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
 
 | Bölüm | Beklenen | Gerçek | Sebep |
@@ -1725,6 +1772,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | AG · kitaba sadık taban | *iki özgün eksikti* | **temiz** — kitabın metninden yeniden kuruldu |
 | AH · cevabın güncelliği | *dört ağır bulgu cevapta yoktu* | **temiz** — cevap güncellendi, eşleme beyanlı |
 | AI · koltuk dayanakları | *hiç doğrulanmamıştı* | **temiz** — altı eser doğrulandı, kayda bağlandı |
+| AJ · çalışan kanalın kullanımı | *kanal 27 tur kullanılmadı* | **temiz** — üç bulgunun kanıtı yükseltildi |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -1782,8 +1830,8 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # 32 çalıştırılabilir takım:
-                                  #   285 vaka + 15 mutasyon (D)
+./sinama/hepsi.sh                 # 33 çalıştırılabilir takım:
+                                  #   290 vaka + 15 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -1856,9 +1904,10 @@ Dokuz takım, 96 vaka:
 | AG | **Kitaba sadık taban** — kıyas ölçütü eksiksiz mi | yamalar/, §2, §5 |
 | AH | **Cevabın güncelliği** — ilk ekran en tehlikeliyi söylüyor mu | §4, KITAP-ERRATA |
 | AI | **Koltuk dayanakları** — gerçek kişilerin ağzına konan mercek neye dayanıyor | §7, §1 |
+| AJ | **Çalışan kanalın kullanımı** — açık bulgu neyle ilerletilebilirdi | §2, §11 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**285 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**290 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)

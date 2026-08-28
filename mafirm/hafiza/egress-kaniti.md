@@ -24,6 +24,17 @@ dayanıyordu — yani kendi kuralımı çiğniyordum. Aşağıda gereken kanıt 
 | Vekil durum uç noktası | `$HTTPS_PROXY/__agentproxy/status` | dört ret makinece kaydedildi |
 | WebSearch | aynı alan adları | **çalışıyor** — ama sayfa METNİNİ değil arama motoru özetini döndürür |
 
+> **[AJ-01] Bu satır YİRMİ YEDİ TUR boyunca yanlış okundu — benim tarafımdan.**
+> Kayıt "çalışıyor" diyordu. Ben onu "işe yaramaz" diye okudum ve üç
+> ENGELLEYİCİ bulguyu, çalıştığı KAYITLI olan bir kanalı hiç denemeden açık
+> tuttum. Yirmi sekizinci turda kanal üç bulgunun üçünde de sistematik olarak
+> kullanıldı ve üç hipotezin üçü de bağımsız meslek kaynaklarınca doğrulandı.
+>
+> Ders, kaydın yanlış olması değil: **kaydın DOĞRU olması ve okunmaması.**
+> Bir olumsuz iddia ("erişilemiyor") kanal kanal kanıtlanır; kanallardan biri
+> çalışıyorsa iddia o kanal için GEÇERSİZDİR ve o kanalın ne kadar ileri
+> götürdüğü ölçülmelidir. Ölçmedim; yalnızca sınıflandırdım ve geçtim.
+
 ## Yükümlülüğü getiren hüküm
 
 Ortamın kendi belgesi (`/root/.ccr/README.md`), bu kodun anlamını tanımlıyor:
