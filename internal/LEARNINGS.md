@@ -1003,3 +1003,40 @@ it scales every candidate equally and cannot reorder them.
    feature. The mutation that removed the multiply from `rerank()` passed four
    of five new tests; only an end-to-end one caught it. This is the third time
    this session (L23, L28).
+
+---
+
+## L31 - I broke the regression gate with a commit whose message contained the number
+
+**Evidence.** The corpus-widening commit (L29) took the external pass rate from
+33/36 to 44/54. CI's external gate is `--min-pass-rate 0.85`; 44/54 is 0.8148.
+The run went red. The commit message states "44/54" in a table.
+
+Nothing was wrong with the change, the gate, or the number. I had all three and
+did not put them together, because I was measuring *retrieval quality* - recall,
+nDCG, saturation - and the gate measures *pass rate*, which I had watched fall on
+purpose and stopped thinking of as a threshold. The next commit took it to 47/54
+and CI recovered, so the red was transient by luck of sequencing rather than by
+design.
+
+**What makes this more than carelessness.** Deliberately making an evaluation
+harder and leaving its floor alone guarantees a failure that is expected, and an
+expected failure is the kind people learn to scroll past. The floor is part of
+the change: either it moves with the corpus, or the change waits for the work
+that restores the margin, or the commit says why red is correct for now. Any of
+those is fine. Silence is not.
+
+The floor stays at 0.85. At 47/54 = 0.870 it tolerates exactly one more failing
+case, which is the tightness it is for.
+
+**Rules.**
+1. A threshold in CI is a number in the repository like any other. When a change
+   moves the quantity the threshold guards, check the threshold in the same
+   breath - the arithmetic takes seconds and was already sitting in the commit
+   message.
+2. **Check CI on your own push before starting the next thing.** The gate exists
+   to tell you something, and it can only do that if someone reads it. Two
+   further commits went out before I looked.
+3. Deliberately raising the difficulty of a measurement is a legitimate and
+   valuable act; it is also the moment the old thresholds stop meaning what they
+   meant.
