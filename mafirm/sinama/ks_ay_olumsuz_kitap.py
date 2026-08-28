@@ -127,9 +127,20 @@ else:
     # İşletim sözleşmesinin kuralları §3'ün içindedir; onları "§N" diye
     # anmak kitabın N. bölümünü işaret eder ve o bölüm başka bir şeydir.
     KURAL_KONU = {1: "kanıt", 4: "başlık sırası", 8: "çatışma", 9: "onay"}
+    # [Ellinci tur] Karakter sınıfı \n'i dışlıyordu: "§9\n(onay durumu)"
+    # biçiminde SATIR KAYDIRMASI olan bir karışma ölçüte GÖRÜNMEZDİ ve
+    # ölçüt sessizce yeşil kalıyordu. Aynı kaçış deliği AM-01 (39. tur) ve
+    # BA (46. tur) takımlarında da çıkmıştı; bu üçüncüsü. Satır sonları
+    # eşleştirmeden ÖNCE tek boşluğa indirilir — cümle sınırı (nokta) ve
+    # tablo sınırı (|) hâlâ korunur.
+    _TES = re.sub(r"[ \t]*\n[ \t]*", " ", TESLIMAT)
     _karisan = []
     for n, konu in KURAL_KONU.items():
-        for m in re.finditer(r"§%d(?![0-9.])[^.\n|]{0,70}" % n, TESLIMAT):
+        # Karakter sınıfı \n'i dışlamayı SÜRDÜRÜR; işi yapan şey yukarıdaki
+        # normalleştirmedir. İki mekanizmayı birden kullanmak, mutasyonun
+        # hangisini sınadığını belirsizleştirir: biri sökülünce öteki yakalar
+        # ve ölçüt sağlam sanılır. Tek mekanizma, sınanabilir mekanizmadır.
+        for m in re.finditer(r"§%d(?![0-9.])[^.\n|]{0,70}" % n, _TES):
             parca = m.group(0)
             if re.search(konu, parca, re.I) and "CLAUDE.md" not in parca:
                 _karisan.append("§%d…%s" % (n, konu))

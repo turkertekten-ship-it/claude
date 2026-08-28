@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>52 çalıştırılabilir takım · 388 vaka · 0 sinyal</span>
+    <span>53 çalıştırılabilir takım · 394 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -3068,6 +3068,53 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Ellinci tur</span>
+  <h2>Üçüncü örnek arandı ve en ağırı çıktı</h2>
+  <p>İki tur üst üste aynı biçim çıkmıştı: bir ölçüt teslimatlardan
+  <strong>birine</strong> uygulanmış, ötekine değil. Üç örnek bir sınıftır —
+  üçüncüsü arandı, ve bulunan öncekilerden ağırdı.</p>
+
+  <p>Raporun <strong>kural 4</strong> (cevapla başla), <strong>kural 5</strong>
+  (iki zorunlu kapanış başlığı) ve <strong>kural 9</strong> (onay durumu) uyumu kırk dokuz tur boyunca sınandı. <strong>Bu sayfa hiç
+  sınanmadı.</strong> Ölçülünce, yayımlanan belge — okuyucunun açtığı,
+  kaydedip paylaşabildiği belge — şunları taşımıyordu:</p>
+
+  <table><thead><tr><th>Kural</th><th>Ne gerekiyordu</th><th>Bu sayfada</th></tr></thead>
+  <tbody>
+    <tr><td>kural 5</td><td>"Şimdi ne yapılmalı" başlığı</td><td><b>yoktu</b></td></tr>
+    <tr><td>kural 5</td><td>kapsam beyanı: hukuki görüş değildir</td><td><b>yoktu</b></td></tr>
+    <tr><td>kural 9</td><td>onay durumu</td><td><b>yoktu</b></td></tr>
+    <tr><td>kural 5</td><td>belge bu iki başlıkla <em>biter</em></td><td>kaynak listesiyle bitiyordu</td></tr>
+  </tbody></table>
+
+  <div class="callout">
+    <em>"Yetkili avukat görüşü"</em> ifadesi sayfada geçiyordu — ama bir
+    <strong>başlık</strong> olarak değil, bir kapıyı <strong>anlatan</strong>
+    cümlenin içinde. Tekrar eden sınıfın bir görünümü daha:
+    <strong>anmak, taşımak değildir.</strong> Ölçüt bu yüzden başlıkları
+    düzyazıdan değil, belgenin yapısından okuyor.
+  </div>
+
+  <p>Bu biçimsel bir eksiklik değil. kural 5 ile kural 9 tam olarak bu belge için
+  vardır: hukuki analiz gibi okunan, kaydedilip iletilebilen bir metin,
+  <em>"bu hukuki görüş değildir"</em> ve <em>"onaylanmamıştır"</em> demeden
+  dolaşıma girmemelidir. İkisi de eklendi — aşağıda, belgenin sonunda.</p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">yöntem</span>
+      <span class="pill p">Mutasyon hedefi</span></div>
+    <h3>Üç mutasyon "kaçtı" göründü; hiçbiri kaçmamıştı</h3>
+    <p>Zorunlu başlıkların <strong>önüne</strong> bölüm eklendi, oysa sınanan
+    şey sonda olmalarıydı. Onay ifadesinin <strong>biri</strong> silindi,
+    belgede yedi tane daha vardı. İkinci başlığın <strong>ilk maddesi</strong>
+    yorum içine alındı, altısı yerinde kaldı. Bir önceki turun kuralı bir kez
+    daha, ama tersinden: bir mutasyon indiği kanıtlanmadan okunamaz —
+    <strong>ve indiği kanıtlanmış olması, doğru şeyi bozduğu anlamına
+    gelmez.</strong></p>
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -3183,9 +3230,77 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
   değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.</p>
 </section>
 
+<section id="simdi-ne-yapilmali">
+  <span class="sec-tag">kural 5 · zorunlu kapanış</span>
+  <h2>Şimdi ne yapılmalı</h2>
+  <ol>
+    <li><strong>Üç ENGELLEYİCİ mevzuat bulgusunu birincil kaynaktan teyit
+    ettirin.</strong> Erişimi olan bir insan Resmî Gazete'deki 2026/2 sayılı
+    Tebliğ metnini ve 4054 sayılı Kanun'u açmalı. I-01 ile I-02 bildirime
+    tabilik sonucunu <strong>iki ayrı yönde</strong> değiştirir; I-03 dört
+    dosyaya yayılmış bir atıftır. Teyide kadar rekabet biriminin çıktılarına
+    <strong>canlı bir dosyada dayanılmaz.</strong></li>
+    <li><strong>Kitabın §14 yamasını uygulamadan önce §12'nin dokuz beklenen
+    kümesini güncelleyin.</strong> Aksi hâlde kurulum kendi denetimini geçemez
+    ve §19 hiç çalışmaz.</li>
+    <li><strong>Sır kapısını Bash'i kapsayacak biçimde kurun</strong> ve
+    müvekkil ad kaydını doldurun; boş kayıt, kural 6'nın gerçek kişi ayağının
+    kapsanmadığı anlamına gelir.</li>
+    <li><strong>Depo yıldız sayılarına dayanmadan önce yeniden çekin</strong> —
+    o dosya günlük bozulma sınıfındadır.</li>
+    <li><strong>§6'nın kapanış koşulu maddesine karar verin.</strong> Kitabın
+    §6'sı ile §5.3'ü Ltd. Şti. pay devrinde birbiriyle çelişiyor; önerilen tek
+    satırlık düzeltme yazılı ve kum havuzunda sınandı, ama uygulanması bir
+    hukuki nitelendirme kararıdır ve bu yüzden <strong>yapılmadı.</strong></li>
+    <li><strong>Bir sonraki kurulumda sınama takımını koşun.</strong> Sıfır
+    sinyal, bu belgenin hâlâ ölçtüğü sistemi anlattığının tek kanıtıdır.</li>
+  </ol>
+</section>
+
+<section id="yetkili-avukat">
+  <span class="sec-tag">kural 5 · zorunlu kapanış</span>
+  <h2>Yetkili avukat görüşü gereken konular</h2>
+  <div class="callout">
+    Bu belge bir hukuk pratiğinin <strong>sistemini</strong> sınar;
+    <strong>hukuki görüş değildir</strong> ve kaleme alanı hiçbir ülkede baroya
+    kayıtlı değildir. Hiçbir bulgusu, adı belli bir yetkili avukat
+    <strong>onaylamadan</strong> canlı bir dosyada kullanılamaz; bu hâliyle
+    belge <strong>onaylanmamıştır.</strong>
+  </div>
+  <p>Aşağıdakiler dayanılmadan önce yetkili avukat görüşü ister ve
+  <strong>bu liste boş değildir</strong>:</p>
+  <ul>
+    <li><strong>Teknoloji teşebbüsü istisnasının kapsamı</strong> (I-01):
+    indirim, birinci fıkranın iki bendine birden mi uygulanır? Cevap, bir
+    işlemin bildirime tabi olup olmadığını değiştirir.</li>
+    <li><strong>Teknoloji bağlantı ölçütü</strong> (I-02): "Türkiye'de
+    yerleşik" mi, yoksa kitaptaki "faaliyet gösteren ya da Ar-Ge yürüten"
+    mi?</li>
+    <li><strong>Bekletici etkinin dayanağı</strong> (I-03): 4054 m.10 mu,
+    m.11 mi.</li>
+    <li><strong>TTK 499 ve 595/1'in nitelendirilmesi</strong> (I-05): pay
+    defteri kaydının açıklayıcı mı kurucu mu olduğu ve noter onayının
+    kapsamı.</li>
+    <li><strong>Ltd. Şti.'de TTK m.595/2 genel kurul onayının niteliği</strong>
+    (U-02): kapanış öncesi bir <em>koşul</em> mu, yoksa devri tamamlayan
+    <em>kurucu</em> işlem mi? Cevap kapanış sırasını ve nihai tarih hesabını
+    değiştirir.</li>
+    <li><strong>Kitabın §5'indeki her eşiğin bugünkü değeri.</strong> Bu
+    belgenin mevzuat katmanı <strong>birincil kaynakla doğrulanmadı</strong>;
+    kanıt katmanı arama motoru özetidir ve bunun gerekçesi kayıtlıdır.</li>
+    <li><strong>Bu belgenin bulgularına dayanarak canlı bir dosyada atılacak
+    her adım.</strong></li>
+  </ul>
+  <p class="sub">Kontrol edildi: rekabet.gov.tr arama sonuçları · GitHub depo
+  çözümlemesi · yayıncı kayıtları · vekil egress ret kaydı · yerel kurulum ve
+  sınama takımı (hepsi 2026-08-27/28). Bulunamayan: 4054 sayılı Kanun ile
+  2026/2 sayılı Tebliğ'in birebir Resmî Gazete metni — kuruluş egress
+  politikası reddi.</p>
+</section>
+
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 52 takım · 388 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 53 takım · 394 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
