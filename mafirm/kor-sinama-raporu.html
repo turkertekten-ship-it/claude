@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>17 takım · 170 vaka · 0 sinyal</span>
+    <span>18 takım · 177 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -532,8 +532,8 @@ KALDI A-07  §19 pilotu, avro çevrilmeden
         <td class="ev">"kariyer bitirir" denen üç cümlenin üçü de hiçbir kapıyı ateşlemiyor</td></tr>
       <tr><td class="rule-no">3 · Güncellik</td><td class="st"><span class="pill w">Kısmi</span></td>
         <td class="ev">Türkçe tarih biçimi, tarihi hiç olmayan eşik, gelecek tarih görünmüyor</td></tr>
-      <tr><td class="rule-no">4 · Yön</td><td class="st"><span class="pill f">Yok</span></td>
-        <td class="ev">hiçbir kapı çıktı sırasına bakmıyor</td></tr>
+      <tr><td class="rule-no">4 · Yön</td><td class="st"><span class="pill p">Mekanizma*</span></td>
+        <td class="ev"><strong>kitapta yoktu:</strong> başlık sırası makinece görülebilir. Bu raporun kendisi dokuz tur boyunca kuralı çiğnedi ve hiçbir şey söylemedi</td></tr>
       <tr><td class="rule-no">5 · Kapsam</td><td class="st"><span class="pill w">Kısmi</span></td>
         <td class="ev">sekiz sabit ifade dışındaki her tavsiye kipi geçiyor; büyük harfli başlık yanlış pozitif üretiyor</td></tr>
       <tr><td class="rule-no">6 · Sır</td><td class="st"><span class="pill w">Kısmi</span></td>
@@ -542,10 +542,10 @@ KALDI A-07  §19 pilotu, avro çevrilmeden
         <td class="ev">—</td></tr>
       <tr><td class="rule-no">8 · Çıkar çatışması</td><td class="st"><span class="pill f">Yok</span></td>
         <td class="ev">dosya hiç oluşturulmuyor; yokluğu denetimden geçiyor</td></tr>
-      <tr><td class="rule-no">9 · İnsan onayı</td><td class="st"><span class="pill f">Yok</span></td>
-        <td class="ev">—</td></tr>
-      <tr><td class="rule-no">10 · Dil</td><td class="st"><span class="pill f">Yok</span></td>
-        <td class="ev">—</td></tr>
+      <tr><td class="rule-no">9 · İnsan onayı</td><td class="st"><span class="pill w">Kısmi*</span></td>
+        <td class="ev">onay izlenemez ama onay durumunun <strong>beyanı</strong> istenebilir; sessizlik onaylanmış gibi okunur</td></tr>
+      <tr><td class="rule-no">10 · Dil</td><td class="st"><span class="pill w">Kısmi*</span></td>
+        <td class="ev">"ilk geçtiğinde açıklanır" şartı tanımlı terim listesi için denetlenebilir</td></tr>
       <tr><td class="rule-no">11 · Önce araştır</td><td class="st"><span class="pill f">Bozuk</span></td>
         <td class="ev">üretimde çalışmıyor — bkz. C-10</td></tr>
       <tr><td class="rule-no">§7 · Koltuk sağlaması</td><td class="st"><span class="pill f">Yok</span></td>
@@ -931,6 +931,45 @@ connect_rejected  <span class="bad">www.spk.gov.tr:443</span>         gateway an
 </section>
 
 <section>
+  <span class="sec-tag">Onuncu tur</span>
+  <h2>Rapor, yöntemle başlıyordu</h2>
+  <p>§4: <em>"Her çıktı cevapla başlar. Sonra gerekçe, en sonda yöntem. Yöntemi
+  merak eden okuyucu aşağı iner; cevabı merak eden ilk paragrafta bulur."</em></p>
+  <p>Bu rapor <strong>dokuz tur boyunca <em class="term">## Yöntem</em> ile
+  başlıyordu</strong> ve cevabı 818. satırda tutuyordu — kuralın önlemek için
+  var olduğu şeyin ta kendisi. Artık cevapla başlıyor, yöntem bulguların
+  sonrasına indi, iki zorunlu başlık en sonda kaldı. Aynı turda raporun
+  <strong>onaysız olduğu ilk bölümde</strong> yazıldı (sessizlik onaylanmış gibi
+  okunur) ve teknik terimler ilk geçtiklerinde açıklandı.</p>
+
+  <h3 style="font-size:19px;margin:28px 0 10px">Bu, kitapta bir kusur daha
+  gösterdi</h3>
+  <p>Kapsama matrisinde §4, §9 ve §10 <em>"hiç kapsanmayan"</em> diye
+  duruyordu — kitap onları "biçim kuralı, kapı konusu değil" diye geçmişti.
+  Oysa üçü de kısmen makinece kontrol edilebilir: §4 bir <strong>başlık
+  sırası</strong> kuralıdır, §9 onayın kendisini değil ama <strong>beyanını</strong>
+  isteyebilir, §10 tanımlı bir terim listesi için denetlenebilir. Kitap,
+  uygulanabilir olanı uygulanamaz saymış. <strong>Kapsanmayan kural sayısı
+  altıdan üçe indi.</strong></p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">kendi betiğim</span>
+      <span class="pill f">Maskelenen çıkış kodu</span></div>
+    <h3>Koşum betiğimde <em class="term">| wc -l</em> kusurunun kendisi</h3>
+    <p>F takımı çöktü ve takım hâlâ <strong>0 SİNYAL</strong> dedi. Sebebi tek
+    satırdı:</p>
+<pre>python3 "$S/ks_f_kapsama.py" | tail -8; topla "F · doktrin kapsama matrisi" <span class="bad">0</span></pre>
+    <p>Çıkış kodu <strong>elle 0 yazılmış</strong>, üstelik boru hattının kodu
+    zaten <em class="term">tail</em>'inki. Kitabın denetiminde D takımıyla
+    bulduğum kusurun kendi koşum betiğimdeki hâli. Düzeltildi ve mutasyonla
+    doğrulandı — ama <strong>ilk mutasyon denemem yine tutmadı</strong>
+    (<em class="term">sys.exit(0)</em> satırından sonra eklediğim satır hiç
+    çalışmadı) ve kuralımı üçüncü kez hatırlamak zorunda kaldım: <em>bir
+    mutasyon sınaması, mutasyonun olduğunu kanıtlamadan geçerli değildir.</em></p>
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -962,6 +1001,10 @@ connect_rejected  <span class="bad">www.spk.gov.tr:443</span>         gateway an
     ayrıştırıcı kusurum ve hepsi aynı yönde: <strong>bir dedektör, ölçtüğü
     şeyin gerçek biçimini görmeden yazılırsa, bulduğu şey kendi
     körlüğüdür.</strong></li>
+    <li><strong>Koşum betiğim bir takımın çıkış kodunu elle 0 yazıyordu.</strong>
+    F çöktüğünde takım "0 SİNYAL" diyordu — kitapta bulduğum kusurun kendi
+    betiğimdeki hâli. Ve düzeltmeyi sınarken mutasyonum yine tutmadı; aynı
+    kuralı üçüncü kez hatırladım.</li>
     <li><strong>Kapımın kendi raporumu reddettiğini gördüm ve üzerinden
     geçtim.</strong> Sekizinci turda <em class="term">RAPOR.md [kapsam] avukat
     başlığı yok</em> çıktısı ekrandaydı; okudum, başka bir şeye baktım. Bir turu
@@ -1039,7 +1082,7 @@ connect_rejected  <span class="bad">www.spk.gov.tr:443</span>         gateway an
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># on yedi takım, 170 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># on sekiz takım, 177 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
