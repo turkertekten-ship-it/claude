@@ -201,11 +201,11 @@ def _first_party(repo: RepoIndex, config: CheckConfig) -> frozenset[str]:
     names: set[str] = set()
     bases = [repo.root]
     # A workspace declares its members with their own manifests. Without this,
-    # `import core` inside `packages/api` resolves to nothing local and is
+    # a cross-package import inside one member resolves to nothing local and is
     # reported as an undeclared third-party dependency - with a detail that is
-    # false, because `packages/api/pyproject.toml` declares it and
-    # `packages/core` provides it. Monorepos are the normal case this checker
-    # gets pointed at, so getting them wrong is not an edge case.
+    # false, because the importing member's own manifest declares it and a
+    # sibling member provides it. Monorepos are a normal case this checker gets
+    # pointed at, so getting them wrong is not an edge case.
     for member in _workspace_dirs(repo):
         bases.append(member)
         bases.append(member / "src")

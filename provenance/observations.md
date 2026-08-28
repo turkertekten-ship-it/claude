@@ -138,3 +138,154 @@ hold a shell script turned a failing `make test` into a *passing* one that
 collected zero tests. `unittest discover` exits 0 on an empty suite. The
 `tests_evidence` checker now parses the collected count and reports
 `TESTS_VACUOUS` for a green run that asserted nothing.
+
+## The web and GitHub ingest paths, exercised for the first time
+
+At the start of this round `src/oodarag/` had **no tests at all** — 2,583 lines
+across twelve modules, none of it ever executed by the suite. Everything green
+until then covered `tools/`. Running the two built ingest paths against real
+services found what only real execution finds.
+
+### GitHub
+
+The connector raised `TypeError` at the end of **every run using its default
+resource set** `[src:S-11]`. `log.info("github fetch complete", repo=self.slug,
+**counts)` collided with `counts["repo"]`, which exists whenever `"repo"` is in
+`resources` — the default. `Connector.run` caught it and recorded `failed=1`, so
+`IngestDelta.failed` was permanently non-zero. That delta is precisely the
+signal the OODA loop is meant to read to decide whether a source is healthy, so
+the one number the design leans on was reporting a failure that never happened.
+The counts are now namespaced (`n_repo`, `n_readme`, `n_files`).
+
+What the live run confirmed, rather than assumed:
+
+* Every file document's citation URI pins the head commit sha, not a branch —
+  40 of 40 on a cold run `[src:S-11]`.
+* The head-sha short circuit is real: a second run against an unchanged head
+  spends two requests instead of walking the tree `[src:S-11]`.
+* The `git/blobs` fallback returns the file correctly `[src:S-11]`. The
+  raw-first optimisation itself is **unverified here**: this repository is
+  public and `raw.githubusercontent.com` still answered 404 through the sandbox
+  proxy, so every blob came from the API. An earlier draft of this file recorded
+  "one request via raw" — that was an artifact of `HttpClient` not counting its
+  `allow_status` branch, fixed in this round, and the corrected cost is two
+  requests. It is written down rather than deleted because a measurement that
+  turned out to be an instrument error is worth more on the record than off it.
+* A `ghp_`-shaped token is redacted before a `RawDocument` exists `[src:S-11]`.
+
+One thing could **not** be verified live and is recorded rather than assumed:
+GitHub returns `Link: rel="next"` as a numeric-ID path
+(`/repositories/<id>/commits?page=2`), which the sandbox proxy rejects with 403.
+`paginate()` parses the header correctly; following it across pages is covered
+by fake-transport tests instead.
+
+### Web
+
+`github.com/robots.txt` answers 403 through the proxy, and `robots.py` treats a
+restricted rules file as disallow-all, so a crawl of github.com correctly yields
+nothing `[src:S-13]`. That is RFC 9309 working as documented.
+
+Against `pypi.org`, which does serve robots.txt, a real crawl ran end to end:
+three pages stopped by `max_pages` with 114 URLs still queued, live
+rules obeyed (`/help/` allowed, `/simple/` denied), and extraction that kept the
+heading structure while dropping the cookie banner and skip-links `[src:S-12]`.
+
+Two bugs in `html.py`, the second of them introduced while fixing the first:
+
+* **Navigation links were being discarded.** Links were collected from the tree
+  *after* aggressive pruning, so every `<nav>` and `<footer>` link had already
+  been deleted. The comment directly above that code claimed the opposite — "a
+  crawler needs the nav it just discarded in order to find the next page". On a
+  documentation site, whose link structure is almost entirely navigation, the
+  crawler would have found almost nothing. Extraction is now two-stage: drop
+  what is never content, collect links, then drop the boilerplate.
+* **That fix broke `link_density`.** The metric divides link text by body text,
+  and suddenly the numerator spanned the whole document while the denominator
+  was still the body — so it read 0.47 on a page whose body contained no links
+  at all, and 1.00 on the PyPI homepage. Since its docstring defines a high
+  value as "boilerplate removal failed", the metric reported failure exactly
+  when removal had succeeded. `ExtractedPage` now carries `body_links`
+  separately from `links`, and the corrected figure for that homepage is 0.195
+  `[src:S-12]`.
+
+The second one is worth recording for its own sake: it was found only because
+the first fix was measured rather than assumed, and it would have been invisible
+in any test that checked link *counts* instead of the derived metric.
+
+### Two open items closed
+
+`make lint` had been reported UNVERIFIABLE on every run because its recipe runs
+`compileall`, which the commands checker refused to execute since it writes
+bytecode into the tree under review and ignores `PYTHONDONTWRITEBYTECODE`. The
+run environment now sets `PYTHONPYCACHEPREFIX` outside the tree, so the command
+is executed and passes.
+
+The `links` checker's module docstring promised "HEAD (falling back to GET)" and
+the code never fell back, so `https://api.github.com` — which answers 400 to HEAD
+and 200 to GET — was reported as a dead link. The fallback now exists, and only
+404 and 410 count as dead: a refused method, a demand for credentials, a rate
+limit or a 5xx is a fact about the server at that moment, not about the
+documentation `[src:S-14]`.
+
+## What the first tests found
+
+`src/oodarag` went from **no tests at all** to 383 of them `[src:S-15]`. Writing
+them surfaced 29 bugs `[src:S-17]`, and the pattern across them is worth stating
+because it is not the pattern anyone expects.
+
+Almost none were logic errors in the happy path. The code is careful there. They
+clustered in three places instead:
+
+**Optimisations that lost data.** Every saving in this pipeline works by *not*
+transferring something, and each one had found a different way to make "I did
+not send it" indistinguishable from "it is gone".
+
+* The GitHub head-sha short circuit — the connector's headline cost saving —
+  made a warm run report every file in the corpus as removed and drop every
+  stored hash. Measured against the real API: 6 of 6 files proposed for
+  deletion, 0 hashes kept `[src:S-16]`. The saving proposed wiping the index and
+  then paid for a full re-ingest.
+* A 304 from a conditional GET did the same thing to the crawler whenever a
+  client was shared between runs — which is the documented way to share a rate
+  limit.
+* The blob-sha map recorded a file's sha *before* fetching its bytes, so one
+  transient error meant that file was never fetched again.
+* `next_cursor` advanced the head sha even when the tree walk had failed, which
+  poisons the cursor permanently: the next run takes the short circuit and skips
+  the files that commit added, forever, with no error anywhere.
+
+The first two share one cause and now share one fix:
+`Connector.unchanged_external_ids`, which lets a source say "still there, still
+the same" about a document it deliberately did not send.
+
+**Standards implemented from memory rather than from the text.** `robots.py`
+names RFC 9309 as its contract and delegated to `RobotFileParser.can_fetch`,
+which returns the *first* matching rule. §2.2.2 requires the *longest* match to
+win. So `Disallow: /docs/` followed by `Allow: /docs/public/` was read backwards
+and the explicitly-published subtree was the one thing refused. `Crawl-delay:
+0.5` was silently discarded because the stdlib accepts only integers — on a
+module whose docstring opens by explaining that impolite crawling gets you
+blocked.
+
+**Failure paths that were never taken.** `_decompress` caught `OSError` and
+`zlib.error` but not the `EOFError` a truncated gzip stream actually raises, so
+one reset connection killed a whole crawl. `TokenBucket.acquire(n)` hung for
+ever when `n` exceeded capacity — no exception, no log line. `extract()` raised
+`RecursionError` on a page with a few hundred unclosed tags, which is precisely
+the broken page the module promises to survive; its stated principle is
+"degrade, don't die", and that was the one input that made it die.
+
+Two more were mine, introduced during this round and caught by measuring rather
+than assuming: collecting links after the aggressive prune deleted every
+navigation link before the crawler saw them, and the fix for it silently
+inverted `link_density` so the metric reported failure exactly when boilerplate
+removal had succeeded. Both are described above under the web section.
+
+### What is still not verified
+
+One item, and it is by design rather than unfinished: link reachability is not
+checked unless `--network` is passed, because a result that depends on the
+network is not reproducible and an unreachable host inside a sandbox is not
+evidence of a broken link. Run with `--network` it reports 0 errors and 0
+warnings, with three links undetermined — two hosts the sandbox proxy blocks and
+one that refuses a bare-origin request `[src:S-14]`.

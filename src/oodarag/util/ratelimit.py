@@ -9,13 +9,21 @@ import time
 class TokenBucket:
     def __init__(self, rate_per_sec: float, burst: int | None = None) -> None:
         self.rate = max(rate_per_sec, 0.001)
-        self.capacity = float(burst if burst is not None else max(1, int(rate_per_sec)))
+        # A bucket that can never hold one token can never hand one out, and
+        # `acquire()` below waits for a refill that the capacity clamp forbids -
+        # so `TokenBucket(5, burst=0)` used to hang the calling thread for ever.
+        self.capacity = max(1.0, float(burst if burst is not None else max(1, int(rate_per_sec))))
         self._tokens = self.capacity
         self._last = time.monotonic()
         self._lock = threading.Lock()
 
     def acquire(self, tokens: float = 1.0) -> float:
         """Block until `tokens` are available. Returns the seconds spent waiting."""
+        # Refill caps at `capacity`, so a request for more than that can never
+        # be satisfied: the loop below would sleep, wake, find the same deficit
+        # and sleep again, for ever. Wait for a full bucket instead - the caller
+        # gets throttled, which is the point, rather than deadlocked.
+        tokens = min(tokens, self.capacity)
         waited = 0.0
         while True:
             with self._lock:

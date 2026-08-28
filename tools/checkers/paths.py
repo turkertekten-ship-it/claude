@@ -213,12 +213,26 @@ def _is_path_like(token: str) -> bool:
     return "/" in token and (bool(_SUFFIX_RE.search(token)) or token.endswith("/"))
 
 
+#: A first segment that is a hostname: `github.com/robots.txt`,
+#: `example.org/index.html`, `docs.python.org/3/library`. These are URLs written
+#: without their scheme, so they name a resource on another host and no
+#: repository-relative lookup can decide anything about them. The scheme test in
+#: `_PLACEHOLDER_CHARS` catches `https://...` but not the bare form.
+_HOSTLIKE_RE = re.compile(
+    r"^(?:[A-Za-z0-9-]+\.)+(?:com|org|net|io|dev|edu|gov|int|mil|co|ai|sh|me|"
+    r"info|xyz|app|cloud|test|local|localhost)$",
+    re.IGNORECASE,
+)
+
+
 def _is_excluded(token: str) -> bool:
     """Tokens no repository-relative lookup can honestly decide."""
     if token.startswith(("/", "~")):
         return True  # an absolute path names the host's filesystem, not this tree
     if "..." in token:
         return True  # an elision, as in `curl ... | sh`
+    if _HOSTLIKE_RE.match(token.split("/", 1)[0]):
+        return True  # a URL with its scheme left off
     return any(ch in _PLACEHOLDER_CHARS for ch in token)
 
 

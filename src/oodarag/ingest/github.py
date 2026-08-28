@@ -136,12 +136,26 @@ class GitHubClient:
 
 
 def _next_link(link_header: str) -> str | None:
+    """The URL of the next page, or None if this was the last one.
+
+    Only the *first* parameter of each link used to be inspected, which quietly
+    lost any link that carries another parameter ahead of its rel - an ordering
+    RFC 8288 explicitly permits and proxies do produce. A missed next link is
+    invisible: the walk stops after page one, reports success, and the caller
+    indexes 100 of 4,000 issues. So every parameter is checked, and rel is
+    accepted bare, single-quoted or double-quoted.
+    """
     for part in link_header.split(","):
         segments = part.split(";")
         if len(segments) < 2:
             continue
-        if 'rel="next"' in segments[1].replace(" ", "").replace("'", '"'):
-            return segments[0].strip().strip("<>")
+        for segment in segments[1:]:
+            key, _, value = segment.partition("=")
+            if key.strip().lower() != "rel":
+                continue
+            # A rel may hold several space-separated relation types.
+            if "next" in value.strip().strip("\"'").lower().split():
+                return segments[0].strip().strip("<>")
     return None
 
 
@@ -167,6 +181,9 @@ class GitHubConnector(Connector):
     authority: float = 1.2                        # a repo is authoritative about itself
     gh: GitHubClient = field(default_factory=GitHubClient)
     stats: dict[str, Any] = field(default_factory=dict)
+    #: File ids proven unchanged by a sha comparison rather than a fetch. See
+    #: Connector.unchanged_external_ids for why silence is not absence.
+    _unchanged: set[str] = field(default_factory=set, repr=False)
 
     def __post_init__(self) -> None:
         if not self.owner or not self.repo:
@@ -229,6 +246,7 @@ class GitHubConnector(Connector):
     def fetch(self, cursor: dict[str, Any]) -> Iterator[RawDocument]:
         counts: dict[str, int] = {}
         skipped: dict[str, int] = {}
+        self._unchanged = set()
 
         meta = self.gh.get(f"/repos/{self.slug}")
         ref = self.ref or meta.get("default_branch") or "main"
@@ -253,6 +271,10 @@ class GitHubConnector(Connector):
                 # file "unchanged" anyway, so skip the fetch entirely.
                 log.info("head unchanged, skipping file walk", repo=self.slug, sha=head_sha[:8])
                 skipped["head_unchanged"] = len(prior_blobs)
+                # Not fetching them is the whole point; forgetting them is not.
+                self._unchanged.update(
+                    f"{self.slug}#file:{path}" for path in prior_blobs)
+                self.stats["files_walked"] = True
             else:
                 blob_shas: dict[str, str] = {}
                 emitted = 0
@@ -274,20 +296,30 @@ class GitHubConnector(Connector):
                         skipped["max_files"] = skipped.get("max_files", 0) + 1
                         continue
                     blob_sha = entry.get("sha", "")
-                    blob_shas[path] = blob_sha
                     # Blob sha is git's own content hash: if it matches the last
                     # run we already have this file's bytes and never fetch them.
                     if prior_blobs.get(path) == blob_sha and not cursor.get("force_refetch"):
+                        blob_shas[path] = blob_sha
                         skipped["blob_unchanged"] = skipped.get("blob_unchanged", 0) + 1
+                        self._unchanged.add(f"{self.slug}#file:{path}")
                         continue
                     text = self._fetch_blob(path, blob_sha, head_sha)
                     if text is None:
+                        # A recorded sha asserts "we have these bytes". Recording
+                        # it before the fetch made that assertion false for every
+                        # failed fetch: the file then matched the short circuit on
+                        # every later run and was never fetched again, so one
+                        # transient 500 dropped it from the index permanently
+                        # while the delta still reported a clean run. Retrying it
+                        # next run costs a raw-host request, which is free.
                         skipped["binary_or_failed"] = skipped.get("binary_or_failed", 0) + 1
                         continue
+                    blob_shas[path] = blob_sha
                     emitted += 1
                     yield self._file_document(path, text, size, head_sha, blob_sha, ref)
                 counts["files"] = emitted
                 self.stats["blob_shas"] = blob_shas
+                self.stats["files_walked"] = True
 
         if "issues" in self.resources or "pulls" in self.resources:
             want_pulls = "pulls" in self.resources
@@ -325,10 +357,30 @@ class GitHubConnector(Connector):
 
         self.stats["counts"] = counts
         self.stats["skipped"] = skipped
-        log.info("github fetch complete", repo=self.slug, **counts)
+        # The counts are namespaced because their keys are resource names, and
+        # one of those resources is called "repo" - which collided with the
+        # `repo=` field and made this line raise TypeError on every run using
+        # the default resource set. `Connector.run` caught it and recorded
+        # failed=1, so the ingest delta reported a permanent failure that never
+        # happened, and that delta is what the OODA loop reads to decide
+        # whether the source is healthy.
+        log.info("github fetch complete", repo=self.slug,
+                 **{f"n_{name}": value for name, value in counts.items()})
+
+    def unchanged_external_ids(self) -> set[str]:
+        """Files proven unchanged by a sha comparison instead of a fetch."""
+        return set(self._unchanged)
 
     def next_cursor(self, cursor: dict[str, Any]) -> dict[str, Any]:
-        cursor["head_sha"] = self.stats.get("head_sha", cursor.get("head_sha"))
+        # The head sha may only advance once the walk it labels has finished.
+        # It was being written as soon as the head commit was read, so a tree
+        # call that failed - or a `run(limit=...)` that abandoned the generator
+        # part way through - left the cursor claiming a commit whose files were
+        # never fetched. The next run then took the head-unchanged short circuit
+        # against a stale blob map and skipped the walk outright, losing those
+        # files for good with no error anywhere to say so.
+        if "files" not in self.resources or self.stats.get("files_walked"):
+            cursor["head_sha"] = self.stats.get("head_sha", cursor.get("head_sha"))
         cursor["ref"] = self.stats.get("ref", cursor.get("ref"))
         if blobs := self.stats.get("blob_shas"):
             cursor["blob_shas"] = blobs
@@ -430,7 +482,12 @@ class GitHubConnector(Connector):
     def _issue_document(self, issue: dict[str, Any]) -> RawDocument:
         is_pr = "pull_request" in issue
         number = issue.get("number")
-        labels = [lbl.get("name", "") for lbl in issue.get("labels", []) if isinstance(lbl, dict)]
+        # `.get("labels", [])` returns None when the key is present and null,
+        # and iterating that raised out of the fetch generator - which
+        # `Connector.run` counts as the *source* failing, so one odd issue
+        # discarded every document after it. Same guard as `user` below.
+        labels = [lbl.get("name", "") for lbl in (issue.get("labels") or [])
+                  if isinstance(lbl, dict)]
         parts = [
             f"# {'PR' if is_pr else 'Issue'} #{number}: {issue.get('title','')}",
             f"State: {issue.get('state')} | Author: {(issue.get('user') or {}).get('login')}"

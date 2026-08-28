@@ -65,7 +65,11 @@ class Response:
     @property
     def text(self) -> str:
         charset = "utf-8"
-        ctype = self.headers.get("content-type", "")
+        # Parameter names are case-insensitive (RFC 2045), and servers do send
+        # `Charset=`. Matching only the lowercase spelling silently decoded a
+        # latin-1 page as utf-8, turning every accented character into U+FFFD.
+        # Codec lookup is itself case-insensitive, so the lowered value is fine.
+        ctype = self.headers.get("content-type", "").lower()
         if "charset=" in ctype:
             charset = ctype.split("charset=", 1)[1].split(";")[0].strip().strip('"') or "utf-8"
         try:
@@ -90,9 +94,14 @@ class RetryPolicy:
 
     def delay_for(self, attempt: int, retry_after: float | None = None) -> float:
         if retry_after is not None:
-            return min(retry_after, self.max_delay)
+            return _clamp(retry_after, self.max_delay)
         raw = min(self.base_delay * (2 ** (attempt - 1)), self.max_delay)
-        return raw * (1.0 + random.uniform(-self.jitter, self.jitter))
+        # The clamp is not cosmetic. Jitter was applied *after* the cap, so a
+        # policy capped at 30s could sleep 37.5s, and any jitter >= 1.0 produced
+        # a negative delay - which `time.sleep()` rejects with ValueError, so a
+        # retryable 503 came back to the caller as an unrelated crash instead of
+        # a retry.
+        return _clamp(raw * (1.0 + random.uniform(-self.jitter, self.jitter)), self.max_delay)
 
 
 @dataclass
@@ -177,9 +186,18 @@ class HttpClient:
                                     elapsed_s=time.monotonic() - started)
                 if e.code in allow_status:
                     payload = e.read() if hasattr(e, "read") else b""
-                    return Response(url, e.code, resp_headers,
-                                    _decompress(payload, resp_headers.get("content-encoding", "")),
-                                    elapsed_s=time.monotonic() - started)
+                    allowed = Response(url, e.code, resp_headers,
+                                       _decompress(payload, resp_headers.get("content-encoding", "")),
+                                       elapsed_s=time.monotonic() - started)
+                    # An allowed non-2xx (a missing robots.txt, a 404 blob) was
+                    # the one outcome that touched no counter at all: it is not
+                    # an error and it was not counted as a request either, so a
+                    # run that fetched a thousand robots.txt files reported zero
+                    # traffic and the cost of a crawl could not be read off the
+                    # stats it publishes.
+                    self.stats["requests"] += 1
+                    self.stats["bytes"] += len(allowed.body)
+                    return allowed
                 err = HttpError(e.code, url, _safe_read(e), resp_headers)
                 last_exc = err
                 if not err.retryable or attempt == self.retry.attempts:
@@ -238,18 +256,40 @@ class _NoRedirectOnPost(urllib.request.HTTPRedirectHandler):
         return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
+def _clamp(delay: float, max_delay: float) -> float:
+    return max(0.0, min(delay, max_delay))
+
+
+def _salvage(payload: bytes, wbits: int) -> bytes:
+    """Whatever decompresses before the stream runs out, or b"" if none of it does."""
+    try:
+        return zlib.decompressobj(wbits).decompress(payload)
+    except (OSError, zlib.error):
+        return b""
+
+
 def _decompress(payload: bytes, encoding: str) -> bytes:
     enc = encoding.lower().strip()
-    try:
-        if enc == "gzip":
+    if enc == "gzip":
+        try:
             return gzip.decompress(payload)
-        if enc == "deflate":
+        except EOFError:
+            # A body cut short mid-stream (connection reset, a proxy that gave
+            # up) raises EOFError, which is neither OSError nor zlib.error - so
+            # it escaped `request()`, whose handlers cover URLError/OSError
+            # only, and one truncated page killed the whole fetch. Keep the
+            # prefix that did decompress: a partial document degrades, an
+            # exception here does not.
+            return _salvage(payload, 31) or payload
+        except (OSError, zlib.error):
+            return payload  # server lied about the encoding; take the bytes as-is
+    if enc == "deflate":
+        for wbits in (zlib.MAX_WBITS, -zlib.MAX_WBITS):  # zlib-wrapped, then raw
             try:
-                return zlib.decompress(payload)
+                return zlib.decompress(payload, wbits)
             except zlib.error:
-                return zlib.decompress(payload, -zlib.MAX_WBITS)
-    except (OSError, zlib.error):
-        return payload  # server lied about the encoding; take the bytes as-is
+                continue
+        return _salvage(payload, zlib.MAX_WBITS) or _salvage(payload, -zlib.MAX_WBITS) or payload
     return payload
 
 

@@ -70,10 +70,14 @@ _UNSAFE_PHRASES = ("git push", "pip install")
 _UNSAFE_CHARS = (">", "|", "&&", ";", "$(", "`")
 # argv is handed to subprocess without a shell, so these stdlib modules are the
 # remaining way a "safe-looking" command mutates the machine or never returns.
-# `compileall` is here for a narrower reason: writing .pyc into the tree would
-# break rule 8, and it is the one module that ignores PYTHONDONTWRITEBYTECODE.
+# `compileall` used to be listed here because it writes .pyc into the tree under
+# review and ignores PYTHONDONTWRITEBYTECODE. It no longer needs to be: the run
+# environment sets PYTHONPYCACHEPREFIX, so those writes land outside the tree.
+# Keeping it banned left `make lint` permanently UNVERIFIABLE on any repository
+# whose lint step is a compile check - a very common shape, and exactly the kind
+# of documented command worth actually running.
 _UNSAFE_MODULES = frozenset(
-    {"pip", "venv", "ensurepip", "compileall", "http.server", "smtpd", "idlelib"}
+    {"pip", "venv", "ensurepip", "http.server", "smtpd", "idlelib"}
 )
 _MUTATING_WORDS = frozenset(
     "install uninstall publish upload deploy release init bootstrap".split()

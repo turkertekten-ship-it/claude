@@ -133,3 +133,70 @@ class TestOfflineVerdicts(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestReachabilitySemantics(unittest.TestCase):
+    """Only *gone* is a dead link.
+
+    Everything else a server can say — it refused the method, it wants
+    credentials, it is rate limiting, it is broken today — is a fact about the
+    server at this moment. Reporting that as a broken link puts a false finding
+    in front of a reader who then has to go and disprove it.
+    """
+
+    def setUp(self) -> None:
+        self.checker = LinksChecker()
+        self.calls: list[tuple[str, str]] = []
+
+    def _with_responses(self, responses: dict[str, tuple[int | None, str]]):
+        def probe(url: str, method: str):
+            self.calls.append((method, url))
+            return responses.get(method, (None, "URLError"))
+        self.checker._probe = staticmethod(probe)  # type: ignore[method-assign]
+
+    def _codes(self, responses):
+        from tools.evidence import Claim
+        self._with_responses(responses)
+        claim = Claim("see https://h.test/x", "README.md", 3)
+        return [f.code for f in self.checker._reach(claim, "https://h.test/x")]
+
+    def test_a_200_is_silent(self):
+        self.assertEqual(self._codes({"HEAD": (200, "")}), [])
+
+    def test_head_falls_back_to_get(self):
+        # api.github.com answers 400 to HEAD and 200 to GET. Without the
+        # fallback the module docstring's promise was false and the link was
+        # reported dead.
+        self.assertEqual(self._codes({"HEAD": (400, "HTTP 400"), "GET": (200, "")}), [])
+        self.assertEqual([m for m, _ in self.calls], ["HEAD", "GET"])
+
+    def test_404_is_the_dead_link_case(self):
+        codes = self._codes({"HEAD": (404, "HTTP 404"), "GET": (404, "HTTP 404")})
+        self.assertEqual(codes, ["LINK_DEAD"])
+
+    def test_410_is_also_gone(self):
+        self.assertEqual(self._codes({"HEAD": (410, ""), "GET": (410, "")}), ["LINK_DEAD"])
+
+    def test_a_refused_method_is_not_a_dead_link(self):
+        for status in (400, 401, 403, 405, 429):
+            with self.subTest(status=status):
+                codes = self._codes({"HEAD": (status, ""), "GET": (status, "")})
+                self.assertEqual(codes, ["LINK_NOT_CONFIRMED"])
+                self.calls.clear()
+
+    def test_a_server_error_is_not_a_dead_link(self):
+        codes = self._codes({"HEAD": (503, ""), "GET": (503, "")})
+        self.assertEqual(codes, ["LINK_NOT_CONFIRMED"])
+
+    def test_a_transport_failure_is_unverifiable(self):
+        codes = self._codes({})
+        self.assertEqual(codes, ["LINK_UNREACHABLE"])
+
+    def test_no_reachability_finding_is_ever_a_run_failure(self):
+        from tools.evidence import Claim
+        for responses in ({"HEAD": (404, "")}, {"HEAD": (503, "")}, {}):
+            self._with_responses(responses)
+            claim = Claim("x", "README.md", 1)
+            for f in self.checker._reach(claim, "https://h.test/x"):
+                self.assertNotEqual(f.severity.value, "error",
+                                    "a network result must never fail the run")

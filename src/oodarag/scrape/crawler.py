@@ -31,6 +31,24 @@ from oodarag.util.logging import get_logger
 
 log = get_logger("crawler")
 
+
+def _safe_normalize(url: str) -> str | None:
+    """`normalize_url`, but a malformed URL is a URL to drop, not a crawl to lose.
+
+    `normalize_url` reaches `SplitResult.port`/`.hostname`, both of which raise
+    `ValueError` on a malformed authority - `http://host:80x/`, an unclosed IPv6
+    literal. Those appear in real pages (hand-written hrefs, template variables
+    that never got substituted), and one of them anywhere in the frontier used to
+    abort `crawl()` mid-generator: the caller kept whatever had already been
+    yielded, lost every page still queued, and got a report with no `stopped_by`,
+    no duration and no frontier count - so the failure was not even diagnosable
+    afterwards. Returning None lets the caller count it and keep going.
+    """
+    try:
+        return normalize_url(url)
+    except ValueError:
+        return None
+
 HTML_TYPES = frozenset({"text/html", "application/xhtml+xml", ""})
 TEXT_TYPES = frozenset({"text/plain", "text/markdown", "text/x-rst", "application/json"})
 _BINARY_EXT_RE = re.compile(
@@ -93,6 +111,10 @@ class CrawlReport:
     duration_s: float = 0.0
     frontier_left: int = 0
     stopped_by: str = ""
+    #: URLs the server answered 304 to. They are pages that still exist and have
+    #: not changed, so a connector must be able to tell them from pages that
+    #: disappeared - see Connector.unchanged_external_ids.
+    not_modified: list[str] = field(default_factory=list)
 
     def as_dict(self) -> dict[str, object]:
         return {
@@ -105,6 +127,7 @@ class CrawlReport:
             "bytes": self.bytes,
             "duration_s": round(self.duration_s, 2),
             "frontier_left": self.frontier_left,
+            "not_modified": len(self.not_modified),
         }
 
 
@@ -168,7 +191,10 @@ class Crawler:
         frontier: deque[tuple[str, int]] = deque()
 
         for seed in self.config.seeds:
-            normalized = normalize_url(seed)
+            normalized = _safe_normalize(seed)
+            if normalized is None:
+                self.report.skipped["bad_url"] += 1
+                continue
             if normalized not in self._seen_urls:
                 self._seen_urls.add(normalized)
                 frontier.append((normalized, 0))
@@ -176,7 +202,10 @@ class Crawler:
         if self.config.use_sitemap:
             for seed in list(self.config.seeds):
                 for loc in self._sitemap_urls(seed):
-                    normalized = normalize_url(loc)
+                    normalized = _safe_normalize(loc)
+                    if normalized is None:
+                        self.report.skipped["bad_url"] += 1
+                        continue
                     if normalized not in self._seen_urls:
                         self._seen_urls.add(normalized)
                         frontier.append((normalized, 1))
@@ -214,7 +243,12 @@ class Crawler:
                 continue
 
             if resp.status == 304:
+                # Unchanged, not gone. Recording the URL is what lets the
+                # connector classify it as unchanged; without it a second crawl
+                # through a shared client (the documented way to share a rate
+                # limit) made every unchanged page look deleted.
                 self.report.skipped["not_modified"] += 1
+                self.report.not_modified.append(url)
                 continue
 
             ctype = resp.content_type
@@ -235,7 +269,9 @@ class Crawler:
                 page = extract(resp.text, resp.url)
 
             # A redirect can land two frontier entries on the same final page.
-            final = normalize_url(resp.url)
+            # A server that redirects to a malformed Location still gave us a
+            # page; fall back to the URL we asked for rather than dropping it.
+            final = _safe_normalize(resp.url) or url
             if final != url and final in self._seen_urls:
                 self.report.skipped["redirect_dupe"] += 1
                 continue
@@ -250,14 +286,23 @@ class Crawler:
             # same document. Version-pinned doc pages are the common case: they
             # differ by a few words but are one page for retrieval purposes.
             if self.config.dedupe_canonical and page.canonical:
-                canonical = normalize_url(page.canonical)
-                if canonical == final:
-                    self._seen_canonical.setdefault(canonical, final)
-                else:
-                    if (first := self._seen_canonical.get(canonical)) is not None:
+                # One canonical URL means one document, whichever of its URLs we
+                # happened to reach first. The `canonical == final` case used to
+                # be exempt from the duplicate check, which made the dedupe
+                # order-dependent: crawling /stable/ then /latest/ kept one page,
+                # crawling /latest/ then /stable/ kept both - and seeding a docs
+                # site at /latest/ is the normal way round. The retriever then
+                # returns the same passage twice, which is the exact failure this
+                # module's docstring says dedupe exists to prevent.
+                canonical = _safe_normalize(page.canonical)
+                if canonical is None:
+                    self.report.skipped["bad_canonical"] += 1
+                elif (first := self._seen_canonical.get(canonical)) is not None:
+                    if first != final:
                         self.report.skipped["duplicate_canonical"] += 1
                         log.debug("duplicate canonical", url=final, same_as=first)
                         continue
+                else:
                     self._seen_canonical[canonical] = final
 
             digest = content_hash(page.text)
@@ -289,7 +334,10 @@ class Crawler:
             if link.nofollow and not self.config.follow_nofollow:
                 self.report.skipped["nofollow"] += 1
                 continue
-            normalized = normalize_url(link.url)
+            normalized = _safe_normalize(link.url)
+            if normalized is None:
+                self.report.skipped["bad_url"] += 1
+                continue
             if normalized in self._seen_urls:
                 continue
             self._seen_urls.add(normalized)
@@ -321,14 +369,22 @@ class Crawler:
             except (HttpError, TransportError, ET.ParseError) as e:
                 log.warn("sitemap unreadable", url=sm_url, err=str(e)[:120])
                 continue
+            # What a <loc> means is decided by the document it came from: in a
+            # <sitemapindex> it is another sitemap, in a <urlset> it is a page.
+            is_index = root.tag.endswith("sitemapindex")
             for element in root.iter():
                 tag = element.tag.rsplit("}", 1)[-1]
                 if tag != "loc" or not (element.text or "").strip():
                     continue
                 loc = element.text.strip()
-                parent_tag = "sitemap" if root.tag.endswith("sitemapindex") else "url"
-                if parent_tag == "sitemap" and len(seen_maps) < 5:
-                    queue.append(loc)
+                if is_index:
+                    # The map cap used to fall through to `found`, so past five
+                    # maps a nested index's children were handed to the frontier
+                    # as if they were pages - the crawler then spent fetches on
+                    # sitemap XML, and any host serving it as text/plain got raw
+                    # XML into the corpus. Over the cap, drop them.
+                    if len(seen_maps) < 5:
+                        queue.append(loc)
                 else:
                     found.append(loc)
         log.info("sitemap discovery", seed=seed, maps=len(seen_maps), urls=len(found))

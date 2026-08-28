@@ -26,9 +26,9 @@ it, so the table is checkable rather than decorative:
 | HTTP | `util/http.py` | urllib client with token-bucket rate limiting (one bucket per client, not per host), retry honouring `Retry-After` and GitHub's `x-ratelimit-reset`, conditional GETs via ETag, an 8 MiB cap per response, and no silent POST replay on redirect |
 | Text | `util/text.py` | NFKC normalization, code-aware tokenization, markdown section splitting that never splits a fenced block, and secret redaction applied at the connector boundary |
 | HTML | `scrape/html.py` | a tolerant tree builder over `html.parser` with explicit recovery rules, structural plus link-density boilerplate removal, and markdown rendering that preserves headings, lists and code fences |
-| Robots | `scrape/robots.py` | RFC 9309 semantics with per-host caching; 5xx and unreachable are treated as disallow-all, not as permission |
+| Robots | `scrape/robots.py` | RFC 9309 semantics with per-host caching: longest-match wins with `Allow` taking ties (§2.2.2), fractional `Crawl-delay` honoured, and 5xx or unreachable treated as disallow-all rather than as permission |
 | Crawl | `scrape/crawler.py` | breadth-first, dedupes on content hash and declared canonical as well as URL, records why each URL was skipped, honours a per-host crawl delay, and bounds pages, fetches, depth and wall-clock. Bytes are counted and reported but not bounded — the only byte limit is the client's 8 MiB per response |
-| Ingest | `ingest/base.py` | the connector contract: content-hash incrementality, atomically persisted cursors, and per-document failures counted rather than raised |
+| Ingest | `ingest/base.py` | the connector contract: content-hash incrementality, atomically persisted cursors, per-document failures counted rather than raised, and `unchanged_external_ids` so a source that saves bandwidth is not mistaken for one that lost documents |
 | GitHub | `ingest/github.py` | repo, README, files, issues, PRs, commits and releases; head-sha short circuit, one recursive tree call, and raw-over-API blob fetches to stay inside the REST quota |
 | Web | `ingest/web.py` | the crawler as a connector, with redaction and provenance stamping |
 | Models | `models.py` | `RawDocument -> Document -> Chunk -> ScoredChunk -> Answer`, carrying provenance at every hop |
@@ -82,6 +82,22 @@ make check           # lint, tests, and the evidence checkers
 
 There is deliberately no `make demo` yet. There was one, and it invoked a module
 that did not exist.
+
+## Tests
+
+The suite is stdlib `unittest`, no dependencies, and it drives the network-facing
+code through fake transports so it runs anywhere.
+
+```bash
+PYTHONPATH=src:. python3 -m unittest discover -s tests -t .   # everything
+PYTHONPATH=src:. OODARAG_LIVE=1 python3 -m unittest tests.test_oodarag_live
+```
+
+The second command is opt-in and really talks to `api.github.com` and `pypi.org`.
+It is separate rather than skipped-on-failure, because a network test that
+quietly passes when the network is missing is a green tick asserting something
+nobody checked. What it covers, and what the sandbox it was written in could not
+verify, is recorded in `provenance/observations.md`.
 
 ## Design principles
 

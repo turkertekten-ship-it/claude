@@ -71,6 +71,93 @@ sources:
       writes bytecode into the tree under review; and link reachability was not
       checked because the network is off by default.
 
+  - id: S-11
+    kind: measurement
+    command: python3 -m unittest tests.test_oodarag_live
+    env: OODARAG_LIVE=1, GITHUB_TOKEN set
+    cwd: working tree of this branch
+    exit_code: 0
+    observed: >-
+      12 live integration tests pass against the real api.github.com and
+      pypi.org. Cold connector run yields documents whose permalinks are all
+      pinned to the head sha; a second run with an unchanged head spends 2
+      requests instead of walking the tree; the git/blobs fallback returns the
+      file correctly; a github-token-shaped string is redacted before a
+      document exists.
+    correction: >-
+      An earlier version of this entry claimed raw.githubusercontent.com served
+      a blob in one request. That was wrong. The repository is public and the
+      raw host still answered 404 through the sandbox proxy, so the API fallback
+      did the work and the fetch cost two requests. The "one request" reading
+      came from HttpClient not incrementing its counter on the allow_status
+      branch - a bug fixed in this same round. The raw-first optimisation is
+      therefore UNVERIFIED here, not confirmed.
+
+  - id: S-12
+    kind: measurement
+    command: Crawler(CrawlConfig(seeds=["https://pypi.org/help/"], max_pages=3, max_depth=1))
+    cwd: working tree of this branch
+    observed: >-
+      3 pages fetched, 361167 bytes, stopped_by=max_pages, 114 URLs left in the
+      frontier, 3 URLs skipped by robots. Live robots.txt parsed: /help/
+      allowed, /simple/ disallowed, sitemap surfaced. Extraction of
+      https://pypi.org/help/ gave 5977 words, 113 body links, link_density
+      0.063, headings intact, and no cookie banner or skip-link in the body.
+
+  - id: S-13
+    kind: measurement
+    command: RobotsPolicy.explain("https://github.com/turkertekten-ship-it/claude")
+    cwd: working tree of this branch
+    observed: >-
+      github.com/robots.txt answered 403 through the sandbox proxy, so the
+      policy set disallow_all and the crawl yielded nothing with
+      skipped={"robots": 1}. This is RFC 9309 behaviour working as documented,
+      not a defect: a site that will not tell us its rules does not get crawled
+      on the assumption they are permissive.
+
+  - id: S-14
+    kind: measurement
+    command: python3 -m tools.ultrareview . --only links --network
+    cwd: working tree of this branch
+    observed: >-
+      0 errors, 0 warnings, 3 unverifiable. Two hosts are blocked by the sandbox
+      proxy and one rejects a bare-origin request; none is evidence of a broken
+      link, and each is reported as undetermined rather than dead.
+
+  - id: S-15
+    kind: measurement
+    command: python3 -m unittest discover -s tests -t .
+    env: PYTHONPATH=src:.
+    cwd: working tree of this branch
+    exit_code: 0
+    observed: >-
+      686 tests, 12 of them skipped (the opt-in live suite). 383 of these are
+      new and cover src/oodarag, which had none: html 48, crawl and robots 60,
+      github 73, http and utilities 111, models/ingest/text 69, the
+      unchanged-without-bytes contract 10, live integration 12.
+
+  - id: S-16
+    kind: measurement
+    command: warm-run behaviour of GitHubConnector against the real API
+    cwd: working tree of this branch
+    observed: >-
+      Before the fix, a second run over an unchanged repository reported 6 of 6
+      files in removed_last_run and stored 0 hashes. After it, the same run
+      reports unchanged=6, keeps all 6 hashes, and proposes no deletions; a
+      third run repeats that rather than re-ingesting.
+
+  - id: S-17
+    kind: report
+    reporter: five test-writing subagents, one per module group (this session)
+    observed: >-
+      29 bugs reported across src/oodarag while writing its first tests; 27
+      fixed by the agent that owned the file, 2 handed back because the fix
+      belonged to a file another agent owned. Each is covered by a regression
+      test naming the failure it encodes.
+    note: >-
+      Second-hand by construction. Every fix landed with a test, and the whole
+      suite plus the live suite were re-run here before any of it was recorded.
+
   - id: S-10
     kind: report
     reporter: the /ultrareview judgement layer (subagents, this session)

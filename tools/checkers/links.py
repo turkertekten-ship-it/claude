@@ -250,42 +250,62 @@ class LinksChecker:
     # ------------------------------------------------------------------ network
 
     def _reach(self, claim: Claim, url: str) -> Iterator[Finding]:
-        request = urllib.request.Request(url, method="HEAD",
-                                         headers={"User-Agent": "ultrareview/1.0"})
-        try:
-            with urllib.request.urlopen(request, timeout=10) as resp:
-                status = resp.status
-        except urllib.error.HTTPError as e:
-            if e.code in (403, 405, 501):  # HEAD refused; the URL may still be fine
-                yield Finding(
-                    checker=self.name, code="LINK_METHOD_REFUSED",
-                    verdict=Verdict.UNVERIFIABLE, severity=Severity.INFO, claim=claim,
-                    detail=f"{url!r} refused HEAD with {e.code}; reachability is undetermined.")
-                return
-            yield Finding(
-                checker=self.name, code="LINK_DEAD",
-                verdict=Verdict.CONTRADICTED, severity=Severity.WARN, claim=claim,
-                evidence=[Evidence.at(claim.path, claim.line, claim.text),
-                          Evidence.measured(f"HTTP {e.code} for {url}", value=e.code, path=url)],
-                detail=f"{url!r} returned HTTP {e.code}.",
-                remedy="Update or remove the link.")
-            return
-        except Exception as e:
-            # A transport failure is a fact about this sandbox, not the link.
+        """Ask the network, and be strict about what the answer proves.
+
+        Only *gone* is a dead link. A 404 or 410 says the resource is not there,
+        which is a fact about the repository's documentation. Everything else a
+        server can say - it refused the method, it wants credentials, it is rate
+        limiting, it is broken today - is a fact about the server at this moment,
+        and reporting it as a broken link puts a false finding in front of a
+        reader who then has to go and disprove it.
+
+        HEAD first because it is cheap, then GET, because plenty of hosts reject
+        a bare HEAD: `https://api.github.com` answers 400 to HEAD and 200 to GET.
+        """
+        status, error = self._probe(url, "HEAD")
+        if status is None or status >= 400:
+            get_status, get_error = self._probe(url, "GET")
+            if get_status is not None:
+                status, error = get_status, get_error
+
+        if status is None:
+            # A transport failure inside a sandbox is not evidence about the link.
             yield Finding(
                 checker=self.name, code="LINK_UNREACHABLE",
                 verdict=Verdict.UNVERIFIABLE, severity=Severity.INFO, claim=claim,
-                detail=(f"{url!r} could not be reached from here "
-                        f"({type(e).__name__}); that is not evidence the link is broken."))
+                detail=f"{url!r} could not be reached from here ({error}); "
+                       "that is not evidence the link is broken.")
             return
-        if status >= 400:
+
+        if status in (404, 410):
             yield Finding(
                 checker=self.name, code="LINK_DEAD",
                 verdict=Verdict.CONTRADICTED, severity=Severity.WARN, claim=claim,
                 evidence=[Evidence.at(claim.path, claim.line, claim.text),
                           Evidence.measured(f"HTTP {status} for {url}", value=status, path=url)],
-                detail=f"{url!r} returned HTTP {status}.",
+                detail=f"{url!r} returned HTTP {status}: the resource is not there.",
                 remedy="Update or remove the link.")
+            return
+
+        if status >= 400:
+            yield Finding(
+                checker=self.name, code="LINK_NOT_CONFIRMED",
+                verdict=Verdict.UNVERIFIABLE, severity=Severity.INFO, claim=claim,
+                detail=(f"{url!r} answered HTTP {status} to both HEAD and GET. That is the "
+                        "server refusing this request, not the resource being gone, so "
+                        "reachability is undetermined."))
+
+    @staticmethod
+    def _probe(url: str, method: str) -> tuple[int | None, str]:
+        request = urllib.request.Request(
+            url, method=method, headers={"User-Agent": "ultrareview/1.0"})
+        try:
+            with urllib.request.urlopen(request, timeout=10) as resp:
+                return resp.status, ""
+        except urllib.error.HTTPError as e:
+            return e.code, f"HTTP {e.code}"
+        except Exception as e:
+            return None, type(e).__name__
 
 
 register(LinksChecker())

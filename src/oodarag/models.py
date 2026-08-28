@@ -181,7 +181,13 @@ class Answer:
         return out
 
     def to_json(self, include_retrieved: bool = False) -> str:
-        return json.dumps(self.to_dict(include_retrieved), indent=2, ensure_ascii=False)
+        # `metrics` is a free-form bag every stage drops its counters into, so
+        # one stage recording a set or a timestamp object used to raise
+        # TypeError here - throwing away a finished answer at the last step
+        # because of a diagnostic field nobody reads. `default=str` is what the
+        # logger and the state store already do with the same kind of payload.
+        return json.dumps(self.to_dict(include_retrieved), indent=2, ensure_ascii=False,
+                          default=str)
 
 
 @dataclass(slots=True)

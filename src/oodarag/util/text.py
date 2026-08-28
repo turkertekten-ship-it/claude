@@ -35,6 +35,15 @@ STOPWORDS = frozenset(
 def normalize_unicode(text: str) -> str:
     """NFKC-fold and strip control characters, preserving newlines and tabs."""
     text = unicodedata.normalize("NFKC", text)
+    # A carriage return is a line break, not a character to delete. It was being
+    # dropped here - `\r` is category Cc - and this runs *before*
+    # `normalize_whitespace`, whose own `\r` handling therefore never saw one.
+    # On a `\r`-only transcript (classic Mac exports, terminal captures) the
+    # lines either side were glued: "Done.\rNext" became "Done.Next", which
+    # `tokenize` reads as the single token "done.next" because the tokenizer
+    # deliberately keeps dotted paths together. Neither "done" nor "next" is
+    # then in the index, so the passage cannot be retrieved by either word.
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
     return "".join(ch for ch in text if ch in "\n\t" or not unicodedata.category(ch).startswith("C"))
 
 
@@ -91,17 +100,72 @@ def estimate_tokens(text: str) -> int:
 
 
 def truncate_tokens(text: str, max_tokens: int) -> str:
+    """Cut `text` down to at most `max_tokens`, measured by `estimate_tokens`.
+
+    The postcondition is the point: whatever comes back estimates at or under
+    the budget it was given.
+    """
+    if max_tokens <= 0:
+        return ""
     if estimate_tokens(text) <= max_tokens:
         return text
-    return text[: max_tokens * 4].rsplit(" ", 1)[0] + " ..."
+    # The estimate is max(separators + 1, chars / 4), so cutting on characters
+    # alone only satisfies one of its two arms. On separator-dense text - a
+    # transcript with one word per line, which is one of the corpora this
+    # package targets - `truncate_tokens(t, 10)` returned a string estimating
+    # 22 tokens, so a caller sizing a model context by these functions overran
+    # it by more than 2x on exactly the input it was budgeting for.
+    budget = max_tokens - 1  # the " ..." marker costs one separator
+    cut = text[: budget * 4]
+    separators = 0
+    for i, ch in enumerate(cut):
+        if ch in " \n":
+            separators += 1
+            if separators >= budget:
+                cut = cut[:i]
+                break
+    head = cut.rsplit(" ", 1)[0] if " " in cut else cut
+    return f"{head} ..." if head else "..."
+
+
+def _fence_spans(text: str) -> list[tuple[int, int]]:
+    """Character ranges covered by fenced code blocks, fence lines included.
+
+    An unclosed fence runs to the end of the document - the same assumption
+    `split_markdown_sections` makes when it stops emitting boundaries.
+    """
+    spans: list[tuple[int, int]] = []
+    start: int | None = None
+    offset = 0
+    for line in text.split("\n"):
+        if _CODE_FENCE_RE.match(line):
+            if start is None:
+                start = offset
+            else:
+                spans.append((start, offset + len(line) + 1))
+                start = None
+        offset += len(line) + 1
+    if start is not None:
+        spans.append((start, offset))
+    return spans
 
 
 def heading_path(markdown: str, offset: int) -> list[str]:
     """The chain of markdown headings in effect at a character offset."""
+    # A `#` line inside a fenced code block is a comment, not a heading.
+    # `split_markdown_sections` already knew that when choosing its boundaries;
+    # this function did not, so a shell block containing `# install deps` was
+    # read as a level-1 heading, which cleared the real chain and relabelled
+    # every section after the fence. The path is what goes into a chunk's
+    # context header, which is embedded and indexed, so the retriever ended up
+    # citing a section the document does not contain.
+    fences = _fence_spans(markdown)
     path: list[str] = []
     for m in _MD_HEADING_RE.finditer(markdown):
         if m.start() > offset:
             break
+        if any(lo <= m.start() < hi for lo, hi in fences):
+            continue
         level = len(m.group(1))
         del path[level - 1 :]
         path.append(m.group(2).strip())
@@ -162,7 +226,14 @@ def redact_secrets(text: str) -> str:
         (r"\b(xox[abposr]-[A-Za-z0-9\-]{10,})", "<redacted:slack-token>"),
         (r"(?i)\b(bearer)\s+[A-Za-z0-9._\-]{20,}", r"\1 <redacted>"),
         (
-            r"(?i)\b(api[_-]?key|secret|password|passwd|token)\b(\s*[:=]\s*)[\"']?[A-Za-z0-9._\-]{12,}[\"']?",
+            # The optional quote after the key name is not cosmetic. Without it
+            # the separator had to follow the word immediately, so `password =
+            # hunter2hunter2` was redacted but `{"password": "hunter2hunter2"}`
+            # was not - and a JSON config blob is the single most common shape a
+            # credential is leaked in, in the chat logs and repository files
+            # these connectors read straight into the index.
+            r"(?i)\b(api[_-]?key|secret|password|passwd|token)\b([\"']?\s*[:=]\s*)"
+            r"[\"']?[A-Za-z0-9._\-]{12,}[\"']?",
             r"\1\2<redacted>",
         ),
         (r"-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----",

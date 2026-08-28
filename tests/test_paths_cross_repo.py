@@ -136,3 +136,29 @@ class TestSlugShapeIsNotEnough(unittest.TestCase):
         readme = "# T\n\nDoctrine is in the `acme/upstream` repository — its `provenance/`.\n"
         codes = [f.code for f in self._findings(readme)]
         self.assertIn("PATH_IN_OTHER_REPO", codes)
+
+
+class TestHostlikeTokens(unittest.TestCase):
+    """`github.com/robots.txt` is a URL without its scheme, not a repo path."""
+
+    def _codes(self, readme: str):
+        with tempfile.TemporaryDirectory() as tmp:
+            return [f.code for f in PathsChecker().check(RepoIndex(build(tmp, readme)),
+                                                         CheckConfig())]
+
+    def test_a_bare_hostname_path_is_not_a_repo_path(self):
+        for token in ("github.com/robots.txt", "example.org/index.html",
+                      "docs.python.org/3/library/ast.html", "pypi.org/simple/"):
+            with self.subTest(token=token):
+                self.assertEqual(self._codes(f"# T\n\nSee `{token}` for details.\n"), [])
+
+    def test_a_real_broken_repo_path_is_still_reported(self):
+        # Not named "missing.md": _ABSENCE_RE matches the word "missing", so a
+        # fixture using it would be suppressed by the guard that exists to stop
+        # the checker contradicting prose which says a path is absent.
+        self.assertEqual(self._codes("# T\n\nSee `docs/guide.md`.\n"), ["PATH_MISSING"])
+
+    def test_a_directory_that_merely_contains_a_dot_is_still_checked(self):
+        # `my.package/thing.py` is not a hostname; the TLD list is what
+        # separates the two, and over-matching here would silence real findings.
+        self.assertEqual(self._codes("# T\n\nSee `my.package/thing.py`.\n"), ["PATH_MISSING"])

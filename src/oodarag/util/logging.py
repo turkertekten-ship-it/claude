@@ -26,28 +26,38 @@ class Logger:
             else os.environ.get("OODARAG_LOG_FORMAT", "").lower() == "json"
         )
 
-    def _emit(self, level: str, msg: str, **fields: Any) -> None:
+    def _emit(self, level: str, msg: str, /, **fields: Any) -> None:
         if _LEVELS[level] < self.level:
             return
         if self.json_mode:
             payload = {"ts": round(time.time(), 3), "level": level, "logger": self.name, "msg": msg}
-            payload.update(fields)
+            for key, value in fields.items():
+                # A caller field must not overwrite the event's own level, msg,
+                # ts or logger: those four are what a log reader filters and
+                # greps on, and `log.error("failed", level="chunk")` used to
+                # emit an event that every "level=error" query missed. Data
+                # keys arrive from **counts dicts, so the collision is real.
+                payload[key if key not in payload else f"field_{key}"] = value
             print(json.dumps(payload, default=str), file=sys.stderr, flush=True)
         else:
             extra = " ".join(f"{k}={v}" for k, v in fields.items())
             prefix = {"debug": "  ", "info": "  ", "warn": "! ", "error": "x "}[level]
             print(f"{prefix}[{self.name}] {msg}{' ' + extra if extra else ''}", file=sys.stderr, flush=True)
 
-    def debug(self, msg: str, **f: Any) -> None:
+    # `msg` is positional-only on purpose. Callers log data dicts they did not
+    # write - `log.info("ingest done", **counts)` - and a key named `msg` used to
+    # raise "got multiple values for argument 'msg'", so one unexpected key in
+    # the data ended the run at the line that was only trying to report on it.
+    def debug(self, msg: str, /, **f: Any) -> None:
         self._emit("debug", msg, **f)
 
-    def info(self, msg: str, **f: Any) -> None:
+    def info(self, msg: str, /, **f: Any) -> None:
         self._emit("info", msg, **f)
 
-    def warn(self, msg: str, **f: Any) -> None:
+    def warn(self, msg: str, /, **f: Any) -> None:
         self._emit("warn", msg, **f)
 
-    def error(self, msg: str, **f: Any) -> None:
+    def error(self, msg: str, /, **f: Any) -> None:
         self._emit("error", msg, **f)
 
 

@@ -40,6 +40,15 @@ BLOCK_TAGS = frozenset(
 )
 HEADING_TAGS = {"h1": 1, "h2": 2, "h3": 3, "h4": 4, "h5": 5, "h6": 6}
 
+# Deepest scope the builder will open. Every stage below (prune, score, render)
+# walks the tree recursively, so tree depth is stack depth; an unbounded tree
+# turns a malformed page into a RecursionError. Real documents nest far less
+# than this - it is unclosed inline tags, one new scope each, that run away.
+_MAX_TREE_DEPTH = 150
+# ARIA landmarks. The same statement as <nav>/<header>/<footer>/<aside> in a
+# different vocabulary, so they are dropped at the same stage those tags are.
+_LANDMARK_ROLES = frozenset({"navigation", "banner", "contentinfo", "complementary", "search"})
+
 # class/id substrings that mark chrome rather than content
 _NOISE_ATTR_RE = re.compile(
     r"(^|[-_ ])(nav|navbar|menu|sidebar|side-?bar|footer|masthead|breadcrumb|pagination|pager|"
@@ -69,7 +78,14 @@ class ExtractedPage:
     title: str
     text: str
     markdown: str
+    #: Every followable link in the document, chrome included. This is what a
+    #: crawler needs: the navigation it must not index is still the navigation
+    #: it has to follow to find the next page.
     links: list[Link] = field(default_factory=list)
+    #: Links inside the extracted body only. Kept separate from `links` because
+    #: the two answer different questions, and conflating them broke
+    #: `link_density` - see that property.
+    body_links: list[Link] = field(default_factory=list)
     headings: list[tuple[int, str]] = field(default_factory=list)
     meta: dict[str, Any] = field(default_factory=dict)
     lang: str = ""
@@ -83,11 +99,21 @@ class ExtractedPage:
 
     @property
     def link_density(self) -> float:
-        """Fraction of the extracted text that sits inside links. A high value on
-        the *final* extraction means boilerplate removal failed."""
+        """Fraction of the extracted body that sits inside links.
+
+        A high value means boilerplate removal failed: what survived extraction
+        is a list of links rather than prose.
+
+        It is computed from `body_links`, not `links`, and the difference is the
+        whole meaning of the number. `links` spans the entire document including
+        the navigation that removal correctly discarded; measuring against that
+        divides chrome link text by body text, so the metric reports failure
+        exactly when removal succeeded — it read 0.47 on a page whose body
+        contained no links at all.
+        """
         if not self.text:
             return 0.0
-        link_chars = sum(len(link.text) for link in self.links)
+        link_chars = sum(len(link.text) for link in self.body_links)
         return min(1.0, link_chars / max(1, len(self.text)))
 
     def outgoing(self, *, follow_only: bool = True) -> list[str]:
@@ -173,7 +199,12 @@ class _TreeBuilder(HTMLParser):
             self.stack.pop()
         node = Node(tag, attr_map)
         self.current.add(node)
-        self.stack.append(node)
+        if len(self.stack) < _MAX_TREE_DEPTH:
+            self.stack.append(node)
+        # Past the cap the element is recorded but opens no scope, so its text
+        # lands in the nearest ancestor instead of deepening the tree. Flatter
+        # structure is a far better outcome than the RecursionError that a page
+        # with a few hundred unclosed <span>s used to raise.
 
     def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         self.current.add(Node(tag.lower(), {k.lower(): (v or "") for k, v in attrs}))
@@ -220,10 +251,15 @@ def _should_drop(node: Node, aggressive: bool) -> bool:
     if "display:none" in node.attrs.get("style", "").replace(" ", "").lower():
         return True
     role = node.attrs.get("role", "").lower()
-    if role in {"navigation", "banner", "contentinfo", "complementary", "search", "dialog", "alert"}:
+    if role in {"dialog", "alert"}:
         return True
     if aggressive:
-        if node.tag in BOILERPLATE_TAGS:
+        # Landmark roles are demoted to the aggressive pass for the same reason
+        # <nav> is: the conservative pass runs before links are collected, and a
+        # Sphinx/ReadTheDocs sidebar is <div role="navigation">. Dropping it up
+        # front deleted that site's entire link graph before the crawler saw it -
+        # the identical starvation the two-stage prune was introduced to fix.
+        if node.tag in BOILERPLATE_TAGS or role in _LANDMARK_ROLES:
             return True
         blob = node.classes
         if blob and _NOISE_ATTR_RE.search(blob) and not _CONTENT_ATTR_RE.search(blob):
@@ -291,6 +327,12 @@ def _render(node: Node, base_url: str, links: list[Link], headings: list[tuple[i
             depth: int = 0, list_stack: tuple[str, ...] = ()) -> str:
     """Render a pruned subtree to markdown."""
     tag = node.tag
+    if tag in ("head", "title"):
+        # <title> is metadata and is already reported as such. When _find_main
+        # falls back to the document root - which it does on any short page -
+        # rendering it welded the title onto the front of the body text, so the
+        # crawler's content hash and word count counted chrome as content.
+        return ""
     if tag == "a":
         href = node.attrs.get("href", "").strip()
         text = clean(_inline_text(node))
@@ -353,9 +395,18 @@ def _render(node: Node, base_url: str, links: list[Link], headings: list[tuple[i
         return f" [image: {alt}] " if alt else " "
 
     if tag == "tr":
-        cells = [clean(_inline_text(c)) for c in node.children
+        # A cell is one line by definition: a newline inside one (a cell holding
+        # two <p>s) would end the row mid-table and turn the rest into prose.
+        cells = [" ".join(clean(_inline_text(c)).split()) for c in node.children
                  if isinstance(c, Node) and c.tag in ("td", "th")]
-        return "\n| " + " | ".join(cells) + " |" if cells else ""
+        if not cells:
+            return ""
+        row = "\n| " + " | ".join(cells) + " |"
+        if any(isinstance(c, Node) and c.tag == "th" for c in node.children):
+            # Without the delimiter line under the header, GFM does not see a
+            # table at all and renders every row as literal pipe characters.
+            row += "\n| " + " | ".join("---" for _ in cells) + " |"
+        return row
     if tag == "table":
         inner = "".join(
             _render(c, base_url, links, headings, depth + 1, list_stack) if isinstance(c, Node) else ""
@@ -373,6 +424,18 @@ def _render(node: Node, base_url: str, links: list[Link], headings: list[tuple[i
 
 
 _FENCE_RE = re.compile(r"^```", re.MULTILINE)
+_INDENT_RE = re.compile(r"^[ \t]*")
+
+
+def _collapse_runs(line: str) -> str:
+    """Collapse runs of spaces inside a line, keeping its leading indent.
+
+    The indent is not noise here: two spaces before a `-` are what make a
+    nested list nested. Collapsing them to one demoted every sub-item to a
+    sibling, so a three-level API reference came out as one flat list.
+    """
+    indent = _INDENT_RE.match(line).group(0)
+    return indent + re.sub(r"[ \t]{2,}", " ", line[len(indent):])
 
 
 def _tidy(markdown: str) -> str:
@@ -384,8 +447,7 @@ def _tidy(markdown: str) -> str:
     parts = markdown.split("```")
     for i in range(0, len(parts), 2):  # even indices are outside fences
         block = parts[i]
-        block = "\n".join(line.rstrip() for line in block.split("\n"))
-        block = re.sub(r"[ \t]{2,}", " ", block)
+        block = "\n".join(_collapse_runs(line.rstrip()) for line in block.split("\n"))
         block = re.sub(r"\n{3,}", "\n\n", block)
         parts[i] = block
     joined = "```".join(parts)
@@ -403,7 +465,15 @@ def _inline_text(node: Node, preserve: bool = False) -> str:
             alt = c.attrs.get("alt", "").strip()
             out.append(f" [image: {alt}] " if alt else " ")
         else:
-            out.append(_inline_text(c, preserve))
+            inner = _inline_text(c, preserve)
+            if inner and not preserve and c.tag in BLOCK_TAGS:
+                # Same failure as whitespace between inline elements, one level
+                # up: <blockquote><p>First.</p><p>Second.</p></blockquote> has
+                # no text node between the paragraphs, and concatenating them
+                # produced "First.Second." in the quote. In preserve mode the
+                # source whitespace is already the content, so nothing is added.
+                inner = f"\n{inner}\n"
+            out.append(inner)
     joined = "".join(out)
     return joined if preserve else clean(joined)
 
@@ -448,6 +518,38 @@ def _collect_meta(root: Node, raw_scripts: list[tuple[dict[str, str], str]],
     return meta, title, lang, canonical, jsonld, published
 
 
+def _collect_links(node: Node, base_url: str) -> list[Link]:
+    """Every followable link in a subtree, deduped, in document order."""
+    out: list[Link] = []
+    seen: set[str] = set()
+    for child in node.iter_nodes():
+        if child.tag != "a":
+            continue
+        href = child.attrs.get("href", "").strip()
+        if not href or href.lower().startswith(("javascript:", "mailto:", "tel:", "#", "data:")):
+            continue
+        try:
+            absolute = urljoin(base_url, href)
+        except ValueError:
+            continue
+        if not absolute.startswith(("http://", "https://")) or absolute in seen:
+            continue
+        seen.add(absolute)
+        rel = child.attrs.get("rel", "").lower()
+        out.append(Link(absolute, clean(_inline_text(child)), rel, "nofollow" in rel))
+    return out
+
+
+def _parse(html: str) -> _TreeBuilder:
+    parser = _TreeBuilder()
+    try:
+        parser.feed(html)
+        parser.close()
+    except Exception:
+        pass  # tolerant by design: keep whatever tree we managed to build
+    return parser
+
+
 def extract(html: str, url: str = "", *, aggressive: bool = True,
             min_words: int = 25) -> ExtractedPage:
     """Extract clean markdown, links and metadata from an HTML document.
@@ -456,55 +558,46 @@ def extract(html: str, url: str = "", *, aggressive: bool = True,
     a nav list, or one whose article is wrapped in a `class="sidebar"` div),
     we retry conservatively rather than return an empty page.
     """
-    parser = _TreeBuilder()
-    try:
-        parser.feed(html)
-        parser.close()
-    except Exception:
-        pass  # tolerant by design: keep whatever tree we managed to build
+    parser = _parse(html)
     root = parser.root
 
     meta, title, lang, canonical, jsonld, published = _collect_meta(root, parser.raw_scripts, url)
 
-    def build(aggr: bool) -> ExtractedPage:
-        import copy
-
-        tree = copy.deepcopy(root)
-        _prune(tree, aggr)
+    def build(tree: Node, aggr: bool) -> ExtractedPage:
+        # Two-stage pruning, and the order is the whole point. The first pass
+        # drops only what is never content - script, style, hidden elements -
+        # so the navigation is still standing when links are collected. The
+        # second pass removes the boilerplate, which is what the *text*
+        # extraction needs and what the crawler must not be charged for.
+        #
+        # Collecting links after the aggressive pass instead was a real bug: on
+        # any page with a <nav>, every navigation link had already been deleted,
+        # so the crawler saw only in-body links and a documentation site - whose
+        # link structure is almost entirely nav - crawled to a near-standstill.
+        _prune(tree, False)
+        all_links = _collect_links(tree, url or canonical)
+        if aggr:
+            _prune(tree, True)
         main = _find_main(tree)
         links: list[Link] = []
         headings: list[tuple[int, str]] = []
         markdown = _render(main, url or canonical, links, headings)
         markdown = _tidy(markdown)
         text = clean(re.sub(r"^#{1,6}\s+", "", markdown, flags=re.MULTILINE))
-        # Links from the whole document, not just the main region: a crawler
-        # needs the nav it just discarded in order to find the next page.
-        all_links: list[Link] = []
-        seen: set[str] = set()
-        for node in tree.iter_nodes():
-            if node.tag != "a":
-                continue
-            href = node.attrs.get("href", "").strip()
-            if not href or href.lower().startswith(("javascript:", "mailto:", "tel:", "#", "data:")):
-                continue
-            try:
-                absolute = urljoin(url or canonical, href)
-            except ValueError:
-                continue
-            if not absolute.startswith(("http://", "https://")) or absolute in seen:
-                continue
-            seen.add(absolute)
-            rel = node.attrs.get("rel", "").lower()
-            all_links.append(Link(absolute, clean(_inline_text(node)), rel, "nofollow" in rel))
         return ExtractedPage(
             url=url, title=title, text=text, markdown=markdown, links=all_links,
-            headings=headings, meta=meta, lang=lang, canonical=canonical,
-            published=published, jsonld=jsonld,
+            body_links=links, headings=headings, meta=meta, lang=lang,
+            canonical=canonical, published=published, jsonld=jsonld,
         )
 
-    page = build(aggressive)
+    page = build(root, aggressive)
     if aggressive and len(page.text.split()) < min_words:
-        fallback = build(False)
+        # The first build pruned `root` in place, so the retry needs a fresh
+        # tree. Re-parsing gives one, and unlike copy.deepcopy - which this used
+        # - it costs nothing on the common path and does not recurse six frames
+        # per DOM level: that copy raised RecursionError on a page nested about
+        # 150 deep, which is a broken page, exactly what must not crash.
+        fallback = build(_parse(html).root, False)
         if len(fallback.text.split()) > len(page.text.split()):
             return fallback
     return page
