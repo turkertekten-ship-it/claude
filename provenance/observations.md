@@ -99,6 +99,15 @@ contents were not reconstructed, summarised, or guessed at.
 - Of the 12 branches, only this session's vendors skills from outside the account, so the find-install-route overlap between sessions is in mandate rather than in output. [src:FLEET-SKILLS-2026-08-27]
 - A trial merge of one sibling branch conflicted on 7 files and produced two different questions sharing the id `U-7`, because unknown ids are allocated per branch with no shared counter; the merge was aborted rather than resolved. [src:LEDGER-ID-COLLISION-2026-08-27]
 
+## Observed — the owner's domain, from the fleet's own artifacts
+
+- A sibling branch carries a 99-file `mafirm/` tree written in Turkish, headed "Sınır ötesi birleşme ve devralma pratiği · işletim sözleşmesi" — a cross-border M&A practice operating agreement. [src:BOOK-IDENTIFIED-2026-08-27]
+- "The book" is a Turkish-language sectioned installation guide for that practice, numbered at least §1–§14, with §3 the operating agreement, §4 the specialty units and §5.1 the competition thresholds; its errata records that most defects blind testing found were in the book's text rather than in the installation. [src:BOOK-IDENTIFIED-2026-08-27]
+- That guide's own rules are an evidence rule, a negative-claim rule holding "no such obligation exists" to a higher bar than a positive claim, and a currency rule treating a stale Turkish threshold as worse than none because it looks checked. [src:BOOK-IDENTIFIED-2026-08-27]
+- `mevzuat.gov.tr`, `resmigazete.gov.tr`, `rekabet.gov.tr`, `spk.gov.tr` and `kvkk.gov.tr` are all refused at CONNECT, so Turkish merger-control thresholds cannot be verified against primary sources from this allowlist. [src:TR-REGULATORS-BLOCKED-2026-08-27]
+- The session whose goal names "imb youtube" committed `corpus/ibm-technology/manifest.json`, resolving the term as IBM Technology and grading each entry's channel attribution rather than asserting it. [src:IBM-MANIFEST-2026-08-27]
+- Of 10 branches on the `claude-ai` remote, 8 hold exactly one file — the `CLAUDE.md` pointer — while one holds 14 files and one holds 95 including a full `.claude/` tree. [src:CLAUDE-AI-SPLIT-2026-08-27]
+
 ## Observed — what the egress allowlist actually costs
 
 - The YouTube captions endpoint is reachable, but Google's implementation guide requires OAuth 2.0 for `captions.list` and OAuth plus video ownership for `captions.download`, which returns 403 for third-party public videos. [src:YOUTUBE-CAPTIONS-OAUTH-2026-08-27]

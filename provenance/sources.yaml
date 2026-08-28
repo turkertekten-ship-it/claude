@@ -726,3 +726,118 @@ sources:
       reading-order recovery. Tesseract returns text, not table geometry.
       These packages are apt-installed into the container and are as ephemeral
       as ~/.claude; a fresh session must install them again.
+
+  - id: BOOK-IDENTIFIED-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T17:30Z"
+    method: "git show origin/claude/blind-testing-ooda-5o3s67 of mafirm/KITAP-ERRATA.md and mafirm/CLAUDE.md; git ls-tree of mafirm/"
+    evidence: >-
+      That branch carries a 99-file `mafirm/` tree written in Turkish
+      ("mafirm" = M&A firm). `mafirm/KITAP-ERRATA.md` - kitap is Turkish for
+      book - is titled "Kitap için errata · Sürüm 1.0 → 1.1" and states that
+      most defects blind testing found are "kurulumda değil, kitabın
+      metnindedir" (not in the installation, but in the book's text). It
+      corrects the book by section: §3 "İşletim sözleşmesi" (operating
+      agreement), §4 "Uzmanlık birimleri" (specialty units), §5.1 "Rekabet
+      eşikleri — mevzuat" (competition thresholds - legislation), and refers
+      to §7, §11 and §14. mafirm/CLAUDE.md is headed "Sınır ötesi birleşme ve
+      devralma pratiği · işletim sözleşmesi" (cross-border merger and
+      acquisition practice · operating agreement) and states an evidence rule,
+      a negative-claim rule, and a currency rule for annually-updated Turkish
+      thresholds. mafirm/birimler/_koltuklar/ holds files named for M&A and
+      corporate-law figures including joseph-flom, faiza-saeed, leo-strine,
+      ken-adams and james-freund.
+    note: >-
+      RESOLVES U-3 as to what the book IS, not as to its title or author. It is
+      a Turkish-language sectioned installation guide for a cross-border M&A
+      practice, numbered at least §1-§14. Both readings previously entertained
+      here - a closing book, and an information memorandum - were wrong. The
+      §2-§7 range in the sibling's status line refers to this document's own
+      sections.
+
+  - id: TR-REGULATORS-BLOCKED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T17:32Z"
+    method: "curl over www.mevzuat.gov.tr, www.resmigazete.gov.tr, www.rekabet.gov.tr, www.spk.gov.tr, www.kvkk.gov.tr"
+    evidence: >-
+      All five return 000, refused at CONNECT, the same signature as every
+      other non-allowlisted host. The mafirm errata independently reports the
+      same for the first four and marks its competition-threshold section
+      "birincil kaynakla doğrulanamadı" (could not be verified against a
+      primary source).
+    note: >-
+      Directly consequential for that work: the book's Turkish merger-control
+      thresholds cannot be checked against primary sources from any container
+      on this allowlist. That session handled it correctly by flagging the
+      section as requiring human confirmation rather than asserting the
+      numbers.
+
+  - id: IBM-MANIFEST-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T17:25Z"
+    method: "git show origin/claude/rag-system-data-pipeline-rdkde9:corpus/ibm-technology/manifest.json"
+    evidence: >-
+      The session whose goal contains "imb youtube" committed
+      corpus/ibm-technology/manifest.json, described as "IBM Technology video
+      manifest for the YouTube connector". Entries carry video_id, title,
+      channel "IBM Technology", topics, and a `verification` field graded
+      search_confirmed or search_listed, with anything weaker excluded. The
+      first entry is "What is Retrieval-Augmented Generation (RAG)?" by Marina
+      Danilevsky. Its _provenance block states youtube.com is unreachable from
+      that container, that no transcript text is included, and that no entry
+      carries a summary because attributing prose to a video whose captions
+      were never read "would produce a citation that looks verbatim and is
+      not".
+    note: >-
+      RESOLVES U-4 by that entry's own stated criterion - "the owner expands
+      the term, or that session commits a resolved source list". That session
+      committed one, and resolved "imb" as IBM Technology. This remains that
+      session's reading rather than the owner's statement, and it is graded
+      per-entry rather than asserted, which is why it is treated as resolving
+      the register entry rather than as proof of intent.
+
+  - id: CLAUDE-AI-SPLIT-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T17:35Z"
+    method: "git ls-remote --heads; git ls-tree -r --name-only per branch on the claude-ai remote"
+    evidence: >-
+      The claude-ai remote carries 10 branches. Eight hold exactly one file,
+      CLAUDE.md - the pointer to the doctrine repository. Two diverge:
+      claude/rag-system-data-pipeline-rdkde9 holds 14 files including a CI
+      workflow, README.md and install.sh, and
+      claude/research-skill-mastery-mwjs01 holds 95 files including a full
+      .claude/ tree of agents and commands.
+    note: >-
+      Bears on U-5 without closing it. Eight of ten sessions independently
+      converged on "claude-ai carries a pointer and nothing else", so that is
+      now established practice rather than one session's working decision. It
+      still does not state the owner's intent, and the register's own warning
+      applies: where content landed says which session put it there. The
+      95-file branch is a live divergence, not a rounding error.
+
+  - id: TABLES-RECOVERABLE-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T17:40Z"
+    method: "pdfplumber 0.11.10 extract_tables with default, text/text and text/lines strategies over a generated ruled table PDF; pdftoppm -r 200 then tesseract with the tsv output mode over the same document"
+    evidence: >-
+      With the default line-based strategy pdfplumber found 0 tables, because
+      the test document has horizontal rules and no vertical ones. With
+      vertical_strategy and horizontal_strategy both set to "text" it returned
+      one table with the correct grid - ['Clause','Cap','Survival'],
+      ['7.2','20%','18 mont'], ['7.3','100%','36 mont'] - interleaved with
+      empty rows, and with the final cell clipped at the inferred column
+      boundary. Plain text extraction from the same page was exact.
+      Tesseract's tsv mode over the rasterised page returned word-level boxes
+      whose left coordinates cluster at 71, 335 and 599 and whose tops cluster
+      at 116, 201 and 284, matching the three columns and three rows; "18" and
+      "months" are separate words at left 599 and 642.
+    note: >-
+      Narrows the U-9 residue considerably. Born-digital table structure IS
+      recoverable with pdfplumber's text strategy, imperfectly - cells clip at
+      inferred boundaries and phantom empty rows appear, so it needs
+      validation rather than trust. Scanned table structure is reconstructible
+      in principle, because tesseract's tsv output carries the geometry, but
+      that requires clustering words into column and row bands and is not
+      available off the shelf. What genuinely remains unavailable is a trained
+      table-structure model of TableFormer's kind, for merged cells, spanning
+      headers and complex layouts.

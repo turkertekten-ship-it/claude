@@ -72,6 +72,34 @@ memorandum — and nothing seen here distinguishes them.
 to the wrong §-numbering is worse than no guide, because it looks authoritative
 and cites sections that do not exist.
 
+**RESOLVED (2026-08-27T17:30Z) — and both earlier readings were wrong.** The
+answer was on a branch this register had never read. `blind-testing-ooda-5o3s67`
+carries a 99-file `mafirm/` tree written in Turkish, and
+`mafirm/KITAP-ERRATA.md` — *kitap* is Turkish for **book** — is an errata sheet
+against it [src:BOOK-IDENTIFIED-2026-08-27].
+
+The book is a **Turkish-language sectioned installation guide for a
+cross-border M&A practice**, numbered at least §1–§14: §3 is the operating
+agreement, §4 the specialty units, §5.1 the competition thresholds. The
+"§2–§7" in that session's status line is this document's own numbering. It is
+neither a closing book nor an information memorandum — the two candidates
+entertained above, both discarded.
+
+The errata's own finding is worth carrying forward: most defects blind testing
+surfaced were **in the book's text, not in the installation**
+[src:BOOK-IDENTIFIED-2026-08-27].
+
+**Still not known:** the book's title and author. Resolving what a document
+*is* is not the same as identifying it, and nothing here names it.
+
+**A live hazard for that work.** The book's Turkish merger-control thresholds
+cannot be checked against primary sources from any container on this
+allowlist: `mevzuat.gov.tr`, `resmigazete.gov.tr`, `rekabet.gov.tr`,
+`spk.gov.tr` and `kvkk.gov.tr` are all refused at CONNECT
+[src:TR-REGULATORS-BLOCKED-2026-08-27]. That session marked the section
+"could not be verified against a primary source" and required human
+confirmation rather than asserting the numbers, which is the correct handling.
+
 ---
 
 ### U-4 — What "imb youtube" designates
@@ -113,6 +141,25 @@ on the strength of this. If the expansion is wrong, every artifact built on it
 inherits the error silently — which is the exact failure this register exists
 to prevent. Note also that even if the reading is right, the transcripts of
 that channel are not reachable through the Data API — see U-7.
+
+**RESOLVED (2026-08-27T17:25Z), by this entry's own criterion.** The criterion
+above was "the owner expands the term, *or that session commits a resolved
+source list*". That session committed one:
+`corpus/ibm-technology/manifest.json`, an "IBM Technology video manifest for
+the YouTube connector" [src:IBM-MANIFEST-2026-08-27]. The session holding the
+term resolved it as **IBM Technology**.
+
+Two things make this safe to record as resolved rather than as another guess.
+The manifest grades each entry — `search_confirmed` where multiple independent
+results attribute the video to IBM, `search_listed` where one did, and anything
+weaker is excluded. And it carries no summaries at all, because
+youtube.com was unreachable from that container and attributing prose to a
+video whose captions were never read "would produce a citation that looks
+verbatim and is not" [src:IBM-MANIFEST-2026-08-27].
+
+**What is resolved and what is not:** the term's referent, as fixed by the
+session that owns it and graded per entry. Not the owner's own statement of
+intent, which was never obtained.
 
 **Separately, and independently of what "imb" means:** the blocker recorded
 against that goal has moved. `www.youtube.com` is genuinely unreachable, but
@@ -202,6 +249,25 @@ install: these are apt packages in a container that does not persist. A fresh
 session has none of them. Anything depending on this path needs the install to
 be a scripted step, not a remembered one.
 
+**Tables are further along than "unavailable" (2026-08-27T17:40Z).** Tested
+rather than assumed [src:TABLES-RECOVERABLE-2026-08-27]:
+
+- **Born-digital tables** — `pdfplumber`'s default line-based strategy found
+  nothing on a table ruled only horizontally, but with both strategies set to
+  `"text"` it returned the correct grid. Imperfectly: cells clip at the
+  inferred column boundary (`18 months` came back `18 mont`) and phantom empty
+  rows appear. Usable with validation; not usable on trust.
+- **Scanned tables** — tesseract's `tsv` output carries word-level geometry,
+  and on the rasterised page the left coordinates clustered cleanly at three
+  column positions and the tops at three row positions. Reconstruction is
+  therefore possible, but it means clustering words into row and column bands
+  yourself; nothing off the shelf does it.
+
+**What is genuinely still missing** is narrow and worth naming precisely: a
+*trained* table-structure model of TableFormer's kind, for merged cells,
+spanning headers and complex or rotated layouts. That is the whole of the
+residue — not "PDF parsing", not "tables".
+
 **Resolves fully when:** Hugging Face is reachable, or a table-structure model
 is obtainable from an allowlisted host.
 
@@ -253,6 +319,29 @@ division becomes evident.
 **Interim convention:** doctrine and shared tooling live in `claude`;
 `claude-ai` carries a pointer to it. This is a working decision made to keep
 four concurrent sessions from diverging — not a discovered fact.
+
+**Practice has now converged, which is not the same as resolved
+(2026-08-27T17:35Z).** The `claude-ai` remote carries 10 branches. **Eight hold
+exactly one file, `CLAUDE.md`** — the pointer — so eight sessions independently
+arrived at the interim convention without coordinating
+[src:CLAUDE-AI-SPLIT-2026-08-27]. That promotes it from one session's working
+decision to established practice.
+
+It does **not** close this entry, and the reason is the warning this register
+already carries: where content landed says which session put it there, never
+what the owner wants. Eight sessions agreeing is eight sessions making the same
+convenient choice.
+
+**Two branches diverge, and one is not a rounding error.**
+`rag-system-data-pipeline` holds 14 files there including CI and an
+`install.sh`; `research-skill-mastery` holds **95**, a full `.claude/` tree of
+agents and commands [src:CLAUDE-AI-SPLIT-2026-08-27]. That is a second copy of
+the doctrine layer in the repository the doctrine explicitly says must not hold
+one — the "two copies of a rule set become two different rule sets" failure,
+already in progress rather than hypothetical.
+
+**Resolves when:** the owner states the split. Until then the divergence should
+be surfaced to them, not silently normalised in either direction.
 
 ---
 

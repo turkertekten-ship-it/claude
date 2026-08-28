@@ -44,6 +44,7 @@ at the commit named; none was inferred from its name. [src:FLEET-SKILLS-2026-08-
 | `prompt-forge` (+ `prompt-critic`, `/prompt`, `/prompt-audit`) | `session-y42cyg@8b59cd6` | A seven-slot prompt specification with a linter and an adversarial reading pass — treats a bad result as a specification failure, not a model failure. |
 | `workbench` (+ `blind-judge`, `/ab`, `/wb-doctor`) | `code-playground-parity-xw0snj@2794c4a` | Blind pairwise comparison of prompt or config variants, with significance. Ships a 10-module Python package, so it does not travel as a lone `SKILL.md`. |
 | `/ultrareview` | `reverse-engineer-chat-setup-husv9h@abed75a` | The closing gate: re-verify provenance, tests and the diff before work is called finished. |
+| **`mafirm/` — 11 skills, 5 agents, 9 commands, in Turkish** | `blind-testing-ooda-5o3s67` | A cross-border M&A practice: `spa-inceleme` (SPA review), `rekabet-esigi` (competition thresholds), `kapanis-listesi` (closing checklist), `kosul-takibi` (conditions tracking), `kurul-notu` (board memo), `madde-karsilastirma` (clause comparison), `yaptirim-taramasi` (sanctions screening), `once-arastir` (research first), with agents `madde-avcisi` (clause hunter), `esik-denetcisi` (threshold auditor) and `emsal-bulucu` (precedent finder). [src:BOOK-IDENTIFIED-2026-08-27] |
 
 **Why they are listed rather than merged.** All four descend from the doctrine
 root, so they *can* be merged [src:FLEET-BRANCHES-2026-08-27] — a trial merge
@@ -74,6 +75,7 @@ Match the work in hand to the left column.
 | reviewing retrieval code before calling a stage done | `rag-audit` | Reads the code that is present rather than the design that was intended. |
 | giving another session programmatic access to the index | `mcp-builder` | Sibling sessions run in separate containers and cannot read each other. |
 | ingesting a contract or deal document | `chunking-advisor`, Legal/Contracts branch | The owner's own corpus is a numbered transaction set; clauses are the unit of meaning, not sections. See [docs/design/chunking.md](docs/design/chunking.md). |
+| reviewing an SPA, screening sanctions, tracking closing conditions, checking a Turkish competition threshold | the `mafirm/` suite *(fleet)* | Purpose-built for this owner's actual practice, in the language they practise in. Its threshold work needs human confirmation — the Turkish regulators are unreachable from here. [src:TR-REGULATORS-BLOCKED-2026-08-27] |
 | writing an ADR, a spec, or a sectioned guide | `doc-coauthoring` | Structured co-authoring rather than a wall of generated prose. |
 | setting up how a task will be worked, or about to trust unchecked output | `cherny` *(fleet)* | Builds the check before the work, so "it looks done" stops being the completion signal. |
 | writing or rewriting any prompt, or briefing a subagent | `prompt-forge` *(fleet)* | Most disappointing output is a specification failure; this makes the gaps visible instead of guessed. |

@@ -134,7 +134,9 @@ Two constraints follow that the rest of this document does not carry:
   |---|---|
   | born-digital PDF | `pypdf`, or `pdftotext` |
   | scanned PDF | `pdftoppm` → `tesseract` |
-  | tables, reading order | **still unavailable** — this is what TableFormer was for |
+  | born-digital tables | `pdfplumber`, both strategies set to `"text"` — correct grid, but cells clip at inferred boundaries and phantom empty rows appear, so validate rather than trust [src:TABLES-RECOVERABLE-2026-08-27] |
+  | scanned tables | reconstructible from `tesseract --tsv` word boxes, which cluster cleanly by column and row — but you write the clustering [src:TABLES-RECOVERABLE-2026-08-27] |
+  | merged cells, spanning headers, rotated layouts | **still unavailable** — this, precisely, is what TableFormer was for |
 
   The honest sequencing, then: extract born-digital text directly, fall back to
   rasterise-and-OCR when extraction returns empty, and **never let an empty
