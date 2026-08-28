@@ -118,6 +118,8 @@ python3 "$S/ks_av_anma.py"; topla "AV · anma/tanım sınıfı taraması" $?
 echo
 python3 "$S/ks_aw_alinti.py"; topla "AW · kitap alıntılarının doğruluğu" $?
 echo
+python3 "$S/ks_ax_yapi.py"; topla "AX · kitap yapısı iddiaları" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** kırk altı çalıştırılabilir takım — **359
+**Yamalı hâlde sistem çalışıyor:** kırk yedi çalıştırılabilir takım — **364
 vaka, 27 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15 → **27/27** (mutasyon kümesi otuz
 sekizinci turda on beşten yirmi yediye çıkarıldı: 26 kontrolün dokuzu hiç
@@ -2414,6 +2414,48 @@ dönüşmediğini sağlıyor: listede olup da kitapta **geçen** bir cümle kır
 verir. Ve kitap kaynağı bulunamazsa AW sessizce geçmez, **kırmızı** olur —
 doğrulanamayan bir alıntı doğrulanmış sayılamaz.
 
+### Sayılar doğru çıktı — ve doğrulanmış olmak sınanmamış olmaktan farklıdır
+
+Kırk birinci tur raporun **alıntılarını** kitaba karşı sınadı ve dört yanlış
+buldu. Kardeş eksen sınanmamıştı: raporun kitabın **yapısı** hakkındaki
+**sayısal** iddiaları. Rapor sürekli sayı veriyor ve bulguların ağırlığı bu
+sayılara asılı.
+
+| iddia | kitapta ölçülen | sonuç |
+|---|---|---|
+| §16'nın **on bir** kontrolü | 11 *(imza şablonu hariç)* | ✓ |
+| §18'in **dokuz** sınırı | 9 numaralı madde | ✓ |
+| §12 **dört** kapı kuruyor | `kapsam · kanit · sir · guncellik` + metinde "dört kapı" | ✓ |
+| §14 beşinciyi ekliyor, **yedi** vaka | *"…diğer dördün yanına eklenir ve `_selftest` şu **yedi** vakayla genişletilir"* | ✓ |
+
+**Dördü de doğru.** Bu takım bir kusur bulmadı; bir iddiayı **doğruladı** ve
+doğrulamayı kalıcı hâle getirdi. İkisi aynı şey değil — kırk birinci tur tam
+olarak bunu gösterdi: o güne kadar alıntılar da "doğru sanılıyordu".
+
+İki bölüm başlığı da yerini buldu: §18 kitapta *"Bu sistemin bilerek
+yapmadıkları"*, §19 ise *"İlk dosya"* (*"Denetim yeşile döndükten sonra bir
+kez çalıştırılır"*). Rapor onlara kendi kısa adlarıyla atıfta bulunuyor;
+numaralar doğru, adlar parafraz. AX-05 artık raporun andığı **her** bölüm
+numarasının kitapta gerçekten bir bölüm olduğunu sınıyor.
+
+### Ve sayarken üç kez kendi ölçütüm yanıldı
+
+| ölçüt hatası | ne oldu |
+|---|---|
+| `kontrol "` sayımı **12** verdi | birincisi fonksiyonun **imza yorumuydu** (`kontrol "<ad>" "<komut>"`) — şablonu kontrol saymak |
+| §18 maddeleri **10** çıktı | bölüm **başlığı** da `18.` ile başlıyor ve madde sanıldı |
+| "N kontrol" kalıbı **26** buldu | o benim **yamalı** denetimimin sayısı, kitabınki değil |
+
+Üçü de tek bir şeyin türevi: **tanım ile örneği, başlık ile maddeyi, kendi
+sistemim ile kitabı karıştırmak.** Kırkıncı turun "anmak tanımlamak
+değildir" sınıfının sayı tarafındaki hâli.
+
+Ve bir dördüncüsü mutasyonda çıktı: ölçüt **ilk** eşleşmeyi alıyordu, oysa
+aynı iddia iki teslimatta iki kez geçiyor ve biri **satır kırılmasıyla**
+bölünmüştü. Mutasyon birini bozduğunda ölçüt ötekini bulup yeşil kalıyordu.
+Artık **tüm** eşleşmelerin aynı sayıyı söylemesi isteniyor — iki teslimat
+birbirinden ayrışırsa da kırmızı verir.
+
 ---
 
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
@@ -2540,6 +2582,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | AU · epilog kontrollerinin sınaması | *dört epilog kontrolü hiç sınanmamıştı* | **temiz** — saf fonksiyona çevrildi, 7 vaka 32 ms |
 | AV · anma/tanım sınıfı taraması | *iki ölçüt yorumla/düzyazıyla tatmin oluyordu* | **temiz** — ikisi de koda bağlandı, sınıf taranıyor |
 | AW · kitap alıntılarının doğruluğu | *dört alıntı yanlış; biri kitaba ait olmayan bir cümleyi kitaba mal ediyordu* | **temiz** — düzeltildi, 13 alıntı doğrulandı |
+| AX · kitap yapısı iddiaları | *sayısal iddialar hiç sınanmamıştı* | **temiz** — dördü de doğru çıktı, doğrulama kalıcı |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -2598,7 +2641,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 ### Nasıl yeniden koşulur
 ```
 ./sinama/hepsi.sh                 # 34 çalıştırılabilir takım:
-                                  #   359 vaka + 27 mutasyon (D)
+                                  #   364 vaka + 27 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -2685,9 +2728,10 @@ Dokuz takım, 96 vaka:
 | AU | **Epilog kontrollerinin sınaması** — koşumu bilen katman nasıl sınanır | §16, §12 |
 | AV | **Anma/tanım sınıfı taraması** — ölçüt kodu mu, kodu anlatan cümleyi mi ölçüyor | §12, §16 |
 | AW | **Kitap alıntılarının doğruluğu** — raporun kitaba atfettiği her cümle kitapta var mı | §1, §13.3, §14 |
+| AX | **Kitap yapısı iddiaları** — raporun verdiği sayılar kitapla uyuşuyor mu | §12, §14, §16, §18 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**359 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**364 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)
