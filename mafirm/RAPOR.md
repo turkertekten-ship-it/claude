@@ -6,7 +6,7 @@
 > kurulum değişirse `sinama/hepsi.sh` yeniden koşulmalıdır: 0 SİNYAL,
 > raporun hâlâ ölçtüğü sistemi anlattığının kanıtıdır.
 
-Sürüm 1.0 · 2026-08-27 · OODA döngüsü: gözlem → yönelim → karar → eylem → döngü
+Sürüm 1.0 · 2026-08-27 · OODA (gözlem → yönelim → karar → eylem → döngü) döngüsü
 
 ## Cevap
 
@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** elli bir çalıştırılabilir takım — **382
+**Yamalı hâlde sistem çalışıyor:** elli iki çalıştırılabilir takım — **387
 vaka, 27 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15 → **27/27** (mutasyon kümesi otuz
 sekizinci turda on beşten yirmi yediye çıkarıldı: 26 kontrolün dokuzu hiç
@@ -96,7 +96,8 @@ Bu, raporun en önemli bulgusu ve yalnızca üretim yolunu sınayarak görülüy
 
 `kapi_arastirma`, çıktının `^Kontrol edildi:` satırı taşımasını istiyor.
 Öz-sınama fonksiyona ham Python dizesi veriyor ve `re.M` ile `^` gerçek satır
-başına oturuyor: geçiyor. Gerçek kanca ise stdin'den JSON okuyor ve kitabın
+başına oturuyor: geçiyor. Gerçek kanca ise stdin'den JSON (programlar arasında veri taşıyan
+metin biçimi) okuyor ve kitabın
 kodu metni şöyle düzleştiriyor:
 
 ```python
@@ -145,7 +146,7 @@ disari = arac in ("WebSearch", "WebFetch") or arac.startswith("mcp__")
 
 Bash yok. Ve `settings.json` matcher'ı `"WebSearch|WebFetch|Write|Edit"` —
 **kanca Bash'te hiç çalışmıyor.** Oysa kitabın kendisi §14'te `curl` ile GitHub
-API'sine gitmeyi, §2'de `git`i, §13'te `pip install`i ve üç dış aracı Bash
+API'sine (bir programın başka programlara açtığı erişim arayüzü) gitmeyi, §2'de `git`i, §13'te `pip install`i ve üç dış aracı Bash
 üzerinden öneriyor.
 
 Ölçüldü:
@@ -274,7 +275,8 @@ modellenmiyor (A-15).
 ### §13 · Depolar — 16/16 çözüldü
 Hiçbir depo uydurma değil. Dört maddi bulgu:
 - **courtlistener lisansı yanlış.** Kitap "açık (depoya bakın)"; gerçek
-  **AGPL-3.0-or-later**. §13.7 tam da bu soruyu sorup PyMuPDF'i AGPL diye
+  **AGPL** (ağ üzerinden hizmet verse bile kullanıcıya kendi kaynak kodunu
+açmayı zorunlu kılan bulaşıcı açık kaynak lisansı) **3.0 veya sonrası**. §13.7 tam da bu soruyu sorup PyMuPDF'i AGPL diye
   eliyor — aynı listede aynı lisanslı ikinci bir depo "açık" diye geçiyor.
 - **diff-match-patch 2024-08-05'te arşivlendi**, kitap yazmıyor.
 - **opensanctions verisi CC BY-NC 4.0** (kod MIT). NC = ticari kullanım dışı;
@@ -288,7 +290,7 @@ Hiçbir depo uydurma değil. Dört maddi bulgu:
 onlara yönleniyor.
 
 ### §17 · Akademik kaynaklar — künye sağlam, aktarım hatalı
-DOI, dergi, cilt, sayı, yıl, yazarlar, tasarım, örneklem, görev listesi, kol
+DOI (bir akademik yayının kalıcı kimlik numarası), dergi, cilt, sayı, yıl, yazarlar, tasarım, örneklem, görev listesi, kol
 yapısı: hepsi doğru. **Kitabın savını taşıyan dört olumsuz bulgunun dördü de
 doğrulandı**, akıl yürütme modelinin insan kontrol kolundan daha fazla
 uydurduğu (11'e 4) dâhil. Üç aktarım hatası:
@@ -306,10 +308,10 @@ DEĞİLDİ ve yazarların kendi okuması erişim ile akıl yürütmeyi ödünle�
 tamamlayıcı sayıyor. Çalışma bir otomatik kapıyı hiç sınamadı.
 
 ### §5 · Mevzuat — üç bulgu, ikisi bildirime tabiliği değiştirir
-**Bu oturumda dört Türk birincil kaynağı alan adına HTTPS, kuruluş
-egress politikasıyla CONNECT aşamasında 403 ile reddedildi** (CONNECT: bir
-vekil üzerinden şifreli bağlantı açma isteği; ret, bağlantı kurulmadan
-önce orada verildi) (kanıt: `hafiza/egress-kaniti.md`): `mevzuat.gov.tr`,
+**Bu oturumda dört Türk birincil kaynağı alan adına HTTPS (şifreli web bağlantısı
+protokolü), kuruluş
+egress politikasıyla CONNECT (bir vekil üzerinden şifreli bağlantı açma isteği; ret,
+bağlantı kurulmadan önce orada verildi) aşamasında 403 ile reddedildi** (kanıt: `hafiza/egress-kaniti.md`): `mevzuat.gov.tr`,
 `resmigazete.gov.tr`, `rekabet.gov.tr`, `spk.gov.tr` — hepsi reddedildi.
 Aşağıdakiler desteklenmiş yeniden kurgudur, birincil doğrulama değildir. (Kanalın
 güvenilmezliği ölçüldü: aynı SPK eşiği için dört sorguda %50, %90 ve %98 döndü.)
@@ -510,7 +512,8 @@ connect_rejected  www.spk.gov.tr:443         gateway answered 403 to CONNECT
 N takımı sekiz vakayla bunu denetliyor — ve iki kaçamağı özellikle kapatıyor:
 **çalışan kanal da yazılmalı** (WebSearch çalışıyor; döndürdüğü şey sayfa metni
 değil arama motoru özeti) ve **iddia fazla geniş yazılmamalı** ("hiçbir şeye
-erişilemedi" yanlış olurdu; GitHub MCP ile on altı depo çözüldü).
+erişilemedi" yanlış olurdu; GitHub MCP (modele dış araç bağlamayı
+standartlaştıran protokol) ile on altı depo çözüldü).
 
 Bu kanıt üç mevzuat bulgusunu **çözmüyor**. Yalnızca neden çözülemediğini
 doğrulanabilir kılıyor — ve N-08 raporun bunu çözdüğünü iddia etmediğini
@@ -581,7 +584,8 @@ kapısı (§6) bir **güvenlik denetimidir** ve güvenlik denetimi yalnızca iyi
 niyetli girdiyle sınanmaz. Bunu altı tur boyunca hiç sınamamıştım.
 
 Ve bu kuramsal bir tehdit modeli değil: üç yüzeyin üçü de **kaza olarak
-oluşur.** PDF ya da Word'den kopyala yapıştır rutin olarak yumuşak tire,
+oluşur.** PDF (taşınabilir belge biçimi) ya da Word'den
+kopyala yapıştır rutin olarak yumuşak tire,
 sıfır genişlikli karakter ve ayrışmış aksan üretir. Bir müvekkil kod adı veri
 odası belgesinden kopyalanıp bir web aramasına yapıştırıldığında kapının onu
 görmesi gerekir. Görmüyordu:
@@ -597,7 +601,8 @@ bulunmuştu: Python'un `İ`.lower() ayrışması. Kitap o kusuru düzeltmemişti
 ben düzelttim ama **sınıfı genellemedim** — tek bir örneği yamalayıp yüzeyin
 tamamını sınamadım. Altı tur sonra döndüm.
 
-Düzeltme yalnızca sır kapısında: biçim karakterlerini at, NFKC ile birleştir (Unicode'un uyumluluk normalleştirmesi: ayrışmış aksanları tek karaktere indirger),
+Düzeltme yalnızca sır kapısında: biçim karakterlerini at, NFKC (Unicode'un uyumluluk normalleştirmesi: ayrışmış aksanları tek
+karaktere indirger) ile birleştir,
 dar bir homoglif tablosunu — Latin harfe görsel olarak eşdeğer Kiril/Yunan harfleri — Latin'e katla. Diğer kapılarda uygulanmadı — aşırı
 normalleştirme yanlış pozitif üretir; ama **dışarı giden bir çağrıda fazla
 bloklamak, az bloklamaktan güvenlidir.**
@@ -901,7 +906,8 @@ kaçırma vakalarını kapatıyordum. Sonucu ölçmedim.
 
 Türkçede "yüzde" pay oranıdır, tazminat tavanıdır, sepettir, oy çoğunluğudur,
 earn-out payıdır. Genişletilmiş desen bunların **hepsini bir mevzuat eşiği**
-sayıyordu. Yani **her SPA incelemesi ve her ortaklık yapısı notu** üç kapıyı
+sayıyordu. Yani **her SPA (Share Purchase Agreement: pay alım satım
+sözleşmesi) incelemesi ve her ortaklık yapısı notu** üç kapıyı
 birden ateşliyordu: `kanit` dayanak istiyordu, `guncellik` doğrulama tarihi,
 `arastirma` "Kontrol edildi" satırı — doğrulanacak hiçbir mevzuat olmadığı
 hâlde.
@@ -1319,7 +1325,7 @@ makinede aynı cevabı alıyor mu"* demedi.
 Bu sistem için soru kozmetik değil. Kitap §6'da **sınır ötesi** bir pratik
 kuruyor: aynı dosyalar İstanbul, Londra, New York ve Singapur arasında dolaşır.
 
-**Bulgu.** Bugün İstanbul'da damgalanan bir `Doğrulama:` satırı, UTC−11'deki
+**Bulgu.** Bugün İstanbul'da damgalanan bir `Doğrulama:` satırı, UTC (eşgüdümlü evrensel zaman) ölçeğinde −11 saat dilimindeki
 bir masada **"GELECEK tarihli (1 gün)"** diye bloklanıyordu. Belge doğru, kapı
 yanlış — ve §14'e göre böyle bir kapı kapatılır.
 
@@ -1410,7 +1416,8 @@ rastladığım örnek düzeltilmişti:
 - AD-01 — ünlü uyumu: *adımLI* ama *bölümLÜ*; desen ikincisini atlıyordu
 - AA — takım adı **tek harf** varsayımı **üç ayrı bileşende** gömülüydü
 
-Dördü de aynı kökten: **Türkçe metni ASCII sezgisiyle okumak.** Ve dördü de
+Dördü de aynı kökten: **Türkçe metni ASCII (aksansız temel Latin
+karakter kümesi) sezgisiyle okumak.** Ve dördü de
 ancak o örneğe çarptığımda görüldü. Yirmi iki tur boyunca sınıfın kendisini
 hiç taramadım. AE taradı — ve **üç kusur daha** çıktı.
 
@@ -1725,7 +1732,8 @@ bağımlılığının **tek kanalı dosya sistemidir**. Ölçüldü: o kanal aç
 **B-34 canlı ad kaydını yok ediyordu.** Vaka, kural 6'nın gerçek kişi ayağını
 sınamak için `hafiza/muvekkil-adlari.txt` dosyasına bir fixture yazıyor,
 aslını yalnızca bir DEĞİŞKENDE tutuyor ve `finally` ile geri koyuyordu.
-`finally` SIGKILL'de koşmaz. Süreç o pencerede öldürüldü: dosyanın 274 baytı
+`finally` SIGKILL'de (süreci hiç uyarmadan anında
+sonlandıran işletim sistemi sinyali) koşmaz. Süreç o pencerede öldürüldü: dosyanın 274 baytı
 gitti. Dosya `.gitignore`'da olduğu için `git checkout` ile dönülemedi —
 **tek kopya ölen sürecin belleğindeydi.**
 
@@ -1853,7 +1861,8 @@ söylüyor.
    kırıyor**. Desen eşleşmedi, vaka yeşile döndü. Yirmi dokuzuncu turda AI-02
    aynı tuzağı yakalamıştı: satır kırılması bir metnin anlamını değiştirmez,
    ölçütün ona duyarlı olması bir **ölçüm kusurudur**.
-2. **Sonra ölçüt yorumla tatmin oluyordu.** Yamayı açıklayan HTML yorumu
+2. **Sonra ölçüt yorumla tatmin oluyordu.** Yamayı açıklayan HTML (web sayfalarının
+işaretleme dili) yorumu
    `dosyalar/` sözcüğünü içeriyordu; mutasyonda prosedürün tamamı silinse
    bile vaka yeşil kalıyordu — yani ölçüt **prosedürü değil, prosedürden söz
    eden bir cümleyi** ölçüyordu. AF-02'nin sınıfı. Yorumlar ölçüm dışına
@@ -2537,7 +2546,7 @@ güncellenmiyor.** Beklenen kümeler güncellenmiyordu (birinci bulgu),
 
 Bu tur şu gözlemle açıldı: *"ortam engellenen egress için bir çare
 belgeliyor ve ben onu hiç okumadım."* **Yanlıştı.** `hafiza/egress-kaniti.md`
-vekil durum uç noktasını zaten kaydediyordu ve README'ye iki kez atıf
+vekil durum uç noktasını zaten kaydediyordu ve README'ye (bir deponun ana açıklama dosyası) iki kez atıf
 yapıyordu.
 
 Yirmi sekizinci turda WebSearch satırını *"işe yaramaz"* diye yanlış
@@ -2548,7 +2557,9 @@ karşılığıdır. Üçüncü kez.
 
 **Ama turda gerçek bir kazanım da var.** Reddin anlamı şimdiye kadar tek bir
 yetkiye dayanıyordu: aracın kendi ret iletisi. Ortamın **kendi belgesi**
-aynı şeyi bağımsız olarak söylüyor (`/root/.ccr/README.md`, satır 18-19):
+aynı şeyi bağımsız olarak söylüyor — TLS (bağlantıyı şifreleyen güvenlik
+katmanı) doğrulamasını kapatmayı ve vekili devre dışı bırakmayı yasaklayarak
+(`/root/.ccr/README.md`, satır 18-19):
 
 > *"Never disable TLS verification, never unset HTTPS_PROXY, and do not retry
 > organization policy denials (403/407) — report them instead."*
@@ -2681,13 +2692,59 @@ içinde kırmızı, koşumdan sonra yeşil görünüyordu. Onuncu ve on altınc�
 turların katman kuralı — *denetim, kendini denetleyen takımı denetleyemez* —
 **üçüncü kez**, bu kez veri yoluyla çiğnenmişti. Sayı artık durağan ölçülüyor:
 `hepsi.sh`'e bağlı her takımın kendi `BEKLENEN_VAKA` beyanı toplanıyor
-— bugün toplam 382 vaka — ve her takımın kendi sıfırıncı vakası o beyanın
+— bugün toplam 387 vaka — ve her takımın kendi sıfırıncı vakası o beyanın
 gerçeğe eşit olduğunu ayrıca güvenceye alıyor. Bozulmuş bir `SAYIM.txt` ile BB'nin çıktısı
 **birebir aynı** kalıyor; bağımsızlık ölçülerek gösterildi.
 
 Turun kalıcı kuralı: **bir sayı ya bugün ölçülebilen değere eşittir, ya da
 hangi koşuma ait olduğunu söyler.** İndissiz bir tarihsel sayı, güncel bir
 iddiadan ayırt edilemez — ve okuyucu ayırt etmek zorunda bırakılamaz.
+
+### Üç terim soruldu, on yedi terim vardı
+
+§10 açık: *"Piyasada karşılığı yerleşmiş İngilizce terimler korunur ve **ilk
+geçtiklerinde açıklanır**."* R-06 bunu kırk yedi tur boyunca sınadı ve her
+turda "temiz" dedi. Sınadığı şey **elle yazılmış üç terimdi**: NFKC, CONNECT,
+homoglif. Yani ölçüt yalnızca açıklandığını zaten bildiği terimleri soruyordu.
+
+Raporun düzyazısında **on yedi** açıklanmamış terim vardı. Bu, "elle yazılan
+liste ölçtüğü şeyden sürüklenir" sınıfının **üçüncü** örneğidir — P takımının
+teslimat listesi ve M-03'ün önek listesinden sonra — ve yirmi yedinci turun
+kuralı gereği sınıf artık duran bir sağlamayla kapanıyor: BC listeyi
+**keşfe** çevirdi.
+
+Keşfin tek zor yanı Türkçeydi. Rapor vurgu için büyük harf kullanıyor
+(DAYANAK, KURULUMA), İngilizce terimler de büyük harf. Ayıran ölçüt basit:
+**küçük harfli hâli belgede sıradan bir Türkçe sözcük olarak geçiyorsa, o
+büyük harf vurgudur.** `dayanak` geçiyor, `nfkc` geçmiyor.
+
+**En ağır bulgu AGPL.** §13'ün engelleyici lisans bulgusunun **anlamı** bu
+kısaltmayı bilmeye bağlıydı: bir hukukçu okuyucu için, ağ üzerinden hizmet
+verse bile kaynak kodu açmayı zorunlu kılan bulaşıcı bir lisans ile izin
+verici bir lisans arasındaki fark, bulgunun tamamıdır. Rapor bunu hiç
+açıklamamıştı. Şimdi on yedisi de ilk geçtikleri yerde açıklanıyor.
+
+**Ölçüt üç kez yanıldı, biri öğretici.** Gevşetilmiş bir sürüm — "açıklama
+cümlenin içinde, terimden sonraki on iki sözcükte olsun" — **yedi yanlış
+geçiş** verdi: DOI bir virgüllü listenin iki noktasıyla, HTTPS yanındaki
+CONNECT parantezinin içinden, UTC ilgisiz bir *"(1 gün)"* ile "açıklanmış"
+sayıldı. **Noktalama, anlamın vekili değildir.** Bu yüzden ölçüt
+gevşetilmedi, **belge sıkılaştırıldı**: açıklama terimin hemen ardında durur.
+Ölçütün tahmin etmesi gereken hiçbir şey kalmadı.
+
+Öteki ikisi dedektörün kendi kusuruydu: keşif sözcük sınırı kullanırken ölçüm
+düz alt dizi araması yapıyordu, bu yüzden bir kısaltmanın ilk geçişi başka
+bir sözcüğün **içinde** bulunuyordu — ikisi iki farklı şeyi ölçüyordu. Ve
+markdown vurgusunu soymak, alt çizgili bir ortam değişkeni adından
+**var olmayan yeni bir terim uydurdu**.
+
+**Ve mutasyon sınamasında yeni bir geçersizlik biçimi çıktı.** Keşfi köreltme
+mutasyonu ilk denemede "kaçtı" göründü. Kaçmamıştı: **mutasyon hiç
+inmemişti.** İniş kanıtı olarak dosyaya ayrıca eklenen bir işaret aranıyordu
+ve o işaret mutasyondan **bağımsız** olarak yerleşmişti. Otuzuncu turun
+kuralı bir madde kazandı: *bir mutasyon indiği kanıtlanmadan okunamaz* — ve
+**kanıt, mutasyonun kendisi olmalıdır; yanına konan bir işaret değil.**
+Kalıp doğrudan doğrulanınca vaka gerektiği gibi kırmızıya döndü.
 
 ---
 
@@ -2820,6 +2877,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | AZ · kitaba sadık kopyaların sadakati | *"sadık" sıfatı hiç sınanmamıştı* | **temiz** — 258/262 birebir, kalan dördü beyanlı |
 | BA · kayıt ile iddianın çelişmesi | *kaydın "çalışıyor" dediğini teslimat "işe yaramaz" diye anmıştı — üç kez* | **temiz** — bugün çelişki yok, muafiyet beyanlı |
 | BB · sayıların zaman indisi | *kırk yedinci turda görüldü, "Dokuz takım, 96 vaka" başlığı 53 satırlık tablonun üstünde duruyordu* | **temiz** — dört sürüklenmiş sayı düzeltildi |
+| BC · §10 terim açıklaması | *R-06 üç terimlik elle yazılmış listeyi soruyordu; düzyazıda on yedi açıklanmamış terim vardı* | **temiz** — on yedisi de ilk geçişte açıklandı |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -2877,8 +2935,8 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # 51 çalıştırılabilir takım:
-                                  #   382 vaka + 27 mutasyon (D)
+./sinama/hepsi.sh                 # 52 çalıştırılabilir takım:
+                                  #   387 vaka + 27 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -2912,7 +2970,7 @@ vakalardır ve hepsi geçer. Kör sınama o aklın dışında kalanı arar: bir
 hukukçunun gerçekten yazacağı cümleyi, kancanın gerçekten göreceği veriyi,
 bozulduğunda denetimin gerçekten yakalayıp yakalamadığını.
 
-Elli dört takım, 382 vaka:
+Elli beş takım, 387 vaka:
 
 | Takım | Neyi sınar | Kaynağı |
 |---|---|---|
@@ -2970,9 +3028,10 @@ Elli dört takım, 382 vaka:
 | AZ | **Kitaba sadık kopyaların sadakati** — raporun "önce" tabanı gerçekten kitabın metni mi | §12, §14, §16 |
 | BA | **Kayıt–iddia çelişkisi** — kayıt bir şeyin çalıştığını/doğrulandığını söylerken teslimat onu olumsuzluyor mu | §4, §17, §19 |
 | BB | **Sayıların zaman indisi** — teslimattaki her toplam ya bugün ölçülene eşit ya da hangi koşuma ait olduğunu söylüyor mu | §12, §19 |
+| BC | **§10 terim açıklaması** — düzyazıdaki her İngilizce/teknik terim ilk geçtiğinde açıklanmış mı (liste değil, keşif) | §10 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**382 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**387 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)

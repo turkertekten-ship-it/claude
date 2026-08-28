@@ -128,6 +128,8 @@ python3 "$S/ks_ba_kayit_celiski.py"; topla "BA · kayıt ile iddianın çelişme
 echo
 python3 "$S/ks_bb_zaman_indisi.py"; topla "BB · sayıların zaman indisi" $?
 echo
+python3 "$S/ks_bc_terim.py"; topla "BC · §10 terim açıklaması (keşifle)" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"
