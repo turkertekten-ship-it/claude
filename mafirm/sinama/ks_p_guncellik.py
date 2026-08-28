@@ -41,12 +41,47 @@ SINIFLAR = {
     "KİTAP SÜRÜMÜNE BAĞLI": None,
 }
 
-TESLIMATLAR = [
-    "RAPOR.md", "KITAP-ERRATA.md",
-    "sinama/ks_g_depolar.md", "sinama/ks_h_kaynaklar.md",
-    "sinama/ks_i_mevzuat.md",
-    "hafiza/egress-kaniti.md", "hafiza/dogrulama-bulgulari.md",
-]
+# [AT-02 · otuz sekizinci tur] Bu liste ELLE YAZILMIŞTI ve bayatladı.
+# Otuz dördüncü turda `hafiza/arac-katalogu.md` teslimatını ekledim; listeye
+# koymadım. Ölçüldü: o dosyadan doğrulama tarihini silmek denetimi kırmızıya
+# ÇEVİRMİYORDU — yani dört tur boyunca güncellik kuralının dışında durdu.
+# Bu, incelemenin ikinci sınıfıdır: elle yazılmış sayı ve listeler ölçtükleri
+# şeyden ayrışır. Kendi aparatımda, kendi teslimatımla.
+#
+# Liste TERSİNE ÇEVRİLDİ: teslimatlar KEŞFEDİLİR, muafiyetler beyan edilir.
+# Muafiyet listesi küçük ve durağandır; teslimat listesi büyüyen taraftır.
+# Yeni bir teslimat eklendiğinde artık hiçbir şey yapılması gerekmez — kural
+# kendiliğinden ona da uygular.
+MUAF = {
+    # kitabın kendi eseri, benim teslimatım değil
+    "CLAUDE.md": "işletim sözleşmesi — kitabın metni",
+    # canlı kayıt ve şablonu: iddia taşımaz, veri taşır
+    "hafiza/cikar-catismasi.md": "canlı çatışma kaydı (kural 6, izlenmez)",
+    "hafiza/cikar-catismasi.ornek.md": "şablon",
+    "hafiza/muvekkil-adlari.ornek.txt": "şablon",
+}
+
+
+def _kesfet():
+    """Teslimat = kök, hafiza/ ve sinama/ altındaki .md dosyaları, muaflar hariç."""
+    bulunan = []
+    for d in ("", "hafiza", "sinama"):
+        tam = os.path.join(_KOK_COZ, d) if d else _KOK_COZ
+        try:
+            adlar = sorted(os.listdir(tam))
+        except OSError:
+            continue
+        for ad in adlar:
+            if not ad.endswith(".md"):
+                continue
+            rel = "%s/%s" % (d, ad) if d else ad
+            if rel in MUAF:
+                continue
+            bulunan.append(rel)
+    return bulunan
+
+
+TESLIMATLAR = _kesfet()
 
 BASLIK = re.compile(
     r"Doğrulama:\s*(\d{4}-\d{2}-\d{2})\s*·\s*Bozulma sınıfı:\s*([A-ZÇĞİÖŞÜ ]+?)\*\*")

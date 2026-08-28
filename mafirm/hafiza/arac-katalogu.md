@@ -1,7 +1,10 @@
 # Araç kataloğu — §13'ün kararları, kurulumda
 
-> **Doğrulama: 2026-08-28 · Bozulma sınıfı: HIZLI (lisans, arşiv ve bakım
-> durumu haftalar içinde değişebilir)**
+> **Doğrulama: 2026-08-28 · Bozulma sınıfı: ALTI AY**
+>
+> §3'ün kuralı. Ama dikkat: bu dosyadaki alanlar altı ayda BİR BOZULMAZ —
+> arşiv durumu bir günde değişebilir, lisans bir sürümde. Altı ay, ötesinde
+> dayanılmaması gereken ÜST SINIRDIR, tazeliğin garantisi değil.
 
 [AP-01 · otuz dördüncü tur] Kitabın §13'ü altı deposu için lisans, yıldız,
 son güncelleme ve bir **Karar** yazıyor — ama bu tablo kurulumda hiçbir dosya

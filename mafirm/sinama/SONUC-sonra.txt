@@ -1,5 +1,5 @@
 ###############################################################
-#  KÖR SINAMA TAKIMI — 2026-08-28T13:33:45Z
+#  KÖR SINAMA TAKIMI — 2026-08-28T13:56:09Z
 ###############################################################
 
 /root/mafirm/sinama/ks_a_esik.py:45: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
@@ -155,9 +155,21 @@ DENETİM OK
   YAKALADI  settings.json kancasını kaldır           
   YAKALADI  koltuk dosyalarının 13'ünü sil          
   YAKALADI  esik.py'yi tamamen boşalt                  
+  YAKALADI  üç uzmanlık birimini sil                 
+  YAKALADI  bir birimin INDEX.md'sini sil               
+  YAKALADI  koltuk kapısını sessizce kapat           
+  YAKALADI  matcher'dan Bash'i çıkar                  
+  YAKALADI  errata'ya uydurma vaka kimliği ekle        
+  YAKALADI  raporun beyan sayısını boz               
+  YAKALADI  tabloda anılmayan bir takım ekle          
+  YAKALADI  bir teslimattan doğrulama tarihini sil     
+  YAKALADI  kimlik yolunu .gitignore'dan çıkar        
+  YAKALADI  bir koltuktan kaynak beyanını sil         
+  YAKALADI  engelleyici bulgu işaretini sil            
+  YAKALADI  egress kanıtını boşalt                  
 
 -----------------------------------------------------------------------
-15 mutasyon · 15 yakalandı · 0 KAÇIRILDI
+27 mutasyon · 27 yakalandı · 0 KAÇIRILDI
 
 =======================================================================
 KÖR SINAMA E — kitabın doğrulama komutları vs kitabın beklenen değerleri
@@ -274,7 +286,7 @@ GEÇTİ K-15   koltuk kapısı yöntem dosyalarını bloklamıyor
 KÖR SINAMA L — çapraz referans bütünlüğü
 ================================================================================================
 GEÇTİ L-01   belgelerdeki her yol atfının hedefi var
-        61 atıf incelendi, kırık: yok
+        62 atıf incelendi, kırık: yok
 GEÇTİ L-02   her INDEX kendi yöntem dosyalarının hepsini anıyor
         anılmayan: yok
 GEÇTİ L-03   belgelerde sabit ~/mafirm yolu kalmamış
@@ -294,9 +306,9 @@ KÖR SINAMA M — errata ↔ sınama izlenebilirliği
 GEÇTİ M-01   her errata maddesi bir sınama vakasına atıf yapıyor
         65 madde · atıfsız 0: yok
 GEÇTİ M-02   atıf yapılan her vaka kimliği gerçekten tanımlı
-        401 tanımlı kimlik · uydurma dayanak: yok
+        407 tanımlı kimlik · uydurma dayanak: yok
 GEÇTİ M-03   [A] ve [B] maddelerinin atıfları gerçek vakalara bağlı
-        sadık koşumda kalan: 51 · tanımlı vaka: 330 · bağsız madde: yok
+        sadık koşumda kalan: 51 · tanımlı vaka: 336 · bağsız madde: yok
 GEÇTİ M-04   sadık sistemde kalan her vaka errata'da ya da raporda açıklanmış
         51 vaka kaldı · açıklanmamış: yok
 ------------------------------------------------------------------------------------------------
@@ -355,7 +367,7 @@ GEÇTİ O-17   normalleştirme kapının öz-sınamasını bozmadı
 KÖR SINAMA P — raporun kendi teslimatlarına güncellik kuralı
 ================================================================================================
 GEÇTİ P-01   her teslimat doğrulama tarihi VE bozulma sınıfı taşıyor
-        7 teslimat · eksik: yok
+        8 teslimat · eksik: yok
 GEÇTİ P-02   her bozulma sınıfı beyan edilmiş sözlükten
         bilinmeyen: yok
 GEÇTİ P-03   bayatlamış her teslimat bayatlığını AÇIKÇA yazıyor
@@ -602,39 +614,39 @@ GEÇTİ Z-08   denetim beyan edilen asgari kontrol sayısını taşıyor
 KÖR SINAMA AA — kapı arızalandığında hangi yöne düşüyor
 ================================================================================================
 GEÇTİ AA-01a    bozuk olay: bozuk JSON
-        çıkış 2 (49 ms)
+        çıkış 2 (30 ms)
 GEÇTİ AA-01b    bozuk olay: boş girdi
-        çıkış 2 (33 ms)
+        çıkış 2 (31 ms)
 GEÇTİ AA-01c    bozuk olay: tool_input yok
-        çıkış 0 (51 ms)
+        çıkış 0 (45 ms)
 GEÇTİ AA-01d    bozuk olay: tool_input dizge
-        çıkış 0 (50 ms)
+        çıkış 0 (31 ms)
 GEÇTİ AA-01e    bozuk olay: tool_input liste
-        çıkış 0 (48 ms)
+        çıkış 0 (32 ms)
 GEÇTİ AA-01f    bozuk olay: tool_name yok
-        çıkış 0 (36 ms)
+        çıkış 0 (32 ms)
 GEÇTİ AA-01g    bozuk olay: tool_name None
-        çıkış 0 (51 ms)
+        çıkış 0 (30 ms)
 GEÇTİ AA-01h    bozuk olay: içerik None
-        çıkış 0 (39 ms)
+        çıkış 0 (32 ms)
 GEÇTİ AA-01i    bozuk olay: içerik sayı
-        çıkış 0 (33 ms)
+        çıkış 0 (48 ms)
 GEÇTİ AA-01j    bozuk olay: derin iç içe
-        çıkış 0 (39 ms)
+        çıkış 0 (35 ms)
 GEÇTİ AA-01k    bozuk olay: JSON dizi (nesne değil)
-        çıkış 2 (33 ms)
+        çıkış 2 (38 ms)
 GEÇTİ AA-01l    bozuk olay: JSON null
-        çıkış 2 (34 ms)
+        çıkış 2 (36 ms)
 GEÇTİ AA-02     ayrıştırma SONRASI arıza politikası yazılı ve dışarıda kapalı
         kanca, ayrıştırma sonrası istisnayı yakalayıp dışarı kanalında 2 döndürüyor
 GEÇTİ AA-03-20  boşluksuz 20000 karakter bütçe içinde bitiyor
-        71 ms (bütçe 5000 ms) çıkış 0
+        77 ms (bütçe 5000 ms) çıkış 0
 GEÇTİ AA-03-80  boşluksuz 80000 karakter bütçe içinde bitiyor
-        215 ms (bütçe 5000 ms) çıkış 0
+        177 ms (bütçe 5000 ms) çıkış 0
 GEÇTİ AA-03-200 boşluksuz 200000 karakter bütçe içinde bitiyor
-        348 ms (bütçe 5000 ms) çıkış 0
+        354 ms (bütçe 5000 ms) çıkış 0
 GEÇTİ AA-04     400 KB gerçek düzyazı bütçe içinde
-        436 ms çıkış 0
+        413 ms çıkış 0
 GEÇTİ AA-05     dayanıklılık yaması doğruluğu bozmadı
         üç davranış vakası da beklendiği gibi
 ------------------------------------------------------------------------------------------------
@@ -696,7 +708,7 @@ GEÇTİ AD-06   riskli ajan dağıtan her komut sır sınırını yazıyor
 KÖR SINAMA AE — Türkçeyi ve kendi kimliklerini desenle okumak
 ================================================================================================
 GEÇTİ AE-01   vaka kimliği desenleri iki harfli öneki de görüyor
-        46 dosya tarandı, tek harf varsayan desen yok
+        47 dosya tarandı, tek harf varsayan desen yok
 GEÇTİ AE-02   Türkçe harf içeren her karakter sınıfı TAM
         yarım Türkçe alfabe taşıyan sınıf yok
 GEÇTİ AE-03   Türkçe metin üzerinde çıplak .lower() yok
@@ -712,15 +724,15 @@ GEÇTİ AE-05   Türkçe küçültme dört köşede de doğru
 KÖR SINAMA AF — aparatın kendi hakkındaki iddiaları
 ================================================================================================
 GEÇTİ AF-01   diskteki her takım hepsi.sh tarafından çağrılıyor
-        42 takımın hepsi çağrılıyor
+        43 takımın hepsi çağrılıyor
 GEÇTİ AF-02   her python takımı kaybolan vaka korumasını taşıyor
-        40 python takımının hepsi vaka sayısını beyan ediyor
+        41 python takımının hepsi vaka sayısını beyan ediyor
 GEÇTİ AF-03   beyan-koşum sağlaması tam günlüğü bilen yerde duruyor
         12 beyan epilogda tam günlükle sınanıyor
 GEÇTİ AF-04   belirti karşılaştırması tam günlüğü bilen yerde duruyor
         12/12 beyan belirti kaydı taşıyor, epilogda sınanıyor
 GEÇTİ AF-05   raporun ölçüm iddiaları canlı çıktıyla uyuşuyor
-        2 ölçüm iddiası canlı koşumla doğrulandı (denetim mutasyonu=15/15, V meşru korpus=17)
+        2 ölçüm iddiası canlı koşumla doğrulandı (denetim mutasyonu=27/27, V meşru korpus=17)
 ------------------------------------------------------------------------------------------------
 5 vaka · 5 geçti · 0 beklenen · 0 SİNYAL
 
@@ -870,6 +882,14 @@ GEÇTİ          AS-05  sınanan her kapı iki yönde de ayırt ediyor
 ----------------------------------------------------------------------------------------------------
 5 vaka · 5 geçti · 0 beklenen · 0 SİNYAL
 
+GEÇTİ          AT-01  denetimin her kontrolü bir mutasyonun beyan edilmiş hedefi         
+GEÇTİ          AT-02  teslimat listesi elle yazılmıyor, keşfediliyor                     
+GEÇTİ          AT-03  her mutasyon hedef kontrolünü beyan ediyor                         
+GEÇTİ          AT-04  D, mutasyonun hedef kontrolü kırmızıya çevirdiğini doğruluyor      
+GEÇTİ          AT-05  taban çizgisi yeşil değilse mutasyon sınaması geçersiz sayılıyor   
+----------------------------------------------------------------------------------------------------
+5 vaka · 5 geçti · 0 beklenen · 0 SİNYAL
+
 ###############################################################
 #  ÖZET
 ###############################################################
@@ -915,6 +935,7 @@ GEÇTİ          AS-05  sınanan her kapı iki yönde de ayırt ediyor
   AQ · yaptırım taramasının zaman ekseni temiz
   AR · onay durumu (yedinci kapı)      temiz
   AS · kapıların öz-sınama kapsaması temiz
+  AT · denetimin mutasyon kapsaması    temiz
   ------------------------------------------------------------
   TOPLAM SİNYAL                         0
 

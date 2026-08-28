@@ -110,6 +110,8 @@ python3 "$S/ks_ar_onay.py"; topla "AR · onay durumu (yedinci kapı)" $?
 echo
 python3 "$S/ks_as_kapi_kapsama.py"; topla "AS · kapıların öz-sınama kapsaması" $?
 echo
+python3 "$S/ks_at_denetim_kapsama.py"; topla "AT · denetimin mutasyon kapsaması" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

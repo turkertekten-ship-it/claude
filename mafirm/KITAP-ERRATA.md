@@ -792,6 +792,35 @@ yokluğun kanıtı değildir") kendisi düşer. *(G-07)*
 **[B] §15.2** izinsiz kapanış riskini "4054 sayılı Kanun madde 11"e
 dayandırıyor — bkz. §5.1, m.10 olmalı. *(I-03)*
 
+## §16 · Denetim — kontrollerin mutasyon kapsaması
+
+**[B] §16'nın kontrollerinin kaçının hiç başarısız olamayacağını ölçen bir
+mekanizma yok — ve raporun üçüncü bulgusu tam da bunun bir örneğidir.**
+Rapor kitabın on bir kontrolünden altısının hiçbir koşulda başarısız
+olamayacağını buldu. Ama o bir **örnektir**; **sınıf**, denetimin kendi
+kontrollerinin mutasyonla sınandığını hiçbir yerin sağlamamasıdır.
+
+Kanıtı yine bu incelemenin kendisidir. Yamalı denetim 26 kontrole çıktı;
+D takımının on beş mutasyonu tek tek koşularak her birinin **hangi**
+kontrolü HATA'ya düşürdüğü ölçüldü. Sonuç: **17 kontrol sınanıyordu, dokuzu
+hiç sınanmamıştı.** Doğru ifade "dokuz kontrol bozuk" değil, "dokuz kontrol
+**sınanmamış**"tır — üçünün çalıştığını bu oturumda gördüm, ama görmek
+sağlama değildir. *(AT-01)*
+
+**[B] Mutasyon sınaması "denetim kırmızıya döndü mü" diye soruyordu; "hangi
+kontrol kırmızıya döndü" diye değil.**
+Ölçüldü: "bütün becerileri sil" mutasyonu hem hedeflenen `beceriler (>=11)`
+kontrolünü hem de **alakasız** bir kontrolü kırmızıya çeviriyor. Yani hedef
+kontrol hiç çalışmasa bile mutasyon "yakalandı" sayılabilirdi — iddia ettiği
+şeye bakmayan bir kontrolün, ölçüm tarafındaki hâli. *(AT-04)*
+
+→CEVAP: YOK — cevabın "yamalı hâlde sistem çalışıyor" cümlesi kapsıyor:
+mutasyon kümesi 15'ten **27'ye** çıkarıldı (dokuz sınanmamış kontrol + üçü
+yalnızca yan etkiyle kırmızıya dönenler), her mutasyon artık **hedef
+kontrolünü beyan ediyor** ve D o kontrolün HATA verdiğini doğruluyor. AT-01
+her kontrolün bir mutasyon hedefi olduğunu her koşumda sorar; iki liste de
+kaynaktan türetilir, elle yazılmaz.
+
 ## §16 · Denetim
 
 **[A] On bir kontrolün altısı hiçbir koşulda başarısız olamaz.** Mutasyon

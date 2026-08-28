@@ -45,9 +45,11 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** kırk iki çalıştırılabilir takım — **337
-vaka, 15 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
-denetimin mutasyon yakalaması 4/15 → 15/15, birimler arası tutarlılık takımının
+**Yamalı hâlde sistem çalışıyor:** kırk üç çalıştırılabilir takım — **342
+vaka, 27 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
+denetimin mutasyon yakalaması 4/15 → 15/15 → **27/27** (mutasyon kümesi otuz
+sekizinci turda on beşten yirmi yediye çıkarıldı: 26 kontrolün dokuzu hiç
+sınanmıyordu), birimler arası tutarlılık takımının
 kendi mutasyon yakalaması 10/10. Ama **üç mevzuat bulgusu ile kitabın kendi içindeki bir çelişki açık kalır**
 ve bunlar kod düzeltmesiyle kapanmaz: ikisi bir işlemin bildirime tabi olup olmadığını değiştirir ve
 birincil kaynak erişimi olan bir insan gerektirir; dördüncüsü (§6'nın koşul
@@ -2167,6 +2169,75 @@ Ve AS-05 kapsamanın bir **sayım değil davranış** olduğunu tutuyor: her kap
 için ateşleyen ve susan birer metin verilir, kapı ikisini ayırmalı. Kapıyı
 fazla geniş yapan mutasyon AS-05'i kırmızıya çeviriyor.
 
+### Denetimin 26 kontrolünden dokuzu hiç sınanmamıştı
+
+Otuz yedinci tur "her kapının bir öz-sınama vakası olmalı" sınıfını kapattı.
+Aynı soru bir katman aşağıda hiç sorulmamıştı: **denetimin kontrollerinden
+kaçı mutasyonla sınanıyor?**
+
+Çıkarım yapılmadı, ölçüldü. D'nin on beş mutasyonu tek tek koşuldu ve her
+birinin **hangi** kontrolü HATA'ya düşürdüğü kaydedildi:
+
+| | |
+|---|---|
+| sınanan kontrol | **17** |
+| **hiç sınanmamış** | **9** |
+
+Sınanmayanlar: uzmanlık birimleri · her birimin INDEX.md'si · koltuk kapısı
+gerçekten bloklıyor · errata izlenebilir · olumsuz iddia kanıtlı · raporun
+beyan sayısı · her takım tabloda · teslimatlar tarih taşıyor · kimlik yolları
+`.gitignore`'da.
+
+Bu, raporun **üçüncü** bulgusunun ölçüm tarafındaki hâlidir — kitabın on bir
+kontrolünden altısının hiçbir koşulda başarısız olamaması. Kitabı o ölçütle
+eleştirirken kendi denetimimin dokuz kontrolünü aynı ölçüte tabi
+tutmamıştım. **Doğru ifade "dokuz kontrol bozuk" değil, "dokuz kontrol
+sınanmamış"tır**: üçünün çalıştığını bu oturumda kendi gözümle gördüm —
+ama görmek sağlama değildir.
+
+### Mutasyon "kırmızıya döndü mü" diye soruyordu, "hangisi" diye değil
+
+İkinci kusur ölçümün kendisindeydi. D yalnızca denetimin çıkış koduna
+bakıyordu. Ölçüldü ki *"bütün becerileri sil"* mutasyonu hem hedeflenen
+`beceriler (>=11)` kontrolünü **hem de alakasız** bir kontrolü kırmızıya
+çeviriyor. Yani hedef kontrol hiç çalışmasa bile mutasyon "yakalandı"
+sayılabilirdi — **iddia ettiği şeye bakmayan bir kontrolün, ölçüm tarafındaki
+hâli.** Artık her mutasyon hedef kontrolünü beyan ediyor ve D o kontrolün
+HATA verdiğini doğruluyor. Küme 15'ten **27'ye** çıktı.
+
+### Ve takımın cevabı çağıranın ortamına bağlıydı
+
+Sayıları güncellerken AF-05 kırmızıya döndü: rapor "27/27" diyordu, AF ise
+"24/27" görüyordu. Sebep bir bookkeeping hatası değildi.
+
+| koşum | sonuç |
+|---|---|
+| `bash ks_d_denetim.sh` | **27/27** |
+| `MAFIRM=… bash ks_d_denetim.sh` | **24/27** |
+
+Dışarıdan `MAFIRM` verildiğinde (ki `hepsi.sh` ve AF öyle yapıyor) kum
+havuzundaki `denetim.sh` onu **miras alıyor** ve canlı ağacı denetliyordu.
+Denetimin üç kontrolü Python takımlarına devrediyor; o takımlar da kökü
+`MAFIRM`'den çözüyor — dolayısıyla kum havuzuna uygulanan mutasyon
+görünmüyordu. Yirmi birinci turda kurulan AC sınıfı (ortam bağımsızlığı),
+bu kez mutasyon harnessinin içinde. Kum havuzu kökü sabitlendi; her iki
+koşum da 27/27.
+
+### Teslimat listesi elle yazılmıştı ve dört tur boyunca bayattı
+
+Yeni mutasyonlardan biri —*"bir teslimattan doğrulama tarihini sil"*—
+denetimi **kırmızıya çevirmedi.** Sebebi: P'nin teslimat listesi elle
+yazılmıştı ve otuz dördüncü turda eklediğim `hafiza/arac-katalogu.md` o
+listeye hiç konmamıştı. **Kendi eklediğim teslimat, dört tur boyunca kendi
+güncellik kuralımın dışında durdu.**
+
+İncelemenin ikinci sınıfı (elle yazılmış sayı ve listeler ölçtükleri şeyden
+ayrışır), yine kendi aparatımda. Liste **tersine çevrildi**: teslimatlar
+keşfedilir, muafiyetler beyan edilir. Muafiyet listesi küçük ve durağandır
+(kitabın CLAUDE.md'si, canlı çatışma kaydı ve şablonu); teslimat listesi
+büyüyen taraftır. Yeni bir teslimat eklendiğinde artık hiçbir şey yapmak
+gerekmiyor — kural kendiliğinden ona da uygulanıyor.
+
 ---
 
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
@@ -2258,7 +2329,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | A · eşik mantığı | 8 kaldı | 7 kaldı (**bilerek** — eski API'nin kaydı) + 9 yeni vaka geçti |
 | B · beş kapı | 24 kaldı | **1 kaldı** (boş ad kaydı) |
 | C · üretim yolu | 9 kaldı | **temiz** |
-| D · mutasyon | 11 kaçtı | **temiz — 15/15 yakalandı** |
+| D · mutasyon | 11 kaçtı | **temiz — 27/27 yakalandı** (ilk ölçüm 15 mutasyonluydu; küme otuz sekizinci turda genişletildi) |
 | E · beklenen değerler | 4 kaldı | 3 kaldı (kitabın kendi değerleri) |
 | J · §19 kabul sınaması | doğru cevap da bloklu | 2 kaldı (**bilerek** — kitaba sadık karşılaştırma) |
 | K · yönlendirme + koltuk | 3 kaldı | **temiz** |
@@ -2289,6 +2360,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | AQ · yaptırım taramasının zaman ekseni | *son kontrol noktası imza; kapanışta yeniden tarama yok* | **temiz** — dördüncü nokta ve kapanış adımı eklendi |
 | AR · onay durumu (yedinci kapı) | *onaysız §9 çıktısı hiçbir kapıya takılmıyordu* | **temiz** — yedinci kapı eklendi |
 | AS · kapıların öz-sınama kapsaması | *yedinci kapının öz-sınama vakası yoktu* | **temiz** — dört vaka eklendi, kapsama sağlamaya bağlandı |
+| AT · denetimin mutasyon kapsaması | *26 kontrolün 9'u hiç sınanmamıştı* | **temiz** — 12 mutasyon eklendi, hedef beyanı zorunlu |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -2347,7 +2419,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 ### Nasıl yeniden koşulur
 ```
 ./sinama/hepsi.sh                 # 34 çalıştırılabilir takım:
-                                  #   337 vaka + 15 mutasyon (D)
+                                  #   342 vaka + 27 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -2430,9 +2502,10 @@ Dokuz takım, 96 vaka:
 | AQ | **Yaptırım taramasının zaman ekseni** — imza ile kapanış arasında ne oluyor | §9, §5.1, §6 |
 | AR | **Onay durumu** — onay ihtiyacının beyanı ile onayın kendisi | §9, §12 |
 | AS | **Kapıların öz-sınama kapsaması** — kitabın §14 kusurunu ben de işledim mi | §12, §14, §16 |
+| AT | **Denetimin mutasyon kapsaması** — 26 kontrolün kaçı sınanıyor | §16, §12 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**337 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**342 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)
