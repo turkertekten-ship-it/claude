@@ -178,6 +178,20 @@ else
   printf "  ok    %-38s %s\n" "müvekkil ad kaydı" "$adet ad"
 fi
 
+# [W-02] §2 `emsal/` dizinini "onaylı madde bankası" olarak açıyor, §10
+# emsal-bulucu'yu yalnızca orayı aramak üzere görevlendiriyor, §14
+# once-arastir'ın üçüncü adımını oraya yönlendiriyor — ve bankayı hiç
+# doldurmuyor. Boş bir bankada arama yapan ajan "emsal yok" der; okuyucu bunu
+# dünyaya dair bir tespit sanır. §14'ün kendi kuralı: "Boş bir arama yokluğun
+# kanıtı değildir." Boş müvekkil ad kaydıyla aynı kusur, ikinci yerde.
+emsal_adet=$(find "$M/emsal" "$M"/birimler/*/emsal -type f ! -name '.*' 2>/dev/null | wc -l)
+if [ "$emsal_adet" -eq 0 ]; then
+  echo "  UYARI emsal (onaylı madde bankası) BOŞ — emsal-bulucu'nun"
+  echo "        'emsal yok' cevabı DÜNYAYA değil BOŞ DOLABA dairdir"
+else
+  printf "  ok    %-38s %s\n" "onaylı madde bankası" "$emsal_adet madde"
+fi
+
 echo "=== açık doğrulama bulguları ==="
 if [ -f "$M/hafiza/dogrulama-bulgulari.md" ]; then
   eng=$(grep -c '| ENGELLEYICI |' "$M/hafiza/dogrulama-bulgulari.md" | head -1); eng=${eng:-0}

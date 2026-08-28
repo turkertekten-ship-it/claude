@@ -25,7 +25,7 @@ kendi §16 denetimi yeşile dönmedi.
 3. **Denetim on beş bozmadan on birini görmüyor**; sıfır beceri, kancasız
    ayarlar ve tamamen boş bir `esik.py` taşıyan bir sistemde "DENETİM OK" diyor.
 
-**Yamalı hâlde sistem çalışıyor:** on dokuz çalıştırılabilir takım — **201
+**Yamalı hâlde sistem çalışıyor:** yirmi çalıştırılabilir takım — **205
 vaka, 15 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15, birimler arası tutarlılık takımının
 kendi mutasyon yakalaması 10/10. Ama **üç mevzuat bulgusu ile kitabın kendi içindeki bir çelişki açık kalır**
@@ -936,6 +936,63 @@ edildi` tanımasını geri almak V-01/V-17/V-31'i kırmızıya döndürdü.
 
 ---
 
+## Yedi buçuk artı on dört · Boş bir dolap, yokluğun kanıtı değildir
+
+§14 kuralı kendisi yazıyor:
+
+> *"Boş bir GitHub araması yokluğun kanıtı değildir. Kayıtlara bak."*
+
+Kitap bunu dış arama için söylüyor. Aynı tuzağı **kendi dosya düzeninde**
+kuruyor:
+
+- §2 `emsal/` dizinini açıyor ve ona bir ad veriyor: **onaylı madde bankası**.
+- §4 her birim altında `birimler/<birim>/emsal/` açıyor.
+- §10 `emsal-bulucu` alt ajanını **yalnızca orayı aramak** üzere
+  görevlendiriyor.
+- §14 `once-arastir`ın üçüncü adımını oraya yönlendiriyor.
+- **Ve bankayı hiç doldurmuyor.**
+
+Sonuç: banka boşken ajan *"yeterince yakın emsal yok"* der. Okuyucu bunu
+**dünyaya** dair bir tespit sanır; oysa **boş bir dolaba** dair bir tespittir.
+İkisi aynı cümleyle ifade edildiğinde §2 çiğnenmiş olur — olumsuz iddia,
+kanıtsız. Ve bu, bir ajanın tek işini sessizce yapılamaz kılar.
+
+Kusurun bir örneği daha önce kapatılmıştı: boş müvekkil ad kaydı denetimde
+**her koşumda sesli** bildiriliyor. İkinci örneği on dört tur boyunca
+görmedim çünkü hiçbir takım "bir bileşenin aradığı yer dolu mu" diye
+sormamıştı. W takımı sordu.
+
+İki düzeltme:
+
+1. **Denetim artık boş madde bankasını sesli bildiriyor** — müvekkil ad
+   kaydıyla birebir aynı desende.
+2. **`emsal-bulucu` iki cevabı ayırmak zorunda:** *"banka boş"* (dolapta hiç
+   madde yok — emsal yokluğunun kanıtı DEĞİL) ile *"yeterince yakın emsal
+   yok"* (banka dolu, tarandı, yakın biçim çıkmadı). Her ikisinde de kaç
+   dosyanın tarandığı yazılır.
+
+`cikti/` ve `dosyalar/` de boş, ama onlar `.gitignore`'lu çalışma
+dizinleridir; aranan bir bilgi kaynağı değiller. Ayrım takımın içinde yazılı.
+
+### Takımın kendi kusuru — ters mutasyon buldu
+
+W-02'nin ilk hâli `emsal/` ile `birimler/*/emsal/`yi **ayrı** kaynak sayıyor
+ve denetimin duyurusunu "emsal" alt dizgesiyle arıyordu. Denetim ise ikisini
+**tek bir banka** olarak sayar ve duyuruyu "madde bankası" diye etiketler.
+Bankayı doldurup duyuru sustuğunda takım hâlâ kırmızı kalıyordu: **ölçtüğüm
+şeyin tanımı, ölçenin tanımıyla aynı değildi.** Bunu düz mutasyon değil,
+**ters** mutasyon buldu — kusuru geri getirmek değil, düzeltmeyi uygulamak.
+
+Ayrıca W-03'ün ilk hâli `once-arastir`ı **doğru sebeple değil** geçiriyordu:
+anahtar kelime araması, becerinin GitHub'a dair uyarısını yakalıyordu. Ölçüt
+yakınlığa bağlandı; beceri şimdi §14'ün `bulunamayan:` alanı sayesinde ve
+onun sayesinde geçiyor.
+
+Mutasyon: duyuruyu kaldırmak W-02'yi, ajandan ayrımı kaldırmak W-03'ü
+kırmızıya döndürdü; bankayı doldurmak ikisini de doğru biçimde susturdu.
+
+---
+
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
 
 | Bölüm | Beklenen | Gerçek | Sebep |
@@ -1033,6 +1090,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | M · errata izlenebilirliği | 3 kaldı (kendi raporum) | **temiz** |
 | N · olumsuz iddia kanıtı | kanıtsızdı | **temiz** |
 | V · kapıların yanlış pozitifi | *hiç ölçülmemişti* | **temiz** — 17 meşru metin, 0 yanlış pozitif |
+| W · sessizce boş arama kaynağı | *hiç sorulmamıştı* | **temiz** — boş banka artık sesli |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -1090,8 +1148,8 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # 19 çalıştırılabilir takım:
-                                  #   201 vaka + 15 mutasyon (D)
+./sinama/hepsi.sh                 # 20 çalıştırılabilir takım:
+                                  #   205 vaka + 15 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -1151,9 +1209,10 @@ Dokuz takım, 96 vaka:
 | T | **§18'in dokuz sınırı doğru mu** | §18, CLAUDE.md §2 |
 | U | **Birimler arası tutarlılık** — bir birim ötekiyle çelişiyor mu | §4, §6, §5.3 |
 | V | **Kapıların yanlış pozitifi** — doğru iş bloklanıyor mu | §12, §14 |
+| W | **Sessizce boş arama kaynağı** — 'bulunamadı' ne demek | §2, §14, §10 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**201 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**205 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)

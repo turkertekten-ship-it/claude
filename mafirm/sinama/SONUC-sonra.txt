@@ -1,5 +1,5 @@
 ###############################################################
-#  KÖR SINAMA TAKIMI — 2026-08-28T09:22:50Z
+#  KÖR SINAMA TAKIMI — 2026-08-28T09:30:18Z
 ###############################################################
 
 /root/mafirm/sinama/ks_a_esik.py:45: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
@@ -294,7 +294,7 @@ KÖR SINAMA M — errata ↔ sınama izlenebilirliği
 GEÇTİ M-01   her errata maddesi bir sınama vakasına atıf yapıyor
         53 madde · atıfsız 0: yok
 GEÇTİ M-02   atıf yapılan her vaka kimliği gerçekten tanımlı
-        230 tanımlı kimlik · uydurma dayanak: yok
+        235 tanımlı kimlik · uydurma dayanak: yok
 GEÇTİ M-03   [A] ve [B] maddelerinin atıfları sadık sistemde gerçekten kaldı
         sadık koşumda kalan vaka: 41 · sınanmamış ağır madde: yok
 GEÇTİ M-04   sadık sistemde kalan her vaka errata'da ya da raporda açıklanmış
@@ -393,7 +393,7 @@ KÖR SINAMA R — yön, insan onayı ve dil kuralları
 GEÇTİ R-01   rapor cevapla başlıyor, yöntemle değil
         ilk bölüm: 'Cevap' — §4: 'cevabı merak eden ilk paragrafta bulur'
 GEÇTİ R-02   yöntem bölümü bulgulardan sonra geliyor
-        yöntem 27. başlık, ilk bulgu 1. başlık
+        yöntem 28. başlık, ilk bulgu 1. başlık
 GEÇTİ R-03   iki zorunlu başlık en sonda ve doğru sırada
         son iki başlık: ['Şimdi ne yapılmalı', 'Yetkili avukat görüşü gereken konular']
 GEÇTİ R-04   raporun onay durumu açıkça yazılı (§9)
@@ -526,6 +526,20 @@ GEÇTİ V-31   meşru iş ürününde yanlış pozitif yok
 ------------------------------------------------------------------------------------------------
 24 vaka · 24 geçti · 0 beklenen · 0 SİNYAL
 
+================================================================================================
+KÖR SINAMA W — sessizce boş arama kaynakları
+================================================================================================
+GEÇTİ W-01   arama kaynağı olarak adlandırılan dizinler tespit edildi
+        birimler/*/emsal <- .claude/agents/emsal-bulucu.md; emsal <- .claude/agents/emsal-bulucu.md, .claude/skills/once-arastir/SKILL.md; hafiza <- .claude/skills/once-arastir/SKILL.md
+GEÇTİ W-02   boş bir arama kaynağı denetimde SESLİ bildiriliyor
+        boş kaynak yok ya da hepsi sesli
+GEÇTİ W-03   arayan bileşen BOŞ KAYNAK ile BULUNAMADI'yı ayırıyor
+        arayan bileşenlerin hepsi ayrımı yazıyor
+GEÇTİ W-04   boş müvekkil ad kaydı hâlâ sesli bildiriliyor
+        denetim bu kaydı her koşumda bildiriyor (regresyon koruması)
+------------------------------------------------------------------------------------------------
+4 vaka · 4 geçti · 0 beklenen · 0 SİNYAL
+
 ###############################################################
 #  ÖZET
 ###############################################################
@@ -548,6 +562,7 @@ GEÇTİ V-31   meşru iş ürününde yanlış pozitif yok
   T · §18'in dokuz sınırı           temiz
   U · birimler arası tutarlılık      temiz
   V · kapıların yanlış pozitifi     temiz
+  W · sessizce boş arama kaynağı     temiz
   ------------------------------------------------------------
   TOPLAM SİNYAL                         0
 

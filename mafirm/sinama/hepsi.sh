@@ -55,6 +55,8 @@ python3 "$S/ks_u_birimler_arasi.py"; topla "U · birimler arası tutarlılık" $
 echo
 python3 "$S/ks_v_yanlis_pozitif.py"; topla "V · kapıların yanlış pozitifi" $?
 echo
+python3 "$S/ks_w_bos_kaynak.py"; topla "W · sessizce boş arama kaynağı" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

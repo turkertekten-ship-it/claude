@@ -165,6 +165,17 @@ tazminat tavanı, oy çoğunluğu). Kitabın kendi uyarısı buraya düşer: *"D
 bloklayan bir kapı bir gün içinde kapatılır."* → Bir yüzde ancak DÜZENLEYİCİ
 bir ipucuyla aynı cümlede geçtiğinde eşik sayılmalı. *(V-03, V-08, V-24)*
 
+**[B] Kitap bir madde bankası kuruyor, üç tüketici bağlıyor ve bankayı hiç
+doldurmuyor.** §2 `emsal/` dizinini "onaylı madde bankası" olarak açar, §4 her
+birim altında `birimler/<birim>/emsal/` açar, §10 `emsal-bulucu` alt ajanını
+YALNIZCA orayı aramak üzere görevlendirir ve §14 `once-arastir`ın üçüncü
+adımını oraya yönlendirir. Banka boş kurulur ve boşluğu hiçbir yerde
+bildirilmez. Boş bankada arama yapan ajan "yeterince yakın emsal yok" der;
+okuyucu bunu dünyaya dair bir tespit sanır. Kitabın kendi §14'ü tam bunu
+yasaklar: *"Boş bir arama yokluğun kanıtı değildir."* → Denetim boş bankayı
+sesli bildirmeli ve `emsal-bulucu` "banka boş" ile "yakın emsal yok"u
+ayırmalı. *(W-02, W-03)*
+
 ## §7 · Ortak koltukları
 
 **[B] Kitabın en yüksek itibar riskli kuralının hiçbir mekanizması yok.**
