@@ -23,8 +23,16 @@ unsourced belongs in `provenance/unknowns.md` as an open question. This is
 enforced, not trusted:
 
 ```bash
-bash tests/run_all.sh        # verifier + every test suite
+bash tests/run_all.sh        # verifier, every test suite, and the mirror check
 ```
+
+## Two repositories, mirrored
+
+`turkertekten-ship-it/claude` and `turkertekten-ship-it/claude-ai` carry the
+same doctrine and tooling, so a session cloning either one is fully equipped.
+That duplication is deliberate and its cost is checked rather than trusted —
+`make mirror-check` fails on any difference, `make mirror` re-syncs, and the
+check runs inside `run_all.sh` whenever the sibling repository is on disk.
 
 ## Why the pipeline exists
 
@@ -67,6 +75,8 @@ make reachability  # what this container can and cannot fetch, as a table
 | `prompts/` | System prompts carrying the doctrine into a session. |
 | `src/oodarag/` | The retrieval pipeline. |
 | `tools/verify_provenance.py` | The fabrication guard. |
+| `tools/verify_mirror.py` | The drift guard: both repositories must agree. |
+| `corpus/` | Committed source material, including the video manifest. |
 | `tools/ingest_chat_archive.py` | Conversation-archive ingestion and search. |
 | `tests/` | Tests for all of the above, including their failure cases. |
 | `.claude/skills/` | `ooda` and `researching-before-acting`, loaded by cloud sessions. |
