@@ -4231,3 +4231,78 @@ inside a gate forces floor rebases that mean nothing.
 3. **A pass rate is a threshold on a metric, and thresholds hide partial
    failure.** Eight of eight passed while recall said 0.75; the metric was there
    all along and only the shape of the questions made it worth reading.
+
+---
+
+## L77 - Multi-hop retrieval, built and measured: inert when fair, harmful when forced
+
+L76 left a target: eight questions whose answer needs a document the question
+cannot reach, single-shot recall@8 **0.75**, four of eight retrieving only the
+package the question names. This built the second hop and measured it.
+
+**The mechanism.** After the first fusion, read the *names* the winning
+documents mention - the corpus is 349 package pages and 80% of them name another
+package - keep the candidates whose names are rare, then search *within* those
+documents with the original query and fuse the result as a third arm.
+
+| configuration | recall@8 | both documents found | precision@8 |
+|---|---|---|---|
+| off | **0.7500** | **4/8** | **0.4531** |
+| hop, fused as a third arm | 0.7500 | 4/8 | 0.4531 |
+| hop, 1 reserved slot | 0.6875 | 3/8 | 0.4062 |
+| hop, 2 reserved slots | 0.6875 | 3/8 | 0.3438 |
+| hop, 1 slot, double weight | 0.6875 | 3/8 | 0.3125 |
+
+Fused fairly it is **identical to off, to four decimals** - the linked documents
+never outrank a result the query actually matched. Forced into the window it
+**costs** a case, because the slot it takes was holding a document that was
+right.
+
+**Three defects on the way, each worth its own line.**
+
+*The seed was too narrow.* Reading names out of the winning *chunk* finds
+nothing: aiohttp mentions `yarl` once, in a requirements list nowhere near the
+passage that wins a query about URLs. Seeding from the winning **document** is
+what makes the link visible at all.
+
+*The IDF lookup was unstemmed.* Candidates are ranked by the rarity of the name
+that found them, and the IDF table is keyed on stems. An unstemmed lookup misses
+and returns the ceiling, so `requests` - which 76 of 349 pages mention - ranked
+as the rarest name in the corpus and crowded out the real link. The bug was
+invisible except as bad candidates.
+
+*Ranking candidates cannot work at all here.* aiohttp's page says it requires
+`attrs`, `multidict`, `yarl` and `frozenlist`, and says nothing about what any
+of them is for. **The information needed to choose `yarl` for a question about
+web addresses is not in the corpus** - it is in the reader's knowledge that yarl
+is the URL library. Searching inside the candidates was the fix for that, and it
+runs into the other wall: yarl's page says "URL", the question says "web
+addresses", and bridging those is the semantic gap that blocks the offline
+embedder everywhere else.
+
+**So the questions were harder than "multi-hop".** Each of them needs *both* a
+hop and a paraphrase, and this pipeline has neither. The one case the hop
+converts, Flask to Werkzeug, works because the linked page's own words answer
+the question once you are looking at it.
+
+**Reverted.** Not kept behind a flag: query expansion earned that treatment by
+being neutral with a plausible future, and this is inert-or-harmful with a
+blocker identical to the one item 1 has been waiting on for six sessions. The
+golden set stays, the measurement stays, and 120 lines of retrieval code that
+cannot help until there is a better embedder do not.
+
+**Rules.**
+1. **Build the smallest version and measure it before the design gets
+   interesting.** The third arm answered the question in an afternoon; the
+   version with candidate scoring, reserved slots and weight tuning would have
+   answered the same question a day later.
+2. **A feature that is exactly neutral is telling you it never fires.** Identical
+   to four decimals is not "no harm done", it is "the code path does nothing",
+   and the next step is to find out why rather than to weight it higher.
+3. **Check whether the information your feature needs is in the corpus at all.**
+   No amount of ranking finds which dependency handles URLs when the page lists
+   dependencies without describing them.
+4. **A test set can be hard for two reasons at once.** These questions need a
+   hop *and* a paraphrase; measuring the hop against them measures the
+   paraphrase too, and a feature that fixes half of a compound problem measures
+   as a failure.
