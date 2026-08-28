@@ -127,6 +127,27 @@ class TestSessionAndSubagent(Harness):
         )
         self.assertIn("TaskList", specific["additionalContext"])
 
+    def test_every_session_start_carries_recovery_wording(self):
+        """The reason field is empty after a real compaction on 2.1.247.
+
+        So the recovery instruction cannot live only behind `reason == compact`
+        — that branch never runs. Every start carries it.
+        """
+        specific = self.specific(self.hook(payload("SessionStart", session_id="c2")))
+        self.assertIn("TaskList", specific["additionalContext"])
+
+    def test_session_starts_are_never_deduplicated(self):
+        """Re-seeding twice is harmless; missing the post-compaction re-seed is not.
+
+        A real compaction fires SessionStart again with an empty reason, so a
+        dedupe keyed on the session could swallow exactly the re-seed that
+        matters most.
+        """
+        body = payload("SessionStart", session_id="same-session")
+        first, second = self.hook(body), self.hook(body)
+        self.assertTrue(first.stdout.strip())
+        self.assertTrue(second.stdout.strip(), "a repeated session start was suppressed")
+
     def test_subagents_get_the_directive_too(self):
         specific = self.specific(self.hook(payload("SubagentStart", agent_type="Explore")))
         self.assertIn("done-condition", specific["additionalContext"])

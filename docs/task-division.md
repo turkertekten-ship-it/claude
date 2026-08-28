@@ -111,9 +111,6 @@ Elsewhere:
   the host Mac. Not verifiable here. That root cause hints the *project* route
   may fare better, since a repo-carried hook lives inside the sandbox, but that
   is a lead and not a finding. See `docs/open-items.md`.
-- **`SessionStart` re-seeding after a compaction is unverified.** The event
-  fires on every session, but only ever with `reason: ""` here; a one-shot run
-  cannot fill a context window. The falsifier is written down.
 - **Per machine, per clone.** One install covers one machine. Another laptop
   needs its own run, or a clone of a repository carrying the project route.
 - **Sessions already running keep the settings they started with.** Restart to

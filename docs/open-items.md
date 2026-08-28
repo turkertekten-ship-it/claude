@@ -71,8 +71,6 @@ delivery route: a subagent may treat an injected directive as suspicious rather
 than authoritative. The subagent directive is therefore written as plain
 operating guidance, and the mechanism does not depend on subagents obeying it.
 
----
-
 ### 7. Which contract do `TaskCreated` / `TaskCompleted` honour? — *neither*
 
 Headless sessions have no task tools, so the first attempt at this was
@@ -103,20 +101,33 @@ Two further findings came out of the same run, both bugs of mine:
   would have flagged every completion forever. `TaskCompleted` is now
   observational: it logs and emits nothing.
 
+### 8. Does `SessionStart` re-seed after a compaction? — *yes, once it reads the right field*
+
+Settled by forcing a real compaction: build a conversation with `-p --continue`
+until there is enough to compact, then send `/compact`.
+
+- `PreCompact` fires, with `trigger: "manual"`.
+- A `SessionStart` follows the compaction.
+- Its reason arrives in **`source`**, not the documented `session_start_reason`.
+  A live payload carries `cwd, hook_event_name, session_id, source,
+  transcript_path`, plus `model` and `prompt_id` after a compaction.
+
+Reading the documented name returned an empty string for every start, so the
+compaction branch had never once run. Reading `source` gives `"compact"` after a
+compaction and `"resume"` for `--continue` sessions, both confirmed in the
+ledger.
+
+Two related fixes went in with it. Session starts are **no longer
+deduplicated** — an earlier dedupe could have swallowed the post-compaction
+re-seed, which is precisely the moment the directive has just been dropped from
+context, and seeding twice costs nothing. And the recovery wording ("recover an
+in-flight task list with `TaskList`") now appears in *every* session directive
+rather than only the compaction one, so it does not depend on any field name
+being right.
+
 ---
 
 ## Open, with the reason and the falsifier
-
-### 8. Does `SessionStart` re-seed after a compaction?
-
-**Unverified.** `SessionStart` is confirmed to fire — the ledger records it on
-every session — but only ever with `reason: ""`. Triggering a real compaction
-requires filling a context window, which a one-shot headless run cannot do.
-
-*Falsifier:* in a long interactive session that compacts, the ledger should gain
-a `session-start` entry with `"reason": "compact"`. If it does not, the
-compaction path is dead code and the directive is lost at exactly the moment it
-is most needed.
 
 ### 9. Does Cowork run these hooks? ([#63360](https://github.com/anthropics/claude-code/issues/63360))
 

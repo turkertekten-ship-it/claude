@@ -605,3 +605,46 @@ Anthropic's own plugin-dev skill, and the running binary — and the binary is t
 only one that has been right every time. Everything in this system that was
 wrong for more than five minutes was wrong because something *plausible* was
 believed instead of measured.
+
+---
+
+## Cycle 28 — Act: force a compaction, and find the third wrong field name
+
+**Observe.** Cycle 26 listed the post-compaction re-seed as unverifiable because
+a one-shot run cannot fill a context window. That was a failure of imagination:
+a compaction can be *asked for*. `-p --continue` builds a conversation, `/compact`
+compacts it.
+
+First attempt: "Not enough messages to compact" — but `PreCompact` fired, with
+`trigger: "manual"`. Six turns later the compaction ran for real, and a
+`SessionStart` followed it — with `reason: ""`.
+
+**Orient — the third field-name mismatch, and the worst-hidden one.** Logging
+the payload keys settled it: a live `SessionStart` carries `cwd,
+hook_event_name, session_id, source, transcript_path`, plus `model` and
+`prompt_id` after a compaction. The reason lives in **`source`**. The reference
+documents `session_start_reason`, which is simply not sent.
+
+So the compaction branch had never run — every start read as reasonless. Reading
+`source` gives `"compact"` after a compaction and `"resume"` under `--continue`,
+both now in the ledger.
+
+**A second bug, found while fixing the first.** Session starts were being
+deduplicated. A compaction fires `SessionStart` again in the same session, so
+that dedupe could swallow the re-seed at exactly the moment the directive has
+just been dropped from context — the one moment it exists for. Session starts
+are no longer deduplicated at all: seeding twice is free, missing the re-seed is
+not. And the recovery wording now sits in *every* session directive, so it no
+longer depends on any field name being right.
+
+**Orient — the shape of all four field bugs.** `task_title` → `task_subject`.
+`completion_notes` → does not exist. `session_start_reason` → `source`.
+`permissionDecision: deny` → `decision: block`. Every one of them was read from
+the reference, and every one produced code that ran cleanly, exited 0, logged
+happily, and did nothing. A hook that runs is not a hook that works — and a
+field that parses is not a field that arrives.
+
+**What is left.** Three items, none of them silent: Cowork, which is not in this
+environment; and the branch divergence plus the pinned marketplace ref, which
+are the owner's decisions and not this session's to make. Each carries its
+falsifier in `docs/open-items.md`.

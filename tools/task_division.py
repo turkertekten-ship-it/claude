@@ -89,7 +89,11 @@ SESSION_DIRECTIVE = """\
 Every prompt in this session gets restated as a numbered list of tasks with
 checkable done-conditions before any work starts, tracked with TaskCreate and
 TaskUpdate where those tools exist. A genuinely atomic request still gets a
-one-item list, stated explicitly rather than skipped."""
+one-item list, stated explicitly rather than skipped.
+
+If a task list from earlier in this session is still in flight — after a
+compaction, a resume or a fork — recover it with TaskList and continue it rather
+than starting a new one."""
 
 COMPACT_DIRECTIVE = """\
 == re-stating a directive that compaction may have dropped ==
@@ -371,11 +375,32 @@ def on_user_prompt_submit(payload, cfg):
 
 
 def on_session_start(payload, cfg):
-    reason = str(payload.get("session_start_reason") or "").strip().lower()
-    if not claim_once(payload, f"session-{reason or 'start'}"):
-        return None
-    context = COMPACT_DIRECTIVE if reason == "compact" else SESSION_DIRECTIVE
-    log_event(cfg, "session-start", {"reason": reason, "session": payload.get("session_id")})
+    """Seed the directive at every session start, including after a compaction.
+
+    Deliberately *not* deduplicated, and deliberately not relying on
+    `session_start_reason`. Measured on 2.1.247: a real compaction fires
+    `PreCompact` with `trigger: "manual"` and then a `SessionStart` whose reason
+    is **empty**, not the documented `"compact"`. An earlier version keyed a
+    special compaction directive off that value, which therefore never ran, and
+    deduplicated session starts — which risked swallowing the re-seed at exactly
+    the moment the directive has just been dropped from context.
+
+    Seeding twice is harmless. Failing to re-seed after a compaction is the
+    failure this handler exists to prevent, so the trade goes that way, and the
+    session directive itself carries the recovery wording for every start.
+    """
+    # `source`, not the documented `session_start_reason`: a live SessionStart
+    # payload carries cwd, hook_event_name, session_id, source, transcript_path
+    # (plus model and prompt_id after a compaction). Reading the documented name
+    # produced an empty reason for every start, which is what made the
+    # compaction branch look like dead code.
+    reason = _first(payload, "source", "session_start_reason", "reason").strip().lower()
+    context = COMPACT_DIRECTIVE if reason in ("compact", "postcompact") else SESSION_DIRECTIVE
+    log_event(
+        cfg,
+        "session-start",
+        {"reason": reason, "session": payload.get("session_id"), "keys": sorted(payload.keys())},
+    )
     return emit("SessionStart", context=context)
 
 
