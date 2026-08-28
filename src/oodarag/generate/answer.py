@@ -96,6 +96,31 @@ class AnswerConfig:
     #: Re-sweep when the corpus changes - this number is a property of the
     #: corpus, not of the algorithm. It has now been re-swept twice for exactly
     #: that reason, and moved neither time.
+    #:
+    #: **What no value of this floor can do.** Three of the five remaining
+    #: external gate failures are this gate answering a question it should
+    #: refuse, so the obvious move is to raise the floor. It does not work, and
+    #: the reason is that the two distributions overlap
+    #: (`scripts/abstention_floor_curve.py`, over 61 answerable and 15
+    #: abstainable goldens):
+    #:
+    #:   should answer   min .0850  p25 .3466  median .4542  p75 .5760  max 1.0
+    #:   should abstain  min .0034  p25 .0198  median .0901  p75 .3114  max .7249
+    #:
+    #: The medians separate cleanly, which is why a floor works at all and why
+    #: 12 of 15 abstain cases are caught. The tail does not. Catching "Which
+    #: package sends mail over SMTP?" at .7249 needs a floor above it, which
+    #: sits past the median of the answerable cases. Catching "What is the
+    #: capital of France?" at .3303 needs ~.34, and 13 answerable cases score
+    #: below that.
+    #:
+    #: The three that get through are not random: "sends mail over SMTP",
+    #: "renders Jinja templates to PDF" (.5910), "pins dependency hashes for
+    #: reproducible installs" (.2481). Each is a plausible conjunction of terms
+    #: the corpus really contains, asked about a package it does not. That is
+    #: the hardest case for any bag-of-terms relevance and it is a feature
+    #: problem, not a threshold problem - so the next attempt here should be a
+    #: different signal, not another sweep of this one.
     min_relevance: float = 0.19
     generator: str = "auto"  # "auto" | "extractive" | "claude"
 

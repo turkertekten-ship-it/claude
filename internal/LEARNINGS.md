@@ -3829,3 +3829,64 @@ corpus, not in another sweep of a fusion or windowing constant.
 3. **State the prediction before the sweep even when you expect nothing.**
    "Flat, because the reranker dominates" survived four of five values and
    failed at `rrf_k=1`, which is more informative than "flat" would have been.
+
+---
+
+## L77 - The floor is not the problem, and I nearly reported that it was
+
+L76 concluded that the retrieval parameters are all on plateaus and the
+remaining headroom is elsewhere. Looking at where, the five external gate
+failures split 3:2 - three are the abstention gate *answering* an out-of-corpus
+question, only two are retrieval misses. So the gate, not retrieval, is where
+the gate corpus is losing.
+
+Three wrong turns on the way to the actual finding, each caught by a cheap check.
+
+**First, "answerability is a constant".** Probing four questions, every returned
+chunk had `rerank_answerability` 1.0, including "What is the capital of France?"
+- the exact dead-feature pattern of L30. Measured over 61 questions it takes 13
+distinct values; it is per-question, so eight identical values in one question's
+results is what a working feature looks like here. Four questions was not a
+sample, it was an anecdote.
+
+**Second, hand-built inputs.** I wrote five out-of-corpus questions myself and
+measured against them. The golden sets already carry 15 `expect_abstain` cases,
+built the same way as everything else (L31). Swapping them in moved the median
+of the abstain distribution from 0.3114 to 0.0901 - my invented questions were
+*harder* than the real ones and would have overstated the problem.
+
+**Third, and the one that would have shipped a wrong recommendation.** My curve
+scored floors by "abstain cases caught plus answer cases past the floor", and
+made 0.10 look better than the shipped 0.19 (68 against 67). It is not a
+contradiction, it is a different measurement: a case can clear the floor and
+still fail because retrieval returned the wrong document, so "answers past the
+floor" over-counts. The shipped value was chosen on end-to-end pass rate, which
+is what the project gates on. Two curves over one decision, analysed differently
+(L24's shape, in the tooling).
+
+**The finding that survived all three.** Over 61 answerable and 15 abstainable
+goldens:
+
+    should answer   min .0850  p25 .3466  median .4542  p75 .5760  max 1.0
+    should abstain  min .0034  p25 .0198  median .0901  p75 .3114  max .7249
+
+The medians separate, which is why a floor works at all and catches 12 of 15.
+The tail does not, and **no value of the floor fixes the three failures**:
+catching the worst at .7249 needs a floor past the median of the answerable
+cases; catching "capital of France" at .3303 needs ~.34, below which 13
+answerable cases sit.
+
+The three that get through are the hardest possible cases for a bag-of-terms
+score: "sends mail over SMTP", "renders Jinja templates to PDF", "pins
+dependency hashes for reproducible installs" - each a plausible conjunction of
+terms the corpus genuinely contains, asked about a package it does not have.
+
+**Rules.**
+1. **A per-item feature that is identical within an item is not a constant.**
+   Check the axis the feature varies along before calling it dead.
+2. **When your new curve disagrees with an existing one, find what each
+   measures before believing either.** Mine isolated a component and read as a
+   verdict on the whole.
+3. **Distinguish "this threshold is mistuned" from "this feature cannot make
+   this decision".** Only the second is worth acting on, and the quartiles say
+   which - overlapping tails with separated medians means tune no further.
