@@ -22,7 +22,7 @@ from oodarag.pipeline import IndexPipeline
 from oodarag.retrieve.hybrid import HybridRetriever, RetrievalConfig
 from oodarag.store.sqlite_store import SqliteStore
 
-CORPUS = ("corpus/external/pypi", ("**/*.md",), "evals/goldens-external.jsonl")
+from _corpora import EXTERNAL as CORPUS  # noqa: E402
 
 
 def relevances(store, embedder, goldens, power: float):

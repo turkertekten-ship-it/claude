@@ -14,6 +14,7 @@ the ranker costs the primary corpus.
 """
 import shutil, tempfile
 
+from _corpora import EXTERNAL  # noqa: E402
 from oodarag.eval.harness import EvalHarness, load_goldens
 from oodarag.generate.answer import AnswerConfig, AnswerGenerator
 from oodarag.ingest.filesystem import FilesystemConnector
@@ -28,8 +29,8 @@ workdir = tempfile.mkdtemp(prefix="gatepower-")
 try:
     store = SqliteStore(f"{workdir}/index.db")
     pipeline = IndexPipeline(store)
-    pipeline.run([FilesystemConnector("corpus/external/pypi",
-                                      patterns=("**/*.md",), key="fs:external")])
+    root, patterns, _ = EXTERNAL
+    pipeline.run([FilesystemConnector(root, patterns=patterns, key="fs:external")])
     cases = load_goldens("evals/goldens-external.jsonl")
     print("| rank power | gate power | pass | recall@8 | MRR | nDCG@8 |")
     print("|------------|------------|------|----------|-----|--------|")

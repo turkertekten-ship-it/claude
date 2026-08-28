@@ -41,12 +41,7 @@ from oodarag.pipeline import IndexPipeline
 from oodarag.retrieve.hybrid import HybridRetriever, RetrievalConfig
 from oodarag.store.sqlite_store import SqliteStore
 
-CORPORA = {
-    "external": ("corpus/external/pypi", ("**/*.md",), "evals/goldens-external.jsonl"),
-    "primary": (".", ("src/**/*.py", "tests/**/*.py", "docs/**/*.md",
-                      "internal/**/*.md", "*.md", "corpus/reference/**/*.md"),
-                "evals/goldens.jsonl"),
-}
+from _corpora import CORPORA  # noqa: E402
 
 
 def chunk_config(field: str, value: int, scale: bool) -> ChunkConfig:

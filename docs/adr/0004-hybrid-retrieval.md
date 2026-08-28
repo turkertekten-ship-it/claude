@@ -19,32 +19,32 @@ MMR.
 
 The argument above is an argument. These are the numbers, from
 `scripts/ablation.py` on the external corpus (266 documents, 3,166 chunks,
-54 golden cases), each configuration differing in one thing:
+54 golden cases, `base_weight` 5.0), each configuration differing in one thing:
 
 | configuration | pass | recall@8 | prec@8 | MRR | nDCG@8 |
 |---|---|---|---|---|---|
-| hybrid | **41/54** | **0.8140** | 0.2006 | **0.6641** | 0.6872 |
-| lexical only | 40/54 | 0.7907 | 0.1948 | 0.6484 | 0.6688 |
-| dense only | 37/54 | 0.6744 | 0.1715 | 0.5853 | 0.5955 |
+| hybrid | **43/54** | **0.8721** | 0.2122 | **0.6994** | **0.7294** |
+| lexical only | 42/54 | 0.8372 | 0.1948 | 0.6617 | 0.6898 |
+| dense only | 37/54 | 0.6744 | 0.1773 | 0.5891 | 0.5985 |
 | no rerank | 32/54 | 0.6047 | 0.0901 | 0.5022 | 0.5204 |
-| no MMR | 41/54 | 0.8256 | **0.2122** | 0.6615 | **0.6901** |
+| no MMR | 42/54 | 0.8488 | **0.2267** | 0.6900 | 0.7174 |
 
-Hybrid beats *both* arms alone on pass rate for the first time - at 153
-documents it was level with the lexical arm - and the arms are complementary in
-the way predicted: **dense alone loses 0.14 of recall, lexical alone 0.02**.
-Reranking is the single most load-bearing component (+9 cases, +0.21 recall,
-+0.11 precision).
+Hybrid beats both arms alone on every metric, which no earlier corpus could
+show: at 153 documents it merely tied the lexical arm on pass rate. The arms are
+complementary in the way predicted - **dense alone loses 0.20 of recall, lexical
+alone 0.035** - and reranking is the single most load-bearing component
+(+11 cases, +0.27 recall, +0.12 precision).
 
-**MMR has now measured three values on three corpus sizes**: neutral at 91
-documents, worth a case at 153, and at 266 neutral on pass rate and slightly
-negative on every metric. It stays on, because a component whose measured worth
-oscillates around zero as the corpus grows has not been resolved by this golden
-set, and the third reading is no more authoritative than the two before it.
+MMR has now measured four values across three corpus sizes: neutral at 91, worth
+a case at 153, neutral-to-negative at 266, and worth a case at 266 again once
+`base_weight` moved from 1.0 to 5.0. Its worth is a property of the ordering it
+is handed rather than of MMR, so it moves whenever anything upstream does. It
+stays on and nothing is counted on it.
 
-The same run on the primary corpus (84 documents, 864 chunks) says the same
-thing about MMR - 18/20 either way - and rates reranking at two cases.
+The same run on the primary corpus (84 documents, 870 chunks) rates reranking at
+two cases and finds hybrid, dense-only and no-MMR all at 18/20.
 
-**This table has now been overturned four times, and how it was wrong is the
+**This table has now been overturned five times, and how it was wrong is the
 useful part.**
 
 At 33 documents and 2,615 chunks, 90.9% of them PyPI download boilerplate,

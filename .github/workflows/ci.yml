@@ -102,15 +102,16 @@ jobs:
         run: |
           python -m oodarag.cli --config oodarag-external.toml index
           # Rebased 0.86 -> 0.74 when the corpus went from 153 to 266 pages and
-          # the same retriever read 41/54 instead of 48/54 (L66). A floor is a
-          # ratchet against regression, not a claim about a fixed corpus:
-          # widening the corpus changes what the number means, so the floor is
-          # re-derived rather than kept or quietly ignored. 41/54 = 0.759 passes,
-          # 40/54 = 0.741 passes and 39/54 = 0.722 fails, so one regression is
-          # tolerated and two are not - the tightness the floor has always had.
+          # the same retriever read 41/54 instead of 48/54 (L66): a floor is a
+          # ratchet against regression, not a claim about a fixed corpus, so
+          # replacing the corpus retires it. Then ratcheted 0.74 -> 0.77 when
+          # base_weight 5.0 took the same corpus to 43/54 (L67) - a floor left
+          # where it was after an improvement lets the gain erode silently.
+          # 42/54 = 0.778 passes and 41/54 = 0.759 fails, so one regression is
+          # tolerated and two are not, the tightness this floor has always had.
           python -m oodarag.cli --config oodarag-external.toml eval \
             --goldens evals/goldens-external.jsonl \
-            --min-pass-rate 0.74 --out eval-external.md
+            --min-pass-rate 0.77 --out eval-external.md
 
       - uses: actions/upload-artifact@v4
         if: always()

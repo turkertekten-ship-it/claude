@@ -18,7 +18,7 @@
 | External eval corpus | done | 266 PyPI pages with provenance, release dates and a manifest, rebuildable by `scripts/build_external_corpus.py`; 5 of 54 questions contaminated, 31 documents held out as 36 holdouts |
 | Incremental deletion | done | Removals propagate to the delta, prune guarded at 25% of a source, refused entirely for a failed connector |
 | CLI | done | `preflight, index, query, eval, loop, status, journal, demo` |
-| CI | done | Three jobs: stdlib matrix, numpy path, retrieval regression gate; floors 0.85 primary, 0.74 external (rebased for a corpus 74% larger, L66) |
+| CI | done | Three jobs: stdlib matrix, numpy path, retrieval regression gate; floors 0.85 primary, 0.77 external (rebased for a corpus 74% larger, then ratcheted for base_weight 5.0; L66, L67) |
 | Non-negotiables | verified | All five attacked directly, not just asserted: zero-dependency walked module by module, provenance and redaction attacked with crafted inputs, degradation measured through partial and silent-empty source failures (L37-L39) |
 
 **Current measurements** (offline embedder, deterministic).
@@ -31,12 +31,12 @@ negative case look like a retrieval regression.
 
 | | primary (this repo) | external (266 PyPI pages) |
 |---|---|---|
-| golden cases | **18/20** | **41/54** |
-| recall@8 | 0.7812 | 0.8140 |
-| precision@8 | 0.2031 | 0.2006 |
-| hit@8 | 0.8750 | 0.8605 |
-| MRR | 0.5729 | 0.6641 |
-| nDCG@8 | 0.6063 | 0.6872 |
+| golden cases | **18/20** | **43/54** |
+| recall@8 | 0.8125 | 0.8721 |
+| precision@8 | 0.2266 | 0.2122 |
+| hit@8 | 0.8750 | 0.9070 |
+| MRR | 0.5990 | 0.6994 |
+| nDCG@8 | 0.6274 | 0.7294 |
 | citation coverage | 1.00 | 1.00 |
 | contamination | 4/20 questions, 10 documents (20 holdouts) | 5/54 questions, 31 documents (36 holdouts) |
 | role | smoke test | **regression gate** |
@@ -73,26 +73,26 @@ whose value depends on what the last session wrote in markdown cannot detect a
 regression in retrieval, which is what the external column is for.
 
 What each retrieval arm is worth, on the external set (`scripts/ablation.py`,
-266 documents, 3,166 chunks - the whole table re-run, never a column):
+266 documents, 3,166 chunks, `base_weight` 5.0 - the whole table re-run, never a
+column):
 
 | configuration | pass | recall@8 | prec@8 | MRR | nDCG@8 |
 |---|---|---|---|---|---|
-| hybrid | 41/54 | 0.8140 | 0.2006 | 0.6641 | 0.6872 |
-| lexical only | 40/54 | 0.7907 | 0.1948 | 0.6484 | 0.6688 |
-| dense only | 37/54 | 0.6744 | 0.1715 | 0.5853 | 0.5955 |
+| hybrid | **43/54** | **0.8721** | 0.2122 | **0.6994** | **0.7294** |
+| lexical only | 42/54 | 0.8372 | 0.1948 | 0.6617 | 0.6898 |
+| dense only | 37/54 | 0.6744 | 0.1773 | 0.5891 | 0.5985 |
 | no rerank | 32/54 | 0.6047 | 0.0901 | 0.5022 | 0.5204 |
-| no mmr | 41/54 | **0.8256** | **0.2122** | 0.6615 | **0.6901** |
+| no mmr | 42/54 | 0.8488 | **0.2267** | 0.6900 | 0.7174 |
 
-Reranking is the most load-bearing component by a distance - nine cases - and
-hybrid now beats *both* arms alone rather than tying with the lexical one, which
-is the first corpus on which the second arm pays for itself on pass rate.
+Reranking is the most load-bearing component by a distance - eleven cases - and
+hybrid beats both arms alone on every metric, which the 153-document corpus
+could not show.
 
-**MMR has now measured three different values on three corpus sizes**: neutral
-at 91 documents, worth a case at 153, and at 266 it is neutral on pass and
-slightly *negative* on every metric. Left on. A component whose measured worth
-oscillates around zero as the corpus grows is a component this golden set cannot
-resolve, and switching it off on the third reading would be acting on the noise
-that the first two readings already demonstrated.
+**MMR is worth a case again, and that is the point rather than the number.**
+Measured four times now: neutral at 91 documents, worth a case at 153, neutral
+and slightly negative at 266, and worth a case at 266 once `base_weight` moved
+to 5.0. Its value is not a property of MMR but of the ordering it is handed, so
+it will keep moving whenever anything upstream does. Left on, and not counted on.
 
 Nothing here is saturated any more. recall@8 was 0.9821 with a median of 1.0 on
 the 33-document corpus; it now reads 0.9186 with a minimum of 0.0.
@@ -207,10 +207,14 @@ its current failures are that artefact. See docs/EVALUATION.md.
   worst unanswerable case do co-occur, and three answerable cases have none
   (L32).
 
-- **Query expansion.** Built, measured, and off by default because it made
-  retrieval worse. The table is in `retrieve/expansion.py`.
+- **Query expansion.** Built and measured three times, off each time for a
+  different reason - the current one being that it is *neutral* on the corpus
+  that gates: identical pass rate and recall at every setting, and the one case
+  it converts is on the 20-case smoke corpus at one of four settings (L67). The
+  table is in `retrieve/expansion.py`.
 
-- **Raising the embedder's `dim`, or moving the arm weights off 1.0.** Both
+- **Raising the embedder's `dim`, or moving the *arm* weights off 1.0** (the
+  reranker's `base_weight` did move, to 5.0 - L67). Both
   swept over both corpora (`scripts/embedder_sweep.py`, L65). 768 is where
   hybrid pass rate is maximal; 1536 and up cost 1.5x to 4.6x query latency to
   lose a case. The weights are not a dial: past a ratio of

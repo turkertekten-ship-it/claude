@@ -35,12 +35,7 @@ from oodarag.pipeline import IndexPipeline
 from oodarag.retrieve.hybrid import HybridRetriever, RetrievalConfig
 from oodarag.store.sqlite_store import SqliteStore
 
-CORPORA = {
-    "external": ("corpus/external/pypi", ("**/*.md",), "evals/goldens-external.jsonl"),
-    "primary": (".", ("src/**/*.py", "tests/**/*.py", "docs/**/*.md",
-                      "internal/**/*.md", "*.md", "corpus/reference/**/*.md"),
-                "evals/goldens.jsonl"),
-}
+from _corpora import CORPORA  # noqa: E402
 
 
 def measure(store, embedder, cases, config: RetrievalConfig):

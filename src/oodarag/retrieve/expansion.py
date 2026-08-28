@@ -27,34 +27,34 @@ the same. Three things bound it:
 
 ## Measured result: OFF by default
 
-**These numbers were re-measured after the corpora grew, and the earlier
-conclusion did not survive** - see the note below. Current A/B, everything else
-identical, at 153 external documents / 54 cases and 228 primary documents / 20
-cases (`scripts/expansion_ab.py`):
+**Re-measured twice now, and the reason has changed both times.** The numbers
+below are at 266 external documents / 54 cases and 84 primary documents / 20
+cases, with `base_weight` 5.0 (`scripts/expansion_ab.py`):
 
 | corpus   | expansion | pass  | recall@8 | MRR    | nDCG@8 |
 |----------|-----------|-------|----------|--------|--------|
-| external | off       | 47/54 | 0.8721   | 0.7304 | 0.7487 |
-| external | on        | 47/54 | 0.8837   | 0.7246 | 0.7485 |
-| primary  | off       | 16/20 | 0.7812   | 0.6354 | 0.6442 |
-| primary  | on        | 16/20 | 0.8125   | 0.6375 | 0.6582 |
+| external | off       | 43/54 | 0.8721   | 0.6994 | 0.7294 |
+| external | on, 8 terms, w=0.5  | 43/54 | 0.8721 | 0.6919 | 0.7247 |
+| external | on, 4 terms, w=0.5  | 43/54 | 0.8721 | 0.6926 | 0.7254 |
+| external | on, 8 terms, w=0.25 | 43/54 | 0.8721 | 0.6996 | 0.7302 |
+| primary  | off       | 18/20 | 0.8125   | 0.5990 | 0.6282 |
+| primary  | on, 8 terms, w=0.5  | 18/20 | 0.8125 | 0.6219 | 0.6508 |
+| primary  | on, 4 terms, w=0.5  | **19/20** | **0.8750** | 0.6328 | 0.6713 |
+| primary  | on, 8 terms, w=0.25 | 18/20 | 0.8125 | 0.6302 | 0.6526 |
 
-It stays off, for a different reason than before. **The pass rate does not move
-on either corpus, at any of four settings** (4, 8 and 12 terms; weight 0.25 and
-0.5). Recall improves on both - primary by 0.031, and primary improves on every
-metric - but not one case converts, so the gain is real and inframarginal. It
-costs 20% of query latency, measured: 99.0 ms to 118.8 ms mean on the external
-set. Better recall for no additional answered question, at a fifth more latency,
-is not a default.
+It stays off, and the argument is now about *where* the gain is. On the corpus
+that gates, every setting is identical on pass rate and recall to four decimals -
+expansion changes nothing there. The one case it converts is on the 20-case
+primary corpus, at one of four settings, which is a peak rather than a plateau,
+and it costs a second lexical search on every query.
 
-**What the earlier version of this block said, and why it was wrong.** It
-recorded "external 20/20 ... primary 17/20 off, 17/20 on" and concluded "no
-corpus improved; the primary corpus got measurably worse." That measurement was
-taken against an external corpus roughly a third of its current size and a
-golden set a third its current length, and both of its claims are now false:
-primary improves on every metric, and external improves on recall. A stale
-number in a *decision* record is worse than a stale number in a report, because
-it does not merely mislead a reader - it keeps a feature switched off (L52).
+**Both earlier versions of this block were measured on a corpus that did not
+exist anywhere else.** The previous one recorded "228 primary documents" - the
+repository *plus* the entire external corpus, because `expansion_ab.py` defined
+the primary corpus as `**/*.md` rooted at the repository, and that glob is
+recursive. Its predecessor concluded "no corpus improved; the primary corpus got
+measurably worse" from a corpus a third of today's size. Every sweep now imports
+`scripts/_corpora.py` and a test fails if one grows its own definition (L67).
 
 The documented drift case still reproduces in spirit: the technique is sound,
 helps on many corpora, and is bounded here by the three limits above. Turn it on

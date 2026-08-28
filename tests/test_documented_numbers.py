@@ -68,6 +68,56 @@ def _golden_count(rel: str) -> int:
                if line.strip() and not line.lstrip().startswith("#"))
 
 
+class CorpusDefinitionTest(unittest.TestCase):
+    """Every sweep must measure the same two corpora.
+
+    Each script builds its own index, so each carried its own idea of what the
+    primary corpus is - and `**/*.md` rooted at the repository is recursive, so
+    two of them swallowed `corpus/external/pypi` and ran the *primary* golden
+    set against 341 documents where every other script used 84. Both had
+    produced recorded conclusions (L67).
+
+    A corpus definition is part of a measurement's result, so there is one copy
+    in `scripts/_corpora.py` and this asserts nothing else grows another.
+    """
+
+    SCRIPTS = ROOT / "scripts"
+
+    def test_no_script_declares_its_own_corpus_patterns(self):
+        offenders = []
+        for path in sorted(self.SCRIPTS.glob("*.py")):
+            if path.name == "_corpora.py":
+                continue
+            text = path.read_text("utf-8")
+            if "FilesystemConnector(" not in text:
+                continue
+            body = "\n".join(line for line in text.splitlines()
+                              if not line.lstrip().startswith("#"))
+            if '"**/*.md"' in body or '"src/**/*.py"' in body:
+                offenders.append(path.name)
+        self.assertEqual(offenders, [],
+                         f"these scripts declare their own corpus instead of "
+                         f"importing scripts/_corpora.py: {offenders}")
+
+    def test_the_primary_corpus_excludes_the_external_one(self):
+        """The specific drift, asserted directly: the primary corpus is the
+        repository, and the external corpus is not part of it."""
+        import sys
+        sys.path.insert(0, str(self.SCRIPTS))
+        try:
+            import _corpora
+        finally:
+            sys.path.pop(0)
+        root, patterns, _ = _corpora.PRIMARY
+        matched = set()
+        for pattern in patterns:
+            matched.update((ROOT / root).glob(pattern))
+        external = {p.resolve() for p in (ROOT / "corpus/external/pypi").glob("*.md")}
+        self.assertTrue(external, "the external corpus is missing")
+        leaked = sorted(p.name for p in matched if p.resolve() in external)
+        self.assertEqual(leaked, [], f"primary corpus swallows {len(leaked)} external pages")
+
+
 class DocumentedNumbersTest(unittest.TestCase):
     def test_every_pypi_page_count_matches_the_corpus_on_disk(self):
         actual = _external_corpus_size()

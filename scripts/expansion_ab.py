@@ -27,9 +27,11 @@ ARMS = [
     ("on, 12 terms, w=0.5", dict(use_expansion=True, expansion_terms=12, expansion_weight=0.5)),
 ]
 
+from _corpora import CORPORA as _CORPORA  # noqa: E402
+
 CORPORA = [
-    ("external", "corpus/external/pypi", ("**/*.md",), "evals/goldens-external.jsonl"),
-    ("primary", ".", ("**/*.md", "src/**/*.py"), "evals/goldens.jsonl"),
+    ("external", *_CORPORA["external"]),
+    ("primary", *_CORPORA["primary"]),
 ]
 
 for name, root, patterns, goldens_path in CORPORA:

@@ -30,10 +30,10 @@ from oodarag.retrieve.hybrid import HybridRetriever, RetrievalConfig
 from oodarag.store.sqlite_store import SqliteStore
 
 WEIGHTS = [1, 2, 5, 10, 20, 35, 50, 80]
-CORPORA = [
-    ("external", "corpus/external/pypi", ["**/*.md"], "evals/goldens-external.jsonl"),
-    ("primary", ".", ["**/*.md", "src/**/*.py"], "evals/goldens.jsonl"),
-]
+from _corpora import CORPORA as _CORPORA  # noqa: E402
+
+CORPORA = [(name, root, list(patterns), goldens)
+           for name, (root, patterns, goldens) in _CORPORA.items()]
 
 for name, root, patterns, gpath in CORPORA:
     work = tempfile.mkdtemp(prefix=f"bw-{name}-")

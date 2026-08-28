@@ -32,7 +32,7 @@ from oodarag.retrieve.hybrid import HybridRetriever, RetrievalConfig
 from oodarag.store.sqlite_store import SqliteStore
 from oodarag.util.text import tokenize
 
-CORPUS = ("corpus/external/pypi", ("**/*.md",), "evals/goldens-external.jsonl")
+from _corpora import EXTERNAL as CORPUS  # noqa: E402
 
 
 def unstemmed_vocabulary(store) -> set[str]:

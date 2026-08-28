@@ -3521,3 +3521,93 @@ now matches CI.
 5. **A threshold separating two populations that grow together does not scale
    with the corpus.** The floor sweep trades one-for-one across a 2.7x range,
    which says the answer is not a better threshold.
+
+---
+
+## L67 - Two sweeps were measuring a corpus that exists nowhere else
+
+Chasing why `bcrypt` stopped being retrieved on the widened corpus led into
+`scripts/base_weight_sweep.py`, which had already measured that mechanism (L58).
+Its output began:
+
+```
+## primary: 341 documents, 20 cases
+```
+
+The primary corpus is **84** documents. The script defined it as `**/*.md`
+rooted at the repository, and that glob is recursive, so it swallowed all 266
+pages of `corpus/external/pypi`. It was running the *primary* golden set - 20
+questions about this repository - against the repository diluted 4:1 with PyPI
+package pages. `expansion_ab.py` had the same definition and the same defect;
+its own decision record says "228 primary documents", which is the same
+arithmetic one corpus-size ago. Every other script used the six-pattern
+definition and 84 documents.
+
+**Both scripts had produced recorded conclusions.**
+
+### What the corrected runs say
+
+`base_weight` decides how much the fused retrieval score counts against the
+reranker's own adjustment. L58 measured the two on scales 34.5x apart, predicted
+that raising it would recover cases the arms had ranked highly, and **falsified
+that prediction**: on the corpus of the day the external set was best at 1.0 and
+the primary set wanted 35, so it shipped as a compromise "that happens to favour
+the corpus the gate runs on".
+
+Corrected, and at 266 documents:
+
+| base_weight | 1 | 2 | 3 | **4** | **5** | **6** | 8 | 12 | 16 |
+|---|---|---|---|---|---|---|---|---|---|
+| external | 41/54 | 41/54 | 41/54 | **43/54** | **43/54** | **43/54** | 41/54 | 40/54 | 40/54 |
+| recall@8 | .8140 | .8140 | .8140 | .8605 | **.8721** | **.8721** | .8372 | .8256 | .8256 |
+| primary | 18/20 | 18/20 | 18/20 | 18/20 | 18/20 | 18/20 | 18/20 | 19/20 | 18/20 |
+
+Three samples wide, +2 cases and +0.058 recall on the corpus that gates, and
+free on the other - whose pass rate does not move anywhere between 1 and 8 and
+whose nDCG improves. **Shipped at 5.0.** The old primary column (16/20 at
+base_weight 1, rising to 18 at 35) was the mixture talking; the real primary
+corpus reads 18/20 at 1 and never goes below it.
+
+So L58's hypothesis was right and its corpus was too small to show it. The
+falsification stands as a record of what 153 documents could support, which is
+why it is worth keeping rather than editing.
+
+Downstream of the change, on the external gate: **41/54 -> 43/54**, recall
+0.8140 -> 0.8721, nDCG 0.6872 -> 0.7294. The primary gate holds 18/20 with
+recall 0.7812 -> 0.8125. The CI floor is ratcheted 0.74 -> 0.77 to hold it.
+
+**Query expansion** was the other conclusion drawn from the mixture: "off by
+default, because it made retrieval worse", later corrected to "off because the
+gain is inframarginal". Corrected and re-measured, it is *neutral* - identical
+pass rate and recall to four decimals at every setting on the gate corpus - and
+converts one case on the 20-case primary corpus at one of four settings. Still
+off, now for the third distinct reason, and this time the reason is that there
+is nothing on the gate corpus to switch on for.
+
+**MMR moved again too**, without being touched: worth a case at 153 documents,
+neutral-to-negative at 266, worth a case again at 266 once `base_weight` became
+5.0. A diversification step is a function of the ordering handed to it, so its
+measured worth is really a measurement of everything upstream.
+
+### The fix
+
+`scripts/_corpora.py` holds one definition, every sweep imports it, and
+`tests/test_documented_numbers.py` fails if a script grows its own or if the
+primary definition matches an external page. The check is worth its keep: the
+pre-fix definition matches 341 files, 266 of them external corpus pages.
+
+**Rules.**
+1. **A corpus definition is part of a measurement's result.** Two scripts with
+   different definitions are two experiments, and only the printed document
+   count says so - which is why every sweep here now prints it.
+2. **`**/*.md` rooted at a repository is recursive and will find your test
+   fixtures.** The corpus you evaluate against is the one the glob matched, not
+   the one you meant.
+3. **Re-run a falsification when its corpus changes.** L58 predicted an effect,
+   failed to find it, and was right - the prediction needed 266 documents and
+   a corrected corpus to show up. A negative result is dated evidence, not a
+   closed question.
+4. **When a shared constant moves, every measurement that depended on it is
+   stale** - the ablation, MMR's worth and the expansion A/B all had to be
+   re-run after `base_weight` changed, and each was measured at the old value
+   an hour earlier.

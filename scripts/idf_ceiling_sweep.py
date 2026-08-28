@@ -18,6 +18,7 @@ scripts/idf_discrimination.py); this particular fix does not.
 """
 import shutil, tempfile
 
+from _corpora import EXTERNAL  # noqa: E402
 from oodarag.eval.harness import EvalHarness, load_goldens
 from oodarag.generate.answer import AnswerConfig, AnswerGenerator
 from oodarag.ingest.filesystem import FilesystemConnector
@@ -31,8 +32,8 @@ work = tempfile.mkdtemp(prefix="idfcap-")
 try:
     store = SqliteStore(f"{work}/index.db")
     pipeline = IndexPipeline(store)
-    pipeline.run([FilesystemConnector("corpus/external/pypi",
-                                      patterns=("**/*.md",), key="fs:ext")])
+    root, patterns, _ = EXTERNAL
+    pipeline.run([FilesystemConnector(root, patterns=patterns, key="fs:ext")])
     cases = load_goldens("evals/goldens-external.jsonl")
     print("| idf ceiling | pass | recall@8 | MRR | nDCG@8 |")
     print("|-------------|------|----------|-----|--------|")

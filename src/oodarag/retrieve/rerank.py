@@ -225,7 +225,28 @@ class HeuristicReranker(Reranker):
     #: corpus is unaffected either way - its files still share one checkout age.
     recency_weight: float = 0.0
     position_weight: float = 0.05
-    base_weight: float = 1.0
+    #: How much the fused retrieval score counts against this reranker's own
+    #: adjustment. The two are on different scales - RRF contributions span
+    #: about 0.021 while the adjustment spans 0.720 - so at 1.0 the two
+    #: retrieval arms decided roughly 3% of the ordering and acted as a
+    #: candidate generator for a lexical re-scorer (L58).
+    #:
+    #: L58 raised the obvious hypothesis, that the imbalance was costing cases,
+    #: and *falsified* it on the corpus of the day: at 153 documents the
+    #: external set was best at 1.0 and got worse from there, while the primary
+    #: set wanted 35, so the value shipped as a compromise. At 266 documents
+    #: both corpora point the same way and there is a plateau to stand on:
+    #:
+    #:     base_weight     1      2      3     4      5      6     8     12
+    #:     external    41/54  41/54  41/54  43/54  43/54  43/54  41/54  40/54
+    #:     recall@8    .8140  .8140  .8140  .8605  .8721  .8721  .8372  .8256
+    #:     primary     18/20  18/20  18/20  18/20  18/20  18/20  18/20  19/20
+    #:
+    #: Shipped at 5.0: three samples wide on the corpus that gates, +2 cases and
+    #: +0.058 recall over 1.0, and free on the primary corpus, whose pass rate
+    #: does not move between 1 and 8 and whose nDCG improves. The hypothesis was
+    #: right and the corpus was too small to show it (L67).
+    base_weight: float = 5.0
     half_life_days: float = 365.0
     #: Source of "now" for the recency factor. Injectable so a run can be made
     #: reproducible: with the wall clock, two runs of the same query over the
