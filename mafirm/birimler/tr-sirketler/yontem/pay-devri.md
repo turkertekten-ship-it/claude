@@ -28,6 +28,16 @@ devir gerçekleşmez.
 - **TTK m.595/2**: şirket sözleşmesinde aksi öngörülmedikçe devir **genel kurul
   onayına** tabidir. Onaya kadar devir askıdadır; onay, devri tamamlayan
   **kurucu** işlemdir.
+
+  > [AÇIK SORU — U-02: bu nitelendirme sistem içinde ÇELİŞİYOR.
+  > `birimler/sinir-otesi/yontem/mimari.md`, aynı genel kurul onayını
+  > "Kapanış öncesi koşullar" listesinde sayar — yani devirden ÖNCE
+  > tamamlanması gereken bir KOŞUL olarak. İkisi bir arada olamaz ve fark
+  > kapanış sırasını ve nihai tarih hesabını değiştirir: kurucu işlemse
+  > kapanış GÜNÜ yapılır, koşulsa kapanıştan ÖNCE tamamlanmış olmalıdır.
+  > Hangisinin doğru olduğu bir hukuki nitelendirmedir ve adı belli bir
+  > yetkili avukatın kararıdır (işletim sözleşmesi kural 9); bu dosya karar
+  > vermez. bkz. KITAP-ERRATA.md §6 ve hafiza/dogrulama-bulgulari.md U-02]
 - Pay defterine kayıt, ardından **Ticaret Sicili Müdürlüğü**'ne tescil ve
   Ticaret Sicili Gazetesi'nde ilan.
 

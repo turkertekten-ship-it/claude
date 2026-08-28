@@ -142,6 +142,8 @@ python3 "$S/ks_bh_ucuncu_dosya.py"; topla "BH · üçüncü dosya: itirazlı öl
 echo
 python3 "$S/ks_bi_kapanis_uyarisi.py"; topla "BI · risk uyarısı her cevap yolunda mı" $?
 echo
+python3 "$S/ks_bj_birim_celiskisi.py"; topla "BJ · birimler arası hukuki nitelik çelişkisi" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

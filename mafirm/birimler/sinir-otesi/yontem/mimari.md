@@ -63,6 +63,16 @@ olur.
 4. Üçüncü taraf sözleşme onayları (kontrol değişikliği hükümleri)
 5. Şirket organ kararları ve Ltd. Şti. için genel kurul onayı
 
+> [AÇIK SORU — U-02: 5. maddedeki genel kurul onayının bu listede yer alması,
+> onu kapanıştan ÖNCE tamamlanması gereken bir KOŞUL sayar.
+> `birimler/tr-sirketler/yontem/pay-devri.md` ise TTK m.595/2 onayını
+> "devri tamamlayan KURUCU işlem" olarak niteler — yani kapanış GÜNÜ yapılan
+> ve devri doğuran işlem. İkisi bir arada olamaz; fark kapanış sırasını ve
+> nihai tarih hesabını değiştirir. Hangisinin doğru olduğu bir hukuki
+> nitelendirmedir ve adı belli bir yetkili avukatın kararıdır (işletim
+> sözleşmesi kural 9); bu dosya karar vermez.
+> bkz. KITAP-ERRATA.md §6 ve hafiza/dogrulama-bulgulari.md U-02]
+
 ## Yetkili avukat görüşü gereken konular
 
 Uygulanacak hukuk ve merci seçimi, başvuru paketi ve yukarıda sayılan her Türk
