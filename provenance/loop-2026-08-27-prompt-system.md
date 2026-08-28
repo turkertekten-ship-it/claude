@@ -643,6 +643,33 @@ Its first version appended the new rule and only then discovered the target did
 not exist, leaving an orphan. The test caught it, and the check now runs before
 anything is written.
 
+## Nineteenth loop — the hook that could never fail
+
+Rule 10 recorded a commit that went out with the suite red. Observe asked the
+obvious follow-up: is there anything mechanical that would have stopped it?
+
+Nothing. No git hook, `core.hooksPath` unset. And the search turned up the same
+defect already in the repository.
+
+> The surprise: `.claude/settings.json` runs the suite on Stop and pipes it into
+> `tail`, so the hook's exit status is `tail`'s. It has been *displaying* test
+> results and never gating on them, for this whole session. The hand-rolled
+> mistake behind rule 10 was a reproduction of one already committed in the
+> settings, written before this session began. Two levels, one defect, and the
+> guard that looked like enforcement was a print statement.
+
+Both now capture the suite's status and exit with it, and `githooks/pre-push`
+refuses a push when the suite is non-zero. The override is `git push
+--no-verify`, documented as something to declare in the commit message rather
+than a way past a failure nobody read. Git hooks are not cloned, so `githooks/`
+is committed and `tools/install_git_hooks.sh` sets `core.hooksPath`.
+
+The falsifier cost something the first time. A deliberate breakage was undone
+with `git reset --hard`, which also discarded the uncommitted hook being
+tested — the work and the sabotage went out together. Redone the right way
+round: commit the work, then break, test, and restore with `git checkout --`.
+Rule 11 records it.
+
 ## Still open
 
 `U-6`, `U-7` and `U-8` in [unknowns.md](unknowns.md): what Saraev actually
