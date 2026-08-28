@@ -14,6 +14,7 @@ Run: python3 tests/test_layer_integrity.py
 """
 
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -70,13 +71,42 @@ def referenced_paths(text: str) -> set[str]:
     return out
 
 
+def _on_a_remote_branch(ref: str) -> bool:
+    """True if the path exists on some fetched branch of this repository.
+
+    A fleet document legitimately talks about files that live on a sibling's
+    branch and not in this checkout. Those are real, checkable references — so
+    they are resolved against the remote refs rather than waved through by an
+    exception list, which would stop the check noticing a genuine typo.
+    """
+    try:
+        branches = subprocess.run(
+            ["git", "for-each-ref", "--format=%(refname)", "refs/remotes/origin"],
+            cwd=REPO, capture_output=True, text=True, timeout=30,
+        ).stdout.split()
+    except (OSError, subprocess.SubprocessError):
+        return False
+    for br in branches:
+        probe = subprocess.run(
+            ["git", "cat-file", "-e", f"{br}:{ref}"],
+            cwd=REPO, capture_output=True, timeout=30,
+        )
+        if probe.returncode == 0:
+            return True
+    return False
+
+
 def unresolved(refs: set[str], src: Path) -> list[str]:
-    """A reference resolves if it names a file from the repo root or from the
+    """A reference resolves if it names a file from the repo root, from the
     directory of the document that mentions it — `base-operator.md` inside
-    prompts/README.md means prompts/base-operator.md."""
+    prompts/README.md means prompts/base-operator.md — or, for a document about
+    the fleet, from any fetched branch of this repository."""
     bad = []
     for ref in refs:
         if (REPO / ref).exists() or (src.parent / ref).exists():
+            continue
+        if _on_a_remote_branch(ref):
+            print(f"       (note: {ref} is absent here but present on a sibling branch)")
             continue
         bad.append(ref)
     return sorted(bad)

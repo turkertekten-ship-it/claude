@@ -189,6 +189,29 @@ Two days earlier he noted auto mode had reached the Pro plan and gained Sonnet 4
 > spine because that is what every source, including the documentation, treats
 > as the quality lever.
 
+## Observed — the loops claim, and what deflates it
+
+By mid-2026 his stated method had moved past prompting altogether: "I don't prompt Claude anymore. I have loops running that prompt Claude and figuring out what to do. My job is to write loops." [src:CHERNY-LOOPS-2026-08-28]
+
+This resolves the "prompt engineering is not that important" headline that U-9 was opened for: the claim is that polishing prompts is the wrong lever, not that specificity is worthless. The method he prescribes instead is the one already at the centre of this corpus — give the model a task that is too hard, give it tools to verify the work, see where it struggles, then fix that with better prompting, a skill, or an MCP. [src:CHERNY-LOOPS-2026-08-28]
+
+The name "loop engineering" is **not his**: it is a third-party coinage by Addy Osmani and Peter Steinberger, and so is the tidy "sense-decide-act-check" definition that circulates with it. [src:LOOP-ENGINEERING-KB-2026-08-28]
+
+Several widely-repeated numbers around this material are weaker than their circulation suggests. The "4% of all public GitHub commits" figure is SemiAnalysis's estimate, not Anthropic's measurement; his "200%" and "~70%" per-engineer productivity figures come from different interviews and do not agree; and Anthropic itself reportedly cautioned that the lines-of-code productivity framing was "almost certainly an overstatement". [src:LOOP-ENGINEERING-KB-2026-08-28]
+
+Auto mode, which the May post calls his #1 tip, has published limits: a measured 93% permission-acceptance rate against the rhetorical "99%", a 0.4% false-positive rate, and a **17% false-negative** rate. [src:LOOP-ENGINEERING-KB-2026-08-28]
+
+> That 17% is the number to carry. It is the documented cost of the practice he
+> now leads with, and no summary of his advice that this session found mentions
+> it. Reporting the #1 tip without it would be promotional rather than useful.
+
+> Grading, stated plainly: this section is second-hand at best. Every
+> underlying talk and article sits on a host the proxy refuses, so none of it
+> was read at the source. It is here because the deflationary parts are the
+> parts a promotional corpus would not invent — and it is deliberately kept out
+> of `.claude/skills/cherny/SKILL.md`, which draws only on material read
+> directly.
+
 ## Observed — CLAUDE.md is a living artifact, not a config file
 
 His team shares a single `CLAUDE.md` **for the Claude Code repo**, checked into git, with the whole team contributing multiple times a week — and other teams at Anthropic maintain their own, each responsible for keeping theirs current. [src:CHERNY-THREAD-MIRROR-2026-01-02] [src:SCREENSHOT-AUDIT-2026-08-27]

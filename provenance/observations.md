@@ -110,3 +110,20 @@ contents were not reconstructed, summarised, or guessed at.
 - The 2026-05-24 post recorded as unreachable was recovered from a mirrored X digest on GitHub: he states "These days my #1 tip is: use auto mode", framing it as "the key building block for multi-clauding". [src:CHERNY-X-2026-05-24]
 - An independent transcription of the 2026-01-02 thread, carrying all 23 posts with per-post timestamps, was recovered the same way and preserves text the compilation drops. [src:CHERNY-THREAD-MIRROR-2026-01-02]
 - Both recoveries came through `raw.githubusercontent.com`, which is reachable while every host actually serving the posts is not. Third-party mirrors on GitHub are the only route to this material from this container. [src:CHERNY-X-2026-05-24] [src:CHERNY-THREAD-MIRROR-2026-01-02]
+
+## Observed — the fleet, read from diffs
+
+- The fleet grew from 4 branches to 14 on `claude` and 10 on `claude-ai`; every non-mine branch was read as a diff rather than inferred from its name. [src:FLEET-DIFFS-2026-08-28]
+- `src/oodarag/cli.py` — absent on this branch and reported missing earlier — exists on five sibling branches as five different files (34340, 17528, 16405, 13655 and 10679 bytes), all declaring `prog="ooda"` with disjoint subcommand sets. [src:FLEET-DIFFS-2026-08-28]
+- Two branches independently built the same Turkish `mafirm/` system from the same handbook, on histories with no merge base; of 54 shared paths, 52 differ in content. [src:FLEET-DIFFS-2026-08-28]
+- `claude/blind-testing-ooda-5o3s67` roots at a third commit that is neither of the two known roots, so the unrelated-histories hazard is wider than `FLEET.md` recorded. [src:FLEET-DIFFS-2026-08-28]
+- A sibling branch asserts in `claude-ai/CLAUDE.md` that no `prompts/` directory "exists in either repository", while this branch has carried six files under `prompts/` since before that commit. [src:SIBLING-FALSE-CLAIM-2026-08-28]
+- That is a negative claim generalised from one branch to both repositories — the exact move the doctrine forbids — and it was made by the session that built a ten-checker review tool. [src:SIBLING-FALSE-CLAIM-2026-08-28]
+- The subagent reported that one branch carries a byte-identical copy of `tools/verify_provenance.py` on an unrelated root; this session could not reproduce that comparison, and records the claim as unconfirmed rather than repeating it. [src:FLEET-DIFFS-2026-08-28]
+
+## Observed — Cherny's most recent stated method
+
+- By mid-2026 his reported method is loops rather than prompts: "I don't prompt Claude anymore... My job is to write loops." [src:CHERNY-LOOPS-2026-08-28]
+- That does not contradict the corpus: the method he prescribes alongside it — give the model a task that is too hard, give it tools to verify, see where it struggles, then fix with prompting, a skill or an MCP — is the verification loop this corpus is built around. [src:CHERNY-LOOPS-2026-08-28]
+- "Loop engineering" is a third-party name for it, coined by others, not Cherny's or Anthropic's label. [src:LOOP-ENGINEERING-KB-2026-08-28]
+- Auto mode, which he calls his #1 tip as of 2026-05-24, carries a documented 17% false-negative rate and a measured 93% acceptance rate against a rhetorical "99%". [src:LOOP-ENGINEERING-KB-2026-08-28] [src:CHERNY-X-2026-05-24]

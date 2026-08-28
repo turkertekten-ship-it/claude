@@ -24,6 +24,9 @@ is the roster and the rules that keep them from overwriting each other.
 
 - All four sessions were RUNNING, created within 19 minutes of each other on 2026-08-27, all on `claude-opus-5` in `permission_mode: auto`. [src:SESSIONS-2026-08-27]
 - A fifth session was created at 15:00:53Z, after that snapshot: `session_01FXG7QRcwJ7PiYoH5QU7QsR`, on `claude-opus-5` at `xhigh`, owning `claude/great-euler-6tx6y6` in both repositories. It wrote this line. [src:SESSION-SELF-2026-08-27]
+- By 2026-08-28 the roster above is badly stale: `claude` carries 14 remote branches and `claude-ai` 10, against the 4 recorded at snapshot time. The table is kept as the 14:27Z capture it says it is; the current list lives in `provenance/observations.md`. [src:FLEET-DIFFS-2026-08-28]
+- Every non-mine branch has now been read as a diff. Five siblings independently wrote `src/oodarag/cli.py` as five mutually incompatible programs, and two built the same Turkish `mafirm/` system from the same handbook on histories that share no ancestor. [src:FLEET-DIFFS-2026-08-28]
+- A third root commit exists on `claude/blind-testing-ooda-5o3s67`, so the unrelated-histories hazard described below spans three roots in this repository, not two. [src:FLEET-DIFFS-2026-08-28]
 - At 14:27Z no session had pushed anything: both remotes had zero refs. [src:REPO-EMPTY-2026-08-27]
 - By 15:00Z, `claude/rag-system-data-pipeline-rdkde9` had appeared on the `claude` remote at commit `1d7ce8f`, pushed 14:34:34Z, carrying 20 files — a Python package under `src/oodarag/` with `ingest/`, `scrape/`, and `util/` subpackages, plus a Makefile, `pyproject.toml`, `README.md`, and `.gitignore`. [src:SIBLING-PUSH-RAG-2026-08-27]
 - That branch does not exist on the `claude-ai` remote, and `claude/blind-testing-ooda-5o3s67` and `claude/go-page-ultrathink-ooda-kqxvnc` had not been pushed to either remote. [src:BRANCHES-ABSENT-2026-08-27]

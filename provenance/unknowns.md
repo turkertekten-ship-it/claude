@@ -9,26 +9,24 @@ entry, move the resolved fact into `observations.md` with a new source id.
 
 ---
 
-### U-1 — Contents of the three sibling sessions
+### U-1 — Contents of the sibling sessions — **OUTPUT KNOWN, REASONING NOT**
 
-**Unknown:** what was actually said, decided, or built in
-`RAG system and data pipeline`, `Blind testing and OODA analysis`, and
-`Go page review and ultrathink OODA`.
+**Moved 2026-08-28.** The fleet has grown to 14 branches on `claude` and 10 on
+`claude-ai`, and every one has now been read as a diff rather than as a title.
+What each session *built* is recorded in `observations.md`.
+[src:FLEET-DIFFS-2026-08-28]
 
-**Why:** only session metadata was retrievable; no transcript-reading tool was
-exposed, the sessions run in other containers, and none had pushed a commit.
+**Still unknown, and unchanged in principle:** a diff shows what a session
+produced, never what it was asked, what it tried and discarded, or why. No
+transcript-reading tool was ever exposed. The sessions' own reports about their
+results — test counts, mutation-catch rates, negative findings — are each
+session's claims about its own work and have not been re-run here.
 
 **Resolves when:** a transcript export is placed in `archive/` and ingested.
-Pushed branches do *not* resolve this: a diff shows what a session built, never
-what it was asked, what it rejected, or why.
 
-**Partially moved:** as of 15:00Z the RAG session had pushed
-`claude/rag-system-data-pipeline-rdkde9`, so its *output* is now readable. Its
-file listing has been recorded; its code has not been reviewed, and its
-reasoning remains unknown. The other two sessions have pushed nothing.
-
-**Do not:** infer their contents from their titles. A title is a label the
-system generated, not a record of the work.
+**Do not:** infer their contents from their titles. That rule is what this
+entry has always been for, and the branch names remain as uninformative as the
+session titles were.
 
 ---
 
@@ -47,17 +45,22 @@ Privacy → Export data) and drops `conversations.json` into `archive/`.
 
 ---
 
-### U-3 — What "the book" refers to
+### U-3 — What "the book" refers to — **SUBSTANTIALLY ANSWERED**
 
-**Unknown:** two sessions reference a book — "M&A installation guide per book
-§2–§7" and "encoding book corrections". Which book, and what those sections
-require, is not known here.
+**Answered 2026-08-28, from diffs rather than from the owner.** Two sibling
+branches, `claude/blind-testing-ooda-5o3s67` and
+`claude/go-page-ultrathink-ooda-kqxvnc`, both build a Turkish system called
+`mafirm/` against a document their own files name. The blind-test report on the
+first is headed "Kör sınama raporu · Uluslararası M&A Hukuku Kurulum Kitabı" —
+a blind-test report on an *International M&A Law Installation Handbook*.
+[src:FLEET-DIFFS-2026-08-28]
 
-**Why:** the reference appears only inside another session's one-line summary.
-The document itself was never in reach of this session.
+**Still unknown:** the handbook itself was never in reach of this session. What
+its §2–§7 require — the sections the original goal string named — is known only
+through those branches' descriptions of it, which are their claims about a
+document this session has not read.
 
-**Resolves when:** the source document is committed to a repository, or the
-owner names it.
+**Do not:** treat the sibling branches' account of the book as the book.
 
 ---
 
@@ -141,21 +144,25 @@ corroboration available while `x.com` is blocked.
 
 ---
 
-### U-9 — What Cherny actually said about prompt engineering
+### U-9 — What Cherny said about prompt engineering — **ANSWERED, SECOND-HAND**
 
-**Unknown:** a search result carried the headline "Head Of Anthropic's Claude
-Code Says Prompt Engineering Not That Important". Whether he said that, and in
-what context, is not established.
+**Answered 2026-08-28.** The headline was not a distortion, but it was also not
+a contradiction of this corpus. His position, as reported: prompt engineering is
+largely not important, "people tend to overthink it a little bit", and
+over-specifying is unnecessary — coupled with "I don't prompt Claude anymore. I
+have loops running that prompt Claude and figuring out what to do. My job is to
+write loops." [src:CHERNY-LOOPS-2026-08-28] [src:LOOP-ENGINEERING-KB-2026-08-28]
 
-**Why:** only the headline was returned; the article was not fetched, and the
-domain was not reachable [src:EGRESS-BLOCKED-2026-08-27]. A headline is a
-label, and this repository does not expand labels into content.
+**Why it does not contradict the corpus:** the same reporting has him
+prescribing the empirical method this corpus already carries — give the model a
+task that is too hard, give it tools to verify the work, see where it struggles,
+then fix that with better prompting, a skill, or an MCP. The claim is that
+polishing prompts is the wrong lever, not that specificity is worthless.
 
-**Resolves when:** the article or its underlying interview becomes reachable.
-
-**Note:** it is recorded because it may sit in tension with the corpus's
-emphasis on detailed specs and plan quality. That tension is unresolved, not
-decided.
+**Still unknown:** the exact wording and its context. Every source for it is a
+transcript or article this session could not fetch; the talks it traces to are
+on YouTube and unreachable. The tension flagged when this entry was opened is
+resolved only to the standard of second-hand reporting.
 
 ---
 

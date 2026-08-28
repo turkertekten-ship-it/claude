@@ -689,3 +689,112 @@ sources:
       including the parts the compilation drops, and it agrees with the
       screenshots wherever both were checked. Still SECOND-HAND — a scrape, not
       x.com, which remains blocked.
+
+  - id: FLEET-DIFFS-2026-08-28
+    kind: repo_state
+    collected_at: "2026-08-28T08:05Z"
+    method: >-
+      Agent(subagent) fleet sync reading every non-mine remote ref on both
+      repositories via git show/diff/log, followed by this session
+      independently re-checking the four load-bearing claims with
+      git ls-tree, git cat-file -s, git diff --quiet and git grep
+    evidence: >-
+      The fleet grew from 4 branches to 14 on `claude` and 10 on `claude-ai`.
+      Verified here directly: `src/oodarag/cli.py` exists on five branches as
+      five different blobs (34340, 17528, 16405, 13655 and 10679 bytes) all
+      declaring prog="ooda" with disjoint subcommand sets; `prompts/` exists on
+      claude/great-euler-6tx6y6 with six files; ai-system-research-3jpwda
+      carries six files under tests/ against ten on this branch. Reported by the
+      subagent and NOT reproduced here: that ai-system-research-3jpwda's
+      tools/verify_provenance.py is byte-identical to the doctrine branch's —
+      `git diff --quiet` against origin/claude/review-chat-archive-zrynr4
+      reports a difference, so either the claim was wrong or that branch moved
+      between the two checks.
+    note: >-
+      Second-hand except where re-verified. The branch-by-branch descriptions
+      are the subagent's reading, not this session's, and are recorded as such.
+
+  - id: SIBLING-FALSE-CLAIM-2026-08-28
+    kind: repo_state
+    collected_at: "2026-08-28T08:06Z"
+    method: >-
+      git ls-tree --name-only HEAD prompts/ on claude/great-euler-6tx6y6;
+      git grep on origin/claude/ultrareview-data-checkers-98ad9p -- CLAUDE.md
+      in the claude-ai repository
+    evidence: >-
+      `claude-ai` branch ultrareview-data-checkers-98ad9p states in its
+      CLAUDE.md: "An earlier version of this section also named a `prompts/`
+      directory. No such directory exists in either repository." At the same
+      time `git ls-tree --name-only HEAD prompts/` on claude/great-euler-6tx6y6
+      lists prompts/README.md, prompts/archive-ingest.md,
+      prompts/base-operator.md, prompts/builder.md, prompts/cherny-operator.md
+      and prompts/researcher.md — six files, pushed before that branch's commit.
+    note: >-
+      A sibling session asserted a negative about repository state that is false
+      against a branch already pushed. It is recorded without inferring intent:
+      the likely cause is checking only its own branch and generalising to "in
+      either repository". That is precisely the move this repository's doctrine
+      forbids — absence on the branch you can see is not absence everywhere —
+      and it was made by the session that built a ten-checker review tool.
+      Recorded here rather than raised on their branch, per the rule against
+      pushing to another session's branch.
+
+  - id: LOOP-ENGINEERING-KB-2026-08-28
+    kind: repo_state
+    collected_at: "2026-08-28T08:10Z"
+    method: >-
+      GIT_LFS_SKIP_SMUDGE=1 git clone --depth 1
+      https://github.com/cocodedk/loop-engineering; docs/10-sources.md and
+      docs/11-caveats.md read in full by this session
+    evidence: >-
+      A third-party annotated knowledge base separating primary from secondary
+      sources on Cherny's "loop" material. It states the verified-primary origin
+      of "I don't prompt Claude anymore... My job is to write loops" as his own
+      on-camera remarks at Sequoia AI Ascent 2026 and the Acquired Unplugged /
+      WorkOS event of 2026-06-02, and states plainly that the term "loop
+      engineering" is a third-party coinage by Addy Osmani and Peter
+      Steinberger, "not Anthropic's or Cherny's own label". Its caveats file
+      records: the "sense-decide-act-check" definition is a commentator's
+      paraphrase, not his wording; the "4% of public GitHub commits" figure is
+      SemiAnalysis's, not Anthropic's; his "200%" and "~70%" productivity
+      figures come from different interviews and do not agree; Anthropic's own
+      measured auto-mode acceptance is 93% against a rhetorical "99%", with a
+      0.4% false-positive and 17% false-negative rate; and Anthropic reportedly
+      cautioned that the lines-of-code productivity framing was "almost
+      certainly an overstatement". It also cites a Threads post of 2025-12-27
+      as verbatim for 259 PRs and 497 commits in 30 days.
+    note: >-
+      TERTIARY — a third party's compilation of other people's coverage. Used
+      here only for its negative and deflationary findings, which are the parts
+      a promotional corpus is least likely to invent, and for its explicit
+      separation of what is Cherny's wording from what is commentary. None of
+      the underlying talks or articles was reachable from this container, so
+      nothing here is confirmed against a primary source. Its own caveats file
+      states the corpus "is promotional in posture" and that the viral quote
+      "spread because it is striking, not because it was independently
+      verified" — which is the reason it is cited with this grading.
+
+  - id: CHERNY-LOOPS-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T08:08Z"
+    method: >-
+      WebSearch(query="Boris Cherny 'prompt engineering' not that important
+      Claude Code quote what he actually said"); WebSearch(query="'my job is to
+      write loops' Boris Cherny interview transcript loop engineering Claude
+      Code github"); curl reachability probe of the two underlying articles
+    evidence: >-
+      Search summaries report him saying prompt engineering is "largely not
+      important", that "people tend to overthink it a little bit", and the
+      quote: "I don't prompt Claude anymore. I have loops running that prompt
+      Claude and figuring out what to do. My job is to write loops." They also
+      report the method he prescribes instead: "approach it empirically — give
+      it a task that's too hard, give it the tools to verify the work, see where
+      it struggles, and then fix that either with better prompting or with a
+      skill, or if the model is missing context, give it an MCP". Both
+      underlying articles (searchenginejournal.com, addyosmani.com) returned
+      HTTP 000 through the egress proxy.
+    note: >-
+      SECOND-HAND. Search-engine summaries of pages that could not be fetched.
+      Recorded because the claim was already registered as an open question, and
+      because the answer changes how the corpus's emphasis on specificity should
+      be read.
