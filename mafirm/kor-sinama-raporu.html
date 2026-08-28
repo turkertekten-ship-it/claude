@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>49 çalıştırılabilir takım · 372 vaka · 0 sinyal</span>
+    <span>49 çalıştırılabilir takım · 373 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -2817,6 +2817,47 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Kırk beşinci tur</span>
+  <h2>Kendi kaydımı üçüncü kez yanlış okudum — ve kayıt yine haklıydı</h2>
+  <p>Bu tur şu gözlemle açıldı: <em>"ortam engellenen egress için bir çare
+  belgeliyor ve ben onu hiç okumadım."</em> <strong>Yanlıştı.</strong>
+  <code>hafiza/egress-kaniti.md</code> vekil durum uç noktasını zaten
+  kaydediyordu ve README'ye iki kez atıf yapıyordu.</p>
+
+  <div class="callout">
+    Yirmi sekizinci turda WebSearch satırını <em>"işe yaramaz"</em> diye
+    yanlış okumuştum; burada da kendi kaydımı okumadan bir eksiklik
+    varsaydım. <strong>Kayıt tutmak yetmiyor; kaydı okumak ayrı bir
+    iştir</strong> — ve bu, raporun kitaba yönelttiği eleştirinin (yazılı ama
+    bakılmayan kontrol) bendeki karşılığıdır. Üçüncü kez.
+  </div>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">N-09</span>
+      <span class="pill p">İkinci, bağımsız yetki</span></div>
+    <h3>Üç engelleyici bulguyu açık bırakmak, ortamın istediği davranış</h3>
+    <p>Reddin anlamı şimdiye kadar <strong>tek</strong> bir yetkiye
+    dayanıyordu: aracın kendi ret iletisi. Ortamın <strong>kendi belgesi</strong>
+    aynı şeyi bağımsız olarak söylüyor (<code>/root/.ccr/README.md</code>,
+    satır 18-19):</p>
+    <blockquote>"Never disable TLS verification, never unset HTTPS_PROXY, and
+    do not retry organization policy denials (403/407) — report them
+    instead."</blockquote>
+    <p>İkisi de bu raporun yaptığı şeyi <strong>buyuruyor</strong>: politika
+    reddi yeniden denenmez, raporlanır. Yani üç ENGELLEYİCİ bulgunun açık
+    bırakılması bir eksiklik değil, <strong>ortamın açıkça istediği
+    davranıştır.</strong></p>
+    <p>Vekilin kendi kaydı da yeniden doğrulandı: dört Türk birincil kaynağı
+    için dört <code>connect_rejected · 403</code> — benim çağrı dökümüme
+    değil, <strong>altyapının kendisine</strong> ait bir kayıt.</p>
+  </div>
+
+  <p>N-09 artık iki bağımsız yetkiyi birden istiyor: <strong>tek bir yetkiye
+  dayanan olumsuz iddia, o yetki yanlış okunduğunda çöker</strong> — ve bu
+  turda kendi kaydımı yanlış okuduğumu bir kez daha gördüm.</p>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -2934,7 +2975,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 49 takım · 372 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 49 takım · 373 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
