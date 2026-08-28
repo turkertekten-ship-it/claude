@@ -95,9 +95,12 @@ SLOTS: tuple[Slot, ...] = (
     ),
     Slot(
         "CONTEXT", "CONTEXT",
-        _c(r"\bcontext\b|\bbackground\b|\bcurrently\b|\bexisting\b|\bwe (have|use|are|run)\b|\bthe (repo|repository|codebase|project|file|system|stack|team)\b|\bhere (is|are)\b|\battached\b|\bgiven\b|\bversion\b"),
-        "what is already true that the model must not guess at",
-        "Every fact you leave out is a fact the model supplies, and it supplies it plausibly.",
+        _c(r"\bcontext\b|\bbackground\b|\bcurrently\b|\bexisting\b|\bwe (have|use|are|run)\b|\bthe (repo|repository|codebase|project|file|system|stack|team)\b|\bhere (is|are)\b|\battached\b|\bgiven\b|\bversion\b"
+           r"|\b(i|we) (have )?(already )?tried\b|\blast time\b|\bfailed (when|because|with)\b"
+           r"|\bdid not work\b|\bdoes not work\b|\bprevious attempt\b"),
+        "what is already true, including what you have already tried and how it failed",
+        "Every fact you leave out is a fact the model supplies, and it supplies it plausibly — "
+        "and a failed attempt you do not mention is one it may propose back to you.",
     ),
     Slot(
         "TASK", "TASK",

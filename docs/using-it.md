@@ -62,7 +62,7 @@ fixing once.
 
 ```
 ROLE           who is answering, if it changes the answer
-CONTEXT        what is already true — paths, versions, what has been tried
+CONTEXT        what is already true — paths, versions, what you tried that failed
 TASK           one imperative, and the artifact it produces
 CONSTRAINTS    what is forbidden; the bound on length, scope, and effort
 OUTPUT         the exact shape of the reply

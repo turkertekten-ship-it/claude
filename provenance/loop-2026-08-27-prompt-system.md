@@ -855,6 +855,35 @@ problem it addressed, the result, and the specific reason it failed. The Decide
 phase of the OODA skill points at it, because that is the moment somebody is
 about to try something.
 
+## Twenty-sixth loop — the context nobody was asking for
+
+Loop twenty-five cloned one of five named repositories and found two artifacts
+the fetch summaries had hidden. This cloned the next one, on the same reasoning.
+
+Its guide to writing a directive names six kinds of context an author should
+supply: goal, examples, past work, edge cases, constraints, preferences. Five
+map onto the seven slots.
+
+> The surprise: **past work does not.** Nothing in the slots, the `/prompt`
+> command or the portable preamble asked what the author had already tried and
+> how it failed. That is the one category of context a model cannot obtain for
+> itself, and its absence has a specific cost the guide names outright — "Share
+> Failures: if you've tried this before and it failed, share what went wrong" —
+> because without it the model will propose back the thing that already failed.
+> This repository built `provenance/rejected.md` one loop ago for exactly that
+> failure at the level of the project, and had no equivalent at the level of a
+> single prompt.
+
+The CONTEXT slot now asks for it, its cue recognises "I already tried X and it
+failed" as context, `/prompt` names it as one of the three questions almost
+always worth spending — an example, a prior attempt, a known edge case — and
+the portable preamble adds it to the checklist the model runs over an incoming
+prompt.
+
+Twice now the request-serving finding came from cloning a repository whose
+README summary had been read months of loops earlier. The summary is not the
+document.
+
 ## Still open
 
 `U-6`, `U-7` and `U-8` in [unknowns.md](unknowns.md): what Saraev actually

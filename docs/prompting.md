@@ -19,7 +19,7 @@ The tool is `tools/prompt_forge.py`. The procedure is
 | Slot | Settles | Absent, the model will |
 |---|---|---|
 | ROLE | who is answering | answer as the average of everyone who has written on the topic |
-| CONTEXT | what is already true | supply the missing facts, plausibly |
+| CONTEXT | what is already true, including what you tried that failed | supply the missing facts, plausibly — and may propose back the approach that already failed |
 | TASK | the imperative and its artifact | answer the topic instead of doing the task |
 | CONSTRAINTS | what is forbidden, and the bounds | run to whatever length it stops at |
 | OUTPUT | the shape of the reply | return prose that must be re-read before it is usable |

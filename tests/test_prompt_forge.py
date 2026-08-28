@@ -191,6 +191,11 @@ def test_narrowings_are_proven() -> None:
     check("a framed section with no handle anywhere still fires",
           "UNVERIFIABLE_ACCEPTANCE" in rules_for(
               "Write it.\n\n## ACCEPTANCE TEST\nIt should feel right to the reader.\n"))
+    for attempt in ("Write the parser. I already tried regex and it failed on nested quotes.",
+                    "Write the parser. Last time BeautifulSoup did not work on this markup.",
+                    "Write it. My previous attempt failed because of pagination."):
+        check(f"a prior attempt is context: {attempt[20:52]!r}",
+              "NO_CONTEXT" not in rules_for(attempt), rules_for(attempt))
     check("prose mentioning verification is not a stated test",
           "UNVERIFIABLE_ACCEPTANCE" not in
           rules_for("Write it. Never silently promote a report to verified."))

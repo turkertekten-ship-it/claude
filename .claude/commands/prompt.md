@@ -28,8 +28,12 @@ Read `.claude/skills/prompt-forge/SKILL.md` first and work its four phases.
    second-hand — keep only the divergences you can point at in the text.
 2b. **Reverse the prompt, when the ask is thin.** If three or more slots are
    absent and the owner is here to answer, invert the direction before
-   forging: ask up to five clarifying questions in one message, aimed at the
-   preferences they did not state, and build the prompt from the answers. Five
+   forging: ask up to five clarifying questions in one message, and build the
+   prompt from the answers. Three of them are almost always worth spending:
+   **an example** of the output they want, **what they have already tried** and
+   how it failed, and **an edge case they already know about**. Those are the
+   context a model cannot obtain for itself, and without the second it will
+   cheerfully propose the thing that already failed. Five
    questions asked once cost a turn; a wrong reading of a thin ask costs the
    work. Skip this entirely when nobody is there to answer — see step 3. (The
    technique is documented as Saraev's "reverse prompting"; `docs/prompting.md`

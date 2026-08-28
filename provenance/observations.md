@@ -141,3 +141,9 @@ contents were not reconstructed, summarised, or guessed at.
 - The directive template in `Vibe-Marketer/Agentic-Workflows-Template`, a repository stating it is based on Saraev's DOE framework, marks a short required set of sections and says of the remainder: "Add sections as you discover edge cases, not upfront". [src:DOE-TEMPLATES-2026-08-28]
 - The same repository carries a `learnings/` template whose stated purpose is to capture "approaches that were tested but not selected, and why. Prevents re-discovering dead ends." [src:DOE-TEMPLATES-2026-08-28]
 - Both files were absent from the fetch tool's summary of that repository's README, and were found only by cloning it — the second time in this session that a clone returned what a fetch had not. [src:DOE-TEMPLATES-2026-08-28] [src:SARAEV-REPOS-2026-08-27]
+
+## Observed — a category of context this repository did not ask for
+
+- A third-party guide to writing directives names six kinds of context an author should supply: goal, examples, past work, edge cases, constraints and preferences. [src:CREATING-DIRECTIVES-2026-08-28]
+- Five map onto this repository's seven slots. **Past work does not**: nothing in the slots, the `/prompt` command or the portable preamble asked what the author had already tried, or how it failed. [src:CREATING-DIRECTIVES-2026-08-28]
+- The same guide states the reason plainly under "Share Failures": "If you've tried this before and it failed, share what went wrong. Claude will design around those issues." [src:CREATING-DIRECTIVES-2026-08-28]

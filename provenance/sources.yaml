@@ -380,3 +380,14 @@ sources:
       Saraev's DOE framework; neither file is his, and his own pages remain
       unreachable. Both templates were invisible in the fetch tool's summary of
       the README, and were found only by cloning - which is rule 2.
+
+  - id: CREATING-DIRECTIVES-2026-08-28
+    kind: repo_state
+    collected_at: "2026-08-28T11:10Z"
+    method: "git clone --depth 1 datacraftdevelopment/ClaudeAgent_v3; docs/creating_directives.md read in full"
+    evidence: provenance/raw/creating-directives-2026-08-28.md
+    note: >-
+      Third-party guidance on writing a directive, read first-hand. Names six
+      kinds of context an author should supply; five map onto this
+      repository's slots and one, prior attempts and known failures, does not
+      appear anywhere in it.
