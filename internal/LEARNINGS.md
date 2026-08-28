@@ -2499,3 +2499,51 @@ already written down.
 3. **One stale measurement is rarely alone.** Widening the corpus aged four
    documented conclusions at once, and they were only found because the first
    one prompted a sweep of the others.
+
+---
+
+## L55 - A cancelled build reports zero failures
+
+Checking CI on the commit that widened the corpus - the one carrying the gate
+risk, where the external pass rate fell to 0.870 against an 0.85 floor - I asked
+the API for failed jobs and got:
+
+    {"failed_jobs":0,"message":"No failed jobs found in this workflow run"}
+
+and moved on. That run had been **cancelled**, not passed.
+
+`.github/workflows/ci.yml` sets `concurrency: cancel-in-progress: true`, so
+pushing a second commit kills the first commit's run. A cancelled run has no
+failed jobs, so every check phrased as *"were there failures?"* answers no -
+identically to a green run. The question was wrong, not the answer.
+
+The widening was verified in the end, by three later runs that contain it, so
+nothing was actually shipped unverified. The method was still unsound, and it
+was unsound in the direction that matters: it can only ever produce a false
+*pass*.
+
+**Two things follow, and they are different.**
+
+*For reading a result:* assert `conclusion == "success"`. "No failures" is a
+weaker claim that a cancelled, skipped or never-started run also satisfies. This
+is the L-series rule about operations that can silently do nothing, applied to
+the thing that reports on all the others - and I had spent this whole session
+insisting on verifying CI before claiming green, using a query that could not
+distinguish green from cancelled.
+
+*For the repository:* with `cancel-in-progress`, only the branch tip is
+guaranteed verified. A per-commit greenness discipline is not enforceable under
+that setting, and pretending otherwise is worse than knowing it. The setting is
+kept - re-running superseded commits is not worth the minutes - and the
+workflow now says plainly what its run history does and does not mean.
+
+**Rules.**
+1. **Verify the positive, not the absence of the negative.** "No failures", "no
+   errors logged", "nothing was rejected" are all satisfied by *nothing having
+   happened*. Ask for the success, and get a state, not a count of problems.
+2. **The check on your checks deserves the same scrutiny as the checks.** L28
+   said attack the measuring instrument first; this is the instrument that
+   reports whether every other instrument ran.
+3. **A tooling default can quietly void a discipline.** Nobody chose "only the
+   tip gets verified" - it arrived with a sensible cost-saving default, and it
+   silently changed what a green history means.

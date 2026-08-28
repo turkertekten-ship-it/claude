@@ -6,6 +6,15 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Superseded runs are cancelled, so only the *tip* of a branch is guaranteed to
+# have been verified - an intermediate commit pushed and then quickly followed
+# by another may have no completed run at all.
+#
+# The trap that matters when reading this history: a cancelled run reports
+# **zero failed jobs**. Any check phrased as "were there failures?" - including
+# the GitHub API's failed-jobs queries - answers no for a run that never
+# finished, which is indistinguishable from success. Assert
+# `conclusion == "success"`, never the absence of failures (LEARNINGS L55).
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
