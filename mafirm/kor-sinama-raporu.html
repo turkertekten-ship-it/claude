@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>45 çalıştırılabilir takım · 354 vaka · 0 sinyal</span>
+    <span>45 çalıştırılabilir takım · 355 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -2619,6 +2619,29 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Kırkıncı tur · doğrulama</span>
+  <h2>Ve doğrulama sırasında bir tuzak daha açıldı</h2>
+  <p>Turu doğrularken D taban çizgisi <strong>"5 hata"</strong> verdi ve
+  mutasyon sınaması geçersiz sayıldı — oysa canlı denetim yeşildi ve sistemde
+  hiçbir şey bozuk değildi.</p>
+  <p>Sebep: D'nin kum havuzu yolu <strong>sabitti</strong>
+  (<code>${TMPDIR}/ks_d_kum</code>), ve o sırada arka planda koşan başka bir D
+  örneği aynı havuzu kullanıyordu. <strong>İki koşum birbirini eziyordu.</strong></p>
+
+  <div class="callout">
+    Bu, otuzuncu turun yan etki sınıfının <strong>ağacın dışındaki</strong>
+    hâlidir: AL-01..03 ağacı koruyor, ama <code>/tmp</code> altındaki
+    paylaşılan bir yol onların görüş alanının dışında. AL-08 o boşluğu kapatır
+    ve her koşum kendi havuzunu alır.
+    <br><br>
+    Ders, bu incelemenin en sık tekrar edeni: <strong>bir takım kırmızı
+    verdiğinde ilk şüpheli sistem değil, ölçümün kendi koşullarıdır.</strong>
+    Burada "5 hata" ne kitabın ne yamanın kusuruydu — ölçümün kendi
+    eşzamanlılığıydı.
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -2736,7 +2759,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 45 takım · 354 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 45 takım · 355 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
