@@ -172,8 +172,11 @@ reachable.
 owner wants graded. They were derived here, not taken from a published
 framework, and the profile severities are judgement calls.
 
-**Why:** no prior prompt corpus of the owner's was available to calibrate
-against — the chat index holds nothing yet.
+**Why:** no corpus of the *owner's* prompts has been available to calibrate
+against. The index is no longer empty — it holds this container's own
+transcripts, which are this session's subagent briefs and one message of theirs
+[src:PROMPT-HABITS-RUN-2026-08-27] — but that is the harness talking to itself,
+not a sample of how they write.
 
 **Resolves when:** a body of the owner's real prompts is indexed and scored, and
 the rules that misfire on them are corrected. `prompt_forge.py score` over an

@@ -572,6 +572,42 @@ Loop twelve's consistency guard caught the new tool going undocumented within a
 minute of its existing, which is the third loop running that a previous loop's
 guard has caught this one's mistake.
 
+## Seventeenth loop — a claim with a half-life, and a guard that did not earn its place
+
+Loop sixteen fixed staleness for numbers. Observe asked the same question of
+prose: which present-tense claims about the world have gone false?
+
+Two. `README.md` said "the chat index holds nothing yet, and says so rather than
+pretending otherwise", and `unknowns.md` U-8 gave the empty index as its reason.
+Both stopped being true in the third loop, when the command the README itself
+recommends was run.
+
+> The surprise is who falsified it. Not drift, not another session — the
+> document's own instruction. It told the reader to run
+> `ingest_chat_archive.py ingest --include-projects`, running it made the status
+> line false, and nothing noticed for thirteen loops in a repository whose first
+> rule is that claims must be sourced.
+
+Both are corrected. The README no longer asserts what the index holds; it names
+the command that reports it, because a status line maintained by hand is a claim
+with a half-life.
+
+**An attempted guard was then backed out, which is the more useful half of this
+loop.** An `UNDATED_STATE` rule was written for `verify_provenance.py`: an
+assertion about mutable state must carry a date. It took four rounds of
+narrowing — conditionals ("if the archive is empty"), generic examples ("a
+repository with no commits"), descriptions of possible output, past-completed
+framings ("both repositories started empty") — and still flagged four of nine
+cases wrongly, including reading "the index is **no** longer empty" as an
+emptiness claim.
+
+The honest reading is that the mechanism was wrong, not that it needed a fifth
+narrowing. Detecting an assertion in English by pattern is the same trap as an
+acceptance test that cannot fail: a check that cannot be made precise. The
+mechanism that does work already exists — loop sixteen's register re-runs the
+command and compares exactly. It was reverted, and rule 8 records why, so the
+next session does not rebuild it.
+
 ## Still open
 
 `U-6`, `U-7` and `U-8` in [unknowns.md](unknowns.md): what Saraev actually

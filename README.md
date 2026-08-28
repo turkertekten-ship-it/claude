@@ -111,6 +111,16 @@ repository content.
 
 ## Status
 
-The tooling runs and is tested. The provenance ledger holds what was actually
-established on 2026-08-27. The chat index holds nothing yet, and says so
-rather than pretending otherwise.
+The tooling runs and is tested — `bash tests/run_all.sh` is the current answer,
+not this paragraph.
+
+This section used to assert that the chat index held nothing. That stopped being
+true the moment somebody ran the command three sections above, and nothing
+noticed for thirteen loops. A status line maintained by hand is a claim with a
+half-life. For anything that changes, run the command:
+
+```bash
+python3 tools/ingest_chat_archive.py stats     # what the index actually holds
+python3 tools/verify_measurements.py           # the numbers these documents quote
+python3 tools/check_consistency.py             # the lists that must agree
+```
