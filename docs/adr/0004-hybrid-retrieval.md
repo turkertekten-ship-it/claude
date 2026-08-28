@@ -19,32 +19,30 @@ MMR.
 
 The argument above is an argument. These are the numbers, from
 `scripts/ablation.py` on the external corpus (266 documents, 3,166 chunks,
-54 golden cases, `base_weight` 5.0), each configuration differing in one thing:
+54 golden cases, `base_weight` 5.0, `rrf_k` 16), each configuration differing in
+one thing:
 
 | configuration | pass | recall@8 | prec@8 | MRR | nDCG@8 |
 |---|---|---|---|---|---|
-| hybrid | **43/54** | **0.8721** | 0.2122 | **0.6994** | **0.7294** |
-| lexical only | 42/54 | 0.8372 | 0.1948 | 0.6617 | 0.6898 |
-| dense only | 37/54 | 0.6744 | 0.1773 | 0.5891 | 0.5985 |
-| no rerank | 32/54 | 0.6047 | 0.0901 | 0.5022 | 0.5204 |
-| no MMR | 42/54 | 0.8488 | **0.2267** | 0.6900 | 0.7174 |
+| hybrid | **44/54** | **0.8953** | 0.2413 | 0.7198 | 0.7505 |
+| lexical only | **44/54** | 0.8837 | 0.2093 | **0.7677** | **0.7803** |
+| dense only | 37/54 | 0.6860 | 0.1890 | 0.5853 | 0.6014 |
+| no rerank | 38/54 | 0.7442 | 0.1570 | 0.5525 | 0.5899 |
+| no MMR | 44/54 | 0.8953 | **0.2442** | 0.7173 | 0.7484 |
 
-Hybrid beats both arms alone on every metric, which no earlier corpus could
-show: at 153 documents it merely tied the lexical arm on pass rate. The arms are
-complementary in the way predicted - **dense alone loses 0.20 of recall, lexical
-alone 0.035** - and reranking is the single most load-bearing component
-(+11 cases, +0.27 recall, +0.12 precision).
+**The decision is under pressure from its own gate.** The lexical arm alone ties
+hybrid on pass rate here and beats it on MRR and nDCG; hybrid keeps a 0.012 edge
+on recall and a wider one on precision. What holds the decision up is the other
+corpus: on the primary set hybrid is 19/20 against 18/20 for either arm alone,
+and it leads on every metric.
 
-MMR has now measured four values across three corpus sizes: neutral at 91, worth
-a case at 153, neutral-to-negative at 266, and worth a case at 266 again once
-`base_weight` moved from 1.0 to 5.0. Its worth is a property of the ordering it
-is handed rather than of MMR, so it moves whenever anything upstream does. It
-stays on and nothing is counted on it.
+So the arms are kept, and the honest summary is narrower than this ADR's
+original claim. Hybrid is *not* reliably better than the lexical arm on this
+corpus at these settings; it is better on one corpus, level on the other, and it
+is insurance against a corpus where lexical matching fails - which is the case
+a hosted embedder would create and this one cannot demonstrate.
 
-The same run on the primary corpus (84 documents, 870 chunks) rates reranking at
-two cases and finds hybrid, dense-only and no-MMR all at 18/20.
-
-**This table has now been overturned five times, and how it was wrong is the
+**This table has now been overturned six times, and how it was wrong is the
 useful part.**
 
 At 33 documents and 2,615 chunks, 90.9% of them PyPI download boilerplate,

@@ -49,7 +49,23 @@ class RetrievalConfig:
     #: to disable an arm and 1.0 otherwise; the values in between are a cliff.
     dense_weight: float = 1.0
     lexical_weight: float = 1.0
-    rrf_k: int = 60
+    #: RRF's rank damping. 60 is the constant from the original TREC work and
+    #: was carried unexamined through every sweep until both the corpus and
+    #: `base_weight` moved (L68). Re-swept at 266 documents with base_weight
+    #: 5.0, 12-20 is a plateau on *both* corpora at once:
+    #:
+    #:     rrf_k        8     12     16     20     25     30     45     60
+    #:     external  43/54  43/54  43/54  43/54  42/54  42/54  42/54  43/54
+    #:     recall@8  .8837  .8837  .8837  .8837  .8605  .8605  .8605  .8721
+    #:     primary   18/20  19/20  19/20  19/20  19/20  19/20  18/20  18/20
+    #:     recall@8  .8125  .8750  .8750  .8750  .8750  .8750  .8125  .8125
+    #:
+    #: 16 is the middle of that intersection. Lower `k` means less damping of
+    #: the top-rank advantage, which is what a fused score deserves once it
+    #: carries five times the weight it used to. It also widens the usable range
+    #: of the arm weights, whose cliff sits at `(rrf_k + candidate_k)/(rrf_k+1)` -
+    #: 1.64 at 60, 3.29 at 16 (fusion.py, L65).
+    rrf_k: int = 16
     use_mmr: bool = True
     mmr_lambda: float = 0.7
     use_rerank: bool = True

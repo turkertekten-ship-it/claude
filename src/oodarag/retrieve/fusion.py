@@ -19,14 +19,16 @@ retrieval mechanisms is the strongest signal available.
 list of `n` candidates every contribution lies between `weight/(k+1)` and
 `weight/(k+n)`, so one arm's whole range spans a factor of only
 
-    (k + n) / (k + 1)      = 1.64 at the shipped k=60, candidate_k=40
+    (k + n) / (k + 1)      = 3.29 at the shipped k=16, candidate_k=40
+                           = 1.64 at the k=60 this shipped with until L68
 
 Give one arm more than that ratio and *every* document it returns outscores
 every document the other arm returns alone: the lighter arm stops contributing
-anything but tie-breaks. Measured on the external set (L65): `lexical_weight`
-0.75 and 0.9 behave like the shipped 1.0, 0.65 loses two cases, and **0.6 is
-indistinguishable from 0.0** - 44/54, recall 0.8023, nDCG 0.6972, the same
-numbers as deleting the arm.
+anything but tie-breaks. Measured at k=60 (L65): `lexical_weight` 0.75 and 0.9
+behaved like the shipped 1.0, 0.65 lost two cases, and **0.6 was
+indistinguishable from 0.0** - identical to four decimals on three metrics, the
+same numbers as deleting the arm. Halving `k` to 16 doubled the usable range,
+which is a side effect of that change rather than its purpose.
 
 The cliff moves when `k` or the candidate pool moves, and neither is next to the
 weights. `test_rrf_weight_ratio_beyond_the_rank_range_silently_drops_an_arm`

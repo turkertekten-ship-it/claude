@@ -18,7 +18,7 @@
 | External eval corpus | done | 266 PyPI pages with provenance, release dates and a manifest, rebuildable by `scripts/build_external_corpus.py`; 5 of 54 questions contaminated, 31 documents held out as 36 holdouts |
 | Incremental deletion | done | Removals propagate to the delta, prune guarded at 25% of a source, refused entirely for a failed connector |
 | CLI | done | `preflight, index, query, eval, loop, status, journal, demo` |
-| CI | done | Three jobs: stdlib matrix, numpy path, retrieval regression gate; floors 0.85 primary, 0.77 external (rebased for a corpus 74% larger, then ratcheted for base_weight 5.0; L66, L67) |
+| CI | done | Three jobs: stdlib matrix, numpy path, retrieval regression gate; floors 0.85 primary, 0.79 external (rebased for a corpus 74% larger, then ratcheted for base_weight 5.0; L66, L67) |
 | Non-negotiables | verified | All five attacked directly, not just asserted: zero-dependency walked module by module, provenance and redaction attacked with crafted inputs, degradation measured through partial and silent-empty source failures (L37-L39) |
 
 **Current measurements** (offline embedder, deterministic).
@@ -31,12 +31,12 @@ negative case look like a retrieval regression.
 
 | | primary (this repo) | external (266 PyPI pages) |
 |---|---|---|
-| golden cases | **18/20** | **43/54** |
-| recall@8 | 0.8125 | 0.8721 |
-| precision@8 | 0.2266 | 0.2122 |
-| hit@8 | 0.8750 | 0.9070 |
-| MRR | 0.5990 | 0.6994 |
-| nDCG@8 | 0.6274 | 0.7294 |
+| golden cases | **19/20** | **44/54** |
+| recall@8 | 0.8750 | 0.8953 |
+| precision@8 | 0.2500 | 0.2413 |
+| hit@8 | 0.9375 | 0.9302 |
+| MRR | 0.6510 | 0.7198 |
+| nDCG@8 | 0.6734 | 0.7505 |
 | citation coverage | 1.00 | 1.00 |
 | contamination | 4/20 questions, 10 documents (20 holdouts) | 5/54 questions, 31 documents (36 holdouts) |
 | role | smoke test | **regression gate** |
@@ -73,26 +73,27 @@ whose value depends on what the last session wrote in markdown cannot detect a
 regression in retrieval, which is what the external column is for.
 
 What each retrieval arm is worth, on the external set (`scripts/ablation.py`,
-266 documents, 3,166 chunks, `base_weight` 5.0 - the whole table re-run, never a
-column):
+266 documents, 3,166 chunks, `base_weight` 5.0, `rrf_k` 16, priors rescaled -
+the whole table re-run, never a column):
 
 | configuration | pass | recall@8 | prec@8 | MRR | nDCG@8 |
 |---|---|---|---|---|---|
-| hybrid | **43/54** | **0.8721** | 0.2122 | **0.6994** | **0.7294** |
-| lexical only | 42/54 | 0.8372 | 0.1948 | 0.6617 | 0.6898 |
-| dense only | 37/54 | 0.6744 | 0.1773 | 0.5891 | 0.5985 |
-| no rerank | 32/54 | 0.6047 | 0.0901 | 0.5022 | 0.5204 |
-| no mmr | 42/54 | 0.8488 | **0.2267** | 0.6900 | 0.7174 |
+| hybrid | **44/54** | **0.8953** | 0.2413 | 0.7198 | 0.7505 |
+| lexical only | **44/54** | 0.8837 | 0.2093 | **0.7677** | **0.7803** |
+| dense only | 37/54 | 0.6860 | 0.1890 | 0.5853 | 0.6014 |
+| no rerank | 38/54 | 0.7442 | 0.1570 | 0.5525 | 0.5899 |
+| no mmr | 44/54 | 0.8953 | **0.2442** | 0.7173 | 0.7484 |
 
-Reranking is the most load-bearing component by a distance - eleven cases - and
-hybrid beats both arms alone on every metric, which the 153-document corpus
-could not show.
+**The dense arm is on notice again.** On the gate corpus the lexical arm alone
+now ties hybrid on pass rate and *beats* it on MRR and nDCG - one configuration
+ago hybrid beat both arms on every metric. The primary corpus still says hybrid
+(19/20 against 18/20 for either arm alone), which is the only reason the arm
+survives this reading. ADR 0004 has now been overturned six times and this is
+the second time the dense arm has been the thing overturned.
 
-**MMR is worth a case again, and that is the point rather than the number.**
-Measured four times now: neutral at 91 documents, worth a case at 153, neutral
-and slightly negative at 266, and worth a case at 266 once `base_weight` moved
-to 5.0. Its value is not a property of MMR but of the ordering it is handed, so
-it will keep moving whenever anything upstream does. Left on, and not counted on.
+Reranking is worth six cases and MMR none on the external set, one on primary.
+Both numbers have moved every time something upstream did; an ablation measures
+a component *in a configuration*, never a component.
 
 Nothing here is saturated any more. recall@8 was 0.9821 with a median of 1.0 on
 the 33-document corpus; it now reads 0.9186 with a minimum of 0.0.
@@ -197,11 +198,15 @@ its current failures are that artefact. See docs/EVALUATION.md.
   itself the finding. It currently buys a case and costs ordering quality on
   both corpora. The table is in `retrieve/rerank.py`.
 
-- **Retuning `candidate_k`, `mmr_lambda`, `rrf_k` or `coverage_weight`.** All
-  four swept over both corpora and confirmed on plateaus at their current values
-  (L33, `scripts/constant_sweep.py`). `candidate_k` is the one worth knowing
-  about: a deeper candidate pool is *worse*, not better, because it gives the
-  reranker more chances to promote the wrong document.
+- **Retuning `candidate_k`, `mmr_lambda` or `coverage_weight`.** Swept over both
+  corpora and confirmed on plateaus (L33), then re-swept after `base_weight` and
+  `rrf_k` moved, because a constant confirmed under a different configuration is
+  a stale constant (L68). `rrf_k` did move, 60 to 16. `candidate_k` stays at 40
+  and **its recorded rationale is now false**: "a deeper pool is worse, because
+  it gives the reranker more chances to promote the wrong document" held when
+  the reranker decided almost the whole ordering. With the fused score carrying
+  five times the weight, 30 through 80 are level and 80 is a single high sample
+  between two lower ones - a peak to leave alone, not a plateau to move to.
 
 - **Term co-occurrence as a gate signal.** Measured and refuted: the terms of the
   worst unanswerable case do co-occur, and three answerable cases have none
@@ -218,7 +223,7 @@ its current failures are that artefact. See docs/EVALUATION.md.
   swept over both corpora (`scripts/embedder_sweep.py`, L65). 768 is where
   hybrid pass rate is maximal; 1536 and up cost 1.5x to 4.6x query latency to
   lose a case. The weights are not a dial: past a ratio of
-  `(rrf_k + candidate_k) / (rrf_k + 1)` = 1.64 the lighter arm is dropped
+  `(rrf_k + candidate_k) / (rrf_k + 1)` - 1.64 at the old `rrf_k`, 3.29 now - the lighter arm is dropped
   entirely, and `lexical_weight=0.6` measures identical to `0.0`. The one
   tempting setting, 0.75, is a peak on the external corpus and costs a case on
   the primary one.

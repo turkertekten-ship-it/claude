@@ -2559,8 +2559,13 @@ class RecencyTest(unittest.TestCase):
 
     NOW = 1_700_000_000.0
 
-    def _ranked(self, ages_days, weight=0.08):
-        """Identical documents differing only in age; returns their order."""
+    def _ranked(self, ages_days, weight=0.8):
+        """Identical documents differing only in age; returns their order.
+
+        Recency ships off (L61), so this has to pass a weight, and the weight is
+        relative to `base_weight` - a tie-breaker is only as strong as the score
+        it breaks ties in. 0.08 delivered this property when `base_weight` was
+        1.0; at 5.0 the same property needs 0.8, measured (L68)."""
         store = SqliteStore(":memory:")
         self.addCleanup(store.close)
         pipeline = IndexPipeline(store)
@@ -2623,7 +2628,10 @@ class AuthorityTest(unittest.TestCase):
     neither. These tests are its whole coverage.
     """
 
-    def _ranked(self, authorities, weight=0.12):
+    def _ranked(self, authorities, weight=None):
+        """`weight=None` means the shipped default, so this cannot pin a value
+        the reranker has moved away from - which is how it came to assert 0.12
+        after the default became 0.6 (L68)."""
         store = SqliteStore(":memory:")
         self.addCleanup(store.close)
         pipeline = IndexPipeline(store)
@@ -2639,7 +2647,8 @@ class AuthorityTest(unittest.TestCase):
 
         retriever = HybridRetriever(store, pipeline.embedder)
         retriever.reranker.clock = lambda: 1_700_000_000.0
-        retriever.reranker.authority_weight = weight
+        if weight is not None:
+            retriever.reranker.authority_weight = weight
         results, _ = retriever.retrieve("how are dense and lexical arms combined")
         return [r.chunk.doc_id for r in results]
 

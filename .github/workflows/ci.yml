@@ -88,6 +88,12 @@ jobs:
           # left where it was after an improvement lets the gain erode
           # silently; a floor moved up locks it in. 17/20 = 0.85 still passes,
           # so this tolerates exactly one regression, which is the intent.
+          #
+          # Deliberately NOT ratcheted when this corpus reached 19/20 (L68).
+          # Its pass rate moves by a case when a session writes documentation,
+          # in both directions, with no retrieval change at all (L63) - so a
+          # tight floor here would fail CI on prose. The external gate is the
+          # one that ratchets.
           python -m oodarag.cli eval \
             --exclude-source chat \
             --min-pass-rate 0.85 \
@@ -105,13 +111,14 @@ jobs:
           # the same retriever read 41/54 instead of 48/54 (L66): a floor is a
           # ratchet against regression, not a claim about a fixed corpus, so
           # replacing the corpus retires it. Then ratcheted 0.74 -> 0.77 when
-          # base_weight 5.0 took the same corpus to 43/54 (L67) - a floor left
-          # where it was after an improvement lets the gain erode silently.
-          # 42/54 = 0.778 passes and 41/54 = 0.759 fails, so one regression is
+          # base_weight 5.0 took the same corpus to 43/54 (L67), then rrf_k 16
+          # and the rescaled priors took it to 44/54 (L68) - a floor left where
+          # it was after an improvement lets the gain erode silently.
+          # 43/54 = 0.796 passes and 42/54 = 0.778 fails, so one regression is
           # tolerated and two are not, the tightness this floor has always had.
           python -m oodarag.cli --config oodarag-external.toml eval \
             --goldens evals/goldens-external.jsonl \
-            --min-pass-rate 0.77 --out eval-external.md
+            --min-pass-rate 0.79 --out eval-external.md
 
       - uses: actions/upload-artifact@v4
         if: always()

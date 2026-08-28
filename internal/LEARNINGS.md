@@ -3611,3 +3611,112 @@ pre-fix definition matches 341 files, 266 of them external corpus pages.
    stale** - the ablation, MMR's worth and the expansion A/B all had to be
    re-run after `base_weight` changed, and each was measured at the old value
    an hour earlier.
+
+---
+
+## L68 - Every constant confirmed under the old configuration was a stale constant
+
+L67 changed `base_weight` from 1.0 to 5.0 and ended with the rule that every
+measurement depending on a moved constant is stale. This is that rule applied to
+the rest of the retrieval constants, all of which were "swept over both corpora
+and confirmed on plateaus" (L33) - at `base_weight` 1.0, on a corpus of 153
+documents.
+
+**`rrf_k` moved, 60 to 16.** 60 is the constant from the original TREC work,
+carried unexamined. Re-swept at 266 documents with `base_weight` 5.0, 12-20 is a
+plateau on *both* corpora simultaneously:
+
+| rrf_k | 8 | 12 | 16 | 20 | 25 | 30 | 45 | 60 |
+|---|---|---|---|---|---|---|---|---|
+| external | 43/54 | 43/54 | **43/54** | 43/54 | 42/54 | 42/54 | 42/54 | 43/54 |
+| recall@8 | .8837 | .8837 | **.8837** | .8837 | .8605 | .8605 | .8605 | .8721 |
+| primary | 18/20 | 19/20 | **19/20** | 19/20 | 19/20 | 19/20 | 18/20 | 18/20 |
+
+Less damping suits a fused score that now carries five times the weight it used
+to. It also widens the arm-weight cliff from 1.64 to 3.29 (L65), which is a side
+effect rather than a reason.
+
+**`candidate_k` stayed at 40 and its recorded rationale did not.** L33 recorded
+"a deeper candidate pool is *worse*, because it gives the reranker more chances
+to promote the wrong document". Under the new fusion, 30 through 80 are level
+and 80 is a single high sample (44/54) between 60 and 120 (43 and 42) - a peak,
+so nothing moves, but the *reason* the old value survives is now the opposite of
+the recorded one.
+
+### Raising one side of a sum retires the other side
+
+Two tests started failing on the `base_weight` change, and they were right to:
+
+```
+FAIL: test_a_trusted_source_outranks_an_identical_untrusted_one
+FAIL: test_a_fresher_document_outranks_an_identical_stale_one
+```
+
+`authority` and `recency` are *tie-breakers*: what matters is their size
+relative to the score whose ties they break. Multiplying the fused term by five
+without touching them cut their influence by the same factor, and the property
+they exist for - a trusted or fresher document outranking an otherwise identical
+one - stopped holding. Nothing in the configuration says these numbers are
+coupled; two tests did.
+
+Rescaled to match, and the cost measured rather than assumed:
+
+| | authority 0.12 | 0.6 | position 0.05 | 0.25 |
+|---|---|---|---|---|
+| external | 43/54 | 43/54 | 43/54 | **44/54** |
+| primary | 19/20 | 19/20 | 19/20 | 19/20, nDCG .6157 -> **.6734** |
+
+Authority is free, exactly as L62 predicted for a feature that does not vary
+within candidate sets - it changes nothing on either corpus and restores the
+tie-break. Position buys a case.
+
+**And `position_weight` was left at 0.25 rather than 0.8, where it measures
+better.** The external corpus improves monotonically all the way up - 46/54 and
+recall 0.9186 at 0.8, with no plateau anywhere - while the primary corpus loses
+recall past 0.35. A knob that only ever wants to go up on one corpus is
+measuring that corpus's shape: PyPI pages open with the description that answers
+the question, so "prefer the first chunk" keeps paying. That is a fact about the
+pages. 0.25 is the principled value - the old weight times the change in
+`base_weight` - and it is where the two corpora still agree.
+
+**Recency's conclusion survived the rescale and its scale did not.** Re-swept at
+the new `base_weight`: 0.0 reads 44/54, then 43, 43, 41, 38 at 0.1, 0.2, 0.4 and
+0.8. Off is still best and still degrades monotonically (L61), but the *value*
+that delivers the documented behaviour moved from 0.08 to 0.8, and the test that
+pins that behaviour had 0.08 hardcoded. The authority test now passes `None` and
+reads the shipped default, so it cannot pin a value the reranker has left.
+
+### Where the session's changes leave the gate
+
+| | before this session | now |
+|---|---|---|
+| external corpus | 153 pages | **266 pages** |
+| external pass | 48/54 | **44/54** |
+| external recall@8 | 0.9070 | 0.8953 |
+| primary pass | 18/20 | **19/20** |
+| primary recall@8 | 0.7812 | **0.8750** |
+
+The external column looks like a loss and is not: on the *same* 266-page corpus
+the retriever went 41/54 to 44/54 and recall 0.8140 to 0.8953. The 48/54 was
+measured on a corpus 43% smaller that flattered it (L66). The floor is ratcheted
+0.77 to 0.79.
+
+**The primary floor was deliberately not ratcheted** to match its 19/20. That
+corpus's pass rate moves by a case when a session writes documentation, in both
+directions, with no retrieval change at all (L63) - so a tight floor there would
+fail CI on prose. Only the corpus that cannot describe this repository gets a
+tight ratchet.
+
+**Rules.**
+1. **A constant confirmed under a configuration is confirmed *for* that
+   configuration.** Four constants were on documented plateaus; one moved, and
+   two of the other three changed value or rationale.
+2. **When a knob scales one term of a sum, every other term's meaning changed.**
+   The priors were not touched and were retired anyway. Ask what a number is
+   relative to before deciding it is unaffected.
+3. **A test that hardcodes a default will pin the value the code has left.**
+   `weight=None` and read the shipped default: then the test measures the
+   system rather than a copy of it.
+4. **A knob that improves monotonically on one corpus with no plateau is
+   measuring that corpus.** Stop at the principled value and write down what the
+   ramp was telling you.

@@ -193,7 +193,7 @@ class HeuristicReranker(Reranker):
     #: nothing to say about it, and tuning it against a 20-case set where no
     #: metric moves would be fitting noise. It becomes real on a corpus that
     #: mixes sources of genuinely different trust *within the same answers*.
-    authority_weight: float = 0.12
+    authority_weight: float = 0.6
     #: **0.0, and that is a measurement rather than a default.**
     #:
     #: This was 0.08 and unmeasurable for the life of the project: every
@@ -223,8 +223,31 @@ class HeuristicReranker(Reranker):
     #: raise it for a superseding corpus, and measure, because a prior that
     #: suits the wrong corpus is noise injected into every query. The primary
     #: corpus is unaffected either way - its files still share one checkout age.
+    #:
+    #: Re-swept after `base_weight` became 5.0, since the table above was taken
+    #: at 1.0 and these weights are relative to it: 0.0 reads 44/54, then 43,
+    #: 43, 41 and 38 at 0.1, 0.2, 0.4 and 0.8. The conclusion survives the
+    #: rescale unchanged - off is best and it degrades monotonically - and the
+    #: scale does not: 0.8 is now where a fresher document reliably outranks an
+    #: identical stale one, where 0.08 used to be (L68).
     recency_weight: float = 0.0
-    position_weight: float = 0.05
+    #: Both query-independent priors are scaled to `base_weight`: they are
+    #: tie-breakers, so what matters is their size *relative to the fused score
+    #: they are breaking ties in*. Raising `base_weight` 1.0 -> 5.0 without them
+    #: silently retired them - two tests that assert a trusted or fresher
+    #: document outranks an otherwise identical one started failing, which is
+    #: the property they exist for (L68). At 5x they work again, and the cost is
+    #: measured: authority is free (identical on both corpora, exactly as L62
+    #: predicted for a feature that does not vary within candidate sets) and
+    #: position buys a case on the external corpus and nDCG on both.
+    #:
+    #: `position_weight` is *not* tuned past this. It keeps improving the
+    #: external corpus monotonically - 46/54 and recall 0.9186 at 0.8 - with no
+    #: plateau anywhere, while the primary corpus loses recall past 0.35. A
+    #: knob that only ever wants to go up on one corpus is measuring that
+    #: corpus's shape: PyPI pages open with the description that answers the
+    #: question. That is a fact about the pages, not about retrieval.
+    position_weight: float = 0.25
     #: How much the fused retrieval score counts against this reranker's own
     #: adjustment. The two are on different scales - RRF contributions span
     #: about 0.021 while the adjustment spans 0.720 - so at 1.0 the two
