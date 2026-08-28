@@ -407,6 +407,39 @@ ETKİLENEN ve SÜRÜMSÜZ işaretleri tanımlandı), "hiçbir dosyayı düzenlem
 kuralı aynen korundu ve tablonun makinede kalması kural 6 gereği açıkça
 yazıldı. Kitaba sadık sürüm `yamalar/kitaba-sadik/esik-denetle.md`.
 
+## §8 · Çıkar çatışması
+
+**[A] Çatışma kontrolü tek yönlü ve yalnızca açılış anına bağlı.**
+§8 tek cümledir: *"Bir dosya **açılmadan önce** `hafiza/cikar-catismasi.md`
+**karşı taraflar için** kontrol edilir. Çatışma bir uyarı değil, durma
+sebebidir."* `/dosya-ac` bunu birebir uyguluyor: *"verilen **karşı taraf**
+adlarını ara."* İki bağ da sınanmamış:
+
+**Yön.** Çatışma simetrik bir ilişkidir ve en ağır hâli tersidir: yeni
+dosyanın **müvekkili**, açık bir dosyanın **karşı tarafı** olabilir — yani
+şu anda aleyhine çalıştığımız kişi için çalışmaya başlarız. Kaydın kendi
+biçimi (`<taraf adı> · <dosya> · <hangi tarafta> · <tarih>`) bu soruyu
+cevaplayacak veriyi **zaten taşıyor**; prosedür hiç sormuyor.
+
+**Zaman.** Kontrol açılış anına bağlı. Kayda sonradan bir ad girdiğinde
+çatışma **o an doğar** ve hiçbir şey geriye bakmıyor. Otuz birinci turdaki
+eşik sorusunun ("mevzuat değişti, verilmiş görüşe ne oluyor") çıkar
+çatışması ayağındaki hâli — ve aynı kök: kitap kontrolleri **olaylara**
+değil **anlara** bağlıyor.
+
+Kitap iki şeyi doğru yapıyor ve bunlar olumlu kontrol olarak tutuldu: boş
+kayıt "temiz" sayılmıyor, ve eşleşme uyarı değil durma sebebi. §18.9 de
+sınırı dürüstçe beyan ediyor ("bu dosya yalnızca içine yazıldığı kadar
+iyidir") — ama o sınır **açıklanmamış ilişkilere** dairdir; yön ve zaman
+boşluğu açıklanmış ilişkilerde bile açıktır. *(AO-02, AO-03)*
+
+→CEVAP: YOK — cevabın "yamalı hâlde sistem çalışıyor" cümlesi kapsıyor:
+kontrol iki yönlü hâle getirildi ve kayda taraf işlendiğinde açık dosyaları
+yeniden tarayan bir adım eklendi (bildirir, düzenlemez; tablo makinede
+kalır). **Yama neyin çatışma SAYILDIĞINA karar vermez** — o bir meslek
+kuralları meselesidir ve §9 uyarınca insana aittir; yalnızca mekanik
+kontrolün iki yönü de kapsaması sağlandı.
+
 ## §12 · Kapılar — sır kapısının görmediği yol
 
 **[A] Sır kapısı müvekkil ADINI arıyor ama müvekkil DOSYA YOLUNU görmüyor.**

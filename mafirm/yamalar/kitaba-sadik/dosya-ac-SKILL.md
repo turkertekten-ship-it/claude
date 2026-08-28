@@ -6,14 +6,9 @@ description: Yeni bir dosya (iş) açılırken, bir işe klasör, çıkar çatı
 # Dosya açma
 
 ## Sıra kesindir
-1. **Çıkar çatışması kontrolü — İKİ YÖNLÜ.** `hafiza/cikar-catismasi.md`
-   okunur ve **hem karşı taraf adları hem de müvekkil adı** kayıtta aranır:
-   çatışma simetriktir ve en ağır hâli, yeni dosyanın müvekkilinin açık bir
-   dosyanın karşı tarafı olmasıdır. Dosya bu adımdan önce açılmaz. Bir
-   eşleşme —hangi yönde olursa olsun— uyarı değil DURMA sebebidir
-   (işletim sözleşmesi §8). Kayda yeni taraf işlendiğinde `dosyalar/*/`
-   altındaki açık dosyalar aynı iki yönlü aramayla yeniden taranır; bulunan
-   bildirilir, hiçbir dosya düzenlenmez.
+1. **Çıkar çatışması kontrolü.** `hafiza/cikar-catismasi.md` karşı taraflar için
+   okunur. Dosya bu adımdan önce açılmaz. Bir eşleşme uyarı değil DURMA
+   sebebidir (işletim sözleşmesi §8).
    Dosya yoksa: bu bir "temiz" sonucu değildir. "Çatışma listesi yok, kontrol
    yapılamadı" yazılır ve insana sorulur.
 2. **Klasör.** `dosyalar/<ad>/` altında `veri/`, `cikti/`, `KAPSAM.md`.

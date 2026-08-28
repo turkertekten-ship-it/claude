@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** otuz yedi çalıştırılabilir takım — **312
+**Yamalı hâlde sistem çalışıyor:** otuz sekiz çalıştırılabilir takım — **317
 vaka, 15 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15, birimler arası tutarlılık takımının
 kendi mutasyon yakalaması 10/10. Ama **üç mevzuat bulgusu ile kitabın kendi içindeki bir çelişki açık kalır**
@@ -1931,6 +1931,52 @@ karşılaştırmanın **yapılabilirliğidir**, belirli tarihsel eşiklerin
 doğruluğu değil; gerçek bir tarihsel rakam yazmak §11'in mevzuat katmanına
 birincil kaynaksız bir iddia sokardı.
 
+### Çatışma kontrolü tek yönlü bakıyordu — ve yalnızca bir an
+
+§8 tek cümledir: *"Bir dosya **açılmadan önce** `hafiza/cikar-catismasi.md`
+**karşı taraflar için** kontrol edilir. Çatışma bir uyarı değil, durma
+sebebidir."* `/dosya-ac` bunu birebir uyguluyor: *"verilen **karşı taraf**
+adlarını ara."* O cümlede iki bağ var ve ikisi de sınanmamıştı.
+
+**Yön.** Çatışma simetriktir ve en ağır hâli tersidir: yeni dosyanın
+**müvekkili**, açık bir dosyanın **karşı tarafı** olabilir — yani şu anda
+aleyhine çalıştığımız kişi için çalışmaya başlarız. Kaydın kendi biçimi
+(`<taraf adı> · <dosya> · <hangi tarafta> · <tarih>`) bu soruyu cevaplayacak
+veriyi **zaten taşıyor**; prosedür hiç sormuyordu.
+
+**Zaman.** Kontrol açılış anına bağlıydı. Kayda sonradan bir ad girdiğinde
+çatışma **o an doğar** ve hiçbir şey geriye bakmıyordu. Bu, otuz birinci
+turdaki eşik sorusunun çıkar çatışması ayağındaki hâlidir — ve aynı kök:
+**kitap kontrolleri olaylara değil anlara bağlıyor.**
+
+Kitap iki şeyi doğru yapıyor; ikisi de olumlu kontrol olarak tutuldu (boş
+kayıt "temiz" sayılmıyor; eşleşme durma sebebi). §18.9 sınırı da dürüstçe
+beyan ediyor — ama o sınır **açıklanmamış** ilişkilere dairdir; yön ve zaman
+boşluğu **açıklanmış** ilişkilerde bile açıktı.
+
+**Yamanın sınırı açıkça yazıldı:** neyin çatışma *sayıldığına* karar
+verilmedi. O bir meslek kuralları meselesidir ve §9 uyarınca insana aittir;
+yalnızca mekanik kontrolün iki yönü de kapsaması sağlandı.
+
+### Aynı ölçüt üç kez fazla geniş çıktı
+
+AO-02 bu turda üç kez yeşil verdi ve üçü de yanlıştı — üçü de tek bir
+sınıfın örneği: **yakınlık kanıt değildir.**
+
+| ölçek | neyi yakaladı | neden yanlıştı |
+|---|---|---|
+| 600 karakterlik **pencere** | "müvekkil" | üçüncü adımdan geliyordu — KAPSAM.md'ye *yazan* bir talimattan |
+| **cümle** | "müvekkilinin" | yamanın *açıklama* cümlesiydi, iki nokta üst üstenin ardında |
+| `ara\b` | — | Türkçe çekimi görmüyor: "aranır" = ara + ek *(AE sınıfı, beşinci kez)* |
+
+Ölçüt sonunda **cümleciğe** indirildi: bir cümlecik hem arama fiilini, hem
+müvekkili, hem de neyin içinde arandığını taşımak zorunda. Ancak o zaman
+mutasyon (beceriden müvekkil aramasını çıkar) yakalandı.
+
+**Ve AO-05 kendi yamamı yakaladı:** cümleye bir ara söz eklemek
+("eşleşme varsa —hangi yönde olursa olsun— DUR") ölçütün aradığı dizgeyi
+bozdu. Ölçüt bir *cümleyi* değil bir *anlamı* sınamalıydı; öyle yapıldı.
+
 ---
 
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
@@ -2048,6 +2094,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | AL · takımların yan etkisi / bağımsızlık | *B-34 canlı ad kaydını yok ediyor, AF-03 kendi koşumunu okuyor* | **temiz** — iki yan etki kapatıldı, sağlama epiloga taşındı |
 | AM · kararın hukuki sürümü | *eşik denetimi canlı dosyaları hiç açmıyor* | **temiz** — tarama kapsamı vaadine eşitlendi |
 | AN · yamanın kabul sınaması | *yamanın tablosu kapıya görünmüyordu* | **temiz** — sır kapısına canlı iş yolu kuralı eklendi |
+| AO · çatışmanın yönü ve zamanı | *kontrol tek yönlü ve yalnız açılışta* | **temiz** — iki yönlü ve geriye dönük hâle getirildi |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -2106,7 +2153,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 ### Nasıl yeniden koşulur
 ```
 ./sinama/hepsi.sh                 # 34 çalıştırılabilir takım:
-                                  #   312 vaka + 15 mutasyon (D)
+                                  #   317 vaka + 15 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -2184,9 +2231,10 @@ Dokuz takım, 96 vaka:
 | AL | **Takımların yan etkisi ve bağımsızlığı** — takım kendi ölçtüğü ağacı kirletiyor mu | §8, kural 6, §12 |
 | AM | **Kararın hukuki sürümü** — eşik değişince verilmiş görüşe ne oluyor | §3, §5.1, §11 |
 | AN | **Yamanın kabul sınaması** — eklenen katman gerçekten karar verdiriyor mu | §15.1, kural 6 |
+| AO | **Çıkar çatışmasının yönü ve zamanı** — kontrol simetrik mi, geriye bakıyor mu | §8, §9, §18.9 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**312 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**317 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)

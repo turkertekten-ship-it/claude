@@ -100,6 +100,8 @@ python3 "$S/ks_am_surum.py"; topla "AM · kararın hukuki sürümü" $?
 echo
 python3 "$S/ks_an_kabul.py"; topla "AN · yamanın kabul sınaması" $?
 echo
+python3 "$S/ks_ao_catisma.py"; topla "AO · çatışmanın yönü ve zamanı" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"
