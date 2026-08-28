@@ -1538,3 +1538,74 @@ class CitationMarkerTest(unittest.TestCase):
 
         check = verify("[1] Budgets bound the crawl.", self._citations())
         self.assertEqual([c.marker for c in check.citations], [1])
+
+
+class SecretRedactionTest(unittest.TestCase):
+    """Secrets are redacted at the connector boundary - non-negotiable 5.
+
+    Redaction runs on every ingested document (`pipeline.py`, and each
+    connector), so it has two failure directions and they are not symmetric:
+    a missed credential is written into a file that gets copied around, and an
+    over-eager rule rewrites the corpus itself. Both are measured here.
+    """
+
+    def test_the_credential_classes_that_were_leaking(self):
+        """Five classes found by attacking the redactor, each demonstrated
+        leaking before the pattern that now catches it."""
+        for name, text, marker in [
+            ("basic auth", "Authorization: Basic YWRtaW46aHVudGVyMg==", "redacted"),
+            ("url password", "https://user:s3cr3tpass@github.com/x.git", "url-password"),
+            ("db url", "postgres://admin:hunter2hunter@db:5432/app", "url-password"),
+            ("aws secret", "aws_secret_access_key = wJalrXUtnFEMI/K7MDENGbPxRfi", "aws-secret"),
+            ("aws session", "AWS_SESSION_TOKEN=IQoJb3JpZ2luX2VjELb1234567890", "aws-secret"),
+            ("jwt", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIn0.abcdefgh", "jwt"),
+        ]:
+            with self.subTest(name=name):
+                out = redact_secrets(text)
+                self.assertIn(marker, out, f"{name} leaked: {out}")
+
+    def test_a_url_keeps_its_user_and_loses_only_the_password(self):
+        """The user is provenance - which account fetched this - and the
+        password is the secret. Redacting the whole authority would make the
+        citation less useful for no security gain."""
+        out = redact_secrets("https://alice:s3cr3tpass@github.com/org/repo.git")
+        self.assertIn("alice", out)
+        self.assertNotIn("s3cr3tpass", out)
+        self.assertIn("github.com/org/repo.git", out)
+
+    def test_an_ordinary_url_is_untouched(self):
+        for url in ("https://pypi.org/project/blinker/",
+                    "http://localhost:8080/health",
+                    "file:///home/user/claude/src/oodarag/util/text.py"):
+            with self.subTest(url=url):
+                self.assertEqual(redact_secrets(f"See {url} for details."),
+                                 f"See {url} for details.")
+
+    def test_source_code_is_not_rewritten(self):
+        """The reason two attempted improvements were reverted. Allowing the
+        keyword a suffix catches `aws_secret_access_key = ...` and also
+        `unit_tokens = estimate_tokens(...)`; measured, that rewrote 14 of 51
+        source files in this repository against a baseline of 3."""
+        for line in ("unit_tokens = estimate_tokens(unit_text)",
+                     "max_tokens=self.max_tokens,",
+                     "def _idf(self, token: str) -> float:",
+                     "context = format_context(citations, max_tokens=cfg.tokens)"):
+            with self.subTest(line=line):
+                self.assertEqual(redact_secrets(line), line,
+                                 "redaction rewrote source code")
+
+    def test_a_short_secret_is_knowingly_not_caught(self):
+        """Pinning an accepted cost rather than a success.
+
+        `password: hunter2` is seven characters and survives the eight-character
+        floor. Lowering the floor catches it and also catches `token: str)`, so
+        the floor stays and this test exists to make a future change confront
+        the trade rather than discover it. If this ever fails because the floor
+        moved, re-run the false-positive measurement in L38 first.
+        """
+        self.assertEqual(redact_secrets("password: hunter2"), "password: hunter2")
+
+    def test_a_specific_marker_is_not_overwritten_by_the_generic_rule(self):
+        out = redact_secrets("GITHUB_TOKEN=ghp_abcdefghijklmnop0123456789")
+        self.assertIn("github-token", out,
+                      "the generic rule overwrote a more specific marker")

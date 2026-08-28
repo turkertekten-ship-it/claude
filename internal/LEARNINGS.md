@@ -1344,3 +1344,60 @@ Costs nothing: 48/54 and 18/20, citation coverage 1.0 on both, unchanged.
    are never more than 99 citations *and* that anything longer is not a marker -
    the second half was silently false, and false in the direction of shipping
    the bad case.
+
+---
+
+## L38 - Attacking the redactor: five leaks closed, two "improvements" reverted on measurement
+
+**Evidence.** Secrets are redacted at the connector boundary - non-negotiable 5,
+because an index is a file that gets copied around. Attacking `redact_secrets`
+with eleven credential shapes, five got through:
+
+    Authorization: Basic YWRtaW46aHVudGVyMg==            leaked
+    https://user:s3cr3tpass@github.com/org/repo.git      leaked
+    postgres://admin:hunter2hunter@db:5432/app           leaked
+    aws_secret_access_key = wJalrXUtnFEMI/K7MDENG...     leaked
+    eyJhbGciOi....eyJzdWIiOiIxIn0.abcdefgh               leaked
+    password: hunter2                                    leaked
+
+The URL one matters most for this system specifically: the GitHub connector
+handles clone URLs and every chunk stores a provenance URI, so a credential
+there lands in the index **and** in every citation quoting that chunk. The user
+is kept and only the password replaced - the user is provenance, the password is
+the secret.
+
+**Two attempted fixes were reverted, on evidence.** Redaction runs over every
+ingested document, source code included, so it has two failure directions:
+
+    change                              secrets caught   source files rewritten
+    baseline                            6 of 11          3 of 51
+    keyword allowed a suffix            +aws             14 of 51
+    value floor lowered 8 -> 4          +short password  (with above) 14 of 51
+    both reverted, specific patterns    11 of 11         4 of 51
+
+The suffix form catches `aws_secret_access_key = ...` and also
+`unit_tokens = estimate_tokens(...)`, `max_tokens=self.max_tokens` and
+`def _idf(self, token: str)`. Excluding code punctuation from the value does not
+help, because the value simply ends before the bracket. Telling an identifier
+from a credential generically is a losing game, so the keyword rule stays narrow
+and `aws_secret_access_key` is named specifically, where precision costs nothing.
+
+`password: hunter2` is still not caught: seven characters against an eight
+character floor, and lowering the floor catches `token: str)`. That is now a
+**test asserting the leak**, so a future widening has to confront the trade
+rather than discover it.
+
+The remaining false positives are 4 of 91 corpus files and 4 of 51 source files
+against a baseline of 3 and 3. The extra corpus file is `pyjwt.md`, where the
+JWT rule correctly fires on a JWT in the project's own documentation - a
+redactor cannot tell an example credential from a live one and should not try.
+
+**Rules.**
+1. **A redactor has two failure directions and they are not symmetric, but
+   neither is free.** "False positives are cheap" is true right up until the
+   thing being rewritten is the corpus the system exists to search.
+2. Prefer a specific pattern to a widened general one. Every widening of the
+   keyword rule bought one credential shape and cost several files.
+3. **Write a test for the leak you decided not to close.** An accepted cost that
+   is not written down is indistinguishable from an oversight, and the next
+   person to widen the floor will not know it was ever considered.

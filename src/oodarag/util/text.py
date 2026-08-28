@@ -256,8 +256,25 @@ def redact_secrets(text: str) -> str:
         (r"\b(sk-ant-[A-Za-z0-9_\-]{16,})", "<redacted:anthropic-key>"),
         (r"\b(sk-[A-Za-z0-9]{32,})", "<redacted:api-key>"),
         (r"\b(AKIA[0-9A-Z]{16})\b", "<redacted:aws-key-id>"),
+        # Named specifically because the keyword sits in the middle of the name,
+        # which the generic rule below deliberately does not handle - and this
+        # is one of the most widely copy-pasted credential names there is.
+        (r"(?i)\b(aws_secret_access_key|aws_session_token)\s*[:=]\s*[\"']?"
+         r"(?!<redacted)[^\s\"']{16,}[\"']?",
+         r"\1=<redacted:aws-secret>"),
         (r"\b(xox[abposr]-[A-Za-z0-9\-]{10,})", "<redacted:slack-token>"),
-        (r"(?i)\b(bearer)\s+[A-Za-z0-9._\-]{20,}", r"\1 <redacted>"),
+        (r"(?i)\b(bearer|basic)\s+[A-Za-z0-9._\-+/=]{16,}", r"\1 <redacted>"),
+        # A credential inside a URL is the one this system is most likely to
+        # meet: the GitHub connector handles clone URLs, and every chunk stores
+        # a provenance URI, so a leak here lands in the index *and* in every
+        # citation that quotes the chunk. The user is kept - it is provenance,
+        # not a secret - and only the password is replaced.
+        (r"(?i)\b([a-z][a-z0-9+.\-]*://)([^/\s:@]{1,64}):([^/\s@]{1,256})@",
+         r"\1\2:<redacted:url-password>@"),
+        # A JSON Web Token is self-identifying: the header almost always begins
+        # `{"alg"`, which base64url-encodes to `eyJhbGciOi`.
+        (r"\beyJ[A-Za-z0-9_\-]{8,}\.[A-Za-z0-9_\-]{8,}\.[A-Za-z0-9_\-]{8,}",
+         "<redacted:jwt>"),
         (
             # `\b` before the keyword would not match GITHUB_TOKEN= or
             # DB_PASSWORD=, because `_` is a word character and so presents no
@@ -265,12 +282,23 @@ def redact_secrets(text: str) -> str:
             # exclusively, so the naive form silently redacted nothing that
             # mattered. The value class is widened too: a password containing
             # @ or ! is still a password.
+            # No suffix after the keyword, deliberately. Allowing one catches
+            # `aws_secret_access_key = ...` and also `unit_tokens =
+            # estimate_tokens(...)`, taking source files with it: measured, the
+            # suffix form rewrites 14 of 51 files in this repository against a
+            # baseline of 3. Names whose keyword sits in the middle are handled
+            # by specific patterns above, where precision costs nothing.
             r"(?i)(?<![A-Za-z0-9])[A-Za-z0-9_.\-]*"
             r"(api[_-]?key|secret|password|passwd|token|credential)"
             # (?!<redacted) so a value already replaced by a more specific rule
             # above is left alone - otherwise the generic rule overwrites
             # <redacted:github-token> with a vaguer marker and the report loses
             # which kind of credential was found.
+            # Eight characters, unchanged. Lowering it to catch
+            # `password: hunter2` also catches `token: str)` and similar, and
+            # redaction runs over every ingested document including source
+            # code. A shorter secret slipping through is the accepted cost;
+            # rewriting the corpus is not. See L38 for the measurement.
             r"(\s*[:=]\s*)[\"']?(?!<redacted)[^\s\"']{8,}[\"']?",
             r"<redacted:\1>",
         ),
