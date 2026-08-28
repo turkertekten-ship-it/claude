@@ -1431,3 +1431,44 @@ sources:
       the other in prose it would have manufactured exactly the differential
       attrition the module exists to detect. A detector that invents the
       artifact it hunts is the worst version of this tool.
+
+  - id: MODEL-MISREPORTED-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T23:10Z"
+    method: >-
+      tools/acceptance_check.py criterion C2 failed, reporting one model family
+      across the powered runs; then a direct call through ClaudeCLIBackend with
+      model=claude-sonnet-5, printing the raw envelope's modelUsage keys.
+    evidence: >-
+      Asking the CLI for claude-sonnet-5 returns modelUsage keyed
+      ['claude-haiku-4-5-20251001', 'claude-sonnet-5'] — the auxiliary model
+      first. ClaudeCLIBackend._from_envelope took next(iter(model_usage)), so
+      every run in this repository recorded claude-haiku-4-5-20251001 as its
+      model, including all 240 runs of each Sonnet suite. After the fix,
+      asking for claude-sonnet-5 records claude-sonnet-5 and asking for
+      claude-haiku-4-5 records claude-haiku-4-5.
+    note: >-
+      The runs themselves were correct — --model was passed and the CLI honoured
+      it, confirmed by the presence of the asked-for key in modelUsage. What was
+      wrong is the field describing them, which is the field anyone auditing the
+      claim would read. Found by an acceptance criterion, not by a test: no test
+      asserted that a run records the model it was told to use, because the
+      value looked plausible.
+
+  - id: ACCEPTANCE-CRITERIA-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T23:15Z"
+    method: python3 tools/acceptance_check.py
+    evidence: >-
+      15 passed, 0 failed, 2 blocked. The two blocked are the withdrawn Console
+      Workbench UI and direct Messages API access. On its first run the check
+      failed two criteria — C2, which exposed the model misreporting above, and
+      E1, which cited a ledger id that does not exist.
+    note: >-
+      These criteria are one reading of a request that named an ambition rather
+      than a test, written down so they can fail rather than left implicit so
+      that any amount of work could be called sufficient. They are not the
+      author's criteria and may measure the wrong things; a wrong row means the
+      row is wrong, not the evidence. That the first run failed twice, and that
+      one failure was a real defect nobody had tested for, is the argument for
+      writing them as executable rather than as prose.

@@ -1116,7 +1116,23 @@ def test_review_findings() -> None:
     check("compare() excludes errored runs from judging",
           "not r.errored" in src)
 
-    # 6. RunResult.to_dict() never wrote `cases`, so every stratified analysis
+    # 6. _from_envelope took the first modelUsage key, and the CLI reports its
+    #    auxiliary model alongside the one that answered -- so every run in
+    #    this repository recorded haiku regardless of what it ran.
+    cli = backend.ClaudeCLIBackend()
+    env = {"result": "ok",
+           "modelUsage": {"claude-haiku-4-5-20251001": {"outputTokens": 3},
+                          "claude-sonnet-5": {"outputTokens": 120}},
+           "usage": {"input_tokens": 5, "output_tokens": 120}}
+    got = cli._from_envelope(env, backend.Request(prompt="p", model="claude-sonnet-5"), 10)
+    check("a run records the model it was asked for",
+          got.model == "claude-sonnet-5", got.model)
+    # And with no match, the model that did the generating, not the first key.
+    got2 = cli._from_envelope(env, backend.Request(prompt="p", model=""), 10)
+    check("failing that, the model that generated the most",
+          got2.model == "claude-sonnet-5", got2.model)
+
+    # 7. RunResult.to_dict() never wrote `cases`, so every stratified analysis
     #    downstream read an empty mapping and silently reported one stratum.
     rr = runner.RunResult(suite="s", run_id="r", backend="echo", started_at="t",
                           cases=[spec.Case(id="h-x", prompt="p", note="[stratum:heldout]")])

@@ -419,7 +419,29 @@ class ClaudeCLIBackend(Backend):
                        elapsed_ms: int) -> Completion:
         usage = envelope.get("usage") or {}
         model_usage = envelope.get("modelUsage") or envelope.get("model_usage") or {}
-        model_name = next(iter(model_usage), request.model or "")
+        # `next(iter(...))` took whichever key happened to come first, and the CLI
+        # reports its AUXILIARY model alongside the one that answered: asking for
+        # claude-sonnet-5 returns modelUsage keyed
+        # ['claude-haiku-4-5-20251001', 'claude-sonnet-5'], so every run in this
+        # repository recorded haiku regardless of what it actually ran. The runs
+        # were fine; the field describing them was not, and an acceptance check
+        # reading that field concluded a two-family experiment had used one.
+        #
+        # Prefer the model that was ASKED for, then the one that did the most
+        # generating, and only then fall back.
+        model_name = ""
+        if model_usage:
+            asked = request.model or ""
+            exact = [k for k in model_usage if k == asked]
+            prefixed = [k for k in model_usage if asked and k.startswith(asked)]
+            if exact or prefixed:
+                model_name = (exact or prefixed)[0]
+            else:
+                def out_tokens(key: str) -> int:
+                    entry = model_usage.get(key) or {}
+                    return int(entry.get("outputTokens") or entry.get("output_tokens") or 0)
+                model_name = max(model_usage, key=out_tokens)
+        model_name = model_name or request.model or ""
         error = ""
         if envelope.get("is_error"):
             # `subtype` is often the useless string "success" even on an error
