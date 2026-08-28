@@ -78,6 +78,8 @@ python3 "$S/ks_ab_care.py"; topla "AB · blok iletisinin çaresi" $?
 echo
 python3 "$S/ks_ac_ortam.py"; topla "AC · ortam bağımsızlığı" $?
 echo
+python3 "$S/ks_ad_komut.py"; topla "AD · komutların iddiaları" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

@@ -276,6 +276,15 @@ AC-04 aynı boşluğu kitaba sadık kapıda ikinci kez ölçer.
 > ve orada biter (AC-04 beş gün ileri tarihin hâlâ bloklandığını, AC-05 bayat
 > kontrolünün yaşadığını sabitler). *(B-23, AC-01, AC-02, AC-04)*
 
+**[C] §15 komutları başka bileşenler hakkında SAYISAL iddialarda bulunuyor ve
+hiçbiri korunmuyor.** `/spa-incele` "sekiz adımlı sıra", `/kurul-notu` "beş
+bölümlü sıra", `/esik-denetle` "altı aydan eski" der. Üçü de BUGÜN doğrudur —
+ve hiçbir kontrol onları bağlamaz. Kitabın kendi §9'u aynı sınıfta zaten
+bayatladı ("10 beceri", §14 on birinciyi ekleyince). Beceri bir adım
+kazandığında ya da `BAYAT_GUN` değiştiğinde komut sessizce yalan söylemeye
+başlar. → Bir bileşenin başka bir bileşen hakkındaki her sayısal iddiası
+kontrol edilen bir iddia olmalı. *(AD-01, AD-03)*
+
 ## §7 · Ortak koltukları
 
 **[B] Kitabın en yüksek itibar riskli kuralının hiçbir mekanizması yok.**

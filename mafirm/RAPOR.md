@@ -25,7 +25,7 @@ kendi §16 denetimi yeşile dönmedi.
 3. **Denetim on beş bozmadan on birini görmüyor**; sıfır beceri, kancasız
    ayarlar ve tamamen boş bir `esik.py` taşıyan bir sistemde "DENETİM OK" diyor.
 
-**Yamalı hâlde sistem çalışıyor:** yirmi altı çalıştırılabilir takım — **254
+**Yamalı hâlde sistem çalışıyor:** yirmi yedi çalıştırılabilir takım — **260
 vaka, 15 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15, birimler arası tutarlılık takımının
 kendi mutasyon yakalaması 10/10. Ama **üç mevzuat bulgusu ile kitabın kendi içindeki bir çelişki açık kalır**
@@ -1337,6 +1337,47 @@ AA (süre ve arıza yönü) ve AC (ortam) bu üç ekseni artık kalıcı olarak
 
 ---
 
+## Yedi buçuk artı yirmi bir · Komutların iddiaları doğruydu; hiçbiri korunmuyordu
+
+§15 dokuz komut kurar ve her biri **başka bileşenler hakkında iddiada
+bulunur**: *"`spa-inceleme` becerisindeki **sekiz adımlı** sırayı uygula"*,
+*"`kurul-notu` becerisindeki **beş bölümlü** sırayı uygula"*, *"tarih **altı
+aydan** eskiyse bayat"*. L takımı komutların **atıflarını** kontrol ediyordu;
+**söylediklerini** hiçbir şey kontrol etmiyordu.
+
+**Bu turda canlı bir kusur çıkmadı ve bunu olduğu gibi yazıyorum.** Beceri
+gerçekten sekiz adımlı, gerçekten beş bölümlü, `BAYAT_GUN = 183` gerçekten
+altı ay. Dokuz komutun andığı her beceri ve ajan mevcut. Riskli ajan dağıtan
+komutların hepsi sır sınırını yazıyor — `tara.md` bunu on altıncı turda
+`esik-denetcisi`'ne eklediğimden **daha önce** yapıyormuş.
+
+Bulunan şey, kusurun **yokluğunu koruyan hiçbir şeyin olmadığıdır.** Ve bu,
+bu raporun defalarca belgelediği sınıfın ta kendisi:
+
+- §9'un "10 beceri" beklentisi, §14 on birinciyi ekleyince bayatladı.
+- Bu raporun "on üç beyan" satırı, gerçek **on birken** yazılıydı.
+- F matrisi üç kuralda "mekanizma yok" diyordu; **üçünün de** mekanizması vardı.
+
+**El yazısı bir sayı, ölçtüğü şeyden bağımsız yaşar.** Bugün doğru olması,
+yarın doğru kalacağı anlamına gelmiyor — ve bu üç örnekte de tam olarak öyle
+olmadı. AD, komutların sayısal ve yapısal her iddiasını **kontrol edilen bir
+iddiaya** çeviriyor. Mutasyon beşte beş: beceriye bir adım eklemek, bir
+beceriyi silmek, `BAYAT_GUN`'u değiştirmek, bir komuttan §0 sözleşmesini
+kaldırmak ve bir komuttan sır sınırını çıkarmak — hepsi yakalanıyor.
+
+### Takımın kusuru: Türkçe ünlü uyumu
+
+AD-01'in ilk hâli iki iddiadan **birini** doğrulayıp "doğrulandı" diyordu.
+Desen `(adım|bölüm|alan)l[ıi]` arıyordu; Türkçe ünlü uyumu *adım**lı***,
+*bölüm**lü*** verir. "Beş bölümlü" sessizce atlandı.
+
+**Kapsadığını sanan bir dedektör, kapsamadığını söylemez.** On dokuzuncu turun
+tek harfli takım adı kusuruyla aynı sınıf, bu kez Türkçe'nin kendi
+biçimbiliminden. §12'nin İ/ı tuzağı, U-05'in ek çekimi, ve şimdi bu: **Türkçe
+metni desenle okuyan her şey, üçüncü kez aynı yerden sızdı.**
+
+---
+
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
 
 | Bölüm | Beklenen | Gerçek | Sebep |
@@ -1441,6 +1482,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | AA · kapının arıza yönü | *hiç ölçülmemişti* | **temiz** — her arıza 0 ya da 2, süre sınırlı |
 | AB · blok iletisinin çaresi | *teşhis vardı, çare yoktu* | **temiz** — altı kapı da çare gösteriyor |
 | AC · ortam bağımsızlığı | *hiç ölçülmemişti* | **temiz** — yedi dilim, beş yerel ayar, tek karar |
+| AD · komutların iddiaları | *hiç okunmamıştı* | **temiz** — canlı kusur yok; iddialar artık kilitli |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -1498,8 +1540,8 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # 26 çalıştırılabilir takım:
-                                  #   254 vaka + 15 mutasyon (D)
+./sinama/hepsi.sh                 # 27 çalıştırılabilir takım:
+                                  #   260 vaka + 15 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -1566,9 +1608,10 @@ Dokuz takım, 96 vaka:
 | AA | **Kapının arıza yönü** — çökünce açık mı kapalı mı | §12, kural 6 |
 | AB | **Blok iletisinin çaresi** — bloklanan ne yapacağını öğreniyor mu | §14, §12 |
 | AC | **Ortam bağımsızlığı** — cevap makineye göre değişiyor mu | §6, §3, §12 |
+| AD | **Komutların iddiaları** — §15 başka bileşenler hakkında ne söylüyor | §15, §9, §0 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**254 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**260 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)
