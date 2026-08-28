@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** elli yedi çalıştırılabilir takım — **415
+**Yamalı hâlde sistem çalışıyor:** elli sekiz çalıştırılabilir takım — **420
 vaka, 27 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15 → **27/27** (mutasyon kümesi otuz
 sekizinci turda on beşten yirmi yediye çıkarıldı: 26 kontrolün dokuzu hiç
@@ -2692,7 +2692,7 @@ içinde kırmızı, koşumdan sonra yeşil görünüyordu. Onuncu ve on altınc�
 turların katman kuralı — *denetim, kendini denetleyen takımı denetleyemez* —
 **üçüncü kez**, bu kez veri yoluyla çiğnenmişti. Sayı artık durağan ölçülüyor:
 `hepsi.sh`'e bağlı her takımın kendi `BEKLENEN_VAKA` beyanı toplanıyor
-— bugün toplam 415 vaka — ve her takımın kendi sıfırıncı vakası o beyanın
+— bugün toplam 420 vaka — ve her takımın kendi sıfırıncı vakası o beyanın
 gerçeğe eşit olduğunu ayrıca güvenceye alıyor. Bozulmuş bir `SAYIM.txt` ile BB'nin çıktısı
 **birebir aynı** kalıyor; bağımsızlık ölçülerek gösterildi.
 
@@ -3043,6 +3043,29 @@ Bir de mutasyon tarafında: ilk denemede biçim yer tutucularını bozan bir
 mutasyon programı çökertti ve vakayı yanlış sebeple kırmızı yaptı.
 **Programı bozan bir mutasyon, ölçütü sınamaz.**
 
+### Dördüncü dosya: uyarı, riskin bulunduğu her yola değil tek yola bağlıydı
+
+Üç turda aynı biçim üç kez çıktı — ve üçüncüsünde sınıfın adı belli oldu:
+
+| Tur | Uyarı | Nereye bağlıydı | Nerede eksikti |
+|---|---|---|---|
+| 54 | mevzuat belirsizliği (I-01) | yalnızca "evet" | olumsuz cevap |
+| 55 | itirazlı ölçüt (I-02) | hiçbir yere | istisna uygulanırken |
+| 56 | **kapanış yasağı (I-03)** | yalnızca "evet" | **belirlenemiyor** |
+
+Dördüncü dosya şunu sordu: cevap *belirlenemiyor* olduğunda ne yazıyor?
+Çıktı, kural 2'yi doğru uyguluyordu — *"bu hâliyle 'bildirim gerekmez'
+YAZILMAZ"*. Ama **kapanış yasağı yoktu.** Oysa cevap belirsizse işlem
+bildirime tabi **olabilir** ve izinsiz kapanış riski **canlıdır**. Kitabın
+kendi cümlesiyle: *"Yabancı bir alıcı için Türk işlem pratiğindeki en
+sonuçlu cümle budur"* — ve tam da belirsizlikte eksikti.
+
+Sınıf artık bir **değişmezle** kapanıyor: *cevap HAYIR değilse, kapanış
+yasağı çıktıda olmalıdır.* BI-05 bunu üç cevap yolunda birden ölçüyor. Ve
+ters yönü de sınanıyor: kesin olumsuz cevapta yasak **olmamalı** — her yere
+konan bir uyarı bilgi taşımaz, yalnızca gürültü ekler. Mutasyon dördü de
+yakaladı, yasağı risksiz yola koyan mutasyon dâhil.
+
 **Ve mutasyon tarafında üç kez yanıldım — üçü de aynı biçimde.** Üç mutasyon
 "kaçtı" göründü; hiçbiri kaçmamıştı. Zorunlu başlıkların **önüne** bölüm
 ekledim, oysa sınanan şey sonda olmalarıydı. Onay ifadesinin **birini**
@@ -3189,6 +3212,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | BF · ölçüm iddiaları canlı değerle | *rapor "13 alıntı doğrulandı" diyordu; takım 21 alıntı doğruluyordu* | **temiz** — iddia canlı değerden okunuyor |
 | BG · ikinci dosya | *"bildirime tabi değil" cevabı, onu tersine çeviren açık soruyu hiç anmıyordu* | **temiz** — uyarı olumsuz cevabın yanında |
 | BH · üçüncü dosya | *model, teknoloji istisnasının itirazlı ölçütünü ifade edemiyordu* | **temiz** — yerleşiklik alanı ve I-02 uyarısı eklendi |
+| BI · risk uyarısı her cevap yolunda | *kapanış yasağı yalnızca "evet" cevabında yazılıydı* | **temiz** — değişmez sınanıyor: cevap HAYIR değilse yasak var |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -3246,8 +3270,8 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # 57 çalıştırılabilir takım:
-                                  #   415 vaka + 27 mutasyon (D)
+./sinama/hepsi.sh                 # 58 çalıştırılabilir takım:
+                                  #   420 vaka + 27 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -3281,7 +3305,7 @@ vakalardır ve hepsi geçer. Kör sınama o aklın dışında kalanı arar: bir
 hukukçunun gerçekten yazacağı cümleyi, kancanın gerçekten göreceği veriyi,
 bozulduğunda denetimin gerçekten yakalayıp yakalamadığını.
 
-Altmış takım, 415 vaka:
+Altmış bir takım, 420 vaka:
 
 | Takım | Neyi sınar | Kaynağı |
 |---|---|---|
@@ -3345,9 +3369,10 @@ Altmış takım, 415 vaka:
 | BF | **Ölçüm iddiaları** — teslimattaki her ölçüm sayısı, o değeri üreten takımdan okunanla aynı mı | kural 1, §16 |
 | BG | **İkinci dosya** — kayıtlı bir açık soru cevabı tersine çeviriyorsa, uyarı olumsuz cevabın yanında duruyor mu | §5, §19, kural 2 |
 | BH | **Üçüncü dosya** — girdi modeli itiraz edilen ölçütü söyleyebiliyor mu; istisna uygulanırken itiraz anılıyor mu | §5, §19, kural 1 |
+| BI | **Risk uyarısının kapsaması** — kapanış yasağı, riskin bulunduğu her cevap yolunda mı | §5, kural 2, kural 9 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**415 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On üç**
+**420 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On üç**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)

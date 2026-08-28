@@ -140,6 +140,8 @@ python3 "$S/ks_bg_ikinci_dosya.py"; topla "BG · ikinci dosya: cevabı çeviren 
 echo
 python3 "$S/ks_bh_ucuncu_dosya.py"; topla "BH · üçüncü dosya: itirazlı ölçüt ifade edilebiliyor mu" $?
 echo
+python3 "$S/ks_bi_kapanis_uyarisi.py"; topla "BI · risk uyarısı her cevap yolunda mı" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

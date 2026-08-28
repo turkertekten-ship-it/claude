@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>57 çalıştırılabilir takım · 415 vaka · 0 sinyal</span>
+    <span>58 çalıştırılabilir takım · 420 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -3375,6 +3375,41 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Elli altıncı tur</span>
+  <h2>Dördüncü dosya: uyarı tek yola bağlıydı</h2>
+  <p>Üç turda aynı biçim üç kez çıktı — ve üçüncüsünde sınıfın adı belli
+  oldu: <strong>uyarı, riskin bulunduğu her cevap yoluna değil, tek bir yola
+  bağlanmış.</strong></p>
+
+  <table><thead><tr><th>Tur</th><th>Uyarı</th><th>Nereye bağlıydı</th><th>Nerede eksikti</th></tr></thead>
+  <tbody>
+    <tr><td>54</td><td>mevzuat belirsizliği</td><td>yalnızca "evet"</td><td>olumsuz cevap</td></tr>
+    <tr><td>55</td><td>itirazlı ölçüt</td><td>hiçbir yere</td><td>istisna uygulanırken</td></tr>
+    <tr><td><b>56</b></td><td><b>kapanış yasağı</b></td><td>yalnızca "evet"</td><td><b>belirlenemiyor</b></td></tr>
+  </tbody></table>
+
+  <div class="callout">
+    Cevap <em>belirlenemiyor</em> olduğunda çıktı kuralı doğru uyguluyordu —
+    <em>"bu hâliyle 'bildirim gerekmez' yazılmaz"</em>. Ama
+    <strong>kapanış yasağı yoktu.</strong> Oysa cevap belirsizse işlem
+    bildirime tabi <strong>olabilir</strong> ve izinsiz kapanış riski
+    <strong>canlıdır</strong>. Kitabın kendi cümlesiyle: <em>"Yabancı bir
+    alıcı için Türk işlem pratiğindeki en sonuçlu cümle budur"</em> — ve tam
+    da belirsizlikte eksikti.
+  </div>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">BI-05</span>
+      <span class="pill p">Sınıf bir değişmezle kapandı</span></div>
+    <h3>Cevap "hayır" değilse, kapanış yasağı çıktıda olmalıdır</h3>
+    <p>Değişmez üç cevap yolunda birden ölçülüyor. Ters yönü de sınanıyor:
+    kesin olumsuz cevapta yasak <strong>olmamalı</strong> — her yere konan bir
+    uyarı bilgi taşımaz, yalnızca gürültü ekler. Mutasyon dördü de yakaladı,
+    yasağı risksiz yola koyanı dâhil.</p>
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -3560,7 +3595,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 57 takım · 415 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 58 takım · 420 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:

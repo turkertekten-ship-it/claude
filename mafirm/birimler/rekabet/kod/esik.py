@@ -153,8 +153,18 @@ class Sonuc:
                   "(4054 sayılı Kanun; madde numarası DOĞRULANAMADI — "
                   "bkz. hafiza/dogrulama-bulgulari.md I-03).")
         elif self.sonuc == BELIRSIZ:
+            # [BI · elli altıncı tur] Kapanış yasağı YALNIZCA "evet" yolunda
+            # yazılıyordu. Oysa cevap belirlenemiyorsa işlem bildirime tabi
+            # OLABİLİR ve izinsiz kapanış riski CANLIDIR — yasağın en çok
+            # gerektiği yer burasıdır. Uyarıyı tek bir cevap yoluna bağlamak,
+            # bu incelemede üç kez çıkan sınıfın adıdır.
             print("  Yukarıdaki bilinmeyen rakamlar temin edilir. Bu hâliyle "
                   "cevap verilmez.")
+            print("  BU ARADA KAPANIŞ YAPILMAZ: işlem bildirime tabi "
+                  "olabilir ve bildirime tabi bir işlem, izin alınmadan "
+                  "hukuken geçerlilik kazanmaz. İmza serbesttir; kapanış "
+                  "değildir. (4054 sayılı Kanun; madde numarası "
+                  "DOĞRULANAMADI — bkz. hafiza/dogrulama-bulgulari.md I-03.)")
         elif self.itiraz:
             print("  Eşik, KİTABIN YAZDIĞI okumaya göre aşılmıyor. Yukarıdaki "
                   "açık soru çözülmeden 'bildirim gerekmez' sonucuna "
