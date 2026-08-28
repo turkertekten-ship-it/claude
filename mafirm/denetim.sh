@@ -115,6 +115,9 @@ PYX"
 kontrol "errata izlenebilir (her madde bir vakaya bağlı)" \
   "python3 $M/sinama/ks_m_izlenebilirlik.py >/dev/null 2>&1 && echo 'hepsi bağlı'"
 
+kontrol "olumsuz iddia kanıtlı (kural 2)" \
+  "python3 $M/sinama/ks_n_olumsuz.py >/dev/null 2>&1 && echo 'kanıtlı'"
+
 echo "=== kapsanmayan kurallar sesli bildirilir ==="
 adet=$(grep -cve '^[[:space:]]*#' -e '^[[:space:]]*$' "$M/hafiza/muvekkil-adlari.txt" 2>/dev/null | head -1)
 adet=${adet:-0}

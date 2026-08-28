@@ -1,5 +1,5 @@
 ###############################################################
-#  KÖR SINAMA TAKIMI — 2026-08-27T15:53:40Z
+#  KÖR SINAMA TAKIMI — 2026-08-28T07:45:25Z
 ###############################################################
 
 /root/mafirm/sinama/ks_a_esik.py:41: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
@@ -274,7 +274,7 @@ GEÇTİ K-15   koltuk kapısı yöntem dosyalarını bloklamıyor
 KÖR SINAMA L — çapraz referans bütünlüğü
 ================================================================================================
 GEÇTİ L-01   belgelerdeki her yol atfının hedefi var
-        32 atıf incelendi, kırık: yok
+        35 atıf incelendi, kırık: yok
 GEÇTİ L-02   her INDEX kendi yöntem dosyalarının hepsini anıyor
         anılmayan: yok
 GEÇTİ L-03   belgelerde sabit ~/mafirm yolu kalmamış
@@ -294,13 +294,35 @@ KÖR SINAMA M — errata ↔ sınama izlenebilirliği
 GEÇTİ M-01   her errata maddesi bir sınama vakasına atıf yapıyor
         41 madde · atıfsız 0: yok
 GEÇTİ M-02   atıf yapılan her vaka kimliği gerçekten tanımlı
-        132 tanımlı kimlik · uydurma dayanak: yok
+        140 tanımlı kimlik · uydurma dayanak: yok
 GEÇTİ M-03   [A] ve [B] maddelerinin atıfları sadık sistemde gerçekten kaldı
         sadık koşumda kalan vaka: 41 · sınanmamış ağır madde: yok
 GEÇTİ M-04   sadık sistemde kalan her vaka errata'da ya da raporda açıklanmış
         41 vaka kaldı · açıklanmamış: yok
 ------------------------------------------------------------------------------------------------
 4 vaka, 4 geçti, 0 KALDI
+
+================================================================================================
+KÖR SINAMA N — raporun olumsuz iddialarının kanıtı (CLAUDE.md §2)
+================================================================================================
+GEÇTİ N-01   rapor bir olumsuz iddia taşıyor (kural 2 devreye girer)
+        bulunan: ulaşamamıştı
+GEÇTİ N-02   olumsuz iddia makinece kaydedilmiş kanıta dayanıyor
+        vekilin kendi kaydında 4 ret; araç hatası değil, bağımsız kayıt
+GEÇTİ N-03   kanıt host'ları ve ret mekanizmasını adlandırıyor
+        host: 4/4 · hepsi CONNECT 403: True
+GEÇTİ N-04   kanıt hangi kanalların denendiğini tek tek yazıyor
+        eksik kanal: yok
+GEÇTİ N-05   reddin anlamını tanımlayan hüküm alıntılanmış
+        ortamın kendi belgesi alıntılanıyor: 403 = kuruluş politikası reddi
+GEÇTİ N-06   çalışan kanal da yazılmış (kaçamak yok)
+        WebSearch çalışıyor ve kullanıldı; döndürdüğü şey sayfa metni değil
+GEÇTİ N-07   iddia belirli alan adlarıyla sınırlı, genel değil
+        GitHub MCP ile 16 depo çözüldü — 'hiçbir şeye erişilemedi' YANLIŞ olurdu
+GEÇTİ N-08   kanıt, üç mevzuat bulgusunu çözdüğünü İDDİA ETMİYOR
+        erişimin neden yok olduğunu kanıtlamak, bulguyu kapatmaz
+------------------------------------------------------------------------------------------------
+8 vaka, 8 geçti, 0 KALDI
 
 ###############################################################
 #  ÖZET
@@ -315,6 +337,7 @@ GEÇTİ M-04   sadık sistemde kalan her vaka errata'da ya da raporda açıklanm
   K · yönlendirme ve koltuk sağlaması temiz
   L · çapraz referans bütünlüğü   temiz
   M · errata izlenebilirliği           temiz
+  N · olumsuz iddia kanıtı            temiz
   ------------------------------------------------------------
   toplam başarısız vaka               13
 

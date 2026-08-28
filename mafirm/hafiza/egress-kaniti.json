@@ -1,0 +1,32 @@
+{
+  "toplandi": "2026-08-28",
+  "vekil_etkin": true,
+  "secici": false,
+  "arac_kapsamli": false,
+  "reddedilen": [
+    {
+      "ts": "2026-08-28T07:43:07.449Z",
+      "kind": "connect_rejected",
+      "detail": "gateway answered 403 to CONNECT (policy denial or upstream failure)",
+      "host": "www.mevzuat.gov.tr:443"
+    },
+    {
+      "ts": "2026-08-28T07:43:07.706Z",
+      "kind": "connect_rejected",
+      "detail": "gateway answered 403 to CONNECT (policy denial or upstream failure)",
+      "host": "www.rekabet.gov.tr:443"
+    },
+    {
+      "ts": "2026-08-28T07:43:08.433Z",
+      "kind": "connect_rejected",
+      "detail": "gateway answered 403 to CONNECT (policy denial or upstream failure)",
+      "host": "www.resmigazete.gov.tr:443"
+    },
+    {
+      "ts": "2026-08-28T07:43:08.691Z",
+      "kind": "connect_rejected",
+      "detail": "gateway answered 403 to CONNECT (policy denial or upstream failure)",
+      "host": "www.spk.gov.tr:443"
+    }
+  ]
+}

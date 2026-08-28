@@ -34,9 +34,10 @@ Dokuz takım, 96 vaka:
 | K | Yönlendirme, üst bilgi ve koltuk sağlaması | §7, §9, §10, §11 |
 | L | Çapraz referans bütünlüğü ve taşınabilirlik | §4'ün düzen gerekçesi |
 | M | **Errata ↔ sınama izlenebilirliği** — raporun kendisine kanıt kuralı | CLAUDE.md §1 |
+| N | **Olumsuz iddia kanıtı** — raporun kendisine olumsuz iddia kuralı | CLAUDE.md §2 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamadan ve iki
-takım eklendikten sonra **132 vaka, 13 kaldı** — ve on üçünün her biri ya
+takım eklendikten sonra **140 vaka, 13 kaldı** — ve on üçünün her biri ya
 kitabın davranışının bilerek bırakılmış kaydıdır ya da belgelenmiş bir
 öntanımlı boşluktur; hiçbiri yamalı sistemde çözülmemiş bir kusur değildir.
 
@@ -279,7 +280,7 @@ DEĞİLDİ ve yazarların kendi okuması erişim ile akıl yürütmeyi ödünle�
 tamamlayıcı sayıyor. Çalışma bir otomatik kapıyı hiç sınamadı.
 
 ### §5 · Mevzuat — üç bulgu, ikisi bildirime tabiliği değiştirir
-**Bu ortamda hiçbir birincil kaynağa erişilemedi**: `mevzuat.gov.tr`,
+**Bu oturumda dört Türk birincil kaynağı alan adına HTTPS, kuruluş egress politikasıyla CONNECT aşamasında 403 ile reddedildi** (kanıt: `hafiza/egress-kaniti.md`): `mevzuat.gov.tr`,
 `resmigazete.gov.tr`, `rekabet.gov.tr`, `spk.gov.tr` — hepsi reddedildi.
 Aşağıdakiler desteklenmiş yeniden kurgudur, birincil doğrulama değildir. (Kanalın
 güvenilmezliği ölçüldü: aynı SPK eşiği için dört sorguda %50, %90 ve %98 döndü.)
@@ -442,6 +443,51 @@ bir errata maddesinin atfı silinirse denetim kırmızıya dönüyor.
 
 ---
 
+## Yedi buçuk artı dört · Raporun kendi olumsuz iddiası kanıtsızdı
+
+İşletim sözleşmesi §2 bu sistemdeki en sert kuraldır: *"Olumsuz bir iddia,
+olumludan daha yüksek bir kanıt eşiği ister… ancak o yükümlülüğü getirecek olan
+hükmü göstererek ve nereye bakıldığını söyleyerek yazılır."*
+
+Kural kitabın çıktısı için yazıldı. Ama **bu rapor da bir çıktıdır** ve şu
+olumsuz iddiayı taşıyordu: *"Bu ortamda hiçbir birincil kaynağa erişilemedi."*
+Dört tur boyunca o iddia yalnızca **iki araç hatasına** dayanıyordu. Yani rapor,
+kitapta bulduğu kusurun aynısını yapıyordu.
+
+Eksik olan üç şey vardı ve üçü de yapılabilirdi:
+
+1. **Ortamın kendi belgesini hiç okumamıştım.** `/root/.ccr/README.md`, 403'ün
+   ne anlama geldiğini tanımlıyor: *"The destination host is not allowed by your
+   organization's egress policy… Do not retry or route around it — report the
+   blocked host."* Yani red geçici bir arıza değil, bir politika kararı — ve
+   doğru davranış onu aşmak değil, bildirmek.
+2. **Bash + curl kanalını hiç denememiştim.** WebFetch'i hukuk kaynaklarına,
+   curl'ü GitHub'a denemiştim; curl'ü hukuk kaynaklarına hiç denemedim. Dördü
+   de `CONNECT tunnel failed, response 403` verdi.
+3. **Vekilin kendi kaydını hiç sormamıştım.** `__agentproxy/status` uç noktası
+   dört reddi zaman damgasıyla ve host adıyla kaydediyor.
+
+Şimdi iddia kesin biçimde yazılı ve `hafiza/egress-kaniti.md` içinde
+kanıtlanıyor:
+
+```
+connect_rejected  www.mevzuat.gov.tr:443     gateway answered 403 to CONNECT
+connect_rejected  www.rekabet.gov.tr:443     gateway answered 403 to CONNECT
+connect_rejected  www.resmigazete.gov.tr:443 gateway answered 403 to CONNECT
+connect_rejected  www.spk.gov.tr:443         gateway answered 403 to CONNECT
+```
+
+N takımı sekiz vakayla bunu denetliyor — ve iki kaçamağı özellikle kapatıyor:
+**çalışan kanal da yazılmalı** (WebSearch çalışıyor; döndürdüğü şey sayfa metni
+değil arama motoru özeti) ve **iddia fazla geniş yazılmamalı** ("hiçbir şeye
+erişilemedi" yanlış olurdu; GitHub MCP ile on altı depo çözüldü).
+
+Bu kanıt üç mevzuat bulgusunu **çözmüyor**. Yalnızca neden çözülemediğini
+doğrulanabilir kılıyor — ve N-08 raporun bunu çözdüğünü iddia etmediğini
+denetliyor.
+
+---
+
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
 
 | Bölüm | Beklenen | Gerçek | Sebep |
@@ -529,6 +575,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | K · yönlendirme + koltuk | 3 kaldı | **temiz** |
 | L · referans bütünlüğü | 1 kaldı (kendi regresyonum) | **temiz** |
 | M · errata izlenebilirliği | 3 kaldı (kendi raporum) | **temiz** |
+| N · olumsuz iddia kanıtı | kanıtsızdı | **temiz** |
 
 Mühendislik katmanı yeşil: `denetim.sh --yapisal` → `DENETİM OK`.
 Tam denetim kırmızı: `denetim.sh` → `DENETİM BAŞARISIZ: 3` — üç ENGELLEYİCİ
@@ -563,7 +610,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # on üç takım, 132 vaka
+./sinama/hepsi.sh                 # on dört takım, 140 vaka
 ./denetim.sh --yapisal            # mühendislik katmanı
 ./denetim.sh                      # mevzuat bulguları dâhil
 ```
