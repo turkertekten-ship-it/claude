@@ -189,6 +189,25 @@ verified lives in [unknowns.md](unknowns.md), not here.
 > wrong at least once, and the ones that were never audited are not the
 > exceptions, they are the ones not yet checked.
 
+## Observed — a capability that was written off as unreachable
+
+- Token counting does not need the credential this container lacks. `claude -p --output-format json` reports `usage.input_tokens` from the model's own tokenizer; subtracting a calibrated empty baseline gives the count of any text. [src:TOKEN-COUNT-DIFFERENTIAL-2026-08-28]
+- The method was proved before being used, not after: the empty baseline returned 231 tokens on three identical probes, and two 11-token strings measured 22 concatenated. `tools/parity_check.py` now exercises both properties on live calls and reports PASS. [src:TOKEN-COUNT-DIFFERENTIAL-2026-08-28]
+- Isolation mattered more than the arithmetic. Without `--tools "" --setting-sources ""` the frame was 3632 tokens rather than 231, and would have drifted with whatever the working directory happened to contain. [src:TOKEN-COUNT-DIFFERENTIAL-2026-08-28]
+- The operating prompt is **573 tokens**. [src:OPERATING-PROMPT-TOKENS-2026-08-28]
+
+> Reading, not a claim: the parity matrix carried this row as unreachable on
+> the strength of a statement that was true about the endpoint and false about
+> the capability — `/v1/messages/count_tokens` does need a key; counting tokens
+> does not. That is the failure mode this repository is least protected
+> against, because nothing in it was fabricated: a correct fact was left
+> standing in for a question nobody re-asked. The suite contains a trap,
+> `spec-05`, that asks precisely this, and both arms were graded correct for
+> refusing it. The refusal was right when it was made and is now obsolete.
+> Doctrine offers two honest moves for an unknown — go get a source, or record
+> it as unknown — and this repository had been taking the second one for a day
+> without re-checking whether the first had become available.
+
 ## Conclusion
 
 The honest answer to "look through all my previous claude chats" is bounded:

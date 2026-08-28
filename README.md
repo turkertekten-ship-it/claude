@@ -29,6 +29,7 @@ bash tests/run_all.sh        # verifier + every test suite
 | `prompts/` | System prompts carrying the doctrine into a session. |
 | `tools/verify_provenance.py` | The fabrication guard. |
 | `tools/ingest_chat_archive.py` | Conversation-archive ingestion and search. |
+| `tools/count_tokens.py` | Token counts from the model's own tokenizer, no API key. |
 | `workbench/` | The prompt workbench: variants, sweeps, graders, blind A/B. |
 | `docs/parity.md` | Console Workbench → Claude Code parity matrix, sourced. |
 | `src/oodarag/` | An OODA-driven RAG pipeline on the standard library alone. |
@@ -60,6 +61,7 @@ python3 -m workbench blind  suites/doctrine-adherence.yaml   # blind pairwise A/
 python3 -m workbench report .workbench/<run-id> # markdown + JSON report
 
 python3 tools/parity_check.py                   # execute the parity matrix
+python3 tools/count_tokens.py --selfcheck       # prove the counter, then use it
 ```
 
 `parity_check.py` is the part worth pointing at. `docs/parity.md` is a table of

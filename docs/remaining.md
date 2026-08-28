@@ -118,6 +118,14 @@ caught.
 
 ---
 
+> One row left this list without anyone spending anything: `count_tokens` was
+> unreachable only as an endpoint. The capability was reachable the whole time
+> through `usage.input_tokens`, and the operating prompt turns out to be 573
+> tokens. [src:TOKEN-COUNT-DIFFERENTIAL-2026-08-28]
+> [src:OPERATING-PROMPT-TOKENS-2026-08-28] The lesson is not about tokens: an
+> item can sit on a blocked list because the sentence justifying it is true
+> about the thing it names and false about the thing you wanted.
+
 > The honest summary: one item needs a key, one needs a time machine, and one
 > has an answer that is simply not the answer anyone wanted — now established
 > at a sample size that makes it an answer rather than an absence of one.

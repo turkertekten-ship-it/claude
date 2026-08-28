@@ -443,13 +443,54 @@ def c_accounting(backend) -> Result:
 
 @check("count_tokens before sending", live=False)
 def c_count_tokens(backend) -> Result:
+    """The endpoint needs a credential. Counting tokens does not.
+
+    This row read UNREACHABLE for a day on the strength of a true statement
+    about /v1/messages/count_tokens, which quietly became a false statement
+    about the capability. `claude -p --output-format json` reports
+    `usage.input_tokens` from the same tokenizer, so the count is recoverable
+    by difference against a calibrated empty baseline. The distinction the row
+    now draws is between the endpoint and the number.
+    """
     from workbench.api_backend import AnthropicAPIBackend
     has = callable(getattr(AnthropicAPIBackend, "count_tokens", None))
+    if not has:
+        return Result("count_tokens before sending", FAIL, "not implemented")
     return Result("count_tokens before sending", UNREACHABLE,
                   "/v1/messages/count_tokens is implemented and driven over real "
                   "HTTP in the test suite: it returns a count and omits max_tokens, "
-                  "which that endpoint rejects. Missing: a credential, not code."
-                  if has else "not implemented")
+                  "which that endpoint rejects. Missing: a credential, not code. "
+                  "The capability itself is NOT missing — see the next row.")
+
+
+@check("Token counting without a credential")
+def c_count_tokens_differential(backend) -> Result:
+    """Prove the differential counter, rather than asserting it works.
+
+    Determinism and additivity are the two properties the method rests on, so
+    both are exercised here on live calls. If either failed, every count the
+    tool produced would be wrong, and an UNREACHABLE row would be the honest
+    result rather than a PASS.
+    """
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import count_tokens as ct
+    try:
+        first, second = ct.probe(""), ct.probe("")
+        counter = ct.Counter()
+        a = counter.count(ct.ADDITIVITY_A)
+        b = counter.count(ct.ADDITIVITY_B)
+        ab = counter.count(ct.ADDITIVITY_A + ct.ADDITIVITY_B)
+    except ct.ProbeError as exc:
+        return Result("Token counting without a credential", UNREACHABLE, str(exc))
+    ok = first == second and a > 0 and ab == a + b
+    return Result("Token counting without a credential", PASS if ok else FAIL,
+                  f"usage.input_tokens gives Anthropic's own tokenizer through the "
+                  f"CLI: baseline {first} tokens on two identical probes, and "
+                  f"{a}+{b}={ab} on concatenation. Token counts are measured here "
+                  f"without the endpoint and without a key"
+                  if ok else
+                  f"the differential method does not hold: baseline {first} vs "
+                  f"{second}, {a}+{b} vs {ab}")
 
 
 @check("Batch API 50% discount", live=False)

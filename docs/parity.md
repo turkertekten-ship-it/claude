@@ -257,8 +257,20 @@ Two further findings from the same paper shape the implementation:
   over real HTTP against a conforming server. No CLI flag exists under any
   spelling probed; what is missing now is a credential for Anthropic's
   endpoint, not code and not a tested transport. The same is true of
-  `count_tokens`, batch submission, an exact `max_tokens`, and `temperature` on
+  batch submission, an exact `max_tokens`, and `temperature` on
   models old enough to accept it.
+
+  **`count_tokens` came off that list**, and the way it did is worth recording.
+  The sentence above was true of the endpoint and false of the capability:
+  `/v1/messages/count_tokens` does need a key, but `claude -p --output-format
+  json` reports `usage.input_tokens` from the same tokenizer, so subtracting a
+  calibrated empty baseline counts any text without one. Determinism and
+  additivity were checked first — 231 tokens on three identical probes, and
+  11 + 11 = 22 on concatenation — because a differential method that silently
+  stopped holding would put invented numbers into a repository built to prevent
+  exactly that. `tools/count_tokens.py` implements it and `parity_check.py`
+  proves it live. The two rows are now separate: the endpoint is unreachable,
+  the capability is not. [src:TOKEN-COUNT-DIFFERENTIAL-2026-08-28]
 
   Every documented credential path was checked and all are closed:
   `ANTHROPIC_API_KEY` unset, no `ant` CLI, no `~/.config/anthropic`, no
