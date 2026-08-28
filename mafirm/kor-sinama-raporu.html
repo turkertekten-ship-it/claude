@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>48 çalıştırılabilir takım · 368 vaka · 0 sinyal</span>
+    <span>49 çalıştırılabilir takım · 372 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -2776,6 +2776,47 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Kırk dördüncü tur</span>
+  <h2>"Kitaba sadık" sıfatı kırk üç tur boyunca sınanmamıştı</h2>
+  <p>Önceki üç tur raporun kitap hakkındaki <strong>sözlerini</strong> sınadı.
+  Bu tur <strong>tabana</strong> bakıyor: raporun bütün önce/sonra
+  karşılaştırması <code>yamalar/kitaba-sadik/</code> altındaki kopyalara
+  dayanıyor. AG o dosyaların <em>var olduğunu</em>, canlı sürümden
+  <em>farklı</em> olduğunu ve kitabın bilinen kusurlarını <em>taşıdığını</em>
+  ölçüyor — ama hiçbiri <strong>kitabın metniyle</strong> karşılaştırmıyordu.</p>
+
+  <p>Karşılaştırıldı: <strong>262 esaslı satırın 258'i</strong> kitapta
+  birebir bulundu.</p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AZ-01</span>
+      <span class="pill b">Dört satır kitabın harfi değil</span></div>
+    <h3>Kitap sonucu basmıyor, talimatı veriyor</h3>
+    <p>Kalan dördü <code>kapi.py</code>'nin <code>denetle()</code> bölümünde:
+    §12 fonksiyonu <strong>dört</strong> kapıyla basıyor, §14 beşinciyi verip
+    <em>"denetle() içine diğer dördün yanına eklenir"</em> diyor. Beş kapılı
+    <code>denetle()</code> metnini kitaptan <strong>kopyalamak mümkün
+    değil</strong>; talimatı uygulayarak yazmak gerekiyor.</p>
+    <p>O dört satır uydurma değil — ama kitabın harfi de değil, ve fark
+    yazılmak zorunda: <strong>kırk birinci turda kendi yamamı kitabın metni
+    sanıp kitaba kredi vermiştim.</strong> Beyan
+    <code>TURETME.md</code> içinde: hangi satır, hangi talimattan. AZ-03
+    beyanın bir <strong>kaçış deliğine</strong> dönüşmediğini sağlıyor.</p>
+  </div>
+
+  <div class="callout">
+    <strong>Ve küçük bir kitap kusuru daha çıktı.</strong> §16 kapı
+    öz-sınamasını <code>kontrol "dört kapı"</code> etiketiyle çağırıyor; §14
+    beşinciyi ekledikten sonra sistemde <strong>beş</strong> kapı var ve
+    etiket güncellenmiyor. Küçük — davranış doğru, yalnızca ad bayat — ama
+    sınıfı §14'ün merkezî kusuruyla aynı: <strong>yeni bir kapı eklenirken
+    ona bağlı hiçbir şey güncellenmiyor.</strong> Beklenen kümeler (birinci
+    bulgu), öz-sınama kapsaması (AS-01), ve kontrolün adı. Üçü tek bir
+    eksikliğin üç görünümü.
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -2893,7 +2934,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 48 takım · 368 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 49 takım · 372 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
