@@ -4423,3 +4423,71 @@ put a line through a quantity that was wrong.
    both is where you find out.
 3. **When a knob keeps improving as you lower it, check what it is buying.**
    Below 0.30 this one improves the score by doing less of what it exists to do.
+
+---
+
+## L80 - The corpus cannot teach itself the words it is missing
+
+L79 left the external gate at 65/79 and a categorised failure list: five
+unanswerable questions answered, five refusals that follow from a retrieval
+miss, and **six paraphrase gaps** - the question says "clock" and freezegun's
+page says "freeze time"; the question says "fakes HTTP replies" and responses'
+page says "mock out the requests library".
+
+The standing answer to those is item 1, a hosted embedder, blocked on a key for
+six sessions. Before accepting that a third time, this asks whether the corpus
+carries the link itself. If "clock" and "freeze" co-occur across 349 pages, a
+co-occurrence model built from the corpus is a zero-dependency route to the same
+place, and one this project could actually build.
+
+**First, the gap is not a vocabulary gap.** The missed pages do contain some of
+the question's words - `responses` has six of nine, `testcontainers` three of
+seven. What they lack are the *discriminating* ones:
+
+| target | in the page | absent |
+|---|---|---|
+| freezegun | 2 of 4 | `control`, `clock` |
+| responses | 6 of 9 | `fakes`, `replies`, `network` |
+| bidict | 2 of 5 | `type`, `looked`, `value` |
+| langdetect | 3 of 7 | `guesses`, `natural`, `piece`, `written` |
+
+**Then the decisive measurement.** For each absent term, the terms it co-occurs
+with most across 4,220 chunks, by PMI, and whether any of them appear in the
+page the question should have found:
+
+```
+freezegun  'clock'    df=14   partners: eastern.localize, is_dst, tsub, tavg   -> none
+responses  'replies'  df=14   partners: httpxmock, pytest_httpx, httpx.client  -> none
+responses  'fakes'    df=14   partners: bean, cheesecak, oat, lollipop         -> none
+langdetect 'guesses'  df=17   partners: func_a, rerais, tb, readme.rst         -> none
+bidict     'value'    df=437  partners: none_value, realist, vertic            -> none
+```
+
+**Not one partner of any probed term appears in its target page**, and two of
+them point somewhere worse than nowhere: `replies` co-occurs with `pytest_httpx`
+- a *different* mocking library, so a corpus-derived expansion would confidently
+retrieve the wrong package - and `fakes` co-occurs with the cheesecake and
+lollipops of faker's example data.
+
+**So the blockage is not a missing feature, it is missing knowledge.** That
+"clock" and "freeze time" name the same idea is general language knowledge; 349
+pages of package descriptions do not contain it, and no amount of arithmetic
+over them will. This closes the zero-dependency route with a measurement rather
+than an assumption, and it changes what item 1 means: a hosted embedder is not
+the *convenient* answer to these six cases, it is the only one.
+
+`scripts/paraphrase_gap.py` re-runs it, and will be worth re-running on a corpus
+that is not 349 near-independent product pages - the technique works where
+documents discuss each other's subject matter, which is exactly what this corpus
+was chosen not to do.
+
+**Rules.**
+1. **Before accepting a blocker, measure whether the cheap route is actually
+   closed.** "We need an embedding model" is a claim about the corpus, and the
+   corpus can be asked.
+2. **A co-occurrence bridge can be worse than no bridge.** The nearest neighbours
+   of `replies` in this corpus name a competing library; a system that expanded
+   the query with them would fail the same case with more confidence.
+3. **A negative result about a whole class of solutions is worth a script.** The
+   next session should not have to re-derive that the corpus has nothing to say
+   about `clock`.

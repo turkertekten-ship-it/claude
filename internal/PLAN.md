@@ -128,6 +128,17 @@ its current failures are that artefact. See docs/EVALUATION.md.
    purpose - the offline embedder cannot bridge "running forever" to a corpus
    that says "never terminates".
 
+   **The zero-dependency alternative is measured and closed** (L80). Six of the
+   gate's remaining failures are paraphrase gaps - the question says "clock",
+   freezegun's page says "freeze time" - and the obvious cheap route is a
+   co-occurrence model built from the corpus itself. Measured across 4,220
+   chunks, not one of the top PMI partners of `clock`, `fakes`, `replies`,
+   `guesses`, `value` or `looked` appears in the page that question should have
+   found, and two point at a competing library. The knowledge that those phrases
+   name the same idea is general language knowledge and is not in 349 package
+   pages. A hosted embedder is not the convenient answer to these cases; it is
+   the only one.
+
    **Measure it in hybrid, not alone, and expect the arm to outrun the system.**
    Widening the offline embedder from 192 to 3072 buckets buys the dense arm
    twelve cases and the pipeline none, because RRF publishes the average of the
