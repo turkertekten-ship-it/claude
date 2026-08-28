@@ -100,6 +100,15 @@ def grade(text: str, strict: bool = False) -> tuple[int, list[str]]:
         path = Path(tmp) / "candidate.md"
         path.write_text(template.format(body=text.strip()), encoding="utf-8")
         findings = vp.scan_markdown(path, set(known))
+
+    # A syntax placeholder is not an invented citation. Grading free prose, a
+    # model that writes `State the fact + source: "X happened. [src:ID]"` is
+    # explaining the tag, and scoring that as fabrication is a category error --
+    # the same one that made this grader fail 18 of 18 correct refusals before
+    # prose mode existed. Under --strict the text is a findings document, where
+    # a placeholder left in is a real defect, so it still counts there.
+    if not strict:
+        findings = [f for f in findings if f.code != "PLACEHOLDER_SOURCE"]
     return len(findings), [f"line {f.line}: {f.code}: {f.message}" for f in findings]
 
 

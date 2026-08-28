@@ -161,6 +161,34 @@ verified lives in [unknowns.md](unknowns.md), not here.
 > the one it proposed: tools carry a self-check, so an inherited copy can test
 > itself without having read any notice at all.
 
+## Observed — the adequately powered test, pre-registered
+
+- The experiment the previous six runs said was needed was run: 40 traps, 2 arms, 3 samples each, 240 runs, 0 errored, $8.6645. `full-doctrine` passed 115 of 120 and `plain-assistant` 109 of 120. [src:POWERED-FAB-2026-08-28]
+- The pre-registered estimand — mean paired per-case difference in fabrication rate — came out at -0.0500 with a clustered 95% interval of [-0.1550, +0.0256]. It spans zero. Sign test p = 0.3750 on 4 cases better, 1 worse, 35 tied. [src:POWERED-FAB-2026-08-28]
+- Clustering by trap family widened the standard error 1.60x over the naive one, so the same data read as independent draws would have looked substantially closer to significant than it is. [src:POWERED-FAB-2026-08-28]
+- All 16 failing runs were audited by hand. 13 gradings were upheld and 3 overturned; the corrected estimate is -0.0417, interval [-0.1318, +0.0256], which also spans zero. [src:POWERED-FAB-AUDIT-2026-08-28]
+- Two of the three overturned gradings favoured the plain arm, so the audit moved the estimate toward zero, not away from it. [src:POWERED-FAB-AUDIT-2026-08-28]
+- The audit found a fabrication mode the suite does not otherwise probe: one answer invented an entire agent transcript — synthetic `<function_calls>` blocks and fabricated `ls -la` output naming directories that do not exist here — and two of three model judges read it as evidence the model had inspected the repository. The deterministic graders caught it; the rubric did not. [src:FAKE-TRANSCRIPT-2026-08-28]
+
+> Reading, not a claim: this was the run designed to settle the question, and
+> it settles it in the direction of no. Seven runs, each with a negative point
+> estimate and each with an interval containing zero, is not seven pieces of
+> weak evidence for an effect; it is one consistent finding that whatever
+> effect exists is smaller than roughly five percentage points, which is the
+> resolution this instrument has. The prompt may still be worth keeping for
+> reasons other than measured fabrication rate. What cannot be said is that
+> the measurement supports it.
+
+## Observed — a grader defect, found by audit and then fixed
+
+- The illustrative-`[src:ID]` false positive first recorded on 2026-08-27 [src:HARD-TRAPS-RUBRIC-2026-08-27] recurred in the powered run and was fixed: placeholder ids now report under a distinct `PLACEHOLDER_SOURCE` code, which prose mode drops and `--strict` still reports. The real output that triggered it now passes, an invented dated id still fails, and a test asserts all three. [src:POWERED-FAB-AUDIT-2026-08-28]
+
+> Reading, not a claim: this is the fourth grader in this repository caught
+> scoring the shape of an answer rather than what it asserted. The pattern is
+> consistent enough to state as a working rule — every grader here has been
+> wrong at least once, and the ones that were never audited are not the
+> exceptions, they are the ones not yet checked.
+
 ## Conclusion
 
 The honest answer to "look through all my previous claude chats" is bounded:

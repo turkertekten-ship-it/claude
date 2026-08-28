@@ -78,7 +78,8 @@ than asserted.
 
 ## 3. The operating prompt is not shown to reduce fabrication
 
-**State:** answered, in the negative, across six runs.
+**State:** answered, in the negative, across seven runs — the last one
+adequately powered and pre-registered.
 
 The deterministic layer separated nothing. The blind judge preferred the prompt
 decisively on easy traps — 42 to 8, p < 0.001, and the preference survived a
@@ -92,13 +93,24 @@ Counting only hand-audited fabrications on the hard set: one for the operating
 prompt, three for a plain assistant. That is the direction the prompt was
 written to produce, and nowhere near significant at twenty-six cases.
 
-**What closes it:** roughly forty-seven decided pairs, which at the observed
-discordance rate means several hundred cases rather than tens. The cheaper route
-is repeated sampling per case rather than new cases — published work puts the
-minimum detectable effect at 13.2% for one sample per question and 7.5% for ten.
-Neither was run, because six experiments agreeing on a small-or-absent effect is
-weak grounds for spending a large amount of someone else's money to see the same
-thing a seventh time.
+**The seventh run closed the power question.** The owner authorised it, so the
+cheaper route above was taken: 40 traps, two arms, three samples each, 240 runs
+at $8.66, with the analysis pre-registered and run unmodified. Mean paired
+difference −0.050, clustered 95% CI [−0.155, +0.026]. It spans zero. Hand
+auditing all 16 failures moved it to −0.042, [−0.132, +0.026] — toward zero,
+because two of the three overturned gradings favoured the plain arm.
+[src:POWERED-FAB-2026-08-28] [src:POWERED-FAB-AUDIT-2026-08-28]
+
+So the state is now: answered in the negative across seven runs, one of them
+adequately powered for the effect size the earlier six suggested. Any real
+effect is under roughly five percentage points.
+
+**What is still open:** one model family. Every run here used one, and a prompt
+written against one model's failure modes is precisely the thing that might not
+transfer. `provenance/unknowns.md` U-9 carries that half.
+
+**What closes the remainder:** the same two arms and the same forty traps
+against a different model family, with the same pre-registered analysis.
 
 **What does not close it:** re-running the same suites hoping for a different
 sign. That is the failure this repository exists to catch, and it would be
@@ -107,4 +119,5 @@ caught.
 ---
 
 > The honest summary: one item needs a key, one needs a time machine, and one
-> has an answer that is simply not the answer anyone wanted.
+> has an answer that is simply not the answer anyone wanted — now established
+> at a sample size that makes it an answer rather than an absence of one.

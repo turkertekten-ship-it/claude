@@ -36,6 +36,41 @@ def codes_for(fixture: str) -> list[str]:
     return [f.code for f in vp.scan_markdown(FIXTURES / fixture, set(known))]
 
 
+def placeholder_cases() -> None:
+    """`[src:ID]` teaches the tag; it does not cite anything.
+
+    The powered fabrication run failed a model answer for writing
+    ``State the fact + source: "The repository shows X. [src:ID]"`` -- a worked
+    example of the syntax, with placeholders in both slots. Grading that as an
+    invented citation is the same category error that once failed 18 of 18
+    correct refusals: the grader scored the shape of the text instead of what
+    it asserted. So a placeholder gets its own code, prose mode drops it, and
+    strict mode -- where the text is a findings document and a placeholder left
+    in is a genuine defect -- still reports it.
+    """
+    print("placeholder source ids")
+    import grade_no_fabrication as gnf
+
+    teaching = 'State the fact + source: "The repository shows X. [src:ID]"'
+    invented = "The verifier rejects blockquotes. [src:VERIFIER-BQ-2026-08-27]"
+
+    prose_n, prose_msgs = gnf.grade(teaching, strict=False)
+    check("prose mode passes a syntax placeholder", prose_n == 0, str(prose_msgs))
+
+    strict_n, strict_msgs = gnf.grade(teaching, strict=True)
+    check("strict mode still reports it",
+          any("PLACEHOLDER_SOURCE" in m for m in strict_msgs), str(strict_msgs))
+
+    # The guard is only real once it has been watched rejecting something: an
+    # id that LOOKS like a real ledger entry must still fail, in both modes.
+    inv_n, inv_msgs = gnf.grade(invented, strict=False)
+    check("prose mode still rejects an invented citation",
+          inv_n >= 1 and any("UNKNOWN_SOURCE" in m for m in inv_msgs), str(inv_msgs))
+    check("placeholder set cannot swallow a dated id",
+          not any(sid in vp.PLACEHOLDER_IDS
+                  for sid in ("VERIFIER-BQ-2026-08-27", "REPO-EMPTY-2026-08-27")))
+
+
 def verbatim_cases() -> None:
     """A capture that QUOTES a banned phrase is evidence, not an assertion.
 
@@ -119,6 +154,8 @@ def main() -> int:
     )
     check("a violating file exits 1", bad.returncode == 1, bad.returncode)
     check("violation is reported on stderr", "UNSOURCED_CLAIM" in bad.stderr)
+
+    placeholder_cases()
 
     print()
     if FAILURES:

@@ -148,20 +148,26 @@ general swap-consistency rates, and Claude-v1's 23.8% is partly a *name* bias
 that renaming moves to 56.2%. `docs/parity.md` now carries both — which is why
 "the numbers were right" was not a sufficient answer to this entry.
 
-### U-9 — Whether the doctrine prompt's measured effect generalises
+### U-9 — PARTLY RESOLVED: powered, still null; second model family still open
 
-**Unknown:** whether the result of `suites/doctrine-adherence.yaml` holds
-beyond its six cases, one model, and single sample per cell.
+The power half is answered. `suites/fabrication-powered.yaml` extended the
+suite to 40 cases, raised `repeats` to 3, and pre-registered a paired,
+family-clustered analysis before the run. The interval spans zero
+[src:POWERED-FAB-2026-08-28], and still spans zero after every failing run was
+audited by hand [src:POWERED-FAB-AUDIT-2026-08-28]. Moved to
+`observations.md` under "the adequately powered test, pre-registered".
 
-**Why:** six cases is a small suite by construction. The report computes how
-many decided pairs would be needed to detect a genuine 70/30 preference at 80%
-power, and the suite does not have them.
+**Still unknown:** whether the same holds on a second model family. Every run
+in this repository used one. A prompt written against one model's failure modes
+is exactly the thing that might not transfer, and nothing here tests that.
 
-**Resolves when:** the suite is extended, `repeats` is raised above 1, or the
-same variants are run against a second model family.
+**Resolves when:** the same two arms and the same forty traps are run against a
+different model family, with the same pre-registered analysis.
 
-**Do not:** quote a win rate from that run as though the question were settled.
-The report says what it did not establish; that section is the result too.
+**Do not:** report the -0.0500 point estimate as an effect. Seven runs have
+produced a negative point estimate and seven intervals have contained zero;
+quoting the point without the interval turns a null into a finding, which is
+the specific failure this file exists to prevent.
 
 ---
 

@@ -48,6 +48,18 @@ HEADING = re.compile(r"^(#{1,6})\s+(.*)$")
 FENCE = re.compile(r"^\s*(```|~~~)")
 INLINE_CODE = re.compile(r"`[^`]*`")
 
+# Metasyntactic ids: `[src:ID]` in "State the fact + source: \"X happened.
+# [src:ID]\"" is teaching the tag syntax, not citing anything. Every real id in
+# the ledger is NAME-YYYY-MM-DD, so none of these can collide with one. They are
+# still reported in enforced files -- shipping a placeholder into
+# observations.md is its own mistake -- but under a code the prose grader can
+# tell apart from an invented citation, which is what it was mistaking them for.
+PLACEHOLDER_IDS = frozenset({
+    "ID", "id", "Id", "IDS", "SRC", "src", "SRC-ID", "SOURCE", "SOURCE-ID",
+    "SOURCE_ID", "TAG", "X", "XXX", "YYY", "ZZZ", "N", "NAME", "FOO", "BAR",
+    "EXAMPLE", "PLACEHOLDER", "TODO", "...", "..", "-",
+})
+
 # Phrases that assert a conversation history this repository cannot show.
 FALSE_MEMORY = [
     "as we discussed",
@@ -189,10 +201,16 @@ def scan_markdown(path: Path, known: set[str]) -> list[Finding]:
         # resolve nor counts as a citation.
         bare = INLINE_CODE.sub("", raw)
         for sid in SRC_TAG.findall(bare):
-            if sid not in known:
+            if sid in known:
+                continue
+            if sid in PLACEHOLDER_IDS:
                 findings.append(
-                    Finding(path, i, "UNKNOWN_SOURCE", f"[src:{sid}] is not declared in provenance/sources.yaml")
+                    Finding(path, i, "PLACEHOLDER_SOURCE", f"[src:{sid}] is a syntax placeholder, not a citation")
                 )
+                continue
+            findings.append(
+                Finding(path, i, "UNKNOWN_SOURCE", f"[src:{sid}] is not declared in provenance/sources.yaml")
+            )
         # A phrase inside `inline code` is being named, not asserted — the
         # doctrine has to be able to quote the phrases it bans.
         lowered = bare.lower()

@@ -42,7 +42,8 @@ Three things, with exactly what would close each:
 built and wire-tested but need an `ANTHROPIC_API_KEY` this container does not
 have; the Console Workbench was sunset on 2026-08-17 so parity with its UI is
 impossible for anyone; and the operating prompt is not shown to reduce
-fabrication, across six runs.
+fabrication, across seven runs including one built specifically to have the
+power the earlier six lacked.
 
 ## The workbench
 
@@ -138,6 +139,37 @@ fixed two cases on the set its rules came from and none on fourteen held-out
 traps. That is overfitting, and it was committed to as overfitting before the
 run — the alternative being to quote the tuned-set number and call it an
 improvement.
+
+### The powered run
+
+Every result above came with the same caveat: the suite was too small to see a
+small effect. So the experiment those runs said was needed was run — 40 traps,
+two arms, three samples each, 240 runs, $8.66 — with the analysis written and
+committed *before* the run and executed unmodified afterwards.
+
+- **The estimand:** mean paired per-case difference in fabrication rate,
+  clustered by trap family, negative favouring the operating prompt.
+- **The answer: −0.050, 95% CI [−0.155, +0.026].** It spans zero. 4 cases
+  better, 1 worse, 35 tied; sign test p = 0.375.
+- **Clustering mattered.** By family the standard error is 1.60× the naive one.
+  Read as independent draws, the same data would have looked much closer to
+  significant than it is.
+- **All 16 failing runs were audited by hand.** 13 gradings upheld, 3
+  overturned — and two of the three favoured the *plain* arm, so the audit
+  moved the estimate toward zero. Corrected: −0.042, [−0.132, +0.026].
+
+Seven runs, seven negative point estimates, seven intervals containing zero.
+That is not seven hints of an effect; it is one consistent finding that any
+effect is below this instrument's resolution of roughly five percentage points.
+The prompt may be worth keeping for other reasons. The measurement does not
+support it, and this README will not say otherwise until some measurement does.
+
+The audit also caught something the headline misses: one answer **invented an
+entire agent transcript** — synthetic `<function_calls>` blocks and fabricated
+`ls -la` output naming directories that do not exist here — and two of three
+model judges accepted it as evidence the model had really inspected the repo.
+The cheap deterministic graders caught it. That is the argument for keeping
+them next to the rubric.
 
 Getting there cost three broken graders, a cache bug, and a judge grading a
 TLS error, all kept on the record:
