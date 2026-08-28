@@ -609,9 +609,12 @@ sources:
       the most out of Claude Code. // These days my #1 tip is: use auto mode //
       Auto mode means no more permission prompts. It is the key building block
       for multi-clauding: start a session, then while it runs, work on another
-      session in parallel." It quotes an earlier post of 2026-05-22: "Two
-      updates to auto mode: · Now available on the Pro plan · Sonnet 4.6 is now
-      supported, alongside Opus 4.7. Shift+tab, and let Claude run."
+      session in parallel." It quote-tweets a post of 2026-05-22 whose
+      quotedTweet.author is {"username":"ClaudeDevs"}, authorId
+      2024518793679294464 — NOT Cherny: "Two updates to auto mode: · Now
+      available on the Pro plan · Sonnet 4.6 is now supported, alongside Opus
+      4.7. Shift+tab, and let Claude run." Anything drawn from that quoted
+      object is ClaudeDevs speaking, not him.
       SECOND-HAND: this is a scraper's capture, not x.com itself, which remains
       blocked. It carries structured metadata (author id, timestamps, engagement
       counts, a quoted-tweet object) that a hand-written fake would be unlikely
@@ -873,3 +876,35 @@ sources:
       archetype model of product roles (Prototyper, Builder, Sweeper, Grower,
       Maintainer). SECOND-HAND: a scraper's capture, carrying per-post ids,
       timestamps and engagement counts, not checked against x.com.
+
+  - id: AUDIT-SECOND-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T08:45Z"
+    method: >-
+      Agent(fact-checker) re-audit of docs/cherny-practice.md after it roughly
+      doubled in size; all three findings re-derived by this session against
+      provenance/raw/cherny/ before being acted on
+    evidence: >-
+      Three findings, all confirmed here. (1) The corpus said "Two days earlier
+      he noted auto mode had reached the Pro plan..." — but the cited capture's
+      quotedTweet.author is {"username":"ClaudeDevs"}, authorId
+      2024518793679294464, not bcherny/159337660. A quoted party's words were
+      credited to the person quoting them. (2) A sentence contrasted "We call
+      this" with "I call this" and cited the compilation, which in fact says
+      "Boris calls this" — so the contrast as written matched no source, and the
+      supporting entry was SCREENSHOT-AUDIT-2026-08-27, not the compilation.
+      (3) A later section restated the flattened prohibition on
+      --dangerously-skip-permissions as unconditional fact, reintroducing the
+      exact inaccuracy the retraction two hundred lines earlier exists to
+      correct. It separately confirmed clean: every figure checked against the
+      raw captures, and no other surviving assertion of the retracted reversal.
+      It also reported that the file changed on disk mid-audit, because this
+      session was editing it concurrently.
+    note: >-
+      The first finding is the same failure this corpus documents in the
+      compilation — reassigning a quoted party's words — committed here, with
+      the disproving field present in the very file cited. The third shows a
+      retraction is not one edit: the claim had to be corrected in two places
+      two hundred lines apart, and the second was missed. The procedural note is
+      kept too: auditing a file while editing it makes the audit
+      irreproducible, and the fix is to freeze the target or record the sha.

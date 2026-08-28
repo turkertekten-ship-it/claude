@@ -104,7 +104,7 @@ The two sources give different bounds for that fan-out: the documentation says "
 
 The documented rationale for parallel *review* is not throughput but independence: "A fresh context improves code review since Claude won't be biased toward code it just wrote." [src:DOCS-BESTPRACTICES-2026-08-27]
 
-Anthropic generalises that into a theory they call test time compute — the post says "We call this", not "I call this": more tokens on a coding problem gives a better result, and **separate context windows** make it better still — which is why "one agent can cause bugs and another (using the same exact model) can find them". [src:CHERNY-TIPS-REPO-2026-08-27]
+Anthropic generalises that into a theory they call test time compute. The original post says "We call this"; the compilation renders it "Boris calls this", which quietly promotes a company framing into a personal one: [src:SCREENSHOT-AUDIT-2026-08-27] more tokens on a coding problem gives a better result, and **separate context windows** make it better still — which is why "one agent can cause bugs and another (using the same exact model) can find them". [src:CHERNY-TIPS-REPO-2026-08-27]
 
 He draws the analogy explicitly to human teams, and concludes that "multiple uncorrelated context windows" — in his hedged wording, "tends to be a good approach" — will hold until agents "probably" write bug-free code. [src:CHERNY-TIPS-REPO-2026-08-27]
 
@@ -180,7 +180,13 @@ The corpus's most recent primary-derived statement is from 2026-05-24, recovered
 
 Asked what his biggest tip is, he answers: "These days my #1 tip is: use auto mode", explaining that "Auto mode means no more permission prompts. It is the key building block for multi-clauding: start a session, then while it runs, work on another session in parallel." [src:CHERNY-X-2026-05-24]
 
-Two days earlier he noted auto mode had reached the Pro plan and gained Sonnet 4.6 support alongside Opus 4.7. [src:CHERNY-X-2026-05-24]
+He quote-tweeted a post from two days earlier by the official `@ClaudeDevs` account — not by him — announcing that auto mode had reached the Pro plan and gained Sonnet 4.6 support alongside Opus 4.7. [src:CHERNY-X-2026-05-24]
+
+> Caught on audit: an earlier draft of this line read "he noted", crediting
+> Cherny with a sentence the capture's own `quotedTweet.author` field attributes
+> to `@ClaudeDevs`. That is the same error this document criticises the
+> compilation for — reassigning a quoted party's words to the person quoting
+> them — made here, with the disproving field sitting in the cited file.
 
 A sweep of 183 mirrored digests recovered 13 of his posts spanning 2026-03-13 to **2026-08-22** — five days before this corpus was assembled, so it is current rather than four months stale. [src:CHERNY-X-SWEEP-2026-08-28]
 
@@ -289,7 +295,7 @@ Its stated best practices for subagents are, verbatim: "Design focused subagents
 
 His other named hook uses are loading context at `SessionStart`, logging every bash command at `PreToolUse`, routing permission prompts to WhatsApp at `PermissionRequest`, and poking Claude to continue at `Stop`. [src:CHERNY-TIPS-REPO-2026-08-27]
 
-**Permissions**: he is explicit that you should *not* use `--dangerously-skip-permissions`, and should instead pre-allow known-safe commands via `/permissions`, checked into the team's `.claude/settings.json`. [src:CHERNY-TIPS-REPO-2026-08-27]
+**Permissions**: he does not use `--dangerously-skip-permissions` as a default, preferring to pre-allow known-safe commands via `/permissions`, checked into the team's `.claude/settings.json` — but he does use it, or `--permission-mode=dontAsk`, inside a sandbox for long-running work. The conditional matters and is set out in full above. [src:CHERNY-PERMISSIONS-CONDITIONAL-2026-08-27]
 
 By April, auto mode had arrived, and he frames it as the safer alternative to skipping permissions and as what makes running more parallel sessions practical. [src:CHERNY-TIPS-REPO-2026-08-27]
 

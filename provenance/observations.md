@@ -127,3 +127,11 @@ contents were not reconstructed, summarised, or guessed at.
 - That does not contradict the corpus: the method he prescribes alongside it — give the model a task that is too hard, give it tools to verify, see where it struggles, then fix with prompting, a skill or an MCP — is the verification loop this corpus is built around. [src:CHERNY-LOOPS-2026-08-28]
 - "Loop engineering" is a third-party name for it, coined by others, not Cherny's or Anthropic's label. [src:LOOP-ENGINEERING-KB-2026-08-28]
 - Auto mode, which he calls his #1 tip as of 2026-05-24, carries a documented 17% false-negative rate and a measured 93% acceptance rate against a rhetorical "99%". [src:LOOP-ENGINEERING-KB-2026-08-28] [src:CHERNY-X-2026-05-24]
+
+## Observed — the second audit of the corpus
+
+- A fresh fact-checker found three real defects in the revised corpus, all confirmed here before being acted on. [src:AUDIT-SECOND-2026-08-28]
+- The corpus credited Cherny with a sentence written by the `@ClaudeDevs` account, which he had quote-tweeted — the same reassignment of a quoted party's words that this corpus documents the compilation committing, with the disproving `quotedTweet.author` field sitting in the cited capture. [src:AUDIT-SECOND-2026-08-28]
+- A retracted claim had survived in a second location two hundred lines from the retraction: correcting a claim once is not correcting it. [src:AUDIT-SECOND-2026-08-28]
+- Every numeric figure in the corpus was re-checked against the raw captures and none had drifted. [src:AUDIT-SECOND-2026-08-28]
+- The audit ran against a file being edited concurrently by this session, which made it partly irreproducible; freezing the target or recording its sha would have avoided that. [src:AUDIT-SECOND-2026-08-28]
