@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>22 çalıştırılabilir takım · 217 vaka · 0 sinyal</span>
+    <span>23 çalıştırılabilir takım · 225 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -1371,6 +1371,66 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">On sekizinci tur</span>
+  <h2>Kitap ikinci kez koşulunca her yamayı geri alıyor</h2>
+  <p>Kitap bir <strong>kurulum kitabıdır</strong>. Asıl kullanımı
+  çalıştırılmaktır — ve on yedi tur boyunca hiçbir takım onu <strong>iki
+  kez</strong> çalıştırmadı.</p>
+<pre>printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' <span class="dim">&gt;</span> .gitignore</pre>
+  <p><code>&gt;</code> üzerine yazar. Aynısı §5'in <em class="term">esik.py</em>si,
+  §12'nin <em class="term">kapi.py</em>si ve §16'nın
+  <em class="term">denetim.sh</em>'i için de geçerli: hepsi "yazılır" der.
+  Kitabı yeniden izleyen biri — yeni bir oturum, ikinci bir hukukçu, ya da
+  <strong>§0'ın dördüncü kuralının</strong> <em>"denetim kırmızıysa dur ve
+  düzelt"</em> talimatını izleyen kişi — <strong>her yamayı</strong> geri alır.
+  Bir önceki turda konan kural 6 koruması dâhil.</p>
+  <p>Yıkımın olması kaçınılmaz; ölçülen şey <strong>görülüp
+  görülmediğidir</strong>. Sessizce geri alınan bir koruma, hiç konmamış bir
+  korumadır.</p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">Z-02</span>
+      <span class="pill f">Sessiz geri alma</span></div>
+    <h3>Yamanın türüne göre değişen bütünlük, bütünlük değildir</h3>
+    <p>Kitaba sadık <em class="term">kapi.py</em> geri konduğunda denetim
+    <strong>kırmızıya dönüyor</strong> — mekanizma kısmen çalışıyor. Ama
+    <code>.gitignore</code> silinince <strong><code>DENETİM OK</code></strong>
+    diyordu: bir önceki turun kural 6 koruması sessizce geri alınıyor ve
+    uygulayıcı hiçbir şey görmüyordu. Denetime kontrol eklendi.</p>
+  </div>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">Z-07 · Z-08</span>
+      <span class="pill f">Denetçinin kendisi</span></div>
+    <h3>Denetçiyi ezmek denetimi kapatır</h3>
+    <p>Kitabın kendi <em class="term">denetim.sh</em>'ini geri koyun →
+    <strong><code>DENETİM OK</code></strong>. Sonra kural 6 korumasını da silin
+    → <strong>hâlâ <code>DENETİM OK</code></strong>.</p>
+    <p><strong>Denetim kendi bütünlüğünü doğrulayamaz</strong>, çünkü
+    doğrulayacak kod ezilen dosyanın içindedir. Uygulayıcı korumasız bir
+    sisteme <strong>yeşil</strong> bir denetimle bakar — ve yeşili veren,
+    kitabın kendi betiğidir.</p>
+    <p>Dış katman <em class="term">sinama/</em>dır: <strong>kitap oraya hiçbir
+    şey yazmaz</strong>, dolayısıyla yeniden kurulumdan sağ çıkar. Denetçinin
+    bütünlüğü oraya kondu. Mutasyonda denetçiyi geri almak <strong>sekiz
+    vakanın beşini</strong> birden kırmızıya çeviriyor — en tehlikeli
+    değişiklik, en gürültülü sinyali veriyor.</p>
+  </div>
+
+  <div class="callout">
+    <strong>Her şey bozuk değil ve bu da ölçüldü.</strong>
+    <code>mkdir -p</code> adımları gerçekten zararsızdır (Z-06). Z-02'nin bir
+    genelleme değil bir <strong>ölçüm</strong> olduğunu belli eden şey budur.
+    <br><br>
+    Bu turda kendi sınamam bir kez de <strong>geçersiz taban
+    çizgisinde</strong> koştu: kum havuzunun denetimi zaten kırmızıydı, çünkü
+    yeni takım rapor tablosunda yoktu — üç vaka okunamazdı. Üçüncü turda
+    öğrendiğim kural burada işe yaradı: <strong>kırmızı tabanda mutasyon
+    okunmaz.</strong> Taban düzeltildi, sonuç sonra okundu.
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -1488,7 +1548,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 22 takım · 217 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 23 takım · 225 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
