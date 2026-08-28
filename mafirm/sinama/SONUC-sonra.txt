@@ -1,5 +1,5 @@
 ###############################################################
-#  KÖR SINAMA TAKIMI — 2026-08-28T09:01:36Z
+#  KÖR SINAMA TAKIMI — 2026-08-28T09:11:29Z
 ###############################################################
 
 /root/mafirm/sinama/ks_a_esik.py:45: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
@@ -186,14 +186,14 @@ KÖR SINAMA E — kitabın doğrulama komutları vs kitabın beklenen değerleri
 -----------------------------------------------------------------------
 12 doğrulama · 9 geçti · 3 beklenen · 0 SİNYAL
 
-  tam mekanizmalı : 1  (1'ü bu raporun eklediği)
-  kısmi           : 6  (kanıtlanmış boşluklarla; 2'i bu raporun)
-  bozuk           : 1  (üretimde çalışmıyor)
-  hiç kapsanmayan : 3
-
-§12'nin iddiası: 'doktrin baskı altında uyulmayan şeydir; kapılar
-uyulan şeydir.' Ölçüm: on bir kuralın 4 tanesi baskı altında
+uyulan şeydir.' Ölçüm: on bir kuralın 1 tanesi baskı altında
 çalışan bir mekanizmaya sahip DEĞİL; kalan 4 tanesi kısmi.
+GEÇTİ F-01  matriste adı geçen her mekanizma gerçekten var
+        11 kuralın mekanizma atfı çözüldü
+GEÇTİ F-02  'YOK' diyen her kural gerçekten mekanizmasız (§2)
+        'YOK' diyen kural kalmadı — iddia edilecek olumsuz yok. (Üç tur önce üç taneydi ve üçü de yanlıştı.)
+------------------------------------------------------------------------------------------------
+2 vaka · 2 geçti · 0 SİNYAL
 
 ================================================================================================
 KÖR SINAMA J — §19 kabul sınaması, uçtan uca
@@ -274,7 +274,7 @@ GEÇTİ K-15   koltuk kapısı yöntem dosyalarını bloklamıyor
 KÖR SINAMA L — çapraz referans bütünlüğü
 ================================================================================================
 GEÇTİ L-01   belgelerdeki her yol atfının hedefi var
-        47 atıf incelendi, kırık: yok
+        48 atıf incelendi, kırık: yok
 GEÇTİ L-02   her INDEX kendi yöntem dosyalarının hepsini anıyor
         anılmayan: yok
 GEÇTİ L-03   belgelerde sabit ~/mafirm yolu kalmamış
@@ -292,9 +292,9 @@ GEÇTİ L-06   hafiza/ dosyalarının hepsi var
 KÖR SINAMA M — errata ↔ sınama izlenebilirliği
 ================================================================================================
 GEÇTİ M-01   her errata maddesi bir sınama vakasına atıf yapıyor
-        50 madde · atıfsız 0: yok
+        51 madde · atıfsız 0: yok
 GEÇTİ M-02   atıf yapılan her vaka kimliği gerçekten tanımlı
-        203 tanımlı kimlik · uydurma dayanak: yok
+        205 tanımlı kimlik · uydurma dayanak: yok
 GEÇTİ M-03   [A] ve [B] maddelerinin atıfları sadık sistemde gerçekten kaldı
         sadık koşumda kalan vaka: 41 · sınanmamış ağır madde: yok
 GEÇTİ M-04   sadık sistemde kalan her vaka errata'da ya da raporda açıklanmış

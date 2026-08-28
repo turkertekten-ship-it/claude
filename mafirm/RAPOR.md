@@ -25,7 +25,7 @@ kendi §16 denetimi yeşile dönmedi.
 3. **Denetim on beş bozmadan on birini görmüyor**; sıfır beceri, kancasız
    ayarlar ve tamamen boş bir `esik.py` taşıyan bir sistemde "DENETİM OK" diyor.
 
-**Yamalı hâlde sistem çalışıyor:** on sekiz çalıştırılabilir takım — **175
+**Yamalı hâlde sistem çalışıyor:** on sekiz çalıştırılabilir takım — **177
 vaka, 15 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15, birimler arası tutarlılık takımının
 kendi mutasyon yakalaması 10/10. Ama **üç mevzuat bulgusu ile kitabın kendi içindeki bir çelişki açık kalır**
@@ -194,6 +194,10 @@ olmadığına göre sınıflandırıldı:
 | 11 · Önce araştır | **BOZUK** | üretimde çalışmıyor (bkz. İki) |
 
 **Tam mekanizmalı: 0. Kısmi: 4. Bozuk: 1. Hiç kapsanmayan: 6.**
+
+> Bu tablo **kitaba sadık** kurulumun ölçümüdür — kitabın verdiği hâl.
+> Yamalı sistemin güncel ölçümü aşağıda, "Yamadan sonra" bölümünde ve her
+> koşumda `sinama/ks_f_kapsama.py` çıktısında.
 
 Buna iki kalem daha eklenir. §7 koltukların "o hukukçunun gerçekten yazdığına"
 dayanmasını istiyor — bu, sistemin en yüksek itibar riskidir ve hiçbir kapı bir
@@ -943,6 +947,29 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | L · referans bütünlüğü | 1 kaldı (kendi regresyonum) | **temiz** |
 | M · errata izlenebilirliği | 3 kaldı (kendi raporum) | **temiz** |
 | N · olumsuz iddia kanıtı | kanıtsızdı | **temiz** |
+| U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
+
+Doktrin kapsaması, yamadan sonra (on bir kural):
+**tam mekanizmalı 1 · kısmi 9 · bozuk 1 · hiç kapsanmayan 0** — kitaba sadık
+hâldeki 0 / 4 / 1 / 6'ya karşı.
+
+Bu sayıya varmak için matrisin **kendisini** düzeltmek gerekti ve düzeltme bir
+bulgudur. Matris üç kuralda **"YOK"** yazıyordu — 2 (olumsuz iddia), 8 (çıkar
+çatışması) ve 7 (iki hukuk) — ve **üçünün de mekanizması vardı**: sırasıyla
+N-01..N-08, denetimin çıkar çatışması kontrolü (mutasyonla doğrulandı: dosya
+silinince `DENETİM BAŞARISIZ`) ve K-13. Notlar, mekanizmalar eklendikten
+sonra bayatlamıştı.
+
+Sebebi kitabın kendi kuralıdır. **"YOK" bir olumsuz iddiadır** ve CLAUDE.md §2
+olumsuz iddiadan olumludan yüksek kanıt ister. Matris o iddiayı üç kez
+**kanıtsız** yazdı — yani raporun §12 için kurduğu ölçüm, kendi §2'sini
+çiğniyordu. Artık çiğnemiyor: F-01 matriste adı geçen her mekanizmanın
+gerçekten var olduğunu, F-02 ise her "YOK" iddiasının aramanın boş dönmesiyle
+kanıtlandığını denetliyor. İkisi de mutasyonla kırmızıya döndürüldü.
+
+Kalan tek **BOZUK** kural 11'dir ve bu kitaba sadık hâlin kaydıdır; yamalı
+sistemde çalışır. Dokuz "kısmi"nin her biri kanıtlanmış bir boşlukla yazılı:
+kısmi, "yeterli" demek değildir.
 
 Mühendislik katmanı yeşil: `denetim.sh --yapisal` → `DENETİM OK`.
 Tam denetim kırmızı: `denetim.sh` → `DENETİM BAŞARISIZ: 3` — üç ENGELLEYİCİ
@@ -978,7 +1005,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 ### Nasıl yeniden koşulur
 ```
 ./sinama/hepsi.sh                 # 18 çalıştırılabilir takım:
-                                  #   175 vaka + 15 mutasyon (D)
+                                  #   177 vaka + 15 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -1039,7 +1066,7 @@ Dokuz takım, 96 vaka:
 | U | **Birimler arası tutarlılık** — bir birim ötekiyle çelişiyor mu | §4, §6, §5.3 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**175 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**177 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)

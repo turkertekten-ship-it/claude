@@ -14,7 +14,9 @@ Sınıflar:
   KISMİ      — kapı var ama kör sınama B'de kanıtlanmış boşlukları var
   YOK        — hiçbir otomatik kontrol bu kuralı görmüyor
 """
+import glob
 import os
+import re
 import sys
 # Kök dizin, betiğin KENDİ konumundan çözülür; sabit ~/mafirm değil.
 # [Kör sınamanın kendi bulgusu] Betikler ~/mafirm'i sabitlediği sürece bir
@@ -32,9 +34,15 @@ KURALLAR = [
      "B-13..B-18: 1M altı rakam, sözle yazılmış rakam, TRY, oran biçimi "
      "görünmüyor; DAYANAK belge düzeyinde ve 'Tebliğ' kelimesiyle tatmin oluyor"),
     ("2",  "Olumsuz iddia kuralı",
-     "YOK", "-",
+     "KISMİ*", "N-01..N-08",
      "B-07..B-09: CLAUDE.md'nin 'kariyer bitirir' dediği üç cümlenin üçü de "
-     "hiçbir kapıyı ateşlemiyor"),
+     "hiçbir KAPIYI ateşlemiyor — pratiğin çıktısı bu kural bakımından "
+     "korumasız. Mekanizma yalnızca BU RAPORUN olumsuz iddiaları için var: "
+     "N takımı sekiz vakayla onları kanıta bağlıyor, denetim de her koşumda "
+     "çalıştırıyor. Matris bunu önce 'YOK' diye yazıyordu; 9. ve 10. "
+     "kurallarda aynı darlıktaki mekanizmalar KISMİ* sayıldığı hâlde. "
+     "Dar bir mekanizmayı yok saymak, kapsamı olduğundan kötü gösterir; "
+     "yok olanı var saymak ise daha kötüsünü yapar — ikisi de yazılıyor."),
     ("3",  "Güncellik kuralı",
      "KISMİ", "guncellik",
      "B-21..B-23: Türkçe tarih biçimi, tarihsiz eşik ve gelecek tarihli "
@@ -55,12 +63,22 @@ KURALLAR = [
      "matcher'ında; B-25..B-29: büyük harf kod adı, İngilizce kod adı, "
      "kısaltmasız unvan, gerçek kişi adı, fiyat görünmüyor"),
     ("7",  "İki hukuk kuralı",
-     "YOK", "-",
-     "hiçbir kapı bir ifadenin hangi hukuk sisteminden geldiğini kontrol etmiyor"),
+     "KISMİ*", "K-13",
+     "Hiçbir kapı bir İFADENİN hangi hukuk sisteminden geldiğini kontrol "
+     "etmiyor — kuralın asıl ağırlığı burada ve orada mekanizma YOK. Ama "
+     "kuralın koltuk ayağı sınanıyor: K-13 her dolu koltuğun 'konuşmadığı "
+     "yer'i yazmasını istiyor, yani bir koltuk kendi hukuk sisteminin "
+     "sınırını beyan etmek zorunda. Matris bunu 'YOK' diye yazıyordu; K-13 "
+     "eklendikten sonra bayatlamıştı."),
     ("8",  "Çıkar çatışması kuralı",
-     "YOK", "-",
+     "KISMİ*", "denetim",
      "§2 hafiza/ klasörünü kuruyor ama cikar-catismasi.md dosyasını HİÇ "
-     "oluşturmuyor; D mutasyonu: dosyanın yokluğu denetimden geçiyor"),
+     "oluşturmuyor. Bu kurulumda dosya kuruldu ve denetime bir kontrol "
+     "eklendi; mutasyonla doğrulandı (dosya silinince DENETİM BAŞARISIZ). "
+     "KAPI hâlâ yok ve kontrol dosyanın VARLIĞINI görür, dosya açılmadan "
+     "önce çatışmanın gerçekten BAKILDIĞINI değil — mekanizma bu yüzden "
+     "kısmi. Matris bunu 'YOK' diye yazmayı sürdürüyordu; not, kontrol "
+     "eklendikten sonra bayatlamıştı."),
     ("9",  "İnsan onayı",
      "KISMİ*", "R-04/R-05",
      "Onayın kendisi izlenemez ama ONAY DURUMUNUN BEYANI izlenebilir: R-04 "
@@ -125,9 +143,91 @@ def rapor():
     print("uyulan şeydir.' Ölçüm: on bir kuralın %d tanesi baskı altında" % yoksun)
     print("çalışan bir mekanizmaya sahip DEĞİL; kalan %d tanesi kısmi."
           % sayim["KISMİ"])
-    return sayim["YOK"] + sayim["BOZUK"]
+    return dogrula(sayim)
+
+
+# --- Matrisin KENDİSİ sınanır -----------------------------------------
+# Üç girdi arka arkaya BAYATLADI: 2, 8 ve 7 numaralı kurallar "YOK" yazıyordu
+# ve üçünün de bir mekanizması vardı (sırasıyla N-01..N-08, denetim kontrolü,
+# K-13). Sebep şu: "YOK" bir OLUMSUZ İDDİADIR ve CLAUDE.md §2 olumsuz iddiadan
+# olumludan YÜKSEK kanıt ister. Matris bu iddiayı üç kez kanıtsız yazdı.
+# El yazısı bir durum sütunu, ölçtüğü sistemden bağımsız yaşar. Artık
+# yaşamıyor: her iddia burada makinece doğrulanıyor.
+ANAHTAR = {
+    "1": ("kanit",), "2": ("olumsuz",), "3": ("guncellik",),
+    "4": ("yon", "başlık sırası"), "5": ("kapsam",), "6": ("sir", "gizli"),
+    "7": ("iki hukuk", "konuşmadığı yer"), "8": ("catisma", "çatışma"),
+    "9": ("onay",), "10": ("terim", "dil"), "11": ("arastirma", "Kontrol edildi"),
+}
+
+
+def _kaynaklar():
+    parcalar = []
+    for rel in [".claude/hooks/kapi.py", "denetim.sh"]:
+        yol = os.path.join(_KOK_COZ, rel)
+        if os.path.exists(yol):
+            parcalar.append(open(yol, encoding="utf-8").read())
+    for yol in glob.glob(os.path.join(_KOK_COZ, "sinama", "ks_*.py")) + \
+            glob.glob(os.path.join(_KOK_COZ, "sinama", "ks_*.sh")):
+        if os.path.basename(yol).startswith("ks_f_"):
+            continue                      # matrisin kendi metni kanıt değildir
+        parcalar.append(open(yol, encoding="utf-8").read())
+    return "\n".join(parcalar)
+
+
+def dogrula(sayim):
+    kaynak = _kaynaklar()
+    sinyal = 0
+
+    # F-01 · mekanizma ADI GEÇEN her kural için o ad gerçekten çözülüyor mu
+    cozulmeyen = []
+    for no, ad, durum, kapi, _k in KURALLAR:
+        if durum == "YOK" or kapi == "-":
+            continue
+        adlar = [x.strip() for x in re.split(r"[/,]| ve ", kapi) if x.strip()]
+        for a in adlar:
+            if a.startswith(("R-", "N-", "K-", "B-", "C-", "U-")):
+                kok = a.split("..")[0]
+                if kok not in kaynak:
+                    cozulmeyen.append("%s -> %s" % (no, a))
+            elif a == "denetim":
+                if "kontrol " not in kaynak:
+                    cozulmeyen.append("%s -> denetim" % no)
+            elif ("kapi_" + a) not in kaynak:
+                cozulmeyen.append("%s -> kapi_%s" % (no, a))
+    if cozulmeyen:
+        sinyal += 1
+    print("%s %-5s matriste adı geçen her mekanizma gerçekten var"
+          % ("KALDI" if cozulmeyen else "GEÇTİ", "F-01"))
+    print("        %s" % ("çözülmeyen: " + ", ".join(cozulmeyen) if cozulmeyen
+                          else "%d kuralın mekanizma atfı çözüldü"
+                               % (11 - sayim["YOK"])))
+
+    # F-02 · "YOK" bir olumsuz iddiadır (§2): kanıt, aramanın BOŞ dönmesidir
+    yanlis_yok = []
+    for no, ad, durum, _kapi, _k in KURALLAR:
+        if durum != "YOK":
+            continue
+        bulunan = [a for a in ANAHTAR.get(no, ()) if a.lower() in kaynak.lower()]
+        if bulunan:
+            yanlis_yok.append("%s (%s bulundu)" % (no, ", ".join(bulunan)))
+    if yanlis_yok:
+        sinyal += 1
+    print("%s %-5s 'YOK' diyen her kural gerçekten mekanizmasız (§2)"
+          % ("KALDI" if yanlis_yok else "GEÇTİ", "F-02"))
+    if yanlis_yok:
+        print("        KANITSIZ OLUMSUZ İDDİA: %s" % "; ".join(yanlis_yok))
+    elif sayim["YOK"] == 0:
+        print("        'YOK' diyen kural kalmadı — iddia edilecek olumsuz "
+              "yok. (Üç tur önce üç taneydi ve üçü de yanlıştı.)")
+    else:
+        print("        %d 'YOK' iddiasının hiçbiri için mekanizma bulunamadı"
+              % sayim["YOK"])
+
+    print("-" * 96)
+    print("2 vaka · %d geçti · %d SİNYAL" % (2 - sinyal, sinyal))
+    return sinyal
 
 
 if __name__ == "__main__":
-    rapor()
-    sys.exit(0)
+    sys.exit(min(rapor(), 120))

@@ -139,6 +139,16 @@ hükme farklı nitelik atfetmesi denetimi **yeşil bırakır**. Yapısal denetim
 içeriği hiç okumadığı için bu sınıfa kördür.
 *(U-01, U-02, U-03, U-05, U-06, U-07, U-08, U-09, U-10, U-11)*
 
+**[B] Raporun kendi kapsama matrisi, raporun kendi §2'sini çiğniyordu.**
+Matris üç kuralda "YOK" (mekanizma yok) yazıyordu ve üçünün de mekanizması
+vardı — kural 2 (N-01..N-08), kural 8 (denetim kontrolü, mutasyonla
+doğrulandı), kural 7 (K-13). "YOK" bir **olumsuz iddiadır**; CLAUDE.md §2
+olumsuz iddiadan olumludan yüksek kanıt ister ve matris o iddiayı üç kez
+kanıtsız yazdı. El yazısı bir durum sütunu ölçtüğü sistemden bağımsız yaşar.
+→ F-01 (matriste adı geçen her mekanizma gerçekten var) ve F-02 (her "YOK"
+iddiası, aramanın boş dönmesiyle kanıtlı) eklendi; ikisi de mutasyonla
+kırmızıya döndürüldü. *(F-01, F-02)*
+
 ## §7 · Ortak koltukları
 
 **[B] Kitabın en yüksek itibar riskli kuralının hiçbir mekanizması yok.**
