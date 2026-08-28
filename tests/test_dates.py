@@ -273,6 +273,36 @@ class SourceDateReachesTheDocumentTest(unittest.TestCase):
         self.assertIsNone(docs[0].source_updated_at)
         self.assertEqual(from_raw(docs[0]).updated_at, docs[0].fetched_at)
 
+    def test_a_file_is_dated_by_its_mtime_and_fetched_when_it_was_read(self):
+        """The eighth sibling, and the one both eval corpora are built from.
+
+        The mtime went into `fetched_at`, so `Document.created_at` claimed the
+        file was ingested at its mtime. `updated_at` came out right only because
+        it falls back to `fetched_at` when no source date is set - correct by
+        accident, from two errors cancelling.
+        """
+        from oodarag.ingest.base import MemoryStateStore
+        from oodarag.ingest.filesystem import FilesystemConnector
+
+        mtime = utc_epoch("2024-06-07T08:09:10")
+        with TemporaryDirectory() as tmp:
+            path = Path(tmp) / "note.md"
+            path.write_text("# A note\n\nWritten well before this test ran.\n", "utf-8")
+            os.utime(path, (mtime, mtime))
+
+            started = time.time()
+            docs = FilesystemConnector(root=tmp, patterns=["**/*.md"]) \
+                .run(MemoryStateStore()).documents
+
+        self.assertEqual(len(docs), 1)
+        self.assertEqual(docs[0].source_updated_at, mtime)
+        self.assertGreaterEqual(docs[0].fetched_at, started,
+                                "the read time was overwritten with the mtime")
+        document = from_raw(docs[0])
+        self.assertEqual(document.updated_at, mtime)
+        self.assertGreaterEqual(document.created_at, started,
+                                "the document claims it was ingested in 2024")
+
 
 if __name__ == "__main__":
     unittest.main()

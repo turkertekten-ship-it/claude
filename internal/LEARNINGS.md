@@ -1759,11 +1759,46 @@ field. Both now delegate to one `util.dates.to_timestamp`, and a test asserts
 that every shape the parser accepts is a date the scorer can read.
 
 **Measured.** Primary 18/20, external 48/54 - **unchanged**, before and after.
-That is the honest result and not a disappointing one: both eval corpora are
-built by the filesystem connector, which has no source date, so neither corpus
-can see this change at all. A correct fix that the evals cannot measure is a
-gap in the evals, not evidence of value. It is recorded here as such rather
-than claimed as an improvement.
+A correct fix the evals cannot measure is a gap in the evals, not evidence of
+value, so it is recorded as such rather than claimed as an improvement.
+
+**Correction, made in the next cycle: the reason I first gave for "unchanged"
+was wrong.** I wrote that both eval corpora are built by the filesystem
+connector, "which has no source date, so neither corpus can see this change at
+all." It has one. `FilesystemConnector` was passing `path.stat().st_mtime` as
+`fetched_at`, and `Document.from_raw` falls back to `fetched_at`, so every
+document in both corpora already carried its own per-file date. Measured on the
+built indexes:
+
+| corpus | docs | distinct dates | span | recency factor |
+| --- | --- | --- | --- | --- |
+| primary | 96 | 94 | 0.94 days | 0.994773 - 0.999980 |
+| external | 91 | 34 | 0.030 days | 0.999182 - 0.999348 |
+
+So the factor is **saturated, not constant** - a distinction that matters
+because they have different causes and only one of them is a bug. At
+`recency_weight = 0.08` the whole spread is worth 4.2e-04 of score on the
+primary corpus, against a coverage term weighted 0.45 over [0, 1]: about a
+thousandth of the discriminating range, enough to break an exact tie and
+nothing else.
+
+The cause is not the connector, it is the corpora. Both are files whose ages
+span under a day - the repository's entire git history is 0.9 days long (`git
+log` over 187 files: 28 distinct commit dates, 0.9-day span), and the external
+pages were scraped into files in one run. There is no age signal in either
+corpus to find. Saying "the connector has no date" pointed at a fixable bug;
+the truth points at a corpus that cannot exercise the feature, which is the
+L28 rule - suspect the ruler before the thing.
+
+**The eighth sibling.** Checking that claim turned up the site I had missed
+while enumerating the family. `fetched_at=path.stat().st_mtime` is not a
+missing date, it is a date in the wrong field: it makes `Document.created_at`,
+which is `fetched_at`, claim the file was ingested at its mtime. `updated_at`
+came out right only because two errors cancelled - the wrong field, and a
+fallback that reads it. Now `source_updated_at=stat.st_mtime` and `fetched_at`
+is the read time, asserted with `os.utime` against a 2024 date so the
+expectation is derived rather than observed. Both evals: still 18/20 and 48/54,
+because `updated_at` is the same number by either route.
 
 Thirteen mutations were applied and all thirteen were caught - each connector
 dropping its date, chat dating a session by its first turn instead of its last,
@@ -1783,3 +1818,12 @@ parsing dates its own way.
    blocked, filtered, deduplicated or genuinely absent; unchanged is always
    ineffective, already-correct or *unmeasurable by this eval*. Saying which
    costs a sentence and stops the next cycle re-deriving it.
+4. **And the reason has to be checked, not assumed.** I gave one above, in the
+   same breath as writing rule 3, and it was wrong - a plausible mechanism I
+   never measured. Checking it took one query against the built index and
+   turned up both the real cause and the sibling I had missed. An explanation
+   for a null result is a claim like any other.
+5. **Saturated is not constant.** A factor pinned at 0.999 across a corpus and
+   a factor that is literally one value look identical in a pass rate and have
+   different fixes: one needs a corpus with range, the other needs code. Report
+   the spread, not the impression.

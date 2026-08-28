@@ -58,15 +58,22 @@ class FilesystemConnector(Connector):
                     self._skip("binary")
                     continue
                 ext = path.suffix.lower()
+                stat = path.stat()
                 yield RawDocument(
                     source_system="filesystem",
                     external_id=relative,
                     uri=path.as_uri(),
                     title=relative,
                     text=redact_secrets(data.decode("utf-8", "replace")),
-                    fetched_at=path.stat().st_mtime,
+                    # The mtime is the file's claim about its own content, not
+                    # when we read it. It used to be stored as `fetched_at`,
+                    # which made `Document.created_at` say the file was ingested
+                    # at its mtime. `updated_at` came out right by accident,
+                    # since it falls back to `fetched_at`; `created_at` did not.
+                    source_updated_at=stat.st_mtime,
                     metadata={
                         "kind": "file", "path": relative, "ext": ext,
+                        "mtime": stat.st_mtime,
                         "language": LANGUAGE_BY_EXT.get(ext, "text"),
                         "size": len(data), "authority": self.authority,
                         "is_doc": ext in {".md", ".markdown", ".rst", ".txt", ".adoc"},

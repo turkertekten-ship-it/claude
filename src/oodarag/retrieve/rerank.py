@@ -135,17 +135,25 @@ class HeuristicReranker(Reranker):
     #: Between them that is 0.20 of the reranker's weight carried by unit tests
     #: alone (L43).
     authority_weight: float = 0.12
-    #: Neither eval gate can see this. Both corpora are written in one pass, so
-    #: their documents share a timestamp - spread 0.00 days external, 0.91 days
-    #: primary - and a factor identical across every candidate cannot reorder
-    #: anything. Measured: switching recency off entirely leaves both sets at
-    #: 48/54 and 18/20 with every metric unchanged, and moving the clock five
-    #: years forward does nothing either.
+    #: Neither eval gate can see this, and the reason is saturation rather than
+    #: uniformity - a distinction worth keeping, because the two have different
+    #: fixes. The documents do carry distinct dates (94 of 96 on the primary
+    #: corpus, 34 of 91 on the external one), but they span 0.94 and 0.03 days,
+    #: so the factor itself spans only 0.9948-0.9999 and 0.9992-0.9993. At the
+    #: weight below that is 4.2e-04 of score against a coverage term weighted
+    #: 0.45 over [0, 1]: enough to break an exact tie, and nothing else.
+    #: Measured: switching recency off entirely leaves both sets at 48/54 and
+    #: 18/20 with every metric unchanged, and moving the clock five years
+    #: forward does nothing either.
     #:
-    #: So this weight is carried by unit tests alone, and a regression in it
-    #: would not show up in the regression gate. Recorded rather than removed:
-    #: the factor is right for a corpus of mixed ages, which is what a crawl or
-    #: a chat archive produces, and those are not what the gates run on.
+    #: The corpora are the limit, not the code. Both are files whose ages span
+    #: under a day - this repository's entire git history is 0.9 days long, and
+    #: the external pages were scraped in one run - so there is no age signal in
+    #: either to find. So this weight is carried by unit tests alone, and a
+    #: regression in it would not show up in the regression gate. Recorded
+    #: rather than removed: the factor is right for a corpus of mixed ages,
+    #: which is what a crawl or a chat archive produces, and those are not what
+    #: the gates run on.
     recency_weight: float = 0.08
     position_weight: float = 0.05
     base_weight: float = 1.0
