@@ -1,0 +1,65 @@
+# Measurements this repository quotes, and the commands that produce them.
+#
+# The ledger in sources.yaml records what was seen and when. This records what
+# must still be so: `tools/verify_measurements.py` re-runs every command below
+# and fails when the number has moved. It exists because four of the six scores
+# quoted in observations.md had drifted after fifteen loops of changes, and
+# nothing in the repository could have noticed.
+#
+# Adding a number to a document means adding it here. `expect` is matched as a
+# substring of the command's output.
+
+measurements:
+  - id: SCORE-BASE-OPERATOR
+    command: "python3 tools/prompt_forge.py score --profile system prompts/base-operator.md"
+    expect: "96/100"
+    note: >-
+      Measured 2026-08-28 by running the command above; not typed from memory.
+
+  - id: SCORE-BUILDER
+    command: "python3 tools/prompt_forge.py score --profile system prompts/builder.md"
+    expect: "92/100"
+    note: >-
+      Measured 2026-08-28 by running the command above; not typed from memory.
+
+  - id: SCORE-RESEARCHER
+    command: "python3 tools/prompt_forge.py score --profile system prompts/researcher.md"
+    expect: "90/100"
+    note: >-
+      Measured 2026-08-28 by running the command above; not typed from memory.
+
+  - id: SCORE-ARCHIVE-INGEST
+    command: "python3 tools/prompt_forge.py score --profile system prompts/archive-ingest.md"
+    expect: "90/100"
+    note: >-
+      Measured 2026-08-28 by running the command above; not typed from memory.
+
+  - id: SCORE-PORTABLE-PREAMBLE
+    command: "python3 tools/prompt_forge.py score --profile system prompts/portable-preamble.md"
+    expect: "96/100"
+    note: >-
+      Measured 2026-08-28 by running the command above; not typed from memory.
+
+  - id: SCORE-PROMPT-SMITH
+    command: "python3 tools/prompt_forge.py score --profile system prompts/prompt-smith.md"
+    expect: "100/100"
+    note: >-
+      Measured 2026-08-28 by running the command above; not typed from memory.
+
+  - id: SCORE-STANDING-FORGED
+    command: "python3 tools/prompt_forge.py score --profile contract prompts/forged/standing-prompt-system.md"
+    expect: "100/100"
+    note: >-
+      Measured 2026-08-28 by running the command above; not typed from memory.
+
+  - id: SCORE-WORKED-RAW
+    command: "python3 tools/prompt_forge.py score --profile task tests/fixtures/prompts/worked_raw.md"
+    expect: "38/100"
+    note: >-
+      Measured 2026-08-28 by running the command above; not typed from memory.
+
+  - id: SCORE-WORKED-FORGED
+    command: "python3 tools/prompt_forge.py score --profile build tests/fixtures/prompts/worked_forged.md"
+    expect: "100/100"
+    note: >-
+      Measured 2026-08-28 by running the command above; not typed from memory.

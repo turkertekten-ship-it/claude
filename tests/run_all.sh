@@ -20,6 +20,8 @@ run python3 tests/test_check_output.py
 run python3 tests/test_install_check.py
 run python3 tests/test_check_consistency.py
 run python3 tools/check_consistency.py
+run python3 tests/test_verify_measurements.py
+run python3 tools/verify_measurements.py
 run python3 tools/learn_rule.py review
 run bash tools/install_prompt_system.sh --check
 

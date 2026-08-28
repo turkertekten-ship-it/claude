@@ -356,3 +356,16 @@ sources:
       Four rules, 121 words, 6% of CLAUDE.md at capture time. The projection is
       arithmetic on the measured mean rule length, not an observation of a file
       that exists.
+
+  - id: MEASUREMENTS-DRIFT-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T09:30Z"
+    method: "python3 tools/prompt_forge.py score over the prompts quoted in observations.md, compared against the values recorded on 2026-08-27"
+    evidence: provenance/measurements.yaml
+    note: >-
+      Four of the six scores quoted in observations.md no longer reproduced
+      after fifteen loops of rule corrections: base-operator 94 to 96, builder
+      94 to 92, portable-preamble 98 to 96, researcher 92 to 90, and
+      ingest-chats 100 to 88. The captures in provenance/raw/ remain accurate
+      about what was measured then; the claims stating them in the present
+      tense had gone stale, and nothing could have noticed.

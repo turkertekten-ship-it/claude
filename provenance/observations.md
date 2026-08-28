@@ -79,8 +79,8 @@ contents were not reconstructed, summarised, or guessed at.
 
 ## Observed — the prompt system built here
 
-- `tools/prompt_forge.py` scores this repository's own prompts: `base-operator.md` 94, `builder.md` 94, `researcher.md` 92, `archive-ingest.md` 90, `portable-preamble.md` 98, `prompt-smith.md` 100, all at the `system` profile. [src:PROMPT-SCORES-2026-08-27]
-- Two command prompts were edited after the linter found real gaps in them, and re-measured with the same build of the linter: `fleet-sync.md` 78 to 90, `ingest-chats.md` 82 to 100. [src:PROMPT-SCORES-2026-08-27]
+- As measured on 2026-08-27, this repository's own prompts scored `base-operator.md` 94, `builder.md` 94, `researcher.md` 92, `archive-ingest.md` 90, `portable-preamble.md` 98, `prompt-smith.md` 100 at the `system` profile; four of those six no longer reproduce, because the rules were corrected afterwards. The current values are registered in `measurements.yaml` and re-run by `tools/verify_measurements.py`. [src:PROMPT-SCORES-2026-08-27] [src:MEASUREMENTS-DRIFT-2026-08-28]
+- Two command prompts were edited on 2026-08-27 after the linter found real gaps in them, and re-measured with the same build of the linter at the time: `fleet-sync.md` 78 to 90, `ingest-chats.md` 82 to 100. `ingest-chats.md` now scores 88, the difference being rule corrections rather than an edit to the file. [src:PROMPT-SCORES-2026-08-27] [src:MEASUREMENTS-DRIFT-2026-08-28]
 - `bash tests/run_all.sh` passes with the prompt suite added: the verifier, both existing suites, and `tests/test_prompt_forge.py`. [src:PROMPT-SCORES-2026-08-27]
 - Turning the linter on this repository's own prompts is what surfaced its detector bugs: a role written as "You process exports", an escape clause worded "if no export is present, say exactly that and stop", a generic "demonstrate the failure" read as a false premise, a "Constraints:" heading missed by a singular-only cue, and a contradiction rule firing on two words a hundred lines apart. [src:PROMPT-SCORES-2026-08-27]
 

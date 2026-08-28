@@ -34,6 +34,7 @@ bash tests/run_all.sh        # verifier + both test suites
 | `tools/learn_rule.py` | Appends a learned rule to the instruction file. |
 | `tools/check_output.py` | Checks an answer against the constraints its prompt stated. |
 | `tools/_slots.py` | How a prompt labels its slots — shared by the linter and the checker. |
+| `tools/verify_measurements.py` | Re-runs the measurements this repository quotes, and fails when one has moved. |
 | `tools/check_consistency.py` | Checks that the repository's lists still agree with each other. |
 | `tools/install_prompt_system.sh` | Installs the prompt system into `~/.claude`, for every terminal. |
 | `tests/` | Tests for every tool here, including their failure cases. |

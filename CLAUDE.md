@@ -40,6 +40,13 @@ python3 tools/verify_provenance.py     # 0 clean, 1 violations
 python3 tests/test_verify_provenance.py
 ```
 
+**A source is a snapshot.** The verifier checks that a tag resolves, never that
+the number it records is still what the command produces. Anything quantitative
+a document states goes in `provenance/measurements.yaml` with the command that
+produced it, and `tools/verify_measurements.py` re-runs it. Four of the six
+scores quoted in `observations.md` had drifted before that existed.
+[src:MEASUREMENTS-DRIFT-2026-08-28]
+
 It rejects unsourced claims in enforced files, source ids that do not resolve,
 malformed ledger entries, and false-memory phrases such as `as we discussed`
 or `you previously said` — phrases that assert a shared history this repository
@@ -100,6 +107,7 @@ CLAUDE.md                     this file — doctrine, read first
 FLEET.md                      the concurrent sessions and their branches
 provenance/
   sources.yaml                the ledger — every id that a [src:] tag may cite
+  measurements.yaml           quoted numbers, re-run rather than remembered
   observations.md             established fact, fully sourced
   unknowns.md                 open questions, deliberately left open
   raw/                        verbatim captures backing the ledger
@@ -112,6 +120,7 @@ tools/
   learn_rule.py               appends a learned rule to this file
   check_output.py             checks an answer against its prompt's constraints
   check_consistency.py        checks the repository's lists against each other
+  verify_measurements.py      re-runs the numbers the documents quote
   _slots.py, _phrases.py      shared definitions, imported by the above
   ingest_chat_archive.py      chat-archive ingestion and search
   install_prompt_system.sh    installs the prompt system into ~/.claude
@@ -271,3 +280,4 @@ reader decide whether it still applies. Written by `tools/learn_rule.py`.
 3. [docs] Never quote a score, count, or date you did not just re-run, because the worked example carried two invented numbers into the procedure that teaches the rule against them.
 4. [output] Never exceed a stated limit on length, because an answer to a prompt demanding at most 80 words came back with 86, and nothing was reading the limit back.
 5. [install] Never overwrite a path in a shared directory without checking who wrote it, because the installer clobbered a user command in ~/.claude and the uninstaller then deleted it, and neither was visible in a container where that directory was empty.
+6. [provenance] Never state a measured number in a document without registering the command that produced it, because four of six scores quoted in observations.md had silently stopped reproducing after fifteen loops of rule corrections.
