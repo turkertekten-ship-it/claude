@@ -3,9 +3,21 @@
 Doğrulama: 2026-08-27.
 
 Kontrol edildi: kurulum kitabı §6 (2026-08-27) · OpenSanctions ve nomenklatura
-paket kaydı, PyPI (2026-08-27) · bulunamayan: OFAC, AB, OFSI ve BM liste
-uç noktalarının bu makineden erişilebilirliği — ağ çıkışı kısıtlı, tarama
-çevrimdışı veri kümesiyle yapılır.
+paket kaydı, PyPI (2026-08-27) · OpenSanctions veri uç noktalarının bu
+makineden erişilebilirliği fiilen sınandı (2026-08-28) · bulunamayan:
+`data.opensanctions.org` ve `opensanctions.org` — **ağ çıkışı engelli, veri
+kümesi bu makineye indirilemedi.**
+
+> **Bu birimin çalışır olması için eksik olan tek şey veridir.**
+> `kod/tarama.py` kurulu ve çalışıyor: Türkçe harf çevirisini normalleştirip
+> eşleştirme yapıyor. Ama **karşılaştıracağı liste bu makinede yoktur** ve
+> indirilemedi. Betik `--liste` ile verilen bir dosyayla çalışır; o dosyayı
+> pratiğin kendisi sağlamak zorundadır (OpenSanctions veri kümesinin dışarıda
+> indirilip buraya taşınması ya da bir kurum aboneliği).
+>
+> Bu ayrım kayda geçirilmiştir çünkü tehlikelisi tersidir: çalışan bir tarama
+> betiği görüp "tarama yapıldı" sanmak. **Listesiz çalıştırılan bir tarama,
+> tarama değildir** ve betik bunu çıktısında söyler.
 
 Türkiye'nin coğrafi konumu, karşı taraf taramasını bir formalite olmaktan
 çıkarır. Bir Türk hedefinin Rusya, İran ya da Suriye ticaret geçmişi Türk
