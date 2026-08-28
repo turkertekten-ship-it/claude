@@ -191,6 +191,28 @@ Bu yüzden bu iş gözle değil karşılaştırmayla bitirilir.
    olan npm paketidir (`yamadashy/repomix`). Kitabın §14'te uyardığı "kayıt adı
    depo adı olmayabilir" tuzağının bu kurulumdaki örneği.
 
+## İkinci tur: web ve GitHub derinlemesine (2026-08-28)
+
+İlk kurulumda "doğrulanamadı" diye bırakılan her kalem yeniden ele alındı.
+
+**GitHub.** `api.github.com` hâlâ kapalı, ama GitHub **depo arama** uç noktası
+çalışıyor. On beş deponun yıldızı, lisansı ve son güncellemesi canlı çekildi.
+Sonuç: **kitabın yıldız sayıları esasen doğruydu**, sapma normal büyüme
+kadar — yanlış olan tarihlerdi. İki yeni bulgu: `google/diff-match-patch`
+**arşivlenmiş** bir depodur (kitap yalnızca "eski" diyor) ve
+`great-expectations/great_expectations` adı artık hiç çözülmüyor, yalnızca
+`fivetran/great_expectations` çözülüyor.
+
+**Web.** Türk mevzuatı atıflarının tamamı çapraz doğrulandı ve **dört hata**
+bulundu; en ağırı bekletici şartın yanlış maddeye bağlanmasıydı. Ayrıntı ve
+tam liste `SINIRLAR.md` sınır 10'dadır.
+
+**En sonuçlu düzeltme.** Bekletici şart 4054 m.11'de değil, **4054 m.10 ve
+2010/4 sayılı Tebliğ m.10**'dadır; m.11 hiç bildirilmemiş işlemi düzenler.
+Yanlış atıf dokuz dosyaya yayılmıştı ve on sekiz yerde düzeltildi. Bir kurum
+yazışmasında yanlış madde numarası vermek, rakamı yanlış vermekle aynı
+sınıftadır.
+
 ## Şimdi ne yapılmalı
 
 `bash ~/mafirm/denetim.sh` yeşil dönmeli. Sonra §19'daki ilk dosya bir kez
