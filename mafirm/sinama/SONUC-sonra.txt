@@ -1,5 +1,5 @@
 ###############################################################
-#  KÖR SINAMA TAKIMI — 2026-08-28T09:41:38Z
+#  KÖR SINAMA TAKIMI — 2026-08-28T09:52:21Z
 ###############################################################
 
 /root/mafirm/sinama/ks_a_esik.py:45: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
@@ -274,7 +274,7 @@ GEÇTİ K-15   koltuk kapısı yöntem dosyalarını bloklamıyor
 KÖR SINAMA L — çapraz referans bütünlüğü
 ================================================================================================
 GEÇTİ L-01   belgelerdeki her yol atfının hedefi var
-        48 atıf incelendi, kırık: yok
+        51 atıf incelendi, kırık: yok
 GEÇTİ L-02   her INDEX kendi yöntem dosyalarının hepsini anıyor
         anılmayan: yok
 GEÇTİ L-03   belgelerde sabit ~/mafirm yolu kalmamış
@@ -292,9 +292,9 @@ GEÇTİ L-06   hafiza/ dosyalarının hepsi var
 KÖR SINAMA M — errata ↔ sınama izlenebilirliği
 ================================================================================================
 GEÇTİ M-01   her errata maddesi bir sınama vakasına atıf yapıyor
-        55 madde · atıfsız 0: yok
+        56 madde · atıfsız 0: yok
 GEÇTİ M-02   atıf yapılan her vaka kimliği gerçekten tanımlı
-        243 tanımlı kimlik · uydurma dayanak: yok
+        249 tanımlı kimlik · uydurma dayanak: yok
 GEÇTİ M-03   [A] ve [B] maddelerinin atıfları sadık sistemde gerçekten kaldı
         sadık koşumda kalan vaka: 41 · sınanmamış ağır madde: yok
 GEÇTİ M-04   sadık sistemde kalan her vaka errata'da ya da raporda açıklanmış
@@ -393,7 +393,7 @@ KÖR SINAMA R — yön, insan onayı ve dil kuralları
 GEÇTİ R-01   rapor cevapla başlıyor, yöntemle değil
         ilk bölüm: 'Cevap' — §4: 'cevabı merak eden ilk paragrafta bulur'
 GEÇTİ R-02   yöntem bölümü bulgulardan sonra geliyor
-        yöntem 30. başlık, ilk bulgu 1. başlık
+        yöntem 31. başlık, ilk bulgu 1. başlık
 GEÇTİ R-03   iki zorunlu başlık en sonda ve doğru sırada
         son iki başlık: ['Şimdi ne yapılmalı', 'Yetkili avukat görüşü gereken konular']
 GEÇTİ R-04   raporun onay durumu açıkça yazılı (§9)
@@ -560,6 +560,22 @@ GEÇTİ X-07   arka planda başlatılan dış çağrı BAŞLATMA anında bloklan
 ------------------------------------------------------------------------------------------------
 7 vaka · 7 geçti · 0 beklenen · 0 SİNYAL
 
+================================================================================================
+KÖR SINAMA Y — sistemin KALICI hâle getirdiği sır
+================================================================================================
+GEÇTİ Y-01   kimlik taşıyan kalıcı depolar tespit edildi
+        dosyalar/ (§2: canlı işleri tutar); hafiza/cikar-catismasi.md (kendi metni kimlik verisi tuttuğunu söylüyor); hafiza/muvekkil-adlari.txt (kendi metni kimlik verisi tuttuğunu söylüyor)
+GEÇTİ Y-02   kimlik taşıyan her depo .gitignore ile dışlanmış
+        hepsi dışlanmış
+GEÇTİ Y-03   hiçbir kimlik deposu sürüm denetimince izlenmiyor
+        hiçbiri izlenmiyor
+GEÇTİ Y-04   geçmişte hiçbir sürümde gerçek ad işlenmemiş
+        1 depo incelendi · 0 sürüm tek tek açıldı · commit taşımayan depo: mafirm
+GEÇTİ Y-05   denetim, kayıt dosyası varken korumasını her hâlde söylüyor
+        kayıt dosyası var; denetim çıktısında koruma cümlesi var
+------------------------------------------------------------------------------------------------
+5 vaka · 5 geçti · 0 beklenen · 0 SİNYAL
+
 ###############################################################
 #  ÖZET
 ###############################################################
@@ -584,6 +600,7 @@ GEÇTİ X-07   arka planda başlatılan dış çağrı BAŞLATMA anında bloklan
   V · kapıların yanlış pozitifi     temiz
   W · sessizce boş arama kaynağı     temiz
   X · alt ajan yetkisi / kapı kapsamı temiz
+  Y · sırrın kalıcı deposu          temiz
   ------------------------------------------------------------
   TOPLAM SİNYAL                         0
 

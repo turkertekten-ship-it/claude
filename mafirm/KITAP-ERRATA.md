@@ -190,6 +190,19 @@ eklemek değil — `BashOutput`'un girdisi yalnızca bir `bash_id`'dir, dışar�
 taşımaz; gerçek koruma komutun BAŞLATILDIĞI andadır. Beyan, uygulanabilir hâle
 getirilmeli ya da kaldırılmalı. *(X-02, X-07)*
 
+**[A] §2 bir depo kuruyor ve kural 6'nın yasakladığı şeyi mümkün kılıyor.**
+Kurulumun ikinci adımı `git init` çalıştırır ve `.gitignore`'a yalnızca
+`cikti/`, `dosyalar/*/veri/` ve `.DS_Store` yazar. Ama `git push` veriyi
+makineden ÇIKARIR — kural 6'nın ("müvekkil kimliği makineden çıkmaz")
+yasakladığı şey tam budur. Korunmayanlar: `dosyalar/<is>/` altındaki kapsam
+notu, taslaklar ve yazışma (§2'ye göre CANLI İŞ; yalnızca `veri/` dışlanmış)
+ve §8'in gerektirdiği çıkar çatışması listesi. §12'nin sır kapısı ön kapıyı
+tutarken §2 yükleme rampasını açık bırakıyor.
+→ `dosyalar/` tamamı ve kimlik taşıyan her `hafiza/` dosyası dışlanmalı;
+izlenen sürüm olarak yalnızca ŞABLON bırakılmalı. Dikkat: bir yolu
+`.gitignore`'a eklemek, o yol ZATEN izleniyorsa hiçbir şey yapmaz —
+`git rm --cached` şarttır. *(Y-02, Y-03)*
+
 ## §7 · Ortak koltukları
 
 **[B] Kitabın en yüksek itibar riskli kuralının hiçbir mekanizması yok.**

@@ -1,0 +1,10 @@
+# Sır kapısının dışarı giden çağrılarda arayacağı adlar.
+# Satır başına bir ad: müvekkil, hedef, karşı taraf, işlem kod adı.
+# Bu dosya BOŞKEN kural 6'nın gerçek kişi ayağı KAPSANMIYOR demektir;
+# denetim.sh bunu her koşuda sesli olarak bildirir.
+
+# --- ŞABLON ---------------------------------------------
+# Bu dosya ÖRNEKTİR ve sürüm denetiminde izlenir; içine
+# GERÇEK AD YAZILMAZ. Canlı dosya `hafiza/muvekkil-adlari.txt` yolundadır,
+# .gitignore ile dışlanmıştır ve depoya hiç girmez:
+#     cp hafiza/muvekkil-adlari.ornek.txt hafiza/muvekkil-adlari.txt

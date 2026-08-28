@@ -183,8 +183,18 @@ adet=$(grep -cve '^[[:space:]]*#' -e '^[[:space:]]*$' "$M/hafiza/muvekkil-adlari
 adet=${adet:-0}
 if [ "$adet" -eq 0 ]; then
   echo "  UYARI müvekkil ad kaydı BOŞ — kural 6'nın gerçek kişi ayağı kapsanmıyor"
+  # [Y-05] "Doldur" demek, korumayı söylemeden TEHLİKELİDİR: kullanıcı gerçek
+  # adları §2'nin `git init` ettiği bir depoya yazar ve ilk push kural 6'yı
+  # çiğner. Talimatla birlikte koruma da söylenir.
+  echo "        Doldurmadan önce: bu dosya .gitignore ile DIŞLANMIŞTIR ve"
+  echo "        depoya girmez (izlenen sürüm hafiza/muvekkil-adlari.ornek.txt)."
 else
   printf "  ok    %-38s %s\n" "müvekkil ad kaydı" "$adet ad"
+  # [Y-05] Koruma cümlesi ÖNCE yalnızca "boş" dalında yazılıyordu. Oysa dosya
+  # DOLUYKEN daha da gereklidir: içinde gerçek adlar vardır. Mutasyon bunu
+  # gösterdi — kayıt doldurulunca cümle ortadan kalkıyordu.
+  echo "        Bu dosya .gitignore ile DIŞLANMIŞTIR ve depoya girmez."
+  echo "        İzlenen sürüm: hafiza/muvekkil-adlari.ornek.txt"
 fi
 
 # [W-02] §2 `emsal/` dizinini "onaylı madde bankası" olarak açıyor, §10

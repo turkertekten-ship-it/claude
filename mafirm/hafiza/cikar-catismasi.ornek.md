@@ -18,3 +18,9 @@ Satır başına bir taraf:
 ## Bilinen sınır (kitap §18.9)
 Bu dosya yalnızca içine yazıldığı kadar iyidir. Açıklanmamış bir ilişkiyi
 buradaki hiçbir şey tespit edemez.
+
+# --- ŞABLON ---------------------------------------------
+# Bu dosya ÖRNEKTİR ve sürüm denetiminde izlenir; içine
+# GERÇEK AD YAZILMAZ. Canlı dosya `hafiza/cikar-catismasi.md` yolundadır,
+# .gitignore ile dışlanmıştır ve depoya hiç girmez:
+#     cp hafiza/cikar-catismasi.ornek.md hafiza/cikar-catismasi.md

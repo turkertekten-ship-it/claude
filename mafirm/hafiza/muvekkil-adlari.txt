@@ -1,4 +1,0 @@
-# Sır kapısının dışarı giden çağrılarda arayacağı adlar.
-# Satır başına bir ad: müvekkil, hedef, karşı taraf, işlem kod adı.
-# Bu dosya BOŞKEN kural 6'nın gerçek kişi ayağı KAPSANMIYOR demektir;
-# denetim.sh bunu her koşuda sesli olarak bildirir.

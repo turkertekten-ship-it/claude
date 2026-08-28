@@ -25,7 +25,7 @@ kendi §16 denetimi yeşile dönmedi.
 3. **Denetim on beş bozmadan on birini görmüyor**; sıfır beceri, kancasız
    ayarlar ve tamamen boş bir `esik.py` taşıyan bir sistemde "DENETİM OK" diyor.
 
-**Yamalı hâlde sistem çalışıyor:** yirmi bir çalıştırılabilir takım — **212
+**Yamalı hâlde sistem çalışıyor:** yirmi iki çalıştırılabilir takım — **217
 vaka, 15 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15, birimler arası tutarlılık takımının
 kendi mutasyon yakalaması 10/10. Ama **üç mevzuat bulgusu ile kitabın kendi içindeki bir çelişki açık kalır**
@@ -1062,6 +1062,63 @@ birbirini tutuyor.
 
 ---
 
+## Yedi buçuk artı on altı · Kapı ön kapıyı tutuyordu; §2 rampayı açık bırakmış
+
+Kural 6 sistemin en sert kuralı: **müvekkil kimliği makineden çıkmaz.** §12'nin
+sır kapısı bunu WebSearch, WebFetch ve Bash çağrılarında uyguluyor ve on
+altıncı tur davranışla doğruladı: kod adı taşıyan üç çağrı da bloklanıyor.
+
+Ama §2, kurulumun **ikinci adımında** şunu yapıyor:
+
+    cd ~/mafirm && git init && git branch -M main
+    printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' > .gitignore
+
+Kurulum bir **sürüm deposudur** ve `git push` veriyi makineden **çıkarır** —
+kuralın yasakladığı şeyin ta kendisi. Korunan iki yol var. Korunmayanlar:
+
+| yol | ne tutar | durum |
+|---|---|---|
+| `dosyalar/<is>/` | §2: **canlı işler** — kapsam notu, taslaklar, yazışma | yalnızca `veri/` korunuyordu |
+| `hafiza/muvekkil-adlari.txt` | varlık sebebi **gerçek ad** tutmak | izleniyordu |
+| `hafiza/cikar-catismasi.md` | §8: her dosyanın **karşı tarafları** | izleniyordu |
+
+Kapı ön kapıyı tutuyordu; §2 **yükleme rampasını** açık bırakmıştı. On altı tur
+boyunca hiçbir takım *"sistem neyi kalıcı hâle getiriyor"* diye sormadı.
+
+**Sızıntı olmadı — ve bu ölçüldü, varsayılmadı.** Her iki dosyanın işlenmiş
+her sürümü tek tek açıldı: hepsi yalnızca yorum satırı taşıyor, `dosyalar/`
+altında hiçbir dosya hiç işlenmemiş. Maruziyet **müstakbeldi**: denetim her
+koşumda *"kaydı doldur"* diyor ve dolduran kişi gerçek adları izlenen bir
+ağaca yazacaktı.
+
+Üç düzeltme: üç yol `.gitignore`'a eklendi (`dosyalar/` **tamamı**), iki
+dosya `git rm --cached` ile izlemeden çıkarıldı, ve mekanizma görünür kalsın
+diye izlenen birer **şablon** (`*.ornek.*`) bırakıldı.
+
+> **Ve bu, tek satırlık bir düzeltme değildi.** `.gitignore`'a bir yol
+> eklemek, o yol **zaten izleniyorsa hiçbir şey yapmaz** — git izlenen bir
+> dosyayı asla yoksaymaz (`check-ignore` "yoksayılmıyor" der). Bu düzeltmeyi
+> naif yapan biri korunduğunu sanır ve korunmaz. `git rm --cached` şart.
+
+### Takımın kendi üç kusuru
+
+- **Y-04 boşa geçiyordu.** "Hiç ad işlenmemiş" bir **olumsuz iddiadır**; ilk
+  sürüm **sıfır** sürüm inceleyip onu yazdı, çünkü kurulum kökündeki depo
+  commit taşımıyordu. Sıfır incelenmiş sürüm kanıt değildir. Şimdi ayrım
+  yazılı: *deposu hiç commit taşımıyor* (olumlu kanıt) ile *bakamadım*
+  (başarısızlık) aynı şey değil.
+- **Y-05'in bir kaçış maddesi vardı:** "denetim kaydı anmıyorsa geç." Anmayı
+  **silmek** vakayı yeşile alıyordu — mutasyon sağ kalarak gösterdi.
+  **Koruduğu şeyi kaldırarak tatmin edilebilen bir kontrol, kontrol değildir.**
+- Ve mutasyon bir **gerçek** kusur daha buldu: koruma cümlesi denetimin
+  yalnızca "kayıt boş" dalında yazılıyordu. Oysa dosya **doluyken** daha da
+  gerekli: içinde gerçek adlar var.
+
+Mutasyon: `.gitignore`'u §2'nin hâline döndürmek Y-02'yi, gerçek bir adı
+işlemek Y-03 ile Y-04'ü, koruma cümlesini kaldırmak Y-05'i kırmızıya döndürdü.
+
+---
+
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
 
 | Bölüm | Beklenen | Gerçek | Sebep |
@@ -1161,6 +1218,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | V · kapıların yanlış pozitifi | *hiç ölçülmemişti* | **temiz** — 17 meşru metin, 0 yanlış pozitif |
 | W · sessizce boş arama kaynağı | *hiç sorulmamıştı* | **temiz** — boş banka artık sesli |
 | X · yetki ↔ kapsam | *hiç sorulmamıştı* | **temiz** — beyan ile uygulama hizalandı |
+| Y · sırrın kalıcı deposu | *hiç sorulmamıştı* | **temiz** — üç yol dışlandı, geçmiş temiz |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -1218,8 +1276,8 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # 21 çalıştırılabilir takım:
-                                  #   212 vaka + 15 mutasyon (D)
+./sinama/hepsi.sh                 # 22 çalıştırılabilir takım:
+                                  #   217 vaka + 15 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -1281,9 +1339,10 @@ Dokuz takım, 96 vaka:
 | V | **Kapıların yanlış pozitifi** — doğru iş bloklanıyor mu | §12, §14 |
 | W | **Sessizce boş arama kaynağı** — 'bulunamadı' ne demek | §2, §14, §10 |
 | X | **Alt ajan yetkisi ↔ kapı kapsamı** — yetki var, kural var mı | §10, §12, kural 6 |
+| Y | **Sırrın kalıcı deposu** — sistem neyi versiyonluyor | §2, kural 6 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**212 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**217 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)

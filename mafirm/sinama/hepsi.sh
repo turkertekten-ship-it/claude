@@ -68,6 +68,8 @@ python3 "$S/ks_w_bos_kaynak.py"; topla "W · sessizce boş arama kaynağı" $?
 echo
 python3 "$S/ks_x_yetki.py"; topla "X · alt ajan yetkisi / kapı kapsamı" $?
 echo
+python3 "$S/ks_y_sirrin_deposu.py"; topla "Y · sırrın kalıcı deposu" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

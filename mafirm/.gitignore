@@ -1,3 +1,22 @@
+# --- §2'nin verdiği hâl -------------------------------------------------
 cikti/
 dosyalar/*/veri/
 .DS_Store
+
+# --- [Y-02] KURAL 6 GEREĞİ EKLENDİ --------------------------------------
+# §2 kurulumun ikinci adımında `git init` çalıştırır. Bir depo, `git push`
+# ile veriyi makineden ÇIKARIR — kural 6'nın ("müvekkil kimliği makineden
+# çıkmaz") yasakladığı şey tam olarak budur. §12'nin sır kapısı WebSearch,
+# WebFetch ve Bash çağrılarını tutuyor; sürüm denetimi ise hiç bakılmamış bir
+# yoldu. Kapı ön kapıyı tutarken §2 yükleme rampasını açık bırakıyordu.
+#
+# §2 yalnızca `dosyalar/*/veri/` dizinini dışlıyor. Ama `dosyalar/<is>/`
+# altındaki kapsam notu, taslaklar, yazışma ve notlar da CANLI İŞTİR ve
+# kardeş yol olarak izleniyordu. Dizinin tamamı dışlanır.
+dosyalar/
+
+# Bu iki dosyanın VARLIK SEBEBİ gerçek ad tutmaktır. İzlenen bir yolda
+# durmamalıdırlar. Kurulumda izlenen birer ÖRNEK şablon bulunur; canlı
+# dosyalar şablondan kopyalanır ve depoya hiç girmez.
+hafiza/muvekkil-adlari.txt
+hafiza/cikar-catismasi.md
