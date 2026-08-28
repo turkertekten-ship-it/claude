@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** altmış iki çalıştırılabilir takım — **440
+**Yamalı hâlde sistem çalışıyor:** altmış iki çalıştırılabilir takım — **441
 vaka, 27 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15 → **27/27** (mutasyon kümesi otuz
 sekizinci turda on beşten yirmi yediye çıkarıldı: 26 kontrolün dokuzu hiç
@@ -2692,7 +2692,7 @@ içinde kırmızı, koşumdan sonra yeşil görünüyordu. Onuncu ve on altınc�
 turların katman kuralı — *denetim, kendini denetleyen takımı denetleyemez* —
 **üçüncü kez**, bu kez veri yoluyla çiğnenmişti. Sayı artık durağan ölçülüyor:
 `hepsi.sh`'e bağlı her takımın kendi `BEKLENEN_VAKA` beyanı toplanıyor
-— bugün toplam 440 vaka — ve her takımın kendi sıfırıncı vakası o beyanın
+— bugün toplam 441 vaka — ve her takımın kendi sıfırıncı vakası o beyanın
 gerçeğe eşit olduğunu ayrıca güvenceye alıyor. Bozulmuş bir `SAYIM.txt` ile BB'nin çıktısı
 **birebir aynı** kalıyor; bağımsızlık ölçülerek gösterildi.
 
@@ -3232,6 +3232,45 @@ mevzuat değil, ve metin bunu söylemiyordu. Cümle artık ikisini ayırıyor:
 hangi hükmün sorgulandığı yazılı, ve rakamların **arama kanalının ölçülmüş
 sapması** olduğu açıkça belirtiliyor.
 
+### Ve o liste de elle yazılmıştı
+
+Yayımlanan belgenin kapı listesinde olmaması bir örnek değil, bir **belirtiydi**:
+liste **elle yazılmıştı.** Elle yazılan liste ölçtüğü şeyden sürüklenir — bu
+incelemenin üçüncü sınıfı, dördüncü kez. Liste keşfe çevrildi ve ağaçtaki
+**88 belgenin tamamı** kapılardan geçirildi.
+
+**Altısı ateşliyor, ve altısının da açıklaması var:**
+
+| Belge | Kapı | Neden beyanlı |
+|---|---|---|
+| `CLAUDE.md` | kapsam | işletim sözleşmesinin **kendisi**; kuralı tanımlar, ona tabi bir çıktı değildir |
+| `.claude/skills/yaptirim-taramasi/SKILL.md` | kapsam | beceri **tanımı**; çıktı değil |
+| `DEGISIKLIKLER.md` | kanıt, güncellik | rakam bir **regex değişikliğini anlatan örnek** |
+| `komutlar/15-3-…` | kanıt, güncellik | rakam kitabın kendi `<ornek>` bloğunun içinde |
+
+Son ikisi yeni bir kusur değil: raporun errata'sında kayıtlı **katman
+sınırlamasının** ta kendisi — *kitabın kontrolleri metin arar, metnin hangi
+katmanda olduğunu sormaz.* Kural mı, yorum mu, örnek mi? Kapı ayırt edemiyor.
+Bu tur o sınırlamayı **ölçtü**: seksen sekiz belgede geriye kalan bütün
+ateşlemeleri tam olarak o açıklıyor.
+
+Beyan artık iki yönlü: kapı ateşleyen yeni bir belge gerekçesiz kalırsa vaka
+kırılır, **ve** hiçbir şeyi örtmeyen bayat bir beyan da kırar. Keşif
+körleştirilirse — hiçbir belge taranmazsa — bütün beyanlar bayat düşer ve
+vaka yine kırmızıya döner.
+
+**Ve keşif, ilk hâliyle katman kuralını dördüncü kez çiğnedi.** Ağaçtaki her
+belgeyi tararken bu koşumun **kendi kayıtlarını** da süpürdü: `SONUC-sonra.txt`
+ve `SAYIM.txt` hepsi.sh tarafından koşum sırasında yazılır. AL-06 anında
+yakaladı. Denetim, kendini denetleyen takımın kaydını okuyamaz — okursa cevabı
+koşumun **sırasına** bağlı olur.
+
+İlk düzeltmem yetmedi ve öğreticiydi: dosyaları **adlarıyla** dışlamıştım, ve
+AL-06 yine ateşledi. Haklıydı — **bir kayıt dosyasının adını anmak, statik
+tarayıcı için onu okumaktan ayırt edilemez.** Dışlama artık yapıyla yazılı:
+sınama dizinindeki ham çıktılar zaten teslimat değil, aparattır. *Anmak ile
+okumak arasındaki fark, ölçen taraf için yoktur.*
+
 ---
 
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
@@ -3432,7 +3471,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 ### Nasıl yeniden koşulur
 ```
 ./sinama/hepsi.sh                 # 62 çalıştırılabilir takım:
-                                  #   440 vaka + 27 mutasyon (D)
+                                  #   441 vaka + 27 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -3466,7 +3505,7 @@ vakalardır ve hepsi geçer. Kör sınama o aklın dışında kalanı arar: bir
 hukukçunun gerçekten yazacağı cümleyi, kancanın gerçekten göreceği veriyi,
 bozulduğunda denetimin gerçekten yakalayıp yakalamadığını.
 
-Altmış beş takım, 440 vaka:
+Altmış beş takım, 441 vaka:
 
 | Takım | Neyi sınar | Kaynağı |
 |---|---|---|
@@ -3537,7 +3576,7 @@ Altmış beş takım, 440 vaka:
 | BM | **Çıktı sözleşmesi** — `esik.py`'nin GERÇEK çıktısı, sistemin kendi kapılarından geçiyor mu | §12, §14, §19, kural 1 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**440 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On üç**
+**441 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On üç**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)

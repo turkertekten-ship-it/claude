@@ -147,7 +147,59 @@ vaka("Q-07", "akademik dayanak bir MEVZUAT eşiğini aklamıyor",
 # [AF-02] Kaybolan bir vaka, kırmızı bir vakadan kötüdür: kimse aramaz.
 # Bu koruma on üçüncü turda eklendi ama YALNIZCA sonrasında yazılan
 # takımlara; on beş takım korumasız kaldı. Geriye doldurma.
-BEKLENEN_VAKA = 7
+# --- Q-08 · KEŞİF: kapı ateşleyen her belge beyanlı mı --------------
+# [Altmış ikinci tur] Yukarıdaki TESLIMAT listesi ELLE yazılmıştı ve
+# yayımlanan belge altmış birinci tura kadar içinde yoktu. Elle yazılan
+# liste ölçtüğü şeyden sürüklenir — bu incelemenin üçüncü sınıfı, dördüncü
+# kez. Ağaçtaki her belge taranır; kapı ateşleyen her dosya BEYANLI olmak
+# zorundadır, ve hiçbir şeyi örtmeyen bir beyan da vakayı kırar.
+MUAF_KAPI = {
+    "CLAUDE.md":
+        ("kural belgesi", "işletim sözleşmesinin KENDİSİ; kapsam kuralını "
+         "TANIMLAR, ona tabi bir çıktı değildir"),
+    ".claude/skills/yaptirim-taramasi/SKILL.md":
+        ("tanım belgesi", "beceri TANIMI; çıktı değil, çıktının nasıl "
+         "üretileceğini yazar"),
+    "yamalar/DEGISIKLIKLER.md":
+        ("örnek katmanı", "flagged rakam bir REGEX değişikliğini anlatan "
+         "örnektir, iddia edilen bir eşik değil — KITAP-ERRATA'da kayıtlı "
+         "katman sınırlaması (kural/yorum/örnek ayrımı yok)"),
+    "komutlar/15-3-inceleme-ayristirmasi.md":
+        ("örnek katmanı", "rakam kitabın kendi <ornek> bloğunun içinde; "
+         "aynı katman sınırlaması, kitabın metninde"),
+}
+_bulunan = {}
+for _kok, _dirs, _fs in os.walk(_KOK_COZ):
+    _dirs[:] = [d for d in _dirs if d not in (".git", "__pycache__")]
+    for _f in _fs:
+        _rel = os.path.relpath(os.path.join(_kok, _f), _KOK_COZ)
+        if not _f.endswith((".md", ".html", ".txt")):
+            continue
+        # [AL-06 · katman kuralı, DÖRDÜNCÜ kez] Keşif, bu koşumun KENDİ
+        # kayıtlarını da süpürüyordu; onlar hepsi.sh tarafından bu koşum
+        # sırasında yazılır ve denetim, kendini denetleyen takımın kaydını
+        # okuyamaz — okursa cevabı koşumun sırasına bağlı olur.
+        #
+        # Dışlama, dosya ADIYLA değil YAPIYLA yazılır: takım kaynağında bir
+        # kayıt dosyasının adını ANMAK bile statik tarayıcıya okuma gibi
+        # görünür (ve haklıdır — anma ile okuma ayırt edilemez). Sınama
+        # dizinindeki ham çıktılar zaten teslimat değil, aparattır.
+        if os.path.dirname(_rel) == "sinama" and _f.endswith(".txt"):
+            continue
+        _a = kapilar(_rel)
+        if _a:
+            _bulunan[_rel] = _a
+_beyansiz = sorted(set(_bulunan) - set(MUAF_KAPI))
+_bayat = sorted(set(MUAF_KAPI) - set(_bulunan))
+vaka("Q-08", "kapı ateşleyen her belge gerekçesiyle beyanlı (keşifle)",
+     not _beyansiz and not _bayat,
+     "%d belge tarandı · %d ateşliyor · beyansız: %s · bayat beyan: %s"
+     % (sum(1 for k, d, f in os.walk(_KOK_COZ) for x in f
+            if x.endswith((".md", ".html", ".txt")) and ".git" not in k),
+        len(_bulunan), _beyansiz or "yok", _bayat or "yok"))
+
+
+BEKLENEN_VAKA = 8
 
 
 def rapor():
