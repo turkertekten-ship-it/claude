@@ -695,6 +695,32 @@ itself not a gate. Structural, so unlike the prose rule backed out in loop
 seventeen it can be exact — and it now fails the suite rather than waiting for
 somebody to notice.
 
+## Twenty-first loop — which rules are real
+
+Loop twenty ended on an uncomfortable fact: a lesson written up in the loop log
+was repeated one loop later, in the same file, on the same defect. Writing
+something down did not make it stick. Observe turned that on the learned-rules
+file itself — twelve rules, all prose. How many are actually enforced?
+
+Six. Five are advisory, one is retired, and **nothing in the file said which**.
+
+> The surprise is not the ratio, it is the silence about it. A reader meets
+> twelve numbered imperatives and has no way to tell that half of them are
+> guaranteed by a guard and half are hopes. That mislabels the reliability of
+> the whole mechanism, and the advisory ones are precisely those most likely to
+> be forgotten — which is the failure loop twenty had just demonstrated.
+
+A rule may now name the guard that catches a breach, and the named file must
+exist, because a claim that something is enforced is itself a claim and this
+repository does not take those on trust. `annotate` adds the tag to rules
+written before their guard did, so the file stays owned by the tool rather than
+hand-edited. `review` now reports the split:
+
+    6 of 11 live rule(s) name a guard; 5 are advisory and rely on being remembered
+
+That line is the honest status of the self-annealing loop. It produces rules
+faster than it produces enforcement, and now says so.
+
 ## Still open
 
 `U-6`, `U-7` and `U-8` in [unknowns.md](unknowns.md): what Saraev actually

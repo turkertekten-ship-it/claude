@@ -56,14 +56,21 @@ def read_rules(text: str) -> list[str]:
 
 def normalise(rule: str) -> str:
     """Compare rules by their content, not their numbering or spacing."""
-    stripped = re.sub(r"^\d+\.\s*", "", rule).strip().lower()
+    stripped = ENFORCED_BY.sub("", re.sub(r"^\d+\.\s*", "", rule)).strip().lower()
     return re.sub(r"\s+", " ", stripped).rstrip(".")
 
 
-def render(number: int, category: str, mode: str, action: str, because: str) -> str:
+ENFORCED_BY = re.compile(r"\s*\[enforced by: ([^\]]+)\]\s*$")
+
+
+def render(number: int, category: str, mode: str, action: str, because: str,
+           enforced_by: str | None = None) -> str:
     action = action.strip().rstrip(".")
     because = because.strip().rstrip(".")
-    return f"{number}. [{category.strip()}] {mode} {action}, because {because}."
+    line = f"{number}. [{category.strip()}] {mode} {action}, because {because}."
+    if enforced_by:
+        line += f" [enforced by: {enforced_by.strip()}]"
+    return line
 
 
 SUPERSEDED = re.compile(r"\s+—\s+superseded by rule \d+\.?$")
@@ -81,6 +88,29 @@ def can_supersede(path: Path, number: int) -> tuple[int, str]:
             if SUPERSEDED.search(rule):
                 return 1, f"learn_rule: rule {number} is already superseded"
             return 0, ""
+    return 1, f"learn_rule: no rule numbered {number} in {path}"
+
+
+def annotate(path: Path, number: int, enforced_by: str) -> tuple[int, str]:
+    """Record which guard catches a breach of an existing rule.
+
+    Rules written before enforcement existed for them would otherwise have to
+    be hand-edited, in the one file this tool owns.
+    """
+    named = enforced_by.split("(")[0].split("+")[0].strip()
+    if not (REPO / named).exists():
+        return 1, (f"learn_rule: --enforced-by names {named!r}, which does not exist.\n"
+                   "A claim that something is enforced is itself a claim.")
+    text = path.read_text(encoding="utf-8")
+    lines = text.splitlines()
+    for i, line in enumerate(lines):
+        m = RULE.match(line.strip())
+        if m and int(m.group(1)) == number:
+            if ENFORCED_BY.search(line):
+                return 1, f"learn_rule: rule {number} already names a guard"
+            lines[i] = line.rstrip() + f" [enforced by: {enforced_by.strip()}]"
+            path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+            return 0, f"learn_rule: rule {number} is enforced by {enforced_by.strip()}"
     return 1, f"learn_rule: no rule numbered {number} in {path}"
 
 
@@ -108,12 +138,17 @@ def mark_superseded(path: Path, number: int, by: int) -> tuple[int, str]:
 
 
 def add_rule(path: Path, category: str, mode: str, action: str, because: str,
-             dry_run: bool) -> tuple[int, str]:
+             dry_run: bool, enforced_by: str | None = None) -> tuple[int, str]:
     if not path.exists():
         return 2, f"learn_rule: no such file: {path}"
+    if enforced_by:
+        named = enforced_by.split("(")[0].split("+")[0].strip()
+        if not (REPO / named).exists():
+            return 1, (f"learn_rule: --enforced-by names {named!r}, which does not exist.\n"
+                       "A claim that something is enforced is itself a claim.")
     text = path.read_text(encoding="utf-8")
     existing = read_rules(text)
-    candidate = render(len(existing) + 1, category, mode, action, because)
+    candidate = render(len(existing) + 1, category, mode, action, because, enforced_by)
 
     for rule in existing:
         if normalise(rule) == normalise(candidate):
@@ -200,6 +235,11 @@ def review(path: Path, max_words: int, max_share: int) -> tuple[int, list[str]]:
         lines.append("  same thing, and retire any whose `because` no longer describes a risk")
         lines.append("  this repository still runs — by editing the file, deliberately.")
 
+    live = [r for r in rules if not SUPERSEDED.search(r)]
+    enforced = [r for r in live if ENFORCED_BY.search(r)]
+    if live:
+        lines.append(f"  {len(enforced)} of {len(live)} live rule(s) name a guard; "
+                     f"{len(live) - len(enforced)} are advisory and rely on being remembered")
     retired = [r for r in rules if SUPERSEDED.search(r)]
     if retired:
         lines.append(f"  {len(retired)} superseded, kept for their reasons and still costing context")
@@ -240,6 +280,9 @@ def main(argv: list[str]) -> int:
     group.add_argument("--never", metavar="ACTION", help="what to stop doing")
     add.add_argument("--because", required=True,
                      help="what went wrong, so a later reader can judge whether it still applies")
+    add.add_argument("--enforced-by", default=None,
+                     help="the guard that catches a breach, if there is one. Named files must "
+                          "exist. A rule with none is advisory, and the review says how many are")
     add.add_argument("--dry-run", action="store_true")
 
     sup = sub.add_parser("supersede", help="replace a rule that turned out to be wrong")
@@ -252,6 +295,11 @@ def main(argv: list[str]) -> int:
     sup.add_argument("--because", required=True)
     sup.add_argument("--dry-run", action="store_true")
 
+    ann = sub.add_parser("annotate", help="name the guard that enforces an existing rule")
+    ann.add_argument("number", type=int)
+    ann.add_argument("--file", default=str(DEFAULT_FILE))
+    ann.add_argument("--enforced-by", required=True)
+
     listing = sub.add_parser("list", help="print the rules already recorded")
     listing.add_argument("--file", default=str(DEFAULT_FILE))
 
@@ -262,6 +310,14 @@ def main(argv: list[str]) -> int:
 
     args = parser.parse_args(argv[1:])
     path = Path(args.file).expanduser()
+
+    if args.command == "annotate":
+        if not path.exists():
+            print(f"learn_rule: no such file: {path}", file=sys.stderr)
+            return 2
+        code, message = annotate(path, args.number, args.enforced_by)
+        print(message, file=sys.stderr if code else sys.stdout)
+        return code
 
     if args.command == "supersede":
         if not path.exists():
@@ -318,7 +374,8 @@ def main(argv: list[str]) -> int:
 
     mode = "Always" if args.always else "Never"
     action = args.always or args.never
-    code, message = add_rule(path, args.category, mode, action, args.because, args.dry_run)
+    code, message = add_rule(path, args.category, mode, action, args.because, args.dry_run,
+                             getattr(args, "enforced_by", None))
     print(message, file=sys.stderr if code else sys.stdout)
     return code
 

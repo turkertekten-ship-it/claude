@@ -145,6 +145,46 @@ def main() -> int:
         gone = run("review", "--file", str(Path(tmp) / "nope.md"))
         check("a missing file exits 2", gone.returncode == 2, gone.returncode)
 
+    print("\nan enforcement claim is itself a claim")
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "CLAUDE.md"
+        path.write_text(BASE)
+        bogus = run("add", "--file", str(path), "--category", "x", "--never", "y",
+                    "--because", "z", "--enforced-by", "tools/imaginary.py")
+        check("naming a guard that does not exist is refused", bogus.returncode == 1, bogus.returncode)
+        check("and says why", "does not exist" in bogus.stderr, bogus.stderr[:100])
+        check("nothing was written", lr.read_rules(path.read_text()) == [])
+
+        real = run("add", "--file", str(path), "--category", "guards", "--never",
+                   "skip the suite", "--because", "it caught a real failure",
+                   "--enforced-by", "githooks/pre-push")
+        check("a real guard is accepted", real.returncode == 0, real.stderr[:120])
+        check("and is recorded on the rule",
+              "[enforced by: githooks/pre-push]" in path.read_text(), path.read_text()[-160:])
+
+        run("add", "--file", str(path), "--category", "docs", "--never",
+            "quote a number you did not re-run", "--because", "they drift")
+        a = run("annotate", "2", "--file", str(path), "--enforced-by", "tools/verify_measurements.py")
+        check("annotate names a guard on an existing rule", a.returncode == 0, a.stderr[:120])
+        check("the tag is on rule 2",
+              "verify_measurements" in lr.read_rules(path.read_text())[1], lr.read_rules(path.read_text())[1])
+        twice = run("annotate", "2", "--file", str(path), "--enforced-by", "githooks/pre-push")
+        check("annotating twice is refused", twice.returncode == 1, twice.returncode)
+        missing = run("annotate", "99", "--file", str(path), "--enforced-by", "githooks/pre-push")
+        check("annotating a rule that does not exist is refused", missing.returncode == 1)
+        fake = run("annotate", "1", "--file", str(path), "--enforced-by", "tools/nope.py")
+        check("annotate verifies the guard exists too", fake.returncode == 1, fake.stderr[:80])
+
+        review = run("review", "--file", str(path))
+        check("the review reports the split",
+              "2 of 2 live rule(s) name a guard" in review.stdout, review.stdout[:200])
+
+        run("add", "--file", str(path), "--category", "misc", "--never",
+            "forget things", "--because", "memory fades")
+        review2 = run("review", "--file", str(path))
+        check("an advisory rule is counted as such",
+              "1 are advisory" in review2.stdout, review2.stdout[:200])
+
     print("\na wrong rule is superseded, not deleted")
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / "CLAUDE.md"
