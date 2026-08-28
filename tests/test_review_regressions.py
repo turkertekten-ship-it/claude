@@ -1609,3 +1609,170 @@ class SecretRedactionTest(unittest.TestCase):
         out = redact_secrets("GITHUB_TOKEN=ghp_abcdefghijklmnop0123456789")
         self.assertIn("github-token", out,
                       "the generic rule overwrote a more specific marker")
+
+
+class DegradeWithoutShrinkingTest(unittest.TestCase):
+    """Non-negotiable 4: a failure reduces what the pipeline can do and says so.
+    It never crashes, and it never silently shrinks the corpus.
+
+    The existing coverage takes a connector that yields nothing and then raises.
+    The realistic and more dangerous shape is a *partial* failure - a listing
+    that is truncated part way through, a token that expires mid-page, a mount
+    that goes away - because the documents it did not reach look exactly like
+    documents that were deleted upstream.
+    """
+
+    def _raw(self, i):
+        return RawDocument(source_system="s", external_id=f"d{i}", uri=f"mem://d{i}",
+                           title=f"d{i}", text=f"Document {i} about budgets and crawling.",
+                           metadata={})
+
+    def _full(self, n=8):
+        outer = self
+
+        class _Full(Connector):
+            key = "s"
+            source_system = "s"
+
+            def fetch(self, cursor):
+                for i in range(n):
+                    yield outer._raw(i)
+
+        return _Full()
+
+    def _partial(self, yielded=3):
+        outer = self
+
+        class _Partial(Connector):
+            key = "s"
+            source_system = "s"
+
+            def fetch(self, cursor):
+                for i in range(yielded):
+                    yield outer._raw(i)
+                raise RuntimeError("source went away mid-iteration")
+
+        return _Partial()
+
+    def _silently_empty(self):
+        class _Empty(Connector):
+            key = "s"
+            source_system = "s"
+
+            def fetch(self, cursor):
+                return
+                yield  # pragma: no cover
+
+        return _Empty()
+
+    def setUp(self):
+        self.store = SqliteStore(":memory:")
+        self.addCleanup(self.store.close)
+        self.pipeline = IndexPipeline(self.store)
+        self.pipeline.run([self._full()])
+        self.assertEqual(self.store.stats()["documents"], 8)
+
+    def test_a_partial_failure_reports_no_removals(self):
+        """The five documents it never reached are not evidence of deletion."""
+        report = self.pipeline.run([self._partial()])
+        delta = report.deltas[0]
+        self.assertEqual(delta.failed, 1)
+        self.assertEqual(delta.removed, [],
+                         "documents an interrupted listing never reached were "
+                         "reported as removed")
+        self.assertEqual(self.store.stats()["documents"], 8)
+
+    def test_a_partial_failure_prunes_nothing(self):
+        report = self.pipeline.run([self._partial()])
+        pruned = self.pipeline.prune(report.deltas)
+        self.assertEqual(pruned.deleted, 0)
+        self.assertEqual(self.store.stats()["documents"], 8)
+
+    def test_a_partial_failure_does_not_raise_and_says_what_happened(self):
+        """Degrade, don't die - and *say so*. A run that swallows the failure
+        silently is not degrading, it is hiding."""
+        report = self.pipeline.run([self._partial()])
+        self.assertFalse(report.ok, "a failed source left the run reporting ok")
+        self.assertTrue(report.errors, "the failure was not reported anywhere")
+        self.assertIn("mid-iteration", " ".join(report.errors),
+                      f"the reported error does not name the cause: {report.errors}")
+
+    def test_a_source_that_succeeds_but_returns_nothing_is_caught_by_the_guard(self):
+        """The ambiguous case: no error, and everything gone. Indistinguishable
+        from a real bulk deletion, so the fraction guard is the only thing
+        standing between an expired token and an empty index."""
+        report = self.pipeline.run([self._silently_empty()])
+        self.assertEqual(report.deltas[0].failed, 0)
+        self.assertEqual(len(report.deltas[0].removed), 8)
+
+        pruned = self.pipeline.prune(report.deltas)
+        self.assertEqual(pruned.deleted, 0)
+        self.assertEqual(pruned.skipped, 8)
+        self.assertTrue(pruned.refused)
+        self.assertIn("100%", pruned.refused[0])
+        self.assertEqual(self.store.stats()["documents"], 8,
+                         "an empty listing emptied the index")
+
+
+class ZeroDependencyTest(unittest.TestCase):
+    """Non-negotiable 1: the core runs on a bare Python 3.11.
+
+    CI enforces this by having no install step, and its comment calls a green
+    build "evidence of that claim". It is evidence for the paths the suite
+    exercises. A module no test imports could carry a top-level `import numpy`
+    and CI would stay green - the same gap as a test named for more than it
+    checks. These two close it by walking the package rather than sampling it.
+    """
+
+    def _modules(self) -> list[str]:
+        import pathlib
+
+        root = pathlib.Path(__file__).resolve().parent.parent / "src"
+        names = []
+        for path in sorted(root.rglob("*.py")):
+            rel = path.relative_to(root).with_suffix("")
+            parts = [p for p in rel.parts if p != "__init__"]
+            if parts:
+                names.append(".".join(parts))
+        return sorted(set(names))
+
+    def test_every_module_imports_on_the_standard_library_alone(self):
+        import importlib
+
+        modules = self._modules()
+        self.assertGreater(len(modules), 30, "the module walk found almost nothing")
+        failures = []
+        for name in modules:
+            try:
+                importlib.import_module(name)
+            except Exception as e:  # noqa: BLE001 - the failure is the result
+                failures.append(f"{name}: {type(e).__name__}: {e}")
+        self.assertEqual(failures, [], "modules failed to import: " + "; ".join(failures))
+
+    def test_no_third_party_import_at_module_scope(self):
+        """Import-time is what matters: an optional accelerator imported inside
+        a function degrades to the pure-Python path, and one imported at the top
+        of a module makes the package unusable without it."""
+        import ast
+        import pathlib
+        import sys
+
+        allowed = set(sys.stdlib_module_names) | {"oodarag"}
+        offenders = []
+        root = pathlib.Path(__file__).resolve().parent.parent / "src"
+        for path in sorted(root.rglob("*.py")):
+            tree = ast.parse(path.read_text(encoding="utf-8"))
+            for node in ast.walk(tree):
+                if not isinstance(node, (ast.Import, ast.ImportFrom)):
+                    continue
+                if node.col_offset != 0:
+                    continue  # inside a function or a try block: deferred, fine
+                names = ([a.name for a in node.names] if isinstance(node, ast.Import)
+                         else [node.module or ""])
+                for name in names:
+                    root_pkg = name.split(".")[0]
+                    if root_pkg and root_pkg not in allowed:
+                        offenders.append(
+                            f"{path.relative_to(root)}:{node.lineno} imports {root_pkg}")
+        self.assertEqual(offenders, [],
+                         "third-party imports at module scope: " + "; ".join(offenders))

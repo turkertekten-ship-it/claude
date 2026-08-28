@@ -1401,3 +1401,54 @@ redactor cannot tell an example credential from a live one and should not try.
 3. **Write a test for the leak you decided not to close.** An accepted cost that
    is not written down is indistinguishable from an oversight, and the next
    person to widen the floor will not know it was ever considered.
+
+---
+
+## L39 - Verifying the non-negotiables, and two claims that were true but unchecked
+
+The five non-negotiables in CLAUDE.md are the project's own statement of what
+must not break. Four had been attacked by this point; this closes the other two
+and finds that both hold - with an untested path each.
+
+**Zero required runtime dependencies (1): holds.** Three third-party imports in
+51 modules - numpy twice, anthropic once - all inside functions, and every
+module imports on a bare interpreter.
+
+CI enforces this by having no install step, and its comment calls a green build
+"evidence of that claim". It is evidence for the paths the suite exercises. A
+module no test imports could carry a top-level `import numpy` and CI would stay
+green: `ingest/youtube.py` is such a module, and adding one there was invisible
+until a test walked the package rather than sampling it. Two tests now do -
+import every module, and refuse any third-party import at module scope. Both
+name the file and line.
+
+**Degrade, don't die, and never silently shrink the corpus (4): holds.** The
+dangerous shape is a *partial* failure, because the documents an interrupted
+listing never reached look exactly like documents deleted upstream. Measured:
+
+    scenario                      failed  removed  documents  pruned
+    yields 3 of 8, then raises    1       0        8 -> 8     0
+    raises immediately            1       0        8 -> 8     0
+    succeeds, returns nothing     0       8        8 -> 8     0 (guard refused)
+
+The first two are correct because `ingest/base.py` computes removals only when
+the run completed. The third is the one with no upstream defence at all - a
+source that succeeds and returns nothing is indistinguishable from a source
+whose contents were deleted - and the 25% fraction guard is the only thing
+between an expired token and an empty index. It refused at 100% and said so.
+
+Only the *total* failure had a test. The partial one, which is the realistic
+shape, did not; nor did the silent-empty case end to end. All three are pinned
+now, and each mutation - removals computed on a failed run, the fraction guard
+disabled, the error cleared before reporting - fails exactly one of them.
+
+**Rules.**
+1. **"A green build is evidence of that claim" is worth reading twice.** It is
+   evidence for whatever the build exercises, and a claim about *every* module
+   needs something that walks every module.
+2. When a guard has no upstream defence, test it at the extreme rather than near
+   the threshold. The silent-empty case sends 100% of a source to the guard, and
+   that is the number worth asserting.
+3. A property that holds by construction still needs a test, or the next
+   refactor removes the construction. `removed = ... if completed else []` is one
+   line, and it is the whole of "a failure never shrinks the corpus".
