@@ -2769,3 +2769,64 @@ recover it loses three others.
    nobody negotiated one.** Ours favours the gate corpus, which is right; the
    point is that the trade existed unexamined and the other corpus was paying
    for it.
+
+---
+
+## L59 - Nobody had checked whether the confidence number means anything
+
+Every answer carries a `confidence`, and a caller's only cheap way to decide
+whether to trust a RAG answer is that number. It has never been measured against
+whether the answer was right.
+
+Measured over the 54 external goldens (see the caveat below):
+
+| | n | min | median | max |
+| --- | --- | --- | --- | --- |
+| answered, expected source cited | 36 | 0.665 | **0.940** | 1.000 |
+| answered, wrong or unanswerable | 11 | 0.682 | **0.722** | **1.000** |
+
+**The ranges overlap across 0.318 of a 0.335 span - 95%.** No threshold
+separates them. The medians differ usefully (0.940 vs 0.722) and the best
+available cut sits at 0.74 with TPR-FPR of 0.490, so the signal is real: it is
+informative *by tendency* and useless *as a gate*, and the docstring says
+nothing about which of those it is.
+
+**The part that matters is the maximum.** Three wrong answers are reported at
+confidence **1.000**:
+
+```
+1.000  Which package sends mail over SMTP?        cites packaging.md, environs.md
+1.000  Which package renders Jinja templates to PDF?  cites jinja2.md
+1.000  What is relativedelta used for?            cites arrow.md, greenlet.md
+```
+
+The third is the clearest: a real question with a real answer in the corpus
+(`python-dateutil` documents `relativedelta`), answered from `arrow` and
+`greenlet`, at the top of the scale. A caller filtering on "confidence == 1.0"
+would keep exactly this.
+
+**Caveat, stated because it changes what the numbers compare to.** This
+measurement calls the generator directly and therefore *skips the eval harness's
+per-question quarantine of contaminated documents*. Two of the three cases above
+are not among the eval's six failures, and the quarantine is the likely reason.
+The calibration result stands - it is about what the system reports when it
+answers - but these are not the same population as the eval's pass/fail, and
+reading them as such would be the wrong-unit error of L57 again.
+
+**Why confidence saturates.** It is built from citation coverage and retrieval
+score, both of which are high whenever the extractive generator finds text to
+quote. Quoting successfully is not evidence of answering correctly, and nothing
+in the number is derived from whether the retrieved chunk addresses the question
+- that information exists, in `rerank_relevance`, and the abstention gate uses
+it while the reported confidence does not.
+
+**Rules.**
+1. **A number a caller will act on deserves a calibration measurement, once.**
+   This one took a twenty-line script and had never been run in fifty-eight
+   recorded learnings, all of which were about retrieval quality rather than
+   about what the system tells you regarding it.
+2. **Report the overlap, not the difference in means.** "Correct answers score
+   higher on average" is true here and would have been a fair summary; the
+   ranges overlap 95%, which is the fact a caller needs.
+3. **A confidence that cannot be wrong at 1.0 is a different contract from one
+   that can.** Whichever one you have, say so where the field is defined.
