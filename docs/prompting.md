@@ -115,6 +115,7 @@ it arrived at it.
 | `--profile directive` | the DOE directive field list | as above |
 | `tools/learn_rule.py` | the self-annealing "learned rules" section | as above |
 | reverse prompting in `/prompt` | five clarifying questions, then the contract | as above |
+| the `ICEBERG` rule | the context iceberg: a path beats a pasted document | as above |
 
 "Unverified at source" means exactly this: two independent third parties, read
 first-hand, agree on the shape of his method — and no page or video of his own
@@ -160,7 +161,11 @@ them:
   present, not that it discriminates. `prompt-critic` is the pass that reads for
   that, and it is a subagent rather than a rule for exactly this reason.
 - **Adaptation across attempts.** One prompt at one moment is all a static
-  reading has.
+  reading has. Both CLEAR frameworks have a component for it, and both score
+  `n/a` here rather than pretending otherwise.
+- **Whether pasting was the right call.** `ICEBERG` fires on a large pasted
+  block, but a chat window with no file access has no alternative. That is why
+  it is `info` and why its fix says when to ignore it.
 - **Whether a claimed technique works.** Every rule rationale in the tool is
   stated as this repository's standard, never as a finding about model behaviour
   — because that would be a factual claim, and it would need a source.

@@ -207,11 +207,11 @@ class Hazard:
     why: str
     fix: str
     pattern: re.Pattern | None = None
-    detector: object | None = None      # (lines, text) -> [(lineno, excerpt[, severity])]
+    detector: object | None = None      # (lines, prose, raw) -> [(lineno, excerpt[, severity])]
     profiles: tuple[str, ...] = ("*",)
 
 
-def _detect_false_premise(lines: list[str], text: str) -> list[tuple[int, str]]:
+def _detect_false_premise(lines: list[str], text: str, raw: str) -> list[tuple[int, str]]:
     """`the failing test` names something the prompt never established exists.
 
     The definite article does the damage: it asserts a unique referent. If the
@@ -245,7 +245,7 @@ def _detect_false_premise(lines: list[str], text: str) -> list[tuple[int, str]]:
     return out
 
 
-def _detect_contradiction(lines: list[str], text: str) -> list[tuple[int, str]]:
+def _detect_contradiction(lines: list[str], text: str, raw: str) -> list[tuple[int, str]]:
     """Two instructions that cannot both be satisfied, so one is silently dropped."""
     pairs = [
         (re.compile(r"\b(brief|concise|short|terse|succinct|one paragraph|tl;?dr)\b", re.I),
@@ -276,7 +276,7 @@ def _detect_contradiction(lines: list[str], text: str) -> list[tuple[int, str]]:
     return out
 
 
-def _detect_unbounded(lines: list[str], text: str) -> list[tuple[int, str]]:
+def _detect_unbounded(lines: list[str], text: str, raw: str) -> list[tuple[int, str]]:
     """`all`, `every`, `everything` where nothing says how far that reaches.
 
     The word alone is not the problem - "for every branch that has commits"
@@ -329,7 +329,7 @@ def _detect_unbounded(lines: list[str], text: str) -> list[tuple[int, str]]:
     return out
 
 
-def _detect_multi_ask(lines: list[str], text: str) -> list[tuple[int, str]]:
+def _detect_multi_ask(lines: list[str], text: str, raw: str) -> list[tuple[int, str]]:
     """More asks than one reply can carry, with no order of priority."""
     verb = SLOT_BY_KEY["TASK"].cue
     hits = [i for i, raw in enumerate(lines, start=1) if verb.search(raw.strip())]
@@ -339,7 +339,7 @@ def _detect_multi_ask(lines: list[str], text: str) -> list[tuple[int, str]]:
     return []
 
 
-def _detect_no_stop(lines: list[str], text: str) -> list[tuple[int, str]]:
+def _detect_no_stop(lines: list[str], text: str, raw: str) -> list[tuple[int, str]]:
     """Open-ended verbs with no budget: the loop has no exit condition."""
     openv = re.compile(r"\b(research|explore|investigate|brainstorm|analy[sz]e|study|dig into|look into|survey)\b", re.I)
     bound = re.compile(
@@ -353,7 +353,7 @@ def _detect_no_stop(lines: list[str], text: str) -> list[tuple[int, str]]:
     return []
 
 
-def _detect_wall(lines: list[str], text: str) -> list[tuple[int, str]]:
+def _detect_wall(lines: list[str], text: str, raw: str) -> list[tuple[int, str]]:
     """One block long enough that the instructions inside it stop being separable."""
     out, start, buf = [], 1, []
     for i, raw in enumerate(lines + [""], start=1):
@@ -369,7 +369,7 @@ def _detect_wall(lines: list[str], text: str) -> list[tuple[int, str]]:
     return out
 
 
-def _detect_no_example(lines: list[str], text: str) -> list[tuple[int, str]]:
+def _detect_no_example(lines: list[str], text: str, raw: str) -> list[tuple[int, str]]:
     """A shape was demanded and never shown."""
     wants_shape = re.compile(r"\b(json|csv|yaml|schema|format|classif\w+|extract|parse|tag|label|template)\b", re.I)
     has_example = re.compile(r"\b(e\.?g\.?|for example|for instance|like this|such as|example:)\b|```|\{\s*\"", re.I)
@@ -379,7 +379,32 @@ def _detect_no_example(lines: list[str], text: str) -> list[tuple[int, str]]:
     return []
 
 
-def _detect_pronoun_start(lines: list[str], text: str) -> list[tuple[int, str]]:
+def _detect_iceberg(lines: list[str], text: str, raw: str) -> list[tuple[int, str]]:
+    """A whole document pasted into the prompt, where a path would have done.
+
+    Documented as Saraev's "context iceberg": keep the global rules and the
+    current task above the waterline and let tools read the rest on demand,
+    because a long context both costs more and degrades the answer. This can
+    only ever be advice — in a chat window with no file access, pasting is the
+    only option — so it is graded `info` and says so in the fix.
+    """
+    out, in_fence, start, size, count = [], False, 0, 0, 0
+    for i, line in enumerate(raw.splitlines(), start=1):
+        if FENCE.match(line):
+            if in_fence:
+                if size > 2000 or count > 60:
+                    out.append((start, f"{count} lines / {size} characters pasted inline"))
+                in_fence = False
+            else:
+                in_fence, start, size, count = True, i, 0, 0
+            continue
+        if in_fence:
+            size += len(line) + 1
+            count += 1
+    return out
+
+
+def _detect_pronoun_start(lines: list[str], text: str, raw: str) -> list[tuple[int, str]]:
     """Opening with a pronoun that refers to nothing the model can see."""
     first = next((l for l in lines if l.strip()), "")
     m = re.match(r"\s*(it|this|that|they|them|those|these|he|she)\b", first, re.I)
@@ -389,7 +414,7 @@ def _detect_pronoun_start(lines: list[str], text: str) -> list[tuple[int, str]]:
 def _phrase_detector(phrases: list[str]):
     lowered_phrases = [p.lower() for p in phrases]
 
-    def detect(lines: list[str], text: str) -> list[tuple[int, str]]:
+    def detect(lines: list[str], text: str, raw: str) -> list[tuple[int, str]]:
         out = []
         for i, raw in enumerate(lines, start=1):
             bare = INLINE_CODE.sub("", raw).lower()
@@ -496,6 +521,12 @@ HAZARDS: tuple[Hazard, ...] = (
         detector=_detect_pronoun_start,
     ),
     Hazard(
+        "ICEBERG", "a whole document pasted where a path would do", "info", "economy",
+        "A long context costs tokens on every turn and degrades the answer; a file the model can read on demand costs neither until it is needed.",
+        "If the model can read files, name the path and let it fetch what it needs. If it cannot — a chat window, another vendor — pasting is correct and this finding is noise.",
+        detector=_detect_iceberg,
+    ),
+    Hazard(
         "WALL", "one block long enough to hide its own instructions", "info", "economy",
         "Instructions buried mid-paragraph are followed less reliably than instructions on their own line.",
         "Break into the seven slots, or at least into bullets.",
@@ -541,7 +572,7 @@ FRAMEWORKS = {
             "PLACEHOLDER": "E", "NO_EXAMPLE": "E",
             "NO_ACCEPTANCE": "R",
         },
-        "unmapped": ["NO_ESCAPE", "FALSE_MEMORY", "FALSE_PREMISE"],
+        "unmapped": ["NO_ESCAPE", "FALSE_MEMORY", "FALSE_PREMISE", "ICEBERG"],
         "unchecked": ["A"],
     },
     "clear-saraev": {
@@ -559,7 +590,7 @@ FRAMEWORKS = {
             "VAGUE_QUALITY": "C", "VAGUE_QUANT": "C", "HEDGE": "C",
             "PLACEHOLDER": "C", "FALSE_PREMISE": "C",
             "NO_CONTEXT": "L", "NO_ROLE": "L", "CONTRADICTION": "L",
-            "MULTI_ASK": "L", "WALL": "L", "PRONOUN_START": "L",
+            "MULTI_ASK": "L", "WALL": "L", "PRONOUN_START": "L", "ICEBERG": "L",
             # "Examples: specific scenarios and edge cases" - an escape clause is
             # the edge case named in the prompt, which is why NO_ESCAPE maps here
             # under this framework and nowhere under Lo's.
@@ -684,7 +715,7 @@ def analyse(text: str, profile: str = DEFAULT_PROFILE, source: str = "-") -> Rep
             continue
         hits: list[tuple[int, str]] = []
         if hazard.detector is not None:
-            hits = hazard.detector(lines, prose)          # type: ignore[operator]
+            hits = hazard.detector(lines, prose, text)     # type: ignore[operator]
         elif hazard.pattern is not None:
             for i, raw in enumerate(lines, start=1):
                 bare = INLINE_CODE.sub("", raw)

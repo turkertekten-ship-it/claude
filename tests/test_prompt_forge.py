@@ -70,6 +70,7 @@ HAZARD_CASES = {
         "Fix the linter.\nDeploy the service.\nReview the schema.\n"
     ),
     "WALL": "Write the report. " + ("The system has many interacting parts that matter here. " * 15),
+    "ICEBERG": "Fix this.\n\n```python\n" + ("x = 1  # a pasted line of context\n" * 70) + "```\n",
 }
 
 
@@ -174,6 +175,8 @@ def test_narrowings_are_proven() -> None:
           "FALSE_PREMISE" not in rules_for("Write the guide.\n\n> fix the failing test\n"))
     check("the same line unquoted is an instruction",
           "FALSE_PREMISE" in rules_for("Write the guide.\n\nfix the failing test\n"))
+    check("a small fenced example is not an iceberg",
+          "ICEBERG" not in rules_for("Fix this.\n\n```python\nx = 1\n```\n"))
     check("'the only kind of' is a noun phrase",
           "HEDGE" not in rules_for("That is the only kind of ambiguity worth a turn."))
     check("'kind of works' is a hedge",
