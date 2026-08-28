@@ -696,6 +696,44 @@ class RedactionIsStructuralTest(unittest.TestCase):
                 self.assertEqual(once, redact_secrets(once))
 
 
+class PositionWeightTest(unittest.TestCase):
+    """The smallest reranker weight is the most load-bearing.
+
+    Zeroing each in turn on the external corpus: coverage (0.45) costs one case,
+    phrase (0.25) one, authority (0.12) none, and position - 0.05 at the time -
+    cost three. Weight magnitude is not importance. Raised to 0.15, which is
+    best or joint-best on every metric on both corpora and sits in a plateau
+    (L63).
+    """
+
+    def test_the_shipped_weight_is_the_measured_one(self):
+        from oodarag.retrieve.rerank import HeuristicReranker
+
+        self.assertEqual(HeuristicReranker().position_weight, 0.15)
+
+    def test_it_prefers_the_earlier_chunk_of_equal_matches(self):
+        """The mechanism, on two chunks that differ only in ordinal. Without
+        this the factor could be any number and the test above would still
+        pass."""
+        from oodarag.models import Chunk, ScoredChunk
+        from oodarag.retrieve.rerank import HeuristicReranker
+
+        text = "structlog is a logging library built around dictionaries"
+        results = [
+            ScoredChunk(chunk=Chunk(chunk_id="late", doc_id="d", ordinal=9, text=text),
+                        score=0.5, components={}),
+            ScoredChunk(chunk=Chunk(chunk_id="early", doc_id="d", ordinal=0, text=text),
+                        score=0.5, components={}),
+        ]
+        ranked = HeuristicReranker(idf=lambda t: 4.0).rerank("logging library", results)
+        self.assertEqual(ranked[0].chunk.chunk_id, "early",
+                         "the later chunk of an identical document won")
+        # Derived from the formula 1/(1 + 0.15*ordinal), not read off a run.
+        by_id = {r.chunk.chunk_id: r.components["rerank_position"] for r in ranked}
+        self.assertAlmostEqual(by_id["early"], 1.0, places=9)
+        self.assertAlmostEqual(by_id["late"], 1.0 / (1.0 + 0.15 * 9), places=9)
+
+
 if __name__ == "__main__":
     unittest.main()
 

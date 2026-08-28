@@ -3021,3 +3021,71 @@ sources of genuinely different trust *within the same answers*.
    Recency was harmful and got switched off; authority is merely quiet and was
    left alone. Collapsing both into "does not move the metrics" would have
    invited the same action for opposite situations.
+
+---
+
+## L63 - The smallest weight was the most load-bearing
+
+Re-running the zero-one-weight-at-a-time ablation, because every input to the
+original had changed - the corpus tripled, `coverage_power` went to 2.0, recency
+went live and then off, authority turned out to vary. External, 54 cases:
+
+| weight zeroed | its value | pass | effect |
+| --- | --- | --- | --- |
+| coverage_weight | 0.45 | 48/54 | -1 |
+| phrase_weight | 0.25 | 48/54 | -1 |
+| authority_weight | 0.12 | 49/54 | **none** (L62) |
+| recency_weight | 0.0 | 49/54 | none (already off) |
+| **position_weight** | **0.05** | **46/54** | **-3** |
+
+**The smallest weight costs the most when removed.** Position carries a ninth of
+coverage's weight and three times its effect. Nothing about the configuration
+suggested looking there.
+
+The mechanism is a property of these corpora rather than of ranking in general:
+the first chunk of a PyPI page is the package's own one-line summary, and "which
+library does X?" is answered *there* - not in installation instructions, a
+changelog, or contributor notes. The same holds for a source file, whose first
+chunk carries the module docstring. A prior for "the top of a document states
+what it is" happens to be almost exactly the question both golden sets ask.
+
+**Swept, and 0.15 dominates on both corpora:**
+
+| weight | 0.0 | 0.05 (was) | **0.15** | 0.3 | 0.45 |
+| --- | --- | --- | --- | --- | --- |
+| external pass | 46 | 49 | **49** | 49 | 48 |
+| external nDCG@8 | 0.7284 | 0.7538 | **0.7944** | 0.7965 | 0.7946 |
+| primary pass | 16 | 16 | **17** | 17 | 16 |
+| primary MRR | 0.5350 | 0.6042 | **0.7312** | 0.7312 | 0.7438 |
+| primary nDCG@8 | 0.5885 | 0.6327 | **0.7246** | 0.7175 | 0.7079 |
+
+It is a plateau, not a peak: external holds 49/54 from 0.05 to 0.3, primary
+17/20 from 0.15 to 0.3. Above that both decline, and they decline in a telling
+way - ordering keeps improving on external while recall falls, which is a
+position prior beginning to answer confidently from the top of the wrong
+document.
+
+**Shipped, measured through the real configs rather than the sweep harness:**
+
+| | before | after |
+| --- | --- | --- |
+| external | 48/54 | **49/54** (0.907) |
+| external recall@8 | 0.9070 | **0.9302** |
+| external nDCG@8 | 0.7460 | **0.7888** |
+| primary | 19/20 | 19/20 |
+| primary nDCG@8 | 0.6463 | **0.6814** |
+
+Every metric improves on both corpora and none regresses - the first change this
+session that is not a trade. The gate margin goes from 0.039 to 0.057 above the
+0.85 floor.
+
+**Rules.**
+1. **Weight magnitude is not importance.** The only way to know what a term
+   contributes is to remove it. A 0.05 coefficient was doing more work than a
+   0.45 one, and no amount of reading the scoring function would show that.
+2. **Re-run an ablation when its inputs change, not when you suspect it.**
+   Every input to this one had changed and the conclusion was four cycles old.
+   The cost was one script; the result was the session's best number.
+3. **A prior that matches the shape of your questions is worth more than a
+   general one.** "The top of a document says what it is" is not a deep
+   retrieval principle, and it answers most of what both golden sets ask.

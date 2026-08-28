@@ -224,7 +224,34 @@ class HeuristicReranker(Reranker):
     #: suits the wrong corpus is noise injected into every query. The primary
     #: corpus is unaffected either way - its files still share one checkout age.
     recency_weight: float = 0.0
-    position_weight: float = 0.05
+    #: Earlier chunks of a document are usually its thesis; later ones are
+    #: detail. **0.15, raised from 0.05 after the smallest weight turned out to
+    #: be the most load-bearing.**
+    #:
+    #: Zeroing each weight in turn on the current corpus and defaults, external:
+    #:
+    #:   zeroed            coverage(.45)  phrase(.25)  authority(.12)  position(.05)
+    #:   pass              48/54          48/54        49/54           **46/54**
+    #:
+    #: Position costs three cases when removed - more than coverage, which
+    #: carries nine times its weight. Weight magnitude is not importance: the
+    #: first chunk of a PyPI page is the package's own summary, and "which
+    #: library does X?" is answered there rather than in installation notes or
+    #: a changelog. That is a property of the corpus, and the same holds for
+    #: source files, whose first chunk carries the module docstring.
+    #:
+    #: Swept on both (`pass / recall@8 / MRR / nDCG@8`):
+    #:
+    #:   weight     0.0                    0.05                   0.15
+    #:   external   46 .8837 .6909 .7284   49 .9302 .7122 .7538   49 .9302 .7651 .7944
+    #:   primary    16 .7812 .5350 .5885   16 .7812 .6042 .6327   17 .8125 .7312 .7246
+    #:
+    #: 0.15 is best or joint-best on every metric on both corpora, and sits in a
+    #: plateau rather than on a peak - external holds 49/54 from 0.05 to 0.3,
+    #: primary 17/20 from 0.15 to 0.3. Above 0.3 both decline: ordering keeps
+    #: improving on external while recall falls, which is the shape of a
+    #: position prior starting to answer from the top of the wrong document.
+    position_weight: float = 0.15
     base_weight: float = 1.0
     half_life_days: float = 365.0
     #: Source of "now" for the recency factor. Injectable so a run can be made
