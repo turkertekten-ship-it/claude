@@ -194,6 +194,19 @@ class TestStopEnforcement(Harness):
         self.assertEqual(specific["permissionDecision"], "deny")
         self.assertIn("numbered list of tasks", specific["permissionDecisionReason"])
 
+    def test_refusal_carries_the_form_the_runtime_honours(self):
+        """Regression: `permissionDecision: deny` alone is accepted and ignored.
+
+        Measured on 2.1.247 by counting assistant turns — only the top-level
+        `decision: "block"` pair sends the model back. Both are sent, because
+        the two forms come from two sources that disagree.
+        """
+        proc = self.hook(payload("Stop", session_id="e5", last_assistant_message=self.LONG))
+        body = json.loads(proc.stdout)
+        self.assertEqual(body.get("decision"), "block")
+        self.assertIn("numbered list of tasks", body.get("reason", ""))
+        self.assertEqual(body["hookSpecificOutput"]["permissionDecision"], "deny")
+
     def test_allows_a_divided_reply(self):
         proc = self.hook(
             payload("Stop", session_id="e2", last_assistant_message="1. a\n2. b\n" + self.LONG)

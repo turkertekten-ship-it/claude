@@ -343,6 +343,15 @@ the docs say a blocked `Stop` "fires the `Stop` hook again on the next turn",
 and `claude -p` has no next turn. So `Stop` enforcement is real where another
 turn follows, and inert in one-shot headless mode.
 
+> **Correction, from cycle 22.** Wrong, and wrong for a reason worth keeping.
+> Headless mode has next turns perfectly well. The refusal was ignored because
+> it was sent in the field the *reference* documents, which this version does
+> not act on. `outcome: success` in the event stream — which is what I read this
+> conclusion off — only means the hook process exited 0. It says nothing about
+> whether the payload did anything. Two wrong conclusions in a row from the same
+> underlying bug, each one plausible, each one built on an observation that was
+> real but did not mean what I took it to mean.
+
 This also falsifies the second half of cycle 10, which is corrected in place
 above rather than deleted.
 
@@ -424,3 +433,138 @@ per-machine reach, and the flakiness of tests that talk to a live API.
 
 **Falsifier for the whole thing.** If `make e2e` stops passing, one of the
 claims above has expired. That is the point of writing them as tests.
+
+---
+
+## Cycle 21 — Observe: read what Anthropic itself says about writing hooks
+
+Source: `anthropics/claude-code`,
+`plugins/plugin-dev/skills/hook-development/SKILL.md`, read 2026-08-28.
+
+**Observe.** Anthropic's own hook-development guidance documents the `Stop`
+contract as:
+
+```json
+{"decision": "approve|block", "reason": "Why continuing or stopping"}
+```
+
+The public hooks reference documents it as
+`hookSpecificOutput.permissionDecision: "deny"` with
+`permissionDecisionReason`. These are not the same field, not the same nesting,
+and not the same vocabulary.
+
+**Orient — the surprise.** Every `Stop` refusal shipped so far used the second
+form. If the runtime only reads the first, the enforcement half of this system
+has never done anything, and cycle 15's "no next turn in headless mode" was a
+misdiagnosis of my own bug rather than a property of the product.
+
+**Decide.** Do not pick by authority. Measure. Falsifier: run the same session
+under each payload and count assistant turns — a refusal that works produces
+more than one.
+
+---
+
+## Cycle 22 — Act: measure which `Stop` payload the runtime honours
+
+**Act.** Three variants, same prompt, same everything else, blocking once each:
+
+| Variant | Payload | `assistant` turns | Verdict |
+|---|---|---|---|
+| A | `hookSpecificOutput.permissionDecision: "deny"` | 1 | ignored |
+| B | top-level `{"decision": "block", "reason": …}` | 3 | **honoured** |
+| C | both together | 3 | honoured |
+
+**Orient — the surprise, and it is the largest one in this log.** The documented
+form does nothing. The `Stop` check had been shipping, passing its own tests,
+recording refusals in its ledger, and reporting `outcome: success` — while
+having no effect whatsoever on any session. The tests were green because they
+asserted on the JSON the engine produced, not on whether anything happened.
+
+**Act.** The engine now sends both forms. Verified immediately afterwards on a
+clean stop-only config: 2594 characters of undivided prose, refused, revised,
+and the delivered reply opened `1. Write a flowing-prose explanation …
+**Done-condition:** …`. Ledger: `stop-denied`, then `stop-ok`.
+
+The headless "limitation" documented in cycle 15 and written into the docs was
+deleted, because it was never real. The test that asserted it has been replaced
+by one that counts assistant turns — the test that would have caught this.
+
+---
+
+## Cycle 23 — Act: apply the same doubt to the task events
+
+**Observe.** `TaskCreated` and `TaskCompleted` are documented exactly as `Stop`
+was, so the same doubt applies. Ran the same three-variant probe.
+
+**Result: inconclusive, for a reason worth recording.** The task tools do not
+exist in headless `claude -p` sessions — all three runs came back "there is no
+`TaskCreate` tool available in this environment" — so the hook never fired.
+
+**Decide.** Send both forms for these events too, marked in the code as
+inference from the `Stop` result rather than measurement, with the falsifier
+written into `docs/open-items.md`. Guessing silently would have been the easy
+option; guessing out loud is the honest one.
+
+---
+
+## Cycle 24 — Act: close the distribution questions
+
+Three things that had been asserted rather than tested:
+
+- **`claude plugin marketplace add` → `install`** works end to end, and the
+  installed plugin's hooks fire: the session's reply came back under a
+  "## Task breakdown" heading with per-task done-conditions.
+- **Bug [#53643](https://github.com/anthropics/claude-code/issues/53643)**
+  (a plugin contributing `UserPromptSubmit` writing `"UserPromptSubmit": null`
+  into `settings.json`) **does not reproduce** — after the install the file held
+  only well-formed `extraKnownMarketplaces` and `enabledPlugins`.
+- **The `/divide` skill loads.** It appeared in a live session's skill list as
+  `task-division:divide` — the namespaced form, which also proves the
+  `skills-dir` directory loaded as a plugin and not as a bare skill.
+
+Both referenced issues are now closed as duplicates upstream; #10225 was filed
+against 2.0.24 and does not reproduce on 2.1.247.
+
+---
+
+## Cycle 25 — Act: does the directive reach a subagent, or only the hook?
+
+**Observe.** `subagent-start` appeared in the ledger with `agent_type: Explore`.
+That proves a process ran. It does not prove the subagent saw anything — the
+same distinction that mattered in cycle 6.
+
+**Act.** Injected `MARLINGROVE-3318` through `SubagentStart` and asked an
+`Explore` subagent to report the passphrase it had been given. It came back.
+
+**Orient — an unexpected and welcome surprise.** The subagent reported the
+passphrase *and* flagged it as a likely prompt-injection pattern, noting it was
+not part of its real system prompt. That is correct behaviour from the subagent,
+and it is a genuine limit on this delivery route: context injected at
+`SubagentStart` arrives, but may be treated as suspicious rather than
+authoritative. Recorded in the docs rather than glossed, and the mechanism does
+not depend on subagents complying.
+
+---
+
+## Cycle 26 — Orient: what is left, and why each thing is left
+
+Everything that was ever in doubt now lives in `docs/open-items.md`, closed or
+open, and an open item carries the reason it could not be settled here plus the
+falsifier that would settle it. Four remain open, none of them silently:
+
+- the `TaskCreated`/`TaskCompleted` contract — task tools absent from headless
+  sessions;
+- `SessionStart` re-seeding after compaction — a one-shot run cannot fill a
+  context window;
+- Cowork — not present in this environment; the upstream issue's stated root
+  cause is a sandbox/host split, which *hints* the project route may survive
+  there, and a hint is not a finding;
+- the two repositories' branch divergence, and the marketplace `ref` pinned to
+  this branch — both the owner's decisions, not this session's.
+
+**The pattern, now unmistakable.** Every significant error in this log came from
+an observation that was real and did not mean what it appeared to mean: a
+selftest that passed, a hook that exited 0, a refusal the runtime "accepted", a
+reply that looked undivided. The fix each time was to measure the *effect*
+rather than the *event* — count the turns, read the passphrase back, check what
+actually changed on disk. A hook that runs is not a hook that works.

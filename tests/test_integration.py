@@ -198,27 +198,44 @@ class TestStopEnforcement(LiveSession):
         )
         self.assertIn("stop-denied", self.kinds())
 
-    def test_known_limit_headless_mode_has_no_next_turn(self):
-        """A refused Stop is only useful if another turn follows it.
+    def test_a_refusal_actually_sends_the_model_back(self):
+        """The whole point: a refused reply must be revised, not delivered.
 
-        The docs say a blocked Stop "fires the Stop hook again on the next
-        turn". In `claude -p` there is no next turn: the runtime accepts the
-        deny, emits exactly one assistant message, and exits. So in headless
-        mode the refusal is recorded but the reply is delivered unrevised, and
-        `UserPromptSubmit` injection is the mechanism that actually changes
-        behaviour there.
-
-        This test asserts that limit. If it ever fails, headless sessions have
-        started honouring the refusal and the documentation should be updated.
+        This is the test that would have caught the contract bug. The engine
+        once emitted only `hookSpecificOutput.permissionDecision: "deny"`, which
+        the runtime accepts and ignores — the session ended after one assistant
+        turn and the undivided reply was delivered. Counting turns is what
+        distinguishes "the hook ran" from "the refusal did something".
         """
         self.write_settings(["Stop"])
         events = self.ask_stream(self.PROSE)
-        assistants = [event for event in events if event.get("type") == "assistant"]
-        self.assertEqual(
-            len(assistants),
+        turns = [event for event in events if event.get("type") == "assistant"]
+        self.assertGreater(
+            len(turns),
             1,
-            "headless mode produced more than one assistant turn; the documented "
-            "limitation may no longer hold",
+            "the refusal did not send the model back for another turn; the Stop "
+            "payload is probably in a form this version ignores",
+        )
+        self.assertIn("stop-denied", self.kinds())
+        self.assertIn("stop-ok", self.kinds(), "the revised reply was never accepted")
+
+    def test_the_refusal_carries_both_documented_forms(self):
+        """Two sources document two different Stop contracts; send both."""
+        self.write_settings(["Stop"])
+        events = self.ask_stream(self.PROSE)
+        payloads = []
+        for event in events:
+            if event.get("subtype") == "hook_response" and event.get("hook_event") == "Stop":
+                try:
+                    payloads.append(json.loads(event.get("output") or "{}"))
+                except ValueError:
+                    continue
+        refusals = [p for p in payloads if p.get("decision") == "block"]
+        self.assertTrue(refusals, f"no top-level decision:block was sent; payloads={payloads}")
+        self.assertEqual(
+            refusals[0].get("hookSpecificOutput", {}).get("permissionDecision"),
+            "deny",
+            "the documented form was dropped; keep both until they agree",
         )
 
     def test_one_reply_never_spends_more_than_one_refusal(self):

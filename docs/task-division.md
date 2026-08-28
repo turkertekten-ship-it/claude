@@ -36,8 +36,27 @@ it receives on stdin, so a single registration serves every event:
 | It changes behaviour in sessions that never saw this work | Fresh config, fresh session, ordinary question | reply came back divided |
 | Plugin-provided hooks fire | `--plugin-dir` with a generated plugin | fires — bug [#10225](https://github.com/anthropics/claude-code/issues/10225) does not reproduce on 2.1.247 |
 | Project-scope hooks fire | `.claude/settings.json` in the launch directory | fires |
-| The runtime accepts a `Stop` refusal | `--output-format stream-json`, read the `hook_response` | `permissionDecision: deny`, `outcome: success` |
+| A refusal actually sends the model back | Counted `assistant` turns in `--output-format stream-json` | 1 turn → 3 turns; the revised reply led with a numbered task and a done-condition |
+| The directive reaches a *subagent* | Passphrase injected via `SubagentStart`, read back out of an `Explore` agent | `MARLINGROVE-3318` returned |
+| The plugin installs from a marketplace, not just `--plugin-dir` | `marketplace add` → `install` → live session | reply came back divided |
+| The `/divide` skill loads | Appeared in a live session's skill list | `task-division:divide` |
 | The plugin is well formed | `claude plugin validate --strict` | passes, no warnings |
+
+### The `Stop` contract, which is not what the reference says
+
+Two sources document two different payloads, and only one of them works:
+
+| Form | Source | Effect on 2.1.247 |
+|---|---|---|
+| `hookSpecificOutput.permissionDecision: "deny"` | [hooks reference](https://code.claude.com/docs/en/hooks) | accepted, **ignored** |
+| top-level `{"decision": "block", "reason": …}` | Anthropic's `plugin-dev` hook-development skill | **honoured** |
+
+The engine sends both. This is not belt-and-braces for its own sake: the form
+that works is not the form that is documented, so committing to either alone is
+a bet on which one survives. `outcome: success` in the event stream means only
+that the hook exited cleanly — it says nothing about whether the runtime acted
+on the payload, which is exactly how an earlier version of this shipped a `Stop`
+check that had never once worked.
 
 Reproduce all of it with `make e2e`.
 
@@ -79,23 +98,22 @@ Elsewhere:
 
 ## Limits, stated plainly
 
-- **A refused `Stop` needs a next turn.** The runtime accepts the refusal — that
-  is verified — but in `claude -p` there is no next turn: exactly one assistant
-  message is produced and the reply is delivered unrevised. So in headless
-  one-shot mode the refusal is recorded and not acted on, and
-  `UserPromptSubmit` injection is what actually changes behaviour there.
-  `tests/test_integration.py` asserts this limit, and will fail loudly if it
-  ever stops being true.
-- **Injection alone is not enough either.** Asked for "flowing prose, no lists",
+- **Injection alone is not enough.** Asked for "flowing prose, no lists",
   a model that had received the directive still skipped the division. The two
   mechanisms cover different failures; neither covers both.
 - **Cloud sessions don't read your laptop's `~/.claude`.** The docs say so
   explicitly, which is why the project route matters more than the user route
   for work done through Claude Code on the web. A cloud container's *own*
   `~/.claude` is read normally — this was checked — but it starts empty.
-- **Cowork does not run `~/.claude` hooks at all**, per
-  [#63360](https://github.com/anthropics/claude-code/issues/63360). Unverified
-  here; recorded as second-hand.
+- **Cowork does not run `~/.claude` hooks**, per
+  [#63360](https://github.com/anthropics/claude-code/issues/63360), whose stated
+  root cause is a sandbox/host mismatch — the sandbox is Linux, the config is on
+  the host Mac. Not verifiable here. That root cause hints the *project* route
+  may fare better, since a repo-carried hook lives inside the sandbox, but that
+  is a lead and not a finding. See `docs/open-items.md`.
+- **`SessionStart` re-seeding after a compaction is unverified.** The event
+  fires on every session, but only ever with `reason: ""` here; a one-shot run
+  cannot fill a context window. The falsifier is written down.
 - **Per machine, per clone.** One install covers one machine. Another laptop
   needs its own run, or a clone of a repository carrying the project route.
 - **Sessions already running keep the settings they started with.** Restart to

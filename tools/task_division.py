@@ -22,11 +22,18 @@ stdin, so one script serves every event it handles:
 Behaviour is verified against the real binary in `tests/test_integration.py`,
 which drives `claude -p` and asserts on what the model does, not on JSON shape.
 
-Contracts are taken from <https://code.claude.com/docs/en/hooks>, read
-2026-08-27. Only fields corroborated by more than one read of that page are used:
-`hookSpecificOutput.hookEventName`, `additionalContext`, `systemMessage`,
-`permissionDecision` and `permissionDecisionReason`. Prompt-rewriting fields are
-deliberately not used — two reads disagreed on their names.
+Contracts are taken from <https://code.claude.com/docs/en/hooks> and from
+`anthropics/claude-code` `plugins/plugin-dev/skills/hook-development/SKILL.md`,
+both read 2026-08-27 — and where those two disagree, from measuring the binary.
+
+The disagreement is not academic. For `Stop`, the reference's
+`hookSpecificOutput.permissionDecision: "deny"` is accepted and *ignored* on
+2.1.247, while the plugin-dev skill's top-level `{"decision": "block"}` is
+honoured. Sending only the documented form produced a refusal that had never
+once worked. Denials therefore carry both forms; see `emit()`.
+
+Prompt-rewriting fields are deliberately unused — two reads of the reference
+disagreed on their names, and nothing here needs them.
 """
 
 from __future__ import annotations
@@ -314,7 +321,23 @@ def task_quality(subject: str, description: str) -> list:
 # --------------------------------------------------------------------------
 
 
-def emit(event, *, context="", message="", decision="", reason=""):
+def emit(event, *, context="", message="", decision="", reason="", also_block=False):
+    """Build a hook response.
+
+    `also_block` adds the top-level `decision`/`reason` pair alongside the
+    `hookSpecificOutput` fields. Both forms are documented, by different
+    sources, and only one of them works:
+
+        permissionDecision: deny   (code.claude.com/docs/en/hooks)  -> IGNORED
+        decision: block            (anthropics/claude-code plugin-dev skill) -> honoured
+
+    Measured on 2.1.247 by counting assistant turns in `--output-format
+    stream-json`: with only the first form the session ends after one turn; with
+    the second, or with both together, the model is sent back for another turn.
+    Sending both is deliberate — the pair that works today is not the pair the
+    reference documents, so pinning to either alone is a bet on which one a
+    future version keeps.
+    """
     specific = {"hookEventName": event}
     if context:
         specific["additionalContext"] = context
@@ -324,7 +347,12 @@ def emit(event, *, context="", message="", decision="", reason=""):
         specific["permissionDecision"] = decision
         if reason:
             specific["permissionDecisionReason"] = reason
-    return {"hookSpecificOutput": specific}
+    output = {"hookSpecificOutput": specific}
+    if decision == "deny" and also_block:
+        output["decision"] = "block"
+        if reason:
+            output["reason"] = reason
+    return output
 
 
 # --------------------------------------------------------------------------
@@ -462,7 +490,7 @@ def on_stop(payload, cfg):
         _remember_stop(payload, message, False)
         return emit("Stop", message="No task division found in this reply.")
     _remember_stop(payload, message, True)
-    return emit("Stop", decision="deny", reason=STOP_REASON)
+    return emit("Stop", decision="deny", reason=STOP_REASON, also_block=True)
 
 
 def on_task_created(payload, cfg):
@@ -472,11 +500,16 @@ def on_task_created(payload, cfg):
     detail = "; ".join(findings)
     log_event(cfg, "task-shape", {"findings": findings})
     if cfg["mode"] == "enforce" and cfg.get("enforce_task_quality"):
+        # also_block by inference, not measurement: TaskCreated is documented
+        # exactly as Stop was, and for Stop the documented field turned out to
+        # be accepted and ignored. The task tools are absent from headless
+        # sessions, so this one could not be tested here — see docs/open-items.md.
         return emit(
             "TaskCreated",
             decision="deny",
             reason=f"This task is not checkable: {detail}. Give it an imperative "
             f"subject and a description stating a done-condition, then create it again.",
+            also_block=True,
         )
     return emit("TaskCreated", message=f"task division: {detail}")
 
@@ -492,6 +525,7 @@ def on_task_completed(payload, cfg):
             decision="deny",
             reason="Say what makes this task done — which done-condition now holds — "
             "then mark it completed.",
+            also_block=True,
         )
     return emit("TaskCompleted", message="task division: completed without saying what makes it done")
 

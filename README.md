@@ -74,6 +74,8 @@ make e2e                                        # prove it against the real bina
 
 `docs/task-division.md` records what was verified and how, and states the limits
 plainly — including the one case where the refusal is accepted but cannot act.
-`docs/ooda-log.md` is the working log: twenty cycles, each naming where reality
+`docs/open-items.md` is the register of everything that was in doubt and where
+it now stands, including what could not be tested here and the falsifier for
+each. `docs/ooda-log.md` is the working log: twenty cycles, each naming where reality
 diverged from the previous cycle's assumption, including a conclusion that was
 wrong and is corrected in place rather than deleted.
