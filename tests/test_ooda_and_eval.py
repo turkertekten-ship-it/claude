@@ -144,6 +144,70 @@ class LoopTest(unittest.TestCase):
         self.assertEqual(second.observations["documents_ingested"], 0)
         self.assertEqual(second.situation["embedding_coverage"], 1.0)
 
+    def test_the_loop_converges_on_a_corpus_that_stops_changing(self):
+        """The defining property of a control loop, and the one nothing asserted.
+
+        A loop that keeps acting on an unchanging system is thrashing, and the
+        usual cause is an action that does not clear its own trigger: it fires,
+        the situation is re-measured, the same condition still holds, and it
+        fires again for ever. Neither the per-rule unit tests nor "a second
+        cycle ingests nothing" catch that - the first tests one decision from a
+        hand-built situation, the second only looks at ingestion.
+        """
+        connector = StubConnector("stub", CORPUS)
+        loop = self._loop([connector])
+        reports = [loop.cycle() for _ in range(5)]
+
+        after_settling = reports[1:]
+        for index, report in enumerate(after_settling, start=2):
+            kinds = {action.kind for action in report.actions}
+            self.assertEqual(
+                kinds, {"noop"},
+                f"cycle {index} still wanted to act on an unchanged corpus: {kinds}")
+
+    def test_no_action_is_decided_twice_on_an_unchanged_corpus(self):
+        """Whatever the first cycle decided, the second must not decide again.
+
+        **What this does not prove.** It does not show that the *action* cleared
+        the condition. The observe phase ingests, and ingesting embeds, so a
+        broken `embed_missing` is masked - replacing that call with a no-op
+        leaves both these tests green, which was checked rather than assumed.
+        What it does catch is the loop-level failure: a rule whose condition
+        survives the cycle, which makes the loop act for ever. Mutating the
+        coverage rule to fire unconditionally fails this and the convergence
+        test above.
+
+        Naming it for the loop-level property rather than the per-action one,
+        because a test that claims more than it checks is worse than no test.
+        """
+        # Chunks written without vectors, so embedding coverage is below
+        # threshold and the highest-priority rule genuinely fires. A cycle that
+        # decides nothing cannot demonstrate that decisions clear themselves,
+        # which is why this is set up rather than hoped for.
+        from oodarag.chunking import chunk_document
+        from oodarag.models import Document
+
+        docs = [Document(doc_id=f"x{i}", source_system="stub", external_id=f"x{i}",
+                         uri=f"mem://x{i}", title=f"x{i}",
+                         text=f"Document {i} about budgets, crawling and citations.",
+                         content_hash=f"h{i}", metadata={},
+                         created_at=0.0, updated_at=0.0)
+                for i in range(3)]
+        self.store.upsert_documents(docs)
+        for doc in docs:
+            self.store.replace_chunks(doc.doc_id, chunk_document(doc))
+
+        loop = self._loop([StubConnector("stub", CORPUS)])
+        first = loop.cycle()
+        second = loop.cycle()
+
+        acted = {a.kind for a in first.actions if a.kind != "noop"}
+        self.assertTrue(acted, "the first cycle did nothing, so this proves nothing")
+        repeated = acted & {a.kind for a in second.actions}
+        self.assertFalse(
+            repeated,
+            f"these actions did not clear the condition that triggered them: {repeated}")
+
     def test_cycle_numbers_increment_and_persist(self):
         loop = self._loop([StubConnector("stub", CORPUS)])
         loop.cycle()
