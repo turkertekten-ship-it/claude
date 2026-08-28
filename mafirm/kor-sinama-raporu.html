@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>29 çalıştırılabilir takım · 270 vaka · 0 sinyal</span>
+    <span>30 çalıştırılabilir takım · 275 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -1760,6 +1760,62 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Yirmi beşinci tur</span>
+  <h2>Kıyas ölçütünün kendisi eksikti</h2>
+  <p>Bu raporun en ağır cümleleri bir <strong>karşılaştırmaya</strong> dayanır:
+  <em>"kusur kitabın"</em> ya da <em>"kusur benim"</em>. J-01s ve J-07s kitabın
+  davranışını ölçer, Z-05 kitaba sadık dosyayı geri koyup denetimin kırmızıya
+  döndüğünü gösterir, AA ve AB'nin atıfları o tabana bakar. Taban
+  <em class="term">yamalar/kitaba-sadik/</em>'tir ve
+  <em class="term">DEGISIKLIKLER.md</em> onun hakkında bir <strong>söz</strong>
+  verir: <em>"Karşılaştırma denetlenebilir olsun diye hiçbiri silinmedi."</em></p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AG-01 · AG-02</span>
+      <span class="pill f">Tutulmayan söz</span></div>
+    <h3>İki kitap dosyasının özgünü yoktu</h3>
+    <p><em class="term">.gitignore</em> — §2'nin yazdığı dosya; on yedinci
+    turda kural 6 için yeniden yazdım ve özgününü saklamadım.
+    <em class="term">birimler/rekabet/yontem/tr-esikler.md</em> — §5'in eşik
+    dosyası; üç ENGELLEYİCİ bulgu için yerinde <code>DOĞRULANAMADI</code>
+    işaretleri koydum.</p>
+    <p>Yani tam da mevzuat katmanının <strong>en tartışmalı dosyası</strong>
+    için <em>"kitap ne yazıyordu"</em> sorusu artık kurulumdan
+    cevaplanamıyordu. İkisinin de özgünü <strong>kitabın kendi metninden
+    yeniden kuruldu</strong>; yeniden kurulan dosya hiçbir
+    <code>DOĞRULANAMADI</code> taşımıyor — yani işaretlerin benim olduğu
+    <strong>ölçümle</strong> doğrulandı.</p>
+  </div>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AG-04</span>
+      <span class="pill p">Etiket sınandı</span></div>
+    <h3>"Kitaba sadık" bir etikettir; etiketler yanlış olabilir</h3>
+    <p>AG-04 onu davranışa bağlıyor: korunan <em class="term">kapi.py</em>,
+    kitabın <strong>bilinen dört kusurunu</strong> taşımak zorunda —
+    <code>json.dumps</code> üretim yolu (C-10), Türkçe küçültmenin yokluğu
+    (B-10), olumsuz iddia kapısının yokluğu (B-07), gelecek tarih kontrolünün
+    yokluğu (B-23). <strong>Dördü de mevcut.</strong></p>
+    <p>Mutasyonda "özgün" diye <strong>yamalı</strong> sürümü kopyalamak AG-03
+    ile AG-04'ü birden kırmızıya çeviriyor: bir kıyas ölçütünün
+    <strong>sessizce</strong> yamalı sürümle değiştirilmesi, ölçümün tamamını
+    anlamsız kılardı ve hiçbir şey söylemezdi.</p>
+  </div>
+
+  <div class="callout">
+    <strong>Kontrol edilmeyen bir söz, verilmemiş bir sözdür.</strong>
+    <em class="term">DEGISIKLIKLER.md</em> yirmi dört tur boyunca kendi
+    doğruluğunu iddia etti ve kimse bakmadı. Sözün bir süre tutulmadığı artık
+    belgenin kendisine <strong>yazıldı</strong>, ve her koşumda kontrol
+    ediliyor.
+    <br><br>
+    Ayrıca <code>__pycache__</code> dizinleri <code>.gitignore</code>
+    tarafından dışlanmıyordu. Depoya hiç girmemişlerdi — ama
+    <strong>dışlanmayan bir artık, bir gün eklenen bir artıktır.</strong>
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -1877,7 +1933,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 29 takım · 270 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 30 takım · 275 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
