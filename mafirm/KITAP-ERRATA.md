@@ -473,6 +473,28 @@ kalır). **Yama neyin çatışma SAYILDIĞINA karar vermez** — o bir meslek
 kuralları meselesidir ve §9 uyarınca insana aittir; yalnızca mekanik
 kontrolün iki yönü de kapsaması sağlandı.
 
+## §12 · Kapılar — öz-sınamanın kapsama değişmezi yok
+
+**[B] §12'nin öz-sınaması hiçbir yerde "her kapının bir vakası olmalı"
+demiyor; §14 bu boşluğa düşüyor ve boşluk hâlâ açık.**
+Raporun birinci bulgusu §14'ün beşinci kapıyı ekleyip §12'nin beklenen
+kümelerini güncellememesidir. Ama o bir ÖRNEKTİR; **sınıf**, öz-sınamanın
+kapsama değişmezinin hiç olmamasıdır. Bir kapı eklendiğinde hiçbir şey
+"bunun vakası nerede?" diye sormuyor, ve öz-sınama eski vaka sayısıyla
+"SELFTEST OK" demeye devam ediyor.
+
+Bu maddenin kanıtı bu incelemenin kendisidir: otuz altıncı turda **yedinci
+kapıyı ben ekledim ve öz-sınamaya tek bir vaka yazmadım.** Öz-sınama
+"SELFTEST OK (20 vaka)" demeye devam etti — kapı eklenmeden önce de 20
+diyordu. Kırk bir takımın hiçbiri görmedi, çünkü görecek bir ölçüt yoktu.
+**Kitabın merkezî kusurunu, kitabı yamalarken tekrar ettim.** *(AS-01)*
+
+→CEVAP: YOK — cevabın "yamalı hâlde sistem çalışıyor" cümlesi kapsıyor:
+yedinci kapı için dört yönlü öz-sınama vakası eklendi (sessizlik ateşler,
+onay kaydı susturur, taslak beyanı susturur, içeride hiç ateşlemez) ve
+AS-01 artık `denetle()`'nin çağırdığı **her** kapının öz-sınamada beklenen
+olarak geçtiğini her koşumda sorar. Örnek değil, sınıf kapatıldı.
+
 ## §12 · Kapılar — onay ihtiyacının beyanı, onayın kendisi değildir
 
 **[A] §9 "adı belli bir insan onaylamadan kullanılmaz" diyor; hiçbir kapı

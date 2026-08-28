@@ -629,6 +629,31 @@ def _selftest():
         ("ve/veya alıcı tercih edebilir", False, set()),
         ("Başvuru otuz gün içinde yapılır.", False, set()),
         ("cd ~/mafirm && ls birimler/ çalıştır", False, set()),
+
+        # [AS-01 · otuz yedinci tur] YEDİNCİ KAPI'nın öz-sınama vakaları.
+        # Bunlar otuz altıncı turda YAZILMADI ve öz-sınama "SELFTEST OK
+        # (20 vaka)" demeye devam etti — kapı eklenmeden önce de 20 diyordu.
+        # Yani yeni kapı hiç sınanmadan yeşil göründü. Bu, raporun BİRİNCİ
+        # bulgusunun aynısıdır: §14 beşinci kapıyı ekler, §12'nin beklenen
+        # kümelerini güncellemez. Kitapta bulduğum kusuru, kitabı yamalarken
+        # ben de işledim. AS-01 artık bunu her koşumda sorar.
+        #
+        # Dört yön de sınanır: sessizlik ateşler, onay kaydı susturur,
+        # taslak beyanı susturur, ve İÇERİDE hiç ateşlemez.
+        ("Bu işlem bildirime tabidir ve Kurul'a başvurulmalıdır.\n"
+         "## Yetkili avukat görüşü gereken konular\nHepsi.",
+         True, {"onay"}),
+        ("Bu işlem bildirime tabidir ve Kurul'a başvurulmalıdır.\n"
+         "## Yetkili avukat görüşü gereken konular\nHepsi.\n"
+         "Onay: Av. A. Yılmaz · 2026-08-28",
+         True, set()),
+        ("Bu işlem bildirime tabidir ve Kurul'a başvurulmalıdır.\n"
+         "## Yetkili avukat görüşü gereken konular\nHepsi.\n"
+         "TASLAK — onaylanmamıştır.",
+         True, set()),
+        ("Bu işlem bildirime tabidir ve Kurul'a başvurulmalıdır.\n"
+         "## Yetkili avukat görüşü gereken konular\nHepsi.",
+         False, set()),
     ]
     bugun = date(2026, 8, 27)
     # [K-14] koltuk kapısı iki yönde: beyansız ateşler, beyanlı susar.

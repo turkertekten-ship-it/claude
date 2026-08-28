@@ -64,7 +64,7 @@ eski yola karşı bırakıldı: kusurun kaydı olarak dururlar.
 | 25 | **`hafiza/arac-katalogu.md` (yeni) ve `once-arastir`** | §13'ün araç kararları kurulumda hiçbir dosya bırakmıyordu — karar kitapta, kararın dayandığı olgular bozulmakta. Katalog kuruldu; her satır bizim doğrulama tarihimizi taşır ve doğrulanmamış satır 'temiz' sayılmaz. `once-arastir` `archived` alanını ve kod/veri lisansı ayrımını okuyacak biçimde genişletildi. |
 | 26 | **`yaptirim-taramasi` ve `kapanis-listesi`** | Taramanın üç kontrol noktası da imzaya kadardı; §5.1 ise imza ile kapanış arasına izin beklemesi koyuyor ve listelere atama haftalık. Dördüncü nokta (kapanıştan hemen önce) ve kapanış listesine 0. adım yeniden tarama eklendi. Tarama yine karar değildir; sorgu soyutlama kuralı mutlak. |
 | 27 | **`.claude/hooks/kapi.py` · yedinci kapı** | §9 "adı belli bir insan onaylamadan kullanılmaz" diyor ama hiçbir kapı onay durumuna bakmıyordu; kapsam kapısının aradığı başlık onay İHTİYACININ beyanı, onayın kaydı değil. `kapi_onay` eklendi: §9 sınıfı bir çıktı ya onay kaydı ya da açık durum beyanı taşımalı. Kusur onayın yokluğu değil, onay durumu hakkındaki sessizlik. |\n
-## Eklenen dosyalar
+| 28 | **`.claude/hooks/kapi.py` · öz-sınama** | Yedinci kapı eklenmiş ama öz-sınamaya tek vaka yazılmamıştı; öz-sınama eski sayıyla "SELFTEST OK" demeye devam ediyordu — §14'ün kusurunun aynısı, bu kez benim elimde. Dört yönlü vaka eklendi (sessizlik/onay kaydı/taslak/içeride) ve AS-01 kapsamayı her koşumda sağlıyor. |\n## Eklenen dosyalar
 - `hafiza/cikar-catismasi.md` — §2 `hafiza/` klasörünü kuruyordu ama bu dosyayı
   hiç oluşturmuyordu; oysa CLAUDE.md §8 ve §8 el kitabı Aşama 0 onu bir kapı
   sayıyor. Boş bir listenin "temiz" DEĞİL "kontrol yapılamadı" demek olduğu

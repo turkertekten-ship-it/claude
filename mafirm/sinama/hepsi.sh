@@ -108,6 +108,8 @@ python3 "$S/ks_aq_zaman.py"; topla "AQ · yaptırım taramasının zaman ekseni"
 echo
 python3 "$S/ks_ar_onay.py"; topla "AR · onay durumu (yedinci kapı)" $?
 echo
+python3 "$S/ks_as_kapi_kapsama.py"; topla "AS · kapıların öz-sınama kapsaması" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

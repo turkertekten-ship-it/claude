@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** kırk bir çalıştırılabilir takım — **332
+**Yamalı hâlde sistem çalışıyor:** kırk iki çalıştırılabilir takım — **337
 vaka, 15 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15, birimler arası tutarlılık takımının
 kendi mutasyon yakalaması 10/10. Ama **üç mevzuat bulgusu ile kitabın kendi içindeki bir çelişki açık kalır**
@@ -2132,6 +2132,41 @@ Ve AR-05 ters yönü tutuyor: onay kaydı taşıyan **aynı** metin susmalı. Ka
 fazla geniş yapan bir mutasyon (onay kaydını da yok say) AR-05'i kırmızıya
 çeviriyor — V takımının dersi, yedinci kapıya uygulanmış hâli.
 
+### Kitabın merkezî kusurunu, kitabı yamalarken ben de işledim
+
+Bu raporun **birinci** bulgusu şudur: §14 beşinci kapıyı ekler ve §12'nin
+dokuz vakalık öz-sınamasının beklenen kümelerini güncellemez; zincir §16'yı
+kırmızıya, oradan kurulumu durdurmaya götürür.
+
+Otuz altıncı turda **yedinci kapıyı ekledim ve öz-sınamaya tek bir vaka
+yazmadım.**
+
+| kapı | öz-sınamada beklenen olarak geçtiği vaka |
+|---|---|
+| kapsam · kanit · koltuk | 1 |
+| sir | 2 |
+| guncellik · arastirma | 3 |
+| **onay** | **0** |
+
+Öz-sınama `SELFTEST OK (20 vaka)` demeye devam etti — **kapı eklenmeden önce
+de 20 diyordu.** Yani yeni kapı hiç sınanmadan yeşil göründü. Kırk bir takımın
+hiçbiri görmedi, çünkü görecek bir ölçüt yoktu.
+
+Bu, incelemenin en özeleştirel bulgusu ve aynı zamanda en öğretici olanı:
+**bir kusuru teşhis etmek, ona bağışıklık kazandırmıyor.** Kitabın §14'te
+yaptığını, kitabın §14'ünü eleştiren rapor yazılırken ben yaptım.
+
+Yama iki katmanlı. Örnek: yedinci kapı için dört yönlü öz-sınama vakası
+eklendi — sessizlik ateşler, onay kaydı susturur, taslak beyanı susturur,
+içeride hiç ateşlemez (öz-sınama artık 24 vaka). **Sınıf:** AS-01,
+`denetle()`'nin çağırdığı kapıları **kaynaktan okuyup** her birinin
+öz-sınamada beklenen olarak geçtiğini her koşumda sorar. Elle yazılmış bir
+kapı listesi de bayatlardı (AF'nin dersi); liste koddan türetiliyor.
+
+Ve AS-05 kapsamanın bir **sayım değil davranış** olduğunu tutuyor: her kapı
+için ateşleyen ve susan birer metin verilir, kapı ikisini ayırmalı. Kapıyı
+fazla geniş yapan mutasyon AS-05'i kırmızıya çeviriyor.
+
 ---
 
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
@@ -2253,6 +2288,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | AP · araç kataloğunun kurulumdaki hâli | *katalog kurulumda hiç yok; arşiv ve veri lisansı okunmuyor* | **temiz** — katalog kuruldu, iki alan eklendi |
 | AQ · yaptırım taramasının zaman ekseni | *son kontrol noktası imza; kapanışta yeniden tarama yok* | **temiz** — dördüncü nokta ve kapanış adımı eklendi |
 | AR · onay durumu (yedinci kapı) | *onaysız §9 çıktısı hiçbir kapıya takılmıyordu* | **temiz** — yedinci kapı eklendi |
+| AS · kapıların öz-sınama kapsaması | *yedinci kapının öz-sınama vakası yoktu* | **temiz** — dört vaka eklendi, kapsama sağlamaya bağlandı |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -2311,7 +2347,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 ### Nasıl yeniden koşulur
 ```
 ./sinama/hepsi.sh                 # 34 çalıştırılabilir takım:
-                                  #   332 vaka + 15 mutasyon (D)
+                                  #   337 vaka + 15 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -2393,9 +2429,10 @@ Dokuz takım, 96 vaka:
 | AP | **Araç kataloğunun kurulumdaki hâli** — §13'ün kararları nerede yaşıyor | §13, §14, §3 |
 | AQ | **Yaptırım taramasının zaman ekseni** — imza ile kapanış arasında ne oluyor | §9, §5.1, §6 |
 | AR | **Onay durumu** — onay ihtiyacının beyanı ile onayın kendisi | §9, §12 |
+| AS | **Kapıların öz-sınama kapsaması** — kitabın §14 kusurunu ben de işledim mi | §12, §14, §16 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**332 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**337 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)
