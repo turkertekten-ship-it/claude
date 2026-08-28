@@ -167,7 +167,33 @@ class HeuristicReranker(Reranker):
     #: Without it, rank 2.0 would be worth nothing and rank 2.5 would cost four
     #: cases.
     gate_coverage_power: float | None = 1.0
+    #: Swept on the current corpus and defaults, external / primary:
+    #:
+    #:   coverage_weight   0.20   0.35   0.45   0.60   0.80
+    #:   external pass     48     49     49     49     49
+    #:   external nDCG@8   .8179  .8000  .7944  .7858  .7694
+    #:   primary pass      17     17     17     16     16
+    #:
+    #: **Ordering improves as this weight falls, and the pass rate breaks below
+    #: 0.35.** 0.20 has the best nDCG in the sweep and loses a case; 0.35 keeps
+    #: the case and gains 0.006 of nDCG over 0.45.
+    #:
+    #: Kept at 0.45 anyway. 0.35 sits one step from the cliff at 0.20 while 0.45
+    #: has margin on both sides, and 0.006 of nDCG does not buy that away - the
+    #: same reason `min_relevance` is not set to the peak of its own curve. The
+    #: trade is real and worth knowing: something that lowered coverage's share
+    #: without losing the case at 0.20 would be worth 0.024 of nDCG.
     coverage_weight: float = 0.45
+    #: 0.25 is the optimum on both corpora, not merely acceptable on them:
+    #:
+    #:   phrase_weight     0.05   0.15   0.25   0.40   0.60
+    #:   external nDCG@8   .7725  .7846  .7944  .7829  .7742
+    #:   primary nDCG@8    .6986  .7211  .7246  .6796  .6714
+    #:
+    #: A single interior maximum on each, falling away symmetrically. An exact
+    #: phrase match is rare and highly diagnostic, and weighting it past a
+    #: quarter starts preferring a long shared prefix over actually covering the
+    #: question.
     phrase_weight: float = 0.25
     #: Weak rather than inert, and the distinction took a measurement.
     #:

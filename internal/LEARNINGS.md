@@ -3089,3 +3089,61 @@ session that is not a trade. The gate margin goes from 0.039 to 0.057 above the
 3. **A prior that matches the shape of your questions is worth more than a
    general one.** "The top of a document says what it is" is not a deep
    retrieval principle, and it answers most of what both golden sets ask.
+
+---
+
+## L64 - Two weights measured for the first time, and left alone on purpose
+
+`coverage_weight` and `phrase_weight` had never been swept - only zeroed. After
+the corpus tripled, `coverage_power` doubled and `position_weight` tripled, the
+balance among them had shifted underneath without anyone looking.
+
+**`phrase_weight` is at its optimum**, which is a stronger result than
+"acceptable":
+
+| phrase_weight | 0.05 | 0.15 | **0.25** | 0.40 | 0.60 |
+| --- | --- | --- | --- | --- | --- |
+| external nDCG@8 | .7725 | .7846 | **.7944** | .7829 | .7742 |
+| primary nDCG@8 | .6986 | .7211 | **.7246** | .6796 | .6714 |
+
+A single interior maximum on each corpus, falling away on both sides. Nothing to
+do.
+
+**`coverage_weight` is the interesting one:**
+
+| coverage_weight | 0.20 | 0.35 | **0.45** | 0.60 | 0.80 |
+| --- | --- | --- | --- | --- | --- |
+| external pass | 48 | 49 | **49** | 49 | 49 |
+| external nDCG@8 | **.8179** | .8000 | .7944 | .7858 | .7694 |
+| primary pass | 17 | 17 | **17** | 16 | 16 |
+
+**Ordering improves monotonically as the weight falls**, and the best ordering
+in the whole sweep sits at 0.20 - where a case breaks. 0.35 keeps every case and
+gains 0.006 of nDCG over the shipped 0.45.
+
+**Left at 0.45, and the reason is robustness rather than the number.** 0.35 is
+one step from the cliff at 0.20; 0.45 has margin on both sides. Six thousandths
+of nDCG does not buy that margin away - the same argument that keeps
+`min_relevance` off the peak of its own curve. Taking a small gain by moving to
+the edge of a plateau is how a configuration becomes fragile without anybody
+deciding that it should.
+
+**What the shape says, which is worth more than the setting.** Coverage and
+ordering quality are in tension here: the more the reranker weights term
+coverage, the worse it orders. That is consistent with everything L48 through
+L58 measured - coverage is computed from an IDF that ranks the discriminating
+query term first only 29 times in 40, so leaning on it harder propagates a
+partly-wrong signal. The 0.024 of nDCG between 0.45 and 0.20 is the price of
+that weighting, and anything that fixed the underlying ordering would collect it.
+
+**Rules.**
+1. **Zeroing a weight and sweeping it answer different questions.** The
+   ablation said both of these matter; only the sweep says whether their values
+   are right, and one of them turned out to be exactly right and the other
+   deliberately not optimal.
+2. **Prefer the middle of a plateau to its better-scoring edge.** The edge is
+   worth a rounding error and costs the margin that makes a default survive the
+   next corpus change.
+3. **A monotone trend inside a sweep is a finding even when you do not act on
+   it.** "Ordering improves as coverage's share falls" names a cost the current
+   design is paying and tells the next cycle what a fix would be worth.
