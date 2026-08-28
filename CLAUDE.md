@@ -230,6 +230,11 @@ sourcing are in `docs/prompting.md`. Prompts that leave this machine — chat
 windows, other vendors, another terminal — carry `prompts/portable-preamble.md`
 instead, because none of the hooks here follow them there.
 
+What runs in those other terminals is the installed copy under `~/.claude`, not
+this repository. `bash tools/install_prompt_system.sh --check` compares them and
+`tests/run_all.sh` runs it, because a stale install looks identical and does not
+behave identically.
+
 ---
 
 ## 7. House rules

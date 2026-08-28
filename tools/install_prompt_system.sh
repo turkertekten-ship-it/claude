@@ -16,9 +16,16 @@
 # path does not exist.
 #
 # Usage
-#   bash tools/install_prompt_system.sh [--dry-run] [--uninstall] [--prefix DIR] [--bin-dir DIR]
+#   bash tools/install_prompt_system.sh [--check] [--dry-run] [--uninstall]
+#                                      [--prefix DIR] [--bin-dir DIR]
+#
+# --check compares what is installed against what this repository would install
+# now, and exits 1 if any of it has drifted. Nothing else keeps the two in step:
+# the installed copy is what runs in every other terminal, and a stale one looks
+# identical while behaving differently.
 # Exit
-#   0 installed (or nothing to do) · 1 verification failed · 2 could not run
+#   0 installed, or in sync, or not installed at all · 1 verification failed,
+#   or the install has drifted · 2 could not run
 
 set -uo pipefail
 
@@ -27,11 +34,13 @@ PREFIX="${HOME}/.claude"
 BIN_DIR="${HOME}/.local/bin"
 DRY=0
 UNINSTALL=0
+CHECK=0
 
 while [ $# -gt 0 ]; do
     case "$1" in
         --dry-run)   DRY=1 ;;
         --uninstall) UNINSTALL=1 ;;
+        --check)     CHECK=1 ;;
         --prefix)    PREFIX="${2:?--prefix needs a directory}"; shift ;;
         --bin-dir)   BIN_DIR="${2:?--bin-dir needs a directory}"; shift ;;
         -h|--help)   sed -n '2,20p' "$0"; exit 0 ;;
@@ -60,6 +69,27 @@ TARGETS=(
     "$BIN_DIR/check-output"
 )
 
+
+rendered() {
+    # What the installed copy of a markdown file should contain: the source,
+    # with its commands pointed at the installed binary.
+    sed -e 's|python3 tools/prompt_forge\.py|prompt-forge|g' \
+        -e 's|`\.claude/skills/prompt-forge/SKILL\.md`|`~/.claude/skills/prompt-forge/SKILL.md`|g' \
+        "$1"
+}
+
+
+# Source -> destination for every file the installer writes, in one place so
+# --check and the install itself cannot drift apart.
+markdown_pairs() {
+    printf '%s\n' \
+        "$REPO/.claude/skills/prompt-forge/SKILL.md|$PREFIX/skills/prompt-forge/SKILL.md" \
+        "$REPO/.claude/commands/prompt.md|$PREFIX/commands/prompt.md" \
+        "$REPO/.claude/commands/prompt-audit.md|$PREFIX/commands/prompt-audit.md" \
+        "$REPO/.claude/commands/prompt-habits.md|$PREFIX/commands/prompt-habits.md" \
+        "$REPO/.claude/agents/prompt-critic.md|$PREFIX/agents/prompt-critic.md"
+}
+
 if [ "$UNINSTALL" -eq 1 ]; then
     say "removing the prompt system from $PREFIX"
     for target in "${TARGETS[@]}"; do
@@ -74,6 +104,52 @@ fi
 # Refuse to install something that does not pass its own tests. An installer
 # that ships a broken guard is worse than no installer: the guard's exit code
 # is what everything downstream trusts.
+if [ "$CHECK" -eq 1 ]; then
+    installed=0
+    drifted=0
+    for target in "${TARGETS[@]}"; do
+        [ -e "$target" ] && installed=$((installed + 1))
+    done
+    if [ "$installed" -eq 0 ]; then
+        say "nothing is installed at $PREFIX — nothing to be stale."
+        say "Run: bash tools/install_prompt_system.sh"
+        exit 0
+    fi
+
+    say "comparing $PREFIX against this repository"
+    while IFS='|' read -r src dst; do
+        if [ ! -f "$dst" ]; then
+            say "  MISSING  ${dst#$PREFIX/}"; drifted=$((drifted + 1)); continue
+        fi
+        if rendered "$src" | cmp -s - "$dst"; then
+            say "  same     ${dst#$PREFIX/}"
+        else
+            say "  DRIFTED  ${dst#$PREFIX/}"; drifted=$((drifted + 1))
+        fi
+    done < <(markdown_pairs)
+
+    for tool in prompt_forge.py prompt_habits.py learn_rule.py check_output.py _phrases.py; do
+        if [ ! -f "$PREFIX/tools/$tool" ]; then
+            say "  MISSING  tools/$tool"; drifted=$((drifted + 1))
+        elif cmp -s "$REPO/tools/$tool" "$PREFIX/tools/$tool"; then
+            say "  same     tools/$tool"
+        else
+            say "  DRIFTED  tools/$tool"; drifted=$((drifted + 1))
+        fi
+    done
+
+    if [ "$drifted" -eq 0 ]; then
+        say ""
+        say "in sync. What runs in your other terminals is what is in this repository."
+        exit 0
+    fi
+    say ""
+    say "$drifted file(s) differ. Every terminal on this machine is running the old"
+    say "copy, which looks identical and does not behave identically."
+    say "Run: bash tools/install_prompt_system.sh"
+    exit 1
+fi
+
 if [ "$DRY" -eq 0 ]; then
     if ! python3 "$REPO/tests/test_prompt_forge.py" >/dev/null 2>&1; then
         say "install_prompt_system: the prompt forge test suite fails in this repository." >&2
@@ -91,20 +167,16 @@ for dir in "$PREFIX/skills/prompt-forge" "$PREFIX/commands" "$PREFIX/agents" "$P
 done
 
 install_rewritten() {
-    # Copy a markdown file, pointing its commands at the installed binary.
     local src="$1" dst="$2"
     if [ "$DRY" -eq 1 ]; then say "  would: install $src -> $dst"; return 0; fi
-    sed -e 's|python3 tools/prompt_forge\.py|prompt-forge|g' \
-        -e 's|`\.claude/skills/prompt-forge/SKILL\.md`|`~/.claude/skills/prompt-forge/SKILL.md`|g' \
-        "$src" > "$dst" || return 1
+    rendered "$src" > "$dst" || return 1
     say "  installed $dst"
 }
 
-install_rewritten "$REPO/.claude/skills/prompt-forge/SKILL.md" "$PREFIX/skills/prompt-forge/SKILL.md" || exit 2
-install_rewritten "$REPO/.claude/commands/prompt.md"           "$PREFIX/commands/prompt.md" || exit 2
-install_rewritten "$REPO/.claude/commands/prompt-audit.md"     "$PREFIX/commands/prompt-audit.md" || exit 2
-install_rewritten "$REPO/.claude/commands/prompt-habits.md"    "$PREFIX/commands/prompt-habits.md" || exit 2
-install_rewritten "$REPO/.claude/agents/prompt-critic.md"      "$PREFIX/agents/prompt-critic.md" || exit 2
+
+while IFS='|' read -r src dst; do
+    install_rewritten "$src" "$dst" || exit 2
+done < <(markdown_pairs)
 
 for tool in prompt_forge.py prompt_habits.py learn_rule.py check_output.py _phrases.py; do
     do_it cp "$REPO/tools/$tool" "$PREFIX/tools/$tool" || exit 2

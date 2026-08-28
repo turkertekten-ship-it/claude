@@ -313,6 +313,34 @@ four genuine rules produce no finding there [src:RULES-BUDGET-2026-08-27]. A
 threshold chosen above the real cases would have been a check that never caught
 anything.
 
+## Ninth loop — the copy that actually runs
+
+The owner asked for this to work in every terminal. What runs in a terminal is
+the installed copy under `~/.claude`, and Observe found that nothing kept it in
+step with the repository: `grep` found no staleness check, and the two were
+identical only because this session re-ran the installer by hand after each of
+eight loops.
+
+> The surprise is that this is the repository's own thesis, one level up. Its
+> opening argument is that a rule living only in prose gets skipped under
+> pressure. The currency of the installed copy was living in a habit, and a
+> user has no such habit. A stale `/prompt` in another terminal would have been
+> running rules from before four of these loops — including before the linter
+> bug fixes — while looking exactly the same.
+
+`--check` compares every installed file against what the installer would write
+now, applying the same path rewrite so the markdown copies are not reported as
+false differences. It is in `tests/run_all.sh`, and a machine with nothing
+installed exits 0 rather than failing a fresh clone.
+
+Writing it produced two defects worth naming, both caught by running the
+falsifiers rather than by reading the code. The check ran after the `mkdir`
+loop, so a read-only check created directories on a machine that had nothing
+installed. And moving it earlier put it above its own helper functions, so the
+markdown comparison silently did nothing while the summary still reported "in
+sync" — a check that quietly checked less than it claimed, which is worse than
+no check at all.
+
 ## Still open
 
 `U-6`, `U-7` and `U-8` in [unknowns.md](unknowns.md): what Saraev actually

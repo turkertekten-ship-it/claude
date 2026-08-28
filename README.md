@@ -52,6 +52,7 @@ request rests on something absent — so they are checked mechanically:
 python3 tools/prompt_forge.py lint --profile task my-prompt.txt   # 0 clean, 1 findings
 python3 tools/prompt_forge.py compile my-prompt.txt               # into the seven slots
 bash tools/install_prompt_system.sh                               # /prompt in every terminal
+bash tools/install_prompt_system.sh --check                       # is that copy still current?
 ```
 
 `compile` cannot invent: every line of its output is a line you wrote, a
