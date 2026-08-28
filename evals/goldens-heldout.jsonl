@@ -1,0 +1,36 @@
+# Held-out external goldens: written to test whether the tuning generalises.
+#
+# Six parameters were tuned against goldens-external.jsonl (54 cases) and
+# goldens.jsonl (20): coverage_power, gate_coverage_power, position_weight,
+# candidate_k, recency_weight, min_relevance. Six knobs against 74 cases is
+# enough to fit noise, and nothing here was held out to detect it.
+#
+# Every expected source below is a document that **no existing golden
+# references** - 111 of the 153 were never used. The questions were written
+# from general knowledge of what each package does, not from reading its page,
+# so their phrasing is not derived from the text they must retrieve.
+#
+# This set is never tuned against. It is run to compare configurations, and a
+# parameter chosen because it helps here would defeat its purpose.
+{"question": "Which library draws a progress bar in the terminal while a loop runs?", "expect_sources": ["tqdm"], "tags": ["heldout"]}
+{"question": "Which package opens, resizes and converts image files?", "expect_sources": ["pillow"], "tags": ["heldout"]}
+{"question": "Which library connects to a remote machine over SSH from Python?", "expect_sources": ["paramiko"], "tags": ["heldout"]}
+{"question": "Which package runs background jobs on a queue of workers?", "expect_sources": ["celery"], "tags": ["heldout"]}
+{"question": "Which tool builds documentation from reStructuredText sources?", "expect_sources": ["sphinx"], "tags": ["heldout"]}
+{"question": "Which library checks Python type annotations without running the code?", "expect_sources": ["mypy"], "tags": ["heldout"]}
+{"question": "Which tool reformats Python source to a single consistent style?", "expect_sources": ["black"], "tags": ["heldout"]}
+{"question": "Which package resolves and locks project dependencies and publishes packages?", "expect_sources": ["poetry"], "tags": ["heldout"]}
+{"question": "Which library provides arrays and numerical routines for scientific computing?", "expect_sources": ["numpy"], "tags": ["heldout"]}
+{"question": "Which package gives labelled tabular data structures for analysis?", "expect_sources": ["pandas"], "tags": ["heldout"]}
+{"question": "Which library renders templates with placeholders into text?", "expect_sources": ["jinja2"], "tags": ["heldout"]}
+{"question": "Which package implements ciphers, hashes and certificate handling?", "expect_sources": ["cryptography"], "tags": ["heldout"]}
+{"question": "Which library makes terminal text appear in colour on Windows too?", "expect_sources": ["colorama"], "tags": ["heldout"]}
+{"question": "Which package formats a list of rows as a plain text table?", "expect_sources": ["tabulate"], "tags": ["heldout"]}
+{"question": "Which library plots charts and figures?", "expect_sources": ["matplotlib"], "tags": ["heldout"]}
+{"question": "Which package parses and builds HTML documents from messy markup?", "expect_sources": ["beautifulsoup4"], "tags": ["heldout"]}
+{"question": "Which library talks to a Redis server?", "expect_sources": ["redis"], "tags": ["heldout"]}
+{"question": "Which package measures which lines a test suite executed?", "expect_sources": ["pytest-cov"], "tags": ["heldout"]}
+{"question": "What is the airspeed velocity of an unladen swallow?", "expect_abstain": true, "tags": ["heldout", "negative"]}
+{"question": "Which package trains a large language model from scratch?", "expect_abstain": true, "tags": ["heldout", "negative"]}
+{"question": "How do I file my tax return?", "expect_abstain": true, "tags": ["heldout", "negative"]}
+{"question": "Which library controls a robot arm over CAN bus?", "expect_abstain": true, "tags": ["heldout", "negative"]}

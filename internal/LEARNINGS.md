@@ -3289,3 +3289,59 @@ rename and stays silent on a behaviour change, which is the wrong way round.**
    are additional opportunities to be wrong, and the metric that shows it is
    the one you were not optimising.
 3. **Do not assert on source text when you can assert on behaviour.**
+
+---
+
+## L67 - Six parameters tuned on 74 cases, and nothing held out to detect it
+
+Over this session I changed six defaults, each on a measurement: `coverage_power`
+1.0 -> 2.0, `gate_coverage_power` None -> 1.0, `position_weight` 0.05 -> 0.15,
+`candidate_k` 40 -> 20, `recency_weight` 0.08 -> 0.0, plus re-confirming
+`min_relevance`. Every one was justified by a sweep over the same 74 golden
+questions.
+
+**Six knobs against 74 cases is enough to fit noise, and I had nothing held out
+to tell the difference.** Every "measured improvement" in this session shares
+that weakness, and no amount of care within a sweep detects it.
+
+**The held-out set.** 111 of the 153 corpus documents are referenced by no
+existing golden. `evals/goldens-heldout.jsonl` is 22 questions - 18 positive, 4
+negative - whose expected sources are drawn only from those, written from
+general knowledge of what each package does rather than from reading its page,
+so their phrasing is not derived from the text they have to retrieve. One
+question trips the contamination detector and is quarantined automatically.
+
+**The result: the tuning transfers.**
+
+| | before tuning | shipped |
+| --- | --- | --- |
+| **held-out** pass | 18/22 | **19/22** |
+| **held-out** recall@8 | 0.8889 | **0.9444** |
+| **held-out** nDCG@8 | 0.7771 | **0.8029** |
+| external (tuned on) pass | 46/54 | 49/54 |
+| external (tuned on) nDCG@8 | 0.7353 | 0.7938 |
+
+Better on every metric on cases the parameters never saw. And **the gain is
+smaller on held-out than on the tuned set** - +0.026 of nDCG against +0.059,
++4.5% of pass rate against +6.5%. That gap is the fitting: roughly half of the
+measured improvement on the tuned set does not transfer, and the rest is real.
+
+That is the most useful number this session produced about its own method. It
+does not say the tuning was wrong; it says a measured gain on a tuned set should
+be read at roughly half its face value until something independent confirms it.
+
+**Kept out of the gate on purpose.** CI runs it with `--min-pass-rate 0.6`,
+loose enough to catch only catastrophe. A tight floor would make it one more
+thing to tune against and destroy the property that makes it worth having - the
+same reason the evaluation harness itself deserved adversarial attention (L28).
+Its value is entirely in never having been optimised for.
+
+**Rules.**
+1. **Count your knobs against your cases before trusting a sweep.** Six against
+   seventy-four should have prompted this at the third parameter, not the sixth.
+2. **A held-out set has to be built before you want it and never scored
+   against.** Its only property is independence, and one tuning decision made on
+   it spends that permanently.
+3. **Discount a tuned-set gain by what a held-out set does not reproduce.** Here
+   that factor was about a half, measured rather than assumed - and it is the
+   right lens for re-reading every improvement recorded above.
