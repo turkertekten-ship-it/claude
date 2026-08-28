@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>12 takım · 128 vaka</span>
+    <span>13 takım · 132 vaka</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -323,6 +323,15 @@ footer p + p{margin-top:12px}
         <div class="db-dot a" tabindex="0" data-tip="temiz" style="left:3%"></div>
       </div>
       <div class="db-val">1 → 0</div>
+    </div>
+    <div class="db-row">
+      <div class="db-label"><b>M</b>errata izlenebilirliği</div>
+      <div class="db-track">
+        <div class="db-bar" style="left:3%;width:9%"></div>
+        <div class="db-dot b" tabindex="0" data-tip="3 kaldı — raporun kendi dayanak boşlukları" style="left:12%"></div>
+        <div class="db-dot a" tabindex="0" data-tip="temiz — 41 maddenin 41'i gerçek bir vakaya bağlı" style="left:3%"></div>
+      </div>
+      <div class="db-val">3 → 0</div>
     </div>
     <div class="db-row">
       <div class="db-label"><b>E</b>beklenen değerler</div>
@@ -642,6 +651,56 @@ KALDI A-07  §19 pilotu, avro çevrilmeden
 </section>
 
 <section>
+  <span class="sec-tag">Dördüncü tur</span>
+  <h2>Raporun kendisi de kanıt kuralına tabi</h2>
+  <p>Bu rapor kitaba kırk bir düzeltme öneriyor. Arkasında çalışan bir sınama
+  olmayan bir düzeltme önerisi <strong>bir kanaattir, bir bulgu değildir</strong>
+  — ve kitabın kendi kanıt kuralı tam olarak bunu yasaklıyor:
+  <em>"Dayanağı olmayan bir eşik yazılmaz."</em> Aynı ölçüt rapora uygulandı.</p>
+  <p>M dört soru soruyor: her madde bir vakaya atıf yapıyor mu; atıf yapılan her
+  kimlik gerçekten <strong>tanımlı</strong> mı (uydurma dayanak var mı); ağır
+  maddelerin atıfları kitaba sadık sistemde gerçekten kaldı mı; ve ters yönde —
+  sadık sistemde kalan her vaka açıklanmış mı.</p>
+  <p>İlk koşumda dörtten üçü kaldı. <strong>İkisi M'nin kendi kusuruydu</strong>:
+  ayrıştırıcı aralık atıflarını (<em class="term">B-07…B-09</em>) ve dinamik
+  kurulan kimlikleri (<em class="term">"J-07%s" % etiket</em>) görmüyordu. Ama
+  arkalarında üç gerçek kusur vardı.</p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">M-04</span>
+      <span class="pill f">Errata boşluğu</span></div>
+    <h3>Sır kapısının ikinci kusurunu hiç yazmamışım</h3>
+    <p>Kanal sorununu — Bash'in izlenmemesini — yazmıştım. <strong>Desen
+    darlığını yazmamıştım.</strong> İkisi ayrı kusurdur ve kanal düzeltilse
+    bile desen kusuru kalır: büyük harfli kod adı, İngilizce kod adı,
+    kısaltmasız unvan, gerçek kişi adı ve <strong>fiyat</strong> görünmüyor —
+    oysa CLAUDE.md §6 fiyatı açıkça sayıyor.</p>
+    <p>Beş başarısız vaka (B-25…B-29) hiçbir errata maddesine bağlı değildi.
+    Ters kapsama sorusu olmasa bu boşluk fark edilmezdi.</p>
+  </div>
+
+  <div class="finding warnlvl">
+    <div class="f-head"><span class="f-id">M-01 / M-02</span>
+      <span class="pill w">Dayanaksız atıf</span></div>
+    <h3>İki madde atıfsız, bir kimlik bulunamaz</h3>
+    <p>§16'nın "denetimin bakmadığı şeyler" listesi ve §19'un pilot maddesi
+    hiçbir vakaya atıf yapmıyordu. Ve <em class="term">ks_a_esik.py</em>
+    içinde ölü bir kod yapısı vardı — <em class="term">vaka("A-15" if False
+    else "A-14", …)</em> — çalışıyordu ama A-14 kimliğini statik olarak
+    bulunamaz kılıyordu. Errata'nın <em class="term">J-01</em> atfı da
+    belirsizdi; gerçek kimlik <em class="term">J-01s</em>.</p>
+  </div>
+
+  <div class="note">
+    <b>Şimdi dördü de geçiyor.</b> Kırk bir maddenin kırk biri gerçek bir
+    vakaya bağlı, uydurma dayanak yok, ağır maddelerin hepsi sadık sistemde
+    gerçekten kaldı, ve kalan kırk bir vakanın hepsi açıklanmış. Denetime
+    kalıcı bir kontrol eklendi: <b>bir errata maddesinin atfı silinirse denetim
+    kırmızıya döner.</b> İki yönde sınandı.
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -667,6 +726,12 @@ KALDI A-07  §19 pilotu, avro çevrilmeden
     hâlde "kontrol ateşlemedi" sonucuna varıyordum. Artık mutasyonun gerçekten
     tuttuğu doğrulanıyor: <strong>bir mutasyon sınaması, mutasyonun olduğunu
     kanıtlamadan geçerli değildir.</strong></li>
+    <li><strong>İzlenebilirlik denetleyicimin ayrıştırıcısını da yanlış
+    yazdım</strong> — aralık atıflarını ve dinamik kimlikleri görmüyordu, yedi
+    maddeyi haksız yere "dayanaksız" ilan etti. Bu oturumdaki yedinci
+    ayrıştırıcı kusurum ve hepsi aynı yönde: <strong>bir dedektör, ölçtüğü
+    şeyin gerçek biçimini görmeden yazılırsa, bulduğu şey kendi
+    körlüğüdür.</strong></li>
     <li><strong>İki şüphem yanlış çıktı</strong> ve kitap haklıydı:
     <em class="term">fivetran/great_expectations</em> ile
     <em class="term">Open-Source-Legal/OpenContracts</em> kanonik yollardır; ve
@@ -724,12 +789,13 @@ KALDI A-07  §19 pilotu, avro çevrilmeden
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># on iki takım, 128 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># on üç takım, 132 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
-  <em class="term">mafirm/KITAP-ERRATA.md</em> — 42 madde, ağırlık işaretli,
-  her biri onu bulan sınama vakasıyla.</p>
+  <em class="term">mafirm/KITAP-ERRATA.md</em> — 41 madde, ağırlık işaretli;
+  <strong>her maddesi çalışan bir sınama vakasına bağlı</strong> ve bu bağ
+  denetimde zorunlu tutuluyor.</p>
   <p>Ham çıktılar <em class="term">sinama/SONUC-once.txt</em> ve
   <em class="term">SONUC-sonra.txt</em>; dış doğrulamalar
   <em class="term">ks_g_depolar.md</em>, <em class="term">ks_h_kaynaklar.md</em>,
