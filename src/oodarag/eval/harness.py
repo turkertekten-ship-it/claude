@@ -140,8 +140,17 @@ class EvalReport:
              if self.excluded_sources else ""),
             (self.contamination.summary() if self.contamination else ""),
             (self.discrimination.summary() if self.discrimination else ""),
-            (f"Quarantined {sum(len(d) for d in self.quarantined.values())} contaminated "
-             f"document(s) across {len(self.quarantined)} question(s)."
+            # Two different counts, because they answer different questions and
+            # had been reported under near-identical labels: the run log printed
+            # the distinct-document count and this line printed the sum of
+            # per-question holdouts, so one run said "14" and "29" about the
+            # same operation. A document that contaminates two questions is held
+            # out twice and is one document. `internal/PLAN.md` had recorded the
+            # holdout total as a document count.
+            (f"Quarantined {len({d for ds in self.quarantined.values() for d in ds})} "
+             f"distinct document(s) as "
+             f"{sum(len(d) for d in self.quarantined.values())} per-question "
+             f"holdout(s), across {len(self.quarantined)} question(s)."
              if self.quarantined else ""),
             "",
             "| Metric | mean | p50 | min |",

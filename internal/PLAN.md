@@ -35,23 +35,42 @@ negative case look like a retrieval regression.
 | MRR | 0.5766 | 0.7729 |
 | nDCG@8 | 0.6126 | 0.7965 |
 | citation coverage | 1.00 | 1.00 |
-| contamination | 4/20 questions, 26 documents held out | 4/54 questions, 17 documents |
+| contamination | 4/20 questions, 14 documents (29 holdouts) | 4/54 questions, 14 documents (17 holdouts) |
 | role | smoke test | **regression gate** |
 
 What each retrieval arm is worth, on the external set (`scripts/ablation.py`):
 
 | configuration | pass | recall@8 | prec@8 | MRR | nDCG@8 |
 |---|---|---|---|---|---|
-| hybrid | 44/54 | 0.9186 | 0.2355 | 0.7729 | 0.7965 |
-| lexical only | 43/54 | 0.8837 | 0.2209 | 0.7535 | 0.7687 |
-| dense only | 43/54 | 0.8140 | 0.2326 | 0.7326 | 0.7456 |
+| hybrid | 48/54 | 0.9186 | 0.2355 | 0.7729 | 0.7965 |
+| lexical only | 47/54 | 0.8837 | 0.2209 | 0.7535 | 0.7687 |
+| dense only | 44/54 | 0.8140 | 0.2326 | 0.7326 | 0.7456 |
 | no rerank | 40/54 | 0.7791 | 0.1163 | 0.6948 | 0.6961 |
-| no mmr | 44/54 | 0.9186 | 0.2500 | 0.7702 | 0.7956 |
+| no mmr | 48/54 | 0.9186 | 0.2500 | 0.7702 | 0.7956 |
 
 Reranking is the most load-bearing component by a distance, and hybrid beats
 either arm alone on every metric. That answers the question ADR 0004 had
 deferred: at 33 documents dense-only matched hybrid, and the deferral rather
 than the removal of an arm was the right call (L29).
+
+On pass rate the two arms are no longer close - lexical alone loses one case,
+dense alone loses four - while their retrieval metrics keep the older ordering.
+The pass column is sensitive to the abstention gate and the metric columns are
+not, so a change to the floor moves one and leaves the other untouched.
+
+The contamination row above was wrong in the same way, for a different reason:
+it read "26 documents held out" from a report line that summed *per-question*
+holdouts and called them documents. A document contaminating two questions is
+held out twice and is one document. Both corpora hold out 14 distinct
+documents; the harness now prints both numbers with their units.
+
+**The ablation table was previously wrong in its pass column only** - every metric
+matched to four decimal places while every count was four cases stale, because
+later work moved the abstention floor and added surface answerability, neither
+of which touches a retrieval metric. A partly refreshed table is worse than a
+stale one: the accurate columns vouch for the inaccurate one. Re-run it with
+`PYTHONPATH=src python3 scripts/ablation.py --corpus external` and replace the
+whole table, never a column.
 
 Nothing here is saturated any more. recall@8 was 0.9821 with a median of 1.0 on
 the 33-document corpus; it now reads 0.9186 with a minimum of 0.0.

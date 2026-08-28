@@ -2052,3 +2052,57 @@ alone, and the ordering is the defect: capped at 5.0, `revers` is 5.0 against
 3. **When one cause explains two previously separate findings, prefer it.** The
    monotone `coverage_power` result had been written down as a fact with no
    mechanism. It had one, in another cycle's notes.
+
+---
+
+## L49 - A table wrong in one column, and a number that lost its unit
+
+Two documentation defects found by re-running the commands that produced the
+numbers, rather than reading them.
+
+**The ablation table in `internal/PLAN.md` was wrong in its pass column only.**
+Re-running `scripts/ablation.py --corpus external`, every metric matched to four
+decimal places - recall@8 0.9186, MRR 0.7729, nDCG 0.7965 - and every pass count
+was four cases stale:
+
+| configuration | recorded | actual |
+| --- | --- | --- |
+| hybrid | 44/54 | 48/54 |
+| lexical only | 43/54 | 47/54 |
+| dense only | 43/54 | 44/54 |
+| no rerank | 40/54 | 40/54 |
+
+The mechanism is clean: later work moved the abstention floor and added surface
+answerability. Neither touches a *retrieval* metric, and both change whether a
+case passes. So a partial refresh was invisible - and the stale column changed a
+conclusion, not just a number. At 43 and 43 the two arms read as tied; at 47 and
+44 lexical alone is one case off hybrid while dense alone is four off.
+
+**A partly refreshed table is worse than a stale one**, because the columns that
+are right vouch for the one that is wrong.
+
+**The contamination row had lost its unit.** It read "26 documents held out".
+The harness was printing two counts of one operation under near-identical
+labels: the run log said `documents=14` and the report said "Quarantined 29
+contaminated document(s) across 4 question(s)". Both are correct and they answer
+different questions - 14 distinct documents, held out 29 times, because a
+document contaminating two questions is held out twice and is still one
+document. The report's phrasing implied the first and printed the second, and
+whoever wrote the plan copied it as a document count.
+
+This is L28's class again: a defect in the instrument does not produce a
+failure, it produces a number, and everything downstream inherits it. The report
+now prints "14 distinct document(s) as 29 per-question holdout(s), across 4
+question(s)", and a test asserts the two counts differ when a document
+contaminates two questions and coincide when none does. Both mutations of the
+counters are caught.
+
+**Rules.**
+1. **Re-run the command, do not read the table.** The cost was one minute per
+   table and both were wrong.
+2. **Refresh a measurement table whole, never a column.** Different columns have
+   different sensitivities, so a change can move one and leave the rest exactly
+   right - which is the state that looks most trustworthy and is not.
+3. **A count needs its unit in the sentence that prints it.** "29 documents"
+   and "29 per-question holdouts over 14 documents" are the same number and
+   different facts; only one of them survives being copied somewhere else.

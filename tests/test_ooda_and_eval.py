@@ -492,5 +492,36 @@ Retrieval augmented generation addresses that.
                 self.assertNotEqual(doc.metadata["transcript_source"], "captions")
 
 
+class QuarantineCountsSayWhatTheyCountTest(unittest.TestCase):
+    """The run log and the report counted the same operation differently and
+    labelled both "documents": 14 in one line, 29 in the other. A document that
+    contaminates two questions is held out twice and is still one document.
+    `internal/PLAN.md` had recorded the holdout total as a document count.
+    """
+
+    def _report_with(self, quarantined):
+        from oodarag.eval.harness import EvalReport
+
+        report = EvalReport()
+        report.quarantined = quarantined
+        return report.to_markdown()
+
+    def test_one_document_contaminating_two_questions_is_still_one_document(self):
+        # Derived, not copied: two questions share doc "a", so the distinct
+        # count is 2 (a, b) and the holdout count is 3.
+        text = self._report_with({"q1": ["a", "b"], "q2": ["a"]})
+        self.assertIn("2 distinct document(s)", text)
+        self.assertIn("3 per-question holdout(s)", text)
+        self.assertIn("across 2 question(s)", text)
+
+    def test_the_two_counts_coincide_when_nothing_overlaps(self):
+        text = self._report_with({"q1": ["a"], "q2": ["b"]})
+        self.assertIn("2 distinct document(s)", text)
+        self.assertIn("2 per-question holdout(s)", text)
+
+    def test_nothing_is_claimed_when_nothing_was_quarantined(self):
+        self.assertNotIn("Quarantined", self._report_with({}))
+
+
 if __name__ == "__main__":
     unittest.main()
