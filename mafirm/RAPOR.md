@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** elli dokuz çalıştırılabilir takım — **425
+**Yamalı hâlde sistem çalışıyor:** altmış çalıştırılabilir takım — **430
 vaka, 27 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15 → **27/27** (mutasyon kümesi otuz
 sekizinci turda on beşten yirmi yediye çıkarıldı: 26 kontrolün dokuzu hiç
@@ -2178,7 +2178,7 @@ yaptığını, kitabın §14'ünü eleştiren rapor yazılırken ben yaptım.
 
 Yama iki katmanlı. Örnek: yedinci kapı için dört yönlü öz-sınama vakası
 eklendi — sessizlik ateşler, onay kaydı susturur, taslak beyanı susturur,
-içeride hiç ateşlemez (öz-sınama artık 24 vaka). **Sınıf:** AS-01,
+içeride hiç ateşlemez (öz-sınama o turda 24 vakaya çıktı). **Sınıf:** AS-01,
 `denetle()`'nin çağırdığı kapıları **kaynaktan okuyup** her birinin
 öz-sınamada beklenen olarak geçtiğini her koşumda sorar. Elle yazılmış bir
 kapı listesi de bayatlardı (AF'nin dersi); liste koddan türetiliyor.
@@ -2692,7 +2692,7 @@ içinde kırmızı, koşumdan sonra yeşil görünüyordu. Onuncu ve on altınc�
 turların katman kuralı — *denetim, kendini denetleyen takımı denetleyemez* —
 **üçüncü kez**, bu kez veri yoluyla çiğnenmişti. Sayı artık durağan ölçülüyor:
 `hepsi.sh`'e bağlı her takımın kendi `BEKLENEN_VAKA` beyanı toplanıyor
-— bugün toplam 425 vaka — ve her takımın kendi sıfırıncı vakası o beyanın
+— bugün toplam 430 vaka — ve her takımın kendi sıfırıncı vakası o beyanın
 gerçeğe eşit olduğunu ayrıca güvenceye alıyor. Bozulmuş bir `SAYIM.txt` ile BB'nin çıktısı
 **birebir aynı** kalıyor; bağımsızlık ölçülerek gösterildi.
 
@@ -3075,6 +3075,79 @@ kez daha, ama tersinden: *bir mutasyon indiği kanıtlanmadan okunamaz* —
 **ve indiği kanıtlanmış olması, doğru şeyi bozduğu anlamına gelmez.**
 Mutasyon, ölçütün gerçekten sınadığı şeyi hedeflemelidir.
 
+### Aynı soru öteki birime soruldu — iki dosya birbirini yalanlıyordu
+
+Elli dört–elli altıncı turlar rekabet biriminde bir değişmez kurdu. Aynı soru
+şirketler birimine hiç sorulmamıştı. Sorulunca çıkan şey daha ağır:
+
+| Dosya | TTK m.595/2 genel kurul onayı | Sonucu |
+|---|---|---|
+| `birimler/tr-sirketler/yontem/pay-devri.md` | *"devri tamamlayan kurucu işlem"* | devir onayla **olur**, kapanış günü |
+| `birimler/sinir-otesi/yontem/mimari.md` | "Kapanış öncesi koşullar" listesinin maddesi | kapanıştan **önce** tamamlanmalı |
+
+İkisi bir arada olamaz ve fark **kapanış sırasını ve nihai tarih hesabını**
+değiştirir. Burada iki dosya birbirini **pozitif olarak yalanlıyor** ve
+hiçbiri ötekine atıf yapmıyordu: bir hukukçu hangisini açarsa onun cevabını
+doğru sanardı. Çelişki iki uçta da görünür kılındı ve her uyarı **ötekini**
+gösteriyor — bir çelişkinin yarısını görmek, çelişkiyi görmek değildir.
+**Hangi okumanın doğru olduğu yazılmadı:** nitelendirme hukuki bir karardır
+ve kural 9 uyarınca insana aittir.
+
+**Ölçüt üç kez yanıldı; sonuncusu en öğreticisi.** İlk sürüm *"kurucu işlem"*
+ararken kaynaktaki vurgulu yazımı göremedi. İkincisi, kimliğin metinde geçip
+geçmediğine baktı: uyarı başlığı silinse bile kimlik kaynak atfında geçmeye
+devam ediyordu. Üçüncüsü — **bu turda eklediğim uyarı bloğu, çelişkiyi
+anlatırken çelişkinin sözcüklerini de taşıyordu** ve ölçüt onları sayıyordu;
+çelişkinin bir ucu kaldırılsa bile ölçüt kendi yamamı bulup *"çelişki
+duruyor"* derdi. Uyarı blokları ölçümden düşülüyor. **Kendi yamamı ölçtüğüm
+şeyle karıştırmamak**, bu incelemenin dördüncü tekrar eden sınıfı.
+
+### Ve çelişki elle mi seçilmişti? Keşif ne diyor?
+
+BJ bir çelişki buldu — ama **elle seçilmiş** bir çelişkiyi. Keşif yapıldı:
+yöntem dosyalarında birden fazla dosyada nitelendirilen **üç** hüküm var.
+
+| Hüküm | Dosyalar | Durum |
+|---|---|---|
+| TTK m.595/2 | pay-devri · mimari | **çelişki** — BJ'nin bulduğu |
+| TTK m.499 | pay-devri · kapsam | **uyuşuyor** |
+| II-26.1 | pay-alim-teklifi · INDEX | ikincisi yalnızca işaretçi |
+
+Çelişki yalnızca birindeydi — BJ'nin bulduğu, tek örnekti. **Ama ikinci bir
+kusur çıktı.** `I-05`, pay defteri kaydının ve m.595/1 noter onayının
+nitelendirilmesini yetkili avukat görüşü gereken konular arasında sayıyor —
+ve bu, o nitelendirmeyi **yapan** yöntem dosyasında hiç anılmıyordu. Aynı
+sınıfın **beşinci** görünüşü. İşaretlendi.
+
+Kapsama artık keşifle duruyor: birden fazla dosyada nitelendirilen yeni bir
+hüküm, beyan edilmeden takımı kırar; hiçbir şeyi örtmeyen bayat bir beyan da
+öyle. Ve iki kural kalıcı: hiçbir yöntem dosyası açık bir nitelendirmeye
+**kendi karar veremez**, ve her açık soru işareti **kaynağını gösterir** —
+kaynaksız bir uyarı, okuyucunun doğrulayamayacağı bir uyarıdır.
+
+**Ve bu tur, aparatın üç ayrı gözcüsü tarafından yakalandı.** `AV-02`, yeni
+takımın gereksiz bir **pencere** kullandığını gördü — blok zaten `]` ile
+bittiği için yapısal eşleşme yeterdi; pencere kaldırıldı. `L-01`, uyarı
+bloklarına yazdığım iki yol atfının **eksik** olduğunu gördü: `birimler/`
+öneki olmadan yazılmışlardı ve onları izleyen okuyucu hiçbir yere varmazdı.
+Ve `Q-05` en öğreticisiydi.
+
+### Kendi kapımız da anmayı taşımak sanıyordu
+
+Q-05 şunu sınar: raporun zorunlu avukat başlığı silinirse kapsam kapısı
+yakalar mı? Bu turda **yakalamadı** — çünkü yeni yazdığım düzyazı, o başlığın
+**adını anıyordu** ve kapı başlığı metnin herhangi bir yerinde arıyordu.
+
+Yani gerçek bölümü silip yerine ondan **söz eden** bir cümle bırakmak kapıyı
+susturmaya yetiyordu. Bu, raporun kitapta bulduğu kusurun ta kendisidir:
+*bir kontrolü kaldırıp yerine onu anlatan bir cümle bırakmak denetimi yeşil
+tutar.* Aynı kusur, kendi kapımızda.
+
+Kapı artık başlığı **yapıdan** okuyor: satır başında, başlık işaretiyle.
+Öz-sınamaya iki vaka eklendi — *anma başlık sayılmaz*, *gerçek başlık
+susturur* — ve öz-sınama 26 vakaya çıktı. **Anmak taşımak değildir**, altıncı
+kez ve bu kez bir kapının içinde.
+
 ---
 
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
@@ -3214,6 +3287,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | BH · üçüncü dosya | *model, teknoloji istisnasının itirazlı ölçütünü ifade edemiyordu* | **temiz** — yerleşiklik alanı ve I-02 uyarısı eklendi |
 | BI · risk uyarısı her cevap yolunda | *kapanış yasağı yalnızca "evet" cevabında yazılıydı* | **temiz** — değişmez sınanıyor: cevap HAYIR değilse yasak var |
 | BJ · birimler arası nitelik çelişkisi | *iki yöntem dosyası m.595/2'ye birbirini dışlayan nitelik veriyordu, ikisi de sessizdi* | **temiz** — çelişki iki uçta da görünür, karar insana bırakıldı |
+| BK · hüküm atıflarının kapsaması | *BJ elle seçilmiş tek bir çelişkiye bakıyordu; I-05 hiçbir yöntem dosyasında anılmıyordu* | **temiz** — çoklu atıflar keşifle, açık sorular dosyasında işaretli |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -3271,8 +3345,8 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # 59 çalıştırılabilir takım:
-                                  #   425 vaka + 27 mutasyon (D)
+./sinama/hepsi.sh                 # 60 çalıştırılabilir takım:
+                                  #   430 vaka + 27 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -3306,7 +3380,7 @@ vakalardır ve hepsi geçer. Kör sınama o aklın dışında kalanı arar: bir
 hukukçunun gerçekten yazacağı cümleyi, kancanın gerçekten göreceği veriyi,
 bozulduğunda denetimin gerçekten yakalayıp yakalamadığını.
 
-Altmış iki takım, 425 vaka:
+Altmış üç takım, 430 vaka:
 
 | Takım | Neyi sınar | Kaynağı |
 |---|---|---|
@@ -3372,9 +3446,10 @@ Altmış iki takım, 425 vaka:
 | BH | **Üçüncü dosya** — girdi modeli itiraz edilen ölçütü söyleyebiliyor mu; istisna uygulanırken itiraz anılıyor mu | §5, §19, kural 1 |
 | BI | **Risk uyarısının kapsaması** — kapanış yasağı, riskin bulunduğu her cevap yolunda mı | §5, kural 2, kural 9 |
 | BJ | **Birimler arası nitelik çelişkisi** — iki yöntem dosyası aynı işleme farklı hukuki nitelik veriyorsa ikisi de bunu yazıyor mu | §5, §6, kural 9 |
+| BK | **Hüküm atıflarının kapsaması** — birden fazla dosyada nitelendirilen her hüküm beyanlı mı; açık nitelendirme soruları dosyasında işaretli mi | §5, §6, kural 1, kural 9 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**425 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On üç**
+**430 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On üç**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)

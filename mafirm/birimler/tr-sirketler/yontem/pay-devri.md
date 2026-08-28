@@ -17,6 +17,14 @@ devir gerçekleşmez.
 - **TTK m.499**: devir, ancak **pay defterine kayıt** ile şirkete karşı hüküm
   ifade eder. Ciro ve teslim hakkı taraflar arasında geçirir; şirketin tanımak
   zorunda olduğu şey pay defteri kaydıdır.
+
+  > [AÇIK SORU — I-05: pay defteri kaydının hukuki NİTELİĞİ (açıklayıcı mı,
+  > kurucu mu) ve TTK m.595/1'deki noter onayının kapsamı (imza onayı mı,
+  > düzenleme şeklinde senet mi) yetkili avukat görüşü gerektiren konular
+  > arasında sayılmıştır. Bu dosya yukarıdaki okumayı YAZAR ama nitelendirmeye
+  > KARAR VERMEZ; karar adı belli bir yetkili avukatındır (işletim sözleşmesi
+  > kural 9). bkz. hafiza/dogrulama-bulgulari.md I-05 ve RAPOR.md'nin
+  > "Yetkili avukat görüşü gereken konular" başlığı]
 - Esas sözleşme devri yönetim kurulu onayına bağlayabilir. Bağlamışsa, paylar
   tamamen ödenmiş olsa bile onay gerekir. Takvimi modellemeden önce esas
   sözleşmeyi okuyun.

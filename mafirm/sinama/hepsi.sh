@@ -144,6 +144,8 @@ python3 "$S/ks_bi_kapanis_uyarisi.py"; topla "BI · risk uyarısı her cevap yol
 echo
 python3 "$S/ks_bj_birim_celiskisi.py"; topla "BJ · birimler arası hukuki nitelik çelişkisi" $?
 echo
+python3 "$S/ks_bk_atif_kapsama.py"; topla "BK · hüküm atıflarının kapsaması (keşifle)" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

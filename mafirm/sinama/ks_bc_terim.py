@@ -108,7 +108,6 @@ MUAF_KALINTI = {
     "BITTI": "Türkçe 'bitti' sözcüğünün aksansız yazımı",
     "FERAGAT": "Türkçe hukuk terimi, İngilizce değil",
     "ABA": "kitaptaki vaka kimliği öneki",
-    "HER": "Türkçe 'her' sözcüğünün vurgulu yazımı; çekimli akrabası yok",
     "EVET": "eşik cevabının üç değerinden biri; Türkçe, çekimli akrabası yok",
     "HAYIR": "eşik cevabının üç değerinden biri; Türkçe, çekimli akrabası yok",
     "ERRATA": "Türkçe metinde yerleşik alıntı sözcük; çekimli akrabası yok",

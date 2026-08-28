@@ -278,6 +278,17 @@ def _basvuru_malzemesi(yol):
     return bool(yol) and bool(BASVURU_YOLU.search(str(yol)))
 
 
+def _baslik_olarak_var(metin):
+    """Gerekli başlık, BAŞLIK olarak duruyor mu — anılıyor değil.
+
+    Markdown'da satır başında '#'ler, düz metinde satırın tamamı."""
+    for satir in metin.splitlines():
+        sade = _sadelestir(tr_kucult(satir.strip().lstrip("#").strip()))
+        if sade.startswith(GEREKLI_BASLIK):
+            return True
+    return False
+
+
 def kapi_kapsam(metin, yol=None, disari=False):
     """Görüş biçiminde bir çıktı, avukat başlığını taşımak zorundadır."""
     if _basvuru_malzemesi(yol) and not disari:
@@ -285,7 +296,12 @@ def kapi_kapsam(metin, yol=None, disari=False):
     m = TAVSIYE.search(metin) or OLUMSUZ.search(metin)
     if not m:
         return None
-    if GEREKLI_BASLIK in _sadelestir(tr_kucult(metin)):
+    # [Q-05 · elli sekizinci tur] Başlık DÜZYAZIDA aranıyordu: metnin
+    # herhangi bir yerinde başlığın ADINI anmak kapıyı susturuyordu. Yani
+    # gerçek bölümü silip yerine ondan SÖZ EDEN bir cümle bırakmak yeterdi —
+    # kitabın §16'sında bulunan kusurun aynısı, bu kez kendi kapımızda.
+    # Başlık artık SATIR BAŞINDA ve başlık işaretiyle aranır.
+    if _baslik_olarak_var(metin):
         return None
     tur = "olumsuz iddia" if OLUMSUZ.match(m.group(0)) or OLUMSUZ.search(m.group(0)) \
         else "görüş"
@@ -680,7 +696,23 @@ def _selftest():
             print("  HATA %r -> %s, beklenen %s"
                   % (metin[:44], bulunan or "{}", bekle or "{}"))
             h += 1
-    print("SELFTEST %s (%d vaka)" % ("OK" if not h else "HATA %d" % h, len(V) + len(KV)))
+    # [Q-05] Anma ile başlığı ayıran iki vaka. Bunlar yazılmadan kapı,
+    # "başlıktan söz eden" bir metni "başlığı olan" metin sanıyordu.
+    _anma = ("Bu işlem bildirime tabi değildir.\n\n"
+             "Yukarıda yetkili avukat görüşü gereken konular başlığından "
+             "söz edilmiştir.\n")
+    _basl = ("Bu işlem bildirime tabi değildir.\n\n"
+             "## Yetkili avukat görüşü gereken konular\n- bir konu\n")
+    for _ad, _m, _bekle in (("anma başlık sayılmaz", _anma, True),
+                            ("gerçek başlık susturur", _basl, False)):
+        _ates = "kapsam" in {a for a, _ in denetle(_m, disari=False,
+                                                   yol="deneme.md")}
+        if _ates != _bekle:
+            print("HATA [kapsam/%s] beklenen %s, gerçek %s"
+                  % (_ad, _bekle, _ates))
+            h += 1
+    print("SELFTEST %s (%d vaka)" % ("OK" if not h else "HATA %d" % h,
+                                     len(V) + len(KV) + 2))
     return h
 
 
