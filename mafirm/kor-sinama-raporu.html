@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>28 çalıştırılabilir takım · 265 vaka · 0 sinyal</span>
+    <span>29 çalıştırılabilir takım · 270 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -1702,6 +1702,64 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Yirmi dördüncü tur</span>
+  <h2>Ölçen şeyi kim ölçüyor</h2>
+  <p>Yirmi üç tur boyunca sistemi ölçtüm. <strong>Ölçen şeyin kendisi</strong>
+  — koşum betiği, beyan edilmiş taban, raporun ölçüm cümleleri — büyük ölçüde
+  ölçülmedi.</p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AF-02</span>
+      <span class="pill f">İleriye uygulanmış düzeltme</span></div>
+    <h3>On beş takım korumasızdı</h3>
+    <p>On üçüncü turda bir vaka <strong>iki kez</strong> sessizce kayboldu ve
+    <code>BEKLENEN_VAKA</code> koruması eklendi — ama <strong>yalnızca o turdan
+    sonra yazılan takımlara</strong>. On bir takım korunuyordu, <strong>on
+    beşi</strong> korunmuyordu: B (34 vaka), A (24), O (17), K (15) dâhil.
+    B'de bir vakanın kaybolması <strong>tamamen görünmez</strong> olurdu.</p>
+    <p>Düzeltme <strong>ileriye uygulanmış, geriye doldurulmamıştı</strong> —
+    yirmi üçüncü turun bulgusunun aynısı: <em>bir sınıfı örnek örnek
+    düzeltmek, sınıfı kapatmaz.</em></p>
+    <p><strong>Ve koruma iki yerde sahteymiş.</strong>
+    <em class="term">ks_aa</em> sayıyı <code>len(BICIMLER) + 6</code> diye
+    <strong>hesaplıyordu</strong> — kendi kendine atıf: listeden bir vaka
+    düşerse beyan da düşer ve koruma, korumak için var olduğu şeyi göremez.
+    <em class="term">ks_f</em> ise <code>sonuclar</code> listesi tutmuyor;
+    toplu geriye doldurma bunu görmedi ve <strong>F'i çökertti</strong> — kör
+    bir toplu düzenlemenin bedeli, kendi elimle.</p>
+  </div>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AF-04</span>
+      <span class="pill w">Beyanın arkasına saklanmak</span></div>
+    <h3>Vaka hâlâ düşüyor — ama aynı sebeple mi?</h3>
+    <p><code>beklenen.json</code> bir vakanın <strong>geçmeye</strong>
+    başlamasını yakalar. Bir vaka <strong>başka bir sebeple</strong> düşmeye
+    başlarsa hâlâ BEKLENEN raporlanır: <strong>yeni bir kusur, eski bir beyanın
+    arkasına saklanabilir.</strong></p>
+    <p>İlk çözümüm yanlıştı: beyan metniyle canlı ayrıntıyı kelime örtüşmesiyle
+    kıyasladım ve <strong>on iki beyanın onunu</strong> işaretledi — oysa elle
+    kıyasladığımda hepsi doğruydu. Beyan bir <strong>gerekçedir</strong>, canlı
+    ayrıntı bir <strong>ölçümdür</strong>; haklı olarak farklı kelimeler
+    kullanırlar. Onda sekizi yanlış işaretleyen bir ölçüt, kırmızıyı görmezden
+    gelmeyi öğretir. Doğru mekanizma: beyan anındaki ayrıntı
+    <strong>belirti</strong> olarak kaydedilir ve her koşumda karşılaştırılır.</p>
+  </div>
+
+  <div class="callout">
+    <strong>Ve AF-02'nin ilk hâli de dizge varlığına bakıyordu.</strong> Beyan
+    satırı silindiğinde <code>rapor()</code> içindeki <strong>kullanım</strong>
+    hâlâ o dizgeyi taşıyor ve kontrol boşuna geçiyordu — mutasyon tam olarak
+    böyle sağ kaldı. Ölçüt modül düzeyinde bir <strong>atamaya</strong> bağlandı.
+    <br><br>
+    Temiz çıkan iki şey de ölçüldü: yirmi dokuz takımın hepsi koşum betiği
+    tarafından <strong>çağrılıyor</strong> — bir takım eklenip bağlanmazsa
+    diskte durur, raporda anılır ve <em>hiç koşmaz</em> — ve raporun ölçüm
+    iddiaları canlı çıktıyla uyuşuyor.
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -1819,7 +1877,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 28 takım · 265 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 29 takım · 270 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
