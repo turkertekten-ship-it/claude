@@ -83,9 +83,15 @@ _STEP3 = [
     ("icate", "ic"), ("ative", ""), ("alize", "al"), ("iciti", "ic"),
     ("ical", "ic"), ("ful", ""), ("ness", ""),
 ]
+#: Ordered longest-first within each ending, and "ion" belongs *in* this list -
+#: step 4 removes at most one suffix. It used to sit after the loop as an
+#: unconditional rule, which let step 4 remove two: "additionally" lost "al" in
+#: the loop and then "ion" afterwards, giving "addit" where SQLite's Porter gives
+#: "addition". Ten of the eighteen disagreements measured against SQLite were
+#: this one bug.
 _STEP4 = [
     "al", "ance", "ence", "er", "ic", "able", "ible", "ant", "ement", "ment",
-    "ent", "ou", "ism", "ate", "iti", "ous", "ive", "ize",
+    "ent", "ion", "ou", "ism", "ate", "iti", "ous", "ive", "ize",
 ]
 
 
@@ -134,17 +140,18 @@ def stem(word: str) -> str:
             word = result
             break
 
-    # Step 4 - remove the suffix entirely when the stem is substantial
+    # Step 4 - remove the suffix entirely when the stem is substantial. At most
+    # one suffix, which is what "break" is for: see _STEP4 on the bug that put
+    # "ion" outside this loop and let two come off.
     for suffix in _STEP4:
         if word.endswith(suffix):
             stem_candidate = word[: -len(suffix)]
+            # "ion" only after s or t: "nation" is not "nat".
+            if suffix == "ion" and not stem_candidate.endswith(("s", "t")):
+                break
             if _measure(stem_candidate) > 1:
-                if suffix in ("ion",) and not stem_candidate.endswith(("s", "t")):
-                    continue
                 word = stem_candidate
             break
-    if word.endswith("ion") and _measure(word[:-3]) > 1 and word[-4:-3] in ("s", "t"):
-        word = word[:-3]
 
     # Step 5 - tidy up
     if word.endswith("e"):

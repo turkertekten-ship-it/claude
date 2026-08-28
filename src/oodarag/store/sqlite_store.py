@@ -630,6 +630,15 @@ class SqliteStore:
         log.debug("idf table built", terms=len(table), chunks=len(rows))
         return table
 
+    def corpus_signature(self) -> str:
+        """Content digest of the chunk corpus, for callers holding derived state.
+
+        Anything computed from the corpus - an IDF table, a vocabulary, a fitted
+        embedder - is stale the moment the corpus changes, and the change is
+        invisible from outside. This is the cheap way to ask.
+        """
+        return self._corpus_signature()
+
     def _corpus_signature(self) -> str:
         """Cheap fingerprint of the chunk corpus: count plus a hash of hashes."""
         row = self.conn.execute(

@@ -100,9 +100,44 @@ class HybridRetriever:
         self.config = config or RetrievalConfig()
         self.reranker = reranker or HeuristicReranker(
             idf=store.idf_lookup(), vocabulary=store.vocabulary())
+        #: Whether this retriever owns the reranker's corpus statistics. An
+        #: injected reranker is the caller's to keep current; the default one is
+        #: ours, and it must not outlive the corpus it was built from.
+        self._owns_reranker = reranker is None
+        self._analysis_signature = store.corpus_signature() if reranker is None else ""
+
+    def _refresh_analysis(self) -> None:
+        """Re-read the IDF table and vocabulary when the corpus has changed.
+
+        Both were captured once, at construction. `idf_lookup()` closes over the
+        table it read at that moment and `vocabulary()` returns a plain set, so a
+        retriever built before indexing kept an empty vocabulary for its whole
+        life - and `_answerability` returns 1.0 on an empty vocabulary, which
+        silently removes the abstention gate's only corpus-aware input. `ooda
+        loop` builds its generator before the ACT phase indexes anything, so
+        this was every loop run: the system simply stopped abstaining, and
+        nothing in the eval output distinguished it from working.
+
+        Keyed on the corpus content digest rather than on a counter, for the
+        reason recorded in L27: a corpus rewritten in place moves no counter.
+        The digest costs about 0.5ms per query on a 629-chunk index and scales
+        with chunk count; a very large index should hold the retriever for the
+        life of an index generation instead.
+        """
+        if not self._owns_reranker:
+            return
+        signature = self.store.corpus_signature()
+        if signature == self._analysis_signature:
+            return
+        self.reranker.idf = self.store.idf_lookup()
+        self.reranker.vocabulary = self.store.vocabulary()
+        self._analysis_signature = signature
+        log.debug("refreshed reranker corpus statistics",
+                  terms=len(self.reranker.vocabulary or ()))
 
     def retrieve(self, query: str, *, top_k: int | None = None,
                  filters: dict[str, Any] | None = None) -> tuple[list[ScoredChunk], RetrievalTrace]:
+        self._refresh_analysis()
         config = self.config
         k = top_k or config.top_k
         trace = RetrievalTrace(query=query)

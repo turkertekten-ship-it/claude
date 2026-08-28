@@ -27,6 +27,7 @@ from oodarag.retrieve.rerank import HeuristicReranker, _longest_common_run
 from oodarag.scrape.html import extract
 from oodarag.store.sqlite_store import SqliteStore
 from oodarag.util.http import normalize_url
+from oodarag.util.stemming import stem
 from oodarag.util.text import redact_secrets, tokenize
 
 
@@ -938,3 +939,150 @@ class StaleFitTest(unittest.TestCase):
                       for i in range(6)})
         report = pipeline.run([self._connector(texts)])
         self.assertTrue(report.refit, "75% corpus growth did not trigger a refit")
+
+
+class StaleRerankerAnalysisTest(unittest.TestCase):
+    """A retriever built before indexing kept an empty vocabulary for ever.
+
+    `HybridRetriever.__init__` captured `store.idf_lookup()` and
+    `store.vocabulary()` once. `idf_lookup` closes over the table it read at that
+    moment and `vocabulary` returns a plain set, so neither ever saw a later
+    index run. `_answerability` returns 1.0 when the vocabulary is empty - the
+    guard for a corpus too small to judge absence - so an empty *stale*
+    vocabulary silently removed the abstention gate's only corpus-aware input.
+
+    `ooda loop` constructs its generator before the ACT phase indexes anything,
+    which made this every loop run: the system stopped abstaining and nothing in
+    the eval output said so.
+    """
+
+    def _connector(self, texts: list[str]):
+        docs = [RawDocument(source_system="t", external_id=f"d{i}", uri=f"mem://d{i}",
+                            title=f"d{i}", text=text, metadata={})
+                for i, text in enumerate(texts)]
+
+        class _MemoryConnector(Connector):
+            key = "t"
+            source_system = "t"
+
+            def fetch(self, cursor):
+                yield from docs
+
+        return _MemoryConnector()
+
+    def _corpus(self) -> list[str]:
+        return [
+            "Reciprocal rank fusion combines a dense arm and a lexical arm by rank.",
+            "Crawl budgets bound requests, bytes, depth and wall clock time.",
+            "Citation markers are verified against the chunks actually retrieved.",
+            "Porter stemming is applied by the FTS5 index and by the reranker.",
+            "Contextual headers are embedded with each chunk of a document.",
+        ]
+
+    def test_a_retriever_built_before_indexing_sees_the_corpus(self):
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        pipeline = IndexPipeline(store)
+        retriever = HybridRetriever(store, pipeline.embedder)
+        self.assertFalse(retriever.reranker.vocabulary)
+
+        pipeline.run([self._connector(self._corpus())])
+        retriever.retrieve("how are dense and lexical arms combined")
+        self.assertEqual(retriever.reranker.vocabulary, store.vocabulary(),
+                         "the reranker kept the vocabulary it captured before indexing")
+
+    def test_a_corpus_rewritten_in_place_updates_the_idf_table(self):
+        """Keyed on content, not on a counter: same document count, new words."""
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        pipeline = IndexPipeline(store)
+        pipeline.run([self._connector(self._corpus())])
+        retriever = HybridRetriever(store, pipeline.embedder)
+        retriever.retrieve("fusion")
+        self.assertNotIn("quokka", retriever.reranker.vocabulary)
+
+        replacement = [f"Quokka telemetry calibration, note {i}." for i in range(5)]
+        pipeline.run([self._connector(replacement)])
+        retriever.retrieve("dosage")
+        self.assertIn("quokka", retriever.reranker.vocabulary,
+                      "the corpus was replaced and the reranker did not notice")
+
+    def test_an_injected_reranker_is_left_alone(self):
+        """Overriding the reranker is how a caller supplies its own analysis;
+        overwriting it here would silently discard that."""
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        pipeline = IndexPipeline(store)
+        mine = HeuristicReranker(idf=lambda t: 1.0, vocabulary={"sentinel"})
+        retriever = HybridRetriever(store, pipeline.embedder, reranker=mine)
+        pipeline.run([self._connector(self._corpus())])
+        retriever.retrieve("fusion")
+        self.assertEqual(retriever.reranker.vocabulary, {"sentinel"})
+
+    def test_the_gate_still_abstains_after_a_late_index(self):
+        """The end-to-end consequence, not just the field: an out-of-corpus
+        question must be refused by a retriever that predates the corpus."""
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        pipeline = IndexPipeline(store)
+        retriever = HybridRetriever(store, pipeline.embedder)
+        generator = AnswerGenerator(retriever, AnswerConfig(generator="extractive"))
+        pipeline.run([self._connector(self._corpus() * 8)])
+        retriever.reranker.min_vocabulary_for_answerability = 0
+        answer = generator.answer("What is the boiling point of mercury?")
+        self.assertTrue(answer.abstained,
+                        f"answered an out-of-corpus question: {answer.text[:120]}")
+
+
+class StemmerStepFourTest(unittest.TestCase):
+    """Step 4 removed two suffixes, so the reranker and the index disagreed.
+
+    Porter's step 4 removes at most one suffix. "ion" sat outside the loop as an
+    unconditional rule, so "additionally" lost "al" in the loop and then "ion"
+    after it, giving "addit" where SQLite's Porter tokenizer - the thing that
+    actually builds the lexical index - gives "addition". The reranker then
+    scored a chunk the lexical arm had ranked first as containing none of the
+    query term.
+
+    The `if suffix in ("ion",)` guard inside the loop was unreachable: "ion" was
+    not in the list it iterated.
+    """
+
+    def test_step_four_removes_one_suffix_not_two(self):
+        for word, expected in [("additionally", "addition"),
+                               ("intentionally", "intention"),
+                               ("occasional", "occasion"),
+                               ("professional", "profession"),
+                               ("transactionally", "transaction")]:
+            with self.subTest(word=word):
+                self.assertEqual(stem(word), expected)
+
+    def test_the_ion_condition_is_reachable_and_applied(self):
+        """"ion" comes off only after s or t, so a nation is not a nat."""
+        from oodarag.util.stemming import _STEP4
+
+        self.assertIn("ion", _STEP4, "the guard inside the loop is unreachable again")
+        self.assertEqual(stem("nation"), "nation")
+        self.assertEqual(stem("station"), "station")
+
+    def test_agreement_with_the_index_that_actually_stems_the_corpus(self):
+        """Third-party evidence: SQLite's own Porter tokenizer, read back through
+        fts5vocab. Our stemmer's correctness is not the requirement - agreeing
+        with the tokenizer that built the index is."""
+        conn = sqlite3.connect(":memory:")
+        self.addCleanup(conn.close)
+        try:
+            conn.execute("CREATE VIRTUAL TABLE t USING fts5"
+                         "(x, tokenize='porter unicode61 remove_diacritics 2')")
+        except sqlite3.OperationalError:
+            self.skipTest("FTS5 unavailable in this SQLite build")
+        conn.execute("CREATE VIRTUAL TABLE v USING fts5vocab(t, row)")
+        for word in ("additionally", "intentionally", "relationally", "occasional",
+                     "professional", "transactionally", "internationalized",
+                     "definitionally", "directionality", "provisionally"):
+            with self.subTest(word=word):
+                conn.execute("DELETE FROM t")
+                conn.execute("INSERT INTO t VALUES (?)", (word,))
+                terms = [row[0] for row in conn.execute("SELECT term FROM v")]
+                self.assertEqual(terms, [stem(word)],
+                                 f"{word!r}: the reranker and the index disagree")
