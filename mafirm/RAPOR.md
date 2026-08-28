@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** kırk dokuz çalıştırılabilir takım — **373
+**Yamalı hâlde sistem çalışıyor:** elli çalıştırılabilir takım — **377
 vaka, 27 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15 → **27/27** (mutasyon kümesi otuz
 sekizinci turda on beşten yirmi yediye çıkarıldı: 26 kontrolün dokuzu hiç
@@ -2568,6 +2568,58 @@ N-09 artık iki bağımsız yetkiyi birden istiyor: **tek bir yetkiye dayanan
 olumsuz iddia, o yetki yanlış okunduğunda çöker** — ve bu turda kendi
 kaydımı yanlış okuduğumu bir kez daha gördüm.
 
+### Üç örnek bir sınıftır — ve sınıf, örnekleri düzelterek kapanmaz
+
+Aynı hatayı üç kez yaptım: dördüncü–yirmi sekizinci turda kaydın *çalışıyor*
+dediği kanalı *"işe yaramaz"* diye okudum; kırk beşinci turda kaydın zaten
+içerdiği bir şeyi *"hiç sorgulamadım"* diye açtım; daha önce *"hiçbiri
+silinmedi"* sözü bir süre doğru değildi. Yirmi yedinci turun kendi kuralı
+buydu: **üç örnek bir sınıftır ve sınıf ancak duran bir sağlamayla kapanır.**
+Üçünü de tek tek düzeltmiştim; sınıfı kapatmamıştım.
+
+Sınanamayan ile sınanabileni ayırmak gerekti. *"Yazar kaydını doğru okudu
+mu"* ölçülemez. Ölçülebilen **sonucudur**: kayıt bir şeyin çalıştığını ya da
+doğrulandığını söylüyorken, teslimatın onu çalışmıyor/doğrulanmamış gibi
+anması. Üç olayın üçü de tam olarak bu biçimdeydi. BA takımı bunu ölçüyor:
+`egress-kaniti.md`'nin *çalışıyor* dediği kanalları ve
+`dogrulama-bulgulari.md`'nin *DOĞRULANDI* dediği bulguları toplayıp RAPOR ile
+KİTAP-ERRATA'nın her cümleciğinde arıyor.
+
+**Bugün gerçek çelişki yok.** Değerli olan, ölçütün üç kez yanılması oldu — ve
+üçü de bu incelemenin en sık tekrar eden tuzaklarıydı:
+
+* **Pencere ölçeği iki yanlış pozitif verdi.** Biri WebSearch'ün *çalıştığını*
+  söyleyen cümleydi; öteki I-04'ün doğrulandığını söylerken yanındaki
+  cümleden "kapatılamaz" kelimesini kapıyordu. Yirmi dokuzuncu turun kuralı
+  yine geçerli: **pencere, komşuyu kanıt sanar.** Ölçüt cümleciğe indi ve
+  BA-04 artık pencerenin geri gelmesini yakalıyor.
+* **Satır kaydırması muafiyeti sessizce iptal etti.** Geçmiş hatayı *anlatan*
+  cümleler muaftır — ama kaynakta `yanlış\nokumuştum` yazıyordu ve
+  `yanlış okum` kalıbı hiç eşleşmedi. Muafiyet çalışmadı; kimse fark etmezdi,
+  çünkü sonuç yalnızca "kırmızı" görünüyordu. Aynı delik otuz dokuzuncu turda
+  AM-01'de de çıkmıştı. Her cümlecik artık eşleştirmeden önce tek boşluğa
+  normalleştiriliyor.
+* **Muafiyetin öz-sınaması kesilmiş metni ölçüyordu.** BA-02, muaf tutulan
+  cümleciğin geçmiş-hata işareti taşıyıp taşımadığına bakıyordu; ama elindeki
+  şey gösterim için 70 karaktere **kesilmiş** hâliydi ve işaret kesiğin
+  ötesindeydi. Düzeltince ikinci kusur göründü: soru zaten **totolojiydi** —
+  cümlecik o işareti taşıdığı için muaf tutulmuştu. BA-02 yeniden yazıldı ve
+  artık sınanabilir olanı soruyor: **muafiyet büyüdü mü?** Muaf tutulan her
+  hedef sayısıyla beyan edilir; beyandan fazla muafiyet de, hiçbir şeyi
+  örtmeyen bayat bir beyan da vakayı kırar. Kaçış deliği böylece sessizce
+  genişleyemez.
+
+**Ve takım ilk tam koşusunda kendi apparatına yakalandı.** AE-01,
+`ks_ba_kayit_celiski.py`'nin bulgu kimliklerini `[A-Z]-\d+` ile aradığını
+gördü: **AA/BA gibi iki harfli kimlikler bu desene görünmez.** Bugün öyle bir
+bulgu yok, ama olsaydı BA-01 onu sessizce sınamayacaktı — yani takım, ölçtüğü
+şeyi ölçmediğini hiç söylemeden yeşil kalacaktı. Otuz beşinci turda kendim
+için yazdığım kontrol, kırk altıncı turda yine kendimi yakaladı. Düzeltildi.
+
+Bu turun kalıcı kuralı: **kesilmiş metin gösterim içindir; ölçen hiçbir şey
+onu okumamalıdır** — ve **bir muafiyet, gerekçesi sayıyla yazılmadıkça
+muafiyet değil, kör noktadır.**
+
 ---
 
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
@@ -2697,6 +2749,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | AX · kitap yapısı iddiaları | *sayısal iddialar hiç sınanmamıştı* | **temiz** — dördü de doğru çıktı, doğrulama kalıcı |
 | AY · kitap hakkında olumsuz iddialar | *on iki atıf kural numarasını bölüm numarası sanıyordu* | **temiz** — atıflar düzeltildi, çürütücüler bölüm kapsamlı |
 | AZ · kitaba sadık kopyaların sadakati | *"sadık" sıfatı hiç sınanmamıştı* | **temiz** — 258/262 birebir, kalan dördü beyanlı |
+| BA · kayıt ile iddianın çelişmesi | *kaydın "çalışıyor" dediğini teslimat "işe yaramaz" diye anmıştı — üç kez* | **temiz** — bugün çelişki yok, muafiyet beyanlı |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -2755,7 +2808,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 ### Nasıl yeniden koşulur
 ```
 ./sinama/hepsi.sh                 # 34 çalıştırılabilir takım:
-                                  #   373 vaka + 27 mutasyon (D)
+                                  #   377 vaka + 27 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -2845,9 +2898,10 @@ Dokuz takım, 96 vaka:
 | AX | **Kitap yapısı iddiaları** — raporun verdiği sayılar kitapla uyuşuyor mu | §12, §14, §16, §18 |
 | AY | **Kitap hakkında olumsuz iddialar** — "kitap bunu söylemiyor" doğru mu, ve § atıfları doğru bölümü mü gösteriyor | §3, §8, §9, §16 |
 | AZ | **Kitaba sadık kopyaların sadakati** — raporun "önce" tabanı gerçekten kitabın metni mi | §12, §14, §16 |
+| BA | **Kayıt–iddia çelişkisi** — kayıt bir şeyin çalıştığını/doğrulandığını söylerken teslimat onu olumsuzluyor mu | §4, §17, §19 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**373 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**377 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)
