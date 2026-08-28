@@ -260,6 +260,22 @@ kapatmaktır. En kötüsü güncellik kapısıdır: kitap İKİ biçim kabul ede
 kalır. → Her blok iletisi bir EYLEM göstermeli ve birden çok kabul edilen
 biçim varsa hepsini saymalı. *(AB-01, AB-02, AB-03b)*
 
+**[B] Güncellik kapısı GELECEK tarihli bir doğrulamayı hiç görmüyor.** §12'nin
+kapısı yalnızca BAYAT tarihi arar; ileri tarihli bir `Doğrulama:` satırı
+sessizce geçer. Gelecek tarihli bir doğrulama, yapılmamış bir doğrulamanın en
+olağan yazım biçimidir (kopyala-yapıştır, şablon, ileri tarihli taslak) ve
+kapının varlık sebebi tam olarak budur. B-23 bunu kaçırma olarak kaydeder;
+AC-04 aynı boşluğu kitaba sadık kapıda ikinci kez ölçer.
+
+> **Ve bu kontrolü eklerken YENİ bir kusur doğdu.** Bir takvim tarihi saat
+> dilimi taşımaz; makinenin "bugün"ü taşır. İkisini doğrudan karşılaştırmak,
+> kıyasa olmayan bir saat dilimi sokar: dünya UTC-12 ile UTC+14 arasına, 26
+> saate yayılır. İstanbul'da yazılan doğru bir doğrulama, Pasifik'teki bir
+> masada "GELECEK tarihli" diye bloklanıyordu — ve kitap §6'da SINIR ÖTESİ bir
+> pratik kuruyor, yani dosyalar tam olarak böyle dolaşıyor. Tolerans bir gündür
+> ve orada biter (AC-04 beş gün ileri tarihin hâlâ bloklandığını, AC-05 bayat
+> kontrolünün yaşadığını sabitler). *(B-23, AC-01, AC-02, AC-04)*
+
 ## §7 · Ortak koltukları
 
 **[B] Kitabın en yüksek itibar riskli kuralının hiçbir mekanizması yok.**

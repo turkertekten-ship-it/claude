@@ -387,6 +387,9 @@ def kapi_sir(metin, disari=False):
     return None
 
 
+SAAT_DILIMI_TOLERANSI = 1   # gün · dünyanın 26 saatlik yayılımı
+
+
 def kapi_guncellik(metin, bugun=None):
     """Bayatlamış, gelecek tarihli ya da HİÇ OLMAYAN doğrulama tarihi."""
     # [V-01] Bir KAPI ASLA ÇÖKMEZ. Çöken bir kanca üretimde her yazmayı
@@ -428,7 +431,18 @@ def kapi_guncellik(metin, bugun=None):
         yas = (bugun - d).days
         if yas > BAYAT_GUN:
             return ("guncellik", "%s doğrulaması %d günlük; yeniden çek" % (ham, yas))
-        if yas < 0:                                          # [B-23] gelecek tarih
+        # [AC-01] Bir TAKVİM TARİHİ saat dilimi taşımaz; makinenin "bugün"ü
+        # taşır. İkisini doğrudan karşılaştırmak, kıyasa olmayan bir saat
+        # dilimi sokar. Dünya UTC-12 ile UTC+14 arasına yayılır: 26 saat.
+        # Yani bir yerde "bugün" olan tarih, başka bir masada en çok BİR GÜN
+        # ileride görünür. Kitap §6'da SINIR ÖTESİ bir pratik kuruyor — aynı
+        # dosyalar İstanbul, Londra, New York ve Singapur arasında dolaşır.
+        # Tolerans olmadan, İstanbul'da yazılan doğru bir doğrulama
+        # Pasifik'teki bir masada "GELECEK tarihli" diye bloklanıyordu:
+        # belge doğru, kapı yanlış — ve §14'e göre böyle bir kapı kapatılır.
+        # Tolerans BİR GÜNDÜR ve orada biter: AC-04 beş gün ileri bir tarihin
+        # hâlâ bloklandığını, AC-05 bayat kontrolünün yaşadığını sabitliyor.
+        if yas < -SAAT_DILIMI_TOLERANSI:                      # [B-23] gelecek tarih
             return ("guncellik", "%s doğrulaması GELECEK tarihli (%d gün)"
                     % (ham, -yas))
     return None

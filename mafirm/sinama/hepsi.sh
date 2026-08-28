@@ -76,6 +76,8 @@ python3 "$S/ks_aa_dayaniklilik.py"; topla "AA · kapının arıza yönü" $?
 echo
 python3 "$S/ks_ab_care.py"; topla "AB · blok iletisinin çaresi" $?
 echo
+python3 "$S/ks_ac_ortam.py"; topla "AC · ortam bağımsızlığı" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

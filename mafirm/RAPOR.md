@@ -25,7 +25,7 @@ kendi §16 denetimi yeşile dönmedi.
 3. **Denetim on beş bozmadan on birini görmüyor**; sıfır beceri, kancasız
    ayarlar ve tamamen boş bir `esik.py` taşıyan bir sistemde "DENETİM OK" diyor.
 
-**Yamalı hâlde sistem çalışıyor:** yirmi beş çalıştırılabilir takım — **249
+**Yamalı hâlde sistem çalışıyor:** yirmi altı çalıştırılabilir takım — **254
 vaka, 15 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15, birimler arası tutarlılık takımının
 kendi mutasyon yakalaması 10/10. Ama **üç mevzuat bulgusu ile kitabın kendi içindeki bir çelişki açık kalır**
@@ -1287,6 +1287,56 @@ artık bunu ayrı bir sonuç olarak yazıyor.
 
 ---
 
+## Yedi buçuk artı yirmi · Aynı belge, başka masa, başka karar
+
+S takımı taşınabilirliği **yol** düzeyinde ölçmüştü: klon ile kaynak ağaç aynı
+sonucu veriyor mu. Kurulumun içinde bulunduğu **ortam** — saat dilimi, yerel
+ayar — hiç sorulmamıştı. Yirmi tur boyunca hiçbir takım *"aynı metin başka bir
+makinede aynı cevabı alıyor mu"* demedi.
+
+Bu sistem için soru kozmetik değil. Kitap §6'da **sınır ötesi** bir pratik
+kuruyor: aynı dosyalar İstanbul, Londra, New York ve Singapur arasında dolaşır.
+
+**Bulgu.** Bugün İstanbul'da damgalanan bir `Doğrulama:` satırı, UTC−11'deki
+bir masada **"GELECEK tarihli (1 gün)"** diye bloklanıyordu. Belge doğru, kapı
+yanlış — ve §14'e göre böyle bir kapı kapatılır.
+
+Sebebi kavramsal: **bir takvim tarihi saat dilimi taşımaz**; makinenin "bugün"ü
+taşır. İkisini doğrudan karşılaştırmak, kıyasa olmayan bir saat dilimi sokar.
+Dünya UTC−12 ile UTC+14 arasına, **26 saate** yayılır; bir yerde "bugün" olan
+tarih başka bir masada en çok bir gün ileride görünür. Tolerans bir gündür ve
+**orada biter**: AC-04 beş gün ileri bir tarihin hâlâ bloklandığını, AC-05
+bayat kontrolünün yaşadığını sabitliyor. Mutasyon iki yönde de koştu —
+toleransı kaldırmak AC-01/AC-02'yi, doksan güne açmak AC-04'ü kırmızıya
+çeviriyor. Bir yanlış pozitifi, kontrolü **öldürerek** çözmek en kolay ve en
+yanlış yoldur.
+
+Yerel ayar temiz çıktı: beş yerel ayarda, büyük harfli Türkçe metin dâhil,
+karar değişmiyor. §12'nin İ/ı tuzağı zaten açıkça ele alınmıştı.
+
+### Üçüncü kez aynı desen — ve artık bir kural
+
+Kitaba sadık kapıda **gelecek tarih kontrolü hiç yok** (B-23 bunu kaçırma
+olarak kaydeder). Yani bu yanlış pozitif **kitabın değil benim**: kaçırmayı
+kapatmak için kontrolü ekledim ve ölçmediğim bir eksende kusur doğdu.
+
+Bu artık üç örnekli bir desendir:
+
+| tur | kaçırmayı kapatmak için | açılan ve ölçülmeyen eksen |
+|---|---|---|
+| 14 | `ESIK` genişletildi (B-13..B-18) | **yanlış pozitif** — her SPA incelemesi bloklanıyordu |
+| 19 | `TAVSIYE` genişletildi (B-02..B-06) | **sınırsız süre** — 40 KB girdi kapıyı donduruyordu |
+| 21 | gelecek tarih kontrolü eklendi (B-23) | **ortam bağımlılığı** — başka saat diliminde yanlış blok |
+
+Üçünde de niyet doğruydu, üçünde de ölçüm tek eksenliydi. **Bir kapıyı
+genişletmek tek eksende iyileştirme değildir; ölçülmeyen her eksende bir
+borçtur.** Bunun pratik karşılığı bir kuraldır: *bir kaçırmayı kapatırken,
+açabileceğin eksenleri adlandır ve onları da sına.* V (yanlış pozitif),
+AA (süre ve arıza yönü) ve AC (ortam) bu üç ekseni artık kalıcı olarak
+ölçüyor.
+
+---
+
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
 
 | Bölüm | Beklenen | Gerçek | Sebep |
@@ -1390,6 +1440,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | Z · kurulum bütünlüğü | *kitap iki kez hiç koşulmamıştı* | **temiz** — sessiz geri alma artık görülüyor |
 | AA · kapının arıza yönü | *hiç ölçülmemişti* | **temiz** — her arıza 0 ya da 2, süre sınırlı |
 | AB · blok iletisinin çaresi | *teşhis vardı, çare yoktu* | **temiz** — altı kapı da çare gösteriyor |
+| AC · ortam bağımsızlığı | *hiç ölçülmemişti* | **temiz** — yedi dilim, beş yerel ayar, tek karar |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -1447,8 +1498,8 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # 25 çalıştırılabilir takım:
-                                  #   249 vaka + 15 mutasyon (D)
+./sinama/hepsi.sh                 # 26 çalıştırılabilir takım:
+                                  #   254 vaka + 15 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -1514,9 +1565,10 @@ Dokuz takım, 96 vaka:
 | Z | **Kurulum bütünlüğü** — kitap ikinci kez koşulursa | §2, §0 kural 4 |
 | AA | **Kapının arıza yönü** — çökünce açık mı kapalı mı | §12, kural 6 |
 | AB | **Blok iletisinin çaresi** — bloklanan ne yapacağını öğreniyor mu | §14, §12 |
+| AC | **Ortam bağımsızlığı** — cevap makineye göre değişiyor mu | §6, §3, §12 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**249 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**254 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)

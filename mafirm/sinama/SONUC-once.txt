@@ -282,3 +282,13 @@ KALDI AB-03b  iletinin ÖNERDİĞİ biçim gerçekten o kapıyı susturuyor
 KALDI AB-04   çok kapılı blokta bütün ihlaller tek seferde bildiriliyor
 GEÇTİ AB-05   aynı girdi beş koşumda aynı kapı kümesini veriyor
 6 vaka · 1 geçti · 0 beklenen · 5 SİNYAL
+
+### AC takımı — KİTABA SADIK kapı üzerinde (sonradan eklendi)
+# Kitapta gelecek tarih kontrolü YOKTUR (B-23 bunu kaçırma olarak
+# kaydeder); dolayısıyla AC-01/AC-02 orada boş yere geçer, AC-04 kalır.
+GEÇTİ AC-01   bugün damgalı doğrulama hiçbir saat diliminde reddedilmiyor
+GEÇTİ AC-02   aynı metin bütün saat dilimlerinde aynı kararı alıyor
+GEÇTİ AC-03   aynı metin bütün yerel ayarlarda aynı kararı alıyor
+KALDI AC-04   gerçekten gelecek tarihli doğrulama hâlâ bloklanıyor
+GEÇTİ AC-05   bayat doğrulama hâlâ bloklanıyor
+5 vaka · 4 geçti · 0 beklenen · 1 SİNYAL

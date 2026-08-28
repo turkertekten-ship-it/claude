@@ -1,5 +1,5 @@
 ###############################################################
-#  KÖR SINAMA TAKIMI — 2026-08-28T10:24:58Z
+#  KÖR SINAMA TAKIMI — 2026-08-28T10:32:09Z
 ###############################################################
 
 /root/mafirm/sinama/ks_a_esik.py:45: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
@@ -292,13 +292,13 @@ GEÇTİ L-06   hafiza/ dosyalarının hepsi var
 KÖR SINAMA M — errata ↔ sınama izlenebilirliği
 ================================================================================================
 GEÇTİ M-01   her errata maddesi bir sınama vakasına atıf yapıyor
-        61 madde · atıfsız 0: yok
+        62 madde · atıfsız 0: yok
 GEÇTİ M-02   atıf yapılan her vaka kimliği gerçekten tanımlı
-        281 tanımlı kimlik · uydurma dayanak: yok
+        287 tanımlı kimlik · uydurma dayanak: yok
 GEÇTİ M-03   [A] ve [B] maddelerinin atıfları sadık sistemde gerçekten kaldı
-        sadık koşumda kalan vaka: 50 · sınanmamış ağır madde: yok
+        sadık koşumda kalan vaka: 51 · sınanmamış ağır madde: yok
 GEÇTİ M-04   sadık sistemde kalan her vaka errata'da ya da raporda açıklanmış
-        50 vaka kaldı · açıklanmamış: yok
+        51 vaka kaldı · açıklanmamış: yok
 ------------------------------------------------------------------------------------------------
 4 vaka · 4 geçti · 0 beklenen · 0 SİNYAL
 
@@ -393,7 +393,7 @@ KÖR SINAMA R — yön, insan onayı ve dil kuralları
 GEÇTİ R-01   rapor cevapla başlıyor, yöntemle değil
         ilk bölüm: 'Cevap' — §4: 'cevabı merak eden ilk paragrafta bulur'
 GEÇTİ R-02   yöntem bölümü bulgulardan sonra geliyor
-        yöntem 34. başlık, ilk bulgu 1. başlık
+        yöntem 35. başlık, ilk bulgu 1. başlık
 GEÇTİ R-03   iki zorunlu başlık en sonda ve doğru sırada
         son iki başlık: ['Şimdi ne yapılmalı', 'Yetkili avukat görüşü gereken konular']
 GEÇTİ R-04   raporun onay durumu açıkça yazılı (§9)
@@ -602,39 +602,39 @@ GEÇTİ Z-08   denetim beyan edilen asgari kontrol sayısını taşıyor
 KÖR SINAMA AA — kapı arızalandığında hangi yöne düşüyor
 ================================================================================================
 GEÇTİ AA-01a    bozuk olay: bozuk JSON
-        çıkış 2 (28 ms)
-GEÇTİ AA-01b    bozuk olay: boş girdi
         çıkış 2 (29 ms)
+GEÇTİ AA-01b    bozuk olay: boş girdi
+        çıkış 2 (28 ms)
 GEÇTİ AA-01c    bozuk olay: tool_input yok
-        çıkış 0 (31 ms)
-GEÇTİ AA-01d    bozuk olay: tool_input dizge
-        çıkış 0 (33 ms)
-GEÇTİ AA-01e    bozuk olay: tool_input liste
-        çıkış 0 (31 ms)
-GEÇTİ AA-01f    bozuk olay: tool_name yok
-        çıkış 0 (33 ms)
-GEÇTİ AA-01g    bozuk olay: tool_name None
         çıkış 0 (30 ms)
-GEÇTİ AA-01h    bozuk olay: içerik None
-        çıkış 0 (49 ms)
-GEÇTİ AA-01i    bozuk olay: içerik sayı
-        çıkış 0 (36 ms)
-GEÇTİ AA-01j    bozuk olay: derin iç içe
+GEÇTİ AA-01d    bozuk olay: tool_input dizge
+        çıkış 0 (30 ms)
+GEÇTİ AA-01e    bozuk olay: tool_input liste
         çıkış 0 (29 ms)
+GEÇTİ AA-01f    bozuk olay: tool_name yok
+        çıkış 0 (29 ms)
+GEÇTİ AA-01g    bozuk olay: tool_name None
+        çıkış 0 (31 ms)
+GEÇTİ AA-01h    bozuk olay: içerik None
+        çıkış 0 (31 ms)
+GEÇTİ AA-01i    bozuk olay: içerik sayı
+        çıkış 0 (28 ms)
+GEÇTİ AA-01j    bozuk olay: derin iç içe
+        çıkış 0 (31 ms)
 GEÇTİ AA-01k    bozuk olay: JSON dizi (nesne değil)
-        çıkış 2 (27 ms)
+        çıkış 2 (30 ms)
 GEÇTİ AA-01l    bozuk olay: JSON null
         çıkış 2 (28 ms)
 GEÇTİ AA-02     ayrıştırma SONRASI arıza politikası yazılı ve dışarıda kapalı
         kanca, ayrıştırma sonrası istisnayı yakalayıp dışarı kanalında 2 döndürüyor
 GEÇTİ AA-03-20  boşluksuz 20000 karakter bütçe içinde bitiyor
-        59 ms (bütçe 5000 ms) çıkış 0
+        65 ms (bütçe 5000 ms) çıkış 0
 GEÇTİ AA-03-80  boşluksuz 80000 karakter bütçe içinde bitiyor
-        158 ms (bütçe 5000 ms) çıkış 0
+        155 ms (bütçe 5000 ms) çıkış 0
 GEÇTİ AA-03-200 boşluksuz 200000 karakter bütçe içinde bitiyor
-        325 ms (bütçe 5000 ms) çıkış 0
+        341 ms (bütçe 5000 ms) çıkış 0
 GEÇTİ AA-04     400 KB gerçek düzyazı bütçe içinde
-        419 ms çıkış 0
+        409 ms çıkış 0
 GEÇTİ AA-05     dayanıklılık yaması doğruluğu bozmadı
         üç davranış vakası da beklendiği gibi
 ------------------------------------------------------------------------------------------------
@@ -657,6 +657,22 @@ GEÇTİ AB-05   aynı girdi beş koşumda aynı kapı kümesini veriyor
         5 girdi × 5 koşum, sapma yok
 ------------------------------------------------------------------------------------------------
 6 vaka · 6 geçti · 0 beklenen · 0 SİNYAL
+
+================================================================================================
+KÖR SINAMA AC — kapının cevabı makineye göre değişiyor mu
+================================================================================================
+GEÇTİ AC-01   bugün damgalı doğrulama hiçbir saat diliminde reddedilmiyor
+        7 dilimin hepsinde geçiyor
+GEÇTİ AC-02   aynı metin bütün saat dilimlerinde aynı kararı alıyor
+        4 metin × 7 dilim, sapma yok
+GEÇTİ AC-03   aynı metin bütün yerel ayarlarda aynı kararı alıyor
+        5 metin × 5 yerel ayar, sapma yok
+GEÇTİ AC-04   gerçekten gelecek tarihli doğrulama hâlâ bloklanıyor
+        5 gün ileri tarih: bloklandı
+GEÇTİ AC-05   bayat doğrulama hâlâ bloklanıyor
+        400 günlük tarih: bloklandı
+------------------------------------------------------------------------------------------------
+5 vaka · 5 geçti · 0 beklenen · 0 SİNYAL
 
 ###############################################################
 #  ÖZET
@@ -686,6 +702,7 @@ GEÇTİ AB-05   aynı girdi beş koşumda aynı kapı kümesini veriyor
   Z · kurulum bütünlüğü            temiz
   AA · kapının arıza yönü          temiz
   AB · blok iletisinin çaresi          temiz
+  AC · ortam bağımsızlığı         temiz
   ------------------------------------------------------------
   TOPLAM SİNYAL                         0
 
