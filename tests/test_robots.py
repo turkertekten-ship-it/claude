@@ -112,6 +112,68 @@ Crawl-delay: 0.5
             other = RobotsPolicy(client=_client(), user_agent="SomeOtherBot/2.0")
             self.assertFalse(other.allows(site.url("/anything")))
 
+    def test_another_agents_group_does_not_capture_us(self):
+        """Our UA carries a project URL, so substring matching handed us any
+        group whose token appeared anywhere in it - `claude` and `github` both
+        do. The site here forbids everyone and permits one named crawler that
+        is not us; the whole point is that we stay forbidden."""
+        rules = """
+User-agent: *
+Disallow: /
+
+User-agent: claude
+Allow: /
+
+User-agent: rag
+Allow: /
+"""
+        ua = "oodarag/0.1 (+https://github.com/example/project; research)"
+        with TestSite({"/robots.txt": Route(body=rules, content_type="text/plain")}) as site:
+            policy = RobotsPolicy(client=_client(), user_agent=ua)
+            self.assertFalse(policy.allows(site.url("/anything")),
+                             "a group naming a different crawler was applied to us")
+
+    def test_a_version_in_the_user_agent_line_still_names_us(self):
+        """The tightening above must not overshoot: a file that writes the
+        version it saw is still addressing our product token, and its rules -
+        stricter than the wildcard's here - must be the ones that apply."""
+        rules = """
+User-agent: *
+Allow: /
+
+User-agent: oodarag/0.1
+Disallow: /heavy/
+"""
+        with TestSite({"/robots.txt": Route(body=rules, content_type="text/plain")}) as site:
+            policy = RobotsPolicy(client=_client(), user_agent="oodarag/0.9 (+https://x)")
+            self.assertFalse(policy.allows(site.url("/heavy/report")))
+            self.assertTrue(policy.allows(site.url("/light")))
+
+    def test_repeated_groups_for_one_agent_are_combined(self):
+        """RFC 9309 2.2.1 requires records for the same user-agent to be
+        combined. First-wins dropped the second block entirely, and a file
+        split by a `Sitemap:` line in the middle is an ordinary shape."""
+        rules = """
+User-agent: *
+Disallow: /private/
+Crawl-delay: 1
+
+Sitemap: https://example.com/sitemap.xml
+
+User-agent: *
+Disallow: /admin/
+Crawl-delay: 4
+"""
+        with TestSite({"/robots.txt": Route(body=rules, content_type="text/plain")}) as site:
+            policy = RobotsPolicy(client=_client())
+            self.assertFalse(policy.allows(site.url("/private/x")))
+            self.assertFalse(policy.allows(site.url("/admin/x")),
+                             "the second block's rules were dropped")
+            self.assertTrue(policy.allows(site.url("/public/x")))
+            # No spec answer for merging an extension; the politeness reading is
+            # the longest delay asked for, not whichever block came first.
+            self.assertEqual(policy.crawl_delay(site.url("/")), 4.0)
+
     def test_empty_disallow_means_allow_everything(self):
         rules = "User-agent: *\nDisallow:\n"
         with TestSite({"/robots.txt": Route(body=rules, content_type="text/plain")}) as site:

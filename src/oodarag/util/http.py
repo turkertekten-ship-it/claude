@@ -24,6 +24,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import zlib
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -175,6 +176,20 @@ class PolicyDeniedError(TransportError):
     """
 
 
+class RedirectBlocked(TransportError):
+    """A redirect was refused by the caller's gate before it was followed.
+
+    Distinct from a transport fault: nothing failed, and retrying will produce
+    the same answer. Carries the URL that was refused so the caller can report
+    which hop was declined rather than "something went wrong".
+    """
+
+    def __init__(self, url: str, target: str) -> None:
+        super().__init__(f"redirect from {url} to {target} refused by the caller's gate")
+        self.url = url
+        self.target = target
+
+
 class CircuitOpenError(TransportError):
     """Raised instead of retrying a host already established as unreachable."""
 
@@ -240,6 +255,7 @@ class HttpClient:
         body: bytes | None = None,
         conditional: bool = False,
         allow_status: tuple[int, ...] = (),
+        redirect_gate: Callable[[str], bool] | None = None,
     ) -> Response:
         hdrs = {
             "User-Agent": self.user_agent,
@@ -268,6 +284,8 @@ class HttpClient:
             self._bucket.acquire()
             started = time.monotonic()
             req = urllib.request.Request(url, data=body, headers=hdrs, method=method)
+            if redirect_gate is not None:
+                req.redirect_gate = redirect_gate  # type: ignore[attr-defined]
             try:
                 with self._opener.open(req, timeout=self.timeout) as raw:
                     payload = self._read_capped(raw)
@@ -359,12 +377,34 @@ class HttpClient:
 
 
 class _NoRedirectOnPost(urllib.request.HTTPRedirectHandler):
-    """Follow redirects for safe methods only; never silently replay a POST."""
+    """Follow redirects for safe methods only, and only where the caller allows.
+
+    Two jobs. Never silently replay a POST; and consult the per-request
+    `redirect_gate` if one was attached, so a caller whose permission to fetch
+    is per-URL - the crawler, whose permission comes from robots.txt - can
+    refuse a hop *before* the request is made. Re-checking after the fact stops
+    the page being indexed but the forbidden host has already been contacted.
+
+    The gate is carried on the Request object and copied onto each new one, so
+    it survives a redirect chain rather than guarding only the first hop.
+
+    Note for anyone writing a gate: it runs *inside* an open response, so a gate
+    that itself fetches - the crawler's does, to read the destination's
+    robots.txt - re-enters this client while the origin's connection is held.
+    That works, and it is why the robots cache matters: an uncached gate would
+    hold the origin socket open for a fetch and a rate-limit wait per hop.
+    """
 
     def redirect_request(self, req, fp, code, msg, headers, newurl):  # type: ignore[no-untyped-def]
         if req.get_method() not in ("GET", "HEAD"):
             return None
-        return super().redirect_request(req, fp, code, msg, headers, newurl)
+        gate = getattr(req, "redirect_gate", None)
+        if gate is not None and not gate(newurl):
+            raise RedirectBlocked(req.full_url, newurl)
+        new = super().redirect_request(req, fp, code, msg, headers, newurl)
+        if new is not None and gate is not None:
+            new.redirect_gate = gate
+        return new
 
 
 def _decompress(payload: bytes, encoding: str) -> bytes:
@@ -437,6 +477,20 @@ def normalize_url(url: str, *, drop_fragment: bool = True, drop_query: bool = Fa
 
 
 def same_site(a: str, b: str, *, include_subdomains: bool = True) -> bool:
+    """Is `a` within the site `b` names? Directional, and deliberately so.
+
+    `b` is the reference - a crawl seed - and `include_subdomains` means
+    subdomains *of it*. The check used to be symmetric, accepting
+    `hb.endswith("." + ha)` as well, which let a seed walk *up*: seeding
+    `docs.example.com` put `example.com` in scope, and seeding a page on
+    `user.github.io` put the whole of `github.io` in scope. A config field
+    named `include_subdomains` is not a grant to crawl superdomains, and the
+    error direction was outward - the crawler fetching hosts nobody named
+    (L90's shape, in the sibling that decides where the crawler may go).
+
+    The dot is what makes the suffix test safe: `evilexample.com` does not end
+    with `.example.com`.
+    """
     ha = (urllib.parse.urlsplit(a).hostname or "").lower()
     hb = (urllib.parse.urlsplit(b).hostname or "").lower()
     if not ha or not hb:
@@ -445,4 +499,4 @@ def same_site(a: str, b: str, *, include_subdomains: bool = True) -> bool:
         return True
     if not include_subdomains:
         return False
-    return ha.endswith("." + hb) or hb.endswith("." + ha)
+    return ha.endswith("." + hb)

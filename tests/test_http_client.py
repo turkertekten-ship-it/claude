@@ -42,6 +42,18 @@ class NormalizeUrlTest(unittest.TestCase):
         self.assertTrue(same_site("https://docs.e.com/a", "https://e.com/b"))
         self.assertFalse(same_site("https://docs.e.com/a", "https://e.com/b", include_subdomains=False))
         self.assertFalse(same_site("https://evil.com/a", "https://e.com/b"))
+        # The suffix test must not match without the dot boundary.
+        self.assertFalse(same_site("https://evile.com/a", "https://e.com/b"))
+
+    def test_a_seed_on_a_subdomain_does_not_put_its_parent_in_scope(self):
+        """`include_subdomains` grants subdomains of the seed, not superdomains
+        of it. The symmetric version let a seed walk up to the apex - and on a
+        public suffix like github.io, up to the suffix itself."""
+        self.assertFalse(same_site("https://e.com/a", "https://docs.e.com/b"),
+                         "a subdomain seed widened scope to its parent")
+        self.assertFalse(same_site("https://github.io/x", "https://u.github.io/p"))
+        # The direction that is granted still works.
+        self.assertTrue(same_site("https://api.docs.e.com/a", "https://docs.e.com/b"))
 
 
 class HttpClientTest(unittest.TestCase):

@@ -26,7 +26,8 @@ from typing import Iterator
 from oodarag.scrape.html import ExtractedPage, extract
 from oodarag.scrape.robots import RobotsPolicy
 from oodarag.util.hashing import content_hash
-from oodarag.util.http import HttpClient, HttpError, TransportError, normalize_url, same_site
+from oodarag.util.http import (HttpClient, HttpError, RedirectBlocked, TransportError,
+                               normalize_url, same_site)
 from oodarag.util.logging import get_logger
 
 log = get_logger("crawler")
@@ -203,7 +204,18 @@ class Crawler:
             self._throttle(url)
             self.report.fetches += 1
             try:
-                resp = self.client.get(url, conditional=True)
+                # The gate travels with the request: a redirect to a host we
+                # are not allowed to fetch is refused before it is followed,
+                # rather than discovered after the forbidden host has already
+                # answered (L90).
+                resp = self.client.get(
+                    url, conditional=True,
+                    redirect_gate=lambda target: self._wanted(target, depth)[0])
+            except RedirectBlocked as e:
+                reason = self._wanted(e.target, depth)[1] or "gate"
+                self.report.skipped[f"redirect_{reason}"] += 1
+                self._seen_urls.add(normalize_url(e.target))
+                continue
             except HttpError as e:
                 self.report.errors.append((url, f"http {e.status}"))
                 self.report.skipped[f"http_{e.status}"] += 1
@@ -234,11 +246,22 @@ class Crawler:
             else:
                 page = extract(resp.text, resp.url)
 
-            # A redirect can land two frontier entries on the same final page.
             final = normalize_url(resp.url)
-            if final != url and final in self._seen_urls:
-                self.report.skipped["redirect_dupe"] += 1
-                continue
+            if final != url:
+                # A redirect moves the goalposts: the URL that passed the gate
+                # is not the URL that answered. Without re-gating, one
+                # `Location:` header carried the crawler onto a host whose
+                # robots.txt disallowed everything, and the page was extracted
+                # and yielded (L90). Re-run the whole gate on where we landed.
+                ok, reason = self._wanted(final, depth)
+                if not ok:
+                    self.report.skipped[f"redirect_{reason}"] += 1
+                    self._seen_urls.add(final)
+                    continue
+                # A redirect can land two frontier entries on the same page.
+                if final in self._seen_urls:
+                    self.report.skipped["redirect_dupe"] += 1
+                    continue
             self._seen_urls.add(final)
 
             if page.word_count < self.config.min_words:

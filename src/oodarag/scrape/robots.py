@@ -16,6 +16,12 @@ Under first-match, `/docs/public/guide` is forbidden and a crawler skips the
 entire documentation tree it was pointed at. Under longest-match, which is what
 the site operator meant and what Google and Bing implement, it is allowed.
 
+Group selection follows section 2.2.1, which is where three defects lived at
+once (L90): the product token is matched *whole* and case-insensitively rather
+than as a substring of the user-agent string, and every group naming it is
+combined rather than the first one winning. All three of the bugs that fix
+replaced pointed the same way - at fetching more than the site allowed.
+
 Status handling follows the RFC:
 
   * 2xx -> parse and obey;
@@ -123,25 +129,45 @@ def parse_robots(text: str) -> tuple[list[Group], list[str]]:
 
 
 def _select_group(groups: list[Group], user_agent: str) -> Group | None:
-    """Pick the group addressing us, else the wildcard group.
+    """Pick the rules addressing us, else the wildcard's, merging duplicates.
 
-    Matching is on the product token: a `User-agent: oodarag` line applies to
-    `oodarag/0.1 (+https://...)`.
+    Matching is on the product token and it is exact, per RFC 9309 section
+    2.2.1: a `User-agent: oodarag` line applies to `oodarag/0.1 (+https://...)`
+    and a `User-agent: rag` line does not. This used to also accept any agent
+    string that was a *substring* of the full user-agent, which failed open -
+    our UA carries a project URL, so `User-agent: claude` or `User-agent:
+    github` selected another crawler's group, and whenever that group was more
+    permissive than `*` we crawled what the site had forbidden us.
+
+    Groups naming the same token are combined, which the same section requires
+    and which the previous first-wins search did not do: a file with two
+    `User-agent: *` blocks had every rule in the second one silently dropped.
+    Both defects pointed the same way, at more fetching than the site allowed.
     """
-    ua = user_agent.lower()
-    ua_token = ua.split("/", 1)[0].strip()
-    best: Group | None = None
-    best_len = -1
-    wildcard: Group | None = None
-    for group in groups:
-        for agent in group.agents:
-            if agent == "*":
-                if wildcard is None:
-                    wildcard = group
-                continue
-            if agent and (agent in ua or agent == ua_token) and len(agent) > best_len:
-                best, best_len = group, len(agent)
-    return best or wildcard
+    ua_token = user_agent.lower().split("/", 1)[0].strip()
+
+    def addresses(group: Group) -> bool:
+        # A file that writes its own version in the line ("User-agent:
+        # oodarag/0.1") still names us; compare token against token.
+        return any(agent.split("/", 1)[0].strip() == ua_token
+                   for agent in group.agents if agent)
+
+    chosen = [g for g in groups if addresses(g)]
+    if not chosen:
+        chosen = [g for g in groups if "*" in g.agents]
+    if not chosen:
+        return None
+    if len(chosen) == 1:
+        return chosen[0]
+
+    merged = Group(agents=list(chosen[0].agents))
+    for group in chosen:
+        merged.rules.extend(group.rules)
+    # Crawl-delay is an extension the RFC does not define, so merging it has no
+    # spec answer. Take the longest any block asked for: the politeness reading.
+    delays = [g.crawl_delay for g in chosen if g.crawl_delay is not None]
+    merged.crawl_delay = max(delays) if delays else None
+    return merged
 
 
 @dataclass(slots=True)

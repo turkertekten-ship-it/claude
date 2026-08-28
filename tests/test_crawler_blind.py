@@ -256,6 +256,63 @@ class CrawlerBlindTest(unittest.TestCase):
         self.assertIn(report.stopped_by, {"frontier_exhausted", "max_pages"})
 
 
+class RedirectIsRegatedTest(unittest.TestCase):
+    """A redirect moves the goalposts, and the gate has to move with it.
+
+    The URL the crawler checked is not the URL that answered. One `Location:`
+    header was enough to carry it onto a host whose robots.txt disallowed
+    everything, and the page came back extracted, yielded and ready to index -
+    robots.txt bypassed by a mechanism robots.txt says nothing about.
+    """
+
+    FORBIDDEN = "User-agent: *\nDisallow: /\n"
+    OPEN = "User-agent: *\nDisallow:\n"
+    BODY = "<html><body>" + " word" * 80 + "</body></html>"
+
+    def _run(self, destination_robots: str):
+        with TestSite({"/robots.txt": Route(body=destination_robots,
+                                            content_type="text/plain"),
+                       "/secret": Route(body=self.BODY)}) as destination:
+            hop = destination.url("/secret")
+            with TestSite({"/robots.txt": Route(body=self.OPEN,
+                                                content_type="text/plain"),
+                           "/": Route(body=f'<html><body><a href="/hop">go</a>'
+                                           f'{" w" * 80}</body></html>'),
+                           "/hop": Route(status=302, headers={"Location": hop},
+                                         body="")}) as origin:
+                config = CrawlConfig(seeds=[origin.url("/")], max_pages=5,
+                                     max_depth=2, rate_per_sec=200, min_words=10)
+                crawler = Crawler(config, client=_client())
+                urls = [result.page.url for result in crawler.crawl()]
+                # What the destination's own server saw. Third-party evidence:
+                # the crawler cannot report its way out of a request that
+                # arrived, or into one that did not.
+                return urls, dict(crawler.report.skipped), destination.fetched_paths()
+
+    def test_a_redirect_onto_a_forbidden_host_is_not_indexed(self):
+        urls, skipped, seen = self._run(self.FORBIDDEN)
+        self.assertFalse(any("/secret" in url for url in urls),
+                         "a redirect carried the crawl past the destination's robots.txt")
+        self.assertEqual(skipped.get("redirect_robots"), 1,
+                         f"the page was dropped for some other reason: {skipped}")
+
+    def test_the_forbidden_page_is_never_requested_at_all(self):
+        """Not indexing it is not enough. Refusing after the fact still means
+        the host that forbade us answered a request for the page it forbade."""
+        _, _, seen = self._run(self.FORBIDDEN)
+        self.assertEqual(seen, {"/robots.txt"},
+                         "the forbidden host was asked for more than its rules")
+
+    def test_the_same_redirect_is_followed_when_the_destination_allows_it(self):
+        """The control: with the destination permitting crawling, the identical
+        redirect is followed. Without this the tests above pass for a crawler
+        that simply never follows redirects."""
+        urls, skipped, seen = self._run(self.OPEN)
+        self.assertTrue(any("/secret" in url for url in urls),
+                        f"the redirect was not followed at all: {skipped}")
+        self.assertIn("/secret", seen)
+
+
 class WebConnectorIncrementalTest(unittest.TestCase):
     """The incremental contract, observed end to end."""
 

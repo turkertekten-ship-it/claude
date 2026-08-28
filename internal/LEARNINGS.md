@@ -4514,3 +4514,111 @@ both corpora, and the held-out set - 19/22 everywhere else - drops to 18/22 at
    discriminating on `coverage_power` entirely, which says the sharpening was
    compensating for something the chunking fix removed.
 
+## L90 - Five crawl-scope defects, every one failing open
+
+`scrape/robots.py` opens by saying scraping politely is not optional, and it
+had never been mutation-tested. Checking it against RFC 9309's own text rather
+than re-reading it found three defects in `_select_group`, every one of them
+letting the crawler fetch what the site had forbidden - and the family rule
+then found a fourth of the same kind in `same_site`, the other function that
+decides where the crawler may go.
+
+**1. Substring user-agent matching.** The check was `agent in ua or agent ==
+ua_token`, and `ua` is the *whole* user-agent string - which for this project
+carries a project URL. So `User-agent: claude` and `User-agent: github` both
+matched us, as did `User-agent: rag`. Probed:
+
+    User-agent: *          ->  Disallow: /
+    User-agent: rag        ->  Allow: /
+    allows("/secret") == True
+
+A group written for a different crawler, more permissive than the wildcard,
+selected instead of the wildcard. RFC 9309 2.2.1 compares product tokens, and
+compares them whole.
+
+**2. Repeated groups for one agent were not combined.** Same section requires
+records with the same user-agent to be merged; the search was first-wins:
+
+    User-agent: *  ->  Disallow: /private/
+    User-agent: *  ->  Disallow: /admin/
+    allows("/admin/x") == True
+
+Every rule in the second block silently dropped. A file split by a `Sitemap:`
+line in the middle is an ordinary shape, not a contrived one.
+
+**3. A version in the `User-agent` line missed us entirely.** `User-agent:
+oodarag/0.1` matched neither disjunct - not a substring of `oodarag/0.9 (+...)`,
+not equal to the token `oodarag` - so a group addressing us by name was skipped
+and the permissive wildcard applied instead.
+
+Fixed by comparing product token against product token, exactly, and merging
+every group that names the winner. Crawl-delay has no spec answer for merging,
+so it takes the longest any block asked for. Three regression tests, each
+verified failing against the pre-fix module and passing after.
+
+**Rules.**
+1. **A loose match in a permission check is not a lenient convenience, it is a
+   privilege escalation.** `agent in ua` reads as generous; what it does is let
+   any string a site writes select our rules.
+2. **Never match a token against a string that carries free text.** Our UA
+   holds a URL because politeness asks for one, which turned every word in that
+   URL into a selector.
+3. **When a module names a spec in its first line, test it against the spec's
+   sections, not against its own docstring.** The docstring documented the
+   longest-match rule (2.2.2) at length and was right about it; all three
+   defects were in 2.2.1, which it never mentioned.
+
+**The sibling, checked because of the family rule, had the same defect.**
+`same_site` in `util/http.py` is the other function deciding where the crawler
+may go, and it was symmetric:
+
+    return ha.endswith("." + hb) or hb.endswith("." + ha)
+
+The second clause lets a seed walk *up*. Seeding `docs.example.com` put
+`example.com` in scope; seeding a page on `user.github.io` put the whole of
+`github.io` in scope, because a public suffix is just another parent to a
+string comparison. The config field granting this is named
+`include_subdomains`, and superdomains are not subdomains - a control that does
+not do what it names.
+
+Its one existing test asserted only the granted direction (`docs.e.com` against
+seed `e.com`) and the unrelated-host case, so the parent direction had never
+been looked at. Made directional, with the reference argument documented as
+such; the existing assertions pass unchanged, which is the tell that the
+symmetric half was never the behaviour anyone wanted.
+
+**A fifth, found by asking where else the scope decision could be evaded.**
+Not in a matching function at all: the gate runs on the URL taken off the
+frontier, and a redirect means the URL that was checked is not the URL that
+answers. Probed with two local servers, the destination's robots.txt
+disallowing everything:
+
+    crawled: ['http://A/', 'http://B/secret']
+    SECRET FETCHED: True
+
+One `Location:` header carried the crawler onto a host that forbade it, and the
+page came back extracted, yielded and ready to index - robots.txt bypassed by a
+mechanism robots.txt says nothing about.
+
+Fixed in two places, because they are two different failures. The crawler
+re-runs the whole gate on the final URL, which keeps the page out of the
+corpus. That is not enough on its own: refusing after the fact still means the
+host that forbade us answered a request for the page it forbade. So the gate
+also travels *with* the request - an optional `redirect_gate` on `HttpClient`,
+consulted by the redirect handler before the hop is followed and copied onto
+each new request so a chain stays guarded. The destination's own server is the
+witness: it now sees `{'/robots.txt'}` and nothing else.
+
+That makes five defects across two functions and one control-flow path, and
+**every one of them widened what the crawler was allowed to fetch.** Nothing
+ever narrowed it. When a module's errors are all one-directional, the direction
+is the bug - the author was optimising for not missing pages, in code whose job
+is to miss the pages it was told to miss.
+
+**Rules, continued.**
+5. **A permission check on a URL is void the moment the URL can change under
+   it.** Redirects, canonical rewrites and normalisation all move the subject
+   of the check after the check. Re-gate on what actually answered.
+6. **"Not indexed" and "not requested" are different guarantees**, and the one
+   a politeness rule asks for is the second. Test it with the other server's
+   log, which is the one thing the crawler cannot report its way around.
