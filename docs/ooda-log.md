@@ -644,7 +644,11 @@ the reference, and every one produced code that ran cleanly, exited 0, logged
 happily, and did nothing. A hook that runs is not a hook that works — and a
 field that parses is not a field that arrives.
 
-**What is left.** Three items, none of them silent: Cowork, which is not in this
-environment; and the branch divergence plus the pinned marketplace ref, which
-are the owner's decisions and not this session's to make. Each carries its
-falsifier in `docs/open-items.md`.
+**What is left.** Four items, none of them silent: Cowork, which is not present
+in this environment; the two repositories' branch divergence; the marketplace
+`ref` pinned to this branch; and unknown **U-5**, what belongs in which
+repository. The last three are the owner's decisions and not this session's to
+make. Each carries its falsifier in `docs/open-items.md`.
+
+*(Written first as "three" — a miscount of my own register, corrected here
+rather than quietly. Eight closed, four open, twelve total.)*
