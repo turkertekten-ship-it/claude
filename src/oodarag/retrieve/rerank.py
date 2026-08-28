@@ -167,6 +167,51 @@ class HeuristicReranker(Reranker):
     #: Without it, rank 2.0 would be worth nothing and rank 2.5 would cost four
     #: cases.
     gate_coverage_power: float | None = 1.0
+    #: How the abstention gate's relevance splits between coverage and the
+    #: phrase run:  `(1 - w) * gate_coverage + w * phrase`, times answerability.
+    #: This was a bare 0.6/0.4 in the expression and had never been swept, which
+    #: made it the one free parameter inside the feature L77 identified as the
+    #: gate's bottleneck.
+    #:
+    #: Swept by AUC over 61 answerable and 15 abstainable goldens
+    #: (`scripts/gate_split_sweep.py`), from a single retrieval pass, since
+    #: relevance feeds only the gate and never the ordering:
+    #:
+    #:   coverage weight  0.0    0.2    0.4    0.5    0.6*   0.7    0.8    0.9    1.0
+    #:   AUC              .737   .835   .839   .842   .845   .846   .851   .851   .851
+    #:
+    #: Monotone in coverage and flat from 0.8 up - not the non-monotone wobble
+    #: that means noise (L72). The prediction going in was that the optimum
+    #: would be interior, because the 0.6/0.4 mix beats either component alone;
+    #: it is at the endpoint instead.
+    #:
+    #: **And AUC was wrong again.** Each weight swept against its own floor,
+    #: since dropping the phrase term shifts both distributions upward
+    #: (`scripts/gate_phrase_ab.py`, extended to floor 0.60 because the
+    #: phrase-free curve was still rising at the end of the first range):
+    #:
+    #:   weight 0.4  floor  0.15   0.19*  0.22   0.25   0.28   0.32
+    #:   external           47/54  49/54  48/54  47/54  45/54  44/54
+    #:   held-out           19/22  19/22  19/22  18/22  17/22  16/22
+    #:
+    #:   weight 0.0  floor  0.15   0.22   0.28   0.32   0.36   0.40   0.50
+    #:   external           46/54  46/54  46/54  48/54  46/54  45/54  41/54
+    #:   held-out           19/22  19/22  19/22  19/22  19/22  18/22  16/22
+    #:
+    #: Best phrase-free is 48/54 at floor 0.32 against the shipped 49/54 at
+    #: 0.19, tying on primary and held-out. The +0.006 of AUC bought a lost
+    #: case, which is the third time AUC and the shipping metric have disagreed
+    #: in this gate and the second running where AUC pointed at a change the
+    #: pass rate rejected (L22, L78, L79).
+    #:
+    #: The mechanism is visible in the failure split rather than the totals. At
+    #: the shipped floor the phrase term holds over-answers to 3 where dropping
+    #: it gives 6; phrase-free needs floor 0.32 to get back to 3, and by then it
+    #: has traded an over-refusal for it. The phrase run is not adding
+    #: separation - AUC is right about that - it is letting the gate catch the
+    #: same negatives from a *lower* floor, where fewer positives are lost.
+    #: A signal can be worth keeping for where it puts the operating point.
+    gate_phrase_weight: float = 0.4
     #: Swept on the current corpus and defaults, external / primary:
     #:
     #:   coverage_weight   0.20   0.35   0.45   0.60   0.80
@@ -492,10 +537,20 @@ class HeuristicReranker(Reranker):
             # trusted, recent source outscores the abstention floor and the
             # system answers confidently from nothing. Ordering uses the total;
             # the abstention gate uses `rerank_relevance` alone.
-            relevance = (0.6 * gate_coverage + 0.4 * phrase_score) * answerability
+            relevance = ((1.0 - self.gate_phrase_weight) * gate_coverage
+                         + self.gate_phrase_weight * phrase_score) * answerability
 
             result.components.update({
                 "rerank_relevance": relevance,
+                # The gate's own coverage, which is *not* `rerank_coverage`:
+                # ranking uses `coverage_power` 2.0 and the gate uses
+                # `gate_coverage_power` 1.0, so the two differ (0.5505 against
+                # 0.5998 on one measured chunk). Recording only the ranking one
+                # left the abstention decision the single quantity in the
+                # pipeline that could not be inspected after the fact, and made
+                # the coverage/phrase split below unsweepable without re-running
+                # retrieval for every candidate value.
+                "rerank_gate_coverage": gate_coverage,
                 "rerank_answerability": answerability,
                 "rerank_coverage": coverage,
                 "rerank_phrase": phrase_score,

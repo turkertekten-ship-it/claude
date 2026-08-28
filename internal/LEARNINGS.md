@@ -3950,3 +3950,62 @@ result means a different corpus could reasonably choose it.
 3. **When a candidate wins the proxy, that is the beginning of the
    measurement.** The 0.018 bought a full end-to-end sweep, which is the only
    thing that decided anything.
+
+---
+
+## L79 - A signal can be worth keeping without adding separation
+
+The gate's relevance is `(0.6 * gate_coverage + 0.4 * phrase) * answerability`.
+That split was a bare constant in the expression - not a config field, never
+swept - and it is the only free parameter inside the feature L77 identified as
+the abstention bottleneck.
+
+**Sweeping it needed one thing exposed first.** Relevance feeds only the gate,
+never the ordering, so every split retrieves the same set and each candidate is
+arithmetic on recorded components. Except `gate_coverage` was not recorded:
+`rerank_coverage` is the *ranking* coverage at `coverage_power` 2.0, and the
+gate uses `gate_coverage_power` 1.0 (0.5504 against 0.5998 on one chunk). The
+abstention decision was the one quantity in the pipeline that could not be
+inspected after the fact. Adding `rerank_gate_coverage` made the whole sweep a
+single retrieval pass, and the reconstruction was checked against the shipped
+number to nine places before any of it was believed.
+
+    coverage weight  0.0    0.2    0.4    0.5    0.6*   0.7    0.8    0.9    1.0
+    AUC              .737   .835   .839   .842   .845   .846   .851   .851   .851
+
+I predicted an interior optimum, since the 0.6/0.4 mix beats either component
+alone. Wrong: monotone in coverage, flat from 0.8, best at the endpoint.
+
+**Then end to end it lost anyway**, each weight against its own floor:
+
+    weight 0.4  best 49/54 at floor 0.19  (primary 18/20, held-out 19/22)
+    weight 0.0  best 48/54 at floor 0.32  (primary 18/20, held-out 19/22)
+
+I extended the phrase-free range to 0.60 before believing that, because the
+first sweep ended at 0.32 with the curve still rising - the truncation error of
+L72. It does peak at 0.32 and falls monotonically after: 48, 46, 45, 44, 41, 35.
+
+**The mechanism is in the failure split, not the totals.** At the shipped floor
+the phrase term holds over-answers to 3 where dropping it gives 6. Phrase-free
+needs floor 0.32 to get back to 3, and by then it has traded an over-refusal for
+it. AUC is right that the phrase run adds no separation; what it adds is a
+*lower usable operating point*, where fewer positives are lost to catch the same
+negatives. Those are different properties and only one of them is what AUC
+measures.
+
+**Third disagreement, second in a row.** L22: +0.010 AUC worth three cases.
+L78: +0.018 AUC costing three. Now +0.006 costing one. The rule from L78 - that
+AUC predicts end-to-end behaviour in neither direction - is now three samples
+deep and has stopped being a surprise.
+
+**Rules.**
+1. **"Adds no separation" and "is not worth keeping" are different claims.**
+   A term that shifts where the threshold can sit earns its place without
+   improving any ranking statistic.
+2. **A quantity a decision reads must be recorded**, even when a similarly named
+   one already is. Two coverages differing by a power made the gate's own input
+   unobservable and its only parameter unsweepable.
+3. **Extend a sweep whose curve is still moving at the edge**, before comparing
+   its best cell with anything. This one happened to peak at the boundary; the
+   check cost four minutes and the alternative was a comparison against an
+   unknown.
