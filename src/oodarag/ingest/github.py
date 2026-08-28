@@ -32,7 +32,8 @@ from typing import Any
 
 from oodarag.ingest.base import Connector
 from oodarag.models import RawDocument
-from oodarag.util.http import HttpClient, HttpError, TransportError
+from oodarag.util.http import (HttpClient, HttpError, TransportError,
+                               _same_origin, safe_url)
 from oodarag.util.logging import get_logger
 from oodarag.util.text import redact_secrets
 
@@ -126,7 +127,19 @@ class GitHubClient:
                 yielded += 1
                 if yielded >= max_items:
                     return
-            url = _next_link(resp.headers.get("link", ""))
+            # The Link header is a server-supplied URL that this client then
+            # fetches WITH the bearer token attached. _SafeRedirectHandler
+            # strips credentials across origins on a redirect; following a
+            # Link header walks around that protection, because it is a fresh
+            # request rather than a redirect. TLS makes a hostile
+            # api.github.com unlikely rather than impossible, and the cost of
+            # pinning the origin is one comparison.
+            nxt = _next_link(resp.headers.get("link", ""))
+            if nxt and not _same_origin(url, nxt):
+                log.warn("refusing cross-origin pagination",
+                         from_url=safe_url(url), to_url=safe_url(nxt))
+                return
+            url = nxt
 
     def rate_limit(self) -> dict[str, Any]:
         try:

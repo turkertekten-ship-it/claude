@@ -327,8 +327,36 @@ class ClaudeCLIBackend(Backend):
         argv += ["--no-session-persistence"]
         return argv
 
+    #: Environment variables withheld from an AGENT-mode child. Agent mode runs
+    #: with --permission-mode bypassPermissions, because a permission prompt
+    #: would hang a headless run -- so the model can execute whatever it likes
+    #: inside the working directory. Handing that process the operator's tokens
+    #: as well means a suite case that successfully induces a prompt injection
+    #: gets host execution WITH credentials, and this repository's whole subject
+    #: is prompts that try to make a model do the wrong thing.
+    #:
+    #: No suite sets `mode: agent` today, so nothing is currently exposed. That
+    #: is the reason to do this now rather than after the first one lands.
+    #: Text mode is unaffected: it runs with --tools "" and no permission bypass.
+    AGENT_MODE_WITHHELD = (
+        "GITHUB_TOKEN", "GH_TOKEN", "GITHUB_PAT",
+        "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN",
+        "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN",
+        "OPENAI_API_KEY", "SLACK_TOKEN", "NPM_TOKEN", "PYPI_TOKEN",
+        "SSH_AUTH_SOCK", "GIT_ASKPASS", "GIT_TOKEN",
+    )
+
     def _env(self, request: Request) -> dict[str, str]:
         env = {**os.environ, "CLAUDE_CODE_ENTRYPOINT": "workbench"}
+        if request.mode == "agent":
+            for name in self.AGENT_MODE_WITHHELD:
+                env.pop(name, None)
+            # Anything that merely LOOKS like a credential goes too. A withheld
+            # list only covers the names someone thought of.
+            for name in [k for k in env
+                         if any(m in k.upper() for m in ("TOKEN", "SECRET", "PASSWORD",
+                                                         "API_KEY", "APIKEY", "CREDENTIAL"))]:
+                env.pop(name, None)
         if request.max_output_tokens is not None:
             env["CLAUDE_CODE_MAX_OUTPUT_TOKENS"] = str(request.max_output_tokens)
         return env

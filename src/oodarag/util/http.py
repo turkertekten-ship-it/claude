@@ -206,19 +206,26 @@ class HttpClient:
                     raise err
                 wait = self.retry.delay_for(attempt, _retry_after(resp_headers))
                 self.stats["retries"] += 1
-                log.warn("retrying", url=url, status=e.code, attempt=attempt, wait=round(wait, 2))
+                log.warn("retrying", url=safe_url(url), status=e.code,
+                         attempt=attempt, wait=round(wait, 2))
                 time.sleep(wait)
             except (urllib.error.URLError, TimeoutError, ssl.SSLError, OSError) as e:
-                last_exc = TransportError(f"{type(e).__name__}: {e} ({url})")
+                # safe_url, not url. HttpError already redacts; these three
+                # paths did not, so a credential in a query string would have
+                # reached a log line and an exception message. No caller here
+                # puts one there today -- github.py authenticates by header --
+                # but "no caller does that yet" is not a policy, and the module
+                # states one.
+                last_exc = TransportError(f"{type(e).__name__}: {e} ({safe_url(url)})")
                 if attempt == self.retry.attempts:
                     self.stats["errors"] += 1
                     raise last_exc from e
                 wait = self.retry.delay_for(attempt)
                 self.stats["retries"] += 1
-                log.warn("transport retry", url=url, err=str(e)[:120], attempt=attempt,
-                         wait=round(wait, 2))
+                log.warn("transport retry", url=safe_url(url), err=str(e)[:120],
+                         attempt=attempt, wait=round(wait, 2))
                 time.sleep(wait)
-        raise last_exc or TransportError(f"request failed: {url}")
+        raise last_exc or TransportError(f"request failed: {safe_url(url)}")
 
     def get(self, url: str, **kw: Any) -> Response:
         return self.request("GET", url, **kw)

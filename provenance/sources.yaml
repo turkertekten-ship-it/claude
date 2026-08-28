@@ -1472,3 +1472,34 @@ sources:
       row is wrong, not the evidence. That the first run failed twice, and that
       one failure was a real defect nobody had tested for, is the argument for
       writing them as executable rather than as prose.
+
+  - id: SECURITY-REVIEW-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T23:45Z"
+    method: >-
+      the security-review skill over the branch diff, reading the fifteen
+      security-relevant source files directly; each of its three non-escalated
+      observations then re-verified by hand at the terminal before any change.
+    evidence: >-
+      No HIGH or MEDIUM findings. The reviewer executed rather than inferred
+      the load-bearing checks: a cross-origin redirect yields
+      {'User-agent': 'ua'} with Authorization, Cookie and Proxy-authorization
+      removed; a 400 MiB gzip bomb compressing to 408 KB is refused at
+      20384850 bytes; the `command` grader substitutes only tempfile PATHS, so
+      model text never reaches the shell; yaml.safe_load is used at every one
+      of the six load sites and there is no pickle, eval or exec in the new
+      code; ingest binds every SQL parameter including the FTS MATCH; the MCP
+      probe server speaks JSON-RPC over stdio with no listener.
+    note: >-
+      Three defense-in-depth items were raised without escalation and all three
+      were fixed. Two log lines and a TransportError embedded the unredacted
+      URL while HttpError beside them used safe_url. GitHubClient.paginate
+      followed the Link header with the bearer token attached and no origin
+      check, walking around the redirect protection because a Link fetch is a
+      fresh request rather than a redirect. And agent mode ran with
+      --permission-mode bypassPermissions while inheriting the full parent
+      environment, so a suite case that induced a prompt injection would have
+      got host execution WITH the operator's tokens. Nothing was exposed by
+      any of the three: no caller puts a credential in a query string, TLS
+      stands in front of api.github.com, and no suite sets mode:agent. Fixing
+      the third before the first agent-mode suite exists is the point of it.
