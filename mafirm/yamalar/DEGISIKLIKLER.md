@@ -71,6 +71,9 @@ eski yola karşı bırakıldı: kusurun kaydı olarak dururlar.
 | 32 | **`sinama/epilog.py` (yeni) ve `hepsi.sh`** | Epilogun dört kontrolü gömülü heredoc'tu ve mutasyonla sınanamıyordu (her biri için tam koşum, ~60 sn). Saf fonksiyona çevrildi; katman korundu, sınama 32 ms'ye indi. Gömülü kodda duran çıplak .lower() de düzeltildi — AE `.sh` taramıyordu. |
 | 33 | **`sinama/ks_m_izlenebilirlik.py`** | Atıf ölçütü üç kez fazla dar/fazla genişti: önek listesi "ABCE" diye sabitlenmişti; sonra 'anmak tanımlamak sayıldı' (uydurma kimlik D'nin fixture'ında, AU'nun beyanında ve M'nin kendi yorumunda geçiyordu); son olarak J'nin çalışma anında kurduğu kimlikler görünmüyordu. Ölçüt: her takım yalnızca KENDİ önekini tanımlar, taban ekleri tanınır. |
 | 34 | **`sinama/ks_ae_desen.py`** | AE-03 belge dizgelerini atlamıyordu ve epilog.py'nin kusuru ANLATAN docstring'ini kusur sandı. Belge dizgeleri ölçüm dışına alındı. |
+| 35 | **`sinama/ks_af_aparat.py`** | AF-04 `"belirti" in _hepsi` diyordu; mantık epilog.py'ye taşındıktan sonra dizge yalnızca hepsi.sh'in YORUMUNDA kalmıştı ve ölçüt geçmeye devam ediyordu. Yorumlar ve belge dizgeleri ölçüm dışına alındı. |
+| 36 | **`sinama/ks_ap_katalog.py`** | AP-02 URL'den sonraki 700 karaktere bakıyordu; `archived` curl komutundan silinse bile açıklama düzyazısında durduğu için geçiyordu. Ölçüt komutun kendisine bağlandı. |
+| 37 | **`sinama/ks_k_yonlendirme.py`** | K-12'nin 120 karakterlik penceresi MEŞRUDUR (atıf gerçekten bir yakınlık olgusudur) ama gerekçesi yazılı değildi; AV-02 MUAF beyanı eklendi. |
 - `hafiza/cikar-catismasi.md` — §2 `hafiza/` klasörünü kuruyordu ama bu dosyayı
   hiç oluşturmuyordu; oysa CLAUDE.md §8 ve §8 el kitabı Aşama 0 onu bir kapı
   sayıyor. Boş bir listenin "temiz" DEĞİL "kontrol yapılamadı" demek olduğu

@@ -90,8 +90,25 @@ BEYAN = json.load(io.open(os.path.join(S, "beklenen.json"),
 # taşındı (gömülü heredoc oldukları sürece mutasyonla sınanamıyorlardı).
 # Yapısal sağlama kodu TAKİP EDER: hepsi.sh onu çağırmalı, epilog.py de
 # kontrolü taşımalı. İkisinden biri kopsa kapsama sessizce kaybolurdu.
-_hepsi = oku(os.path.join(S, "hepsi.sh")) + oku(os.path.join(S, "epilog.py"))
-_cagri = "epilog.py" in oku(os.path.join(S, "hepsi.sh"))
+# [AV-01 · kırkıncı tur] YORUMLAR AYIKLANIR. Ölçüldü: epilog.py'den belirti
+# mantığının TAMAMI silindiğinde AF-04 hâlâ GEÇİYORDU — çünkü "belirti"
+# dizgesi hepsi.sh'in bir YORUMUNDA duruyordu; üstelik o yorumu otuz
+# dokuzuncu turda ayrıştırmayı ANLATMAK için ben yazmıştım. Kapsamayı
+# koruyan şey kod değil, kodu anlatan cümleydi.
+def _yorumsuz_kod(metin, kabuk=False):
+    if kabuk:
+        return "\n".join(r for r in metin.splitlines()
+                          if not r.lstrip().startswith("#"))
+    import re as _re
+    m = _re.sub(r'("""|\'\'\')(?:.|\n)*?\1', " ", metin)
+    return "\n".join(r for r in m.splitlines()
+                      if not r.lstrip().startswith("#"))
+
+
+_ham_hepsi = oku(os.path.join(S, "hepsi.sh"))
+_hepsi = (_yorumsuz_kod(_ham_hepsi, kabuk=True)
+          + _yorumsuz_kod(oku(os.path.join(S, "epilog.py"))))
+_cagri = "epilog.py" in _yorumsuz_kod(_ham_hepsi, kabuk=True)
 _var = (_cagri and "beklenen" in _hepsi and "_gunluk" in _hepsi
         and re.search(r"BEKLENEN\\s\+%s", _hepsi) is not None)
 vaka("AF-03", "beyan-koşum sağlaması tam günlüğü bilen yerde duruyor",

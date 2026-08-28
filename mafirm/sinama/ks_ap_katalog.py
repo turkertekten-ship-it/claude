@@ -118,8 +118,16 @@ vaka("AP-01", "§13 araç kataloğu kurulumda yerel bir dosya olarak duruyor",
 # --- AP-02 · tazeleme becerisi `archived` alanını okuyor mu -----------
 # §13'ün "Karar" sütunu bakım durumuna dayanıyor; arşivlenmişlik bunun
 # YETKİLİ hâlidir ve API onu döndürür. pushed_at bir vekildir, olgu değil.
-_alanlar = re.search(r"api\.github\.com/repos.{0,700}", ARASTIR, re.S)
-_metin = _alanlar.group(0) if _alanlar else ""
+# [AV-02 · kırkıncı tur] Ölçüt URL'den sonraki 700 KARAKTERE bakıyordu.
+# Otuz dördüncü turda o pencereye bir AÇIKLAMA paragrafı yazdım ("archived
+# alanı ayrıca okunur çünkü pushed_at bir vekildir…"). Ölçüldü: `archived`
+# curl KOMUTUNDAN silindiğinde AP-02 hâlâ GEÇİYOR — çünkü sözcük açıklamada
+# duruyor. Yani beceri alanı okumayı bıraksa bile ölçüt bunu görmezdi;
+# kapsamayı koruyan şey kod değil, kodu anlatan cümle olurdu. AQ-01'in
+# dersi, ikinci yerde. Ölçüt KOMUTUN KENDİSİNE bağlandı.
+_ham = oku(".claude", "skills", "once-arastir", "SKILL.md")
+_blok = re.search(r'curl -s(?:.|\n)*?print\((?:.|\n)*?"\n', _ham)
+_metin = _blok.group(0) if _blok else ""
 _arsiv = "archived" in _metin
 vaka("AP-02", "tazeleme becerisi deponun ARŞİVLENMİŞ olduğunu okuyor",
      _arsiv,

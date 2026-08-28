@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** kırk dört çalıştırılabilir takım — **349
+**Yamalı hâlde sistem çalışıyor:** kırk beş çalıştırılabilir takım — **354
 vaka, 27 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15 → **27/27** (mutasyon kümesi otuz
 sekizinci turda on beşten yirmi yediye çıkarıldı: 26 kontrolün dokuzu hiç
@@ -2290,6 +2290,54 @@ Ve AE'nin kendisi de aynı sınıfa düştü: belge dizgelerini atlamadığı i�
 açıklama cümlesi, belge dizgesi, fixture, kendi yorumum — beş ayrı kılıkta
 tek bir ders: **bir şeyden söz etmek, o şey olmak değildir.**
 
+### Sınıfı arayan araç, sınıfı dört kez işledi
+
+Son yedi turda bulunan ölçüm kusurlarının çoğu tek bir sınıfa indi ve sınıf
+beş kılıkta göründü: yamayı açıklayan **HTML yorumu** prosedürün yerine
+geçti (AN-05); yamanın **açıklama cümlesi** arama talimatının yerine geçti
+(AM-01); kusuru anlatan **belge dizgesi** kusurun kendisi sanıldı (AE-03);
+uydurma bir kimlik, onu anan **fixture ve yorum** sayesinde "tanımlı" oldu
+(M-03); 300 karakterlik bir **pencere** komşu cümleyi kanıt saydı (AQ-01).
+
+AE Türkçe desen sınıfını tarıyor; bu sınıf için hiçbir tarama yoktu. Bu tur
+onu kurdu — ve **tarama yazılırken sınıf dört kez daha göründü, her seferinde
+taramanın kendisinde:**
+
+| tarama sürümü | hata | ne oldu |
+|---|---|---|
+| dizge + dosya aynı kaynakta | **yanlış atıf** | altı adayın **beşi** taramanın kendi hatasıydı: `"mutasyon" in a` bir **dosya adı**, `"SELFTEST OK" in r.stdout` bir **alt süreç çıktısı**, `"json.dumps"` **başka** bir dosya |
+| "yalnız yorumlu dosyalarda" | **fazla dar** | AP-02'nin gerçek tuzağını kaçırdı: oradaki kirletici bir yorum değil, becerinin **açıklama düzyazısıydı** |
+| tek adımlı veri akışı | **kör** | AF `_hepsi = _ham + …` yazıyor; ölçüt eşleşmeyi kuramadı |
+| yayılma, ayıklamadan habersiz | **yanlış pozitif** | ayıklamayı **zaten yapmış** olan AF'yi suçladı |
+
+Yani sınıfı avlamak için yazılan araç, sınıfın kendisine dört kez düştü.
+Bu tesadüf değil: **"aynı yerde geçiyor" ile "o şey oluyor" arasındaki fark,
+otomatikleştirmesi en zor ayrımdır** — ve tam da bu yüzden elle yazılan her
+ölçüt ona düşmeye eğilimlidir.
+
+### İki gerçek tuzak bulundu; ikisi de benimdi
+
+**AF-04.** `"belirti" in hepsi.sh`. Belirti mantığının **tamamı**
+`epilog.py`'den silindiğinde ölçüt hâlâ geçiyordu — dizge hepsi.sh'in bir
+yorumunda duruyordu, ve o yorumu **otuz dokuzuncu turda ayrıştırmayı
+anlatmak için ben yazmıştım.** Kapsamayı koruyan şey kod değil, kodu anlatan
+cümleydi.
+
+**AP-02.** `archived` alanı curl komutundan silindiğinde ölçüt hâlâ geçiyordu
+— sözcük, otuz dördüncü turda yazdığım **açıklama paragrafında** duruyordu,
+700 karakterlik pencerenin içinde. Beceri alanı okumayı bıraksa bile ölçüt
+bunu görmezdi.
+
+### Ve bir pencere her zaman yanlış değildir
+
+AV-02'nin ilk hâli 100+ karakterlik **her** pencereyi işaretledi ve K-12'yi
+yakaladı. Ama K-12 koltuk dosyalarında bir tırnaklı sözün yakınında **atıf**
+arıyor — ve atıf gerçekten bir yakınlık olgusudur; orada pencere bir vekil
+değil, **ölçülen olgunun kendisidir.** Ayrım otomatikleştirilemez, bu yüzden
+ölçüt **beyan ister**: geniş pencere kullanan her satır gerekçesini yazar
+(P'nin MUAF deseni). K-12 gerekçesini yazdı; beyansız yeni bir pencere
+kırmızı verir.
+
 ---
 
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
@@ -2414,6 +2462,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | AS · kapıların öz-sınama kapsaması | *yedinci kapının öz-sınama vakası yoktu* | **temiz** — dört vaka eklendi, kapsama sağlamaya bağlandı |
 | AT · denetimin mutasyon kapsaması | *26 kontrolün 9'u hiç sınanmamıştı* | **temiz** — 12 mutasyon eklendi, hedef beyanı zorunlu |
 | AU · epilog kontrollerinin sınaması | *dört epilog kontrolü hiç sınanmamıştı* | **temiz** — saf fonksiyona çevrildi, 7 vaka 32 ms |
+| AV · anma/tanım sınıfı taraması | *iki ölçüt yorumla/düzyazıyla tatmin oluyordu* | **temiz** — ikisi de koda bağlandı, sınıf taranıyor |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -2472,7 +2521,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 ### Nasıl yeniden koşulur
 ```
 ./sinama/hepsi.sh                 # 34 çalıştırılabilir takım:
-                                  #   349 vaka + 27 mutasyon (D)
+                                  #   354 vaka + 27 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -2557,9 +2606,10 @@ Dokuz takım, 96 vaka:
 | AS | **Kapıların öz-sınama kapsaması** — kitabın §14 kusurunu ben de işledim mi | §12, §14, §16 |
 | AT | **Denetimin mutasyon kapsaması** — 26 kontrolün kaçı sınanıyor | §16, §12 |
 | AU | **Epilog kontrollerinin sınaması** — koşumu bilen katman nasıl sınanır | §16, §12 |
+| AV | **Anma/tanım sınıfı taraması** — ölçüt kodu mu, kodu anlatan cümleyi mi ölçüyor | §12, §16 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**349 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**354 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)

@@ -473,6 +473,30 @@ kalır). **Yama neyin çatışma SAYILDIĞINA karar vermez** — o bir meslek
 kuralları meselesidir ve §9 uyarınca insana aittir; yalnızca mekanik
 kontrolün iki yönü de kapsaması sağlandı.
 
+## §12 · Kapılar — bir kuralı ANLATAN metin, kuralın kendisi sayılıyor
+
+**[B] Kitabın kontrolleri metin arar; metnin hangi KATMANDA olduğunu
+sormaz.**
+§12'nin kapıları, §16'nın denetimi ve §14'ün öz-sınaması hep aynı biçimde
+çalışır: bir dosyada bir dizge var mı? Ama bir dosyada bir dizge, üç ayrı
+statüde bulunabilir — **kural olarak**, **kuralı anlatan yorum olarak**, ya
+da **kuralın örneği olarak**. Kitap bu ayrımı hiçbir yerde yapmaz, ve
+yapmadığı için bir kontrolü kaldırıp yerine onu ANLATAN bir cümle bırakmak
+denetimi yeşil tutar.
+
+Bu maddenin kanıtı yine bu incelemedir. İki ölçütüm tam olarak buna düştü:
+`"belirti" in hepsi.sh` — mantık başka dosyaya taşındıktan sonra bile
+**yorumda** durduğu için geçiyordu (üstelik o yorumu taşımayı anlatmak için
+ben yazmıştım); `archived` alanı curl komutundan silindiğinde ölçüt hâlâ
+geçiyordu çünkü sözcük **açıklama düzyazısında** duruyordu. İkisinde de
+kapsamayı koruyan şey kod değil, **kodu anlatan cümleydi.** *(AV-01, AV-02)*
+
+→CEVAP: YOK — cevabın "yamalı hâlde sistem çalışıyor" cümlesi kapsıyor: iki
+ölçüt de koda bağlandı (yorumlar ve belge dizgeleri ayıklanır; alan aranması
+komutun kendisinde yapılır) ve AV takımı sınıfı kalıcı olarak tarar —
+hafif bir veri akışıyla, "aynı kaynakta geçiyor" ile "o dosyaya karşı
+sınanıyor"u ayırt ederek.
+
 ## §12 · Kapılar — öz-sınamanın kapsama değişmezi yok
 
 **[B] §12'nin öz-sınaması hiçbir yerde "her kapının bir vakası olmalı"

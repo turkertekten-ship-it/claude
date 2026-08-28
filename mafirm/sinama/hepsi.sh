@@ -114,6 +114,8 @@ python3 "$S/ks_at_denetim_kapsama.py"; topla "AT · denetimin mutasyon kapsamas�
 echo
 python3 "$S/ks_au_epilog.py"; topla "AU · epilog kontrollerinin sınaması" $?
 echo
+python3 "$S/ks_av_anma.py"; topla "AV · anma/tanım sınıfı taraması" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

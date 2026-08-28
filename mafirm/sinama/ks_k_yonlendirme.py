@@ -193,6 +193,10 @@ for f, s_ in koltuklar.items():
             sonrasi = s_[m.end():m.end() + 40]
             if ESER.match(sonrasi):          # "<X>" kitabında / adlı ...
                 continue
+            # AV-02 MUAF: burada YAKINLIĞIN KENDİSİ kanıttır. Bir sözün
+            # kime atfedildiği, atıf işaretinin sözün yanında durmasıyla
+            # belirlenir; pencere bir vekil değil, ölçülen olgunun ta
+            # kendisidir. Koltuk dosyaları düzyazıdır, yorum katmanı yok.
             if ATIF.search(s_[max(0, m.start() - 120):m.end() + 120]):
                 alinti.append((f, m.group(1)[:46]))
 vaka("K-12", "hiçbir koltukta kişiye ATFEDİLEN uydurma söz yok", not alinti,
