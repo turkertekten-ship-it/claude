@@ -23,14 +23,17 @@ from oodarag.config import Config, SourceConfig
 
 def _build(config: Config):
     from oodarag.embedding import get_embedder
-    from oodarag.ingest.base import JsonStateStore
     from oodarag.pipeline import IndexPipeline
     from oodarag.store.sqlite_store import SqliteStore
 
     store = SqliteStore(config.index_path)
     embedder = get_embedder(config.embedder, **config.embedder_options)
-    state = JsonStateStore(config.state_path)
-    return store, IndexPipeline(store, embedder, state=state)
+    # Cursors live in the index, not a file beside it. A separate state file can
+    # be deleted, restored or copied independently of the data it describes, and
+    # when the two diverge every document it lists is reported "unchanged" and
+    # never re-added - a silently partial index. IndexPipeline defaults to the
+    # SQLite-backed store; a JsonStateStore is still available to library users.
+    return store, IndexPipeline(store, embedder)
 
 
 def _generator(config: Config, pipeline):

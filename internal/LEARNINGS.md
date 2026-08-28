@@ -482,3 +482,59 @@ the numbers.
 denominator errors, both were honesty fixes, and the fact that they moved in
 opposite directions is the point: an unexamined metric is not biased in a
 convenient direction, it is simply unknown.
+
+---
+
+## L21 - A cursor that outlives its index produces a silently partial corpus
+
+**Evidence.** Deleting an index and re-running the ingest produced **19
+documents out of 33**, reporting zero errors. Incremental ingest decides
+"unchanged, skip" from the cursor alone; the cursor lived in a JSON file beside
+the index, survived the deletion, and reported every document it knew about as
+unchanged. Nothing re-added them.
+
+The only visible symptom was the eval score halving - recall@8 fell from 0.93 to
+0.41 - which reads as a retrieval regression, not a missing corpus.
+
+**Rule.** The cursor is not the authority on what the index contains; the index
+is. Two changes: cursors now live inside the index by default, so they cannot be
+deleted separately from the data they describe (L15 established this for the
+library and the CLI was still using a file); and before each run the pipeline
+reconciles - anything the cursor claims that the store does not have is dropped
+from the cursor and re-fetched.
+
+**Generalisation.** Any cache that records "I have already handled X" must be
+invalidated by the disappearance of X, not only by a change to it. Optimisations
+that skip work need a way to notice the work has been undone.
+
+---
+
+## L22 - A corpus that documents its own evaluation eventually cannot evaluate
+
+**Evidence.** L10 recorded contamination as something to detect and quarantine.
+It does not stay bounded. All three current failures on the primary golden set
+are now self-reference artefacts:
+
+- the top result for "What stops a crawl from running forever?" is
+  `retrieve/expansion.py`, whose docstring quotes that exact question as the
+  example it was written to fix;
+- the top results for "How does the system decide to abstain?" are the ADR, the
+  learnings file and the regression tests written *about* the abstention logic;
+- "What is the boiling point of mercury?" is answered, because that phrase now
+  appears in the learnings file, two test files, a module docstring and the
+  golden set itself.
+
+The retriever is right every time - those documents genuinely are the best
+lexical and semantic matches for those words. They are simply not the answer.
+Quarantine now removes 26 documents across 4 questions and rises with every
+commit.
+
+**Rule.** Writing things down makes a self-indexing corpus a worse evaluation
+target, and writing less down is not the answer. Gate on a corpus that cannot be
+affected by what you write. The primary set is kept as a smoke test and as a
+live demonstration of contamination - it is genuinely useful for that - and the
+external set is the regression gate.
+
+**The general shape:** when the measurement and the thing measured share a
+substrate, the measurement decays. Budget for an independent one early, while
+the corpus is still small enough that building it is cheap.

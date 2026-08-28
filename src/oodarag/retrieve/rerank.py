@@ -50,6 +50,28 @@ class HeuristicReranker(Reranker):
     #: factor is worth +2 golden cases; on a toy corpus it rejected a question
     #: the corpus plainly answered.
     min_vocabulary_for_answerability: int = 2000
+    #: Exponent applied to IDF when weighting coverage. 1.0 is plain IDF
+    #: weighting; higher values concentrate weight on the query's rare terms, so
+    #: a question whose only distinctive word is missing cannot be carried by
+    #: its generic ones ("how does one Python library let other packages *hook*
+    #: into it" was outvoted by python/library/package).
+    #:
+    #: Measured, and left at 1.0 - the evidence is genuinely mixed:
+    #:
+    #:   corpus    power  pass   recall  prec    MRR     nDCG
+    #:   external  1.0    32/36  0.9286  0.2946  0.8741  0.8633
+    #:   external  2.0    33/36  0.9643  0.3080  0.8676  0.8653
+    #:   external  3.0    33/36  0.9643  0.3036  0.8861  0.8782
+    #:   primary   1.0    17/20  0.7812  0.1953  0.5573  0.5911
+    #:   primary   2.0    18/20  0.7500  0.2109  0.5698  0.5832
+    #:   primary   3.0    18/20  0.7500  0.2031  0.5631  0.5797
+    #:
+    #: Pass rate and precision improve on both corpora; primary recall falls by
+    #: 0.031 and primary nDCG dips. Recall is documented here as the ceiling on
+    #: everything downstream, and trading it for pass rate on one corpus is the
+    #: local optimisation the eval exists to prevent - so the default does not
+    #: move on evidence this mixed. Raise it only with an A/B on your own corpus.
+    coverage_power: float = 1.0
     coverage_weight: float = 0.45
     phrase_weight: float = 0.25
     authority_weight: float = 0.12
@@ -120,8 +142,10 @@ class HeuristicReranker(Reranker):
             else:
                 # Weighted by informativeness: matching a term that appears
                 # everywhere is not evidence, matching a rare one is.
-                total_weight = sum(self.idf(t) for t in query_set)
-                matched_weight = sum(self.idf(t) for t in query_set & chunk_terms)
+                power = self.coverage_power
+                total_weight = sum(self.idf(t) ** power for t in query_set)
+                matched_weight = sum(self.idf(t) ** power
+                                     for t in query_set & chunk_terms)
                 coverage = matched_weight / total_weight if total_weight else 0.0
             # Exact phrase match is rare and highly diagnostic; partial credit
             # for a long shared prefix keeps it from being all-or-nothing.

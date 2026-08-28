@@ -113,9 +113,24 @@ make eval           # primary: this repository
 make eval-external  # external: no self-reference
 ```
 
-**Run both before believing a retrieval change.** The external set caught two
-abstention failures the primary set could not see, because the primary corpus
-contained the very words that made those questions look answerable.
+**The external set is the regression gate; the primary set is a smoke test.**
+
+That was not the original intent, and the reason for the change is worth
+stating. The primary corpus has become a corpus *about its own evaluation*. Its
+top three results for "What stops a crawl from running forever?" are now
+`retrieve/expansion.py` - whose docstring quotes that exact question as the
+example it was written to fix - and `internal/LEARNINGS.md`, which discusses it.
+The retriever is behaving correctly: those documents *are* the best matches for
+those words. They are simply not the answer.
+
+Every fix documented in this repository makes its primary eval slightly less
+able to measure retrieval. That is not a problem to solve by writing less down;
+it is a reason to gate on a corpus that cannot be affected by what gets written
+here.
+
+The external set has already earned it: it caught two abstention failures, an
+nDCG implementation that reported values above 1.0, and a cross-process
+determinism bug - none of which the primary set could see.
 
 ## Known limitations, kept as failing cases
 

@@ -123,6 +123,7 @@ class IndexPipeline:
 
         documents: list[Document] = []
         for connector in connectors:
+            self._reconcile_cursor(connector)
             result = connector.run(self.state, limit=limit_per_source)
             report.deltas.append(result.delta)
             report.errors.extend(result.delta.errors)
@@ -173,6 +174,37 @@ class IndexPipeline:
                  chunks=report.chunks_written, vectors=report.vectors_written,
                  errors=len(report.errors), secs=round(report.duration_s, 2))
         return report
+
+    def _reconcile_cursor(self, connector: Connector) -> None:
+        """Drop cursor entries for documents the index does not actually have.
+
+        Incremental ingest decides "unchanged, skip" from the cursor alone. If
+        the index is rebuilt, restored from an older copy, or partly pruned
+        while the cursor survives, every one of those documents is reported
+        unchanged and never re-added - and the result is an index that is
+        silently missing most of its corpus while every counter reads zero
+        errors. Deleting an index and re-running produced 19 documents out of
+        33, and the only visible symptom was the eval score halving.
+
+        The cursor is not the authority on what the index contains; the index
+        is. Anything the cursor claims and the store lacks is re-fetched.
+        """
+        if self.state is None or not connector.source_system:
+            return
+        cursor = self.state.get(connector.key)
+        hashes = cursor.get("hashes") or {}
+        if not hashes:
+            return
+        present = self.store.find_doc_ids(connector.source_system, list(hashes))
+        missing = [external_id for external_id in hashes if external_id not in present]
+        if not missing:
+            return
+        for external_id in missing:
+            hashes.pop(external_id, None)
+        cursor["hashes"] = hashes
+        self.state.set(connector.key, cursor)
+        log.warn("cursor referenced documents missing from the index; they will be "
+                 "re-fetched", source=connector.key, missing=len(missing))
 
     def _should_refit(self, new_docs: int, total_docs: int) -> bool:
         if not total_docs:

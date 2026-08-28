@@ -25,19 +25,21 @@
 cases have nothing to retrieve, and averaging their zeros in made adding a
 negative case look like a retrieval regression.
 
-| | primary (this repo) | external (14 PyPI pages) |
+| | primary (this repo) | external (33 PyPI pages) |
 |---|---|---|
-| golden cases | 18/20 | **20/20** |
-| recall@8 | 0.81 | **1.00** |
-| hit@8 | 0.88 | 1.00 |
-| MRR | 0.56 | 0.97 |
-| nDCG@8 | 0.60 | 0.98 |
+| golden cases | 17/20 | **32/36** |
+| recall@8 | 0.81 | 0.93 |
+| hit@8 | 0.88 | 0.93 |
+| MRR | 0.59 | 0.87 |
+| nDCG@8 | 0.62 | 0.86 |
 | citation coverage | 1.00 | 1.00 |
-| contamination | 4/20 quarantined | clean |
+| contamination | 4/20 quarantined | 1/36 |
+| role | smoke test | **regression gate** |
 
 The gap between the columns is the self-reference problem, not a difference in
 difficulty: the primary corpus contains the questions, so its best matches are
-the documents *about* the answer rather than the answer.
+the documents written *about* the answer rather than the answer. All three of
+its current failures are that artefact. See docs/EVALUATION.md.
 
 ## Known limitations, deliberately not fixed
 

@@ -616,3 +616,95 @@ class GradedMetricScopeTest(unittest.TestCase):
             Golden(question="what is the melting point of gallium?", expect_abstain=True),
         ])
         self.assertEqual([c.graded for c in report.cases], [True, False])
+
+
+class CoveragePowerTest(unittest.TestCase):
+    """IDF concentration: measured, and deliberately left at its default.
+
+    Raising it improved pass rate and precision on both corpora and cost 0.031
+    of recall on the primary one. Recall is the ceiling on everything
+    downstream, so the default did not move on evidence that mixed - see the
+    table in rerank.py.
+    """
+
+    def test_the_default_is_plain_idf_weighting(self):
+        from oodarag.retrieve.rerank import HeuristicReranker
+
+        self.assertEqual(HeuristicReranker().coverage_power, 1.0)
+
+    def test_raising_it_concentrates_weight_on_the_rare_term(self):
+        from oodarag.retrieve.rerank import HeuristicReranker
+        from oodarag.models import Chunk, ScoredChunk
+
+        idf = {"rare": 8.0, "common": 1.0}.get
+        # A chunk with the generic terms but not the distinctive one.
+        chunk = Chunk("c", "d", 0, "common common words only here")
+        def coverage(power):
+            rr = HeuristicReranker(idf=lambda t: idf(t, 1.0), coverage_power=power)
+            scored = [ScoredChunk(chunk=chunk, score=0.5)]
+            rr.rerank("rare common", scored)
+            return scored[0].components["rerank_coverage"]
+
+        self.assertGreater(coverage(1.0), coverage(3.0),
+                           "concentration did not reduce the generic-only match")
+
+
+class CursorIndexDesyncTest(unittest.TestCase):
+    """A cursor that outlives its index produced a silently partial corpus.
+
+    Incremental ingest decides "unchanged, skip" from the cursor alone. Rebuild
+    the index while a separate state file survives and every document it lists
+    is reported unchanged and never re-added. Observed for real: deleting an
+    index and re-running produced 19 documents out of 33, with zero errors
+    reported - the only symptom was the eval score halving.
+    """
+
+    def setUp(self):
+        import shutil
+        import tempfile
+        from pathlib import Path
+
+        from oodarag.ingest.filesystem import FilesystemConnector
+
+        self.root = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.root, ignore_errors=True)
+        self.source = self.root / "src"
+        self.source.mkdir()
+        for i in range(6):
+            (self.source / f"d{i}.md").write_text(
+                f"# Doc {i}\n\nContent about retrieval number {i}.\n")
+        self.connector = FilesystemConnector(self.source, patterns=("**/*.md",))
+
+    def test_a_surviving_cursor_does_not_hide_a_rebuilt_index(self):
+        from oodarag.ingest.base import JsonStateStore
+
+        state = JsonStateStore(self.root / "state.json")
+        first = SqliteStore(":memory:")
+        self.addCleanup(first.close)
+        IndexPipeline(first, state=state).run([self.connector])
+        self.assertEqual(first.stats()["documents"], 6)
+
+        rebuilt = SqliteStore(":memory:")
+        self.addCleanup(rebuilt.close)
+        report = IndexPipeline(rebuilt, state=state).run([self.connector])
+        self.assertEqual(rebuilt.stats()["documents"], 6,
+                         "the rebuilt index is missing documents the cursor claimed")
+        self.assertEqual(report.deltas[0].new, 6)
+
+    def test_cursors_default_to_living_inside_the_index(self):
+        from oodarag.ingest.base import SqliteStateStore
+
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        self.assertIsInstance(IndexPipeline(store).state, SqliteStateStore)
+
+    def test_an_intact_index_still_skips_unchanged_documents(self):
+        """The reconciliation must not defeat incrementality when nothing is
+        actually missing."""
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        pipeline = IndexPipeline(store)
+        pipeline.run([self.connector])
+        second = pipeline.run([self.connector])
+        self.assertEqual(second.deltas[0].new, 0)
+        self.assertEqual(second.deltas[0].unchanged, 6)

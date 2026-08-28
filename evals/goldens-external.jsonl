@@ -29,3 +29,24 @@
 {"question": "Who won the 1998 FIFA World Cup final?", "expect_abstain": true, "tags": ["external", "negative"]}
 {"question": "What is the capital of France?", "expect_abstain": true, "tags": ["external", "negative"]}
 {"question": "How should I season a cast iron skillet?", "expect_abstain": true, "tags": ["external", "negative"]}
+# --- Harder cases, added once the first set reached ceiling. A regression gate
+# at 20/20 with recall 1.00 cannot detect a regression; these restore headroom.
+# Four kinds: semantic gap (question and answer share little vocabulary),
+# multi-source, disambiguation between similar packages, and near-miss negatives
+# that are plausible in this domain but genuinely absent from the corpus.
+{"question": "How do I stop a token being tampered with in transit?", "expect_sources": ["itsdangerous"], "tags": ["external", "semantic-gap"]}
+{"question": "What lets me change a database schema over time without losing data?", "expect_sources": ["alembic"], "tags": ["external", "semantic-gap"]}
+{"question": "How do Python programs talk to a web server?", "expect_sources": ["werkzeug", "flask"], "tags": ["external", "semantic-gap", "multi-source"]}
+{"question": "What keeps two processes from writing the same file at once?", "tags": ["external", "negative", "thin-source"], "expect_abstain": true, "notes": "Retagged after reading the document. filelock's PyPI page is a stub - badges, 'checkout the official documentation', download links - and contains neither 'process' nor 'concurrent'. The corpus cannot answer this, so grading it as a retrieval miss would blame the retriever for a gap in the corpus. Abstention is the correct behaviour, so that is what it now asserts."}
+{"question": "How does one Python library let other packages hook into it?", "expect_sources": ["pluggy"], "tags": ["external", "semantic-gap"]}
+{"question": "What runs my tests against several Python versions in clean environments?", "expect_sources": ["tox", "virtualenv"], "tags": ["external", "multi-source"]}
+{"question": "How can Python call into existing C code?", "expect_sources": ["cffi", "pycparser"], "tags": ["external", "multi-source"]}
+{"question": "Which package reads TOML configuration files?", "expect_sources": ["tomli"], "tags": ["external", "config"]}
+{"question": "What measures which lines of my code the tests actually execute?", "expect_sources": ["coverage"], "tags": ["external", "semantic-gap"]}
+{"question": "Which library dispatches in-process notifications between objects?", "expect_sources": ["blinker"], "tags": ["external", "semantic-gap"]}
+{"question": "Where should an application store its config and cache directories?", "expect_sources": ["platformdirs"], "tags": ["external", "semantic-gap"]}
+{"question": "What is the difference between the ORM and the migrations tool by the same author?", "expect_sources": ["sqlalchemy", "alembic"], "tags": ["external", "multi-source", "disambiguation"]}
+{"question": "Which package provides the WSGI utilities that Flask builds on?", "expect_sources": ["werkzeug"], "tags": ["external", "disambiguation"]}
+{"question": "Which library pins dependency hashes for reproducible installs?", "expect_abstain": true, "tags": ["external", "negative", "near-miss"]}
+{"question": "Which tool publishes a package to a private PyPI mirror?", "expect_abstain": true, "tags": ["external", "negative", "near-miss"]}
+{"question": "Which package renders Jinja templates to PDF?", "expect_abstain": true, "tags": ["external", "negative", "near-miss"]}
