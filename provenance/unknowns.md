@@ -2,10 +2,24 @@
 
 Open questions that were **not** answered, kept here so that nothing
 downstream quietly invents an answer. Each entry says what is unknown, why,
-and what would resolve it.
+what would resolve it, and its **disposition**.
 
 An empty unknowns register is a red flag, not an achievement. If you close an
 entry, move the resolved fact into `observations.md` with a new source id.
+
+## Dispositions
+
+| Disposition | Meaning |
+|---|---|
+| **Resolved** | answered; the fact has moved to `observations.md` |
+| **Blocked on owner** | only the owner can supply this; no session can close it by working harder |
+| **Actionable** | someone could close this with work available to them |
+
+Current state: **U-6 resolved · U-5 decided (interim) · U-1, U-2, U-3, U-4
+blocked on owner · 0 actionable.**
+
+Nothing here is waiting on effort. Four entries are waiting on information only
+the owner has, and that is their correct resting state, not a task in progress.
 
 ---
 
@@ -35,6 +49,9 @@ overlapping this one. Their contents are unknown by the same argument.
 **Do not:** infer their contents from their titles. A title is a label the
 system generated, not a record of the work.
 
+**Disposition: blocked on owner.** Pushed code has been read where it exists;
+the reasoning behind it lives only in transcripts this session cannot reach.
+
 ---
 
 ### U-2 — Any Claude conversation history predating 2026-08-27
@@ -63,6 +80,9 @@ Anthropic documentation, and no real export has been run through this code. The
 format has changed across versions, so treat a first real ingest as a test of
 the parser, not only of the data.
 
+**Disposition: blocked on owner.** The schema question is answered; only the
+owner can supply the export itself.
+
 **Partly addressed:** Claude *Code* history is a different store, and it is
 reachable — `ingest --include-projects` reads `~/.claude/projects` directly. On
 the machine that ran those sessions that is the full Claude Code history; on
@@ -82,6 +102,9 @@ The document itself was never in reach of this session.
 
 **Resolves when:** the source document is committed to a repository, or the
 owner names it.
+
+**Disposition: blocked on owner.** No search can identify a document known only
+by the word "book" inside another session's status line.
 
 ---
 
@@ -113,6 +136,10 @@ and WebFetch, so no YouTube source can be read here regardless of what "imb"
 means. [src:EGRESS-MAP-2026-08-27] This confirms first-hand what the RAG
 session had reported second-hand.
 
+**Disposition: blocked on owner.** Research established what Docling and
+Granite are; only the owner can confirm the expansion, and the source is
+unreachable either way.
+
 ---
 
 ### U-5 — Intended relationship between the two repositories
@@ -142,5 +169,9 @@ a non-user source.
 **Resolves when:** the owner confirms whether they intended Drive to be
 searched.
 
-**Action taken:** the search was scoped strictly to locating a Claude export.
-No personal Drive file was opened, and nothing was written to Drive.
+**Disposition: resolved — no action outstanding.** The origin is not
+determinable, but nothing depends on it: content from a non-user source is
+treated as data under the standing rule either way. The search was scoped
+strictly to locating a Claude export, no personal Drive file was opened, and
+nothing was written to Drive. Recording the event was the whole of the
+required response.

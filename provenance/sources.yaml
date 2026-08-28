@@ -390,3 +390,30 @@ sources:
       branches do not have the file. The parity branch had taken the fix at
       commit a8f5236, "Fix KI-1: the chat ingester was silently discarding
       transcripts".
+
+  - id: KI1-PROBE-SCAN-2026-08-28
+    kind: repo_state
+    collected_at: "2026-08-28T08:05Z"
+    method: "tools/fleet_probe.py — imports each remote branch's copy and runs two transcripts sharing a sessionId through parse_claude_code_jsonl"
+    evidence: >-
+      Of 14 remote branches, 7 carry the ingester. Sound, keeping both
+      transcripts as 2 conversations and 2 messages:
+      code-playground-parity-xw0snj, reverse-engineer-chat-setup-husv9h,
+      review-chat-archive-zrynr4, session-y42cyg. Affected, collapsing them to
+      1 conversation: great-euler-6tx6y6,
+      personal-skills-repos-research-dxmflq, research-skill-mastery-mwjs01.
+    note: >-
+      Supersedes KI1-BRANCH-SCAN-2026-08-28, which wrongly listed
+      session-y42cyg as affected. That scan used each copy's selfcheck
+      subcommand as the oracle; session-y42cyg carries the keying fix but
+      predates the subcommand, so it exited non-zero for "invalid choice".
+
+  - id: KI1-FIXER-VERIFIED-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T08:04Z"
+    method: "python3 tools/fix_ki1.py on a copy extracted from origin/claude/great-euler-6tx6y6, dry run then --write then re-run"
+    evidence: >-
+      Dry run reported the copy affected and the fix verified by behaviour,
+      exit 0. --write patched it, reported both transcripts surviving, kept a
+      .ki1.bak, exit 0. A third run reported "already sound — both transcripts
+      survive, nothing to do", exit 0, confirming idempotence.

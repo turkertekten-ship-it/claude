@@ -110,7 +110,8 @@ tools/
   verify_provenance.py        the fabrication guard
   ingest_chat_archive.py      chat-archive ingestion, search, and selfcheck
   fleet_snapshot.py           regenerates the FLEET.md roster from live refs
-  fleet_selfcheck.sh          runs a tool's selfcheck on every branch's copy
+  fleet_probe.py              tests every branch's copy for the KI-1 behaviour
+  fix_ki1.py                  repairs an affected copy, verified by behaviour
 tests/                        tests for the above
   run_all.sh                  every check, one command
 archive/                      drop conversation exports here (git-ignored)

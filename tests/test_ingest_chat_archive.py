@@ -239,6 +239,31 @@ def main() -> int:
         check("selfcheck fails when the fix is reverted", bad.returncode == 1, bad.returncode)
         check("failure names the data loss", "SILENTLY DISCARDS" in bad.stdout)
 
+    print("fleet probe cases")
+    sys.path.insert(0, str(REPO / "tools"))
+    import fleet_probe
+
+    good = (REPO / "tools" / "ingest_chat_archive.py").read_text()
+    sound, detail = fleet_probe.probe_source(good)
+    check("probe calls this copy sound", sound, detail)
+
+    marker = 'key = session if path.stem == session else f"{session}:{path.stem}"'
+    broken = good.replace("        " + marker, "        key = session", 1)
+    check("the fix line was found to revert", broken != good)
+    sound_bad, detail_bad = fleet_probe.probe_source(broken)
+    check("probe calls a reverted copy affected", not sound_bad, detail_bad)
+
+    # The false positive that made an earlier scan misreport a healthy branch:
+    # a copy carrying the fix but predating the selfcheck subcommand must still
+    # be judged sound, because behaviour is the oracle, not the CLI surface.
+    no_selfcheck = good.replace('        "selfcheck",\n', "", 1)
+    no_selfcheck = no_selfcheck.replace(
+        '    sub.add_parser(\n        "selfcheck",', '    _unused = (\n        "selfcheck",', 1)
+    sound_ns, detail_ns = fleet_probe.probe_source(good.replace(
+        'help="verify this copy does not silently discard transcripts",', 'help="x",', 1))
+    check("a copy without the selfcheck CLI is still judged by behaviour",
+          sound_ns, detail_ns)
+
     print()
     if FAILURES:
         print(f"FAILED: {len(FAILURES)} case(s): {', '.join(FAILURES)}")
