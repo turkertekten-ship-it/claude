@@ -1534,6 +1534,23 @@ This asks the other half - *does the expectation pick anything out* - and both
 are reported, never silently corrected. Rewriting a golden because it looks too
 broad is how an eval starts agreeing with the system.
 
+**The same check on the answer side found a live one.** `expect_answer_contains`
+is also a substring, searched in the generated answer - which is assembled from
+the corpus, so a term the corpus repeats will appear in almost any answer:
+
+    'sha'          appears in 31 of 81 primary documents (38%)
+    'fingerprint'  14 of 81 (17%)
+    '9309'          5 of 81 (6%)
+    'commit sha'    5 of 81 (6%)
+    'Mozilla'       4 of 91 external (4%)
+
+`"sha"` is satisfied by "shared", "shape" and "share" as readily as by a commit
+sha, in a corpus where more than a third of documents contain one of them. The
+golden using it now says `"commit sha"` - which is what the connector actually
+documents, since an unchanged `head_sha` is what skips the file walk. That is
+making a golden **stricter**, which is the opposite of the failure mode where an
+eval is loosened until it agrees; the case still passes at 18/20.
+
 **Rules.**
 1. **Attack the measuring instrument, and attack it early.** A defect there does
    not produce a failure, it produces a number, and every conclusion downstream

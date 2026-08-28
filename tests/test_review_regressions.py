@@ -1911,6 +1911,70 @@ class GoldenDiscriminationTest(unittest.TestCase):
         report = check(self._store(), [Golden(question="q?", expect_abstain=True)])
         self.assertTrue(report.clean)
 
+    def test_an_answer_expectation_the_corpus_repeats_is_reported(self):
+        """The answer is assembled from the corpus, so a term the corpus repeats
+        everywhere turns up in almost any answer. `"sha"` appeared in 38% of this
+        repository's documents - satisfied by "shared" and "shape" as readily as
+        by a commit sha - and the golden that used it now says "commit sha", at
+        6%."""
+        from oodarag.eval.discrimination import check
+
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        # "sha" is in every document as a substring of "shared" and "shape";
+        # "commit sha" is in one. That is the whole distinction the check makes.
+        docs = [_doc(f"d{i}", f"pkg{i}.md",
+                     f"Package {i} mentions the shared shape of a value.")
+                for i in range(10)]
+        docs[0].text += " The cursor stores a commit sha to skip the walk."
+        store.upsert_documents(docs)
+
+        broad = check(store, [Golden(question="q?", expect_answer_contains=["sha"])])
+        self.assertFalse(broad.clean)
+        self.assertEqual(broad.findings[0].kind, "answer")
+        self.assertIn("answer expectation", broad.findings[0].describe())
+
+        narrow = check(store, [Golden(question="q?",
+                                      expect_answer_contains=["commit sha"])])
+        self.assertTrue(narrow.clean, narrow.summary())
+
+    def test_both_expectation_kinds_are_labelled(self):
+        """A report naming only the string leaves the reader guessing which
+        field to fix."""
+        from oodarag.eval.discrimination import check
+
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        docs = [_doc(f"d{i}", f"pkg{i}.md", "shared text in every document")
+                for i in range(10)]
+        for i, d in enumerate(docs):
+            d.uri = f"file:///corpus/pkg{i}.md"
+        store.upsert_documents(docs)
+        report = check(store, [Golden(question="q?", expect_sources=["corpus"],
+                                      expect_answer_contains=["shared"])])
+        self.assertEqual({f.kind for f in report.findings}, {"source", "answer"})
+
+    def test_the_real_primary_golden_set_discriminates(self):
+        """The set that caught `"sha"`. Runs against the repository itself."""
+        import pathlib
+
+        from oodarag.eval.discrimination import check
+        from oodarag.eval.harness import load_goldens
+        from oodarag.ingest.filesystem import FilesystemConnector
+        from oodarag.pipeline import IndexPipeline
+
+        root = pathlib.Path(__file__).resolve().parent.parent
+        goldens = root / "evals/goldens.jsonl"
+        if not goldens.exists():
+            self.skipTest("primary golden set not present")
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        IndexPipeline(store).run([FilesystemConnector(
+            str(root), patterns=("src/**/*.py", "tests/**/*.py", "docs/**/*.md",
+                                 "internal/**/*.md", "*.md"), key="fs:disc2")])
+        report = check(store, load_goldens(str(goldens)))
+        self.assertTrue(report.clean, report.summary())
+
     def test_the_real_external_golden_set_discriminates(self):
         """Measured against the corpus in the repository, because that is the
         set the regression gate is read from. If a future golden is written too

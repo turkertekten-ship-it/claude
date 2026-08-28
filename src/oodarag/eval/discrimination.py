@@ -35,6 +35,8 @@ class Finding:
     expectation: str
     matched: int
     total: int
+    #: "source" for an expected document, "answer" for expected answer text.
+    kind: str = "source"
     examples: list[str] = field(default_factory=list)
 
     @property
@@ -43,11 +45,12 @@ class Finding:
 
     def describe(self) -> str:
         if not self.matched:
-            return (f"{self.expectation!r} matches no document in the corpus, so "
-                    f"the case can never pass: {self.question}")
-        return (f"{self.expectation!r} matches {self.matched} of {self.total} "
-                f"documents ({self.share:.0%}), so the case passes without "
-                f"discriminating: {self.question}")
+            return (f"{self.kind} expectation {self.expectation!r} matches no "
+                    f"document in the corpus, so the case can never pass: "
+                    f"{self.question}")
+        return (f"{self.kind} expectation {self.expectation!r} matches "
+                f"{self.matched} of {self.total} documents ({self.share:.0%}), "
+                f"so the case passes without discriminating: {self.question}")
 
 
 @dataclass
@@ -72,8 +75,8 @@ class DiscriminationReport:
             "documents": self.documents,
             "findings": [
                 {"question": f.question, "expectation": f.expectation,
-                 "matched": f.matched, "share": round(f.share, 4),
-                 "examples": f.examples}
+                 "kind": f.kind, "matched": f.matched,
+                 "share": round(f.share, 4), "examples": f.examples}
                 for f in self.findings
             ],
         }
@@ -88,18 +91,38 @@ def check(store: SqliteStore, goldens) -> DiscriminationReport:
     blobs = [((d.uri or "") + " " + (d.title or "")).lower() for d in documents]
     names = [d.title or d.uri for d in documents]
 
+    # Answer expectations are searched in the generated answer, but the answer
+    # is assembled from the corpus - so a term the corpus repeats everywhere
+    # will turn up in almost any answer. `"sha"` appears in 38% of this
+    # repository's documents, matching "shared", "shape" and "share" as readily
+    # as a commit sha, and any answer citing a third of the corpus satisfies it.
+    bodies = [(d.text or "").lower() for d in documents]
+
     for golden in goldens:
         for expectation in getattr(golden, "expect_sources", None) or []:
             needle = expectation.lower()
             hits = [i for i, blob in enumerate(blobs) if needle in blob]
-            share = len(hits) / len(documents)
-            if hits and share <= MAX_MATCH_SHARE:
-                continue
-            report.findings.append(Finding(
-                question=golden.question,
-                expectation=expectation,
-                matched=len(hits),
-                total=len(documents),
-                examples=[names[i] for i in hits[:5]],
-            ))
+            report.findings.extend(_finding(golden, expectation, hits, names,
+                                            len(documents), "source"))
+        for expectation in getattr(golden, "expect_answer_contains", None) or []:
+            needle = expectation.lower()
+            hits = [i for i, body in enumerate(bodies) if needle in body]
+            report.findings.extend(_finding(golden, expectation, hits, names,
+                                            len(documents), "answer"))
     return report
+
+
+def _finding(golden, expectation: str, hits: list[int], names: list[str],
+             total: int, kind: str) -> list[Finding]:
+    """Empty when the expectation is discriminating, one finding when it is not.
+
+    A list rather than an optional so the caller reads as a filter; both
+    failure directions - matching nothing, matching nearly everything - produce
+    the same shape.
+    """
+    share = len(hits) / total if total else 0.0
+    if hits and share <= MAX_MATCH_SHARE:
+        return []
+    return [Finding(question=golden.question, expectation=expectation,
+                    matched=len(hits), total=total, kind=kind,
+                    examples=[names[i] for i in hits[:5]])]
