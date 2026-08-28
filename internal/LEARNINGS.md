@@ -4132,3 +4132,51 @@ as 349-with-54-cases and the opposite of 266-with-54-cases.
 4. **When a measurement keeps changing its mind, suspect the measurement.** Two
    corpus sizes and two floors produced four different "best" values, and the
    variance was in the instrument.
+
+---
+
+## L75 - The feature ranking that justified a change, re-run on the bigger sample
+
+L74's rule was to grow the question set before tuning on it again. The gate
+feature ranking is a measurement made on the old set, so it gets the same
+treatment. On 79 cases and 910 pairs, against 54 cases and 473:
+
+| feature | 54 cases | 79 cases |
+|---|---|---|
+| relevance x arm agreement (shipped) | **0.850** | **0.815** |
+| relevance x top-gap | 0.780 | 0.805 |
+| relevance x matched idf | 0.732 | 0.780 |
+| `rerank_relevance` (the old gate) | 0.763 | 0.778 |
+| surface answerability | 0.720 | 0.751 |
+| both arms found the top result | 0.544 | 0.602 |
+
+**The decision survives and its confidence does not.** Agreement is still first,
+but its lead over the field fell from 0.087 to 0.037, and the feature the small
+set ranked *fourth* is now within 0.01 of it. Had the 79-case set come first,
+this would have been a two-way tie rather than a clear winner - and a tie is
+what it should have been called on 54 cases, where 473 pairs cannot separate
+0.85 from 0.78.
+
+**So the tiebreak is a property, not a number.** `relevance x top-gap` is the
+difference between two *total* scores, which means it moves with any scoring
+weight: measured on one query as `base_weight` goes 1, 5, 25, top-gap reads
+0.20, 0.44, 1.29 while agreement reads 0.500, 0.500, 0.625. Putting a floor on
+top-gap would rebuild, in the abstention gate, exactly the defect L69 had to
+repair in the reported confidence - a threshold on a quantity whose scale is set
+somewhere else. Agreement is a share of a window: bounded by construction, and
+L73 measured that its *distribution* holds up across a corpus that quadrupled.
+
+Nothing changed. The value of the exercise is knowing that the shipped feature
+won on a margin the evidence does not support, and stayed shipped for a reason
+the evidence does.
+
+**Rules.**
+1. **Re-run the ranking that justified a decision when the sample grows, not
+   just the decision.** The change was validated; the *reason* given for it was
+   not the reason that survives.
+2. **Between two features the data cannot separate, choose the one whose scale
+   does not depend on a constant elsewhere.** That property is checkable in one
+   query and does not decay with the corpus.
+3. **A 0.09 AUC gap on 473 pairs is a tie.** Small samples make ties look like
+   winners, which is how a session ends up defending the right decision with the
+   wrong argument.

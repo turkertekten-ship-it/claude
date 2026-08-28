@@ -135,20 +135,33 @@ its current failures are that artefact. See docs/EVALUATION.md.
    disappoints in hybrid is evidence about the fusion before it is evidence
    about the model.
 
-2. **The abstention gate**, and for the first time in five sessions it moved.
-   Whether the two retrieval arms *agree* turns out to carry the signal that
-   every previously measured feature lacked - `relevance x agreement` separates
-   answerable from unanswerable at **AUC 0.850**, against 0.763 for the
-   relevance the gate used alone and 0.78 or below for match specificity,
-   document coverage, surface answerability and term co-occurrence (L71). It is
-   free: the ranks are already in the fusion components. Shipped, and the
-   external gate went 44/54 to **47/54** with retrieval untouched.
+2. **The abstention gate**, which moved for the first time in five sessions.
+   Whether the two retrieval arms *agree* carries the signal every previously
+   measured feature lacked, and it is free - the ranks are already in the fusion
+   components. Re-ranked on the enlarged 79-case set (`scripts/gate_features.py`):
 
-   Four unanswerable questions still get answered, and they are the ones the
-   earlier sessions characterised: questions whose every word is in the corpus
-   and only their *combination* is absent, which no feature computed from term
-   overlap can see. Separating those is a judgement about meaning - item 1,
-   still blocked on a key.
+   | feature | AUC, 54 cases | AUC, 79 cases |
+   |---|---|---|
+   | relevance x arm agreement (shipped) | **0.850** | **0.815** |
+   | relevance x top-gap | 0.780 | 0.805 |
+   | `rerank_relevance` (what the gate used) | 0.763 | 0.778 |
+   | surface answerability | 0.751 | 0.751 |
+   | document coverage | 0.687 | 0.712 |
+
+   The choice survives the larger sample and its margin does not: 0.087 ahead on
+   54 cases, 0.037 on 79, with `relevance x top-gap` now within 0.01. **The
+   tiebreak is scale stability, not AUC.** Top-gap is a difference of two total
+   scores, so it moves with any scoring weight - measured, it runs 0.20, 0.44
+   and 1.29 as `base_weight` goes 1, 5, 25, while agreement reads 0.500, 0.500,
+   0.625. A floor on the first is the defect L69 had to repair in the reported
+   confidence; a floor on the second is not (L75).
+
+   Shipped, the external gate reads **63/79** and the primary 19/20. Four
+   unanswerable questions still get answered, and they are the ones earlier
+   sessions characterised: every word present in the corpus, only the
+   combination absent, which no feature computed from term overlap can see.
+   Separating those is a judgement about meaning - item 1, still blocked on a
+   key.
 
 3. **Widen the corpus again.** Done twice more and it keeps paying: 33 to 91
    overturned three recorded conclusions (L29), 91 to 153 settled two more, and
