@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** kırk dokuz çalıştırılabilir takım — **372
+**Yamalı hâlde sistem çalışıyor:** kırk dokuz çalıştırılabilir takım — **373
 vaka, 27 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15 → **27/27** (mutasyon kümesi otuz
 sekizinci turda on beşten yirmi yediye çıkarıldı: 26 kontrolün dokuzu hiç
@@ -2533,6 +2533,41 @@ güncellenmiyor.** Beklenen kümeler güncellenmiyordu (birinci bulgu),
 öz-sınama kapsaması sorulmuyordu (AS-01), kontrolün adı da düzeltilmiyor.
 Üçü tek bir eksikliğin üç görünümü.
 
+### Kendi kaydımı üçüncü kez yanlış okudum — ve kayıt yine haklıydı
+
+Bu tur şu gözlemle açıldı: *"ortam engellenen egress için bir çare
+belgeliyor ve ben onu hiç okumadım."* **Yanlıştı.** `hafiza/egress-kaniti.md`
+vekil durum uç noktasını zaten kaydediyordu ve README'ye iki kez atıf
+yapıyordu.
+
+Yirmi sekizinci turda WebSearch satırını *"işe yaramaz"* diye yanlış
+okumuştum; burada da kendi kaydımı okumadan bir eksiklik varsaydım.
+**Kayıt tutmak yetmiyor; kaydı okumak ayrı bir iştir** — ve bu, raporun
+kitaba yönelttiği eleştirinin (yazılı ama bakılmayan kontrol) bendeki
+karşılığıdır. Üçüncü kez.
+
+**Ama turda gerçek bir kazanım da var.** Reddin anlamı şimdiye kadar tek bir
+yetkiye dayanıyordu: aracın kendi ret iletisi. Ortamın **kendi belgesi**
+aynı şeyi bağımsız olarak söylüyor (`/root/.ccr/README.md`, satır 18-19):
+
+> *"Never disable TLS verification, never unset HTTPS_PROXY, and do not retry
+> organization policy denials (403/407) — report them instead."*
+
+İkisi de bu raporun yaptığı şeyi **buyuruyor**: politika reddi yeniden
+denenmez, raporlanır. Yani üç ENGELLEYİCİ bulgunun açık bırakılması bir
+eksiklik değil, **ortamın açıkça istediği davranıştır.** Bu, raporun en ağır
+üç bulgusunun neden kapatılamadığını savunmaktan çıkarıp **belgelenmiş bir
+kurala uymaya** dönüştürüyor.
+
+Vekilin kendi kaydı da yeniden doğrulandı: dört Türk birincil kaynağı
+(`mevzuat`, `rekabet`, `resmigazete`, `spk`) için dört
+`connect_rejected · 403` kaydı — benim çağrı dökümüme değil, **altyapının
+kendisine** ait bir kayıt.
+
+N-09 artık iki bağımsız yetkiyi birden istiyor: **tek bir yetkiye dayanan
+olumsuz iddia, o yetki yanlış okunduğunda çöker** — ve bu turda kendi
+kaydımı yanlış okuduğumu bir kez daha gördüm.
+
 ---
 
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
@@ -2720,7 +2755,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 ### Nasıl yeniden koşulur
 ```
 ./sinama/hepsi.sh                 # 34 çalıştırılabilir takım:
-                                  #   372 vaka + 27 mutasyon (D)
+                                  #   373 vaka + 27 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -2812,7 +2847,7 @@ Dokuz takım, 96 vaka:
 | AZ | **Kitaba sadık kopyaların sadakati** — raporun "önce" tabanı gerçekten kitabın metni mi | §12, §14, §16 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**372 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**373 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)

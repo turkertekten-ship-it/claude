@@ -1,5 +1,5 @@
 ###############################################################
-#  KÖR SINAMA TAKIMI — 2026-08-28T15:54:24Z
+#  KÖR SINAMA TAKIMI — 2026-08-28T16:04:19Z
 ###############################################################
 
 /root/mafirm/sinama/ks_a_esik.py:45: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
@@ -286,7 +286,7 @@ GEÇTİ K-15   koltuk kapısı yöntem dosyalarını bloklamıyor
 KÖR SINAMA L — çapraz referans bütünlüğü
 ================================================================================================
 GEÇTİ L-01   belgelerdeki her yol atfının hedefi var
-        67 atıf incelendi, kırık: yok
+        68 atıf incelendi, kırık: yok
 GEÇTİ L-02   her INDEX kendi yöntem dosyalarının hepsini anıyor
         anılmayan: yok
 GEÇTİ L-03   belgelerde sabit ~/mafirm yolu kalmamış
@@ -306,9 +306,9 @@ KÖR SINAMA M — errata ↔ sınama izlenebilirliği
 GEÇTİ M-01   her errata maddesi bir sınama vakasına atıf yapıyor
         65 madde · atıfsız 0: yok
 GEÇTİ M-02   atıf yapılan her vaka kimliği gerçekten tanımlı
-        444 tanımlı kimlik · uydurma dayanak: yok
+        445 tanımlı kimlik · uydurma dayanak: yok
 GEÇTİ M-03   [A] ve [B] maddelerinin atıfları gerçek vakalara bağlı
-        sadık koşumda kalan: 51 · tanımlı vaka: 448 · bağsız madde: yok
+        sadık koşumda kalan: 51 · tanımlı vaka: 449 · bağsız madde: yok
 GEÇTİ M-04   sadık sistemde kalan her vaka errata'da ya da raporda açıklanmış
         51 vaka kaldı · açıklanmamış: yok
 ------------------------------------------------------------------------------------------------
@@ -333,8 +333,10 @@ GEÇTİ N-07   iddia belirli alan adlarıyla sınırlı, genel değil
         GitHub MCP ile 16 depo çözüldü — 'hiçbir şeye erişilemedi' YANLIŞ olurdu
 GEÇTİ N-08   kanıt, üç mevzuat bulgusunu çözdüğünü İDDİA ETMİYOR
         erişimin neden yok olduğunu kanıtlamak, bulguyu kapatmaz
+GEÇTİ N-09   reddin anlamı iki bağımsız yetkiden doğrulanıyor
+        çalışma anı yetkisi=True · belgesel yetki (ortamın README'si)=True
 ------------------------------------------------------------------------------------------------
-8 vaka · 8 geçti · 0 beklenen · 0 SİNYAL
+9 vaka · 9 geçti · 0 beklenen · 0 SİNYAL
 
 SELFTEST OK (24 vaka)
 ================================================================================================
@@ -616,37 +618,37 @@ KÖR SINAMA AA — kapı arızalandığında hangi yöne düşüyor
 GEÇTİ AA-01a    bozuk olay: bozuk JSON
         çıkış 2 (29 ms)
 GEÇTİ AA-01b    bozuk olay: boş girdi
-        çıkış 2 (28 ms)
+        çıkış 2 (27 ms)
 GEÇTİ AA-01c    bozuk olay: tool_input yok
-        çıkış 0 (30 ms)
+        çıkış 0 (28 ms)
 GEÇTİ AA-01d    bozuk olay: tool_input dizge
-        çıkış 0 (30 ms)
+        çıkış 0 (27 ms)
 GEÇTİ AA-01e    bozuk olay: tool_input liste
-        çıkış 0 (31 ms)
+        çıkış 0 (27 ms)
 GEÇTİ AA-01f    bozuk olay: tool_name yok
-        çıkış 0 (30 ms)
+        çıkış 0 (28 ms)
 GEÇTİ AA-01g    bozuk olay: tool_name None
-        çıkış 0 (32 ms)
+        çıkış 0 (28 ms)
 GEÇTİ AA-01h    bozuk olay: içerik None
         çıkış 0 (29 ms)
 GEÇTİ AA-01i    bozuk olay: içerik sayı
-        çıkış 0 (29 ms)
+        çıkış 0 (28 ms)
 GEÇTİ AA-01j    bozuk olay: derin iç içe
         çıkış 0 (28 ms)
 GEÇTİ AA-01k    bozuk olay: JSON dizi (nesne değil)
-        çıkış 2 (28 ms)
+        çıkış 2 (31 ms)
 GEÇTİ AA-01l    bozuk olay: JSON null
-        çıkış 2 (29 ms)
+        çıkış 2 (28 ms)
 GEÇTİ AA-02     ayrıştırma SONRASI arıza politikası yazılı ve dışarıda kapalı
         kanca, ayrıştırma sonrası istisnayı yakalayıp dışarı kanalında 2 döndürüyor
 GEÇTİ AA-03-20  boşluksuz 20000 karakter bütçe içinde bitiyor
-        61 ms (bütçe 5000 ms) çıkış 0
+        60 ms (bütçe 5000 ms) çıkış 0
 GEÇTİ AA-03-80  boşluksuz 80000 karakter bütçe içinde bitiyor
-        156 ms (bütçe 5000 ms) çıkış 0
+        153 ms (bütçe 5000 ms) çıkış 0
 GEÇTİ AA-03-200 boşluksuz 200000 karakter bütçe içinde bitiyor
-        331 ms (bütçe 5000 ms) çıkış 0
+        380 ms (bütçe 5000 ms) çıkış 0
 GEÇTİ AA-04     400 KB gerçek düzyazı bütçe içinde
-        433 ms çıkış 0
+        418 ms çıkış 0
 GEÇTİ AA-05     dayanıklılık yaması doğruluğu bozmadı
         üç davranış vakası da beklendiği gibi
 ------------------------------------------------------------------------------------------------

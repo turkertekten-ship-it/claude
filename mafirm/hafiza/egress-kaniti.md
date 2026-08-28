@@ -14,6 +14,42 @@ Bu rapor şu olumsuz iddiayı taşıyor: **"Bu ortamda hiçbir birincil kaynağa
 erişilemedi."** İlk dört turda bu iddia yalnızca iki araç hatasına
 dayanıyordu — yani kendi kuralımı çiğniyordum. Aşağıda gereken kanıt var.
 
+## İki bağımsız yetkili kaynak
+
+Reddin **anlamı** iki ayrı yerden, iki ayrı türde doğrulanıyor:
+
+**1. Çalışma anındaki yetki** — aracın kendi ret iletisi:
+
+> *"…organization's egress policy for this session. Do not retry or route
+> around it — report the…"*
+
+**2. Belgesel yetki** — ortamın kendi belgesi, `/root/.ccr/README.md`
+satır 18-19:
+
+> *"Never disable TLS verification, never unset HTTPS_PROXY, and do not retry
+> organization policy denials (403/407) — report them instead."*
+
+İkisi de aynı şeyi söylüyor ve ikisi de **bu raporun yaptığı şeyi**
+buyuruyor: politika reddi yeniden denenmez, **raporlanır**. Yani üç
+ENGELLEYİCİ bulgunun açık bırakılması bir eksiklik değil, ortamın açıkça
+istediği davranıştır.
+
+**Vekilin kendi kaydı (yeniden doğrulandı 2026-08-28):**
+`__agentproxy/status` uç noktası dört reddi makinece kaydediyor —
+`www.mevzuat.gov.tr`, `www.rekabet.gov.tr`, `www.resmigazete.gov.tr`,
+`www.spk.gov.tr`, hepsi *"gateway answered 403 to CONNECT (policy denial or
+upstream failure)"*. Bu kayıt benim çağrı dökümüme değil, **altyapının
+kendisine** aittir.
+
+### Kendi kaydımı üçüncü kez yanlış okudum
+
+Kırk beşinci tura *"vekil durum uç noktasını hiç sorgulamadım"* diye
+başladım. Yanlıştı: aşağıdaki tablo onu zaten kaydediyor. Yirmi sekizinci
+turda WebSearch satırını "işe yaramaz" diye yanlış okumuştum; burada da
+kendi kaydımı okumadan bir eksiklik varsaydım. **Kayıt tutmak yetmiyor;
+kaydı okumak ayrı bir iştir** — ve bu, raporun kitaba yönelttiği
+eleştirinin (yazılı ama bakılmayan kontrol) bendeki karşılığıdır.
+
 ## Nereye bakıldı
 
 | Kanal | Nasıl denendi | Sonuç |

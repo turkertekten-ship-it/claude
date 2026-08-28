@@ -97,9 +97,35 @@ vaka("N-08", "kanıt, üç mevzuat bulgusunu çözdüğünü İDDİA ETMİYOR",
      "erişimin neden yok olduğunu kanıtlamak, bulguyu kapatmaz")
 
 
+# --- N-09 · reddin anlamı İKİ BAĞIMSIZ yetkiden doğrulanıyor ---------
+# [kırk beşinci tur] Kanıt, reddin ANLAMINI aracın kendi ret iletisiyle
+# kuruyordu — çalışma anındaki bir yetki. Ortamın KENDİ BELGESİ
+# (/root/.ccr/README.md) aynı şeyi bağımsız olarak söylüyor: politika reddi
+# yeniden denenmez, raporlanır. Tek bir yetkiye dayanan bir olumsuz iddia,
+# o yetki yanlış okunduğunda çöker — yirmi sekizinci turda WebSearch
+# satırını yanlış okuduğumda tam olarak bu olmuştu. İki bağımsız kaynak
+# istenmesinin sebebi budur.
+# [satır kırılması tuzağı · standart ders] Alıntı iki satıra bölünmüş
+# ("do not retry\n> organization policy denials"); ham metinde aranırsa
+# bulunamaz. Boşluklar düzleştirilir — alıntının anlamı satır sonuyla
+# değişmez, ölçütün ona duyarlı olması ölçüm kusurudur.
+_ham_kanit = open(kanit_md, encoding="utf-8").read() \
+    if os.path.exists(kanit_md) else ""
+_kanit_metni = re.sub(r"\s*\n>?\s*", " ", _ham_kanit)
+_calisma_ani = re.search(r"egress policy|Do not retry or route around",
+                         _kanit_metni) is not None
+_belgesel = ("/root/.ccr/README.md" in _ham_kanit
+             and re.search(r"do not retry organization policy denials",
+                           _kanit_metni, re.I) is not None)
+vaka("N-09", "reddin anlamı iki bağımsız yetkiden doğrulanıyor",
+     _calisma_ani and _belgesel,
+     "çalışma anı yetkisi=%s · belgesel yetki (ortamın README'si)=%s"
+     % (_calisma_ani, _belgesel))
+
+
 # [AF-02] Kaybolan bir vaka, kırmızı bir vakadan kötüdür: kimse aramaz.
 # Koruma on üçüncü turda eklendi ama yalnızca sonrasında yazılan takımlara.
-BEKLENEN_VAKA = 8
+BEKLENEN_VAKA = 9
 
 
 def rapor_yaz():
