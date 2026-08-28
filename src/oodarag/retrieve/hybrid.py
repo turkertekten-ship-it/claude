@@ -42,7 +42,36 @@ class RetrievalConfig:
     top_k: int = 8
     #: How deep each arm searches before fusion. Wider than top_k on purpose:
     #: fusion and reranking can only promote what they were given.
-    candidate_k: int = 40
+    #: How many chunks each arm contributes before fusion and reranking.
+    #:
+    #: **20, halved from 40**, which is faster *and* slightly better - not a
+    #: trade. Swept on both corpora:
+    #:
+    #:   candidate_k      20      40      80      120     200
+    #:   external pass    49/54   49/54   49/54   48      48
+    #:   external recall  .9302   .9302   .9419   .9186   .8953
+    #:   primary pass     18/20   17/20   16/20   16      16
+    #:   latency (ext)    85ms    98ms    133ms   168ms   233ms
+    #:
+    #: Measured end to end through the shipped configs: identical pass rates,
+    #: nDCG@8 0.7888 -> 0.7954 external and 0.6814 -> 0.6830 primary, latency
+    #: 98.1 -> 83.3ms and 83.0 -> 61.3ms.
+    #:
+    #: **A larger candidate set makes things worse**, which is only surprising
+    #: if the reranker is assumed to be right. It is partly wrong by
+    #: construction - its coverage feature is built on an IDF that ranks the
+    #: discriminating query term first in 29 of 40 goldens (L48) - so every
+    #: extra candidate is another chance to promote something the arms had
+    #: correctly ranked low. Recall@8 does peak at 80, and the pass rate does
+    #: not follow it, because the documents arriving between 40 and 80 are ones
+    #: the reranker then mis-orders.
+    #:
+    #: This is not a licence to shrink further: at 20 the expected document is
+    #: outside both arms' candidate sets for one golden ("How can a test control
+    #: what the clock returns?", lexical rank 107, dense 331). Reaching it needs
+    #: k >= 110, which costs a case on each corpus. That failure is a retrieval
+    #: gap, not a windowing one.
+    candidate_k: int = 20
     dense_weight: float = 1.0
     lexical_weight: float = 1.0
     rrf_k: int = 60

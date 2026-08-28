@@ -32,8 +32,8 @@ negative case look like a retrieval regression.
 | recall@8 | 0.8750 | 0.9302 |
 | precision@8 | 0.2031 | 0.2471 |
 | hit@8 | 0.9375 | 0.9302 |
-| MRR | 0.6652 | 0.7581 |
-| nDCG@8 | 0.6814 | 0.7888 |
+| MRR | 0.6652 | 0.7643 |
+| nDCG@8 | 0.6830 | 0.7954 |
 | citation coverage | 1.00 | 1.00 |
 | contamination | 4/20 questions, 14 documents (29 holdouts) | 5/54 questions, 22 documents (28 holdouts) |
 | role | smoke test | **regression gate** |

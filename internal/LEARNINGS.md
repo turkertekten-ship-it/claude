@@ -2682,9 +2682,17 @@ answer was not where I had been looking.
 
 | expected | dense rank | lexical rank | final rank |
 | --- | --- | --- | --- |
-| structlog | - | **2** | not retrieved |
-| responses | - | **5** | not retrieved |
-| freezegun | - | - | not retrieved |
+| structlog | 42 | **2** | not retrieved |
+| responses | **14** | **5** | not retrieved |
+| freezegun | 331 | 107 | not retrieved |
+
+> **Correction (L66).** The dense column above originally read `-` for all three,
+> and that was a broken probe rather than a measurement: it called
+> `retriever.index`, which does not exist, so the search returned an empty list
+> and every rank came back "not found". The real ranks are shown. They change the
+> reading - `responses` is inside *both* arms' candidate sets and still demoted,
+> which is a stronger claim than the entry made, and `freezegun` is reachable at
+> a larger window rather than absent.
 
 **The lexical arm ranks `structlog` second for its own question, and it does not
 survive to the output.** Two of the three "retrieval failures" are not retrieval
@@ -3208,3 +3216,76 @@ computes the bound rather than trusting the docstring.
 3. **A guard that reads the wrong quantity is worse than a missing one**,
    because it occupies the place where the real check would go. This one has sat
    beside the check that does its job for as long as both have existed.
+
+---
+
+## L66 - A smaller candidate set retrieves better, and my probe had been lying
+
+Two findings, and the second one corrects a table I wrote three cycles ago.
+
+**The probe first.** Chasing where failing cases are lost, I had reported dense
+ranks as "not found" for all three. The probe called `retriever.index` -
+`HybridRetriever` has no such attribute, so `hasattr` was False, the search list
+was empty, and every lookup returned None. **An absence produced by asking
+nothing looks exactly like an absence produced by asking and finding nothing.**
+That is L55's rule ("no failures" is also what nothing looks like) arriving in my
+own diagnostic, one cycle after I wrote it down.
+
+The real ranks, via `store.vector_index(embedder.fingerprint)`:
+
+| expected | lexical | dense | inside k=40 |
+| --- | --- | --- | --- |
+| structlog | 2 | 42 | lexical only |
+| responses | 5 | **14** | **both** |
+| freezegun | 107 | 331 | neither |
+
+`responses` is found by *both* arms well inside the candidate set and still does
+not survive - a stronger version of the demotion claim than L58 made, on
+evidence L58 did not have.
+
+Re-measured properly over all 43 goldens with an expected source: **41 kept, 1
+demoted (`responses`), 1 unreachable (`freezegun`)**. `structlog` is no longer
+among them - raising `position_weight` (L63) fixed it.
+
+**Then the window itself.** `candidate_k` had never been measured:
+
+| candidate_k | 20 | 40 (was) | 80 | 120 | 200 |
+| --- | --- | --- | --- | --- | --- |
+| external pass | 49/54 | 49/54 | 49/54 | 48 | 48 |
+| external recall@8 | .9302 | .9302 | **.9419** | .9186 | .8953 |
+| primary pass | **18/20** | 17/20 | 16/20 | 16 | 16 |
+| external latency | 85ms | 98ms | 133ms | 168ms | 233ms |
+
+**More candidates is worse.** Through the shipped configs, halving it to 20
+keeps both pass rates, improves nDCG@8 on both (0.7888 -> 0.7954 external,
+0.6814 -> 0.6830 primary) and cuts latency 15% and 26%.
+
+That is only surprising if the reranker is assumed correct. It is partly wrong
+by construction - coverage rests on an IDF that ranks the discriminating query
+term first in 29 of 40 goldens (L48) - so each extra candidate is another chance
+to promote something the arms had correctly ranked low. Recall@8 *does* peak at
+80 while the pass rate does not follow, because the documents arriving between
+40 and 80 are ones the reranker then mis-orders. Two metrics disagreeing is the
+signal, again (L58).
+
+**And it closes an avenue rather than opening one.** `freezegun` sits at lexical
+rank 107; reaching it needs k >= 110, which costs a case on each corpus. It is a
+retrieval gap, not a windowing one, and no setting of this parameter recovers it.
+
+**A test I wrote in this cycle was wrong in an instructive way.** To assert both
+arms request the same window I counted occurrences of `k=config.candidate_k` in
+the source and asserted two. There are four - two arms, the expansion arm, and
+the cap on the fused list - so it failed for being wrong about the
+implementation rather than for finding a defect. Replaced with a behavioural
+test on `dense_hits` and `lexical_hits`. **A source-string assertion breaks on a
+rename and stays silent on a behaviour change, which is the wrong way round.**
+
+**Rules.**
+1. **A diagnostic that returns nothing must prove it asked something.** Assert
+   the probe's own preconditions - here, that the index it searched was
+   non-empty - or an empty result will be read as a finding.
+2. **Bigger candidate sets are not free recall.** They are only an improvement
+   if whatever ranks them is trustworthy; against an imperfect reranker they
+   are additional opportunities to be wrong, and the metric that shows it is
+   the one you were not optimising.
+3. **Do not assert on source text when you can assert on behaviour.**

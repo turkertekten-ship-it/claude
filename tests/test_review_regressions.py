@@ -734,6 +734,55 @@ class PositionWeightTest(unittest.TestCase):
         self.assertAlmostEqual(by_id["late"], 1.0 / (1.0 + 0.15 * 9), places=9)
 
 
+class CandidateWindowTest(unittest.TestCase):
+    """A larger candidate set measured worse, not better (L66)."""
+
+    def test_the_shipped_window_is_the_measured_one(self):
+        from oodarag.retrieve.hybrid import RetrievalConfig
+
+        self.assertEqual(RetrievalConfig().candidate_k, 20)
+
+    def test_the_window_bounds_what_each_arm_contributes(self):
+        """Behaviourally, not by counting occurrences in the source.
+
+        The first version of this test grepped `retrieve` for
+        `k=config.candidate_k` and asserted it appeared twice. It appears four
+        times - the two arms, the expansion arm, and the cap on the fused list -
+        so the test failed for being wrong about the implementation rather than
+        for finding anything. A source-string assertion breaks on a rename and
+        stays silent on a behaviour change, which is the wrong way round.
+        """
+        from oodarag.ingest.base import MemoryStateStore
+        from oodarag.ingest.filesystem import FilesystemConnector
+        from oodarag.pipeline import IndexPipeline
+        from oodarag.retrieve.hybrid import HybridRetriever, RetrievalConfig
+        from oodarag.store.sqlite_store import SqliteStore
+        from tempfile import TemporaryDirectory
+
+        with TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            for i in range(30):
+                (root / f"doc{i:02d}.md").write_text(
+                    f"# Document {i}\n\nRetrieval fuses a dense arm and a "
+                    f"lexical arm, entry number {i}.\n", "utf-8")
+            store = SqliteStore(":memory:")
+            self.addCleanup(store.close)
+            pipeline = IndexPipeline(store)
+            pipeline.run([FilesystemConnector(str(root), patterns=["**/*.md"], key="fs:w")])
+
+            for k in (5, 20):
+                retriever = HybridRetriever(store, pipeline.embedder,
+                                            RetrievalConfig(candidate_k=k))
+                _, trace = retriever.retrieve("dense and lexical arm fusion")
+                self.assertLessEqual(trace.dense_hits, k,
+                                     f"the dense arm exceeded candidate_k={k}")
+                self.assertLessEqual(trace.lexical_hits, k,
+                                     f"the lexical arm exceeded candidate_k={k}")
+                self.assertEqual(trace.dense_hits, trace.lexical_hits,
+                                 "the arms contributed unequal candidate counts, so "
+                                 "fusion is weighted by configuration rather than rank")
+
+
 if __name__ == "__main__":
     unittest.main()
 
