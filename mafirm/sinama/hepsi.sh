@@ -33,6 +33,8 @@ python3 "$S/ks_m_izlenebilirlik.py"; topla "M · errata izlenebilirliği" $?
 echo
 python3 "$S/ks_n_olumsuz.py";     topla "N · olumsuz iddia kanıtı" $?
 echo
+python3 "$S/ks_o_kacirma.py";     topla "O · sır kapısı kaçırma yüzeyi" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

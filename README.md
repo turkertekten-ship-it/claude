@@ -19,7 +19,7 @@ aklındaki vakalardır ve hepsi geçer. Kör sınama o aklın dışında kalanı
   ayarlar ve **tamamen boş bir `esik.py`** taşıyan bir sistemde "DENETİM OK".
 - İşletim sözleşmesinin on bir kuralından **yedisinin** çalışan bir mekanizması
   yok; hiçbirinin tam mekanizması yok.
-- Yamadan sonra: **140 vaka, 0 SİNYAL** — on üç bilinen sapma
+- Yamadan sonra: **157 vaka, 0 SİNYAL** — on üç bilinen sapma
   `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş. Beyan edilmemiş bir
   başarısızlık (regresyon) ya da beyanlıyken artık geçen bir vaka (bayat beyan)
   takımı kırmızıya çevirir; ikisi de sınandı — on üçü de ya kitabın davranışının
@@ -39,7 +39,7 @@ aklındaki vakalardır ve hepsi geçer. Kör sınama o aklın dışında kalanı
 
 ## Koşum
 ```
-cd mafirm && ./sinama/hepsi.sh   # on dört takım, 140 vaka
+cd mafirm && ./sinama/hepsi.sh   # on beş takım, 157 vaka
 cd mafirm && ./denetim.sh --yapisal   # mühendislik katmanı  -> DENETİM OK
 cd mafirm && ./denetim.sh            # mevzuat bulguları dâhil -> BAŞARISIZ: 3
 ```

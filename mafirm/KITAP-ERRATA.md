@@ -143,6 +143,19 @@ cümlelerinin üçü de hiçbir kapıyı ateşlemiyor. *(B-07…B-09)*
 çağırmıyor — oysa kitabın kendisi `curl`, `git`, `pip` ve üç dış aracı Bash
 üzerinden öneriyor. Dışarı giden en geniş kanal izlenmiyor. *(C-05…C-09)*
 
+**[B] Sır kapısının ÜÇÜNCÜ kusuru: Unicode kaçırma yüzeyi.** Kanal ve desen
+kusurlarından ayrıdır ve ikisi düzeltilse bile kalır. Kapı düzyazının BİÇİMİNE
+güveniyor; oysa üç yüzey desenleri atlatıyor ve üçü de **kaza olarak oluşur** —
+PDF ya da Word'den kopyala yapıştır rutin olarak bunları üretir:
+ayrışmış aksan (`A.Ş.` → `A.S` + U+0327), görünmez karakter (sıfır genişlikli
+boşluk, yumuşak tire, yön işaretleyicileri) ve homoglif (Kiril `о`, Yunan `ο`).
+Kitabın §12'si zaten aynı SINIFTAN bir kusur taşıyordu (Python'un `İ`.lower()
+ayrışması) ama sınıfı genellemedi.
+→ Sır kapısı eşleştirmeden önce metni normalleştirmeli: biçim karakterlerini
+at, NFKC ile birleştir, dar bir homoglif tablosunu Latin'e katla. Yalnızca sır
+kapısında; dışarı giden çağrıda fazla bloklamak, az bloklamaktan güvenlidir.
+*(O-03…O-12)*
+
 **[B] Sır kapısının İKİNCİ kusuru: desenler çok dar.** Yukarıdaki kanal
 sorunundan ayrı bir kusurdur ve kanal düzeltilse bile kalır. İki desen var
 ("Proje Xxx" ve "Xxx A.Ş.") ve CLAUDE.md §6'nın saydığı şeylerin çoğunu

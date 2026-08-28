@@ -1,5 +1,5 @@
 ###############################################################
-#  KÖR SINAMA TAKIMI — 2026-08-28T07:54:55Z
+#  KÖR SINAMA TAKIMI — 2026-08-28T08:00:18Z
 ###############################################################
 
 /root/mafirm/sinama/ks_a_esik.py:45: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
@@ -274,7 +274,7 @@ GEÇTİ K-15   koltuk kapısı yöntem dosyalarını bloklamıyor
 KÖR SINAMA L — çapraz referans bütünlüğü
 ================================================================================================
 GEÇTİ L-01   belgelerdeki her yol atfının hedefi var
-        35 atıf incelendi, kırık: yok
+        37 atıf incelendi, kırık: yok
 GEÇTİ L-02   her INDEX kendi yöntem dosyalarının hepsini anıyor
         anılmayan: yok
 GEÇTİ L-03   belgelerde sabit ~/mafirm yolu kalmamış
@@ -292,9 +292,9 @@ GEÇTİ L-06   hafiza/ dosyalarının hepsi var
 KÖR SINAMA M — errata ↔ sınama izlenebilirliği
 ================================================================================================
 GEÇTİ M-01   her errata maddesi bir sınama vakasına atıf yapıyor
-        41 madde · atıfsız 0: yok
+        42 madde · atıfsız 0: yok
 GEÇTİ M-02   atıf yapılan her vaka kimliği gerçekten tanımlı
-        140 tanımlı kimlik · uydurma dayanak: yok
+        157 tanımlı kimlik · uydurma dayanak: yok
 GEÇTİ M-03   [A] ve [B] maddelerinin atıfları sadık sistemde gerçekten kaldı
         sadık koşumda kalan vaka: 41 · sınanmamış ağır madde: yok
 GEÇTİ M-04   sadık sistemde kalan her vaka errata'da ya da raporda açıklanmış
@@ -324,6 +324,33 @@ GEÇTİ N-08   kanıt, üç mevzuat bulgusunu çözdüğünü İDDİA ETMİYOR
 ------------------------------------------------------------------------------------------------
 8 vaka · 8 geçti · 0 beklenen · 0 SİNYAL
 
+SELFTEST OK (20 vaka)
+================================================================================================
+KÖR SINAMA O — sır kapısının kaçırma yüzeyi (Unicode)
+================================================================================================
+GEÇTİ O-01   düz kod adı yakalanıyor
+GEÇTİ O-02   düz şirket unvanı yakalanıyor
+GEÇTİ O-03   NFD ayrışmış kod adı yakalanıyor
+        Ş -> S + U+0327 birleşen çengel
+GEÇTİ O-04   NFD ayrışmış şirket unvanı yakalanıyor
+        A.Ş. -> A.S + U+0327
+GEÇTİ O-05   sıfır genişlikli boşluk (U+200B) atlatamıyor
+GEÇTİ O-06   sıfır genişlikli birleştirici (U+200D) atlatamıyor
+GEÇTİ O-07   yumuşak tire (U+00AD) atlatamıyor
+GEÇTİ O-08   sağdan sola işaretleyici (U+200F) atlatamıyor
+GEÇTİ O-09   Kiril 'о' ile yazılmış kod adı yakalanıyor
+GEÇTİ O-10   Kiril 'а' ile yazılmış unvan yakalanıyor
+GEÇTİ O-11   Yunan 'ο' ile yazılmış kod adı yakalanıyor
+GEÇTİ O-12   ayrışma + görünmez + homoglif birlikte
+GEÇTİ O-13   masum işlem metni SUSUYOR
+GEÇTİ O-14   mevzuat metni SUSUYOR
+GEÇTİ O-15   Türkçe aksanlı olağan cümle SUSUYOR
+GEÇTİ O-16   yerel yazmada hiçbir şey ateşlemiyor (disari=False)
+        sır kapısı yalnızca dışarı giden çağrıda ateşler — §12'nin kendi kuralı
+GEÇTİ O-17   normalleştirme kapının öz-sınamasını bozmadı
+------------------------------------------------------------------------------------------------
+17 vaka · 17 geçti · 0 beklenen · 0 SİNYAL
+
 ###############################################################
 #  ÖZET
 ###############################################################
@@ -338,6 +365,7 @@ GEÇTİ N-08   kanıt, üç mevzuat bulgusunu çözdüğünü İDDİA ETMİYOR
   L · çapraz referans bütünlüğü   temiz
   M · errata izlenebilirliği           temiz
   N · olumsuz iddia kanıtı            temiz
+  O · sır kapısı kaçırma yüzeyi   temiz
   ------------------------------------------------------------
   TOPLAM SİNYAL                         0
 

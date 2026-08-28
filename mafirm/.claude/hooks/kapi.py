@@ -43,6 +43,43 @@ def _sadelestir(s):
     return unicodedata.normalize("NFC", s)
 
 
+# --- [O takımı] Kaçırma yüzeyi: Unicode ------------------------------------
+# Sır kapısı bir GÜVENLİK denetimidir ve düzyazı biçimine güvenemez. Üç yol
+# desenleri atlatıyordu ve üçü de KAZA olarak da oluşur — PDF ya da Word'den
+# kopyala yapıştır, yumuşak tire, sıfır genişlikli karakter ve ayrışmış
+# aksan üretir:
+#   NFD ayrışması   "A.Ş." -> A.S + U+0327  (şirket unvanı deseni kaçırdı)
+#   sıfır genişlik  "Proje\u200bŞahin"      (kod adı deseni kaçırdı)
+#   homoglif        Kiril 'о' ile "Prоje"   (kod adı deseni kaçırdı)
+# Zaten §12'de aynı SINIFTAN bir kusur vardı: Python'un 'İ'.lower() ayrışması.
+
+# Türkçe metinde geçebilecek, dar ve muhafazakâr bir karıştırıcı tablosu.
+HOMOGLIF = {
+    "\u0430": "a", "\u0435": "e", "\u043e": "o", "\u0440": "p",
+    "\u0441": "c", "\u0443": "y", "\u0445": "x", "\u0456": "i",
+    "\u0410": "A", "\u0415": "E", "\u041e": "O", "\u0420": "P",
+    "\u0421": "C", "\u0423": "Y", "\u0425": "X", "\u0406": "I",
+    "\u03bf": "o", "\u039f": "O", "\u03b1": "a", "\u0391": "A",
+}
+
+
+def _temizle(s):
+    """Kaçırma yüzeyini kapat: biçim karakterlerini at, birleştir, katla.
+
+    Sıra önemli: önce görünmez karakterler atılır (yoksa NFKC onları
+    koruyabilir), sonra NFKC ile ayrışmış aksanlar birleştirilir, en sonda
+    dar bir homoglif tablosu Latin'e katlanır.
+
+    Bu YALNIZCA sır kapısında uygulanır. Aşırı normalleştirme başka kapılarda
+    yanlış pozitif üretebilir; dışarı giden bir çağrıda ise fazla bloklamak,
+    az bloklamaktan güvenlidir.
+    """
+    s = "".join(c for c in s
+                if unicodedata.category(c) != "Cf" and c != "\u00ad")
+    s = unicodedata.normalize("NFKC", s)
+    return "".join(HOMOGLIF.get(c, c) for c in s)
+
+
 # --- Tavsiye biçimleri [B-02..B-06] ----------------------------------------
 # Kitabın sürümü sekiz sabit ifadeydi. Bir hukukçunun gerçekten yazdığı
 # cümlelerin çoğu o sekizin dışında kalıyordu.
@@ -187,6 +224,7 @@ def kapi_sir(metin, disari=False):
     """Müvekkili tanıtan bilgi makineden çıkmamalı."""
     if not disari:
         return None
+    metin = _temizle(metin)          # [O takımı] kaçırma yüzeyini kapat
     for ad in _ad_kaydi():
         if re.search(re.escape(ad).replace(r"\ ", AYR), metin, re.I):
             return ("sir", "kayıtlı müvekkil/karşı taraf adı makineden çıkıyor: %r"

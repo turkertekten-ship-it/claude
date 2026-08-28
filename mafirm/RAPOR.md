@@ -35,9 +35,10 @@ Dokuz takım, 96 vaka:
 | L | Çapraz referans bütünlüğü ve taşınabilirlik | §4'ün düzen gerekçesi |
 | M | **Errata ↔ sınama izlenebilirliği** — raporun kendisine kanıt kuralı | CLAUDE.md §1 |
 | N | **Olumsuz iddia kanıtı** — raporun kendisine olumsuz iddia kuralı | CLAUDE.md §2 |
+| O | **Sır kapısının kaçırma yüzeyi** — Unicode | CLAUDE.md §6 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamadan ve iki
-takım eklendikten sonra **140 vaka, 0 SİNYAL** — on üç bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve BEKLENEN olarak raporlanıyor — ve on üçünün her biri ya
+takım eklendikten sonra **157 vaka, 0 SİNYAL** — on üç bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve BEKLENEN olarak raporlanıyor — ve on üçünün her biri ya
 kitabın davranışının bilerek bırakılmış kaydıdır ya da belgelenmiş bir
 öntanımlı boşluktur; hiçbiri yamalı sistemde çözülmemiş bir kusur değildir.
 
@@ -544,6 +545,41 @@ yazıldı; taban eşleşmesi `hepsi.sh`'in kendi çıkış kodudur ve orada kal�
 
 ---
 
+## Yedi buçuk artı altı · Kapı, düzyazının biçimine güveniyordu
+
+B takımındaki her vaka bir hukukçunun gerçekten **yazacağı** cümleydi. Ama sır
+kapısı (§6) bir **güvenlik denetimidir** ve güvenlik denetimi yalnızca iyi
+niyetli girdiyle sınanmaz. Bunu altı tur boyunca hiç sınamamıştım.
+
+Ve bu kuramsal bir tehdit modeli değil: üç yüzeyin üçü de **kaza olarak
+oluşur.** PDF ya da Word'den kopyala yapıştır rutin olarak yumuşak tire,
+sıfır genişlikli karakter ve ayrışmış aksan üretir. Bir müvekkil kod adı veri
+odası belgesinden kopyalanıp bir web aramasına yapıştırıldığında kapının onu
+görmesi gerekir. Görmüyordu:
+
+| Yüzey | Örnek | Kapı |
+|---|---|---|
+| NFD ayrışması | `A.Ş.` → `A.S` + U+0327 | **kaçırdı** |
+| Sıfır genişlikli boşluk | `Proje⁠<U+200B>Şahin` | **kaçırdı** |
+| Homoglif | Kiril `о` ile `Prоje` | **kaçırdı** |
+
+Kitabın §12'si zaten **aynı sınıftan** bir kusur taşıyordu ve ikinci turda
+bulunmuştu: Python'un `İ`.lower() ayrışması. Kitap o kusuru düzeltmemişti;
+ben düzelttim ama **sınıfı genellemedim** — tek bir örneği yamalayıp yüzeyin
+tamamını sınamadım. Altı tur sonra döndüm.
+
+Düzeltme yalnızca sır kapısında: biçim karakterlerini at, NFKC ile birleştir,
+dar bir homoglif tablosunu Latin'e katla. Diğer kapılarda uygulanmadı — aşırı
+normalleştirme yanlış pozitif üretir; ama **dışarı giden bir çağrıda fazla
+bloklamak, az bloklamaktan güvenlidir.**
+
+O takımı on yedi vaka: on iki kaçırma yüzeyi kapandı, **dört negatif kontrol**
+kapının masum metinde, mevzuat metninde ve Türkçe aksanlı olağan cümlede
+sustuğunu doğruluyor, ve bir vaka kapının kendi öz-sınamasının bozulmadığını
+denetliyor.
+
+---
+
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
 
 | Bölüm | Beklenen | Gerçek | Sebep |
@@ -666,7 +702,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # on dört takım, 140 vaka
+./sinama/hepsi.sh                 # on beş takım, 157 vaka
 ./denetim.sh --yapisal            # mühendislik katmanı
 ./denetim.sh                      # mevzuat bulguları dâhil
 ```
