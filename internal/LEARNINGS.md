@@ -4009,3 +4009,59 @@ deep and has stopped being a surprise.
    its best cell with anything. This one happened to peak at the boundary; the
    check cost four minutes and the alternative was a comparison against an
    unknown.
+
+---
+
+## L80 - The same always-False probe, twice in one session
+
+Query expansion was the last parameter in `RetrievalConfig` with no measurement
+under it - every other tuned value carries a sweep table, and `use_expansion`
+carried an "off" inherited from a corpus a third the current size. It was also
+the obvious tool for the two remaining external retrieval failures, which are
+vocabulary mismatches ("control what the clock returns" against freezegun's own
+wording).
+
+**Measured, it is inert on the gate corpus and live on the other.** External:
+identical pass and recall for every arm, with 4, 8 and 12 terms byte-identical.
+Primary: 8 terms gains 0.016 of nDCG, 4 terms *costs a case*. Fourth time this
+session the two corpora have wanted different things, after `base_weight` (L58),
+MMR (L75) and the abstention floor.
+
+**Then my probe lied to me, in a way I had already been caught by.** To explain
+the split I counted how many expansion candidates reach the top 8, testing
+`"expansion_rrf" in result.components`. The arm is registered as `"expanded"`,
+so the key is `expanded_rrf` and the test was always False. The probe printed
+"0 reaching the top 8" for both corpora at every candidate_k, which reads
+exactly like a finding - and would have supported the tidy story I had already
+formed, that expansion is truncated away by the halved `candidate_k`. It is the
+same defect as L58's `hasattr(r, "index")`, which produced a column of dashes I
+published before catching. Twice in one session, both times a membership test
+against a name I did not verify, both times producing a plausible zero.
+
+What tipped it off was arithmetic, not suspicion: primary's metrics moved when
+expansion was on, and a component contributing literally nothing cannot move a
+metric. The contradiction was in the data I already had.
+
+**With the right key, the real mechanism.** Expansion voted for 26% of external
+top-8 slots and 31-41% of primary's, touching 43 of 54 and 17 of 20 queries. But
+across 74 queries at k=20 and k=40 it introduced **zero** chunks the other arms
+had not already found. It is a re-ranker of the existing candidate set, never a
+recall mechanism - which is why recall@8 is unchanged to four decimals wherever
+it is enabled, and why it cannot fix the failures it was reached for: freezegun
+is at lexical rank 107 and dense 331, outside the candidate set, and a component
+that only reweights candidates cannot promote one that is not among them.
+
+The code comment says expansion "can add candidates but never evict". True of
+the design and misleading about the effect: on this corpus it never adds either.
+
+**Rules.**
+1. **A membership test against a string you did not verify is a coin flip that
+   always lands the same way.** Print the available keys once before writing
+   `"x" in components`; it costs one line and I have now paid for it twice.
+2. **A zero that agrees with your current hypothesis deserves more scrutiny
+   than one that contradicts it.** Both my zeros were confirmations, which is
+   why neither got checked.
+3. **Cross-check a "contributes nothing" against any metric that moved.** The
+   refutation was already in the table above the probe.
+4. **"Can add" and "does add" are different claims**, and only the second tells
+   you whether a component can fix a recall gap.

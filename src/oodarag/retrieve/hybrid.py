@@ -128,6 +128,38 @@ class RetrievalConfig:
     #: corpus: it helps where a question and its answer share little vocabulary,
     #: and hurts where the initial results are wrong, because it then retrieves
     #: more of the same. See retrieve/expansion.py.
+    #: Measured at last, on 153 external documents and 54 cases
+    #: (`scripts/expansion_ab.py`). It was the only tuned value in this file
+    #: with no table under it, and the "off" was inherited from a run against a
+    #: corpus a third the size.
+    #:
+    #:   arm                 external pass   nDCG@8   primary pass   nDCG@8
+    #:   off                 49/54           .7958    18/20          .7219
+    #:   on,  8 terms w=0.5  49/54           .7952    18/20          .7380
+    #:   on,  4 terms w=0.5  49/54           .7952    17/20          .7031
+    #:   on,  8 terms w=0.25 49/54           .7958    18/20          .7380
+    #:   on, 12 terms w=0.5  49/54           .7952    18/20          .7381
+    #:
+    #: On the gate corpus it does nothing: identical pass and recall, and 4, 8
+    #: and 12 terms are byte-identical. On the primary corpus it moves ordering
+    #: either way - 8 terms gains .016 of nDCG, 4 terms costs a case. Off stays,
+    #: because the gate sees no benefit and the one setting that helps primary
+    #: is next to a setting that hurts it.
+    #:
+    #: **What it is, mechanically.** Expansion voted for 26% of the external
+    #: top-8 slots and 31-41% of primary's, touching 43 of 54 and 17 of 20
+    #: queries - so it is not inert. But across 74 queries at both k=20 and
+    #: k=40 it introduced **zero** chunks the dense and lexical arms had not
+    #: already found. It is a re-ranker of the existing candidate set, never a
+    #: recall mechanism, which is why recall@8 is unchanged to four decimals
+    #: wherever it is switched on.
+    #:
+    #: That settles what it was reached for. The two remaining external
+    #: retrieval failures are documents outside the candidate set entirely
+    #: (freezegun at lexical rank 107 and dense 331), and a component that only
+    #: reweights candidates cannot promote one that is not among them. The
+    #: comment below says expansion "can add candidates"; on this corpus it does
+    #: not, and the difference matters when choosing it to fix a recall gap.
     use_expansion: bool = False
     expansion_feedback_k: int = 5
     expansion_terms: int = 8
