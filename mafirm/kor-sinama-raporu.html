@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>36 çalıştırılabilir takım · 307 vaka · 0 sinyal</span>
+    <span>37 çalıştırılabilir takım · 312 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -2134,6 +2134,66 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Otuz ikinci tur</span>
+  <h2>Yamanın kabul sınaması, yamanın açtığı deliği buldu</h2>
+  <p>Bir yama, işe yaradığı <strong>gösterilene</strong> kadar bir iddiadır.
+  Otuz birinci turun yaması sınandı — ve önce bir hipotez
+  <strong>çürütüldü</strong>.</p>
+
+  <div class="callout">
+    <strong>Çürüyen hipotez de bir ölçümdür.</strong> Hipotez şuydu: <em>"belki
+    hiçbir çıktı hangi rakama dayandığını yazmıyor; o hâlde SÜRÜMSÜZ her zaman
+    doğru olurdu ve yama boş bir tespit üretirdi."</em> Kitabın kendi çıktı
+    sözleşmesi (§15.1) bunu çürütüyor — çıktı <em>"kullanılan rakamlar ve her
+    birinin nereden geldiği"</em> ile doğrulama tarihini istiyor. Yama
+    boşluğa değil, kitabın kendi sözleşmesine dayanıyor. <em>Kitabı haksız
+    yere suçlamamak, onu doğru yerde suçlamak kadar işin parçasıdır.</em>
+  </div>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AN-05</span>
+      <span class="pill a">Kapının görmediği yol</span></div>
+    <h3>Sır kapısı müvekkil ADINI arıyor, müvekkil DOSYA YOLUNU görmüyor</h3>
+    <p>Yama, satırları <strong>müvekkil dosya adlarını</strong> taşıyan bir
+    tablo üretiyor ve "bu tablo makinede kalır" diyor. O cümle kapıya
+    sorulmalıydı. Soruldu:</p>
+    <table><thead><tr><th>dışarı giden metin</th><th>kapı ne yaptı</th></tr></thead><tbody>
+    <tr><td><code>dosyalar/Acme-Gida-devralma/ ETKİLENEN</code></td>
+        <td><strong>hiçbir kapı ateşlemedi</strong></td></tr>
+    </tbody></table>
+    <p>§12'nin sır kapısı işlem kod adına, <code>A.Ş.</code>/<code>Ltd. Şti.</code>
+    ekli unvana, işlem bedeline ve ad kaydına bakıyor. Bir dosya yolu bunların
+    hiçbirine uymaz: ASCII'ye katlanmış, tirelenmiş, eksiz. Oysa §2 sözlüğünde
+    <code>dosyalar/</code> <strong>canlı işleri</strong> tutar — altındaki
+    somut bir ad, tanımı gereği müvekkil kimliğidir.</p>
+    <p><strong>Ve boşluk yamanın açtığı bir boşluk değildi.</strong> §9'un
+    <code>dosya-ac</code> becerisi her işi <code>dosyalar/&lt;ad&gt;/</code>
+    klasörüyle açıyor ve çıktıları oraya yazıyor; sıradan bir oturum bu metni
+    <strong>zaten</strong> üretiyor. Yama yalnızca boşluğun üstüne ışık tuttu.</p>
+  </div>
+
+  <div class="callout">
+    <strong>On dördüncü, on dokuzuncu ve yirmi birinci turların sınıfı,
+    dördüncü kez:</strong> bir kaçırmayı kapatmak ölçülmemiş bir eksen açar.
+    Fark şu ki bu kez eksen, yama hiçbir yere gitmeden önce <strong>kendi
+    kabul sınamasında</strong> yakalandı. Kapıya somut canlı iş yolu kuralı
+    eklendi; yer tutucular (<code>dosyalar/</code>, <code>dosyalar/*/</code>,
+    <code>dosyalar/&lt;is&gt;/</code>) ateşlemez ve otuz yedi takımın
+    hiçbirinde yanlış pozitif üretmedi.
+  </div>
+
+  <p><strong>Errata izlenebilirliği de yeni bulguyu anmayı imkânsız
+  kılıyordu.</strong> M-03 her ağır maddenin atfının <em>kitaba sadık
+  koşumda</em> kalmış olmasını istiyordu — ama o koşum yamalardan öncesidir
+  ve sonradan yazılan bir takımın vakası orada hiç görünemez. Kural, yeni bir
+  kusuru <strong>doğru kimliğiyle anmayı</strong> imkânsız kılıyordu. Ölçüt
+  ikiye ayrıldı; iki dalda da gerçek bir şart var ve mutasyon ikisini de
+  sınıyor: uydurma bir kimlik anmak da, sadık koşumda <em>geçmiş</em> bir
+  vakayı anmak da kırmızı veriyor. <em>Bir kuralı gevşetmek, onu ölçmez hâle
+  getirmez.</em></p>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -2251,7 +2311,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 36 takım · 307 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 37 takım · 312 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
