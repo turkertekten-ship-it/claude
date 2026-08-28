@@ -2039,6 +2039,25 @@ Flat, then worse. Clipping compresses *magnitudes* and leaves the *ordering*
 alone, and the ordering is the defect: capped at 5.0, `revers` is 5.0 against
 `password` at 4.60 - still the wrong way round. Nothing was shipped.
 
+**The obvious next fix is blocked by leakage, which is worth knowing before
+building it.** If the defect is that IDF cannot tell a rare content word from a
+rare function word, the natural correction is a second frequency signal: a term
+appearing in *many questions* and few documents is scaffolding ("cannot",
+"let", "my"), while one appearing in few of both is discriminating ("password",
+"hook"). The 74 golden questions across both sets are exactly such a sample.
+
+They are also the test set. Weighting retrieval by statistics computed over the
+goldens is training on what the goldens are supposed to measure - the same
+contamination this project already quarantines documents to avoid, arriving
+through the term table instead of the corpus. The eval would improve and mean
+less.
+
+A real fix needs question-register frequencies from a source that is not the
+evaluation set: a held-out question pool, or an ordinary-English frequency list.
+The second is the usual answer and costs a dependency or a network fetch, which
+is ADR 0001's territory rather than a tuning decision. Recorded so the next
+cycle reaches that fork knowingly rather than building the leaky version first.
+
 **Rules.**
 1. **A term-weighting scheme inherits the register of the text it was fitted
    on.** IDF over documents answers "rare in these documents", and a query
