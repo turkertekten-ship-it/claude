@@ -1295,3 +1295,47 @@ sources:
       solid halves is unguessable at 1 in 30 and easy for anything that sees.
       The acuity limits are recorded in the probe's docstring rather than
       gated on.
+
+  - id: STOP-SEQUENCES-CLI-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T22:05Z"
+    method: >-
+      ClaudeCLIBackend._from_envelope now applies request.stop_sequences
+      client-side; verified against the live CLI and then by
+      tools/parity_check.py, which runs the same prompt with and without the
+      field set.
+    evidence: >-
+      Prompt "Write exactly this and nothing else: one two three FENCE four
+      five six". Unset, the model returned "one two three FENCE four five six".
+      Set to ("FENCE",), the same prompt returned "one two three " with
+      stop_reason="stop_sequence". The parity row moved from UNREACHABLE to
+      PASS.
+    note: >-
+      Not equivalent to the API and the row says so. The API stops GENERATING
+      at the sequence and bills only what it produced; this truncates text
+      already generated and already paid for. Same visible output, different
+      economics. Before this, the field was accepted by Request and silently
+      ignored by the CLI backend, which is worse than not supporting it: a
+      suite could set it and never learn it had no effect.
+
+  - id: PARITY-COUNT-CORRECTED-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T22:10Z"
+    method: python3 tools/parity_check.py, full live run.
+    evidence: >-
+      27 passed, 0 failed, 8 unreachable, $0.0226. Of the 8 unreachable rows,
+      4 are the API FORM of a capability reachable another way and each now
+      names the row that proves it: custom tool definitions (reachable over
+      MCP), explicit cache_control breakpoints (caching itself is observed),
+      image input as a content block (the CLI reads a generated PNG and names
+      its colours), and count_tokens before sending (a differential counter
+      through the CLI). The genuinely absent four are speed/fast mode,
+      direct Messages API access, temperature/top_p/top_k, and the Batch API.
+    note: >-
+      The summary line used to print one number for both kinds and read as
+      eight missing capabilities. It now separates them, because overstating
+      the gap is the same failure as understating it and the summary was
+      committing it. Of the four that remain, temperature/top_p/top_k was
+      removed from the platform rather than missing from this tool, and
+      speed/fast mode names an SDK opt-in path this harness does not take —
+      so two need a credential, and two cannot be reached from here at all.

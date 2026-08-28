@@ -429,8 +429,26 @@ class ClaudeCLIBackend(Backend):
                         or envelope.get("subtype")
                         or "backend reported is_error")
 
+        text = str(envelope.get("result", ""))
+        stop_reason = str(envelope.get("stop_reason") or "")
+        # The CLI has no --stop-sequences flag, so the request field was
+        # accepted and silently ignored: a suite could set it and get output
+        # straight through it, with nothing saying so. Applied here instead.
+        #
+        # This is NOT what the API does and the difference is worth stating.
+        # The API stops GENERATING at the sequence and bills only what it
+        # produced; this truncates text already generated and paid for. The
+        # visible behaviour matches, the economics do not, and stop_reason is
+        # set to "stop_sequence" so a reader can tell which happened.
+        if request.stop_sequences and text:
+            cut = min((i for i in (text.find(q) for q in request.stop_sequences)
+                       if i >= 0), default=-1)
+            if cut >= 0:
+                text = text[:cut]
+                stop_reason = "stop_sequence"
+
         return Completion(
-            text=str(envelope.get("result", "")),
+            text=text,
             structured=envelope.get("structured_output"),
             cost_usd=envelope.get("total_cost_usd"),
             input_tokens=int(usage.get("input_tokens") or 0),
@@ -439,7 +457,7 @@ class ClaudeCLIBackend(Backend):
             cache_creation_tokens=int(usage.get("cache_creation_input_tokens") or 0),
             duration_ms=int(envelope.get("duration_ms") or elapsed_ms),
             model=model_name,
-            stop_reason=str(envelope.get("stop_reason") or ""),
+            stop_reason=stop_reason,
             num_turns=int(envelope.get("num_turns") or 1),
             session_id=str(envelope.get("session_id") or ""),
             backend=self.name,

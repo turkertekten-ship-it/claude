@@ -299,7 +299,9 @@ def c_attachments(backend) -> Result:
     return Result("Image input as a content block", UNREACHABLE if ok else FAIL,
                   f"attachments lead the first user turn before the text, which is "
                   f"the documented order ({kinds}). Built and wire-tested. Missing: "
-                  f"a credential." if ok else f"wrong block order: {kinds}")
+                  f"a credential. Handing the model an image is NOT missing — see the "
+                  f"'Image input through the CLI' row, which reads a generated PNG "
+                  f"and names its colours." if ok else f"wrong block order: {kinds}")
 
 
 @check("Prompt caching actually happens")
@@ -673,20 +675,56 @@ def c_sampling(backend) -> Result:
                   if all_rejected else f"unexpected: {probes}")
 
 
-@check("stop_sequences", live=False)
+@check("stop_sequences")
 def c_stop_sequences(backend) -> Result:
+    """Reachable through the CLI after all -- with the difference stated.
+
+    This row read UNREACHABLE for the usual reason: no CLI flag, built on the
+    api backend, missing a credential. All true, and all about the endpoint
+    rather than the capability. The CLI backend now applies stop sequences
+    client-side, so a suite that sets the field gets output that stops there.
+    Before, the field was accepted and silently ignored, which is the worse
+    of the two failures: a suite could rely on it and never learn otherwise.
+
+    What this is NOT: the API stops GENERATING at the sequence and bills only
+    what it produced. This truncates text already generated and already paid
+    for. Same visible output, different economics, and stop_reason is set to
+    "stop_sequence" either way so the run record says which happened.
+    """
     from workbench.api_backend import AnthropicAPIBackend
     b = AnthropicAPIBackend(api_key="offline-probe")
     body = b.build_body(Request(prompt="x", model="claude-haiku-4-5",
                                 stop_sequences=("STOP",)))
-    built = body.get("stop_sequences") == ["STOP"]
-    return Result("stop_sequences", UNREACHABLE,
-                  f"no CLI flag. BUILT on the anthropic-api backend and exercised "
-                  f"over real HTTP against a conforming server, which received "
-                  f"{body.get('stop_sequences')} in the request body. What is "
-                  f"missing is a credential for Anthropic's endpoint, not code and "
-                  f"not a tested transport."
-                  if built else "the api backend did not carry stop_sequences")
+    if body.get("stop_sequences") != ["STOP"]:
+        return Result("stop_sequences", FAIL,
+                      "the api backend did not carry stop_sequences")
+
+    prompt = ("Write exactly this and nothing else: "
+              "one two three FENCE four five six")
+    try:
+        plain = backend.complete(Request(prompt=prompt, model="claude-haiku-4-5",
+                                         tools="", mode="text"))
+        cut = backend.complete(Request(prompt=prompt, model="claude-haiku-4-5",
+                                       tools="", mode="text",
+                                       stop_sequences=("FENCE",)))
+    except Exception as exc:  # noqa: BLE001
+        return Result("stop_sequences", UNREACHABLE, str(exc)[:200])
+
+    # The probe is only meaningful if the sequence was there to be cut.
+    if "FENCE" not in plain.text:
+        return Result("stop_sequences", UNREACHABLE,
+                      f"the model did not emit the sequence, so nothing was "
+                      f"there to stop at: {plain.text.strip()[:120]!r}")
+    ok = "FENCE" not in cut.text and cut.stop_reason == "stop_sequence"
+    return Result("stop_sequences", PASS if ok else FAIL,
+                  f"unset, the model returned {plain.text.strip()[:44]!r}; set, the "
+                  f"same prompt returned {cut.text.strip()[:44]!r} with "
+                  f"stop_reason={cut.stop_reason!r}. Applied client-side by the CLI "
+                  f"backend — the API would stop generating and bill less, this "
+                  f"truncates what was already produced, and the run record says so"
+                  if ok else
+                  f"the sequence was not applied: {cut.text.strip()[:120]!r} "
+                  f"(stop_reason={cut.stop_reason!r})")
 
 
 # --------------------------------------------------------------- structure
@@ -1005,9 +1043,26 @@ def main(argv: list[str]) -> int:
               f"{counts[UNREACHABLE]} unreachable — ${total_cost:.4f}, "
               f"{time.time() - started:.0f}s")
         if counts[UNREACHABLE]:
+            # "8 unreachable" reads as eight missing capabilities, and that is
+            # not what the rows say. Four of them name another row where the
+            # SAME capability is reachable by a different route -- the API
+            # form of it is blocked, the thing itself is not. Printing one
+            # number for both would overstate the gap, which is the failure
+            # this repository exists to prevent, committed by its own summary.
+            elsewhere = [r for r in results if r.verdict == UNREACHABLE
+                         and "see the" in (r.detail or "").lower()]
             print("\nUnreachable is not a softer failure. Those capabilities either "
                   "need\nan API key this container does not have, or were removed from "
                   "the\nplatform and cannot be exercised anywhere.")
+            if elsewhere:
+                print(f"\nBut {len(elsewhere)} of the {counts[UNREACHABLE]} are the "
+                      f"API FORM of a capability that is\nreachable another way, and "
+                      f"each says which row proves it:")
+                for r in elsewhere:
+                    print(f"  - {r.capability}")
+                print(f"\nSo the count of capabilities genuinely absent here is "
+                      f"{counts[UNREACHABLE] - len(elsewhere)}, not "
+                      f"{counts[UNREACHABLE]}.")
     return 1 if counts[FAIL] else 0
 
 
