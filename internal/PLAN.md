@@ -15,26 +15,42 @@
 | Generation | done | Citation contract verified against retrieved chunks; extractive default, Claude optional |
 | Eval | done | recall/precision/MRR/nDCG, citation coverage, abstention, contamination detection and quarantine |
 | OODA loop | done | Five journalled phases, auditable policy rules, action budget |
-| External eval corpus | done | 14 PyPI pages with provenance; contamination reports clean, so no quarantine is needed |
+| External eval corpus | done | 33 PyPI pages with provenance and a manifest; 1 of 36 questions contaminated, 2 documents quarantined |
 | Incremental deletion | done | Removals propagate to the delta, prune guarded at 25% of a source, refused entirely for a failed connector |
 | CLI | done | `preflight, index, query, eval, loop, status, journal, demo` |
 | CI | done | Three jobs: stdlib matrix, numpy path, retrieval regression gate |
 
 **Current measurements** (offline embedder, deterministic).
-204 tests passing. Retrieval metrics are over graded cases only - abstention
+227 tests passing. Retrieval metrics are over graded cases only - abstention
 cases have nothing to retrieve, and averaging their zeros in made adding a
 negative case look like a retrieval regression.
 
 | | primary (this repo) | external (33 PyPI pages) |
 |---|---|---|
 | golden cases | 17/20 | **32/36** |
-| recall@8 | 0.81 | 0.93 |
-| hit@8 | 0.88 | 0.93 |
-| MRR | 0.59 | 0.87 |
-| nDCG@8 | 0.62 | 0.86 |
+| recall@8 | 0.8125 | 0.9286 |
+| precision@8 | 0.2031 | 0.2946 |
+| hit@8 | 0.8750 | 0.9286 |
+| MRR | 0.5766 | 0.8741 |
+| nDCG@8 | 0.6126 | 0.8633 |
 | citation coverage | 1.00 | 1.00 |
-| contamination | 4/20 quarantined | 1/36 |
+| contamination | 4/20 questions, 26 documents held out | 1/36 questions, 2 documents |
 | role | smoke test | **regression gate** |
+
+What each retrieval arm is worth, on the external set (`scripts/ablation.py`):
+
+| configuration | pass | recall@8 | prec@8 | MRR | nDCG@8 |
+|---|---|---|---|---|---|
+| hybrid | 32/36 | 0.9286 | 0.2946 | 0.8741 | 0.8633 |
+| lexical only | 32/36 | 0.8929 | 0.2723 | 0.8762 | 0.8486 |
+| dense only | 31/36 | 0.8214 | 0.3393 | 0.7798 | 0.7847 |
+| no rerank | 31/36 | 0.8571 | 0.1652 | 0.7976 | 0.7923 |
+| no mmr | 32/36 | 0.9107 | 0.3036 | 0.8741 | 0.8634 |
+
+Dense-only has the best precision and the worst recall, which is the argument
+for hybrid stated as a measurement rather than a belief. Note that hit@8 is not
+in this table: it read 26/28 for both hybrid and lexical-only, because it
+saturates on a corpus this size (L23).
 
 The gap between the columns is the self-reference problem, not a difference in
 difficulty: the primary corpus contains the questions, so its best matches are
@@ -59,10 +75,45 @@ its current failures are that artefact. See docs/EVALUATION.md.
 
 ## Next, in order of value
 
-2. **A hosted embedder behind the existing interface**, measured against the
+1. **A hosted embedder behind the existing interface**, measured against the
    offline baseline on the same goldens. The interface and the baseline exist;
-   only the comparison is missing.
-4. **Query expansion** for the semantic-gap case, as the cheaper alternative to a
-   neural embedder.
-5. **Multi-hop retrieval**, once single-shot recall is well characterised.
+   only the comparison is missing, and it is currently **blocked**: no
+   `ANTHROPIC_API_KEY` or `VOYAGE_API_KEY` is reachable from this environment.
+   `ooda preflight` reports this, so the block is visible rather than inferred.
+   This is the measurable argument for the one golden case that fails on
+   purpose - the offline embedder cannot bridge "running forever" to a corpus
+   that says "never terminates".
+
+2. **A golden set drawn from a corpus this repository does not describe.** The
+   external set is that, and it is why it is the regression gate. The primary
+   set's quarantine is at 26 documents across 4 questions and rises with every
+   commit (L22). Widening the external corpus is worth more than any scoring
+   change, because it is the only lever on the failures that remain. This is
+   actionable now: `ooda preflight` has `web_pypi` **ok** (HTTP 200) while
+   wikipedia, youtube, ibm.com and arxiv are refused CONNECT by the proxy, so
+   PyPI is the reachable source and the corpus can grow without a new egress
+   path.
+
+3. **Multi-hop retrieval**, once single-shot recall is well characterised.
    Adding a loop over a retriever with unknown recall multiplies every failure.
+   Single-shot recall is now characterised on the external set (0.9286), so the
+   precondition is close to met.
+
+## Deliberately not next
+
+- **Tuning the abstention gate.** Five candidate features were ranked against
+  the one in use and none beat it: AUC 0.973 for `rerank_relevance` against
+  0.77-0.80 for score-shape signals and 0.574 for match specificity
+  (`scripts/gate_features.py`, L25). The two remaining gate failures are the
+  tail of a feature that is already the best available, not a design flaw.
+  Separating "the corpus discusses these words" from "the corpus answers this
+  question" needs a judge that reads or a larger corpus - neither is a scoring
+  change.
+
+- **Raising `coverage_power`.** Measured on both corpora and left at 1.0. It
+  trades primary recall for pass rate on one corpus, and it widens the gate's
+  overlap monotonically (`scripts/gate_margin.py`). The table is in
+  `retrieve/rerank.py`.
+
+- **Query expansion.** Built, measured, and off by default because it made
+  retrieval worse. The table is in `retrieve/expansion.py`.
