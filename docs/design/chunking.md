@@ -124,11 +124,35 @@ Two constraints follow that the rest of this document does not carry:
   usually survives in the text stream, which is what the `context_header`
   above needs; clause *indentation and nesting* generally do not.
 
-  The honest sequencing, then: ship `pypdf` for born-digital documents now,
-  detect the empty-extraction case and record it as a skipped document rather
-  than an empty one, and keep U-9 open for the scanned half. A silent empty
-  extraction is the worst outcome available — it indexes a contract as though
-  it contained nothing.
+  **And the scanned half has a route too.** The Ubuntu archive is reachable
+  even though the launchpad PPAs are not, so `tesseract-ocr` and
+  `poppler-utils` install. `pdftoppm -r 200 -png` followed by `tesseract`
+  returned the test clause headings exactly
+  [src:OCR-CHAIN-WORKS-2026-08-27]. So the full path is available today:
+
+  | Document | Route |
+  |---|---|
+  | born-digital PDF | `pypdf`, or `pdftotext` |
+  | scanned PDF | `pdftoppm` → `tesseract` |
+  | tables, reading order | **still unavailable** — this is what TableFormer was for |
+
+  The honest sequencing, then: extract born-digital text directly, fall back to
+  rasterise-and-OCR when extraction returns empty, and **never let an empty
+  extraction pass silently** — record it as a skipped document with a reason,
+  not as a document containing nothing. Indexing a contract as empty is worse
+  than not indexing it, because it answers queries with confident silence.
+
+  Two constraints to design against rather than discover:
+
+  - **Tables do not survive.** Clause prose comes back; schedules, payment
+    tables and cap tables come back as ordered text without structure
+    [src:OCR-CHAIN-WORKS-2026-08-27]. For a transaction corpus that is a real
+    loss, and it is the residue of U-9, not something `pypdf` or Tesseract can
+    be configured around.
+  - **The toolchain is ephemeral.** These are apt packages in a container that
+    does not persist, exactly like the user-scope skill install. The install
+    has to be a scripted step in the pipeline's setup, never a thing a session
+    remembers having done.
 - **Redaction matters more here than anywhere else in this corpus.** These
   documents name private counterparties, and `redact_secrets` catches
   credentials, not names [src:AUDIT-OODARAG-2026-08-27]. Anything indexing this

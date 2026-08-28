@@ -704,3 +704,25 @@ sources:
       document. A second goal was issued later at 17:0xZ - "dive dep into web
       and git hub and web and git hub and dont stop until all is done and
       nothing is open ooda" - which set no new access scope.
+
+  - id: OCR-CHAIN-WORKS-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T17:15Z"
+    method: "apt-get install tesseract-ocr poppler-utils; PIL-rendered test image OCR'd with tesseract; pdftoppm -r 200 -png then tesseract; pdftotext on the same PDF"
+    evidence: >-
+      The Ubuntu noble archive is reachable even though the launchpad PPAs are
+      refused with 403. tesseract-ocr 5.3.4 with leptonica 1.82.0 installed,
+      reporting languages eng and osd; poppler-utils 24.02.0 installed,
+      providing pdftoppm, pdftotext and pdfimages. On a rendered test image
+      tesseract returned "Clause 3.a Master Agreement" and "Section 7.2
+      Indemnity and Limitation" exactly. On a PDF, `pdftoppm -r 200 -png`
+      followed by tesseract returned "Clause 3.a Master Agreement" and
+      "Section 7.2 Indemnity", and `pdftotext` returned the same text directly.
+    note: >-
+      A complete PDF-to-text path exists inside this egress allowlist with no
+      Hugging Face dependency: pdftotext or pypdf for born-digital documents,
+      pdftoppm plus tesseract for scanned ones. What it does NOT provide is the
+      part Docling's TableFormer exists for - table structure recognition and
+      reading-order recovery. Tesseract returns text, not table geometry.
+      These packages are apt-installed into the container and are as ephemeral
+      as ~/.claude; a fresh session must install them again.

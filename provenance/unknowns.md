@@ -179,13 +179,31 @@ that directory.
 **Do not:** add Docling to a dependency list on the strength of it installing.
 Installation is not capability here.
 
-**Partially routed around (2026-08-27).** `pypdf` is pure Python, installs from
-PyPI, downloads no models, and extracted the test text verbatim
-[src:PYPDF-WORKS-2026-08-27]. Born-digital PDFs are therefore ingestable now
-without resolving this entry. What remains genuinely blocked is the half
-Docling was wanted for: layout, table structure, reading order, and OCR for
-scanned documents. Executed agreements are frequently scanned, so this is not a
-corner case for this corpus.
+**Routed around, and narrower than it looked (2026-08-27).** A complete
+PDF-to-text path exists inside this allowlist with no Hugging Face dependency:
+
+- **Born-digital** — `pypdf` (pure Python, PyPI) extracted the test text
+  verbatim [src:PYPDF-WORKS-2026-08-27]; `pdftotext` from poppler-utils does
+  the same [src:OCR-CHAIN-WORKS-2026-08-27].
+- **Scanned** — the Ubuntu noble archive is reachable even though the launchpad
+  PPAs are refused, so `tesseract-ocr` 5.3.4 and `poppler-utils` 24.02.0 both
+  install. `pdftoppm -r 200 -png` followed by `tesseract` returned the test
+  clause headings exactly [src:OCR-CHAIN-WORKS-2026-08-27].
+
+**What is still genuinely unavailable** is the specific thing Docling's
+TableFormer exists for: table structure recognition and reading-order
+recovery. Tesseract returns text, not table geometry
+[src:OCR-CHAIN-WORKS-2026-08-27]. For a contract corpus that matters in a
+bounded way — clause prose survives, and schedules, payment tables and cap
+tables do not come back as structure.
+
+**Also note the ephemerality**, which is the same trap as the user-scope skill
+install: these are apt packages in a container that does not persist. A fresh
+session has none of them. Anything depending on this path needs the install to
+be a scripted step, not a remembered one.
+
+**Resolves fully when:** Hugging Face is reachable, or a table-structure model
+is obtainable from an allowlisted host.
 
 ---
 

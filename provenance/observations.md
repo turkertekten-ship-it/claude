@@ -109,6 +109,9 @@ contents were not reconstructed, summarised, or guessed at.
 - An "IBM Technology" YouTube channel exists and publishes RAG explainers, including one by a Senior Research Scientist at IBM Research. [src:IBM-YOUTUBE-CHANNEL-2026-08-27]
 - The sibling YouTube connector resolves metadata via oEmbed and captions via `timedtext` rather than the Data API, and both of those endpoints are on `youtube.com` and refused at CONNECT, so only its offline hand-off can run here. [src:YOUTUBE-LIVE-PATH-BLOCKED-2026-08-27]
 - `pypdf` 6.16.2 installs from PyPI, downloads no models, and extracted the test document's text verbatim, so born-digital PDFs are parseable inside this allowlist; it does no layout, table or OCR work. [src:PYPDF-WORKS-2026-08-27]
+- The Ubuntu noble archive is reachable even though the launchpad PPAs are refused with 403, so `tesseract-ocr` 5.3.4 and `poppler-utils` 24.02.0 both install. [src:OCR-CHAIN-WORKS-2026-08-27]
+- `pdftoppm -r 200 -png` followed by `tesseract` returned the test document's clause headings exactly, so scanned PDFs are OCR-able here with no Hugging Face dependency. [src:OCR-CHAIN-WORKS-2026-08-27]
+- What remains unavailable is table-structure recognition and reading-order recovery — the specific capability Docling's TableFormer provides. [src:OCR-CHAIN-WORKS-2026-08-27]
 - The RAG sibling branch now carries `chunking.py`, `cli.py`, `config.py`, `pipeline.py` and `embedding/`, `retrieve/`, `store/`, `generate/`, `eval/`, `ooda/` and `access/` packages, so the stages recorded as absent were unpushed rather than unwritten. [src:RAG-BRANCH-COMPLETE-2026-08-27]
 
 ## Observed — scope of the skill install
