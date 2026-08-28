@@ -1,3 +1,7 @@
+---
+date: 2026-03-19T14:22:23+0000
+source: https://pypi.org/project/attrs/
+---
 [image: attrs]
 
 attrs is the Python package that will bring back the joy of writing classes by relieving you from the drudgery of implementing object protocols (aka dunder methods).

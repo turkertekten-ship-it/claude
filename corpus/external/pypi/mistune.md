@@ -1,3 +1,7 @@
+---
+date: 2026-07-22T05:22:29+0000
+source: https://pypi.org/project/mistune/
+---
 A fast yet powerful Python Markdown parser with renderers and plugins.
 
 ## Overview

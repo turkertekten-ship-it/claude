@@ -1,3 +1,7 @@
+---
+date: 2026-05-26T09:56:02+0000
+source: https://pypi.org/project/pytest-asyncio/
+---
 [image: https://img.shields.io/pypi/v/pytest-asyncio.svg] [image: https://github.com/pytest-dev/pytest-asyncio/workflows/CI/badge.svg] [image: https://codecov.io/gh/pytest-dev/pytest-asyncio/branch/main/graph/badge.svg] [image: Supported Python versions] [image: Matrix chat room: #pytest-asyncio]
 
 pytest-asyncio is a pytest plugin. It facilitates testing of code that uses the asyncio library.

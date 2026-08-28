@@ -1,3 +1,7 @@
+---
+date: 2026-08-11T00:33:40+0000
+source: https://pypi.org/project/trio/
+---
 [image: Join chatroom] [image: Join forum] [image: Documentation] [image: Latest PyPi version] [image: Latest conda-forge version] [image: Test coverage]
 
 ## Trio – a friendly Python library for async concurrency and I/O

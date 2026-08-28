@@ -1,3 +1,7 @@
+---
+date: 2026-05-09T18:28:50+0000
+source: https://pypi.org/project/paramiko/
+---
 [image: PyPI - Package Version] [image: PyPI - Python Version] [image: PyPI - License] [image: CircleCI] [image: Codecov]
 
 ## Welcome to Paramiko!

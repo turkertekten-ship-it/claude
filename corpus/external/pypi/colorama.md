@@ -1,3 +1,7 @@
+---
+date: 2022-10-25T02:36:20+0000
+source: https://pypi.org/project/colorama/
+---
 [image: Latest Version] [image: Supported Python versions] [image: Build Status]
 
 ## Colorama

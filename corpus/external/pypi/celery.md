@@ -1,3 +1,7 @@
+---
+date: 2026-03-26T12:14:49+0000
+source: https://pypi.org/project/celery/
+---
 [image: https://docs.celeryq.dev/en/latest/_images/celery-banner-small.png]
 
 [image: Build status] [image: coverage] [image: BSD License] [image: Celery can be installed via wheel] [image: Semgrep security] [image: Supported Python versions.] [image: Supported Python implementations.] [image: Backers on Open Collective] [image: Sponsors on Open Collective]

@@ -1,3 +1,7 @@
+---
+date: 2024-05-25T18:41:59+0000
+source: https://pypi.org/project/schedule/
+---
 [image: https://github.com/dbader/schedule/workflows/Tests/badge.svg] [image: https://coveralls.io/repos/dbader/schedule/badge.svg?branch=master] [image: https://img.shields.io/pypi/v/schedule.svg]
 
 Python job scheduling for humans. Run Python functions (or any other callable) periodically using a friendly syntax.

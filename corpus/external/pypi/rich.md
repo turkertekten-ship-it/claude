@@ -1,3 +1,7 @@
+---
+date: 2026-04-12T08:24:00+0000
+source: https://pypi.org/project/rich/
+---
 [image: Supported Python Versions] [image: PyPI version]
 
 [image: Downloads] [image: codecov] [image: Rich blog] [image: Twitter Follow]

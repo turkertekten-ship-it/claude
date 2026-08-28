@@ -1,3 +1,7 @@
+---
+date: 2026-08-23T11:43:38+0000
+source: https://pypi.org/project/peewee/
+---
 [image: https://media.charlesleifer.com/blog/photos/peewee4-logo.png]
 
 ## peewee

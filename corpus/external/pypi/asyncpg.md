@@ -1,3 +1,7 @@
+---
+date: 2025-11-24T23:25:23+0000
+source: https://pypi.org/project/asyncpg/
+---
 [image: GitHub Actions status] [image: https://img.shields.io/pypi/v/asyncpg.svg]
 
 asyncpg is a database interface library designed specifically for

@@ -1,3 +1,7 @@
+---
+date: 2026-08-21T16:33:14+0000
+source: https://pypi.org/project/faker/
+---
 Faker is a Python package that generates fake data for you. Whether
 you need to bootstrap your database, create good-looking XML documents,
 fill-in your persistence to stress test it, or anonymize data taken from

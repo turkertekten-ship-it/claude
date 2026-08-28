@@ -1,3 +1,7 @@
+---
+date: 2026-08-11T19:07:09+0000
+source: https://pypi.org/project/sqlalchemy/
+---
 [image: PyPI] [image: PyPI - Python Version] [image: PyPI - Downloads]
 
 The Python SQL Toolkit and Object Relational Mapper

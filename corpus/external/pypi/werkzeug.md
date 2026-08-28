@@ -1,3 +1,7 @@
+---
+date: 2026-04-02T18:49:12+0000
+source: https://pypi.org/project/werkzeug/
+---
 # Werkzeug
 
 werkzeug German noun: "tool". Etymology: werk ("work"), zeug ("stuff")

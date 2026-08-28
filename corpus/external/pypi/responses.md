@@ -1,3 +1,7 @@
+---
+date: 2026-08-26T19:17:23+0000
+source: https://pypi.org/project/responses/
+---
 [image: https://img.shields.io/pypi/v/responses.svg] [image: https://img.shields.io/pypi/pyversions/responses.svg] [image: https://img.shields.io/pypi/dm/responses] [image: https://codecov.io/gh/getsentry/responses/branch/master/graph/badge.svg]
 
 A utility library for mocking out the requests Python library.

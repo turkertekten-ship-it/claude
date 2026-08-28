@@ -1,3 +1,7 @@
+---
+date: 2026-08-18T05:14:22+0000
+source: https://pypi.org/project/idna/
+---
 # Internationalized Domain Names in Applications (IDNA)
 
 Support for Internationalized Domain Names in Applications

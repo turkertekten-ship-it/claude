@@ -1,3 +1,7 @@
+---
+date: 2026-03-25T20:21:10+0000
+source: https://pypi.org/project/tomli/
+---
 [image: Build Status] [image: codecov.io] [image: PyPI version]
 
 # Tomli

@@ -1,3 +1,7 @@
+---
+date: 2026-08-17T08:02:44+0000
+source: https://pypi.org/project/pygments/
+---
 Pygments is a syntax highlighting package written in Python.
 
 It is a generic syntax highlighter suitable for use in code hosting, forums,

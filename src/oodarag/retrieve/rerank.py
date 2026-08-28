@@ -177,26 +177,36 @@ class HeuristicReranker(Reranker):
     #: Between them that is 0.20 of the reranker's weight carried by unit tests
     #: alone (L43).
     authority_weight: float = 0.12
-    #: Neither eval gate can see this, and the reason is saturation rather than
-    #: uniformity - a distinction worth keeping, because the two have different
-    #: fixes. The documents do carry distinct dates (94 of 96 on the primary
-    #: corpus, 34 of 91 on the external one), but they span 0.94 and 0.03 days,
-    #: so the factor itself spans only 0.9948-0.9999 and 0.9992-0.9993. At the
-    #: weight below that is 4.2e-04 of score against a coverage term weighted
-    #: 0.45 over [0, 1]: enough to break an exact tie, and nothing else.
-    #: Measured: switching recency off entirely leaves both sets at 48/54 and
-    #: 18/20 with every metric unchanged, and moving the clock five years
-    #: forward does nothing either.
+    #: **0.0, and that is a measurement rather than a default.**
     #:
-    #: The corpora are the limit, not the code. Both are files whose ages span
-    #: under a day - this repository's entire git history is 0.9 days long, and
-    #: the external pages were scraped in one run - so there is no age signal in
-    #: either to find. So this weight is carried by unit tests alone, and a
-    #: regression in it would not show up in the regression gate. Recorded
-    #: rather than removed: the factor is right for a corpus of mixed ages,
-    #: which is what a crawl or a chat archive produces, and those are not what
-    #: the gates run on.
-    recency_weight: float = 0.08
+    #: This was 0.08 and unmeasurable for the life of the project: every
+    #: document in both corpora shared an age, so the factor was a constant and
+    #: could not reorder anything (L43, L50). The external corpus now carries
+    #: each PyPI page's real release date as committed front matter, spanning
+    #: **5.5 years**, and the factor spans 0.0042-1.0000 instead of
+    #: 0.999182-0.999348 - a 6000x wider signal, worth 0.0797 of score at the
+    #: old weight instead of 0.000013.
+    #:
+    #: Swept the first time it could be (external, 54 cases, dates live):
+    #:
+    #:   recency_weight  0.0    0.02   0.04   0.06   0.08   0.12   0.16
+    #:   pass            49/54  47     47     47     47     45     45
+    #:   recall@8        0.9302 0.8837 0.8837 0.8837 0.9070 0.8605 0.8605
+    #:   nDCG@8          0.7538 0.7414 0.7373 0.7341 0.7390 0.7233 0.7143
+    #:
+    #: Zero dominates on every metric, and the factor was **harmless while dead
+    #: and harmful once alive**. The reason is not subtle: recency is a prior
+    #: for corpora whose documents *supersede* one another - news, changelogs,
+    #: versioned docs, a chat archive - where a later document is more likely to
+    #: be the answer. A corpus of package descriptions has no such property. How
+    #: recently `pydantic` shipped a release says nothing about whether it
+    #: answers a question about `relativedelta`.
+    #:
+    #: So it is off by default and this table is the argument for turning it on:
+    #: raise it for a superseding corpus, and measure, because a prior that
+    #: suits the wrong corpus is noise injected into every query. The primary
+    #: corpus is unaffected either way - its files still share one checkout age.
+    recency_weight: float = 0.0
     position_weight: float = 0.05
     base_weight: float = 1.0
     half_life_days: float = 365.0

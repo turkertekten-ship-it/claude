@@ -1,3 +1,7 @@
+---
+date: 2026-02-18T22:15:17+0000
+source: https://pypi.org/project/cattrs/
+---
 # cattrs: Flexible Object Serialization and Validation
 
 Because validation belongs to the edges.

@@ -1,3 +1,7 @@
+---
+date: 2025-10-27T16:02:15+0000
+source: https://pypi.org/project/pdoc/
+---
 [image: pdoc]
 
  [image: pdoc documentation] [image: CI Status] [image: Code Coverage] [image: autofix.ci: yes] [image: PyPI Version] [image: Supported Python Versions]

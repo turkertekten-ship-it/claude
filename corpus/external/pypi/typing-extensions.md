@@ -1,3 +1,7 @@
+---
+date: 2026-07-02T08:40:04+0000
+source: https://pypi.org/project/typing-extensions/
+---
 # Typing Extensions
 
 [image: Chat at https://gitter.im/python/typing]

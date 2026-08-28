@@ -1,3 +1,7 @@
+---
+date: 2026-08-27T10:01:34+0000
+source: https://pypi.org/project/msgpack/
+---
 # MessagePack for Python
 
 [image: Build Status] [image: Documentation Status]

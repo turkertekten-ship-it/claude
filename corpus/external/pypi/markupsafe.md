@@ -1,3 +1,7 @@
+---
+date: 2025-09-27T18:36:05+0000
+source: https://pypi.org/project/markupsafe/
+---
 # MarkupSafe
 
 MarkupSafe implements a text object that escapes characters so it is

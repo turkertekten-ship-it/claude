@@ -1,3 +1,7 @@
+---
+date: 2026-08-04T17:55:54+0000
+source: https://pypi.org/project/elasticsearch/
+---
 [image: Elastic logo]
 
 # Elasticsearch Python Client

@@ -1,3 +1,7 @@
+---
+date: 2026-08-06T13:46:55+0000
+source: https://pypi.org/project/coverage/
+---
 Code coverage measurement for Python.
 
  [image: Stand with Ukraine]

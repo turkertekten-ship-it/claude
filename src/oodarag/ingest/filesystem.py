@@ -15,7 +15,8 @@ from oodarag.ingest.base import Connector
 from oodarag.ingest.github import LANGUAGE_BY_EXT, SKIP_PATH_RE, TEXT_EXTENSIONS
 from oodarag.models import RawDocument
 from oodarag.util.logging import get_logger
-from oodarag.util.text import redact_secrets
+from oodarag.util.dates import to_timestamp
+from oodarag.util.text import redact_secrets, split_front_matter
 
 log = get_logger("ingest.fs")
 
@@ -59,21 +60,35 @@ class FilesystemConnector(Connector):
                     continue
                 ext = path.suffix.lower()
                 stat = path.stat()
+                # A leading `---` block is metadata, not prose. Left in, its
+                # keys become corpus terms and the date it records stays
+                # invisible to the reranker - the same shape as a connector
+                # reading a real date and filing it where nothing scores it.
+                front, body = split_front_matter(
+                    redact_secrets(data.decode("utf-8", "replace")))
                 yield RawDocument(
                     source_system="filesystem",
                     external_id=relative,
                     uri=path.as_uri(),
                     title=relative,
-                    text=redact_secrets(data.decode("utf-8", "replace")),
-                    # The mtime is the file's claim about its own content, not
-                    # when we read it. It used to be stored as `fetched_at`,
-                    # which made `Document.created_at` say the file was ingested
-                    # at its mtime. `updated_at` came out right by accident,
-                    # since it falls back to `fetched_at`; `created_at` did not.
-                    source_updated_at=stat.st_mtime,
+                    text=body,
+                    # Front matter first, then the mtime. A `date:` field is
+                    # committed and travels with the file; an mtime is set by
+                    # whatever last wrote it, so a fresh clone stamps every
+                    # file with the checkout time and CI would measure a
+                    # different corpus age than a working tree does (L34).
+                    #
+                    # The mtime is still the file's claim about its own content
+                    # rather than when we read it. It used to be stored as
+                    # `fetched_at`, which made `Document.created_at` say the
+                    # file was ingested at its mtime; `updated_at` came out
+                    # right by accident, since it falls back to `fetched_at`.
+                    source_updated_at=(to_timestamp(front.get("date"))
+                                       or stat.st_mtime),
                     metadata={
                         "kind": "file", "path": relative, "ext": ext,
                         "mtime": stat.st_mtime,
+                        **({"front_matter": front} if front else {}),
                         "language": LANGUAGE_BY_EXT.get(ext, "text"),
                         "size": len(data), "authority": self.authority,
                         "is_doc": ext in {".md", ".markdown", ".rst", ".txt", ".adoc"},

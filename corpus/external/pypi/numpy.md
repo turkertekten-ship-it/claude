@@ -1,3 +1,7 @@
+---
+date: 2026-08-09T13:44:51+0000
+source: https://pypi.org/project/numpy/
+---
 [image: Powered by NumFOCUS] [image: PyPI Downloads] [image: Conda Downloads] [image: Stack Overflow] [image: Nature Paper] [image: LFX Health Score] [image: OpenSSF Scorecard] [image: Typing]
 
 NumPy is the fundamental package for scientific computing with Python.

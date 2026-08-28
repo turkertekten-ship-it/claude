@@ -1,3 +1,7 @@
+---
+date: 2026-07-27T11:33:13+0000
+source: https://pypi.org/project/tqdm/
+---
 [image: Logo]
 
 ## tqdm

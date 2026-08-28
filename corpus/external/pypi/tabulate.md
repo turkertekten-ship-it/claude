@@ -1,3 +1,7 @@
+---
+date: 2026-03-04T18:55:31+0000
+source: https://pypi.org/project/tabulate/
+---
 # python-tabulate
 
 Pretty-print tabular data in Python, a library and a command-line

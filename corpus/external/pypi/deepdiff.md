@@ -1,3 +1,7 @@
+---
+date: 2026-05-15T20:18:03+0000
+source: https://pypi.org/project/deepdiff/
+---
 # DeepDiff v 9.1.0
 
 [image: Downloads] [image: Python Versions] [image: License] [image: Build Status] [image: codecov]

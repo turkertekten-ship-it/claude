@@ -1,3 +1,7 @@
+---
+date: 2025-12-23T19:25:42+0000
+source: https://pypi.org/project/aiosqlite/
+---
 [image: Documentation Status] [image: PyPI Release] [image: Changelog] [image: MIT Licensed]
 
 aiosqlite provides a friendly, async interface to sqlite databases.

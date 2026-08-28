@@ -1,3 +1,7 @@
+---
+date: 2026-04-20T23:33:31+0000
+source: https://pypi.org/project/psycopg2-binary/
+---
 Psycopg is the most popular PostgreSQL database adapter for the Python
 programming language. Its main features are the complete implementation of
 the Python DB API 2.0 specification and the thread safety (several threads can

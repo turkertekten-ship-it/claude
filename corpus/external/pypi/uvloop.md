@@ -1,3 +1,7 @@
+---
+date: 2025-10-16T22:16:11+0000
+source: https://pypi.org/project/uvloop/
+---
 [image: https://img.shields.io/github/actions/workflow/status/MagicStack/uvloop/tests.yml?branch=master] [image: https://img.shields.io/pypi/v/uvloop.svg] [image: PyPI - Downloads]
 
 uvloop is a fast, drop-in replacement of the built-in asyncio

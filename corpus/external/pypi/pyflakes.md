@@ -1,3 +1,7 @@
+---
+date: 2025-06-20T18:45:26+0000
+source: https://pypi.org/project/pyflakes/
+---
 A simple program which checks Python source files for errors.
 
 Pyflakes analyzes programs and detects various errors. It works by

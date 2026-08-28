@@ -1,3 +1,7 @@
+---
+date: 2022-01-24T01:14:49+0000
+source: https://pypi.org/project/mccabe/
+---
 Ned’s script to check McCabe complexity.
 
 This module provides a plugin for flake8, the Python code checker.

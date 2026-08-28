@@ -308,3 +308,38 @@ def redact_secrets(text: str) -> str:
     for pattern, replacement in patterns:
         text = re.sub(pattern, replacement, text)
     return text
+
+_FRONT_MATTER_RE = re.compile(r"\A---[ \t]*\r?\n(.*?)\r?\n---[ \t]*\r?\n", re.S)
+
+
+def split_front_matter(text: str) -> tuple[dict[str, str], str]:
+    """A leading `---` block as a mapping, plus the body without it.
+
+    Markdown corpora carry metadata this way - Jekyll, Hugo, Obsidian and any
+    scraper that wants to record where a page came from. Without this the block
+    is indexed as prose: a document about `six` acquires the terms `date`,
+    `source` and `https`, and the date it was written is invisible to the
+    reranker while polluting the term statistics of every file that has one.
+
+    Deliberately not YAML. Flat `key: value` lines only, values taken verbatim
+    and never coerced - a parser that guesses types here would have to be
+    correct about dates, which is what `util.dates` is for. Anything that does
+    not parse leaves the text untouched and returns no keys, because a document
+    that merely starts with a horizontal rule is not front matter and must not
+    lose its first paragraph to one.
+    """
+    match = _FRONT_MATTER_RE.match(text)
+    if not match:
+        return {}, text
+    fields: dict[str, str] = {}
+    for line in match.group(1).splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        key, sep, value = line.partition(":")
+        if not sep or not key.strip():
+            # A block that is not key/value is not front matter. Refuse the
+            # whole thing rather than keep the half that parsed.
+            return {}, text
+        fields[key.strip().lower()] = value.strip()
+    return fields, text[match.end():]

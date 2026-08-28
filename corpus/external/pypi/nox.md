@@ -1,3 +1,7 @@
+---
+date: 2026-08-18T03:09:55+0000
+source: https://pypi.org/project/nox/
+---
 [image: logo]
 
 # Nox

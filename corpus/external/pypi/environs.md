@@ -1,3 +1,7 @@
+---
+date: 2026-08-01T02:21:05+0000
+source: https://pypi.org/project/environs/
+---
 # environs: simplified environment variable parsing
 
 [image: Latest version] [image: Build Status]

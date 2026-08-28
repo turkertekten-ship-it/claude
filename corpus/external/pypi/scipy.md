@@ -1,3 +1,7 @@
+---
+date: 2026-08-21T23:23:44+0000
+source: https://pypi.org/project/scipy/
+---
 [image: https://raw.githubusercontent.com/scipy/scipy/main/doc/source/_static/logo.svg] [image: https://img.shields.io/badge/powered%20by-NumFOCUS-orange.svg?style=flat&colorA=E1523D&colorB=007D8A] [image: https://img.shields.io/pypi/dm/scipy.svg?label=Pypi%20downloads] [image: https://img.shields.io/conda/dn/conda-forge/scipy.svg?label=Conda%20downloads] [image: https://img.shields.io/badge/stackoverflow-Ask%20questions-blue.svg] [image: https://img.shields.io/badge/DOI-10.1038%2Fs41592--019--0686--2-blue.svg] [image: https://insights.linuxfoundation.org/api/badge/health-score?project=scipy]
 
 SciPy (pronounced “Sigh Pie”) is an open-source software for mathematics,

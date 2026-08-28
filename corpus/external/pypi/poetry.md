@@ -1,3 +1,7 @@
+---
+date: 2026-05-09T15:18:55+0000
+source: https://pypi.org/project/poetry/
+---
 # Poetry: Python packaging and dependency management made easy
 
 [image: Poetry] [image: Stable Version] [image: Pre-release Version] [image: Python Versions] [image: Download Stats] [image: Discord]

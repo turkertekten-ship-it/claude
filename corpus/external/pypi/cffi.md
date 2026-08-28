@@ -1,3 +1,7 @@
+---
+date: 2026-08-03T21:19:15+0000
+source: https://pypi.org/project/cffi/
+---
 [image: GitHub Actions Status] [image: PyPI version] [image: Read the Docs]
 
 # CFFI

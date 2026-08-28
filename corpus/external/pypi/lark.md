@@ -1,3 +1,7 @@
+---
+date: 2025-10-27T18:25:54+0000
+source: https://pypi.org/project/lark/
+---
 Lark is a modern general-purpose parsing library for Python.
 With Lark, you can parse any context-free grammar, efficiently, with very little code.
 Main Features:

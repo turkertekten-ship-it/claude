@@ -1,3 +1,7 @@
+---
+date: 2025-12-31T15:09:25+0000
+source: https://pypi.org/project/sphinx/
+---
 [image: Package on PyPI] [image: Build Status] [image: Documentation Status] [image: BSD 2 Clause]
 
 Sphinx makes it easy to create intelligent and beautiful documentation.

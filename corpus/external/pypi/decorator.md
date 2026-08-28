@@ -1,3 +1,7 @@
+---
+date: 2026-05-18T06:03:26+0000
+source: https://pypi.org/project/decorator/
+---
 The goal of the decorator module is to make it easy to define
 signature-preserving function decorators and decorator factories.
 It also includes an implementation of multiple dispatch and other niceties

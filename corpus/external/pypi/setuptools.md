@@ -1,3 +1,7 @@
+---
+date: 2026-08-08T18:27:56+0000
+source: https://pypi.org/project/setuptools/
+---
 [image: pypi-version] [image: py-version] [image: tests] [image: Ruff] [image: docs-badge] [image: skeleton-badge] [image: codecov-badge] [image: Discord]
 
 See the Quickstart

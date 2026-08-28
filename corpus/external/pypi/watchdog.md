@@ -1,3 +1,7 @@
+---
+date: 2024-11-01T14:06:24+0000
+source: https://pypi.org/project/watchdog/
+---
 [image: PyPI Version] [image: PyPI Status] [image: PyPI Python Versions] [image: Github Build Status] [image: GitHub License]
 
 Python API and shell utilities to monitor file system events.

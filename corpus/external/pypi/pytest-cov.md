@@ -1,3 +1,7 @@
+---
+date: 2026-03-21T20:11:14+0000
+source: https://pypi.org/project/pytest-cov/
+---
 | docs | [image: Documentation Status] |
 | tests | [image: GitHub Actions Status] |
 | package | [image: PyPI Package latest release] [image: conda-forge] [image: PyPI Wheel] [image: Supported versions] [image: Supported implementations] [image: Commits since latest release] |

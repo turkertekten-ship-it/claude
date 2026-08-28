@@ -1,3 +1,7 @@
+---
+date: 2026-08-10T13:25:17+0000
+source: https://pypi.org/project/greenlet/
+---
 Greenlets are lightweight coroutines for in-process concurrent
 programming.
 

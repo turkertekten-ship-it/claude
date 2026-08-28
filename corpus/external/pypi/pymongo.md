@@ -1,3 +1,7 @@
+---
+date: 2026-04-20T16:37:20+0000
+source: https://pypi.org/project/pymongo/
+---
 # PyMongo
 
 [image: PyPI Version] [image: Python Versions] [image: Monthly Downloads] [image: API Documentation Status] [image: codecov]

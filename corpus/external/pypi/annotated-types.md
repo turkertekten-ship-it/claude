@@ -1,3 +1,7 @@
+---
+date: 2026-07-23T20:16:12+0000
+source: https://pypi.org/project/annotated-types/
+---
 # annotated-types
 
 [image: CI] [image: pypi] [image: versions] [image: license]

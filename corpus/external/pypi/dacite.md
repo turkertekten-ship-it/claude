@@ -1,3 +1,7 @@
+---
+date: 2025-02-05T09:27:24+0000
+source: https://pypi.org/project/dacite/
+---
 # dacite
 
 [image: Build Status] [image: Coverage Status] [image: License] [image: Version] [image: Python versions] [image: Code style: black]

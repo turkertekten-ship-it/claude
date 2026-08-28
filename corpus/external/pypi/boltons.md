@@ -1,3 +1,7 @@
+---
+date: 2026-07-17T18:38:41+0000
+source: https://pypi.org/project/boltons/
+---
 # Boltons
 
 boltons should be builtins.

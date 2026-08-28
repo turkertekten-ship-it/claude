@@ -1,3 +1,7 @@
+---
+date: 2025-09-25T21:31:46+0000
+source: https://pypi.org/project/pyyaml/
+---
 YAML is a data serialization format designed for human readability
 and interaction with scripting languages. PyYAML is a YAML parser
 and emitter for Python.

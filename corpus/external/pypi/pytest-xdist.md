@@ -1,3 +1,7 @@
+---
+date: 2025-07-01T13:30:56+0000
+source: https://pypi.org/project/pytest-xdist/
+---
 [image: PyPI version] [image: https://img.shields.io/conda/vn/conda-forge/pytest-xdist.svg] [image: Python versions] [image: https://github.com/pytest-dev/pytest-xdist/workflows/test/badge.svg] [image: https://img.shields.io/badge/code%20style-black-000000.svg]
 
 The pytest-xdist plugin extends pytest with new test execution modes, the most used being distributing

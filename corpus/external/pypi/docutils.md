@@ -1,3 +1,7 @@
+---
+date: 2026-05-27T17:40:58+0000
+source: https://pypi.org/project/docutils/
+---
 Author:
 
 David Goodger

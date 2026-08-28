@@ -1,3 +1,7 @@
+---
+date: 2025-09-25T19:49:05+0000
+source: https://pypi.org/project/bcrypt/
+---
 ## bcrypt
 
  [image: Latest Version] [image: https://github.com/pyca/bcrypt/workflows/CI/badge.svg?branch=main]

@@ -1,3 +1,7 @@
+---
+date: 2026-07-29T17:18:04+0000
+source: https://pypi.org/project/fastapi/
+---
 [image: FastAPI]
 
 FastAPI framework, high performance, easy to learn, fast to code, ready for production

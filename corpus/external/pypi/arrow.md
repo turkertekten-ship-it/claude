@@ -1,3 +1,7 @@
+---
+date: 2025-10-18T17:46:45+0000
+source: https://pypi.org/project/arrow/
+---
 [image: Build Status] [image: Coverage] [image: PyPI Version] [image: Supported Python Versions] [image: License] [image: Code Style: Black]
 
 Arrow is a Python library that offers a sensible and human-friendly approach to creating, manipulating, formatting and converting dates, times and timestamps. It implements and updates the datetime type, plugging gaps in functionality and providing an intelligent module API that supports many common creation scenarios. Simply put, it helps you work with dates and times with fewer imports and a lot less code.

@@ -1,3 +1,7 @@
+---
+date: 2026-02-22T02:21:21+0000
+source: https://pypi.org/project/xmltodict/
+---
 # xmltodict
 
 xmltodict is a Python module that makes working with XML feel like you are working with JSON, as in this "spec":

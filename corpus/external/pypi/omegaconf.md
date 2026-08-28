@@ -1,3 +1,7 @@
+---
+date: 2026-06-11T05:05:09+0000
+source: https://pypi.org/project/omegaconf/
+---
 # OmegaConf
 
 | | Description |

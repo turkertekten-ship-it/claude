@@ -1,3 +1,7 @@
+---
+date: 2026-06-28T19:39:20+0000
+source: https://pypi.org/project/apscheduler/
+---
 [image: Build Status] [image: Code Coverage] [image: Documentation]
 
 Advanced Python Scheduler (APScheduler) is a Python library that lets you schedule your Python code

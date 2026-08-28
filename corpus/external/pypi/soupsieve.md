@@ -1,3 +1,7 @@
+---
+date: 2026-08-07T00:57:23+0000
+source: https://pypi.org/project/soupsieve/
+---
 [image: Donate via PayPal] [image: Build] [image: Coverage Status] [image: PyPI Version] [image: PyPI Downloads] [image: PyPI - Python Version] [image: License]
 
 # Soup Sieve

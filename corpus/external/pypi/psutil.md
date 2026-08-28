@@ -1,3 +1,7 @@
+---
+date: 2026-01-28T18:14:54+0000
+source: https://pypi.org/project/psutil/
+---
 [image: Downloads] [image: Github stars] [image: Github forks] [image: Contributors] [image: Binary packages]
 
 [image: Latest version] [image: License] [image: Stackoverflow] [image: Twitter Follow] [image: Tidelift]

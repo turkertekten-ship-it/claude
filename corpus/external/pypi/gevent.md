@@ -1,3 +1,7 @@
+---
+date: 2026-08-10T16:56:19+0000
+source: https://pypi.org/project/gevent/
+---
 ## gevent
 
  [image: https://coveralls.io/repos/gevent/gevent/badge.svg?branch=master&service=github]

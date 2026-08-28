@@ -1,3 +1,7 @@
+---
+date: 2026-08-20T11:16:52+0000
+source: https://pypi.org/project/zope-interface/
+---
 [image: Latest Version] [image: Supported Python versions] [image: https://github.com/zopefoundation/zope.interface/actions/workflows/tests.yml/badge.svg] [image: Documentation Status]
 
 This package is intended to be independently reusable in any Python

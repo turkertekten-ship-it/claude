@@ -1,3 +1,7 @@
+---
+date: 2024-03-01T18:36:18+0000
+source: https://pypi.org/project/python-dateutil/
+---
 ## dateutil - powerful extensions to datetime
 
 [image: pypi version] [image: supported Python version] [image: licence]

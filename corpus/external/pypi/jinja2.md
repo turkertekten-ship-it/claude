@@ -1,3 +1,7 @@
+---
+date: 2025-03-05T20:05:00+0000
+source: https://pypi.org/project/jinja2/
+---
 # Jinja
 
 Jinja is a fast, expressive, extensible templating engine. Special

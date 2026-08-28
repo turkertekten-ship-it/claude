@@ -1,3 +1,7 @@
+---
+date: 2026-06-30T16:17:28+0000
+source: https://pypi.org/project/humanize/
+---
 # humanize
 
 [image: PyPI version] [image: Supported Python versions] [image: Documentation Status] [image: PyPI downloads] [image: GitHub Actions status] [image: codecov] [image: MIT License] [image: Tidelift]

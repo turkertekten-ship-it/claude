@@ -1,3 +1,7 @@
+---
+date: 2024-02-25T23:20:01+0000
+source: https://pypi.org/project/sniffio/
+---
 [image: Join chatroom] [image: Documentation Status] [image: Latest PyPi version] [image: Latest conda-forge version] [image: Automated test status] [image: Test coverage]
 
 ## sniffio: Sniff out which async library your code is running under

@@ -1,3 +1,7 @@
+---
+date: 2026-06-19T10:58:31+0000
+source: https://pypi.org/project/pytest/
+---
 [image: pytest]
 
 ---

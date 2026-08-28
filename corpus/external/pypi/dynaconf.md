@@ -1,3 +1,7 @@
+---
+date: 2026-08-05T19:50:23+0000
+source: https://pypi.org/project/dynaconf/
+---
 [image: dynaconf. new logo]
 
 > dynaconf - Configuration Management for Python.

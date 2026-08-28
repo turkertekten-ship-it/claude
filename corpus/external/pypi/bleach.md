@@ -1,3 +1,7 @@
+---
+date: 2026-06-05T13:01:12+0000
+source: https://pypi.org/project/bleach/
+---
 NOTE: 2026-06-05: Bleach is no longer maintained. There will be no future
 releases including for security issues.
 See issue: https://github.com/mozilla/bleach/issues/698

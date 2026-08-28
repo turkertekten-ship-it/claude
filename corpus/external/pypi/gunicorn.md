@@ -1,3 +1,7 @@
+---
+date: 2026-08-24T15:05:57+0000
+source: https://pypi.org/project/gunicorn/
+---
 # Gunicorn
 
 Gunicorn is maintained by volunteers. If it powers your production, please consider supporting us:

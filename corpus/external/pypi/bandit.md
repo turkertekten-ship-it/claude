@@ -1,3 +1,7 @@
+---
+date: 2026-02-25T06:44:13+0000
+source: https://pypi.org/project/bandit/
+---
 [image: Bandit]
 
 ---

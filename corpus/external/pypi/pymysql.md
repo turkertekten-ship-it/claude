@@ -1,3 +1,7 @@
+---
+date: 2026-05-19T08:26:20+0000
+source: https://pypi.org/project/pymysql/
+---
 [image: Documentation Status] [image: codecov] [image: Ask DeepWiki]
 
 # PyMySQL

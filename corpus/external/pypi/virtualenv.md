@@ -1,3 +1,7 @@
+---
+date: 2026-08-25T05:39:14+0000
+source: https://pypi.org/project/virtualenv/
+---
 # virtualenv
 
 [image: PyPI] [image: PyPI - Implementation] [image: PyPI - Python Version] [image: Documentation] [image: Discord] [image: Downloads] [image: PyPI - License] [image: check]

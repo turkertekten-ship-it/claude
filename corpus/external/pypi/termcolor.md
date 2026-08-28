@@ -1,3 +1,7 @@
+---
+date: 2025-12-29T12:55:20+0000
+source: https://pypi.org/project/termcolor/
+---
 # termcolor
 
 [image: PyPI version] [image: Supported Python versions] [image: PyPI downloads] [image: GitHub Actions status] [image: Codecov] [image: Licence] [image: Code style: Black] [image: Tidelift]

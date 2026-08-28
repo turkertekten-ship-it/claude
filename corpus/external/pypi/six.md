@@ -1,3 +1,7 @@
+---
+date: 2024-12-04T17:35:26+0000
+source: https://pypi.org/project/six/
+---
 [image: six on PyPI] [image: six's documentation on Read the Docs] [image: MIT License badge]
 
 Six is a Python 2 and 3 compatibility library. It provides utility functions

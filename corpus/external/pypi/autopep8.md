@@ -1,3 +1,7 @@
+---
+date: 2025-01-14T14:46:15+0000
+source: https://pypi.org/project/autopep8/
+---
 [image: PyPI Version] [image: Build status] [image: Code Coverage]
 
 autopep8 automatically formats Python code to conform to the PEP 8 style

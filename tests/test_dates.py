@@ -304,5 +304,97 @@ class SourceDateReachesTheDocumentTest(unittest.TestCase):
                                 "the document claims it was ingested in 2024")
 
 
+class FrontMatterDateReachesRetrievalTest(unittest.TestCase):
+    """A markdown corpus records its dates in a `---` block, and git does not
+    preserve mtimes - so a committed `date:` field is the only carrier that
+    reads the same in a working tree and in CI (L34)."""
+
+    def test_a_dated_file_is_scored_on_its_front_matter_not_its_mtime(self):
+        import os
+        from oodarag.ingest.base import MemoryStateStore
+        from oodarag.ingest.filesystem import FilesystemConnector
+
+        stated = utc_epoch("2021-03-08T12:00:00")
+        mtime = utc_epoch("2024-06-07T08:09:10")
+        with TemporaryDirectory() as tmp:
+            path = Path(tmp) / "pkg.md"
+            path.write_text(
+                "---\ndate: 2021-03-08T12:00:00+0000\nsource: https://example.test/pkg/\n"
+                "---\n# pkg\n\nA package that does a thing.\n", "utf-8")
+            os.utime(path, (mtime, mtime))
+            docs = FilesystemConnector(root=tmp, patterns=["**/*.md"]) \
+                .run(MemoryStateStore()).documents
+
+        self.assertEqual(len(docs), 1)
+        self.assertEqual(docs[0].source_updated_at, stated,
+                         "the mtime won over the committed date")
+        self.assertEqual(from_raw(docs[0]).updated_at, stated)
+
+    def test_the_block_is_metadata_and_does_not_become_corpus_text(self):
+        """Left in, `date` and `source` become terms of every dated document and
+        distort the statistics the whole reranker is weighted by."""
+        from oodarag.ingest.base import MemoryStateStore
+        from oodarag.ingest.filesystem import FilesystemConnector
+
+        with TemporaryDirectory() as tmp:
+            (Path(tmp) / "pkg.md").write_text(
+                "---\ndate: 2021-03-08T12:00:00+0000\nsource: https://example.test/pkg/\n"
+                "---\n# pkg\n\nA package that does a thing.\n", "utf-8")
+            docs = FilesystemConnector(root=tmp, patterns=["**/*.md"]) \
+                .run(MemoryStateStore()).documents
+
+        self.assertNotIn("example.test", docs[0].text)
+        self.assertNotIn("date:", docs[0].text)
+        self.assertTrue(docs[0].text.startswith("# pkg"))
+        # Kept as metadata rather than discarded: provenance is load-bearing.
+        self.assertEqual(docs[0].metadata["front_matter"]["source"],
+                         "https://example.test/pkg/")
+
+    def test_an_undated_file_still_falls_back_to_its_mtime(self):
+        import os
+        from oodarag.ingest.base import MemoryStateStore
+        from oodarag.ingest.filesystem import FilesystemConnector
+
+        mtime = utc_epoch("2024-06-07T08:09:10")
+        with TemporaryDirectory() as tmp:
+            path = Path(tmp) / "plain.md"
+            path.write_text("# plain\n\nNo front matter here at all.\n", "utf-8")
+            os.utime(path, (mtime, mtime))
+            docs = FilesystemConnector(root=tmp, patterns=["**/*.md"]) \
+                .run(MemoryStateStore()).documents
+        self.assertEqual(docs[0].source_updated_at, mtime)
+
+    def test_a_block_in_the_middle_of_a_document_is_not_front_matter(self):
+        """Silent content loss, and the mutation that found it survived every
+        other test here.
+
+        Markdown uses `---` for horizontal rules, and a `key: value` line after
+        one is ordinary prose. Matching anywhere instead of only at the start
+        deletes everything above the block - which no length or content check
+        downstream would flag, because what remains is still a valid document.
+        """
+        from oodarag.util.text import split_front_matter
+
+        text = ("# Configuration\n\nThe first section explains the defaults.\n\n"
+                "---\nkey: value\n---\n\nThe second section explains overrides.\n")
+        front, body = split_front_matter(text)
+        self.assertEqual(front, {}, "a mid-document block was read as front matter")
+        self.assertEqual(body, text, "content above the block was discarded")
+        self.assertIn("first section", body)
+
+    def test_a_horizontal_rule_is_not_front_matter(self):
+        """A document opening with `---` must not lose its first paragraph."""
+        from oodarag.ingest.base import MemoryStateStore
+        from oodarag.ingest.filesystem import FilesystemConnector
+
+        with TemporaryDirectory() as tmp:
+            (Path(tmp) / "rule.md").write_text(
+                "---\nThis is prose, not a mapping.\n---\nMore prose.\n", "utf-8")
+            docs = FilesystemConnector(root=tmp, patterns=["**/*.md"]) \
+                .run(MemoryStateStore()).documents
+        self.assertIn("This is prose", docs[0].text)
+        self.assertIsNone(docs[0].metadata.get("front_matter"))
+
+
 if __name__ == "__main__":
     unittest.main()

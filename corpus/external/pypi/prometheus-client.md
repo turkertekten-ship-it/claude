@@ -1,3 +1,7 @@
+---
+date: 2026-07-24T19:36:40+0000
+source: https://pypi.org/project/prometheus-client/
+---
 # Prometheus Python Client
 
 The official Python client for Prometheus.

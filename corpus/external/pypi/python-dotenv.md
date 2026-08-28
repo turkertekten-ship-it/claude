@@ -1,3 +1,7 @@
+---
+date: 2026-08-16T16:54:52+0000
+source: https://pypi.org/project/python-dotenv/
+---
 # python-dotenv
 
 [image: Build Status] [image: PyPI version]

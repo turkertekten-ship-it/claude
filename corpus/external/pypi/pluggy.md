@@ -1,3 +1,7 @@
+---
+date: 2025-05-15T12:30:06+0000
+source: https://pypi.org/project/pluggy/
+---
 [image: pypi] [image: conda-forge] [image: versions] [image: github-actions] [image: Join the chat at https://gitter.im/pytest-dev/pluggy] [image: black] [image: Code coverage Status]
 
 This is the core framework used by the pytest, tox, and devpi projects.

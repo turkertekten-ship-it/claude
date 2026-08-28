@@ -1,3 +1,7 @@
+---
+date: 2026-01-21T03:57:55+0000
+source: https://pypi.org/project/pyparsing/
+---
 ## PyParsing – A Python Parsing Module
 
 [image: Version] [image: Build Status] [image: Coverage] [image: License] [image: Python versions] [image: pyparsing]

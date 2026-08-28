@@ -1,3 +1,7 @@
+---
+date: 2026-08-27T20:53:29+0000
+source: https://pypi.org/project/isort/
+---
 [image: isort - isort your imports, so you don't have to.]
 
 ---

@@ -1,3 +1,7 @@
+---
+date: 2025-10-17T04:03:20+0000
+source: https://pypi.org/project/toolz/
+---
 [image: Build Status] [image: Coverage Status] [image: Version Status]
 
 A set of utility functions for iterators, functions, and dictionaries.

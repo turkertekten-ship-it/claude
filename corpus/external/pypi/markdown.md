@@ -1,3 +1,7 @@
+---
+date: 2026-07-30T19:05:27+0000
+source: https://pypi.org/project/markdown/
+---
 # Python-Markdown
 
 [image: Build Status] [image: Coverage Status] [image: Latest Version] [image: Python Versions] [image: BSD License] [image: Code of Conduct]

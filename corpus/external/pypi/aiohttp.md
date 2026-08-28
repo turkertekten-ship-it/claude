@@ -1,3 +1,7 @@
+---
+date: 2026-07-23T01:52:08+0000
+source: https://pypi.org/project/aiohttp/
+---
 [image: aiohttp logo] [image: GitHub Actions status for master branch] [image: codecov.io status for master branch] [image: Latest PyPI package version] [image: Downloads count] [image: Latest Read The Docs] [image: Codspeed.io status for aiohttp]
 
 ## Key Features

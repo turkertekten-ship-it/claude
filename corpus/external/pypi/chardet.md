@@ -1,3 +1,7 @@
+---
+date: 2026-08-14T20:36:07+0000
+source: https://pypi.org/project/chardet/
+---
 # chardet
 
 Universal character encoding detector.

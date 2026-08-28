@@ -1,3 +1,7 @@
+---
+date: 2026-03-25T14:41:26+0000
+source: https://pypi.org/project/vulture/
+---
 # Vulture - Find dead code
 
 [image: PyPI Version] [image: Conda Version] [image: CI:Test] [image: Codecov Badge]

@@ -1,3 +1,7 @@
+---
+date: 2025-12-08T17:02:38+0000
+source: https://pypi.org/project/networkx/
+---
 [image: https://github.com/networkx/networkx/actions/workflows/test.yml/badge.svg?branch=main] [image: https://img.shields.io/pypi/v/networkx.svg?] [image: https://img.shields.io/pypi/l/networkx.svg?] [image: https://img.shields.io/pypi/pyversions/networkx.svg?] [image: https://img.shields.io/github/labels/networkx/networkx/good%20first%20issue?color=green&label=contribute] [image: https://insights.linuxfoundation.org/api/badge/health-score?project=networkx]
 
 NetworkX is a Python package for the creation, manipulation,

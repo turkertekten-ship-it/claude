@@ -1,3 +1,7 @@
+---
+date: 2026-08-25T19:44:03+0000
+source: https://pypi.org/project/cryptography/
+---
 [image: Latest Version] [image: Latest Docs] [image: https://github.com/pyca/cryptography/actions/workflows/ci.yml/badge.svg]
 
 cryptography is a package which provides cryptographic recipes and

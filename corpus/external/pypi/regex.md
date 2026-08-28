@@ -1,3 +1,7 @@
+---
+date: 2026-07-19T00:16:13+0000
+source: https://pypi.org/project/regex/
+---
 ## Introduction
 
 This regex implementation is backwards-compatible with the standard ‘re’ module, but offers additional functionality.

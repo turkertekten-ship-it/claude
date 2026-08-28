@@ -1,3 +1,7 @@
+---
+date: 2021-05-16T22:03:41+0000
+source: https://pypi.org/project/sortedcontainers/
+---
 Sorted Containers is an Apache2 licensed sorted collections library,
 written in pure-Python, and fast as C-extensions.
 

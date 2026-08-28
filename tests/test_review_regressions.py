@@ -2381,10 +2381,12 @@ class PipelineDeterminismTest(unittest.TestCase):
         pipeline.embed_missing()
         return store, pipeline
 
-    def _retrieve(self, store, pipeline, clock=None):
+    def _retrieve(self, store, pipeline, clock=None, recency_weight=None):
         retriever = HybridRetriever(store, pipeline.embedder)
         if clock is not None:
             retriever.reranker.clock = clock
+        if recency_weight is not None:
+            retriever.reranker.recency_weight = recency_weight
         results, _ = retriever.retrieve("how are dense and lexical arms combined")
         return ([r.chunk.chunk_id for r in results],
                 [round(r.score, 15) for r in results])
@@ -2395,15 +2397,39 @@ class PipelineDeterminismTest(unittest.TestCase):
         second = self._retrieve(store, pipeline, clock=lambda: self.FROZEN)
         self.assertEqual(first, second)
 
-    def test_the_clock_is_what_moves_the_score(self):
-        """Not hash order. A day later, the same query scores differently -
-        which is the recency factor doing its job, and the whole reason a score
-        cannot be asserted exactly against the wall clock."""
+    def test_the_clock_is_what_moves_the_score_when_recency_is_on(self):
+        """Not hash order. With recency enabled, the same query scores
+        differently a hundred days later - which was the whole finding: four
+        differing digests across four hash seeds turned out to be a wall-clock
+        term, not hash order (L29).
+
+        `recency_weight` is passed explicitly because it is now 0.0 by default,
+        measured (L61). Relying on the default here would silently stop testing
+        the thing this was written for.
+        """
         store, pipeline = self._index()
-        now = self._retrieve(store, pipeline, clock=lambda: self.FROZEN)
-        later = self._retrieve(store, pipeline, clock=lambda: self.FROZEN + 86_400 * 120)
+        now = self._retrieve(store, pipeline, clock=lambda: self.FROZEN,
+                             recency_weight=0.08)
+        later = self._retrieve(store, pipeline, clock=lambda: self.FROZEN + 86_400 * 120,
+                               recency_weight=0.08)
         self.assertEqual(now[0], later[0], "the clock changed the ranking, not just the score")
         self.assertNotEqual(now[1], later[1], "the clock had no effect at all")
+
+    def test_the_shipped_default_does_not_depend_on_the_clock_at_all(self):
+        """A stronger property than the project had, and worth pinning.
+
+        With recency off, no scoring term reads the wall clock, so the same
+        index and query give bit-identical scores whenever they are run. That
+        makes a stored result comparable to one produced months later - the
+        thing an injectable clock was introduced to approximate.
+        """
+        store, pipeline = self._index()
+        now = self._retrieve(store, pipeline, clock=lambda: self.FROZEN)
+        much_later = self._retrieve(store, pipeline,
+                                    clock=lambda: self.FROZEN + 86_400 * 3650)
+        self.assertEqual(now, much_later,
+                         "a decade of wall clock changed the result, so something "
+                         "still reads the clock")
 
     def test_the_ranking_is_identical_across_processes(self):
         """Run in subprocesses with different hash seeds, because that is the

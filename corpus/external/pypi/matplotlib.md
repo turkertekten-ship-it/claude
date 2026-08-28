@@ -1,3 +1,7 @@
+---
+date: 2026-07-18T03:38:03+0000
+source: https://pypi.org/project/matplotlib/
+---
 [image: PyPi] [image: Conda] [image: Downloads] [image: NUMFocus] [image: LFX Health Score]
 
 [image: Discourse help forum] [image: Discourse chat] [image: GitHub issues] [image: Contributing]

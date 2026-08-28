@@ -1,3 +1,7 @@
+---
+date: 2026-08-24T13:09:36+0000
+source: https://pypi.org/project/sentry-sdk/
+---
 [image: Sentry for Python]
 
 Bad software is everywhere, and we're tired of it. Sentry is on a mission to help developers write better software faster, so we can get back to enjoying technology. If you want to join us

@@ -1,3 +1,7 @@
+---
+date: 2023-03-26T06:24:33+0000
+source: https://pypi.org/project/radon/
+---
 [image: Codacy badge] [image: Travis-CI badge] [image: Coveralls badge] [image: PyPI latest version badge] [image: Radon license]
 
 ---

@@ -1,3 +1,7 @@
+---
+date: 2026-08-27T21:36:36+0000
+source: https://pypi.org/project/platformdirs/
+---
 # platformdirs
 
 [image: PyPI version] [image: Python versions] [image: CI] [image: Downloads]

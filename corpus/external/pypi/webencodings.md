@@ -1,3 +1,7 @@
+---
+date: 2026-08-15T14:22:56+0000
+source: https://pypi.org/project/webencodings/
+---
 webencodings is a Python implementation of the WHATWG Encoding standard.
 
 In order to be compatible with legacy web content when interpreting something like

@@ -1,3 +1,7 @@
+---
+date: 2026-05-14T19:25:26+0000
+source: https://pypi.org/project/requests/
+---
 # Requests
 
 [image: Version] [image: Supported Versions] [image: Downloads] [image: Contributors] [image: Documentation]

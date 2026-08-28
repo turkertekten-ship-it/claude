@@ -1,3 +1,7 @@
+---
+date: 2026-01-07T13:41:05+0000
+source: https://pypi.org/project/jsonschema/
+---
 [image: PyPI version] [image: Supported Python versions] [image: Build status] [image: ReadTheDocs status] [image: pre-commit.ci status] [image: Zenodo DOI]
 
 jsonschema is an implementation of the JSON Schema specification for Python.

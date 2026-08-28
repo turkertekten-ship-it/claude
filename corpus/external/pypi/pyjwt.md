@@ -1,3 +1,7 @@
+---
+date: 2026-05-21T19:54:35+0000
+source: https://pypi.org/project/pyjwt/
+---
 [image: https://github.com/jpadilla/pyjwt/workflows/CI/badge.svg] [image: https://img.shields.io/pypi/v/pyjwt.svg] [image: https://codecov.io/gh/jpadilla/pyjwt/branch/master/graph/badge.svg] [image: https://readthedocs.org/projects/pyjwt/badge/?version=stable]
 
 A Python implementation of RFC 7519. Original implementation was written by @progrium.

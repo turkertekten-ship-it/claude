@@ -1,3 +1,7 @@
+---
+date: 2026-08-26T14:55:20+0000
+source: https://pypi.org/project/websockets/
+---
 [image: websockets]
 
 [image: licence] [image: version] [image: pyversions]

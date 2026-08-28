@@ -1,3 +1,7 @@
+---
+date: 2025-08-09T10:39:06+0000
+source: https://pypi.org/project/freezegun/
+---
 [image: https://img.shields.io/pypi/v/freezegun.svg] [image: https://github.com/spulec/freezegun/workflows/CI/badge.svg] [image: https://coveralls.io/repos/spulec/freezegun/badge.svg?branch=master]
 
 FreezeGun is a library that allows your Python tests to travel through time by mocking the datetime module.

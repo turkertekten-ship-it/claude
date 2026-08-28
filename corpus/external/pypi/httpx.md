@@ -1,3 +1,7 @@
+---
+date: 2024-12-06T15:37:21+0000
+source: https://pypi.org/project/httpx/
+---
 [image: HTTPX]
 
 HTTPX - A next-generation HTTP client for Python.

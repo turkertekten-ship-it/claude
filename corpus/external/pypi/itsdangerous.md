@@ -1,3 +1,7 @@
+---
+date: 2024-04-16T21:28:14+0000
+source: https://pypi.org/project/itsdangerous/
+---
 # ItsDangerous
 
 ... so better sign this

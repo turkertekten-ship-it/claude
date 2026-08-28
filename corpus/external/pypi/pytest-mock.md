@@ -1,3 +1,7 @@
+---
+date: 2025-09-16T16:37:25+0000
+source: https://pypi.org/project/pytest-mock/
+---
 This plugin provides a mocker fixture which is a thin-wrapper around the patching API
 provided by the mock package:
 

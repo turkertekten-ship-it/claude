@@ -1,4 +1,8 @@
 ---
+date: 2026-07-22T22:17:48+0000
+source: https://pypi.org/project/pandas/
+---
+---
 
 # pandas: A Powerful Python Data Analysis Toolkit
 

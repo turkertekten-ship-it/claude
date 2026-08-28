@@ -1,3 +1,7 @@
+---
+date: 2026-08-04T18:15:27+0000
+source: https://pypi.org/project/packaging/
+---
 Reusable core utilities for various Python Packaging
 interoperability specifications.
 

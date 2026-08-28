@@ -1,3 +1,7 @@
+---
+date: 2026-08-27T21:01:14+0000
+source: https://pypi.org/project/build/
+---
 # build
 
 [image: pre-commit.ci status] [image: CI test] [image: codecov]

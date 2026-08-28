@@ -1,3 +1,7 @@
+---
+date: 2026-08-08T14:27:28+0000
+source: https://pypi.org/project/marshmallow/
+---
 [image: Latest version] [image: Build status] [image: pre-commit.ci status] [image: Documentation]
 
 marshmallow is an ORM/ODM/framework-agnostic library for converting complex datatypes, such as objects, to and from native Python datatypes.

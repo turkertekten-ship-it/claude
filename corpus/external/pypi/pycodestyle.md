@@ -1,3 +1,7 @@
+---
+date: 2025-06-20T18:49:47+0000
+source: https://pypi.org/project/pycodestyle/
+---
 [image: Build status] [image: Documentation Status] [image: Wheel Status] [image: Join the chat at https://gitter.im/PyCQA/pycodestyle]
 
 pycodestyle is a tool to check your Python code against some of the style

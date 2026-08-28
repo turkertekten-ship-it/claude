@@ -1,3 +1,7 @@
+---
+date: 2024-02-08T18:32:43+0000
+source: https://pypi.org/project/python-slugify/
+---
 # Python Slugify
 
 A Python slugify application that handles unicode.

@@ -1,3 +1,7 @@
+---
+date: 2026-08-27T20:08:40+0000
+source: https://pypi.org/project/boto3/
+---
 [image: Package Version] [image: Python Versions] [image: License]
 
 Boto3 is the Amazon Web Services (AWS) Software Development Kit (SDK) for

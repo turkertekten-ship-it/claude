@@ -1,3 +1,7 @@
+---
+date: 2024-12-06T11:20:54+0000
+source: https://pypi.org/project/loguru/
+---
 [image: Loguru logo]
 
 [image: Pypi version] [image: Python versions] [image: Documentation] [image: Build status] [image: Coverage] [image: Code quality] [image: License]

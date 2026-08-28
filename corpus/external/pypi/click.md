@@ -1,3 +1,7 @@
+---
+date: 2026-08-26T13:33:12+0000
+source: https://pypi.org/project/click/
+---
 # Click
 
 Click is a Python package for creating beautiful command line interfaces

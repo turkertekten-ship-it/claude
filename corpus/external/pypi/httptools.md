@@ -1,3 +1,7 @@
+---
+date: 2026-05-25T22:16:50+0000
+source: https://pypi.org/project/httptools/
+---
 [image: Tests]
 
 httptools is a Python binding for the nodejs HTTP parser.

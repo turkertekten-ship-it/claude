@@ -1,3 +1,7 @@
+---
+date: 2026-06-06T07:33:38+0000
+source: https://pypi.org/project/structlog/
+---
 [image: structlog mascot]
 
 structlog is the production-ready logging solution for Python:

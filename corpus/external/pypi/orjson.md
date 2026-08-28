@@ -1,3 +1,7 @@
+---
+date: 2026-08-14T16:12:00+0000
+source: https://pypi.org/project/orjson/
+---
 # orjson
 
 orjson is a fast, correct JSON library for Python. It

@@ -1,3 +1,7 @@
+---
+date: 2026-07-28T06:04:04+0000
+source: https://pypi.org/project/wrapt/
+---
 [image: PyPI] [image: Documentation]
 
 A Python module for decorators, wrappers and monkey patching.

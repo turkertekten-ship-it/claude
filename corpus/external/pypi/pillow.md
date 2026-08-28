@@ -1,3 +1,7 @@
+---
+date: 2026-07-01T11:53:27+0000
+source: https://pypi.org/project/pillow/
+---
 [image: Pillow logo]
 
 # Pillow

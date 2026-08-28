@@ -1,3 +1,7 @@
+---
+date: 2026-05-18T04:30:05+0000
+source: https://pypi.org/project/watchfiles/
+---
 # watchfiles
 
 [image: CI] [image: Coverage] [image: pypi] [image: CondaForge] [image: license]

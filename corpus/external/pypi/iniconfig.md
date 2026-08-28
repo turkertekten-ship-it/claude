@@ -1,3 +1,7 @@
+---
+date: 2025-10-18T21:55:41+0000
+source: https://pypi.org/project/iniconfig/
+---
 ## iniconfig: brain-dead simple parsing of ini files
 
 iniconfig is a small and simple INI-file parser module

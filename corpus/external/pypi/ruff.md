@@ -1,3 +1,7 @@
+---
+date: 2026-08-27T16:33:41+0000
+source: https://pypi.org/project/ruff/
+---
 # Ruff
 
 [image: Ruff] [image: image] [image: image] [image: image] [image: Actions status] [image: Discord]

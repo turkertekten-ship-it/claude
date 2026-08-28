@@ -1,3 +1,7 @@
+---
+date: 2026-07-30T08:50:58+0000
+source: https://pypi.org/project/redis/
+---
 # redis-py
 
 The Python interface to the Redis key-value store.

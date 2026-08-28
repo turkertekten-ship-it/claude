@@ -1,3 +1,7 @@
+---
+date: 2026-08-28T14:03:59+0000
+source: https://pypi.org/project/pydantic/
+---
 # Pydantic Validation
 
 [image: CI] [image: Coverage] [image: pypi] [image: CondaForge] [image: downloads] [image: versions] [image: license] [image: Pydantic v2] [image: llms.txt]

@@ -1,3 +1,7 @@
+---
+date: 2026-08-08T18:27:56+0000
+source: https://pypi.org/project/starlette/
+---
 ✨ The little ASGI framework that shines. ✨
 
 ---

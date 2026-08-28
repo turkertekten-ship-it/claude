@@ -1,3 +1,7 @@
+---
+date: 2026-07-27T15:58:59+0000
+source: https://pypi.org/project/twine/
+---
 [image: twine-version] [image: python-versions] [image: docs-badge] [image: build-badge]
 
 ## twine

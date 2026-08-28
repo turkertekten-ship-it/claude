@@ -1,3 +1,7 @@
+---
+date: 2026-08-25T05:38:59+0000
+source: https://pypi.org/project/tox/
+---
 # tox
 
 [image: PyPI] [image: Supported Python versions] [image: Downloads] [image: Documentation status] [image: check]

@@ -45,36 +45,54 @@ PROJECT_URL = "https://pypi.org/project/{name}/"
 MIN_WORDS = 40
 
 
-def fetch_one(client: HttpClient, robots: RobotsPolicy, name: str) -> tuple[str, str, str]:
-    """Return (markdown, title, note). `note` is empty on success."""
+def fetch_one(client: HttpClient, robots: RobotsPolicy, name: str) -> tuple[str, str, str, str]:
+    """Return (markdown, title, published, note). `note` is empty on success."""
     url = PROJECT_URL.format(name=name)
     if not robots.allows(url):
-        return "", "", "refused by robots.txt"
+        return "", "", "", "refused by robots.txt"
     delay = robots.crawl_delay(url)
     if delay:
         time.sleep(min(delay, 5.0))
     try:
         response = client.get(url)
     except (HttpError, TransportError) as e:
-        return "", "", f"fetch failed: {str(e)[:120]}"
+        return "", "", "", f"fetch failed: {str(e)[:120]}"
     if response.status != 200:
-        return "", "", f"HTTP {response.status}"
+        return "", "", "", f"HTTP {response.status}"
     body = response.body.decode("utf-8", "replace")
     page = extract(body, url=url)
     if page.blocked:
         # A 200 that is not a success. Named rather than counted as a short
         # page, because "blocked" and "genuinely thin" need different responses.
-        return "", "", f"{page.blocked} (HTTP 200)"
+        return "", "", "", f"{page.blocked} (HTTP 200)"
     if len(page.text.split()) < MIN_WORDS:
         # A stub page indexed as a document is a document that answers nothing
         # and dilutes every term statistic. Better absent than empty.
-        return "", "", f"only {len(page.text.split())} words after extraction"
+        return "", "", "", f"only {len(page.text.split())} words after extraction"
     # `markdown`, not `text`. The template filter works on headings, and `text`
     # has none - so writing `text` made the filter a silent no-op and added 60
     # documents with every byte of their boilerplate. The per-page line below
     # reports what was *stored* for the same reason: reporting what was fetched
     # hid it completely.
-    return page.markdown, (page.title or name), ""
+    # PyPI stamps each project page with its latest release time in a
+    # `<time datetime>`, which `extract` already reads. Storing it is what
+    # gives the corpus a real age spread: without it every document is as old
+    # as the checkout and the reranker's recency factor is a constant (L43).
+    return page.markdown, (page.title or name), page.published, ""
+
+
+def _with_front_matter(name: str, published: str, text: str) -> str:
+    """Prepend the release date so it travels with the file, in git.
+
+    Not the mtime: git does not preserve mtimes, so a fresh clone stamps every
+    file with the checkout time and CI would measure a corpus whose documents
+    are all the same age while a working tree measured one spanning years. A
+    committed `date:` field is the same in both (L34, and `util.text
+    .split_front_matter` strips it back out at ingest).
+    """
+    if not published:
+        return text
+    return f"---\ndate: {published}\nsource: {PROJECT_URL.format(name=name)}\n---\n{text}"
 
 
 def main() -> int:
@@ -108,7 +126,7 @@ def main() -> int:
     client = HttpClient(user_agent=USER_AGENT)
     robots = RobotsPolicy(client=client, user_agent=USER_AGENT)
     started = time.monotonic()
-    fetched: dict[str, tuple[str, str]] = {}
+    fetched: dict[str, tuple[str, str, str]] = {}
     skipped: list[tuple[str, str]] = []
 
     for index, name in enumerate(todo):
@@ -118,12 +136,12 @@ def main() -> int:
         if time.monotonic() - started > args.max_seconds:
             skipped.append((name, "wall-clock budget spent"))
             continue
-        text, title, note = fetch_one(client, robots, name)
+        text, title, published, note = fetch_one(client, robots, name)
         if note:
             skipped.append((name, note))
             print(f"  - {name}: {note}")
             continue
-        fetched[name] = (text, title)
+        fetched[name] = (text, title, published)
 
     if not fetched:
         print("no documents fetched", file=sys.stderr)
@@ -137,7 +155,7 @@ def main() -> int:
     known = set(manifest.get("_template_removal", {}).get("headings_removed", []))
     existing = {p.stem: p.read_text(encoding="utf-8") for p in CORPUS.glob("*.md")}
     combined = dict(existing)
-    combined.update({name: text for name, (text, _) in fetched.items()})
+    combined.update({name: text for name, (text, _, _p) in fetched.items()})
     filtered, report = filter_corpus(combined, known=known)
     print(f"\ntemplate: {len(report.template_headings)} headings, "
           f"{report.removed_share:.1%} of {report.documents} documents removed")
@@ -178,9 +196,10 @@ def main() -> int:
         return 0
 
     now = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-    for name, (raw, title) in fetched.items():
+    for name, (raw, title, published) in fetched.items():
         text = filtered[name]
-        (CORPUS / f"{name}.md").write_text(text, encoding="utf-8")
+        (CORPUS / f"{name}.md").write_text(_with_front_matter(name, published, text),
+                                           encoding="utf-8")
         manifest["documents"].append({
             "name": name,
             "url": PROJECT_URL.format(name=name),
@@ -188,6 +207,7 @@ def main() -> int:
             "words": len(text.split()),
             "content_hash": content_hash(text),
             "fetched_at": now,
+            "released_at": published,
             "raw_words": len(raw.split()),
             "raw_content_hash": content_hash(raw),
         })
@@ -196,7 +216,10 @@ def main() -> int:
     # once they arrive must be removed everywhere or the corpus is inconsistent.
     for name, text in filtered.items():
         if name in existing and text != existing[name]:
-            (CORPUS / f"{name}.md").write_text(text, encoding="utf-8")
+            entry0 = by_name.get(name) or {}
+            (CORPUS / f"{name}.md").write_text(
+                _with_front_matter(name, entry0.get("released_at", ""), text),
+                encoding="utf-8")
             entry = by_name.get(name)
             if entry:
                 entry["words"] = len(text.split())

@@ -1,3 +1,7 @@
+---
+date: 2026-01-22T16:35:24+0000
+source: https://pypi.org/project/jmespath/
+---
 ## JMESPath
 
  [image: https://badges.gitter.im/JoinChat.svg]

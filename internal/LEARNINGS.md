@@ -2889,3 +2889,74 @@ condition under which it stops being harmless.
 3. **An inert component makes a real defect invisible.** The bug and the reason
    it does not bite have the same cause, so the corpus that would expose it is
    the one where the feature finally works.
+
+---
+
+## L61 - The recency factor was harmless while dead and harmful once alive
+
+L43 measured `recency_weight` as inert on both corpora: every document shared an
+age, so the factor was a constant and could not reorder anything. L50 refined
+that to *saturated* rather than constant. Neither could say whether the feature
+was any good, because nothing could exercise it.
+
+**PyPI stamps every project page with its release date**, in a `<time datetime>`
+that `scrape/html.extract` already reads - and the corpus builder fetched it and
+threw it away. The same defect as connectors reading a real date and filing it
+where nothing scores it (L44/L45), this time in the tooling.
+
+**The carrier matters and nearly went wrong.** The obvious move is to set each
+file's mtime. Git does not preserve mtimes, so a fresh clone stamps every file
+with the checkout time: recency would be live in a working tree and dead in CI,
+and the two would measure different corpora. That is L34 built in deliberately.
+The date is committed instead, as markdown front matter, which required
+`util.text.split_front_matter` and teaching the filesystem connector to strip a
+`---` block rather than index `date` and `source` as prose.
+
+**Backfilled 151 of 153 pages** - two carry no date on the page and fall back to
+the mtime, reported rather than silently defaulted.
+
+| | before | after |
+| --- | --- | --- |
+| corpus age span | 0.03 days | **1,999 days (5.5 years)** |
+| recency factor | 0.999182-0.999348 | **0.0042-1.0000** |
+| spread | 1.65e-04 | 0.9958, **6000x** |
+| worth, at weight 0.08 | 0.000013 of score | 0.0797 of score |
+
+**Then it could be swept for the first time, and zero dominates:**
+
+| recency_weight | 0.0 | 0.02 | 0.04 | 0.06 | 0.08 | 0.12 | 0.16 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| pass | **49/54** | 47 | 47 | 47 | 47 | 45 | 45 |
+| recall@8 | **0.9302** | 0.8837 | 0.8837 | 0.8837 | 0.9070 | 0.8605 | 0.8605 |
+| nDCG@8 | **0.7538** | 0.7414 | 0.7373 | 0.7341 | 0.7390 | 0.7233 | 0.7143 |
+
+Every non-zero weight is worse on every metric. The feature did not merely fail
+to help - it was **harmless while dead and harmful once alive**, and for four
+cycles it had been recorded as a neutral thing that simply could not be measured.
+
+**Why it is wrong here, and where it would be right.** Recency is a prior for
+corpora whose documents *supersede* one another: news, changelogs, versioned
+docs, a chat archive. A later document is then more likely to be the answer. A
+corpus of package descriptions has no such property - how recently `pydantic`
+shipped says nothing about whether it answers a question about `relativedelta`.
+The prior is not broken; it is applied to a corpus that does not satisfy its
+assumption.
+
+So it ships at 0.0 with the table as the argument for turning it on. A prior
+that suits the wrong corpus is noise injected into every query.
+
+**A determinism property came free.** With no scoring term reading the wall
+clock, the same index and query now give bit-identical scores whenever they run
+- stronger than the injectable clock was introduced to approximate. Pinned, and
+the older test that asserted the clock *does* move the score now passes
+`recency_weight` explicitly, so it keeps testing what it was written for.
+
+**Rules.**
+1. **"Inert" is not "harmless", it is "unmeasured".** Four cycles recorded this
+   factor as unmeasurable and left it on. The first measurement said switch it
+   off. An untested default is a claim, and the claim was wrong.
+2. **Ask what carries a value into version control before choosing where to put
+   it.** An mtime is a perfectly good date that CI cannot see.
+3. **A prior encodes an assumption about the corpus. Write the assumption down
+   next to the weight**, because the weight is meaningless to anyone who does
+   not know which corpora it suits.

@@ -1,3 +1,7 @@
+---
+date: 2026-08-19T06:27:40+0000
+source: https://pypi.org/project/uvicorn/
+---
 [image: uvicorn]
 
 An ASGI web server, for Python.

@@ -1,3 +1,7 @@
+---
+date: 2026-07-12T20:29:05+0000
+source: https://pypi.org/project/anyio/
+---
 [image: Build Status] [image: Code Coverage] [image: Documentation] [image: Gitter chat] [image: Tidelift]
 
 AnyIO is an asynchronous networking and concurrency library that works on top of either asyncio or

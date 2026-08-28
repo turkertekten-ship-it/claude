@@ -1,3 +1,7 @@
+---
+date: 2024-11-08T17:25:46+0000
+source: https://pypi.org/project/blinker/
+---
 # Blinker
 
 Blinker provides a fast dispatching system that allows any number of

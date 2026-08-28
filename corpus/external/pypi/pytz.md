@@ -1,3 +1,7 @@
+---
+date: 2026-07-25T15:12:05+0000
+source: https://pypi.org/project/pytz/
+---
 Author:
 
 Stuart Bishop <stuart@stuartbishop.net>

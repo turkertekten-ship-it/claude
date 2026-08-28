@@ -1,3 +1,7 @@
+---
+date: 2024-10-26T00:50:33+0000
+source: https://pypi.org/project/ftfy/
+---
 # ftfy: fixes text for you
 
 [image: PyPI package] [image: Docs]

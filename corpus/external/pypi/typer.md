@@ -1,3 +1,7 @@
+---
+date: 2026-08-28T10:26:53+0000
+source: https://pypi.org/project/typer/
+---
 [image: Typer]
 
 Typer, build great CLIs. Easy to code. Based on Python type hints.

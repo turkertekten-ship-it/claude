@@ -1,3 +1,7 @@
+---
+date: 2026-08-16T22:54:18+0000
+source: https://pypi.org/project/hypothesis/
+---
 # Hypothesis
 
 - Website

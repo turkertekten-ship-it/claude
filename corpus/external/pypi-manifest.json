@@ -12,7 +12,8 @@
       "content_hash": "a5619f704bb76aaf",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 25408,
-      "raw_content_hash": "1968cdad36248b01"
+      "raw_content_hash": "1968cdad36248b01",
+      "released_at": "2026-07-23T01:52:08+0000"
     },
     {
       "name": "aiosqlite",
@@ -22,7 +23,8 @@
       "content_hash": "e2fcd985fe748390",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 925,
-      "raw_content_hash": "28f7f83da540aca3"
+      "raw_content_hash": "28f7f83da540aca3",
+      "released_at": "2025-12-23T19:25:42+0000"
     },
     {
       "name": "alembic",
@@ -32,7 +34,8 @@
       "content_hash": "475827e3f09c1fa3",
       "fetched_at": "2026-08-28T08:43:13Z",
       "raw_words": 1951,
-      "raw_content_hash": "0fe536da34d387a3"
+      "raw_content_hash": "0fe536da34d387a3",
+      "released_at": "2026-08-08T16:32:01+0000"
     },
     {
       "name": "annotated-types",
@@ -42,7 +45,8 @@
       "content_hash": "423c88139cb42e79",
       "fetched_at": "2026-08-28T08:43:17Z",
       "raw_words": 2046,
-      "raw_content_hash": "4610ac8b9640b573"
+      "raw_content_hash": "4610ac8b9640b573",
+      "released_at": "2026-07-23T20:16:12+0000"
     },
     {
       "name": "anyio",
@@ -52,7 +56,8 @@
       "content_hash": "5e380cd1d82f68e9",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 1152,
-      "raw_content_hash": "befdc17b2ed1ca08"
+      "raw_content_hash": "befdc17b2ed1ca08",
+      "released_at": "2026-07-12T20:29:05+0000"
     },
     {
       "name": "apscheduler",
@@ -62,7 +67,8 @@
       "content_hash": "d8964f19f18f13f7",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 1167,
-      "raw_content_hash": "fddc2ac035e865d6"
+      "raw_content_hash": "fddc2ac035e865d6",
+      "released_at": "2026-06-28T19:39:20+0000"
     },
     {
       "name": "arrow",
@@ -72,7 +78,8 @@
       "content_hash": "ef4603f067c9c7f5",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 1222,
-      "raw_content_hash": "a94978485082eb5d"
+      "raw_content_hash": "a94978485082eb5d",
+      "released_at": "2025-10-18T17:46:45+0000"
     },
     {
       "name": "asyncpg",
@@ -82,7 +89,8 @@
       "content_hash": "1c854b4354dda30b",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 11552,
-      "raw_content_hash": "4b01bdcc35ce9427"
+      "raw_content_hash": "4b01bdcc35ce9427",
+      "released_at": "2025-11-24T23:25:23+0000"
     },
     {
       "name": "attrs",
@@ -92,7 +100,8 @@
       "content_hash": "97b7f80ed056ca77",
       "fetched_at": "2026-08-28T08:18:13Z",
       "raw_words": 1300,
-      "raw_content_hash": "4f2c8ee1887e2a1f"
+      "raw_content_hash": "4f2c8ee1887e2a1f",
+      "released_at": "2026-03-19T14:22:23+0000"
     },
     {
       "name": "autopep8",
@@ -102,7 +111,8 @@
       "content_hash": "60f7a7ef97ee6b16",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 2619,
-      "raw_content_hash": "f61ce1f5c1417fc4"
+      "raw_content_hash": "f61ce1f5c1417fc4",
+      "released_at": "2025-01-14T14:46:15+0000"
     },
     {
       "name": "bandit",
@@ -112,7 +122,8 @@
       "content_hash": "9a35737b6aabbad2",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 1048,
-      "raw_content_hash": "3a3e61e0bccb1739"
+      "raw_content_hash": "3a3e61e0bccb1739",
+      "released_at": "2026-02-25T06:44:13+0000"
     },
     {
       "name": "bcrypt",
@@ -122,7 +133,8 @@
       "content_hash": "f0c99f8852aa072d",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 13575,
-      "raw_content_hash": "39e314d7cbd60760"
+      "raw_content_hash": "39e314d7cbd60760",
+      "released_at": "2025-09-25T19:49:05+0000"
     },
     {
       "name": "beautifulsoup4",
@@ -132,7 +144,8 @@
       "content_hash": "9ed5178830c148c7",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 851,
-      "raw_content_hash": "59a6f5ae8a52c403"
+      "raw_content_hash": "59a6f5ae8a52c403",
+      "released_at": "2026-06-07T16:44:20+0000"
     },
     {
       "name": "black",
@@ -142,7 +155,8 @@
       "content_hash": "563add4f333f8e7b",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 19148,
-      "raw_content_hash": "d5e7c5908a60ee19"
+      "raw_content_hash": "d5e7c5908a60ee19",
+      "released_at": "2026-05-18T16:53:33+0000"
     },
     {
       "name": "bleach",
@@ -152,7 +166,8 @@
       "content_hash": "22201daad9977e25",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 4446,
-      "raw_content_hash": "de7daceba58dd37d"
+      "raw_content_hash": "de7daceba58dd37d",
+      "released_at": "2026-06-05T13:01:12+0000"
     },
     {
       "name": "blinker",
@@ -162,7 +177,8 @@
       "content_hash": "1c628f071dc827dc",
       "fetched_at": "2026-08-28T08:43:12Z",
       "raw_words": 680,
-      "raw_content_hash": "dfabce439977eccd"
+      "raw_content_hash": "dfabce439977eccd",
+      "released_at": "2024-11-08T17:25:46+0000"
     },
     {
       "name": "boltons",
@@ -172,7 +188,8 @@
       "content_hash": "d67846dd02942e14",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 1204,
-      "raw_content_hash": "cdebb2dd72333939"
+      "raw_content_hash": "cdebb2dd72333939",
+      "released_at": "2026-07-17T18:38:41+0000"
     },
     {
       "name": "boto3",
@@ -182,7 +199,8 @@
       "content_hash": "95663ce037923ef1",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 13451,
-      "raw_content_hash": "3cfd140fc9ac0208"
+      "raw_content_hash": "3cfd140fc9ac0208",
+      "released_at": "2026-08-27T20:08:40+0000"
     },
     {
       "name": "build",
@@ -192,7 +210,8 @@
       "content_hash": "0d9e98de3175f9bd",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 1136,
-      "raw_content_hash": "4a0a75679e4a16f4"
+      "raw_content_hash": "4a0a75679e4a16f4",
+      "released_at": "2026-08-27T21:01:14+0000"
     },
     {
       "name": "cattrs",
@@ -202,7 +221,8 @@
       "content_hash": "1b052f1d5644afac",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 1339,
-      "raw_content_hash": "f07ed640e81abc64"
+      "raw_content_hash": "f07ed640e81abc64",
+      "released_at": "2026-02-18T22:15:17+0000"
     },
     {
       "name": "celery",
@@ -212,7 +232,8 @@
       "content_hash": "6cdecc4b8d02fe86",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 3276,
-      "raw_content_hash": "e04a49962541277c"
+      "raw_content_hash": "e04a49962541277c",
+      "released_at": "2026-03-26T12:14:49+0000"
     },
     {
       "name": "certifi",
@@ -222,7 +243,8 @@
       "content_hash": "e0faa1b73268b19e",
       "fetched_at": "2026-08-28T08:18:09Z",
       "raw_words": 1025,
-      "raw_content_hash": "1ab878702ecea2ca"
+      "raw_content_hash": "1ab878702ecea2ca",
+      "released_at": "2026-07-22T03:35:11+0000"
     },
     {
       "name": "cffi",
@@ -232,7 +254,8 @@
       "content_hash": "0ac5ceb10b4fd246",
       "fetched_at": "2026-08-28T08:43:14Z",
       "raw_words": 10155,
-      "raw_content_hash": "e467e886ec44b054"
+      "raw_content_hash": "e467e886ec44b054",
+      "released_at": "2026-08-03T21:19:15+0000"
     },
     {
       "name": "chardet",
@@ -242,7 +265,8 @@
       "content_hash": "590304d329feea09",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 10081,
-      "raw_content_hash": "956d1240ea1ba7bf"
+      "raw_content_hash": "956d1240ea1ba7bf",
+      "released_at": "2026-08-14T20:36:07+0000"
     },
     {
       "name": "charset-normalizer",
@@ -252,7 +276,8 @@
       "content_hash": "81f7b6a093e3d41f",
       "fetched_at": "2026-08-28T08:18:10Z",
       "raw_words": 39102,
-      "raw_content_hash": "ebcef956440522da"
+      "raw_content_hash": "ebcef956440522da",
+      "released_at": "2026-08-15T08:16:22+0000"
     },
     {
       "name": "click",
@@ -262,7 +287,8 @@
       "content_hash": "3d8ea5ca9a3fc619",
       "fetched_at": "2026-08-28T08:18:11Z",
       "raw_words": 1047,
-      "raw_content_hash": "711846344fff5f41"
+      "raw_content_hash": "711846344fff5f41",
+      "released_at": "2026-08-26T13:33:12+0000"
     },
     {
       "name": "colorama",
@@ -272,7 +298,8 @@
       "content_hash": "942a563908bb07e5",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 2678,
-      "raw_content_hash": "b1e30043b085ceb0"
+      "raw_content_hash": "b1e30043b085ceb0",
+      "released_at": "2022-10-25T02:36:20+0000"
     },
     {
       "name": "coverage",
@@ -282,7 +309,8 @@
       "content_hash": "02e91d048cee9802",
       "fetched_at": "2026-08-28T08:43:18Z",
       "raw_words": 24930,
-      "raw_content_hash": "61fa37d69b57626d"
+      "raw_content_hash": "61fa37d69b57626d",
+      "released_at": "2026-08-06T13:46:55+0000"
     },
     {
       "name": "cryptography",
@@ -292,7 +320,8 @@
       "content_hash": "98ed699ffeebf116",
       "fetched_at": "2026-08-28T08:43:14Z",
       "raw_words": 10011,
-      "raw_content_hash": "a69b78bb8d2c7563"
+      "raw_content_hash": "a69b78bb8d2c7563",
+      "released_at": "2026-08-25T19:44:03+0000"
     },
     {
       "name": "dacite",
@@ -302,7 +331,8 @@
       "content_hash": "a0960c6c0647201b",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 2595,
-      "raw_content_hash": "30bbf337524ddadd"
+      "raw_content_hash": "30bbf337524ddadd",
+      "released_at": "2025-02-05T09:27:24+0000"
     },
     {
       "name": "decorator",
@@ -312,7 +342,8 @@
       "content_hash": "04e4702bd877bf02",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 815,
-      "raw_content_hash": "a807771f7961eb4a"
+      "raw_content_hash": "a807771f7961eb4a",
+      "released_at": "2026-05-18T06:03:26+0000"
     },
     {
       "name": "deepdiff",
@@ -322,7 +353,8 @@
       "content_hash": "58bb353c69160ba0",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 1397,
-      "raw_content_hash": "ceb231550a264401"
+      "raw_content_hash": "ceb231550a264401",
+      "released_at": "2026-05-15T20:18:03+0000"
     },
     {
       "name": "defusedxml",
@@ -332,7 +364,8 @@
       "content_hash": "7498959dc8a1f835",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 4168,
-      "raw_content_hash": "2ecf4c30b494ab79"
+      "raw_content_hash": "2ecf4c30b494ab79",
+      "released_at": "2021-03-08T10:59:24+0000"
     },
     {
       "name": "docutils",
@@ -342,7 +375,8 @@
       "content_hash": "83f22bb9e608b83d",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 1940,
-      "raw_content_hash": "e005a42a4e533ab7"
+      "raw_content_hash": "e005a42a4e533ab7",
+      "released_at": "2026-05-27T17:40:58+0000"
     },
     {
       "name": "dynaconf",
@@ -352,7 +386,8 @@
       "content_hash": "ddac08edac8c3d81",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 1700,
-      "raw_content_hash": "e7ad4853b5665d5e"
+      "raw_content_hash": "e7ad4853b5665d5e",
+      "released_at": "2026-08-05T19:50:23+0000"
     },
     {
       "name": "elasticsearch",
@@ -362,7 +397,8 @@
       "content_hash": "40532ee015657973",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 1897,
-      "raw_content_hash": "e6b1eb08f5d63b85"
+      "raw_content_hash": "e6b1eb08f5d63b85",
+      "released_at": "2026-08-04T17:55:54+0000"
     },
     {
       "name": "environs",
@@ -372,7 +408,8 @@
       "content_hash": "6755568c309da95d",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 2551,
-      "raw_content_hash": "f896b6ffe7a6d97b"
+      "raw_content_hash": "f896b6ffe7a6d97b",
+      "released_at": "2026-08-01T02:21:05+0000"
     },
     {
       "name": "faker",
@@ -382,7 +419,8 @@
       "content_hash": "554cdda028b7d359",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 5008,
-      "raw_content_hash": "157bd3532559ea81"
+      "raw_content_hash": "157bd3532559ea81",
+      "released_at": "2026-08-21T16:33:14+0000"
     },
     {
       "name": "fastapi",
@@ -392,7 +430,8 @@
       "content_hash": "4b144ed10d457d9a",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 4310,
-      "raw_content_hash": "774e9c6afa6ae615"
+      "raw_content_hash": "774e9c6afa6ae615",
+      "released_at": "2026-07-29T17:18:04+0000"
     },
     {
       "name": "flake8",
@@ -402,7 +441,8 @@
       "content_hash": "1581e7dea9d485ac",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 1084,
-      "raw_content_hash": "f11ee32b5075fc36"
+      "raw_content_hash": "f11ee32b5075fc36",
+      "released_at": "2025-06-20T19:31:34+0000"
     },
     {
       "name": "flask",
@@ -412,7 +452,8 @@
       "content_hash": "6841bd2a8ea2f4c8",
       "fetched_at": "2026-08-28T08:43:12Z",
       "raw_words": 1015,
-      "raw_content_hash": "b02319d32d75d89c"
+      "raw_content_hash": "b02319d32d75d89c",
+      "released_at": "2026-02-19T05:00:56+0000"
     },
     {
       "name": "freezegun",
@@ -422,7 +463,8 @@
       "content_hash": "17854a0e78c55b9a",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 1839,
-      "raw_content_hash": "4ece2dd574fd7d25"
+      "raw_content_hash": "4ece2dd574fd7d25",
+      "released_at": "2025-08-09T10:39:06+0000"
     },
     {
       "name": "ftfy",
@@ -432,7 +474,8 @@
       "content_hash": "85e2e0597a7faa5c",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 1443,
-      "raw_content_hash": "3afc7cffd8880d86"
+      "raw_content_hash": "3afc7cffd8880d86",
+      "released_at": "2024-10-26T00:50:33+0000"
     },
     {
       "name": "gevent",
@@ -442,7 +485,8 @@
       "content_hash": "2c58b7b9de0837ed",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 5935,
-      "raw_content_hash": "c0678695aab51e41"
+      "raw_content_hash": "c0678695aab51e41",
+      "released_at": "2026-08-10T16:56:19+0000"
     },
     {
       "name": "greenlet",
@@ -452,7 +496,8 @@
       "content_hash": "9ffba384db77ee12",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 8488,
-      "raw_content_hash": "5ad00370a0179a60"
+      "raw_content_hash": "5ad00370a0179a60",
+      "released_at": "2026-08-10T13:25:17+0000"
     },
     {
       "name": "grpcio",
@@ -462,7 +507,8 @@
       "content_hash": "d6ce4a3813163edd",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 7079,
-      "raw_content_hash": "a13ad528403a1b71"
+      "raw_content_hash": "a13ad528403a1b71",
+      "released_at": "2026-08-28T07:07:30+0000"
     },
     {
       "name": "gunicorn",
@@ -472,7 +518,8 @@
       "content_hash": "e777f7db9c634fc4",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 1090,
-      "raw_content_hash": "e0125d4eb6eb9b5d"
+      "raw_content_hash": "e0125d4eb6eb9b5d",
+      "released_at": "2026-08-24T15:05:57+0000"
     },
     {
       "name": "h11",
@@ -482,7 +529,8 @@
       "content_hash": "7cf03bdccb589361",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 1355,
-      "raw_content_hash": "f4a85cb9d430bc86"
+      "raw_content_hash": "f4a85cb9d430bc86",
+      "released_at": "2025-04-24T03:35:24+0000"
     },
     {
       "name": "httptools",
@@ -492,7 +540,8 @@
       "content_hash": "7939a6106505c406",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 5394,
-      "raw_content_hash": "7fd6f9002a0c2cf7"
+      "raw_content_hash": "7fd6f9002a0c2cf7",
+      "released_at": "2026-05-25T22:16:50+0000"
     },
     {
       "name": "httpx",
@@ -502,7 +551,8 @@
       "content_hash": "d9c633efc40563a1",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 1241,
-      "raw_content_hash": "99fdb44747eef334"
+      "raw_content_hash": "99fdb44747eef334",
+      "released_at": "2024-12-06T15:37:21+0000"
     },
     {
       "name": "humanize",
@@ -512,7 +562,8 @@
       "content_hash": "673ff0fc783dc280",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 1386,
-      "raw_content_hash": "53cd343fb27c3fd7"
+      "raw_content_hash": "53cd343fb27c3fd7",
+      "released_at": "2026-06-30T16:17:28+0000"
     },
     {
       "name": "hypothesis",
@@ -522,7 +573,8 @@
       "content_hash": "a1c59e8a0f08b7e2",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 17332,
-      "raw_content_hash": "12471494f42aef70"
+      "raw_content_hash": "12471494f42aef70",
+      "released_at": "2026-08-16T22:54:18+0000"
     },
     {
       "name": "idna",
@@ -532,7 +584,8 @@
       "content_hash": "e21b36c578c9e01b",
       "fetched_at": "2026-08-28T08:18:09Z",
       "raw_words": 1756,
-      "raw_content_hash": "9f81324cebd38231"
+      "raw_content_hash": "9f81324cebd38231",
+      "released_at": "2026-08-18T05:14:22+0000"
     },
     {
       "name": "iniconfig",
@@ -542,7 +595,8 @@
       "content_hash": "99b67a450f72d368",
       "fetched_at": "2026-08-28T08:43:15Z",
       "raw_words": 679,
-      "raw_content_hash": "6a17eedb13ff0e0c"
+      "raw_content_hash": "6a17eedb13ff0e0c",
+      "released_at": "2025-10-18T21:55:41+0000"
     },
     {
       "name": "isort",
@@ -552,7 +606,8 @@
       "content_hash": "7a6f44182360eeaf",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 9216,
-      "raw_content_hash": "8d233fd3a633e376"
+      "raw_content_hash": "8d233fd3a633e376",
+      "released_at": "2026-08-27T20:53:29+0000"
     },
     {
       "name": "itsdangerous",
@@ -562,7 +617,8 @@
       "content_hash": "cb79ae53663d3ead",
       "fetched_at": "2026-08-28T08:43:12Z",
       "raw_words": 557,
-      "raw_content_hash": "bd44d94ff64d532a"
+      "raw_content_hash": "bd44d94ff64d532a",
+      "released_at": "2024-04-16T21:28:14+0000"
     },
     {
       "name": "jinja2",
@@ -572,7 +628,8 @@
       "content_hash": "289d4fd99cb36560",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 1001,
-      "raw_content_hash": "51d705ccbacded1c"
+      "raw_content_hash": "51d705ccbacded1c",
+      "released_at": "2025-03-05T20:05:00+0000"
     },
     {
       "name": "jmespath",
@@ -582,7 +639,8 @@
       "content_hash": "27063dd954b438ed",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 1229,
-      "raw_content_hash": "3e7fad9e1b2f8939"
+      "raw_content_hash": "3e7fad9e1b2f8939",
+      "released_at": "2026-01-22T16:35:24+0000"
     },
     {
       "name": "jsonschema",
@@ -592,7 +650,8 @@
       "content_hash": "7c23142e9ecec696",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 1460,
-      "raw_content_hash": "354b217846c0639c"
+      "raw_content_hash": "354b217846c0639c",
+      "released_at": "2026-01-07T13:41:05+0000"
     },
     {
       "name": "lark",
@@ -602,7 +661,8 @@
       "content_hash": "3abc8fdbd736fd44",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 487,
-      "raw_content_hash": "602c99780408b3ed"
+      "raw_content_hash": "602c99780408b3ed",
+      "released_at": "2025-10-27T18:25:54+0000"
     },
     {
       "name": "loguru",
@@ -612,7 +672,8 @@
       "content_hash": "d1d53d958878b6e4",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 2363,
-      "raw_content_hash": "d8d7156e9fd931b6"
+      "raw_content_hash": "d8d7156e9fd931b6",
+      "released_at": "2024-12-06T11:20:54+0000"
     },
     {
       "name": "lxml",
@@ -622,7 +683,8 @@
       "content_hash": "7adce5a9afe03f4c",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 18032,
-      "raw_content_hash": "2a81ca37266658b0"
+      "raw_content_hash": "2a81ca37266658b0",
+      "released_at": "2026-08-19T04:58:15+0000"
     },
     {
       "name": "markdown",
@@ -632,7 +694,8 @@
       "content_hash": "6e71a24e627140e4",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 763,
-      "raw_content_hash": "6a41871ef4343943"
+      "raw_content_hash": "6a41871ef4343943",
+      "released_at": "2026-07-30T19:05:27+0000"
     },
     {
       "name": "markupsafe",
@@ -642,7 +705,8 @@
       "content_hash": "4b62c945757e4ef6",
       "fetched_at": "2026-08-28T08:18:11Z",
       "raw_words": 17578,
-      "raw_content_hash": "e13903d477aaab52"
+      "raw_content_hash": "e13903d477aaab52",
+      "released_at": "2025-09-27T18:36:05+0000"
     },
     {
       "name": "marshmallow",
@@ -652,7 +716,8 @@
       "content_hash": "cbdb993be65aeac1",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 2064,
-      "raw_content_hash": "fe58741067813461"
+      "raw_content_hash": "fe58741067813461",
+      "released_at": "2026-08-08T14:27:28+0000"
     },
     {
       "name": "matplotlib",
@@ -662,7 +727,8 @@
       "content_hash": "2449b48fafdf1dd9",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 9928,
-      "raw_content_hash": "634f1501c5435881"
+      "raw_content_hash": "634f1501c5435881",
+      "released_at": "2026-07-18T03:38:03+0000"
     },
     {
       "name": "mccabe",
@@ -672,7 +738,8 @@
       "content_hash": "568dfaba6bf5f5a3",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 854,
-      "raw_content_hash": "3d92812f5028ab90"
+      "raw_content_hash": "3d92812f5028ab90",
+      "released_at": "2022-01-24T01:14:49+0000"
     },
     {
       "name": "mistune",
@@ -682,7 +749,8 @@
       "content_hash": "69aad464ad09db22",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 835,
-      "raw_content_hash": "a186232576e18960"
+      "raw_content_hash": "a186232576e18960",
+      "released_at": "2026-07-22T05:22:29+0000"
     },
     {
       "name": "mkdocs",
@@ -692,7 +760,8 @@
       "content_hash": "876858e49243dda0",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 934,
-      "raw_content_hash": "91e8c29e6f4d884c"
+      "raw_content_hash": "91e8c29e6f4d884c",
+      "released_at": "2024-08-30T12:24:05+0000"
     },
     {
       "name": "msgpack",
@@ -702,7 +771,8 @@
       "content_hash": "ddfc3e28dc9b2a94",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 18185,
-      "raw_content_hash": "426587a66272322e"
+      "raw_content_hash": "426587a66272322e",
+      "released_at": "2026-08-27T10:01:34+0000"
     },
     {
       "name": "mypy",
@@ -712,7 +782,8 @@
       "content_hash": "21bee924486e55cb",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 5975,
-      "raw_content_hash": "7a70ca8be812c082"
+      "raw_content_hash": "7a70ca8be812c082",
+      "released_at": "2026-08-15T03:01:23+0000"
     },
     {
       "name": "networkx",
@@ -722,7 +793,8 @@
       "content_hash": "4f2fb39f302a3ef1",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 1263,
-      "raw_content_hash": "4c513556eafd1a28"
+      "raw_content_hash": "4c513556eafd1a28",
+      "released_at": "2025-12-08T17:02:38+0000"
     },
     {
       "name": "nox",
@@ -732,7 +804,8 @@
       "content_hash": "c884f47128f56124",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 892,
-      "raw_content_hash": "dcd7b0061ab0622d"
+      "raw_content_hash": "dcd7b0061ab0622d",
+      "released_at": "2026-08-18T03:09:55+0000"
     },
     {
       "name": "numpy",
@@ -742,7 +815,8 @@
       "content_hash": "14496fbd4526485c",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 13999,
-      "raw_content_hash": "89c3eb8b10daabf3"
+      "raw_content_hash": "89c3eb8b10daabf3",
+      "released_at": "2026-08-09T13:44:51+0000"
     },
     {
       "name": "omegaconf",
@@ -752,7 +826,8 @@
       "content_hash": "31b9293af217eb87",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 1460,
-      "raw_content_hash": "d4210f53ba1eb728"
+      "raw_content_hash": "d4210f53ba1eb728",
+      "released_at": "2026-06-11T05:05:09+0000"
     },
     {
       "name": "orjson",
@@ -762,7 +837,8 @@
       "content_hash": "dea068a80333c82e",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 18023,
-      "raw_content_hash": "44925a387516505e"
+      "raw_content_hash": "44925a387516505e",
+      "released_at": "2026-08-14T16:12:00+0000"
     },
     {
       "name": "packaging",
@@ -772,7 +848,8 @@
       "content_hash": "f488861039159dda",
       "fetched_at": "2026-08-28T08:18:10Z",
       "raw_words": 990,
-      "raw_content_hash": "620c5c3d156943a8"
+      "raw_content_hash": "620c5c3d156943a8",
+      "released_at": "2026-08-04T18:15:27+0000"
     },
     {
       "name": "pandas",
@@ -782,7 +859,8 @@
       "content_hash": "2bc0e11e81c95159",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 9772,
-      "raw_content_hash": "06be50ca746bfc3c"
+      "raw_content_hash": "06be50ca746bfc3c",
+      "released_at": "2026-07-22T22:17:48+0000"
     },
     {
       "name": "paramiko",
@@ -792,7 +870,8 @@
       "content_hash": "39e316791b8b2d62",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 1279,
-      "raw_content_hash": "707fcada82e2125e"
+      "raw_content_hash": "707fcada82e2125e",
+      "released_at": "2026-05-09T18:28:50+0000"
     },
     {
       "name": "pdoc",
@@ -802,7 +881,8 @@
       "content_hash": "cc84cedd986d4852",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 1302,
-      "raw_content_hash": "1eb7b64978870d7b"
+      "raw_content_hash": "1eb7b64978870d7b",
+      "released_at": "2025-10-27T16:02:15+0000"
     },
     {
       "name": "peewee",
@@ -812,7 +892,8 @@
       "content_hash": "865aef17c6645fcb",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 2330,
-      "raw_content_hash": "29afc519f253f7d1"
+      "raw_content_hash": "29afc519f253f7d1",
+      "released_at": "2026-08-23T11:43:38+0000"
     },
     {
       "name": "pillow",
@@ -822,7 +903,8 @@
       "content_hash": "46e73a900387f81d",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 17657,
-      "raw_content_hash": "32ffc9a9ffaaa029"
+      "raw_content_hash": "32ffc9a9ffaaa029",
+      "released_at": "2026-07-01T11:53:27+0000"
     },
     {
       "name": "platformdirs",
@@ -832,7 +914,8 @@
       "content_hash": "a7191e79bfb96538",
       "fetched_at": "2026-08-28T08:43:20Z",
       "raw_words": 1182,
-      "raw_content_hash": "7ea47d4653d40258"
+      "raw_content_hash": "7ea47d4653d40258",
+      "released_at": "2026-08-27T21:36:36+0000"
     },
     {
       "name": "pluggy",
@@ -842,7 +925,8 @@
       "content_hash": "d9f2065121658dcf",
       "fetched_at": "2026-08-28T08:43:16Z",
       "raw_words": 799,
-      "raw_content_hash": "07fd7469311bb52c"
+      "raw_content_hash": "07fd7469311bb52c",
+      "released_at": "2025-05-15T12:30:06+0000"
     },
     {
       "name": "poetry",
@@ -852,7 +936,8 @@
       "content_hash": "5eb5977d93e973c1",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 2108,
-      "raw_content_hash": "1e2f3d9776e53dc3"
+      "raw_content_hash": "1e2f3d9776e53dc3",
+      "released_at": "2026-05-09T15:18:55+0000"
     },
     {
       "name": "prometheus-client",
@@ -862,7 +947,8 @@
       "content_hash": "6ef07c3601b5d8a8",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 658,
-      "raw_content_hash": "6383ff7fa75b44ae"
+      "raw_content_hash": "6383ff7fa75b44ae",
+      "released_at": "2026-07-24T19:36:40+0000"
     },
     {
       "name": "prompt-toolkit",
@@ -882,7 +968,8 @@
       "content_hash": "c4404691845a0561",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 3891,
-      "raw_content_hash": "dd17742bb1067a8c"
+      "raw_content_hash": "dd17742bb1067a8c",
+      "released_at": "2026-01-28T18:14:54+0000"
     },
     {
       "name": "psycopg2-binary",
@@ -892,7 +979,8 @@
       "content_hash": "26a9b2020da0d4fb",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 6978,
-      "raw_content_hash": "ef851b51d7701f8b"
+      "raw_content_hash": "ef851b51d7701f8b",
+      "released_at": "2026-04-20T23:33:31+0000"
     },
     {
       "name": "pycodestyle",
@@ -902,7 +990,8 @@
       "content_hash": "c4e14d585a2f8b45",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 701,
-      "raw_content_hash": "62aff1ea320aa6de"
+      "raw_content_hash": "62aff1ea320aa6de",
+      "released_at": "2025-06-20T18:49:47+0000"
     },
     {
       "name": "pycparser",
@@ -922,7 +1011,8 @@
       "content_hash": "bfe3abdfaa415fc9",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 10021,
-      "raw_content_hash": "03649328f99e59ee"
+      "raw_content_hash": "03649328f99e59ee",
+      "released_at": "2026-08-28T14:03:59+0000"
     },
     {
       "name": "pyflakes",
@@ -932,7 +1022,8 @@
       "content_hash": "0161291eee26d419",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 825,
-      "raw_content_hash": "6fc4458e5cf05f20"
+      "raw_content_hash": "6fc4458e5cf05f20",
+      "released_at": "2025-06-20T18:45:26+0000"
     },
     {
       "name": "pygments",
@@ -942,7 +1033,8 @@
       "content_hash": "540aab9e81b4b320",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 781,
-      "raw_content_hash": "152bb4f604f76d58"
+      "raw_content_hash": "152bb4f604f76d58",
+      "released_at": "2026-08-17T08:02:44+0000"
     },
     {
       "name": "pyjwt",
@@ -952,7 +1044,8 @@
       "content_hash": "d17e931853c8ec34",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 881,
-      "raw_content_hash": "a92e1d244b37b82b"
+      "raw_content_hash": "a92e1d244b37b82b",
+      "released_at": "2026-05-21T19:54:35+0000"
     },
     {
       "name": "pylint",
@@ -962,7 +1055,8 @@
       "content_hash": "579629549e5658ce",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 2413,
-      "raw_content_hash": "03ea70b09efb1b5c"
+      "raw_content_hash": "03ea70b09efb1b5c",
+      "released_at": "2026-08-09T19:13:21+0000"
     },
     {
       "name": "pymongo",
@@ -972,7 +1066,8 @@
       "content_hash": "7d6f7d95dd819e85",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 15559,
-      "raw_content_hash": "433f7bc996b1c166"
+      "raw_content_hash": "433f7bc996b1c166",
+      "released_at": "2026-04-20T16:37:20+0000"
     },
     {
       "name": "pymysql",
@@ -982,7 +1077,8 @@
       "content_hash": "0cb01966e8d8f046",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 1037,
-      "raw_content_hash": "b06778903a00e9df"
+      "raw_content_hash": "b06778903a00e9df",
+      "released_at": "2026-05-19T08:26:20+0000"
     },
     {
       "name": "pyparsing",
@@ -992,7 +1088,8 @@
       "content_hash": "106cf932c41b3a65",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 1200,
-      "raw_content_hash": "a9165ee6e3a14b73"
+      "raw_content_hash": "a9165ee6e3a14b73",
+      "released_at": "2026-01-21T03:57:55+0000"
     },
     {
       "name": "pytest",
@@ -1002,7 +1099,8 @@
       "content_hash": "ca7d9bcb6b632051",
       "fetched_at": "2026-08-28T08:18:13Z",
       "raw_words": 2010,
-      "raw_content_hash": "1db8e4e68c57397f"
+      "raw_content_hash": "1db8e4e68c57397f",
+      "released_at": "2026-06-19T10:58:31+0000"
     },
     {
       "name": "pytest-asyncio",
@@ -1012,7 +1110,8 @@
       "content_hash": "e419887b2f372243",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 1079,
-      "raw_content_hash": "5d220dabcf1df39e"
+      "raw_content_hash": "5d220dabcf1df39e",
+      "released_at": "2026-05-26T09:56:02+0000"
     },
     {
       "name": "pytest-cov",
@@ -1022,7 +1121,8 @@
       "content_hash": "362e88b0b157df57",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 3621,
-      "raw_content_hash": "64e3166f2003b2b7"
+      "raw_content_hash": "64e3166f2003b2b7",
+      "released_at": "2026-03-21T20:11:14+0000"
     },
     {
       "name": "pytest-mock",
@@ -1032,7 +1132,8 @@
       "content_hash": "5d3e7f2b9df3b079",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 936,
-      "raw_content_hash": "6febcbf52bcb5968"
+      "raw_content_hash": "6febcbf52bcb5968",
+      "released_at": "2025-09-16T16:37:25+0000"
     },
     {
       "name": "pytest-xdist",
@@ -1042,7 +1143,8 @@
       "content_hash": "404e880ecafb0378",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 941,
-      "raw_content_hash": "bbc1fc1c7ab1bf4b"
+      "raw_content_hash": "bbc1fc1c7ab1bf4b",
+      "released_at": "2025-07-01T13:30:56+0000"
     },
     {
       "name": "python-dateutil",
@@ -1052,7 +1154,8 @@
       "content_hash": "b2217938b89d99ac",
       "fetched_at": "2026-08-28T08:18:15Z",
       "raw_words": 1111,
-      "raw_content_hash": "791ddcfc9a5438d7"
+      "raw_content_hash": "791ddcfc9a5438d7",
+      "released_at": "2024-03-01T18:36:18+0000"
     },
     {
       "name": "python-dotenv",
@@ -1062,7 +1165,8 @@
       "content_hash": "f3e54766c5f57556",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 3651,
-      "raw_content_hash": "80dde85893559429"
+      "raw_content_hash": "80dde85893559429",
+      "released_at": "2026-08-16T16:54:52+0000"
     },
     {
       "name": "python-slugify",
@@ -1072,7 +1176,8 @@
       "content_hash": "bd5d2c30d3f05d05",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 1404,
-      "raw_content_hash": "2552c431a489f78b"
+      "raw_content_hash": "2552c431a489f78b",
+      "released_at": "2024-02-08T18:32:43+0000"
     },
     {
       "name": "pytz",
@@ -1082,7 +1187,8 @@
       "content_hash": "fa4a671589d45079",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 3815,
-      "raw_content_hash": "5aad76185af4b7da"
+      "raw_content_hash": "5aad76185af4b7da",
+      "released_at": "2026-07-25T15:12:05+0000"
     },
     {
       "name": "pyyaml",
@@ -1092,7 +1198,8 @@
       "content_hash": "678d8c40d7815752",
       "fetched_at": "2026-08-28T08:18:14Z",
       "raw_words": 7449,
-      "raw_content_hash": "634ad011428fbc90"
+      "raw_content_hash": "634ad011428fbc90",
+      "released_at": "2025-09-25T21:31:46+0000"
     },
     {
       "name": "radon",
@@ -1102,7 +1209,8 @@
       "content_hash": "5438d69ed5373311",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 1374,
-      "raw_content_hash": "4d497281f8e5c913"
+      "raw_content_hash": "4d497281f8e5c913",
+      "released_at": "2023-03-26T06:24:33+0000"
     },
     {
       "name": "redis",
@@ -1112,7 +1220,8 @@
       "content_hash": "25936421dac61e64",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 2920,
-      "raw_content_hash": "b811bdd2e3639852"
+      "raw_content_hash": "b811bdd2e3639852",
+      "released_at": "2026-07-30T08:50:58+0000"
     },
     {
       "name": "regex",
@@ -1122,7 +1231,8 @@
       "content_hash": "cf66d579fae98dca",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 18132,
-      "raw_content_hash": "aae3b8e9f5e58d98"
+      "raw_content_hash": "aae3b8e9f5e58d98",
+      "released_at": "2026-07-19T00:16:13+0000"
     },
     {
       "name": "requests",
@@ -1132,7 +1242,8 @@
       "content_hash": "0c795098d5e05475",
       "fetched_at": "2026-08-28T08:18:08Z",
       "raw_words": 1700,
-      "raw_content_hash": "904d0112c85429cb"
+      "raw_content_hash": "904d0112c85429cb",
+      "released_at": "2026-05-14T19:25:26+0000"
     },
     {
       "name": "responses",
@@ -1142,7 +1253,8 @@
       "content_hash": "6883f44cc3ca9c85",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 4868,
-      "raw_content_hash": "8338dbad02a6dc59"
+      "raw_content_hash": "8338dbad02a6dc59",
+      "released_at": "2026-08-26T19:17:23+0000"
     },
     {
       "name": "rich",
@@ -1152,7 +1264,8 @@
       "content_hash": "bb9521de0439f5f2",
       "fetched_at": "2026-08-28T08:18:12Z",
       "raw_words": 3234,
-      "raw_content_hash": "c0c8ee5753c07e53"
+      "raw_content_hash": "c0c8ee5753c07e53",
+      "released_at": "2026-04-12T08:24:00+0000"
     },
     {
       "name": "ruff",
@@ -1162,7 +1275,8 @@
       "content_hash": "97668ec829393692",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 6225,
-      "raw_content_hash": "c6932be5bda76820"
+      "raw_content_hash": "c6932be5bda76820",
+      "released_at": "2026-08-27T16:33:41+0000"
     },
     {
       "name": "schedule",
@@ -1172,7 +1286,8 @@
       "content_hash": "007e98a0b8a13167",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 552,
-      "raw_content_hash": "fbc55c0b85ef49a2"
+      "raw_content_hash": "fbc55c0b85ef49a2",
+      "released_at": "2024-05-25T18:41:59+0000"
     },
     {
       "name": "scipy",
@@ -1182,7 +1297,8 @@
       "content_hash": "d1a8b9a65ca0218e",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 12773,
-      "raw_content_hash": "fefe28aa30f3a83a"
+      "raw_content_hash": "fefe28aa30f3a83a",
+      "released_at": "2026-08-21T23:23:44+0000"
     },
     {
       "name": "sentry-sdk",
@@ -1192,7 +1308,8 @@
       "content_hash": "ac44397ed9e1467e",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 2903,
-      "raw_content_hash": "823f371bea7e6914"
+      "raw_content_hash": "823f371bea7e6914",
+      "released_at": "2026-08-24T13:09:36+0000"
     },
     {
       "name": "setuptools",
@@ -1202,7 +1319,8 @@
       "content_hash": "7ac7e6025204fca2",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 4138,
-      "raw_content_hash": "0579abe43c562200"
+      "raw_content_hash": "0579abe43c562200",
+      "released_at": "2026-08-08T18:27:56+0000"
     },
     {
       "name": "six",
@@ -1212,7 +1330,8 @@
       "content_hash": "8e25fe6fe67f202b",
       "fetched_at": "2026-08-28T08:18:15Z",
       "raw_words": 534,
-      "raw_content_hash": "4f603cdc96f8d42f"
+      "raw_content_hash": "4f603cdc96f8d42f",
+      "released_at": "2024-12-04T17:35:26+0000"
     },
     {
       "name": "sniffio",
@@ -1222,7 +1341,8 @@
       "content_hash": "1e9442657d0fa6a3",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 490,
-      "raw_content_hash": "c3b488cf9ab6caec"
+      "raw_content_hash": "c3b488cf9ab6caec",
+      "released_at": "2024-02-25T23:20:01+0000"
     },
     {
       "name": "sortedcontainers",
@@ -1232,7 +1352,8 @@
       "content_hash": "083d4078a91c6d4b",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 1429,
-      "raw_content_hash": "5857c44f633a767d"
+      "raw_content_hash": "5857c44f633a767d",
+      "released_at": "2021-05-16T22:03:41+0000"
     },
     {
       "name": "soupsieve",
@@ -1242,7 +1363,8 @@
       "content_hash": "9b25bda889baa3af",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 1088,
-      "raw_content_hash": "7d3da80111918994"
+      "raw_content_hash": "7d3da80111918994",
+      "released_at": "2026-08-07T00:57:23+0000"
     },
     {
       "name": "sphinx",
@@ -1252,7 +1374,8 @@
       "content_hash": "39aa61f8a289b776",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 2137,
-      "raw_content_hash": "954ef373608ed619"
+      "raw_content_hash": "954ef373608ed619",
+      "released_at": "2025-12-31T15:09:25+0000"
     },
     {
       "name": "sqlalchemy",
@@ -1262,7 +1385,8 @@
       "content_hash": "8404f8ec685599d5",
       "fetched_at": "2026-08-28T08:43:13Z",
       "raw_words": 7805,
-      "raw_content_hash": "e43df50c22202883"
+      "raw_content_hash": "e43df50c22202883",
+      "released_at": "2026-08-11T19:07:09+0000"
     },
     {
       "name": "starlette",
@@ -1272,7 +1396,8 @@
       "content_hash": "bb7e8fcf9b042cd2",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 2065,
-      "raw_content_hash": "18bf717e846b1578"
+      "raw_content_hash": "18bf717e846b1578",
+      "released_at": "2026-08-08T18:27:56+0000"
     },
     {
       "name": "structlog",
@@ -1282,7 +1407,8 @@
       "content_hash": "fb98a20ef1377cfc",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 1329,
-      "raw_content_hash": "cbde47b1873d304a"
+      "raw_content_hash": "cbde47b1873d304a",
+      "released_at": "2026-06-06T07:33:38+0000"
     },
     {
       "name": "tabulate",
@@ -1292,7 +1418,8 @@
       "content_hash": "1aa4e5a242f32e83",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 5191,
-      "raw_content_hash": "0d58ea9180001edd"
+      "raw_content_hash": "0d58ea9180001edd",
+      "released_at": "2026-03-04T18:55:31+0000"
     },
     {
       "name": "termcolor",
@@ -1302,7 +1429,8 @@
       "content_hash": "49471b7e2ca88b0b",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 1125,
-      "raw_content_hash": "07555911e5d89a85"
+      "raw_content_hash": "07555911e5d89a85",
+      "released_at": "2025-12-29T12:55:20+0000"
     },
     {
       "name": "tomli",
@@ -1312,7 +1440,8 @@
       "content_hash": "5c87d306a85969b5",
       "fetched_at": "2026-08-28T08:43:15Z",
       "raw_words": 5702,
-      "raw_content_hash": "cf6259b11e665b7e"
+      "raw_content_hash": "cf6259b11e665b7e",
+      "released_at": "2026-03-25T20:21:10+0000"
     },
     {
       "name": "toolz",
@@ -1322,7 +1451,8 @@
       "content_hash": "6293d0ad39db92ac",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 982,
-      "raw_content_hash": "fd5775f1cd0adf9d"
+      "raw_content_hash": "fd5775f1cd0adf9d",
+      "released_at": "2025-10-17T04:03:20+0000"
     },
     {
       "name": "tox",
@@ -1332,7 +1462,8 @@
       "content_hash": "8f8ad7b0fc0ff496",
       "fetched_at": "2026-08-28T08:43:18Z",
       "raw_words": 2405,
-      "raw_content_hash": "ec6c5d8cc016bfc7"
+      "raw_content_hash": "ec6c5d8cc016bfc7",
+      "released_at": "2026-08-25T05:38:59+0000"
     },
     {
       "name": "tqdm",
@@ -1342,7 +1473,8 @@
       "content_hash": "4585533d1c591361",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 6672,
-      "raw_content_hash": "f07bae2301002632"
+      "raw_content_hash": "f07bae2301002632",
+      "released_at": "2026-07-27T11:33:13+0000"
     },
     {
       "name": "trio",
@@ -1352,7 +1484,8 @@
       "content_hash": "3207e776bee5c050",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 1401,
-      "raw_content_hash": "5d67ec6f06ed8b84"
+      "raw_content_hash": "5d67ec6f06ed8b84",
+      "released_at": "2026-08-11T00:33:40+0000"
     },
     {
       "name": "twine",
@@ -1362,7 +1495,8 @@
       "content_hash": "9f5708568cc4500e",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 903,
-      "raw_content_hash": "fca0212f7b175b42"
+      "raw_content_hash": "fca0212f7b175b42",
+      "released_at": "2026-07-27T15:58:59+0000"
     },
     {
       "name": "typer",
@@ -1372,7 +1506,8 @@
       "content_hash": "bd822132a6969d38",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 2201,
-      "raw_content_hash": "29349fb1f513c468"
+      "raw_content_hash": "29349fb1f513c468",
+      "released_at": "2026-08-28T10:26:53+0000"
     },
     {
       "name": "typing-extensions",
@@ -1382,7 +1517,8 @@
       "content_hash": "3e319a54e84b4c99",
       "fetched_at": "2026-08-28T08:43:16Z",
       "raw_words": 945,
-      "raw_content_hash": "aafe1eb69ab2f541"
+      "raw_content_hash": "aafe1eb69ab2f541",
+      "released_at": "2026-07-02T08:40:04+0000"
     },
     {
       "name": "tzdata",
@@ -1392,7 +1528,8 @@
       "content_hash": "4912d8123da347b9",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 727,
-      "raw_content_hash": "a7874cef858959ff"
+      "raw_content_hash": "a7874cef858959ff",
+      "released_at": "2026-07-10T08:50:36+0000"
     },
     {
       "name": "urllib3",
@@ -1402,7 +1539,8 @@
       "content_hash": "77203d1e9f954902",
       "fetched_at": "2026-08-28T08:18:09Z",
       "raw_words": 1469,
-      "raw_content_hash": "b8205a6b921dc0ba"
+      "raw_content_hash": "b8205a6b921dc0ba",
+      "released_at": "2026-05-07T16:13:17+0000"
     },
     {
       "name": "uvicorn",
@@ -1412,7 +1550,8 @@
       "content_hash": "9a5363d4c34ca3f0",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 2183,
-      "raw_content_hash": "14ddefe67a3d5795"
+      "raw_content_hash": "14ddefe67a3d5795",
+      "released_at": "2026-08-19T06:27:40+0000"
     },
     {
       "name": "uvloop",
@@ -1422,7 +1561,8 @@
       "content_hash": "0ff064135bf309e9",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 5704,
-      "raw_content_hash": "0ff1dda4aee82c77"
+      "raw_content_hash": "0ff1dda4aee82c77",
+      "released_at": "2025-10-16T22:16:11+0000"
     },
     {
       "name": "virtualenv",
@@ -1432,7 +1572,8 @@
       "content_hash": "0d67e381fcd7595a",
       "fetched_at": "2026-08-28T08:43:19Z",
       "raw_words": 2168,
-      "raw_content_hash": "4af6c9c8f32883af"
+      "raw_content_hash": "4af6c9c8f32883af",
+      "released_at": "2026-08-25T05:39:14+0000"
     },
     {
       "name": "vulture",
@@ -1442,7 +1583,8 @@
       "content_hash": "cd231ad02e66827a",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 2067,
-      "raw_content_hash": "5ea10630027f7840"
+      "raw_content_hash": "5ea10630027f7840",
+      "released_at": "2026-03-25T14:41:26+0000"
     },
     {
       "name": "watchdog",
@@ -1452,7 +1594,8 @@
       "content_hash": "57d8d4259971cf9b",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 6846,
-      "raw_content_hash": "a58787198efb7fe4"
+      "raw_content_hash": "a58787198efb7fe4",
+      "released_at": "2024-11-01T14:06:24+0000"
     },
     {
       "name": "watchfiles",
@@ -1462,7 +1605,8 @@
       "content_hash": "aaf6631bf8223682",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 10667,
-      "raw_content_hash": "d5d195f1e3080406"
+      "raw_content_hash": "d5d195f1e3080406",
+      "released_at": "2026-05-18T04:30:05+0000"
     },
     {
       "name": "webencodings",
@@ -1472,7 +1616,8 @@
       "content_hash": "3c4218cb97d94e32",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 692,
-      "raw_content_hash": "b870d064dd11ce0f"
+      "raw_content_hash": "b870d064dd11ce0f",
+      "released_at": "2026-08-15T14:22:56+0000"
     },
     {
       "name": "websockets",
@@ -1482,7 +1627,8 @@
       "content_hash": "54b25cd6d81b7da2",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 29501,
-      "raw_content_hash": "42682b5ae91c1a48"
+      "raw_content_hash": "42682b5ae91c1a48",
+      "released_at": "2026-08-26T14:55:20+0000"
     },
     {
       "name": "werkzeug",
@@ -1492,7 +1638,8 @@
       "content_hash": "8ad9f0eae8e01b13",
       "fetched_at": "2026-08-28T08:43:12Z",
       "raw_words": 1420,
-      "raw_content_hash": "5d1020ebdf0b5f83"
+      "raw_content_hash": "5d1020ebdf0b5f83",
+      "released_at": "2026-04-02T18:49:12+0000"
     },
     {
       "name": "wheel",
@@ -1502,7 +1649,8 @@
       "content_hash": "8435209ba0fa11d0",
       "fetched_at": "2026-08-28T10:12:13Z",
       "raw_words": 1074,
-      "raw_content_hash": "45c7f8c93b19d427"
+      "raw_content_hash": "45c7f8c93b19d427",
+      "released_at": "2026-08-11T22:02:26+0000"
     },
     {
       "name": "wrapt",
@@ -1512,7 +1660,8 @@
       "content_hash": "b728e4a7bbacb2a9",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 18878,
-      "raw_content_hash": "7d067ca50f9d53d8"
+      "raw_content_hash": "7d067ca50f9d53d8",
+      "released_at": "2026-07-28T06:04:04+0000"
     },
     {
       "name": "xmltodict",
@@ -1522,7 +1671,8 @@
       "content_hash": "7b0b53d4e63ad5aa",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 2418,
-      "raw_content_hash": "f88332163c68a4ea"
+      "raw_content_hash": "f88332163c68a4ea",
+      "released_at": "2026-02-22T02:21:21+0000"
     },
     {
       "name": "zope-interface",
@@ -1532,7 +1682,8 @@
       "content_hash": "579b71be34eeee0f",
       "fetched_at": "2026-08-28T14:15:07Z",
       "raw_words": 13573,
-      "raw_content_hash": "0d24a86428f0c759"
+      "raw_content_hash": "0d24a86428f0c759",
+      "released_at": "2026-08-20T11:16:52+0000"
     }
   ],
   "_template_removal": {

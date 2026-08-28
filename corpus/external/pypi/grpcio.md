@@ -1,3 +1,7 @@
+---
+date: 2026-08-28T07:07:30+0000
+source: https://pypi.org/project/grpcio/
+---
 Package for gRPC Python.
 
 ## Installation

@@ -1,3 +1,7 @@
+---
+date: 2026-08-09T19:13:21+0000
+source: https://pypi.org/project/pylint/
+---
 [image: https://github.com/pylint-dev/pylint/actions/workflows/tests.yaml/badge.svg?branch=main] [image: https://codecov.io/gh/pylint-dev/pylint/branch/main/graph/badge.svg?token=ZETEzayrfk] [image: PyPI Package version] [image: Documentation Status] [image: https://img.shields.io/badge/code%20style-black-000000.svg] [image: https://img.shields.io/badge/linting-pylint-yellowgreen] [image: pre-commit.ci status] [image: CII Best Practices] [image: OpenSSF Scorecard] [image: Discord]
 
 ## What is Pylint?

@@ -1,3 +1,7 @@
+---
+date: 2021-03-08T10:59:24+0000
+source: https://pypi.org/project/defusedxml/
+---
 [image: Latest Version] [image: Supported Python versions] [image: Travis CI] [image: codecov] [image: PyPI downloads] [image: Code style: black]
 
 > “It’s just XML, what could probably go wrong?”

@@ -1,3 +1,7 @@
+---
+date: 2024-08-30T12:24:05+0000
+source: https://pypi.org/project/mkdocs/
+---
 # MkDocs
 
 > Project documentation with Markdown

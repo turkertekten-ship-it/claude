@@ -1,3 +1,7 @@
+---
+date: 2026-08-15T08:16:22+0000
+source: https://pypi.org/project/charset-normalizer/
+---
 # Charset Detection, for Everyone 👋
 
 The Real First Universal Charset Detector

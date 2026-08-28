@@ -1,3 +1,7 @@
+---
+date: 2026-05-07T16:13:17+0000
+source: https://pypi.org/project/urllib3/
+---
 # [image: urllib3]
 
 [image: PyPI Version] [image: Python Versions] [image: Join our Discord] [image: Coverage Status] [image: Build Status on GitHub] [image: Documentation Status]

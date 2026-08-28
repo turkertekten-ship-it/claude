@@ -1,3 +1,7 @@
+---
+date: 2025-06-20T19:31:34+0000
+source: https://pypi.org/project/flake8/
+---
 [image: build status] [image: pre-commit.ci status] [image: Discord]
 
 ## Flake8

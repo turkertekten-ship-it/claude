@@ -1,3 +1,7 @@
+---
+date: 2026-08-11T22:02:26+0000
+source: https://pypi.org/project/wheel/
+---
 This is a command line tool for manipulating Python wheel files, as defined in
 PEP 427. It contains the following functionality:
 

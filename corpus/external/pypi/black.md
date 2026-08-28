@@ -1,3 +1,7 @@
+---
+date: 2026-05-18T16:53:33+0000
+source: https://pypi.org/project/black/
+---
 [image: Black Logo]
 
 ## The Uncompromising Code Formatter

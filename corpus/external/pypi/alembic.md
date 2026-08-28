@@ -1,3 +1,7 @@
+---
+date: 2026-08-08T16:32:01+0000
+source: https://pypi.org/project/alembic/
+---
 Alembic is a database migrations tool written by the author
 of SQLAlchemy. A migrations tool
 offers the following functionality:
