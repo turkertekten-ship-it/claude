@@ -370,3 +370,23 @@ sources:
       later commits") whose evidence enumerated the items without ever writing
       a digit. Removing spelled-out expansion left 0 violations, with the tests
       confirming an absent digit is still caught.
+
+  - id: FLEET-REFS-20260828T075105
+    kind: repo_state
+    collected_at: "2026-08-28T07:51:05+00:00"
+    method: "git fetch --all --prune; git for-each-ref refs/remotes/origin; git ls-tree -r --name-only per branch"
+    evidence: provenance/raw/fleet-refs-2026-08-28T075105+0000.txt
+
+  - id: KI1-BRANCH-SCAN-2026-08-28
+    kind: repo_state
+    collected_at: "2026-08-28T07:52Z"
+    method: "tools/fleet_selfcheck.sh — extracts each remote branch's copy of tools/ingest_chat_archive.py and runs its selfcheck"
+    evidence: >-
+      Of 14 remote branches, 8 carried the ingester. Passing:
+      code-playground-parity-xw0snj, reverse-engineer-chat-setup-husv9h, and
+      review-chat-archive-zrynr4. Failing the selfcheck, and so still carrying
+      KI-1: great-euler-6tx6y6, personal-skills-repos-research-dxmflq,
+      research-skill-mastery-mwjs01, and session-y42cyg. The remaining 6
+      branches do not have the file. The parity branch had taken the fix at
+      commit a8f5236, "Fix KI-1: the chat ingester was silently discarding
+      transcripts".

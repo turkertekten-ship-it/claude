@@ -50,6 +50,17 @@ until the search is re-run.
 - That branch carries the affected version: its copy keys on `session` alone and has no `selfcheck` subcommand. [src:PARITY-MERGE-2026-08-27]
 - It does not contain the three later commits on `claude/review-chat-archive-zrynr4`, including the fix. [src:PARITY-MERGE-2026-08-27]
 
+### Observed — who is still affected (2026-08-28T07:52Z)
+
+> How to reproduce: run `tools/fleet_selfcheck.sh`. It extracts each remote
+> branch's copy and runs its `selfcheck`, rather than guessing from commit
+> ancestry — a branch may have taken the fix by any route.
+
+- Of 14 remote branches, 8 carry the ingester. [src:KI1-BRANCH-SCAN-2026-08-28]
+- Passing: `code-playground-parity-xw0snj`, `reverse-engineer-chat-setup-husv9h`, `review-chat-archive-zrynr4`. [src:KI1-BRANCH-SCAN-2026-08-28]
+- Still affected: `great-euler-6tx6y6`, `personal-skills-repos-research-dxmflq`, `research-skill-mastery-mwjs01`, `session-y42cyg`. [src:KI1-BRANCH-SCAN-2026-08-28]
+- The parity branch took the fix at commit `a8f5236` after this advisory was filed. [src:KI1-BRANCH-SCAN-2026-08-28]
+
 ### Observed — how this was notified
 
 - Sessions in this fleet run in separate containers and no peer messaging reaches them; `ListAgents` reports no reachable agents. [src:NO-TRANSCRIPT-TOOL-CONFIRMED-2026-08-27]
