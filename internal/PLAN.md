@@ -18,10 +18,11 @@
 | External eval corpus | done | 91 PyPI pages with provenance and a manifest, rebuildable by `scripts/build_external_corpus.py`; 4 of 54 questions contaminated, 17 documents quarantined |
 | Incremental deletion | done | Removals propagate to the delta, prune guarded at 25% of a source, refused entirely for a failed connector |
 | CLI | done | `preflight, index, query, eval, loop, status, journal, demo` |
-| CI | done | Three jobs: stdlib matrix, numpy path, retrieval regression gate |
+| CI | done | Three jobs: stdlib matrix, numpy path, retrieval regression gate; floors ratcheted to 0.85 primary / 0.86 external |
+| Non-negotiables | verified | All five attacked directly, not just asserted: zero-dependency walked module by module, provenance and redaction attacked with crafted inputs, degradation measured through partial and silent-empty source failures (L37-L39) |
 
 **Current measurements** (offline embedder, deterministic).
-273 tests passing. Retrieval metrics are over graded cases only - abstention
+313 tests passing. Retrieval metrics are over graded cases only - abstention
 cases have nothing to retrieve, and averaging their zeros in made adding a
 negative case look like a retrieval regression.
 
