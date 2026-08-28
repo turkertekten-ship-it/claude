@@ -41,7 +41,8 @@ faturalarını en pahalı anda keserler.
 - Gizlilik sözleşmesinden önceki yaptırım taraması bir betik çalıştırmadır;
   imzadan sonra öğrenilmesi, alıcının kendi rejiminde bir uyum olayıdır.
 - İzinden önce kapanış, imza tarihinde bir haftalık gecikmeydi; sonrasında
-  4054 sayılı Kanun madde 11 uyarınca hukuken geçerlilik kazanmamış bir
+  4054 sayılı Kanun m.10 ve 2010/4 sayılı Tebliğ m.10 uyarınca hukuken
+  geçerlilik kazanmamış bir
   işlemdir ve madde 16 cezası işlem değerine değil grup cirosuna bağlıdır.
 - Türk şekil şartı, kapanış gününde bir noter randevusudur; karşılanmadığında
   devir hiç gerçekleşmemiştir.
@@ -77,7 +78,8 @@ akışlarda ortaktır ve hiçbirinde yumuşatılmaz:
 - **Çıkar çatışması eşleşmesi** — `hafiza/cikar-catismasi.md` (§8).
 - **Giderilemeyen yaptırım eşleşmesi** — kimlik doğrulaması sonrası hâlâ duran
   eşleşme.
-- **Rekabet izni alınmadan kapanış** — 4054 sayılı Kanun madde 11.
+- **Rekabet izni alınmadan kapanış** — 4054 sayılı Kanun m.10, 2010/4 sayılı
+  Tebliğ m.10 (bekletici şart). Hiç bildirilmemiş işlem: m.11.
 - **Türk şekil şartının karşılanmaması** — TTK m.490/499 (A.Ş.), m.595
   (Ltd. Şti.).
 
