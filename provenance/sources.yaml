@@ -707,3 +707,18 @@ sources:
       are deliberately not recorded here: the finding is the absence, and
       enumerating the owner's documents into a repository would be a cost with
       no evidential benefit.
+
+  - id: OWNER-PRIOR-CHATS-EXIST-2026-08-27
+    kind: user_statement
+    collected_at: "2026-08-27T20:24Z"
+    method: "goal.condition strings recorded on two of the owner's own sessions, read via list_sessions"
+    evidence: >-
+      `personal-skills-repos-research-dxmflq`: "...derive whats usefull for me
+      from research about me, looking into my files and all my previous claude
+      chats ultrathink ooda". `reverse-engineer-chat-setup-husv9h`: "i need you
+      to look at all my previous claude chat chats all my feedbacks and so on
+      and reverse engineer my files for me...".
+    note: >-
+      Two independent instructions, written by the owner, both referring to
+      previous Claude chats as an existing thing. That settles whether earlier
+      conversations exist; it says nothing about what is in them.

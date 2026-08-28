@@ -159,6 +159,12 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - No Claude conversation export exists anywhere reachable. The container holds only this session's own transcript; none of the twelve sibling branches carries one; and the owner's Drive, searched under confirmed authorisation by both title and MIME type, contains no JSON or ZIP file at all. [src:NO-EXPORT-ANYWHERE-2026-08-27]
 - That closes the search rather than the question. The export is a file only the owner can produce, so U-2 stays open as a fact about what exists rather than as work left undone. [src:NO-EXPORT-ANYWHERE-2026-08-27]
 
+## Observed — earlier conversations exist, and the register was conflating two things
+
+- Claude conversations predating this session exist. The owner refers to them in their own words in two independent instructions: "all my previous claude chats", and "all my previous claude chat chats and all my feedbacks and so on". [src:OWNER-PRIOR-CHATS-EXIST-2026-08-27]
+- That was established without fetching anything. It had been sitting in the session goal strings, unread, while the entry asking it was carried as unanswerable. [src:OWNER-PRIOR-CHATS-EXIST-2026-08-27]
+- The entry was unanswerable because it asked two questions at once — whether earlier conversations exist, and what is in them — and only the second needs a file. [src:OWNER-PRIOR-CHATS-EXIST-2026-08-27]
+
 ## Conclusion
 
 The honest answer to "look through all my previous claude chats" is bounded:

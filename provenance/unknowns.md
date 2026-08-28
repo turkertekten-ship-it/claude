@@ -1,11 +1,52 @@
 # Unknowns register
 
-Open questions that were **not** answered, kept here so that nothing
-downstream quietly invents an answer. Each entry says what is unknown, why,
-and what would resolve it.
+Two different things used to live in this file under one heading, and telling
+them apart matters more than it sounds:
 
-An empty unknowns register is a red flag, not an achievement. If you close an
-entry, move the resolved fact into `observations.md` with a new source id.
+- **Open questions** — something not yet established that *a session could go
+  and establish*. These are work. If one is open, someone should be looking.
+- **Waiting on the owner** — an input this environment does not have and
+  cannot produce. These are not work. No amount of investigation creates a
+  file that only the owner can export, and filing one next to a real open
+  question sends the next reader to look for something unfindable.
+
+Both are kept, because nothing downstream may quietly invent an answer to
+either. But they are answered by different people.
+
+An empty *open questions* section is a legitimate end state. An empty register
+overall is a red flag, not an achievement: it usually means the looking
+stopped. If you close an entry, move the resolved fact into `observations.md`
+with a new source id.
+
+---
+
+## Waiting on the owner
+
+Nothing here is blocked on effort. Each names the one action that resolves it.
+
+### W-1 — The claude.ai conversation export
+
+**Needed:** `conversations.json` from claude.ai → Settings → Privacy → Export
+data, dropped into `archive/`.
+
+**Why it cannot be obtained here.** Searched in all three places it could be
+and found in none: the container filesystem holds only this session's own
+transcript, no sibling branch carries one, and the owner's Drive — searched
+under confirmed authorisation, by title and by MIME type — contains no JSON or
+ZIP file at all. [src:NO-EXPORT-ANYWHERE-2026-08-27]
+
+**What is already built for it.** `tools/ingest_chat_archive.py` reads that
+format directly and is now exercised against real data rather than fixtures:
+this session's own transcript ingested as 620 messages with none unparseable,
+searchable with verbatim quotes carrying conversation id, message id and source
+file. [src:CHAT-INDEX-POPULATED-2026-08-27]
+
+**Who else is waiting:** at least two other sessions record the same need.
+[src:SESSION-GOALS-2026-08-27]
+
+---
+
+## Open questions
 
 ---
 
@@ -38,7 +79,25 @@ still shows what a session built, never what it was asked or why it chose.
 
 ---
 
-### U-2 — Any Claude conversation history predating 2026-08-27 — EXHAUSTED HERE
+### U-2 — Any Claude conversation history predating 2026-08-27 — SPLIT
+
+This entry asked two questions at once, and only one of them ever needed a
+file. Bundling them is why it read as permanently unanswerable: the half that
+was answerable stayed buried behind the half that was not.
+
+**Answered — earlier conversations exist.** The owner refers to them in their
+own words, in two independent instructions on two different sessions: "all my
+previous claude chats", and "all my previous claude chat chats and all my
+feedbacks and so on". [src:OWNER-PRIOR-CHATS-EXIST-2026-08-27] Nothing needed
+to be fetched to establish that; it had been sitting in the goal strings.
+
+**Not a question — a missing input.** What is *in* them is not an open
+investigation. It is a file this environment does not have, and no amount of
+looking produces one. It has been moved to **Waiting on the owner** below,
+because a register that files it next to genuine open questions tells a reader
+to go and investigate something that cannot be investigated.
+
+**Original text, kept for the record.**
 
 **Unknown:** whether the account has earlier conversations at all, and what is
 in them.

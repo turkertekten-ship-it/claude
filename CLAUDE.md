@@ -25,6 +25,14 @@ wanted" are not sources.
 - The id must resolve to an entry in `provenance/sources.yaml`.
 - If you have no source, you have two honest options: go get one, or move the
   question to `provenance/unknowns.md` and say plainly that it is unknown.
+- When you move one there, decide which kind it is. An **open question** is
+  something a session could go and establish, and it is work. **Waiting on the
+  owner** is an input this environment cannot produce, and it is not. Filing
+  the second as the first sends every later reader to look for something
+  unfindable — and, worse, buries any part of it that *was* answerable.
+- **Ask a question one at a time.** An entry that bundles "does this exist" with
+  "what is in it" reads as unanswerable when only the second half is, and the
+  first half then goes unasked indefinitely.
 - Editorial framing that asserts nothing goes in a `>` blockquote, which the
   verifier skips. Do not use this to smuggle claims past the check.
 
