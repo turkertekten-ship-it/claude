@@ -378,6 +378,50 @@ class ContaminationTest(unittest.TestCase):
                         negative_questions=set())
         self.assertTrue(report.clean, report.summary())
 
+    def test_commentary_quoting_a_positive_question_is_quarantined(self):
+        """A document that quotes a positive question without being its answer
+        is commentary about the evaluation, not corpus. Leaving it in is how the
+        analysis of a case came to outrank the code the case is about (L95)."""
+        question = "What bounds requests, bytes, depth and wall clock time?"
+        docs = dict(CORPUS)
+        docs["notes.md"] = ("Eval notes. The case 'What bounds requests, bytes, "
+                            "depth and wall clock time?' still fails, and the "
+                            "budget discussion below explains why.")
+        self._index(docs)
+        report = detect(self.store, [question], negative_questions=set(),
+                        expected_sources={question: ["beta"]})
+        fatal = report.fatal_findings
+        self.assertTrue(fatal, "verbatim commentary on a positive case was not acted on")
+        self.assertTrue(all("notes" in f.uri for f in fatal),
+                        f"quarantined something other than the commentary: "
+                        f"{[f.uri for f in fatal]}")
+
+    def test_the_expected_source_is_never_quarantined_for_quoting_the_question(self):
+        """The other direction, and the reason the old rule was written: a
+        document that *is* the answer must survive quoting the question, or the
+        rule removes the source the case asks for."""
+        question = "What bounds requests, bytes, depth and wall clock time?"
+        docs = dict(CORPUS)
+        docs["beta.md"] = (CORPUS["beta.md"] + "\n\nWhat bounds requests, bytes, "
+                           "depth and wall clock time? These budgets do.")
+        self._index(docs)
+        report = detect(self.store, [question], negative_questions=set(),
+                        expected_sources={question: ["beta"]})
+        self.assertEqual([f.uri for f in report.fatal_findings], [],
+                         "the expected source was quarantined for containing the answer")
+
+    def test_without_expected_sources_the_old_behaviour_stands(self):
+        """A golden that names no sources cannot say which document is its
+        answer, so nothing on a positive case is actionable - report, do not
+        act, exactly as before."""
+        question = "What bounds requests, bytes, depth and wall clock time?"
+        docs = dict(CORPUS)
+        docs["notes.md"] = ("Eval notes: 'What bounds requests, bytes, depth and "
+                            "wall clock time?' is one of the cases.")
+        self._index(docs)
+        report = detect(self.store, [question], negative_questions=set())
+        self.assertEqual(report.fatal_findings, [])
+
     def test_the_harness_quarantines_contaminated_documents(self):
         docs = dict(CORPUS)
         docs["leak.md"] = ("A negative test case: what is the melting point of gallium? "

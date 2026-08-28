@@ -85,6 +85,7 @@ class ContaminationReport:
 
 def detect(store: SqliteStore, questions: list[str], *,
            negative_questions: set[str] | None = None,
+           expected_sources: dict[str, list[str]] | None = None,
            verbatim_threshold: float = 0.85,
            overlap_threshold: float = 0.9,
            negative_verbatim_threshold: float = 0.5,
@@ -93,7 +94,17 @@ def detect(store: SqliteStore, questions: list[str], *,
     """Check whether any question appears in the indexed corpus.
 
     `negative_questions` are the ones expected to be unanswerable. Any corpus
-    match against those is fatal; for the rest only a verbatim quotation is.
+    match against those is fatal; for the rest only a verbatim quotation of a
+    document that is *not* one of the question's expected sources is.
+
+    `expected_sources` maps a question to the uri/title substrings its golden
+    names. Without it a verbatim match on a positive question is reported and
+    not acted on, which is what shipped first and what L95 measured the cost
+    of: on a corpus that documents its own evaluation, the documents quoting a
+    question are the analysis of that question, and they outrank the code the
+    golden asks for. Distinguishing the two needs exactly this - a document
+    quoting the question while not being its answer is leakage; the answer
+    quoting the question is the corpus doing its job.
 
     The thresholds are deliberately asymmetric, because the two errors are not
     equally costly. Over-quarantining a document for a positive question costs
@@ -105,6 +116,7 @@ def detect(store: SqliteStore, questions: list[str], *,
     FIFA World Cup final" at 83% overlap, which a 90% threshold sails past.
     """
     negatives = negative_questions or set()
+    expected = expected_sources or {}
     report = ContaminationReport(questions_checked=len(questions))
     if not questions:
         return report
@@ -148,18 +160,25 @@ def detect(store: SqliteStore, questions: list[str], *,
                 position = doc_norm.find(run)
                 if position >= 0:
                     excerpt = doc_norm[max(0, position - 60):position + 160]
-                # Fatal only for a question the corpus is supposed to be unable
-                # to answer. On a positive golden, a document matching the
-                # question's terms *is the answer* - quarantining it would
-                # remove the very source the case expects and turn a passing
-                # case into a failing one. Report it, do not act on it.
+                # Always fatal for a question the corpus is supposed to be
+                # unable to answer. On a positive golden it depends on *which*
+                # document quoted it: the expected source quoting the question
+                # is the corpus containing the answer, and quarantining it
+                # would turn a passing case into a failing one. Any other
+                # document quoting a question verbatim is commentary about the
+                # evaluation, and leaving it in lets the analysis of a case
+                # outrank the code the case is about (L95).
+                wanted = expected.get(question, ())
+                haystack = f"{doc.uri} {doc.title}".lower()
+                is_expected = any(w.lower() in haystack for w in wanted)
+                fatal = is_negative or (bool(wanted) and not is_expected)
                 report.findings.append(Contamination(
                     question=question, doc_id=doc.doc_id, uri=doc.uri,
                     source_system=doc.source_system, kind="verbatim",
                     score=round(longest, 3), excerpt=excerpt.strip(),
-                    fatal=is_negative,
+                    fatal=fatal,
                 ))
-                if is_negative:
+                if fatal:
                     report.by_source[doc.source_system] = \
                         report.by_source.get(doc.source_system, 0) + 1
                 continue

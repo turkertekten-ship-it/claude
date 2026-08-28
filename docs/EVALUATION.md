@@ -126,12 +126,20 @@ make eval-external  # external: no self-reference
 **The external set is the regression gate; the primary set is a smoke test.**
 
 That was not the original intent, and the reason for the change is worth
-stating. The primary corpus has become a corpus *about its own evaluation*. Its
-top three results for "What stops a crawl from running forever?" are now
-`retrieve/expansion.py` - whose docstring quotes that exact question as the
-example it was written to fix - and `internal/LEARNINGS.md`, which discusses it.
-The retriever is behaving correctly: those documents *are* the best matches for
+stating. The primary corpus has become a corpus *about its own evaluation*.
+`retrieve/expansion.py` quotes "What stops a crawl from running forever?" in its
+docstring as the example it was written to fix; `internal/LEARNINGS.md` and this
+file discuss it; and all three used to rank above `crawler.py` for it. The
+retriever was behaving correctly: those documents *are* the best matches for
 those words. They are simply not the answer.
+
+Contamination detection now quarantines them. A document that quotes a positive
+question verbatim without being one of the golden's expected sources is
+commentary about the evaluation rather than corpus, and is held out for that
+question (L95). Eight such documents were already being reported and not acted
+on. This changes nothing on the external corpus, where there are none of them,
+and it does not rescue the primary set: the decay it slows is only the part
+written in the question's own words.
 
 Every fix documented in this repository makes its primary eval slightly less
 able to measure retrieval. That is not a problem to solve by writing less down;
@@ -145,12 +153,24 @@ determinism bug - none of which the primary set could see.
 ## Known limitations, kept as failing cases
 
 `evals/goldens.jsonl` carries a case tagged `known-limitation` that does not
-pass: the offline hashing embedder cannot bridge "running forever" to a corpus
-that says "never terminates" and "unbounded", because the query's most
-informative term appears nowhere.
+pass: the offline hashing embedder cannot bridge "running forever" to a
+`crawler.py` that says "budget", "max_seconds" and "stopped_by".
 
-It stays failing on purpose. It is the measurable argument for a pluggable
-neural embedder, and tuning thresholds until it passes would be overfitting the
+The reason has moved and the claim is corrected rather than repeated. It used to
+be that `forever` appeared nowhere in the corpus. It appears four times now -
+once in `README.md`, in a feature-table row that genuinely does answer the
+question, and three times in prose about this case. So the discriminating term
+is no longer absent; it is present in documents that are not the one the golden
+names.
+
+The external corpus has the same failure in a cleaner form: "How can a test
+control what the clock returns?" expects `freezegun`, whose page never uses the
+words "clock" or "control" and describes travelling through time by mocking
+datetime. `clock` occurs in three documents corpus-wide and the retriever
+returns those (L93).
+
+Both stay failing on purpose. They are the measurable argument for a pluggable
+neural embedder, and tuning thresholds until they pass would be overfitting the
 eval - the exact thing the eval exists to prevent.
 
 ## Using it as a regression gate

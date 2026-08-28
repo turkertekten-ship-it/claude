@@ -209,6 +209,8 @@ class EvalHarness:
         report.contamination = detect(
             store, [g.question for g in goldens],
             negative_questions={g.question for g in goldens if g.expect_abstain},
+            expected_sources={g.question: g.expect_sources for g in goldens
+                              if g.expect_sources},
         )
         # The other half of "is this golden set measuring anything?".
         # Contamination asks whether the corpus gives the answer away;

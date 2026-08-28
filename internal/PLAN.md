@@ -22,32 +22,47 @@
 | Non-negotiables | verified | All five attacked directly, not just asserted: zero-dependency walked module by module, provenance and redaction attacked with crafted inputs, degradation measured through partial and silent-empty source failures (L37-L39) |
 
 **Current measurements** (offline embedder, deterministic).
-411 tests passing. Retrieval metrics are over graded cases only - abstention
+414 tests passing. Retrieval metrics are over graded cases only - abstention
 cases have nothing to retrieve, and averaging their zeros in made adding a
 negative case look like a retrieval regression.
 
 | | primary (this repo) | external (153 PyPI pages) |
 |---|---|---|
-| golden cases | **18/20** | **49/54** |
-| recall@8 | 0.8125 | 0.9302 |
-| precision@8 | 0.2266 | 0.2500 |
-| hit@8 | 0.8750 | 0.9535 |
-| MRR | 0.6271 | 0.7643 |
-| nDCG@8 | 0.6401 | 0.7958 |
+| golden cases | **19/20** | **49/54** |
+| recall@8 | 0.8750 | 0.9302 |
+| precision@8 | 0.2422 | 0.2500 |
+| hit@8 | 0.9375 | 0.9535 |
+| MRR | 0.6432 | 0.7643 |
+| nDCG@8 | 0.6669 | 0.7958 |
 | citation coverage | 1.00 | 1.00 |
-| contamination | 4/20 questions, 15 documents (30 holdouts) | 5/54 questions, 22 documents (28 holdouts) |
+| contamination | 8/20 questions, 18 documents (39 holdouts) | 5/54 questions, 22 documents (28 holdouts) |
 | held-out set | - | 19/22 |
 | role | decaying smoke test | **regression gate** |
 
-The primary column fell a case since these numbers were last written, and the
-cause is the corpus rather than the retriever: the primary corpus *is* this
-repository, so every commit changes it. "How does the crawler avoid returning
-the same page twice?" now retrieves three chunks of
-`tests/test_crawler_blind.py` - text added this session about not fetching a
-page twice - ahead of `crawler.py`. External, which no commit here touches, did
-not move on any metric and improved on hit@8 and precision. L22 predicted this
-and L94 is it happening; treat the primary column as a smoke test whose grade
-decays as the repository grows, not as a signal about retrieval.
+**The primary column is not comparable to the one it replaces**, and the change
+is in the instrument rather than the retriever. Measured in sequence:
+
+    plan as written (at 1c4cd2b)   19/20  recall 0.8750
+    same command, today            18/20  recall 0.8125
+    after the contamination fix    19/20  recall 0.8750
+
+The middle row is L94: the primary corpus *is* this repository, so every commit
+changes it, and "How does the crawler avoid returning the same page twice?"
+began retrieving `tests/test_crawler_blind.py` - tests written this session
+about not fetching a page twice - ahead of `crawler.py`.
+
+The third row is L95, and it is not a recovery. Contamination detection now
+quarantines a document that quotes a positive question verbatim without being
+one of its expected sources; four more primary questions turn out to be
+contaminated that way, by `LEARNINGS.md`, `PLAN.md`, `EVALUATION.md` and the
+skill file - documents that discuss the eval rather than answer it. The number
+returning to 19/20 is a coincidence of which case that removed, not evidence
+that anything got better.
+
+External is the control and did not move: identical on every metric and every
+contamination count before and after, because it holds no commentary about
+itself. Treat the primary column as a smoke test whose grade decays as the
+repository grows, and the external column as the number that means something.
 
 What each retrieval arm is worth, on the external set (`scripts/ablation.py`):
 

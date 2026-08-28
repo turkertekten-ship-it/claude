@@ -4838,3 +4838,68 @@ are written, the more they compete with the code.
    the number had held, and I read it as though it were until I re-ran it.
 4. **When two corpora disagree about whether something regressed, the one that
    your commits do not edit is the witness.**
+
+## L95 - The eval's own commentary was corpus, and the detector was told not to act
+
+L94 found the primary corpus eating a golden case. Following it into the
+contamination detector found the door it came through, held open on purpose:
+
+    # Fatal only for a question the corpus is supposed to be unable to
+    # answer. On a positive golden, a document matching the question's
+    # terms *is the answer* - quarantining it would remove the very source
+    # the case expects. Report it, do not act on it.
+
+That reasoning is half right, and the half it misses is the whole problem. It
+conflates two documents a verbatim match can find:
+
+  * the one that **answers** the question - quarantining it would break the
+    case, exactly as the comment says;
+  * the one that **quotes** the question while discussing the evaluation -
+    which is pure leakage, and which the rule was protecting.
+
+The golden already knows which is which: it names its expected sources. So a
+verbatim match on a positive case is now fatal unless the document is one of
+them.
+
+**Measured before implementing, on both corpora.** Documents quoting a positive
+question verbatim while not being one of its sources:
+
+    primary   8 findings, all scoring 1.00, across 4 questions:
+              LEARNINGS.md, PLAN.md, EVALUATION.md, SKILL.md,
+              expansion.py, rag-design-notes.md
+    external  0
+
+Zero on the external corpus, which is the regression gate. The change could not
+touch it, and after the fact did not: 49/54 and every metric and contamination
+count identical to four decimals, held-out unchanged at 19/22. That is what
+made this safe to do at all.
+
+On the primary corpus, 4 contaminated questions became 8 and the pass rate went
+from 18/20 back to 19/20. **The number returning to where the plan had it is a
+coincidence, not a recovery** - a different case, removed for a different
+reason - and the plan now says so.
+
+**And the self-demonstration.** Two of the eight quarantined findings are
+`internal/LEARNINGS.md` and `internal/PLAN.md` quoting "How does the crawler
+avoid returning the same page twice?" - because I wrote L94 about that case an
+hour earlier. Writing down the analysis of a contaminated case contaminated it
+further. The same is true of the golden note for "What stops a crawl from
+running forever?", which claimed the word `forever` "appears nowhere in the
+corpus": it now appears four times, and three of those are prose about this
+case, in `EVALUATION.md` and `expansion.py`. Both notes are corrected in place
+rather than left standing.
+
+**Rules.**
+1. **A detector that reports without acting will be read as a detector that
+   found nothing.** Eight findings at score 1.00 sat in every eval report this
+   project has produced, correctly labelled non-fatal, and nobody looked.
+2. **When a guard protects against one error, check what it lets through.**
+   "Do not quarantine the answer" was right; "therefore quarantine nothing on a
+   positive case" did not follow, and the golden's own `expect_sources` field
+   had the information to separate them all along.
+3. **Verify the fix cannot move the number that matters, before making it.**
+   Zero findings on the external corpus meant the regression gate was
+   untouchable by this change, and that was measured first, not hoped for.
+4. **Writing about a failing case in a self-indexing repository makes it worse.**
+   Not a reason to stop writing it down - but a reason the primary corpus is a
+   smoke test and the external one is the gate.
