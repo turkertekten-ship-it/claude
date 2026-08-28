@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>33 çalıştırılabilir takım · 290 vaka · 0 sinyal</span>
+    <span>34 çalıştırılabilir takım · 295 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -1956,6 +1956,49 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Yirmi dokuzuncu tur</span>
+  <h2>"Engelleyici değil", "doğrulanmış" demek değildir</h2>
+  <p>Yirmi sekizinci tur, çalıştığı <strong>kayıtlı</strong> olan bir kanalın
+  üç ENGELLEYİCİ bulgu için yirmi yedi tur kullanılmadığını buldu.
+  <strong>Ama o kontrol yalnızca ENGELLEYİCİ satırlara bakıyordu.</strong>
+  Kayıtta dokuz bulgu daha vardı, hepsi <em>"hayır"</em> diye işaretli —
+  ve engelleyici olmamak, denetimi kırmızıya çevirmediğini söyler;
+  <strong>doğrulanmış olduğunu söylemez.</strong></p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">G-01 · G-02 · G-03 · I-04</span>
+      <span class="pill p">Dördü doğrulandı</span></div>
+    <h3>Üçü yetkili kaynağından okundu</h3>
+    <table><thead><tr><th>Bulgu</th><th>Doğrulama</th></tr></thead><tbody>
+    <tr><td><strong>G-01</strong></td><td>courtlistener AGPL — deponun kendi README'si: <em>"…copyright Free Law Project under the Affero GPL."</em></td></tr>
+    <tr><td><strong>G-02</strong></td><td><em>"This repository was archived by the owner on <strong>Aug 5, 2024</strong>."</em> — errata'daki tarih <strong>birebir</strong> doğru</td></tr>
+    <tr><td><strong>G-03</strong></td><td>kod MIT, <strong>veri CC BY-NC 4.0</strong> — ticari kullanım <strong>açıkça yasak</strong></td></tr>
+    <tr><td><strong>I-04</strong></td><td>m.16 alt sınırı <strong>302.484,86 TL</strong> (2026/1 Tebliğ) — errata'daki rakam <strong>birebir</strong> doğru</td></tr>
+    </tbody></table>
+    <p><strong>G-03 doğrulamayla ağırlaştı.</strong> Errata <em>"ticari
+    pratikte lisans sorusu doğurur"</em> diyordu; depo <em>"Data files produced
+    by OpenSanctions are licensed under CC BY-NC 4.0"</em> diyor. Bu bir
+    <strong>soru değil, yasak</strong> — ve kitap bu aracı §13.3'te
+    <strong>ticari bir hukuk pratiği</strong> için öneriyor.</p>
+  </div>
+
+  <div class="callout">
+    <strong>Bir bulguyu kapatmak, kanıtın TÜRÜNE bakmayı gerektirir.</strong>
+    G-01..G-03 <strong>depo olgusudur</strong>; yetkili kaynağı deponun
+    kendisidir — erişildi, okundu, <strong>kapatılabilir</strong>.
+    I-01..I-03 <strong>hukuk metnidir</strong>; yetkili kaynağı birincil
+    mevzuattır, engellidir, ve düzeltmesi §9 uyarınca insana aittir — ikincil
+    kaynakla ne kadar güçlenirse güçlensin <strong>kapatılamaz</strong>. I-04
+    doğrulandı ama rakamı dosyaya yazmak bir mevzuat katmanı değişikliğidir;
+    bulgu bu yüzden silinmedi.
+    <br><br>
+    <strong>Ve AE takımı, AK'yi yazıldığı turda yakaladı:</strong> bulgu
+    kaydını tek harfli bir kimlik deseniyle ayrıştırıyordum. Yirmi üçüncü turda
+    kurulan sınıf taraması, tam da bunun için var.
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -2073,7 +2116,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 33 takım · 290 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 34 takım · 295 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
