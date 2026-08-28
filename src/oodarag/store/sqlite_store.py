@@ -26,11 +26,12 @@ from typing import Any, Iterable, Sequence
 
 from oodarag.models import Chunk, Document
 from oodarag.store.vectors import VectorIndex, pack, unpack
+from oodarag.util.hashing import content_hash
 from oodarag.util.logging import get_logger
 
 log = get_logger("store")
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS documents (
@@ -91,6 +92,11 @@ FTS_SCHEMA = """
 CREATE VIRTUAL TABLE IF NOT EXISTS chunks_fts USING fts5(
     text, context_header, title,
     content='',
+    -- Without this, a contentless FTS5 table cannot be deleted from by rowid;
+    -- the only removal path is the 'delete' command supplied with the row's
+    -- ORIGINAL column values, and getting that wrong deletes nothing silently.
+    -- SQLite >= 3.43. _init_fts falls back for older builds.
+    contentless_delete=1,
     -- Porter stemming wrapped around unicode61. Without it the lexical arm is
     -- exact-match only: a query for "abstain" never matches a document that
     -- says "abstained", and the dense arm has to carry the whole query alone.
@@ -134,13 +140,55 @@ class SqliteStore:
                 log.info("rebuilding FTS index after schema change",
                          from_version=stored_version, to_version=SCHEMA_VERSION)
                 self.conn.executescript("DROP TABLE IF EXISTS chunks_fts;")
-            self.conn.executescript(FTS_SCHEMA)
+            try:
+                self.conn.executescript(FTS_SCHEMA)
+                self.fts_rowid_delete = True
+            except sqlite3.OperationalError:
+                # SQLite < 3.43: no contentless_delete. Fall back to the
+                # values-based delete command, which needs the original text.
+                self.conn.executescript(
+                    FTS_SCHEMA.replace("    contentless_delete=1,\n", ""))
+                self.fts_rowid_delete = False
+                log.info("FTS5 build lacks contentless_delete; using values-based deletes")
             if 0 < stored_version < SCHEMA_VERSION:
                 self._rebuild_fts()
             return True
         except sqlite3.OperationalError as e:
             log.warn("FTS5 unavailable, lexical search will use the fallback", err=str(e))
             return False
+
+    def _purge_fts(self, doc_id: str) -> None:
+        """Remove a document's rows from the lexical index.
+
+        This has to be exact. A contentless FTS5 table cannot be deleted from by
+        rowid unless it was created with `contentless_delete=1`, and the
+        `'delete'` command silently removes nothing unless it is handed the
+        row's *original* column values. Getting it wrong leaves orphaned
+        postings behind - and because SQLite reuses rowids, a later chunk
+        inherits them: a query for a term that exists nowhere in the corpus
+        returns a chunk that does not contain it, under that chunk's citation
+        and URI. Deleted text stays retrievable under someone else's provenance.
+        """
+        if not self.has_fts:
+            return
+        rows = self.conn.execute(
+            """SELECT c.rowid AS rid, c.text AS text, c.context_header AS hdr,
+                      COALESCE(d.title, '') AS title
+               FROM chunks c LEFT JOIN documents d ON d.doc_id = c.doc_id
+               WHERE c.doc_id = ?""",
+            (doc_id,),
+        ).fetchall()
+        if not rows:
+            return
+        if getattr(self, "fts_rowid_delete", False):
+            self.conn.executemany("DELETE FROM chunks_fts WHERE rowid = ?",
+                                  [(r["rid"],) for r in rows])
+        else:
+            self.conn.executemany(
+                "INSERT INTO chunks_fts(chunks_fts, rowid, text, context_header, title) "
+                "VALUES('delete', ?, ?, ?, ?)",
+                [(r["rid"], r["text"], r["hdr"], r["title"]) for r in rows],
+            )
 
     def _rebuild_fts(self) -> None:
         rows = self.conn.execute(
@@ -221,9 +269,13 @@ class SqliteStore:
         return [_row_to_document(r) for r in self.conn.execute("SELECT * FROM documents")]
 
     def delete_document(self, doc_id: str) -> None:
-        self.conn.execute("DELETE FROM documents WHERE doc_id=?", (doc_id,))
-        self.conn.commit()
+        with self.conn:
+            # Before the cascade drops the chunks, while their text is still
+            # readable - the lexical index needs those values to purge itself.
+            self._purge_fts(doc_id)
+            self.conn.execute("DELETE FROM documents WHERE doc_id=?", (doc_id,))
         self._vector_index = None
+        self._invalidate_idf()
 
     # ------------------------------------------------------------------ chunks
 
@@ -235,14 +287,7 @@ class SqliteStore:
         retrievable forever and cite text that no longer exists.
         """
         with self.conn:
-            old = [r["chunk_id"] for r in self.conn.execute(
-                "SELECT chunk_id FROM chunks WHERE doc_id=?", (doc_id,))]
-            if old and self.has_fts:
-                self.conn.executemany(
-                    "INSERT INTO chunks_fts(chunks_fts, rowid, text, context_header, title) "
-                    "VALUES('delete', (SELECT rowid FROM chunks WHERE chunk_id=?), '', '', '')",
-                    [(cid,) for cid in old],
-                )
+            self._purge_fts(doc_id)
             self.conn.execute("DELETE FROM chunks WHERE doc_id=?", (doc_id,))
             title = (self.conn.execute(
                 "SELECT title FROM documents WHERE doc_id=?", (doc_id,)).fetchone() or {"title": ""}
@@ -265,6 +310,7 @@ class SqliteStore:
                         (cursor.lastrowid, chunk.text, chunk.context_header, title),
                     )
         self._vector_index = None
+        self._invalidate_idf()
         return len(chunks)
 
     def get_chunks(self, chunk_ids: Sequence[str]) -> dict[str, Chunk]:
@@ -351,21 +397,43 @@ class SqliteStore:
             return []
         if self.has_fts:
             try:
-                rows = self.conn.execute(
-                    """SELECT c.chunk_id AS chunk_id, bm25(chunks_fts, 1.0, 0.6, 0.4) AS score
-                       FROM chunks_fts
-                       JOIN chunks c ON c.rowid = chunks_fts.rowid
-                       WHERE chunks_fts MATCH ?
-                       ORDER BY score LIMIT ?""",
-                    (terms, k * 4 if allowed else k),
-                ).fetchall()
+                if allowed is None:
+                    rows = self.conn.execute(
+                        """SELECT c.chunk_id AS chunk_id,
+                                  bm25(chunks_fts, 1.0, 0.6, 0.4) AS score
+                           FROM chunks_fts
+                           JOIN chunks c ON c.rowid = chunks_fts.rowid
+                           WHERE chunks_fts MATCH ?
+                           ORDER BY score LIMIT ?""",
+                        (terms, k),
+                    ).fetchall()
+                else:
+                    # Pre-filter in SQL via a temp table. Taking the global
+                    # top-k*4 and intersecting afterwards is a post-filter, and
+                    # it returns nothing whenever the allowed chunks rank below
+                    # that window - which is the normal case when filtering to a
+                    # small source inside a large corpus. Retrieval then
+                    # silently degrades to dense-only.
+                    self.conn.execute(
+                        "CREATE TEMP TABLE IF NOT EXISTS _allowed(chunk_id TEXT PRIMARY KEY)")
+                    self.conn.execute("DELETE FROM _allowed")
+                    self.conn.executemany(
+                        "INSERT OR IGNORE INTO _allowed(chunk_id) VALUES(?)",
+                        [(cid,) for cid in allowed])
+                    rows = self.conn.execute(
+                        """SELECT c.chunk_id AS chunk_id,
+                                  bm25(chunks_fts, 1.0, 0.6, 0.4) AS score
+                           FROM chunks_fts
+                           JOIN chunks c ON c.rowid = chunks_fts.rowid
+                           JOIN _allowed a ON a.chunk_id = c.chunk_id
+                           WHERE chunks_fts MATCH ?
+                           ORDER BY score LIMIT ?""",
+                        (terms, k),
+                    ).fetchall()
             except sqlite3.OperationalError as e:
                 log.warn("fts query failed, using fallback", err=str(e)[:120])
                 return self._search_lexical_fallback(query, k, allowed)
-            results = [(r["chunk_id"], -float(r["score"])) for r in rows]
-            if allowed is not None:
-                results = [pair for pair in results if pair[0] in allowed]
-            return results[:k]
+            return [(r["chunk_id"], -float(r["score"])) for r in rows]
         return self._search_lexical_fallback(query, k, allowed)
 
     def _search_lexical_fallback(self, query: str, k: int,
@@ -432,8 +500,13 @@ class SqliteStore:
                     params.append(value)
             elif key == "exclude_source_system":
                 values = [value] if isinstance(value, str) else list(value)
-                clauses.append(f"d.source_system NOT IN ({','.join('?' * len(values))})")
-                params.extend(values)
+                # An empty exclusion is no constraint. Emitting `NOT IN ()`
+                # returns every chunk, which is the same *set* but not the same
+                # thing: callers use `None` to mean "unfiltered" and skip work.
+                if values:
+                    clauses.append(
+                        f"d.source_system NOT IN ({','.join('?' * len(values))})")
+                    params.extend(values)
             elif key == "doc_ids":
                 clauses.append(f"c.doc_id IN ({','.join('?' * len(value))})")
                 params.extend(value)
@@ -452,6 +525,11 @@ class SqliteStore:
                 # Arbitrary metadata key on either the chunk or its document.
                 clauses.append("(json_extract(c.metadata, ?) = ? OR json_extract(d.metadata, ?) = ?)")
                 params.extend([f"$.{key}", value, f"$.{key}", value])
+        if not clauses:
+            # Every key resolved to "no constraint" (e.g. an empty exclusion
+            # list). That is not the same as "match nothing", and it must not
+            # build a WHERE with no predicate.
+            return None
         sql = ("SELECT c.chunk_id FROM chunks c JOIN documents d ON d.doc_id = c.doc_id "
                f"WHERE {' AND '.join(clauses)}")
         return {r["chunk_id"] for r in self.conn.execute(sql, params)}
@@ -495,9 +573,14 @@ class SqliteStore:
 
         from oodarag.util.text import tokenize
 
-        chunk_count = self.chunk_count()
+        # Keyed on a content digest, not just the count. Re-indexing a document
+        # with reworded text of the same chunk count leaves the count identical
+        # while every term changes - and a stale table gives every term of the
+        # new corpus the maximum idf, which feeds the reranker, the extractive
+        # generator and the abstention gate.
+        signature = self._corpus_signature()
         cached = self.get_meta("idf_table")
-        if cached and cached.get("chunks") == chunk_count:
+        if cached and cached.get("signature") == signature:
             return cached["table"]
 
         document_frequency: Counter[str] = Counter()
@@ -511,9 +594,21 @@ class SqliteStore:
             for term, df in document_frequency.items()
             if df > 1  # singletons all share the maximum idf; the default covers them
         }
-        self.set_meta("idf_table", {"chunks": chunk_count, "table": table})
-        log.debug("idf table built", terms=len(table), chunks=chunk_count)
+        self.set_meta("idf_table", {"signature": signature, "table": table})
+        log.debug("idf table built", terms=len(table), chunks=len(rows))
         return table
+
+    def _corpus_signature(self) -> str:
+        """Cheap fingerprint of the chunk corpus: count plus a hash of hashes."""
+        row = self.conn.execute(
+            "SELECT COUNT(*) AS n, COALESCE(group_concat(content_hash), '') AS h "
+            "FROM (SELECT content_hash FROM chunks ORDER BY chunk_id)"
+        ).fetchone()
+        return f"{row['n']}:{content_hash(row['h'])}"
+
+    def _invalidate_idf(self) -> None:
+        self.conn.execute("DELETE FROM meta WHERE key='idf_table'")
+        self.conn.commit()
 
     def idf_lookup(self):
         """A callable returning the IDF of a stemmed term.

@@ -177,40 +177,46 @@ def _pack_units(
     config: ChunkConfig,
     joiner: str = " ",
     max_tokens: int | None = None,
-) -> list[tuple[str, int]]:
+) -> list[tuple[str, int, int]]:
     """Greedily pack (text, offset) units into target-sized chunks with overlap.
 
     Overlap is applied in whole units, so a chunk never starts mid-sentence.
+
+    Returns `(text, char_offset, first_unit_index)`. The unit index is not
+    decoration: a transcript chunk's timestamp is the timestamp of the cue it
+    starts at, and estimating that from word counts drifts within a few chunks
+    and then saturates on the last cue in the document - publishing a `?t=`
+    deep link that lands at the end of the video whatever passage was cited.
     """
     ceiling = max_tokens or config.hard_max_tokens
-    out: list[tuple[str, int]] = []
-    buffer: list[tuple[str, int]] = []
+    out: list[tuple[str, int, int]] = []
+    buffer: list[tuple[str, int, int]] = []
     size = 0
 
-    for unit_text, offset in units:
+    for index, (unit_text, offset) in enumerate(units):
         unit_tokens = estimate_tokens(unit_text)
         if unit_tokens > ceiling and not buffer:
             # A single oversized unit (a minified line, a huge paragraph):
             # emit it whole rather than cutting it at an arbitrary point.
-            out.append((unit_text, offset))
+            out.append((unit_text, offset, index))
             continue
         if size + unit_tokens > config.target_tokens and buffer:
-            out.append((joiner.join(t for t, _ in buffer), buffer[0][1]))
-            carry: list[tuple[str, int]] = []
+            out.append((joiner.join(t for t, _, _ in buffer), buffer[0][1], buffer[0][2]))
+            carry: list[tuple[str, int, int]] = []
             carried = 0
-            for text, off in reversed(buffer):
-                tokens = estimate_tokens(text)
+            for carried_text, off, idx in reversed(buffer):
+                tokens = estimate_tokens(carried_text)
                 if carried + tokens > config.overlap_tokens:
                     break
-                carry.insert(0, (text, off))
+                carry.insert(0, (carried_text, off, idx))
                 carried += tokens
             buffer = carry
             size = carried
-        buffer.append((unit_text, offset))
+        buffer.append((unit_text, offset, index))
         size += unit_tokens
 
     if buffer:
-        out.append((joiner.join(t for t, _ in buffer), buffer[0][1]))
+        out.append((joiner.join(t for t, _, _ in buffer), buffer[0][1], buffer[0][2]))
     return out
 
 
@@ -228,8 +234,8 @@ def _split_prose(doc: Document, config: ChunkConfig) -> list[tuple[str, int, dic
             index = doc.text.find(sentence, cursor)
             units.append((sentence, index if index >= 0 else cursor))
             cursor = (index if index >= 0 else cursor) + len(sentence)
-        for text, offset in _pack_units(units, config):
-            pieces.append((text, offset, dict(meta)))
+        for packed_text, offset, _ in _pack_units(units, config):
+            pieces.append((packed_text, offset, dict(meta)))
     return pieces or [(doc.text, 0, {})]
 
 
@@ -244,14 +250,14 @@ def _split_code(doc: Document, config: ChunkConfig) -> list[tuple[str, int, dict
     text = doc.text
     if pattern is None:
         units = [(line, 0) for line in text.split("\n")]
-        return [(chunk, offset, {}) for chunk, offset in
+        return [(chunk, offset, {}) for chunk, offset, _ in
                 _pack_units(units, config, joiner="\n", max_tokens=config.code_max_tokens)]
 
     boundaries = [(m.start(), next(g for g in m.groups() if g) if m.groups() else "")
                   for m in pattern.finditer(text)]
     if not boundaries:
         units = [(line, 0) for line in text.split("\n")]
-        return [(chunk, offset, {}) for chunk, offset in
+        return [(chunk, offset, {}) for chunk, offset, _ in
                 _pack_units(units, config, joiner="\n", max_tokens=config.code_max_tokens)]
 
     pieces: list[tuple[str, int, dict]] = []
@@ -267,8 +273,8 @@ def _split_code(doc: Document, config: ChunkConfig) -> list[tuple[str, int, dict
             pieces.append((body, start, meta))
             continue
         units = [(line, 0) for line in body.split("\n")]
-        for packed, _ in _pack_units(units, config, joiner="\n",
-                                     max_tokens=config.code_max_tokens):
+        for packed, _, _ in _pack_units(units, config, joiner="\n",
+                                        max_tokens=config.code_max_tokens):
             pieces.append((packed, start, dict(meta)))
     return pieces
 
@@ -293,17 +299,15 @@ def _split_transcript(doc: Document, config: ChunkConfig) -> list[tuple[str, int
                 units.append((stripped, offset))
         offset += len(line) + 1
 
-    packed = _pack_units(units, config)
     pieces: list[tuple[str, int, dict]] = []
-    consumed = 0
-    for text, start in packed:
-        timestamp = stamps.get(consumed) or _nearest_stamp(stamps, consumed)
+    for packed_text, start, first_unit in _pack_units(units, config):
+        # The exact cue this chunk starts at, reported by the packer.
+        timestamp = stamps.get(first_unit) or _nearest_stamp(stamps, first_unit)
         meta: dict[str, Any] = {}
         if timestamp:
             meta["timestamp"] = timestamp
             meta["deep_link"] = _deep_link(doc.uri, timestamp)
-        pieces.append((text, start, meta))
-        consumed += max(1, text.count(" ") // 12)
+        pieces.append((packed_text, start, meta))
     return pieces
 
 
@@ -343,9 +347,12 @@ def _split_chat(doc: Document, config: ChunkConfig) -> list[tuple[str, int, dict
         offset += len(turn) + 1
 
     pieces: list[tuple[str, int, dict]] = []
-    for index, (text, start) in enumerate(_pack_units(units, config, joiner="\n\n")):
-        meta = {"role": roles.get(index, "")} if roles.get(index) else {}
-        pieces.append((text, start, meta))
+    for packed_text, start, first_unit in _pack_units(units, config, joiner="\n\n"):
+        # Role of the turn the window opens with, by unit index rather than by
+        # chunk position - the two diverge as soon as any chunk holds more than
+        # one turn, which is the normal case.
+        meta = {"role": roles[first_unit]} if first_unit in roles else {}
+        pieces.append((packed_text, start, meta))
     return pieces
 
 

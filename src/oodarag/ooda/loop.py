@@ -152,7 +152,16 @@ class OodaLoop:
                 "last_error": (delta["errors"] or [""])[0],
                 "quarantined": prior.get("quarantined", False),
             }
-        self.store.set_meta("source_health", sources)
+        # Merged, not replaced. A source absent from this cycle's deltas -
+        # including one just quarantined and removed from the connector set -
+        # would otherwise vanish from the record entirely: its quarantine flag
+        # would not survive a restart, and an intermittently failing source
+        # would have its consecutive-failure count reset every time it
+        # reappeared, so it could never reach the quarantine threshold.
+        merged = dict(history)
+        merged.update(sources)
+        self.store.set_meta("source_health", merged)
+        sources = merged
 
         fitted_on = self.store.get_meta("fitted_doc_count", 0) or 0
         growth = ((stats["documents"] - fitted_on) / fitted_on) if fitted_on else 0.0

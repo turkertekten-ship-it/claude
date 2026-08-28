@@ -16,6 +16,7 @@ from __future__ import annotations
 import gzip
 import io
 import json
+import re
 import random
 import ssl
 import time
@@ -216,6 +217,11 @@ class HttpClient:
             **self.default_headers,
             **(headers or {}),
         }
+        # A per-request header explicitly set to None suppresses a default one.
+        # Needed because a default that is right for most endpoints can be wrong
+        # for one of them - sending an Authorization header to a host that does
+        # not expect it can make it 404 rather than ignore it.
+        hdrs = {k: v for k, v in hdrs.items() if v is not None}
         if conditional and url in self._etags:
             hdrs["If-None-Match"] = self._etags[url]
 
@@ -372,7 +378,11 @@ def normalize_url(url: str, *, drop_fragment: bool = True, drop_query: bool = Fa
     netloc = host.lower()
     if parts.port and not ((scheme == "https" and parts.port == 443) or (scheme == "http" and parts.port == 80)):
         netloc = f"{netloc}:{parts.port}"
-    path = urllib.parse.quote(urllib.parse.unquote(parts.path), safe="/%:@&=+$,~()!*'")
+    # Only the case of existing escapes is normalised. Round-tripping through
+    # unquote/quote decoded %2F into a real separator, so /a%2Fb and /a/b
+    # collapsed to one identity - the crawler then deduplicated two distinct
+    # pages and fetched one of them at the wrong path. %25 and %23 the same.
+    path = re.sub(r"%[0-9a-fA-F]{2}", lambda m: m.group(0).upper(), parts.path)
     if path.endswith("/index.html"):
         path = path[: -len("index.html")]
     query = ""

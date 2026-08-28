@@ -255,3 +255,56 @@ because every negative case until now shared no common word with the corpus.
 **Generalisation.** When you fix a scoring component, check its siblings for the
 same class of defect. A weighted term and an unweighted term in one sum means
 the unweighted one now dominates the cases the weighting was meant to fix.
+
+---
+
+## L13 - A silent no-op is worse than a loud failure
+
+**Evidence.** A batch of source edits applied with `str.replace` silently did
+nothing, because the anchor text had moved. The module compiled, the suite
+passed, and the feature was simply absent - surfacing three steps later as an
+`AttributeError` on an attribute that was never added.
+
+**Rule.** Any find-and-modify step must assert it found something. The fix is
+one line - check the occurrence count before replacing and fail loudly when it
+is not what was expected - and it paid for itself immediately: a later batch
+aborted on a bad anchor *before* writing, leaving the tree untouched instead of
+half-patched.
+
+**Generalisation.** This is not about editing. Any operation that can quietly do
+nothing - a regex that matches nothing, a filter that excludes everything, a
+delete that removes no rows - needs to verify it acted.
+
+---
+
+## L14 - An adversarial pass finds what a test suite cannot
+
+**Evidence.** An independent review of a codebase with 156 passing tests found
+**15 confirmed defects**, each reproduced by running it. None of them threw an
+exception. Every one returned a plausible wrong answer:
+
+| Defect | Symptom |
+|---|---|
+| FTS5 `'delete'` given empty values | Deleted text stayed retrievable, and rowid reuse made it resolve **under a different document's citation** |
+| `\b` before an underscore-prefixed keyword | `GITHUB_TOKEN=...` was written to the index unredacted |
+| Relevant set built from the retrieved list | `recall@k` was pinned at 1.0 - the metric documented as the ceiling on everything downstream |
+| `_normalize` leaving double spaces | Any golden question containing a comma was invisible to the verbatim contamination check |
+| Refit baseline rewritten every run | Corpus growth measured against the last *run*, so the embedder could never refit |
+| `source_health` overwritten per cycle | A quarantine did not survive a restart; an intermittent source could never reach the threshold |
+| Fence detection by `split("```")` parity | Prose *mentioning* a fence flipped parity and the whitespace collapse ran inside real code |
+
+**Rule.** A suite proves the cases someone thought of. It cannot prove the
+absence of cases nobody thought of, and a green suite is actively misleading
+about that. Budget for a pass whose explicit goal is to break the thing, with
+two constraints that did the work here: **prove every finding by running it**,
+and **rank by whether a wrong answer reaches a user**, not by how odd the code
+looks.
+
+**Corollary, from fixing them.** Three of the fifteen were siblings of bugs
+already fixed - the same class in the next function along (unweighted matching
+in `contamination` after `rerank` was fixed; a token-boundary collision in the
+very code that had just been corrected). When you fix a defect, search for its
+class, not its instance.
+
+**The honest footnote.** Fixing #3 moved reported `recall@8` from 0.84 to 0.65.
+Nothing got worse; the number started meaning something.

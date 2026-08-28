@@ -31,7 +31,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Any
 
 from oodarag.store.sqlite_store import SqliteStore
-from oodarag.util.text import tokenize, tokenize_all
+from oodarag.util.text import tokenize
 
 
 @dataclass(slots=True)
@@ -85,7 +85,16 @@ class ContaminationReport:
 
 
 def _normalize(text: str) -> str:
-    return re.sub(r"[^a-z0-9 ]+", " ", text.lower()).strip()
+    """Lowercase, strip punctuation, and collapse the resulting whitespace.
+
+    The collapse is not cosmetic. Replacing a punctuation run with a space
+    leaves the space that was already beside it, so "work, exactly" becomes
+    "work  exactly" - while the question side, built from tokens, has single
+    spaces. The two sides then never match, and a question quoted verbatim in
+    the corpus is reported clean. Any golden question containing a comma was
+    invisible to the verbatim check.
+    """
+    return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9 ]+", " ", text.lower())).strip()
 
 
 def detect(store: SqliteStore, questions: list[str], *,
@@ -120,7 +129,8 @@ def detect(store: SqliteStore, questions: list[str], *,
     idf = store.idf_lookup()
     documents = store.all_documents()[:max_docs_scanned]
     prepared = [
-        (doc, _normalize(doc.text), set(tokenize(doc.text, stem_words=True)))
+        (doc, " ".join(tokenize(doc.text, stem_words=True)),
+         set(tokenize(doc.text, stem_words=True)))
         for doc in documents
     ]
 
@@ -132,7 +142,11 @@ def detect(store: SqliteStore, questions: list[str], *,
                          else overlap_threshold)
         q_norm = _normalize(question)
         q_terms = set(tokenize(question, stem_words=True))
-        q_words = _normalize(" ".join(tokenize_all(question))).split()
+        # Content tokens, stemmed - the same analysis the document side gets.
+        # Counting stopwords lets "who won the" score 0.5 against an unrelated
+        # document and quarantine it from a negative case, which removes real
+        # corpus from the eval and makes the contamination signal cry wolf.
+        q_words = tokenize(question, stem_words=True)
         if not q_words:
             continue
 
@@ -144,13 +158,20 @@ def detect(store: SqliteStore, questions: list[str], *,
                 position = doc_norm.find(" ".join(q_words[: max(2, int(len(q_words) * longest))]))
                 if position >= 0:
                     excerpt = doc.text[max(0, position - 60):position + 160]
+                # Fatal only for a question the corpus is supposed to be unable
+                # to answer. On a positive golden, a document matching the
+                # question's terms *is the answer* - quarantining it would
+                # remove the very source the case expects and turn a passing
+                # case into a failing one. Report it, do not act on it.
                 report.findings.append(Contamination(
                     question=question, doc_id=doc.doc_id, uri=doc.uri,
                     source_system=doc.source_system, kind="verbatim",
-                    score=round(longest, 3), excerpt=excerpt.strip(), fatal=True,
+                    score=round(longest, 3), excerpt=excerpt.strip(),
+                    fatal=is_negative,
                 ))
-                report.by_source[doc.source_system] = \
-                    report.by_source.get(doc.source_system, 0) + 1
+                if is_negative:
+                    report.by_source[doc.source_system] = \
+                        report.by_source.get(doc.source_system, 0) + 1
                 continue
             # 2. overlap: nearly every distinctive term of the question present.
             if not q_terms:
@@ -172,10 +193,17 @@ def detect(store: SqliteStore, questions: list[str], *,
     return report
 
 
-def _longest_run(words: list[str], haystack: str) -> float:
-    """Longest contiguous run of `words` present in `haystack`, as a fraction."""
-    for length in range(len(words), 1, -1):
+def _longest_run(words: list[str], haystack: str, min_run: int = 2) -> float:
+    """Longest contiguous run of `words` present in `haystack`, as a fraction.
+
+    `words` and `haystack` must both be stemmed content tokens, and the run is
+    padded so it cannot match the tail of a longer token.
+    """
+    if len(words) < min_run:
+        return 0.0
+    padded = f" {haystack} "
+    for length in range(len(words), min_run - 1, -1):
         for start in range(0, len(words) - length + 1):
-            if " ".join(words[start:start + length]) in haystack:
+            if f" {' '.join(words[start:start + length])} " in padded:
                 return length / len(words)
     return 0.0

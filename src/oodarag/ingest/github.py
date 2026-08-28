@@ -205,16 +205,33 @@ class GitHubConnector(Connector):
         return True, ""
 
     def _fetch_blob(self, path: str, sha: str, ref: str) -> str | None:
-        """Raw first (free), API blob second (costs quota but always works)."""
+        """Raw first (free), API blob second (costs quota but always works).
+
+        Raw is tried **unauthenticated** first. `raw.githubusercontent.com`
+        answers `404: Not Found` - not 401, not 403 - when it is sent an
+        Authorization header it cannot use, so inheriting the API client's auth
+        header silently broke the raw path for every file and sent the whole
+        repository through the quota-costing blob endpoint instead. Nothing
+        failed; the optimization simply stopped happening, and the only symptom
+        was quota consumption nobody was watching.
+
+        Private repositories genuinely need the header, so a 404 unauthenticated
+        is retried with it before giving up on raw.
+        """
         raw_url = f"{self.raw_root}/{self.slug}/{ref}/{urllib.parse.quote(path)}"
-        try:
-            resp = self.gh.client.get(raw_url, allow_status=(404, 403))
+        for headers in ({"Authorization": None}, {}):
+            try:
+                resp = self.gh.client.get(raw_url, headers=headers,
+                                          allow_status=(404, 403))
+            except (HttpError, TransportError) as e:
+                log.debug("raw fetch failed", path=path, err=str(e)[:120])
+                break
             if resp.status == 200:
+                self.stats["raw_hits"] = self.stats.get("raw_hits", 0) + 1
                 if b"\x00" in resp.body[:8192]:
                     return None  # binary despite the extension
                 return resp.text
-        except (HttpError, TransportError) as e:
-            log.debug("raw fetch failed, falling back to API", path=path, err=str(e)[:120])
+        self.stats["raw_misses"] = self.stats.get("raw_misses", 0) + 1
         try:
             blob = self.gh.get(f"/repos/{self.slug}/git/blobs/{sha}")
             if blob.get("encoding") == "base64":

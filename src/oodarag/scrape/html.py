@@ -202,6 +202,20 @@ class _TreeBuilder(HTMLParser):
                 return
         # No matching open tag: stray close, ignore it.
 
+    def close(self) -> None:
+        super().close()
+        # An unclosed <script> keeps HTMLParser in CDATA mode to end of input,
+        # so every remaining byte of the document lands in the script buffer and
+        # is discarded - the page extracts as empty and is indistinguishable
+        # from a genuinely empty one. Recover the text rather than lose it.
+        if self._script_attrs is not None:
+            swallowed = "".join(self._script_buf)
+            self._script_attrs = None
+            self._script_buf = []
+            recovered = clean(re.sub(r"<[^>]+>", " ", swallowed))
+            if recovered:
+                self.current.add(recovered)
+
     def handle_data(self, data: str) -> None:
         if self._script_attrs is not None:
             self._script_buf.append(data)
@@ -388,16 +402,37 @@ def _tidy(markdown: str) -> str:
 
     Code fences are left byte-for-byte: collapsing runs of spaces inside a
     Python snippet changes what the snippet means.
+
+    Fences are found by *line*, not by splitting on the literal ``` and
+    assuming even indices are outside. A page whose prose merely mentions a
+    fence marker - extremely common on documentation about markdown - flips
+    that parity, and the whitespace collapse is then applied inside the real
+    code block, flattening exactly the indentation this promises to preserve.
     """
-    parts = markdown.split("```")
-    for i in range(0, len(parts), 2):  # even indices are outside fences
-        block = parts[i]
-        block = "\n".join(line.rstrip() for line in block.split("\n"))
-        block = re.sub(r"[ \t]{2,}", " ", block)
-        block = re.sub(r"\n{3,}", "\n\n", block)
-        parts[i] = block
-    joined = "```".join(parts)
-    return re.sub(r"\n{3,}", "\n\n", joined).strip()
+    out: list[str] = []
+    buffer: list[str] = []
+    in_fence = False
+
+    def flush() -> None:
+        if not buffer:
+            return
+        if in_fence:
+            out.extend(buffer)          # byte-for-byte
+        else:
+            block = "\n".join(line.rstrip() for line in buffer)
+            block = re.sub(r"[ \t]{2,}", " ", block)
+            out.extend(re.sub(r"\n{3,}", "\n\n", block).split("\n"))
+        buffer.clear()
+
+    for line in markdown.split("\n"):
+        if _FENCE_RE.match(line):
+            flush()
+            out.append(line)
+            in_fence = not in_fence
+            continue
+        buffer.append(line)
+    flush()
+    return re.sub(r"\n{3,}", "\n\n", "\n".join(out)).strip()
 
 
 def _inline_text(node: Node, preserve: bool = False) -> str:

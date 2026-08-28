@@ -172,8 +172,20 @@ def redact_secrets(text: str) -> str:
         (r"\b(xox[abposr]-[A-Za-z0-9\-]{10,})", "<redacted:slack-token>"),
         (r"(?i)\b(bearer)\s+[A-Za-z0-9._\-]{20,}", r"\1 <redacted>"),
         (
-            r"(?i)\b(api[_-]?key|secret|password|passwd|token)\b(\s*[:=]\s*)[\"']?[A-Za-z0-9._\-]{12,}[\"']?",
-            r"\1\2<redacted>",
+            # `\b` before the keyword would not match GITHUB_TOKEN= or
+            # DB_PASSWORD=, because `_` is a word character and so presents no
+            # boundary. Real configuration uses prefixed names almost
+            # exclusively, so the naive form silently redacted nothing that
+            # mattered. The value class is widened too: a password containing
+            # @ or ! is still a password.
+            r"(?i)(?<![A-Za-z0-9])[A-Za-z0-9_.\-]*"
+            r"(api[_-]?key|secret|password|passwd|token|credential)"
+            # (?!<redacted) so a value already replaced by a more specific rule
+            # above is left alone - otherwise the generic rule overwrites
+            # <redacted:github-token> with a vaguer marker and the report loses
+            # which kind of credential was found.
+            r"(\s*[:=]\s*)[\"']?(?!<redacted)[^\s\"']{8,}[\"']?",
+            r"<redacted:\1>",
         ),
         (r"-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----",
          "<redacted:private-key>"),

@@ -22,14 +22,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
-from oodarag.eval.metrics import (
-    hit_at_k,
-    mrr,
-    ndcg_at_k,
-    precision_at_k,
-    recall_at_k,
-    summarize,
-)
+from oodarag.eval.metrics import hit_at_k, mrr, ndcg_at_k, recall_at_k, summarize
 from oodarag.eval.contamination import ContaminationReport, detect
 from oodarag.generate.answer import AnswerGenerator
 from oodarag.util.logging import get_logger
@@ -220,11 +213,21 @@ class EvalHarness:
             ]
             # Graded by *document*, not chunk: a golden that names chunk ids
             # breaks on every chunker change.
-            relevant_positions = {
-                str(i) for i, blob in enumerate(uris)
-                if any(expected.lower() in blob.lower() for expected in golden.expect_sources)
-            }
-            ranked = [str(i) for i in range(len(uris))]
+            #
+            # Each retrieved position is mapped to the expected source it
+            # satisfies, or to a unique sentinel. Building the relevant set from
+            # the *retrieved* list instead - which is what this did - makes the
+            # relevant set a subset of the retrieved set by construction, so
+            # recall is 1.0 whenever anything matched and 1.0 again (via the
+            # empty-set guard) when nothing did. The metric documented as "the
+            # ceiling on everything downstream" reported a constant.
+            expected = [e.lower() for e in golden.expect_sources]
+            ranked = []
+            for i, blob in enumerate(uris):
+                lowered = blob.lower()
+                match = next((e for e in expected if e in lowered), None)
+                ranked.append(match if match is not None else f"\x00miss{i}")
+            relevant_positions = set(expected)
 
             case = CaseResult(
                 question=golden.question,
@@ -236,11 +239,14 @@ class EvalHarness:
             )
             if golden.expect_sources:
                 case.recall = recall_at_k(ranked, relevant_positions, self.k)
-                case.precision = precision_at_k(ranked, relevant_positions, self.k)
+                # Precision counts filled slots, not distinct sources: two
+                # chunks from one expected document are two useful results.
+                filled = sum(1 for r in ranked[:self.k] if r in relevant_positions)
+                case.precision = filled / min(self.k, len(ranked)) if ranked else 0.0
                 case.hit = hit_at_k(ranked, relevant_positions, self.k)
                 case.mrr = mrr(ranked, relevant_positions)
                 case.ndcg = ndcg_at_k(ranked, relevant_positions, self.k)
-                if not relevant_positions:
+                if not set(ranked[:self.k]) & relevant_positions:
                     case.failures.append(
                         f"none of {golden.expect_sources} retrieved; "
                         f"got {case.retrieved_uris[:3]}"

@@ -41,8 +41,12 @@ PYMINOR="$(python3 -c 'import sys; print(sys.version_info[1] if sys.version_info
 # --- session environment ---------------------------------------------------
 # The package is not installed; it is imported from src/. Persist that for the
 # session so every later command is just `python3 -m oodarag.cli ...`.
+PYPATH_LINE="export PYTHONPATH=$ROOT/src"
 if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
-  echo 'export PYTHONPATH=src' >> "$CLAUDE_ENV_FILE"
+  # Idempotent: the hook also fires on resume/clear/compact.
+  if ! grep -qxF "$PYPATH_LINE" "$CLAUDE_ENV_FILE" 2>/dev/null; then
+    echo "$PYPATH_LINE" >> "$CLAUDE_ENV_FILE"
+  fi
 fi
 
 # --- import check (read-only; opens no database, makes no request) ---------
@@ -56,7 +60,7 @@ case "$IMPORT_STATUS" in
   ok*) note "  import oodarag: ${IMPORT_STATUS}" ;;
   *)   note "  import oodarag FAILED: ${IMPORT_STATUS}" ;;
 esac
-note "  Run everything as: PYTHONPATH=src python3 -m oodarag.cli <cmd>   (Makefile exports it for you)"
+note "  PYTHONPATH exported for this session: $ROOT/src. Otherwise: PYTHONPATH=src python3 -m oodarag.cli <cmd>"
 note "  Key commands: preflight (probe reachability FIRST - see internal/CAPABILITY-PROTOCOL.md)"
 note "                index | query \"...\" | eval --exclude-source chat | loop --dry-run | status | journal"
 note "                make test (stdlib unittest) | make lint | make demo"

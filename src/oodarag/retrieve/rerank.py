@@ -143,8 +143,14 @@ def _longest_common_run(words: list[str], haystack: str, min_run: int = 2) -> fl
     """
     if len(words) < min_run:
         return 0.0
+    # Padded on both sides so a run cannot match the tail of a longer token:
+    # without this, ["rank", "fusion"] scores a full 1.0 against
+    # "prank fusion", contributing 0.4 to relevance on a chunk that does not
+    # contain the phrase at all. Stemming makes such collisions more likely,
+    # not less.
+    padded_haystack = f" {haystack} "
     for length in range(len(words), min_run - 1, -1):
         for start in range(0, len(words) - length + 1):
-            if " ".join(words[start:start + length]) in haystack:
+            if f" {' '.join(words[start:start + length])} " in padded_haystack:
                 return length / len(words)
     return 0.0

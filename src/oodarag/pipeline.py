@@ -130,6 +130,13 @@ class IndexPipeline:
             self.embedder.fit([d.text for d in indexed_docs])
             self.store.set_meta("embedder_state",
                                 {"name": self.embedder.name, "state": self.embedder.state()})
+            # Recorded here, at the fit, and nowhere else. Writing it after every
+            # embedding pass measured growth against the last *run* rather than
+            # the last *fit*, so growth never accumulated: a corpus growing in
+            # increments below the threshold grew without bound while the term
+            # statistics stayed fitted on the original documents, and the OODA
+            # loop's REFIT_EMBEDDER rule could never fire either.
+            self.store.set_meta("fitted_doc_count", len(indexed_docs))
             report.refit = True
             log.info("refit embedder", docs=len(indexed_docs),
                      fingerprint=self.embedder.fingerprint)
@@ -181,9 +188,6 @@ class IndexPipeline:
             written += self.store.upsert_embeddings(
                 zip((c.chunk_id for c in ordered), vectors), fingerprint
             )
-        self.store.set_meta("fitted_doc_count",
-                            self.store.conn.execute(
-                                "SELECT COUNT(*) AS n FROM documents").fetchone()["n"])
         log.info("embedded", vectors=written, fingerprint=fingerprint)
         return written
 
@@ -199,6 +203,7 @@ class IndexPipeline:
         self.embedder.fit([d.text for d in documents])
         self.store.set_meta("embedder_state",
                             {"name": self.embedder.name, "state": self.embedder.state()})
+        self.store.set_meta("fitted_doc_count", len(documents))
         report.refit = True
         all_chunks = []
         for document in documents:
