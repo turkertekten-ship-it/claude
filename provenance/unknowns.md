@@ -57,6 +57,16 @@ threads exists on this container or in the connected Drive.
 Privacy → Export data) and drops `conversations.json` into `archive/`.
 `tools/ingest_chat_archive.py` reads that format directly.
 
+**Researched, and still unknown.** A search for a field-level specification of
+the claude.ai export returned only third-party exporter tools and how-to
+articles; the one document that looked like a specification described a proposed
+universal import format rather than Claude's actual export.
+[src:EXPORT-SCHEMA-UNVERIFIED-2026-08-27] The reader's candidate-field approach —
+trying `uuid`/`id`/`conversation_id`, `chat_messages`/`messages`, `sender`/`role`
+in turn and reporting what it cannot map — is therefore the correct hedge on
+evidence rather than merely on caution. It has still only been exercised against
+synthetic fixtures.
+
 **Partly addressed:** Claude *Code* history is a different store, and it is
 reachable — `ingest --include-projects` reads `~/.claude/projects` directly. On
 the machine that ran those sessions that is the full Claude Code history; on

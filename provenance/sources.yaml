@@ -834,3 +834,25 @@ sources:
       The test now pins both halves. Coverage across the eleven pipeline stages
       is ten with unit tests; only `cli` is left, and `make demo` exercises every
       subcommand path it has.
+
+  - id: EXPORT-SCHEMA-UNVERIFIED-2026-08-27
+    kind: api
+    collected_at: "2026-08-27T17:45Z"
+    method: "WebSearch for the claude.ai conversations.json schema; WebFetch of a referenced cross-platform format document on raw.githubusercontent.com"
+    evidence: >-
+      Search returned only third-party exporter tools and how-to articles, none
+      publishing a field-level specification. The one document that looked like
+      a specification, adamkwhite/claude-memory-mcp docs/ai_platform_formats.md,
+      turned out to describe a proposed universal import format rather than
+      Claude's actual export, and says so. A GitHub repository search for Claude
+      Code history tooling returned three projects, all JSONL viewers for
+      ~/.claude, none touching the claude.ai export.
+    note: >-
+      The attempt failed and U-2 stays open. This matters because
+      tools/ingest_chat_archive.py contains a claude.ai export reader that has
+      only ever been exercised against synthetic fixtures. Its design already
+      hedges correctly - it tries a list of candidate names per field
+      (uuid/id/conversation_id, chat_messages/messages/conversation,
+      sender/role/author) and reports what it cannot map rather than guessing -
+      and that hedge is now the right call on evidence rather than on caution.
+      The schema resolves when a real export lands in archive/, not before.
