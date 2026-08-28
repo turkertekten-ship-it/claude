@@ -844,6 +844,20 @@ finding as stated is wrong.
    was in a path with tests; none of the tests asked the question that exposed
    it. Adversarial review is not redundant with testing, and the two find
    different things.
+**How much the first one cost, measured after the fact.** `ooda loop` builds its
+generator before the ACT phase indexes anything, so the empty-vocabulary case was
+every loop run rather than an edge case. Running one cycle against an empty index
+over the 91-document corpus, with the fix and without:
+
+    with the fix       47/54  (0.8704)
+    fix reverted       38/54  (0.7037)
+
+Nine cases. The loop's own quality rule fired an `alert` action in the degraded
+run, so the system did notice - it just had no way to say why, and the number it
+reported was the only visible symptom of a retriever whose gate had been silently
+switched off. A defect that only shows up in the autonomous path is a defect that
+shows up when nobody is watching.
+
 2. **Verify a finding before acting on it, including one that arrives with a
    reproduction.** The reproduction can be correct and the conclusion wrong, or
    the code can have moved underneath it. Re-running the measurement cost
