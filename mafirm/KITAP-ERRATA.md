@@ -149,6 +149,22 @@ kanıtsız yazdı. El yazısı bir durum sütunu ölçtüğü sistemden bağıms
 iddiası, aramanın boş dönmesiyle kanıtlı) eklendi; ikisi de mutasyonla
 kırmızıya döndürüldü. *(F-01, F-02)*
 
+**[A] Kitabın iki çıktı biçimi birbirini tanımıyor.** §3 ve §5.3 yöntem
+dosyalarına `Doğrulama: <tarih>` yazdırıyor; §14 ise ÇIKTILARA
+`Kontrol edildi: <kaynak> (<tarih>)` yazdırıyor. §12'nin güncellik kapısı
+yalnızca birincisini tanıdığı için, §14'ü HARFİYEN izleyen bir çıktı kapıdan
+"doğrulama tarihi yok" diye geri dönüyor. Kitap kendi emrettiği biçimi kendi
+kapısında bloklıyor. → Kapı her iki biçimi de tanımalı. *(V-01)*
+
+**[B] Genişletilmiş bir eşik deseni, doğru işi bloklar.** Kitabın kendi `ESIK`
+deseni yalnızca basamak gruplu para tutarını görür ve B-13..B-18 bunun kaçırma
+yüzeyini kanıtlar. Ama deseni "yüzde" içerecek biçimde genişletmek — bu
+kurulumda yapıldı — Türkçede her SPA incelemesini ve her ortaklık yapısı notunu
+üç kapıya birden takar: "yüzde" ticari metnin günlük kelimesidir (pay oranı,
+tazminat tavanı, oy çoğunluğu). Kitabın kendi uyarısı buraya düşer: *"Doğru işi
+bloklayan bir kapı bir gün içinde kapatılır."* → Bir yüzde ancak DÜZENLEYİCİ
+bir ipucuyla aynı cümlede geçtiğinde eşik sayılmalı. *(V-03, V-08, V-24)*
+
 ## §7 · Ortak koltukları
 
 **[B] Kitabın en yüksek itibar riskli kuralının hiçbir mekanizması yok.**

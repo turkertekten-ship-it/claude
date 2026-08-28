@@ -1,5 +1,5 @@
 ###############################################################
-#  KÖR SINAMA TAKIMI — 2026-08-28T09:11:29Z
+#  KÖR SINAMA TAKIMI — 2026-08-28T09:22:50Z
 ###############################################################
 
 /root/mafirm/sinama/ks_a_esik.py:45: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
@@ -292,9 +292,9 @@ GEÇTİ L-06   hafiza/ dosyalarının hepsi var
 KÖR SINAMA M — errata ↔ sınama izlenebilirliği
 ================================================================================================
 GEÇTİ M-01   her errata maddesi bir sınama vakasına atıf yapıyor
-        51 madde · atıfsız 0: yok
+        53 madde · atıfsız 0: yok
 GEÇTİ M-02   atıf yapılan her vaka kimliği gerçekten tanımlı
-        205 tanımlı kimlik · uydurma dayanak: yok
+        230 tanımlı kimlik · uydurma dayanak: yok
 GEÇTİ M-03   [A] ve [B] maddelerinin atıfları sadık sistemde gerçekten kaldı
         sadık koşumda kalan vaka: 41 · sınanmamış ağır madde: yok
 GEÇTİ M-04   sadık sistemde kalan her vaka errata'da ya da raporda açıklanmış
@@ -393,7 +393,7 @@ KÖR SINAMA R — yön, insan onayı ve dil kuralları
 GEÇTİ R-01   rapor cevapla başlıyor, yöntemle değil
         ilk bölüm: 'Cevap' — §4: 'cevabı merak eden ilk paragrafta bulur'
 GEÇTİ R-02   yöntem bölümü bulgulardan sonra geliyor
-        yöntem 26. başlık, ilk bulgu 1. başlık
+        yöntem 27. başlık, ilk bulgu 1. başlık
 GEÇTİ R-03   iki zorunlu başlık en sonda ve doğru sırada
         son iki başlık: ['Şimdi ne yapılmalı', 'Yetkili avukat görüşü gereken konular']
 GEÇTİ R-04   raporun onay durumu açıkça yazılı (§9)
@@ -472,6 +472,60 @@ GEÇTİ U-11   muaf becerinin belgelediği çıktı biçimi kapsam kapısını a
 ------------------------------------------------------------------------------------------------
 10 vaka · 9 geçti · 1 beklenen · 0 SİNYAL
 
+================================================================================================
+KÖR SINAMA V — kapılar DOĞRU işi bloklıyor mu
+================================================================================================
+GEÇTİ V-01   rekabet eşiği değerlendirmesi — tam biçimli
+        eşik rakamı DAYANAKLI, Kontrol edildi var, avukat başlığı var
+GEÇTİ V-02   kapanış kontrol listesi — tablo
+        hiçbir rakam, tavsiye kipi ya da sır yok
+GEÇTİ V-03   SPA madde incelemesi — bulgu
+        oran bir SÖZLEŞME şartıdır, mevzuat eşiği değil
+GEÇTİ V-04   yönetim kurulu notu — cevap önce
+        tavsiye var ama avukat başlığı da var
+GEÇTİ V-05   büyük harfli Türkçe başlık
+        başlık BÜYÜK harfle yazılmış — Türkçe İ/ı tuzağı [B-10]
+GEÇTİ V-06   karşı tarafın görüşünün AKTARIMI
+        olumsuz iddia AKTARILIYOR, kurulmuyor — ve çürütülüyor
+GEÇTİ V-07   dosya yolu, depo adresi değil
+        eğik çizgili yol bir GitHub deposu değildir [kitabın kendi vakası]
+GEÇTİ V-08   pay oranı, mevzuat oranı değil
+        oranlar PAY oranıdır; hiçbir mevzuat eşiği anılmıyor
+GEÇTİ V-09   dava ve dosya numaraları
+        rakamlar DOSYA numarasıdır, eşik değil
+GEÇTİ V-10   Türkçe tarih biçimi
+        tarihler Türkçe biçimde — güncellik kapısı susmalı [B-21]
+GEÇTİ V-11   koltuk dosyası — kaynak beyanlı
+        koltuk kapısının istediği beyan var
+GEÇTİ V-12   müvekkil kod adı — iç yazışma
+        kod adı zaten ANONİMLEŞTİRMEDİR, sızıntı değil
+GEÇTİ V-13   emsal metni — sözleşme dili
+        beyan bir SÖZLEŞME hükmüdür, hukuki görüş değil
+GEÇTİ V-14   kısa iç not — çıktı değil
+        esaslı çıktı değil; hiçbir kapı ateşlememeli
+GEÇTİ V-15   yaptırım taraması — soyutlanmış sorgu
+        "eşleşme yok" olumsuz iddia AMA yöntemi ve kapsamı yazılı
+GEÇTİ V-17   düzenleyici yüzde — tam biçimli ve DAYANAKLI
+        yüzde DÜZENLEYİCİ bağlamda — dayanak, tarih ve Kontrol edildi var, dolayısıyla üç kapı da susmalı
+GEÇTİ V-16   mevzuat metninin doğrudan alıntısı
+        birebir alıntı; kapı alıntıyı iddia sanmamalı
+GEÇTİ V-20   dayanaksız eşik rakamı
+        rakam var; dayanak YOK, doğrulama tarihi YOK, Kontrol edildi YOK — üç kapı da haklı ateşler. İlk sürümde yalnızca kanit beklenmişti; dar bir BEKLENTİ de bir sınama kusurudur
+GEÇTİ V-21   avukat başlığı olmayan tavsiye
+        tavsiye kipi, avukat başlığı yok
+GEÇTİ V-22   kaynak beyansız koltuk
+        koltuk dosyası, Kaynak durumu yok
+GEÇTİ V-24   dayanaksız DÜZENLEYİCİ yüzde eşiği
+        Daraltmanın açtığı olası delik: düzenleyici bağlamdaki bir yüzde, dayanaksız kaldığında HÂLÂ bloklanmalı. Bloklanmıyorsa V-03/V-08 düzeltmesi kaçırma yüzeyi açmış demektir
+GEÇTİ V-23   Kontrol edildi satırı olmayan depo atfı
+        depo anıldı, Kontrol edildi yok
+GEÇTİ V-30   kapılar bu korpusta CANLI (ihlalli metinler yakalanıyor)
+        5/5 ihlalli metin yakalandı — meşru korpusun temiz çıkması kapıların ölü olmasından değil
+GEÇTİ V-31   meşru iş ürününde yanlış pozitif yok
+        17 meşru metnin hiçbirinde kapı ateşlemedi
+------------------------------------------------------------------------------------------------
+24 vaka · 24 geçti · 0 beklenen · 0 SİNYAL
+
 ###############################################################
 #  ÖZET
 ###############################################################
@@ -493,6 +547,7 @@ GEÇTİ U-11   muaf becerinin belgelediği çıktı biçimi kapsam kapısını a
   S · yalıtım (klon yalnız mı)      temiz
   T · §18'in dokuz sınırı           temiz
   U · birimler arası tutarlılık      temiz
+  V · kapıların yanlış pozitifi     temiz
   ------------------------------------------------------------
   TOPLAM SİNYAL                         0
 

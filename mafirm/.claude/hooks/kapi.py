@@ -132,8 +132,81 @@ ESIK = re.compile(
     "("
     + r"\d{1,3}(?:[.,]\d{3}){1,}\s?" + PARA                       # 3.000.000.000 TL
     + r"|\d+(?:[.,]\d+)?\s*(?:bin|milyon|milyar|trilyon)\s*" + PARA  # 3 milyar TL
-    + r"|binde\s+\w+|yüzde\s+\w+|%\s?\d+(?:[.,]\d+)?"           # binde bir, yüzde 98
+    + r"|binde\s+\w+"                                          # binde bir, binde beş
     + ")", re.I)
+
+# [V-03, V-08] "yüzde", Türkçede ticari metnin GÜNLÜK kelimesidir: pay oranı,
+# tazminat tavanı, sepet, oy çoğunluğu, earn-out payı. Onu koşulsuz bir EŞİK
+# saymak, her SPA incelemesinde ve her ortaklık yapısı notunda üç kapıyı birden
+# ateşletiyordu. Kitabın kendi uyarısı tam buraya düşer:
+#
+#     "Doğru işi bloklayan bir kapı bir gün içinde kapatılır; sonra hiçbir şey
+#      uygulanmaz."
+#
+# Bunu ben açtım: B-13..B-18'in KAÇIRMA yüzeyini kapatırken deseni genişlettim
+# ve yanlış pozitif yüzeyini hiç ölçmedim. On dört tur sonra V takımı ölçtü.
+#
+# Ayrım bağlamdadır, biçimde değil. "Payların yüzde altmış yedisi" bu işleme
+# dair bir OLGUDUR; "eşik yüzde elli" bir KURALDIR. Yalnızca ikincisi dayanak
+# ve tarih ister. Düzenleyici ipucu aynı cümlede aranır.
+DUZENLEYICI_IPUCU = re.compile(
+    r"eşi[ğk]|sınır|ceza|oran(?:ı|ında)?\s+(?:uygulan|belirlen)|tebliğ|kanun"
+    r"|madde|kurul|zorunlu|tabi|bildirim|mevzuat|yönetmelik|düzenlem", re.I)
+YUZDE = re.compile(r"(yüzde\s+[\wçğıöşü]+|%\s?\d+(?:[.,]\d+)?)", re.I)
+
+
+def _yuzde_esigi(metin):
+    """Düzenleyici bir ipucuyla AYNI CÜMLEDE geçen yüzde ifadesi."""
+    for cumle in re.split(r"(?<=[.!?;:])\s+|\n", metin):
+        if YUZDE.search(cumle) and DUZENLEYICI_IPUCU.search(cumle):
+            return True
+    return False
+
+
+def esik_var(metin):
+    """Kapıların ortak eşik sorusu: metin bir EŞİK RAKAMI anıyor mu."""
+    return bool(ESIK.search(metin)) or _yuzde_esigi(metin)
+
+
+def esik_bulgulari(metin):
+    """ESIK eşleşmeleri + DÜZENLEYİCİ bağlamdaki yüzde ifadeleri.
+
+    kanit kapısı bunun üzerinde yürür: bir eşik rakamı dayanağını ister ve
+    "eşik yüzde elli" de bir eşiktir. "Payların yüzde altmış yedisi" değildir.
+    """
+    for m in ESIK.finditer(metin):
+        yield m
+    for cumle in re.finditer(r"[^.!?;:\n]+", metin):
+        if not DUZENLEYICI_IPUCU.search(cumle.group(0)):
+            continue
+        for y in YUZDE.finditer(cumle.group(0)):
+            yield _Bulgu(metin, cumle.start() + y.start(),
+                         cumle.start() + y.end())
+
+
+class _Bulgu:
+    """re.Match'in kapıların KULLANDIĞI yüzeyi: start/end/group.
+
+    İlk sürümde group() yoktu ve kanit kapısı m.group(0) çağırıyordu:
+    düzenleyici bağlamda bir yüzde geçen HER belgede kanca AttributeError
+    ile düşüyordu. V korpusunda görünmedi çünkü korpusta düzenleyici
+    bağlamlı MEŞRU bir yüzde yoktu — sınama, sınadığı yüzeyin bir köşesini
+    hiç ziyaret etmemişti. Vaka V-17 o köşeyi ekledi.
+    """
+
+    def __init__(self, metin, b, s_):
+        self._m, self._b, self._s = metin, b, s_
+
+    def start(self):
+        return self._b
+
+    def end(self):
+        return self._s
+
+    def group(self, n=0):
+        if n:
+            raise IndexError("no such group")
+        return self._m[self._b:self._s]
 
 GEREKLI_BASLIK = "yetkili avukat görüşü gereken konular"
 KONTROL = re.compile(r"^[ \t]*Kontrol edildi:", re.M)   # [B-33] girinti serbest
@@ -223,7 +296,7 @@ def kapi_kanit(metin, yol=None):
     bir başvuru dosyasını yönetebilir — `birimler/` ve `emsal/` altındakiler
     yapısı gereği öyledir; bir rapor değildir.
     """
-    for m in ESIK.finditer(metin):
+    for m in esik_bulgulari(metin):
         pencere = metin[max(0, m.start() - YAKINLIK):m.end() + YAKINLIK]
         onceki = metin[:m.start()]
         # 3. yol: açık bir "Dayanak:" beyanı. KAPSAMI iki türlüdür:
@@ -296,9 +369,24 @@ def kapi_sir(metin, disari=False):
 
 def kapi_guncellik(metin, bugun=None):
     """Bayatlamış, gelecek tarihli ya da HİÇ OLMAYAN doğrulama tarihi."""
+    # [V-01] Bir KAPI ASLA ÇÖKMEZ. Çöken bir kanca üretimde her yazmayı
+    # düşürür; yanlış ateşleyen bir kapıdan da kötüdür. bugun bir dizge
+    # olarak geldiğinde eskiden TypeError atıyordu ve bu, yalnızca metinde
+    # gerçekten bir tarih BULUNDUĞUNDA ortaya çıkıyordu — yani en sık
+    # kullanılan yolda değil, doğru biçimli çıktıda.
+    if isinstance(bugun, str):
+        try:
+            bugun = datetime.strptime(bugun, "%Y-%m-%d").date()
+        except ValueError:
+            bugun = None
     bugun = bugun or date.today()
     bulunan = []
-    for m in re.finditer(r"[Dd]oğrulama:?\s*"
+    # [V-01] Kitap AYNI olgu için İKİ biçim emrediyor ve kapı yalnızca birini
+    # tanıyordu: yöntem dosyaları "Doğrulama: <tarih>" taşır (§3/§5.3), beceri
+    # ÇIKTILARI ise "Kontrol edildi: <kaynak> (<tarih>)" taşır (§14). Bir
+    # hukukçu §14'ü harfiyen izlediğinde kapı yine de "doğrulama tarihi yok"
+    # diyordu — yani kitabın kendi çıktı biçimi kendi kapısında bloklanıyordu.
+    for m in re.finditer(r"(?:[Dd]oğrulama:?\s*|Kontrol edildi:[^\n]*?\(\s*)"
                          r"(\d{4}-\d{2}-\d{2}|\d{2}[./]\d{2}[./]\d{4})", metin):
         ham = m.group(1)
         for bicim in ("%Y-%m-%d", "%d.%m.%Y", "%d/%m/%Y"):   # [B-21] Türkçe biçim
@@ -310,7 +398,7 @@ def kapi_guncellik(metin, bugun=None):
     if not bulunan:
         # [B-22] Tarihsiz bir eşik, bayat bir eşikten kötüdür: hiç kontrol
         # edilmemiş olduğu bile bilinmez.
-        if ESIK.search(metin):
+        if esik_var(metin):
             return ("guncellik", "eşik rakamı var ama doğrulama tarihi yok")
         return None
     for ham, d in bulunan:
@@ -327,7 +415,7 @@ def kapi_arastirma(metin, yol=None, disari=False):
     """Bir eşik rakamı ya da GitHub adresi, Kontrol edildi satırı ister."""
     if _basvuru_malzemesi(yol) and not disari:
         return None
-    if (ESIK.search(metin) or GITHUB.search(metin)) and not KONTROL.search(metin):
+    if (esik_var(metin) or GITHUB.search(metin)) and not KONTROL.search(metin):
         return ("arastirma", "rakam ya da depo anıldı, Kontrol edildi satırı yok")
     return None
 

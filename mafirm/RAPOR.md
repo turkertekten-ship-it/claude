@@ -25,7 +25,7 @@ kendi §16 denetimi yeşile dönmedi.
 3. **Denetim on beş bozmadan on birini görmüyor**; sıfır beceri, kancasız
    ayarlar ve tamamen boş bir `esik.py` taşıyan bir sistemde "DENETİM OK" diyor.
 
-**Yamalı hâlde sistem çalışıyor:** on sekiz çalıştırılabilir takım — **177
+**Yamalı hâlde sistem çalışıyor:** on dokuz çalıştırılabilir takım — **201
 vaka, 15 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15, birimler arası tutarlılık takımının
 kendi mutasyon yakalaması 10/10. Ama **üç mevzuat bulgusu ile kitabın kendi içindeki bir çelişki açık kalır**
@@ -851,6 +851,91 @@ Mutasyon sonucu: **10 mutasyonun 10'u yakalandı.**
 
 ---
 
+## Yedi buçuk artı on üç · Kapıyı genişletmiştim; doğru işi bloklamaya başlamıştı
+
+On üç tur boyunca kapıların **KAÇIRMA** yüzeyini ölçtüm: B takımı neyin
+sızdığını, O takımı sır kapısının nasıl atlatıldığını sayıyor. Aynasını hiç
+ölçmedim. Oysa kitap o aynayı **kendisi adlandırıyor** ve ölümcül sayıyor:
+
+> *"Doğru işi bloklayan bir kapı bir gün içinde kapatılır; sonra hiçbir şey
+> uygulanmaz."*
+
+V takımı bir Türk M&A avukatının **gerçekten üreteceği** on yedi metin yazdı —
+eşik değerlendirmesi, kapanış listesi, madde incelemesi, kurul notu, ortaklık
+yapısı, dava envanteri, emsal metni, yaptırım taraması — ve altı kapıyı
+hepsine koşturdu. Metinler kapı koduna göre değil, kitabın §0 çıktı
+sözleşmesine göre yazıldı.
+
+**Dört metinde kapı ateşledi. Üçü gerçek kusurdu ve üçü de benimdi.**
+
+### Bir · "yüzde", Türkçe ticari metnin günlük kelimesidir
+
+Kitabın kendi `ESIK` deseni yalnızca basamak gruplu para tutarıdır:
+
+    ESIK = re.compile(r"\d{1,3}(?:[.,]\d{3}){2,}\s?(?:TL|₺|EUR|USD|avro|dolar)", re.I)
+
+Ben bunu **genişlettim** — `binde \w+|yüzde \w+|%\s?\d+` — çünkü B-13..B-18
+kaçırma vakalarını kapatıyordum. Sonucu ölçmedim.
+
+Türkçede "yüzde" pay oranıdır, tazminat tavanıdır, sepettir, oy çoğunluğudur,
+earn-out payıdır. Genişletilmiş desen bunların **hepsini bir mevzuat eşiği**
+sayıyordu. Yani **her SPA incelemesi ve her ortaklık yapısı notu** üç kapıyı
+birden ateşliyordu: `kanit` dayanak istiyordu, `guncellik` doğrulama tarihi,
+`arastirma` "Kontrol edildi" satırı — doğrulanacak hiçbir mevzuat olmadığı
+hâlde.
+
+Bu, kitabın uyardığı kapatılma sebebinin tam kendisidir. Ve ben yaptım:
+kaçırma yüzeyini kapatırken yanlış pozitif yüzeyini açtım, sonra on üç tur
+boyunca yalnızca kaçırmayı ölçtüm.
+
+**Düzeltme geri alma değil.** Ayrım biçimde değil bağlamdadır. Bir yüzde,
+bu işleme dair bir **olguyu** anlatabilir (payların dağılımı, tazminat tavanı)
+ya da bir **kuralı** anlatabilir (bir tebliğin aradığı oran). Yalnızca ikincisi
+dayanak ve tarih ister.
+
+> Bu paragrafın ilk hâli kuralı bir **örnekle** anlatıyordu ve örnek, kaynaksız
+> bir oran cümlesiydi. Kapı onu yakaladı — **haklı olarak**: bir raporda
+> kaynaksız duran bir oran, okuyucu için örnek değil beyandır. Kapıyı
+> gevşetmek yerine cümle değiştirildi. Bir yüzde artık ancak
+düzenleyici bir ipucuyla (eşik, sınır, ceza, Tebliğ, Kanun, madde, Kurul,
+zorunlu, tabi…) **aynı cümlede** geçtiğinde eşik sayılıyor. V-24 daraltmanın
+delik açmadığını kanıtlıyor: dayanaksız bir *düzenleyici* yüzde hâlâ üç
+kapıdan da geçemiyor.
+
+### İki · Kitabın iki çıktı biçimi birbirini tanımıyordu
+
+`guncellik` kapısı yalnızca `Doğrulama: <tarih>` biçimini tanıyordu. Ama
+kitabın §14'ü **çıktılar** için başka bir biçim emrediyor:
+`Kontrol edildi: <kaynak> (<tarih>)`. Yani §14'ü **harfiyen izleyen** bir
+hukukçunun çıktısı, kapıdan "doğrulama tarihi yok" diye geri dönüyordu. Aynı
+olgu için iki sözleşme, ve kapı yalnızca birini biliyor. Kapı artık ikisini de
+tanıyor.
+
+### Üç · Bir kapı çöküyordu
+
+Düzeltmeyi yazarken `re.Match` yerine geçen asgari bir nesne kullandım ve
+`group()` metodunu koymadım. Düzenleyici bağlamda yüzde geçen **her belgede**
+kanca `AttributeError` ile düşüyordu. **Çöken bir kapı, yanlış ateşleyen
+kapıdan kötüdür**: üretimde her yazmayı düşürür.
+
+Ve V takımı bunu **görmedi** — çünkü korpusta düzenleyici bağlamlı *meşru* bir
+yüzde yoktu. Sınama, sınadığı yüzeyin bir köşesini hiç ziyaret etmemişti;
+kusuru gerçek raporu kapıdan geçiren Q takımı buldu. Köşe V-17 olarak eklendi;
+kapı ayrıca dizge tarihe karşı dayanıklı hâle getirildi.
+
+### Takımın kendi kusuru
+
+V-17 ilk yazıldığında **yanlış listeye** düştü: ihlalli metinler listesine.
+Beklentisi boş olduğu için `set() & X == set()` her zaman doğru çıkıyor ve
+kapıların canlılığını ölçen V-30'un sayısını **sahte biçimde** 4/4'ten 5/5'e
+çıkarıyordu. Bir yerleşim kontrolü eklendi: sıfır beklentili bir kayıt artık
+ihlalli listesinde duramıyor.
+
+Mutasyon: `yüzde`yi yeniden koşulsuz eşik saymak V-03/V-08/V-31'i, `Kontrol
+edildi` tanımasını geri almak V-01/V-17/V-31'i kırmızıya döndürdü.
+
+---
+
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
 
 | Bölüm | Beklenen | Gerçek | Sebep |
@@ -947,6 +1032,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | L · referans bütünlüğü | 1 kaldı (kendi regresyonum) | **temiz** |
 | M · errata izlenebilirliği | 3 kaldı (kendi raporum) | **temiz** |
 | N · olumsuz iddia kanıtı | kanıtsızdı | **temiz** |
+| V · kapıların yanlış pozitifi | *hiç ölçülmemişti* | **temiz** — 17 meşru metin, 0 yanlış pozitif |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -1004,8 +1090,8 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # 18 çalıştırılabilir takım:
-                                  #   177 vaka + 15 mutasyon (D)
+./sinama/hepsi.sh                 # 19 çalıştırılabilir takım:
+                                  #   201 vaka + 15 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -1064,9 +1150,10 @@ Dokuz takım, 96 vaka:
 | S | **Yalıtım** — klon gerçekten yalnız mı | §16'nın taşınabilirliği |
 | T | **§18'in dokuz sınırı doğru mu** | §18, CLAUDE.md §2 |
 | U | **Birimler arası tutarlılık** — bir birim ötekiyle çelişiyor mu | §4, §6, §5.3 |
+| V | **Kapıların yanlış pozitifi** — doğru iş bloklanıyor mu | §12, §14 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**177 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**201 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)

@@ -53,6 +53,8 @@ python3 "$S/ks_t_sinirlar.py";   topla "T · §18'in dokuz sınırı" $?
 echo
 python3 "$S/ks_u_birimler_arasi.py"; topla "U · birimler arası tutarlılık" $?
 echo
+python3 "$S/ks_v_yanlis_pozitif.py"; topla "V · kapıların yanlış pozitifi" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"
