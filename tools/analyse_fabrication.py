@@ -52,6 +52,38 @@ def stratum_of(note: str) -> str:
     return "heldout" if "stratum:heldout" in note else "tuned"
 
 
+def strata_for(payload: dict, case_ids) -> dict[str, str]:
+    """Label each case tuned or heldout, and never guess silently.
+
+    An adversarial review found this was broken from the first run. The notes
+    came from `payload["cases"]`, `RunResult.to_dict()` never wrote that key,
+    so the mapping was empty for every run this workbench could produce. The
+    fallback then passed the bare case id to `stratum_of`, which returns
+    "tuned" for anything not containing "stratum:heldout" -- so all 40 cases
+    were labelled tuned, the held-out block never printed, and the "stratum:
+    tuned" section reproduced the ALL CASES numbers exactly. The pre-registered
+    held-out check had not run once, and nothing said so.
+
+    The lesson is not the missing key. It is that the fallback was a plausible
+    answer instead of an admission, so a broken stratification looked exactly
+    like a stratification where every case happened to be tuned.
+
+    Two sources now, in order, and the second is announced rather than assumed:
+
+    1. `payload["cases"]` notes, when the run recorded them.
+    2. Failing that, the `h-` id prefix, which `family_of` already documents as
+       marking the held-out stratum. Runs written before the fix have no notes,
+       and this recovers them rather than discarding the experiment.
+
+    If neither yields both strata, the caller is told the stratification is
+    unavailable and no stratum block is printed at all.
+    """
+    notes = {c["id"]: c.get("note", "") for c in payload.get("cases", []) or []}
+    if notes:
+        return {cid: stratum_of(notes.get(cid, "")) for cid in case_ids}
+    return {cid: ("heldout" if cid.startswith("h-") else "tuned") for cid in case_ids}
+
+
 def load(run_dir: Path) -> tuple[dict, dict, dict]:
     """Return (rates, families, strata) keyed by case id then arm."""
     payload = json.loads((run_dir / "result.json").read_text(encoding="utf-8"))
@@ -67,14 +99,13 @@ def load(run_dir: Path) -> tuple[dict, dict, dict]:
         fabricated[run["case_id"]][run["variant_id"]].append(
             0 if all(v["passed"] for v in blocking) else 1)
 
-    rates, families, strata = {}, {}, {}
-    notes = {c["id"]: c.get("note", "") for c in payload.get("cases", [])}
+    rates, families = {}, {}
     for case_id, arms in fabricated.items():
         if DOCTRINE not in arms or PLAIN not in arms:
             continue
         rates[case_id] = {a: sum(v) / len(v) for a, v in arms.items()}
         families[case_id] = family_of(case_id)
-        strata[case_id] = stratum_of(notes.get(case_id, case_id))
+    strata = strata_for(payload, rates)
     return rates, families, strata
 
 
@@ -178,9 +209,19 @@ def main(argv: list[str]) -> int:
     print("Negative favours the operating prompt. Clustered by trap family.")
 
     results = [report(rates, families, strata, "ALL CASES")]
-    for name in ("tuned", "heldout"):
-        results.append(report(rates, families, strata, f"stratum: {name}",
-                              keep=lambda c, n=name: strata[c] == n))
+    present = sorted(set(strata.values()))
+    if len(present) < 2:
+        print()
+        print("STRATIFICATION UNAVAILABLE — every case labelled "
+              f"{present[0] if present else 'nothing'!r}.")
+        print("No stratum block is printed, because one stratum containing all")
+        print("the cases is not a stratified analysis. It reproduces the ALL")
+        print("CASES numbers exactly and reads like a second, agreeing result.")
+        print()
+    else:
+        for name in ("tuned", "heldout"):
+            results.append(report(rates, families, strata, f"stratum: {name}",
+                                  keep=lambda c, n=name: strata[c] == n))
 
     print("\n" + "=" * 72)
     head = results[0]

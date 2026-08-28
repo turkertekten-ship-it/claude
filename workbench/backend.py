@@ -186,6 +186,15 @@ class Request:
             "temperature": self.temperature,
             "top_p": self.top_p,
             "top_k": self.top_k,
+            # A spend ceiling changes what comes back -- a capped run can stop
+            # early -- so it must key the cache. Omitting it meant two variants
+            # differing only in their cap collided, and the second was served
+            # the first's answer with --max-budget-usd never reaching the CLI.
+            # A cache that silently ignores the field you are varying is the
+            # same class of bug as the cross-backend collision that once served
+            # 36 echo fixtures into a paid run.
+            "max_budget_usd": self.max_budget_usd,
+            "cwd": self.cwd,
             "repeat": self.repeat,
         }
         blob = json.dumps(payload, sort_keys=True, ensure_ascii=False)
@@ -518,18 +527,44 @@ class CachingBackend(Backend):
             return self.inner.complete(request)
         path = self.cache_dir / f"{request.cache_key()}.json"
         if path.exists():
-            data = json.loads(path.read_text(encoding="utf-8"))
-            if data.get("backend") == self.inner.name:
-                self.hits += 1
-                return Completion(**data)
-            # Someone else's answer. Ignore it rather than reporting it as ours.
-            path.unlink(missing_ok=True)
+            # A truncated or corrupt entry used to raise JSONDecodeError out of
+            # complete() forever: the run that was interrupted mid-write poisoned
+            # that key permanently, and every later run died on it. A cache is an
+            # optimisation, so an unreadable entry is a miss, not a fatal error.
+            try:
+                data = json.loads(path.read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, UnicodeDecodeError, OSError):
+                data = None
+                path.unlink(missing_ok=True)
+            if isinstance(data, dict):
+                if data.get("backend") == self.inner.name:
+                    try:
+                        completion = Completion(**data)
+                    except TypeError:
+                        # Written by an older schema. Discard and re-fetch
+                        # rather than crash.
+                        path.unlink(missing_ok=True)
+                    else:
+                        self.hits += 1
+                        return completion
+                else:
+                    # Someone else's answer. Ignore it rather than reporting it
+                    # as ours.
+                    path.unlink(missing_ok=True)
         self.misses += 1
         completion = self.inner.complete(request)
         if completion.ok:
             payload = asdict(completion)
             payload.pop("raw", None)
-            path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+            # Write to a unique temp file in the same directory, then rename.
+            # rename is atomic within a filesystem, so a reader never sees a
+            # half-written entry and two concurrent writers cannot interleave.
+            tmp = path.with_name(f"{path.stem}.{os.getpid()}.tmp")
+            try:
+                tmp.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+                tmp.replace(path)
+            except OSError:
+                tmp.unlink(missing_ok=True)   # a cache write must never fail a run
         return completion
 
 

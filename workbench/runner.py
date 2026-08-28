@@ -63,7 +63,14 @@ class CaseRun:
         arm was scored 1.33/5 by a judge and surfaced as the single discordant
         case in a held-out comparison, which is to say as evidence that the
         other arm was better.
+
+        A grader that could not reach a judgement counts the same way, for the
+        same reason: an unreadable judge reply is not a verdict about the
+        candidate, so a run whose blocking grader errored is excluded rather
+        than recorded as a failure.
         """
+        if any(v.errored for v in self.verdicts if not v.advisory):
+            return True
         if self.completion is None:
             return False
         return (not self.completion.ok) or not self.completion.text.strip()
@@ -118,6 +125,11 @@ class RunResult:
     backend: str
     started_at: str
     runs: list[CaseRun] = field(default_factory=list)
+    #: The suite's cases, carried so that a downstream analysis can stratify on
+    #: their notes. Absent from result.json until an adversarial review found
+    #: that every stratified analysis had been silently reading an empty
+    #: mapping and reporting one stratum containing everything.
+    cases: list[Any] = field(default_factory=list)
     judgements: list[PairJudgement] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)
     duration_s: float = 0.0
@@ -154,6 +166,13 @@ class RunResult:
             "suite": self.suite, "run_id": self.run_id, "backend": self.backend,
             "started_at": self.started_at, "duration_s": round(self.duration_s, 2),
             "cost_usd": round(self.cost_usd, 6),
+            # The case list, with each case's note. Downstream analyses stratify
+            # on these notes, and until now the key was simply absent: every
+            # reader of result.json got an empty mapping and silently fell back
+            # to whatever its default was. tools/analyse_fabrication.py fell
+            # back to labelling all 40 cases "tuned" and never printed the
+            # held-out block its pre-registration promised.
+            "cases": [{"id": c.id, "note": c.note} for c in self.cases],
             "runs": [r.to_dict() for r in self.runs],
             "judgements": [j.to_dict() for j in self.judgements],
             "position_bias_rate": round(position_bias_rate(self.judgements), 4),
@@ -302,7 +321,14 @@ def compare(suite: Suite, runs: Sequence[CaseRun], judge_backend: Backend,
     for case_id in case_ids:
         # Repeat 0 only: comparing repeats of the same variant would inflate n
         # with correlated observations.
-        pool = {r.variant_id: r for r in runs if r.case_id == case_id and r.repeat == 0}
+        # `not r.errored` is the whole point of that property, and compare()
+        # was the one path that never consulted it. Grading and reporting both
+        # excluded transport failures; blind judging sent them to the judge as
+        # candidates. That is the exact corruption the property was written
+        # after: a TLS failure scored 1.33/5 and surfaced as the single
+        # discordant case in a held-out comparison.
+        pool = {r.variant_id: r for r in runs
+                if r.case_id == case_id and r.repeat == 0 and not r.errored}
         for a_id, b_id in itertools.combinations(variant_ids, 2):
             if a_id not in pool or b_id not in pool:
                 continue
@@ -328,6 +354,7 @@ def execute(suite: Suite, backend: Backend, report: Reporter,
     result = RunResult(
         suite=suite.name, run_id=run_id, backend=backend.name,
         started_at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(started)),
+        cases=list(suite.cases),
     )
 
     report(f"suite {suite.name}: {len(suite.variants)} variant(s) x "

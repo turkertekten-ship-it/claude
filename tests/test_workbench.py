@@ -26,6 +26,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
+from workbench import backend, graders, runner, spec, stats  # noqa: E402
 from workbench.backend import Completion, EchoBackend, Request  # noqa: E402
 from workbench.blind import (  # noqa: E402
     Candidate, blind_text, identical_pair_control, identity_tokens, judge_pair,
@@ -1051,6 +1052,79 @@ def test_registry_kinds() -> None:
           all(k in ("deterministic", "environmental", "model") for k in kinds.values()))
 
 
+def test_review_findings() -> None:
+    """Regressions for the defects an adversarial review confirmed.
+
+    Each of these shipped, each was found by a reviewer reading the code rather
+    than by a test, and every one of them was silent -- a wrong number or a
+    wrong exclusion, never an exception. They are written as the failing input
+    the reviewer named, so a regression reproduces the original bug exactly.
+    """
+    print("\nadversarial review regressions -- every one of these shipped silently")
+
+    # 1. bradley_terry mixed absolute-scale smoothing with per-iteration
+    #    renormalisation, so strength tracked how many games a player was
+    #    sampled into rather than its record.
+    r = stats.bradley_terry([("a", "b")] * 10 + [("a", "c")] + [("b", "c")])
+    order = list(r)
+    check("bradley_terry ranks the head-to-head winner higher",
+          order.index("b") < order.index("c"), str(r))
+    r2 = stats.bradley_terry([("a", "d")] * 10 + [("b", "c")] + [("c", "b")])
+    check("bradley_terry ranks an undefeated player first",
+          list(r2)[0] == "a", str(r2))
+
+    # 2. summarise_pairwise excluded ERROR from the point estimate but handed
+    #    the unfiltered list to the bootstrap, so the interval counted a
+    #    transport failure as a loss and kept it in the denominator.
+    clean = stats.summarise_pairwise(["A"] * 6 + ["B"] * 2, "A", "B", seed=1)
+    dirty = stats.summarise_pairwise(["A"] * 6 + ["B"] * 2 + ["ERROR"] * 4,
+                                     "A", "B", seed=1)
+    check("an ERROR outcome does not move the win-rate interval",
+          clean["ci95_win_rate_a"] == dirty["ci95_win_rate_a"],
+          f'{clean["ci95_win_rate_a"]} vs {dirty["ci95_win_rate_a"]}')
+
+    # 3. cache_key omitted max_budget_usd, so two variants differing only in
+    #    their spend cap collided and the second was served the first's answer.
+    a = backend.Request(prompt="x", model="m", max_budget_usd=1.0)
+    b = backend.Request(prompt="x", model="m", max_budget_usd=5.0)
+    check("a different spend cap is a different cache key",
+          a.cache_key() != b.cache_key())
+
+    # 4. An unreadable judge reply was coerced into a failing vote with score
+    #    0, scoring a judge-side failure against the candidate.
+    v = graders.Verdict(grader="judge", kind=graders.MODEL, passed=False,
+                        score=0.0, errored=True)
+    run = runner.CaseRun(case_id="c", variant_id="v", repeat=0, prompt="p",
+                         output="a real answer", verdicts=[v],
+                         completion=backend.Completion(
+                             text="a real answer", model="m"))
+    check("a run whose blocking judge errored is excluded, not failed",
+          run.errored and not run.passed)
+
+    ok_v = graders.Verdict(grader="judge", kind=graders.MODEL, passed=True, score=1.0)
+    run_ok = runner.CaseRun(case_id="c", variant_id="v", repeat=0, prompt="p",
+                            output="a real answer", verdicts=[ok_v],
+                            completion=backend.Completion(
+                                text="a real answer", model="m"))
+    check("a normal run is still graded normally",
+          (not run_ok.errored) and run_ok.passed)
+
+    # 5. compare() pooled runs for blind judging without consulting `errored`,
+    #    so a transport failure was sent to the judge as a candidate.
+    import inspect
+    src = inspect.getsource(runner.compare)
+    check("compare() excludes errored runs from judging",
+          "not r.errored" in src)
+
+    # 6. RunResult.to_dict() never wrote `cases`, so every stratified analysis
+    #    downstream read an empty mapping and silently reported one stratum.
+    rr = runner.RunResult(suite="s", run_id="r", backend="echo", started_at="t",
+                          cases=[spec.Case(id="h-x", prompt="p", note="[stratum:heldout]")])
+    d = rr.to_dict()
+    check("result.json carries the case notes a stratified analysis needs",
+          d.get("cases") == [{"id": "h-x", "note": "[stratum:heldout]"}], str(d.get("cases")))
+
+
 def main() -> int:
     test_render()
     test_spec()
@@ -1071,6 +1145,7 @@ def main() -> int:
     test_api_backend()
     test_api_backend_over_the_wire()
     test_registry_kinds()
+    test_review_findings()
 
     print()
     if FAILURES:

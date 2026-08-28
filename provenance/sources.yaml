@@ -1154,3 +1154,49 @@ sources:
       and a transport failure are indistinguishable if you only check whether
       the expected string came back. Recorded because the second is a general
       hazard for any eval harness that uses nonce-looking strings as carriers.
+
+  - id: ADVERSARIAL-REVIEW-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T11:45Z"
+    method: >-
+      a five-dimension workflow review (statistics, evaluation integrity,
+      backend and cache, suite and runner, guards) over ~6,700 lines, each
+      finding then handed to an independent agent instructed to refute it;
+      every surviving finding re-verified by hand at the terminal before any
+      fix was written.
+    evidence: >-
+      15 candidate findings, 8 verified, 8 confirmed, 0 refuted. Reproduced by
+      hand: result.json has no `cases` key, so the stratified analysis had
+      never run; a claim carrying a malformed `[src:` exited the provenance
+      guard 0; a `### ` subheading under `## Observed` disabled the unsourced-
+      claim check for the rest of the file; bradley_terry ranked an undefeated
+      10-0 player third with strength 3.67e-09; compare() pooled runs without
+      consulting CaseRun.errored; contains_any with a scalar `values: hello`
+      reported "matched 5/5" against unrelated English text.
+    note: >-
+      That nothing was refuted is itself a caution about the method, not a
+      compliment to it — a refuter that never refutes has not been shown to
+      work. Each finding was therefore re-derived at the terminal before being
+      acted on, and the reproductions above are mine, not the reviewers'.
+
+  - id: STRATIFICATION-NEVER-RAN-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T11:50Z"
+    method: >-
+      python3 tools/analyse_fabrication.py .workbench/20260828T074232Z, before
+      and after repairing the stratum lookup.
+    evidence: >-
+      Before: one block headed "stratum: tuned (40 cases, 6 families)"
+      reproducing the ALL CASES numbers exactly, and no heldout block. After,
+      on the same run data — tuned, 26 cases: rate 5.1% vs 7.7%, mean paired
+      diff -0.0256, 95% CI [-0.1000, +0.0400], sign test p = 1.0000. heldout,
+      14 cases: rate 2.4% vs 11.9%, mean paired diff -0.0952, 95% CI
+      [-0.2667, +0.0000], 3 cases better, 0 worse, 11 tied, sign test
+      p = 0.2500. ALL CASES is unchanged at -0.0500 [-0.1550, +0.0256].
+    note: >-
+      The headline is unaffected; the stratified half of the pre-registration
+      had silently not run and was reported as though it had. Both strata still
+      span zero. The heldout interval's upper bound prints as +0.0000 because a
+      percentile bootstrap on 14 discrete cases has an atom at zero — that is a
+      boundary artifact, not significance, and the sign test on the same 14
+      cases gives p = 0.25.

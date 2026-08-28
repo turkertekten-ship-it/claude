@@ -55,6 +55,11 @@ class Verdict:
     cost_usd: float = 0.0
     #: For judges: the individual votes, so a 2-1 is distinguishable from 3-0.
     votes: list[Any] = field(default_factory=list)
+    #: The grader could not produce a judgement at all -- e.g. every judge call
+    #: returned unreadable output. Distinct from `passed=False`, which is a
+    #: verdict AGAINST the candidate. A run carrying one of these is excluded
+    #: from the statistics rather than counted as a failure.
+    errored: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -62,7 +67,7 @@ class Verdict:
             "score": round(self.score, 4), "detail": self.detail[:2000],
             "weight": self.weight, "advisory": self.advisory,
             "cost_usd": round(self.cost_usd, 6),
-            "votes": self.votes,
+            "votes": self.votes, "errored": self.errored,
         }
 
 
@@ -103,6 +108,24 @@ def _need(g: Grader, key: str) -> Any:
     if key not in g.config:
         raise GraderError(f"grader {g.type!r} requires `{key}`")
     return g.config[key]
+
+
+def _need_list(g: Grader, key: str) -> list[Any]:
+    """Require a list, and refuse a bare string rather than iterating it.
+
+    `values: hello` is valid YAML and means the string "hello", so iterating it
+    yields five single characters -- and `contains_any` then reported "matched
+    5/5" against any English sentence containing h, e, l and o. A grader that
+    passes almost everything is worse than one that errors, because it looks
+    like evidence. This refuses the suite instead.
+    """
+    value = _need(g, key)
+    if isinstance(value, (str, bytes)) or not isinstance(value, (list, tuple)):
+        raise GraderError(
+            f"grader {g.type!r} requires `{key}` to be a list, got "
+            f"{type(value).__name__} {value!r}. A bare string would be iterated "
+            f"character by character; write `{key}: [{value!r}]` if you meant one item.")
+    return list(value)
 
 
 def _binary(g: Grader, kind: str, passed: bool, detail: str) -> Verdict:
@@ -153,7 +176,7 @@ def g_not_contains(g: Grader, ctx: GradingContext) -> Verdict:
 
 @grader("contains_any", DETERMINISTIC)
 def g_contains_any(g: Grader, ctx: GradingContext) -> Verdict:
-    values = _need(g, "values")
+    values = _need_list(g, "values")
     hay = ctx.output.lower() if g.config.get("ignore_case", True) else ctx.output
     hits = [v for v in values
             if (str(v).lower() if g.config.get("ignore_case", True) else str(v)) in hay]
@@ -164,7 +187,7 @@ def g_contains_any(g: Grader, ctx: GradingContext) -> Verdict:
 
 @grader("contains_all", DETERMINISTIC)
 def g_contains_all(g: Grader, ctx: GradingContext) -> Verdict:
-    values = [str(v) for v in _need(g, "values")]
+    values = [str(v) for v in _need_list(g, "values")]
     ic = g.config.get("ignore_case", True)
     hay = ctx.output.lower() if ic else ctx.output
     missing = [v for v in values if (v.lower() if ic else v) not in hay]
@@ -538,19 +561,43 @@ def g_judge(g: Grader, ctx: GradingContext) -> Verdict:
             try:
                 payload = _extract_json(completion.text)
             except (json.JSONDecodeError, ValueError):
-                payload = {"score": 0, "passed": False,
+                # NOT a failing vote. A judge that returned unreadable output
+                # has said nothing about the candidate, and scoring it 0 makes
+                # a judge-side transport or format failure look like evidence
+                # the answer was bad. blind.py refuses this coercion already --
+                # an unparseable verdict there becomes "ERROR", never a tie --
+                # and this path was making exactly the mistake that module was
+                # written to avoid.
+                payload = {"unreadable": True,
                            "reason": f"judge returned unparseable output: {completion.text[:200]}"}
         votes.append(payload)
 
-    passes = sum(1 for v in votes if v.get("passed"))
-    scores = [int(v.get("score", 0)) for v in votes]
-    majority = passes * 2 > len(votes)
+    usable = [v for v in votes if not v.get("unreadable")]
+    unreadable = len(votes) - len(usable)
+
+    if not usable:
+        # Every judge failed to answer. There is no verdict to report, so this
+        # is surfaced as an error rather than as a failing grade.
+        return Verdict(
+            grader=g.label, kind=MODEL, passed=False, score=0.0,
+            detail=f"no usable judgement: all {len(votes)} judge call(s) returned "
+                   f"unreadable output. This is a judge failure, not a verdict "
+                   f"about the candidate.",
+            weight=g.weight, advisory=g.advisory, cost_usd=cost,
+            votes=votes, errored=True,
+        )
+
+    passes = sum(1 for v in usable if v.get("passed"))
+    scores = [int(v.get("score", 0)) for v in usable]
+    majority = passes * 2 > len(usable)
     mean = sum(scores) / len(scores) if scores else 0.0
+    note = (f" ({unreadable} of {len(votes)} judge call(s) returned unreadable "
+            f"output and were excluded)" if unreadable else "")
     return Verdict(
         grader=g.label, kind=MODEL, passed=majority,
         score=max(0.0, min(1.0, (mean - 1) / 4)),
-        detail=f"{passes}/{len(votes)} judges passed it; mean score {mean:.2f}/5. "
-               + (votes[0].get("reason", "") if votes else ""),
+        detail=f"{passes}/{len(usable)} judges passed it; mean score {mean:.2f}/5.{note} "
+               + (usable[0].get("reason", "") if usable else ""),
         weight=g.weight, advisory=g.advisory, cost_usd=cost,
         votes=votes,
     )

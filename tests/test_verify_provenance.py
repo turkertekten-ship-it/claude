@@ -71,6 +71,49 @@ def placeholder_cases() -> None:
                   for sid in ("VERIFIER-BQ-2026-08-27", "REPO-EMPTY-2026-08-27")))
 
 
+def guard_hole_cases() -> None:
+    """Three ways the guard could be switched off silently, found by review.
+
+    Each of these let a fabricated claim through while the tool exited 0, which
+    is the worst failure mode available to a guard: it does not merely miss a
+    problem, it certifies its absence. All three are written as fabrications a
+    reader would believe, so a regression here fails loudly.
+    """
+    print("guard holes")
+    import tempfile
+
+    def scan(body: str) -> list[str]:
+        known, _ = vp.load_sources()
+        with tempfile.TemporaryDirectory(prefix="guard-hole-") as tmp:
+            path = Path(tmp) / "doc.md"
+            path.write_text("---\nprovenance: enforced\n---\n\n" + body, encoding="utf-8")
+            return [f.code for f in vp.scan_markdown(path, set(known))]
+
+    # A malformed citation used to satisfy the "[src:" substring test while
+    # never matching SRC_TAG, so it resolved against nothing and passed.
+    codes = scan("## Observed\n\n- The repositories held 4,812 commits. [src:\n")
+    check("a malformed citation is caught", "MALFORMED_SOURCE" in codes, str(codes))
+
+    # A subheading used to end the enforced region for the rest of the file.
+    codes = scan("## Observed\n\n### Detail\n\n- The fleet reverted 91 commits.\n")
+    check("a subheading does not end the section", "UNSOURCED_CLAIM" in codes, str(codes))
+
+    # An indented fence inside a bullet used to invert the fence state
+    # file-wide, so every later claim was skipped as verbatim evidence.
+    codes = scan("## Observed\n\n- Sourced. [src:REPO-EMPTY-2026-08-27]\n"
+                 "  ```\n  indented\n  ```\n- The merge deleted 3,000 files.\n")
+    check("an indented fence does not disable the check",
+          "UNSOURCED_CLAIM" in codes, str(codes))
+
+    # And the guard must still accept what it is supposed to accept.
+    codes = scan("## Observed\n\n- Sourced. [src:REPO-EMPTY-2026-08-27]\n")
+    check("a well-formed claim still passes", codes == [], str(codes))
+
+    codes = scan("## Observed\n\n- Sourced. [src:REPO-EMPTY-2026-08-27]\n"
+                 "\n```\nverbatim block\n```\n")
+    check("a top-level fence is still verbatim", codes == [], str(codes))
+
+
 def verbatim_cases() -> None:
     """A capture that QUOTES a banned phrase is evidence, not an assertion.
 
@@ -156,6 +199,7 @@ def main() -> int:
     check("violation is reported on stderr", "UNSOURCED_CLAIM" in bad.stderr)
 
     placeholder_cases()
+    guard_hole_cases()
 
     print()
     if FAILURES:

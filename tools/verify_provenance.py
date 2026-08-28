@@ -165,19 +165,44 @@ def claim_lines(text: str):
     A claim line is a top-level bullet or a prose line. Indented continuations
     inherit their bullet's tag, headings introduce sections, and fenced blocks
     are verbatim evidence rather than assertions.
+
+    Two holes were found here by an adversarial review and are both closed:
+
+    - **A subheading used to end the section.** Any heading at all reset
+      `in_section`, so a `### Detail` under `## Observed` switched the check
+      off for everything below it. The section now ends only at a heading of
+      the same depth or shallower, which is what "section" means.
+    - **A fence marker anywhere toggled the state file-wide.** `FENCE` matched
+      an indented ``` inside a list item, so one such line inverted the fence
+      state for the rest of the file and every later claim was skipped as
+      "verbatim evidence". The toggle now tracks the opening fence's indent and
+      only a marker at that indent closes it.
+
+    Both silently disabled the guard rather than failing loudly, which is the
+    worst way for a guard to be wrong.
     """
     in_section = False
-    in_fence = False
+    section_depth = 0
+    fence_indent: int | None = None
     for i, raw in enumerate(text.splitlines(), start=1):
         if FENCE.match(raw):
-            in_fence = not in_fence
+            indent = len(raw) - len(raw.lstrip())
+            if fence_indent is None:
+                fence_indent = indent
+                continue
+            if indent == fence_indent:
+                fence_indent = None
             continue
-        if in_fence:
+        if fence_indent is not None:
             continue
         heading = HEADING.match(raw)
         if heading:
+            depth = len(heading.group(1))
             title = heading.group(2).strip().lower()
-            in_section = title.startswith("observed")
+            if title.startswith("observed"):
+                in_section, section_depth = True, depth
+            elif in_section and depth <= section_depth:
+                in_section = False
             continue
         if not in_section:
             continue
@@ -222,10 +247,24 @@ def scan_markdown(path: Path, known: set[str]) -> list[Finding]:
 
     if is_enforced(text):
         for i, line in claim_lines(text):
-            if "[src:" not in INLINE_CODE.sub("", line):
+            bare = INLINE_CODE.sub("", line)
+            # A tag that PARSES, not the substring "[src:". Testing for the
+            # substring meant a malformed citation -- `[src:` with no id and no
+            # bracket -- satisfied the sourcing requirement here while the
+            # SRC_TAG regex above never matched it, so it resolved against
+            # nothing. An invented statistic carrying one passed the whole
+            # guard and exited 0.
+            if SRC_TAG.search(bare):
+                continue
+            if "[src:" in bare:
                 findings.append(
-                    Finding(path, i, "UNSOURCED_CLAIM", f"claim without a source tag: {line.strip()[:70]!r}")
+                    Finding(path, i, "MALFORMED_SOURCE",
+                            f"citation does not parse as [src:ID]: {line.strip()[:70]!r}")
                 )
+                continue
+            findings.append(
+                Finding(path, i, "UNSOURCED_CLAIM", f"claim without a source tag: {line.strip()[:70]!r}")
+            )
     return findings
 
 

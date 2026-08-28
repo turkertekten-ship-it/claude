@@ -113,6 +113,24 @@ def bradley_terry(pairs: Sequence[tuple[str, str]], iterations: int = 500,
         key = tuple(sorted((winner, loser)))
         meetings[key] = meetings.get(key, 0.0) + 1.0
 
+    # The MM update is scale-equivariant: multiplying every strength by a
+    # constant leaves it unchanged. The smoothing terms are NOT -- they are
+    # anchored to an absolute strength of 1 -- so renormalising inside the loop
+    # broke the fit outright. After each rescale, a player whose pair had been
+    # sampled many times carried a proportionally larger denominator and was
+    # driven toward zero regardless of its record.
+    #
+    # It produced reversed rankings on inputs this workbench generates
+    # routinely, because report.py drops TIE and ERROR judgements and so leaves
+    # pairs with unequal meeting counts. `[('a','b')]*10 + [('a','c')] +
+    # [('b','c')]` ranked c above b although b beat c head-to-head and c never
+    # won; `[('a','d')]*10 + [('b','c')] + [('c','b')]` gave the undefeated
+    # 10-0 player a strength of 3.7e-09 and put it third. Both are regression
+    # tests now.
+    #
+    # The fix: keep the virtual opponent at a FIXED anchor and normalise once,
+    # after convergence, for reporting only.
+    anchor = 1.0
     strength = {p: 1.0 for p in players}
     for _ in range(iterations):
         updated: dict[str, float] = {}
@@ -123,16 +141,17 @@ def bradley_terry(pairs: Sequence[tuple[str, str]], iterations: int = 500,
                     continue
                 other = b if p == a else a
                 denominator += count / (strength[p] + strength[other])
-            # +1 smoothing on both halves: an undefeated player would otherwise
-            # diverge, and a winless one would collapse to zero.
-            updated[p] = (wins[p] + 1.0) / (denominator + 1.0 / (strength[p] + 1.0)) \
-                if denominator > 0 else strength[p]
-        total = sum(updated.values()) or 1.0
-        updated = {p: v / total for p, v in updated.items()}
+            # One virtual game against a fixed-strength opponent, which keeps an
+            # undefeated arm finite and a winless one off zero without making
+            # the fit depend on how many games anyone played.
+            denominator += 1.0 / (strength[p] + anchor)
+            updated[p] = (wins[p] + 1.0) / denominator
         delta = max(abs(updated[p] - strength[p]) for p in players)
         strength = updated
         if delta < tolerance:
             break
+    total = sum(strength.values()) or 1.0
+    strength = {p: v / total for p, v in strength.items()}
     return dict(sorted(strength.items(), key=lambda kv: -kv[1]))
 
 
@@ -171,7 +190,14 @@ def summarise_pairwise(outcomes: Sequence[str], a: str, b: str,
         "win_rate_a_ties_as_half": (wins + 0.5 * ties) / scored if scored else None,
         "p_value_sign_test": round(p, 5),
         "significant_at_0.05": p < 0.05,
-        "ci95_win_rate_a": str(bootstrap_win_rate(outcomes, a, seed=seed)),
+        # ERROR entries are excluded here for the same reason the point
+        # estimate two lines up excludes them, and the comment above says they
+        # must not sit in this denominator. The interval was reading the
+        # unfiltered list, so a transport failure counted as a loss for `a` AND
+        # stayed in the denominator -- an interval that disagreed with the
+        # point estimate it was supposed to bracket.
+        "ci95_win_rate_a": str(bootstrap_win_rate(
+            [o for o in outcomes if o != "ERROR"], a, seed=seed)),
         "pairs_needed_for_70pct_effect": required_pairs(),
     }
 
