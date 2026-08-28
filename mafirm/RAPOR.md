@@ -25,7 +25,7 @@ kendi §16 denetimi yeşile dönmedi.
 3. **Denetim on beş bozmadan on birini görmüyor**; sıfır beceri, kancasız
    ayarlar ve tamamen boş bir `esik.py` taşıyan bir sistemde "DENETİM OK" diyor.
 
-**Yamalı hâlde sistem çalışıyor:** yirmi yedi çalıştırılabilir takım — **260
+**Yamalı hâlde sistem çalışıyor:** yirmi sekiz çalıştırılabilir takım — **265
 vaka, 15 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15, birimler arası tutarlılık takımının
 kendi mutasyon yakalaması 10/10. Ama **üç mevzuat bulgusu ile kitabın kendi içindeki bir çelişki açık kalır**
@@ -1378,6 +1378,56 @@ metni desenle okuyan her şey, üçüncü kez aynı yerden sızdı.**
 
 ---
 
+## Yedi buçuk artı yirmi iki · Bir sınıfı örnek örnek düzeltmek, sınıfı kapatmaz
+
+Aynı kusur **dört kez** ayrı ayrı bulunmuştu ve her seferinde yalnızca
+rastladığım örnek düzeltilmişti:
+
+- §12 — `İ`.lower() `i` + U+0307 verir; *"YETKİLİ" ≠ "yetkili"* **[B-10]**
+- U-05 — Türkçe eklemeli: *defterine / Defterin / defteri* eşleşmez
+- AD-01 — ünlü uyumu: *adımLI* ama *bölümLÜ*; desen ikincisini atlıyordu
+- AA — takım adı **tek harf** varsayımı **üç ayrı bileşende** gömülüydü
+
+Dördü de aynı kökten: **Türkçe metni ASCII sezgisiyle okumak.** Ve dördü de
+ancak o örneğe çarptığımda görüldü. Yirmi iki tur boyunca sınıfın kendisini
+hiç taramadım. AE taradı — ve **üç kusur daha** çıktı.
+
+**Bir · Yama izi deseni son dört turun kimliklerini görmüyordu.** Z-04, yeniden
+kurulumun yamaları geri aldığını yakalayan kontroldür ve yama işaretlerini
+`\[[A-Z]-\d{2}\]` ile arıyordu. `[AA-01]`, `[AC-01]`, `[AB-03b]` bu desene
+**görünmüyor**. Z-04 yalnızca dosyalarda eski tek harfli işaretler de
+bulunduğu için geçiyordu — yani **doğru sebeple değil**. Tek harf varsayımının
+dördüncü yeri.
+
+**İki · Denetimin bulgu sayacı da tek harfliydi.** `dogrulama-bulgulari.md`
+içindeki bulguları `^[A-Z]-[0-9]+` ile sayıyordu; iki harfli bir bulgu kimliği
+eklendiği gün sessizce sıfırdan sayacaktı.
+
+**Üç · Ve B-10 kusurunun kendisi, benim takımımda.** U-09 satırları
+`satir.lower()` ile eliyordu. `"BEKLETİCİ".lower()` → `bekleti̇ci̇` (birleşen
+noktalarla), yani `"bekletici" in ...` **yanlış** döner ve satır **hiç
+incelenmeden** atlanır. Büyük harfle yazılmış bir *"BEKLETİCİ … FERAGAT
+EDİLEBİLİR"* ihlali — yani bir başlık ya da vurgulanmış bir hüküm — sessizce
+geçiyordu. U-09 bu takımda **ikinci kez** düştü: önce sabit `True` yazılmıştı,
+şimdi de Türkçe küçültme.
+
+### Dedektörü keskinleştirirken kör ettim
+
+AE-01'in ilk hâli fazla genişti: bir **araç adı** desenini (`Bash`, `WebFetch`
+eşleyen `^[A-Z]\w*\(.*\)$`) kimlik sanıp işaretliyordu. Daralttım — ve
+**fazla** daralttım: mutasyon (bir kimlik desenini tek harfe geri döndürmek)
+**sağ kaldı**. Yani yanlış pozitifi kovalarken dedektörü kör ettim; on
+dördüncü turda kapılar için yazdığım şeyin, dedektörler için geçerli hâli.
+Ölçüt sadeleştirildi ve mutasyon artık yakalanıyor.
+
+AE-02 de aynı yerden geçti: ilk hâli markdown etiketlerini (`[O takımı]`,
+`[ayrıstirma]`) karakter sınıfı sanıyordu ve `eşi[ğk]` gibi **bilinçli** iki
+harfli bir kümeyi "yarım alfabe" diye işaretliyordu. Ölçüt artık üç ya da daha
+fazla Türkçe harf taşıyan — yani gerçekten **alfabe niyetli** — sınıflara
+bakıyor.
+
+---
+
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
 
 | Bölüm | Beklenen | Gerçek | Sebep |
@@ -1483,6 +1533,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | AB · blok iletisinin çaresi | *teşhis vardı, çare yoktu* | **temiz** — altı kapı da çare gösteriyor |
 | AC · ortam bağımsızlığı | *hiç ölçülmemişti* | **temiz** — yedi dilim, beş yerel ayar, tek karar |
 | AD · komutların iddiaları | *hiç okunmamıştı* | **temiz** — canlı kusur yok; iddialar artık kilitli |
+| AE · desen sınıfı | *örnek örnek düzeltiliyordu* | **temiz** — sınıf tarandı, üç kusur çıktı |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -1540,8 +1591,8 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # 27 çalıştırılabilir takım:
-                                  #   260 vaka + 15 mutasyon (D)
+./sinama/hepsi.sh                 # 28 çalıştırılabilir takım:
+                                  #   265 vaka + 15 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -1609,9 +1660,10 @@ Dokuz takım, 96 vaka:
 | AB | **Blok iletisinin çaresi** — bloklanan ne yapacağını öğreniyor mu | §14, §12 |
 | AC | **Ortam bağımsızlığı** — cevap makineye göre değişiyor mu | §6, §3, §12 |
 | AD | **Komutların iddiaları** — §15 başka bileşenler hakkında ne söylüyor | §15, §9, §0 |
+| AE | **Desen sınıfı taraması** — Türkçeyi ve kendi kimliklerini okumak | §12, B-10, U-05, AD-01 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**260 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**265 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)

@@ -285,6 +285,16 @@ kazandığında ya da `BAYAT_GUN` değiştiğinde komut sessizce yalan söylemey
 başlar. → Bir bileşenin başka bir bileşen hakkındaki her sayısal iddiası
 kontrol edilen bir iddia olmalı. *(AD-01, AD-03)*
 
+**[B] Türkçe metni ASCII sezgisiyle okumak, bu sistemde tekrar eden bir
+sınıftır.** §12 `İ`.lower() tuzağını kendi kodunda çözer (B-10) ama çözümü bir
+YERDE uygular; sistemin geri kalanında aynı hata dört ayrı biçimde geri gelir:
+ek çekimi (defterine/Defterin/defteri eşleşmez), ünlü uyumu (adımLI ama
+bölümLÜ), yarım karakter sınıfları, ve büyük harfli metinde çıplak `.lower()`.
+Bir kurulum kitabı, dilin bu özelliğini TEK BİR YERDE değil, metin okuyan HER
+bileşende ele almalı. → Türkçe metni desenle okuyan her bileşen için: küçültme
+`tr_kucult` üzerinden, karakter sınıfları tam alfabe, ekler dört ünlü
+varyantıyla. *(B-10, U-05, AD-01, AE-02, AE-03)*
+
 ## §7 · Ortak koltukları
 
 **[B] Kitabın en yüksek itibar riskli kuralının hiçbir mekanizması yok.**

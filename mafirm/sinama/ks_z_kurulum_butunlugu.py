@@ -95,7 +95,10 @@ finally:
 
 # --- Z-04 · yamalı dosyalar yama İZİNİ taşıyor ------------------------
 # Bir yama, kendini tanıtmazsa geri alındığı fark edilmez.
-YAMA = re.compile(r"\[[A-Z]-\d{2}[a-z]?(?:, ?[A-Z]-\d{2}[a-z]?)*\]")
+# [AE-01] Tek harf varsayımının DÖRDÜNCÜ yeri. [AA-01], [AC-01], [AB-03b]
+# bu desene GÖRÜNMÜYORDU; Z-04 yalnızca dosyalarda eski tek harfli işaretler
+# de bulunduğu için geçiyordu — yani doğru sebeple değil.
+YAMA = re.compile(r"\[[A-Z]{1,2}-\d{2}[a-z]?(?:, ?[A-Z]{1,2}-\d{2}[a-z]?)*\]")
 izsiz = []
 for rel in (".claude/hooks/kapi.py", "denetim.sh",
             "birimler/rekabet/kod/esik.py"):

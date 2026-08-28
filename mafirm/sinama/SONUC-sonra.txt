@@ -1,5 +1,5 @@
 ###############################################################
-#  KÖR SINAMA TAKIMI — 2026-08-28T10:38:26Z
+#  KÖR SINAMA TAKIMI — 2026-08-28T10:47:06Z
 ###############################################################
 
 /root/mafirm/sinama/ks_a_esik.py:45: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
@@ -294,7 +294,7 @@ KÖR SINAMA M — errata ↔ sınama izlenebilirliği
 GEÇTİ M-01   her errata maddesi bir sınama vakasına atıf yapıyor
         62 madde · atıfsız 0: yok
 GEÇTİ M-02   atıf yapılan her vaka kimliği gerçekten tanımlı
-        294 tanımlı kimlik · uydurma dayanak: yok
+        300 tanımlı kimlik · uydurma dayanak: yok
 GEÇTİ M-03   [A] ve [B] maddelerinin atıfları sadık sistemde gerçekten kaldı
         sadık koşumda kalan vaka: 51 · sınanmamış ağır madde: yok
 GEÇTİ M-04   sadık sistemde kalan her vaka errata'da ya da raporda açıklanmış
@@ -393,7 +393,7 @@ KÖR SINAMA R — yön, insan onayı ve dil kuralları
 GEÇTİ R-01   rapor cevapla başlıyor, yöntemle değil
         ilk bölüm: 'Cevap' — §4: 'cevabı merak eden ilk paragrafta bulur'
 GEÇTİ R-02   yöntem bölümü bulgulardan sonra geliyor
-        yöntem 36. başlık, ilk bulgu 1. başlık
+        yöntem 37. başlık, ilk bulgu 1. başlık
 GEÇTİ R-03   iki zorunlu başlık en sonda ve doğru sırada
         son iki başlık: ['Şimdi ne yapılmalı', 'Yetkili avukat görüşü gereken konular']
 GEÇTİ R-04   raporun onay durumu açıkça yazılı (§9)
@@ -602,39 +602,39 @@ GEÇTİ Z-08   denetim beyan edilen asgari kontrol sayısını taşıyor
 KÖR SINAMA AA — kapı arızalandığında hangi yöne düşüyor
 ================================================================================================
 GEÇTİ AA-01a    bozuk olay: bozuk JSON
-        çıkış 2 (32 ms)
-GEÇTİ AA-01b    bozuk olay: boş girdi
         çıkış 2 (33 ms)
+GEÇTİ AA-01b    bozuk olay: boş girdi
+        çıkış 2 (32 ms)
 GEÇTİ AA-01c    bozuk olay: tool_input yok
-        çıkış 0 (34 ms)
+        çıkış 0 (31 ms)
 GEÇTİ AA-01d    bozuk olay: tool_input dizge
-        çıkış 0 (32 ms)
-GEÇTİ AA-01e    bozuk olay: tool_input liste
-        çıkış 0 (33 ms)
-GEÇTİ AA-01f    bozuk olay: tool_name yok
         çıkış 0 (35 ms)
+GEÇTİ AA-01e    bozuk olay: tool_input liste
+        çıkış 0 (32 ms)
+GEÇTİ AA-01f    bozuk olay: tool_name yok
+        çıkış 0 (30 ms)
 GEÇTİ AA-01g    bozuk olay: tool_name None
         çıkış 0 (32 ms)
 GEÇTİ AA-01h    bozuk olay: içerik None
-        çıkış 0 (33 ms)
+        çıkış 0 (32 ms)
 GEÇTİ AA-01i    bozuk olay: içerik sayı
         çıkış 0 (31 ms)
 GEÇTİ AA-01j    bozuk olay: derin iç içe
         çıkış 0 (31 ms)
 GEÇTİ AA-01k    bozuk olay: JSON dizi (nesne değil)
-        çıkış 2 (32 ms)
+        çıkış 2 (35 ms)
 GEÇTİ AA-01l    bozuk olay: JSON null
-        çıkış 2 (33 ms)
+        çıkış 2 (31 ms)
 GEÇTİ AA-02     ayrıştırma SONRASI arıza politikası yazılı ve dışarıda kapalı
         kanca, ayrıştırma sonrası istisnayı yakalayıp dışarı kanalında 2 döndürüyor
 GEÇTİ AA-03-20  boşluksuz 20000 karakter bütçe içinde bitiyor
-        89 ms (bütçe 5000 ms) çıkış 0
+        61 ms (bütçe 5000 ms) çıkış 0
 GEÇTİ AA-03-80  boşluksuz 80000 karakter bütçe içinde bitiyor
-        159 ms (bütçe 5000 ms) çıkış 0
+        157 ms (bütçe 5000 ms) çıkış 0
 GEÇTİ AA-03-200 boşluksuz 200000 karakter bütçe içinde bitiyor
-        328 ms (bütçe 5000 ms) çıkış 0
+        342 ms (bütçe 5000 ms) çıkış 0
 GEÇTİ AA-04     400 KB gerçek düzyazı bütçe içinde
-        406 ms çıkış 0
+        415 ms çıkış 0
 GEÇTİ AA-05     dayanıklılık yaması doğruluğu bozmadı
         üç davranış vakası da beklendiği gibi
 ------------------------------------------------------------------------------------------------
@@ -692,6 +692,22 @@ GEÇTİ AD-06   riskli ajan dağıtan her komut sır sınırını yazıyor
 ------------------------------------------------------------------------------------------------
 6 vaka · 6 geçti · 0 beklenen · 0 SİNYAL
 
+================================================================================================
+KÖR SINAMA AE — Türkçeyi ve kendi kimliklerini desenle okumak
+================================================================================================
+GEÇTİ AE-01   vaka kimliği desenleri iki harfli öneki de görüyor
+        32 dosya tarandı, tek harf varsayan desen yok
+GEÇTİ AE-02   Türkçe harf içeren her karakter sınıfı TAM
+        yarım Türkçe alfabe taşıyan sınıf yok
+GEÇTİ AE-03   Türkçe metin üzerinde çıplak .lower() yok
+        Türkçe metin küçültmeleri tr_kucult üzerinden
+GEÇTİ AE-04   Türkçe harfli metin ile ASCII hâli aynı kararı alıyor
+        3 çift, kararlar örtüşüyor
+GEÇTİ AE-05   Türkçe küçültme dört köşede de doğru
+        İ→i, I→ı, Ş→ş, YETKİLİ→yetkili
+------------------------------------------------------------------------------------------------
+5 vaka · 5 geçti · 0 beklenen · 0 SİNYAL
+
 ###############################################################
 #  ÖZET
 ###############################################################
@@ -722,6 +738,7 @@ GEÇTİ AD-06   riskli ajan dağıtan her komut sır sınırını yazıyor
   AB · blok iletisinin çaresi          temiz
   AC · ortam bağımsızlığı         temiz
   AD · komutların iddiaları           temiz
+  AE · desen sınıfı taraması        temiz
   ------------------------------------------------------------
   TOPLAM SİNYAL                         0
 

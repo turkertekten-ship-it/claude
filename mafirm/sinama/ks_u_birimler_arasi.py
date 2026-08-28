@@ -22,6 +22,13 @@ import beklenen  # noqa: E402
 KOK = os.environ.get("MAFIRM") or os.path.dirname(
     os.path.dirname(os.path.abspath(__file__)))
 
+import importlib.util as _ilu  # noqa: E402
+_sp_k = _ilu.spec_from_file_location(
+    "kapi_u09", os.path.join(KOK, ".claude/hooks/kapi.py"))
+_kapi_u09 = _ilu.module_from_spec(_sp_k)
+_sp_k.loader.exec_module(_kapi_u09)
+_tr = _kapi_u09.tr_kucult
+
 sonuclar = []
 
 
@@ -282,10 +289,15 @@ FERAGAT = re.compile(r"feragat edilebilir|vazgeçilebilir|feragat edilebileceği
 bekletici, ihlal = {}, []
 for yol, m in sorted(TUM.items()):
     for satir in re.sub(r"\n(?=\s+\S)", " ", m).split("\n"):
-        if "bekletici" not in satir.lower():
+        # [AE-03] Çıplak .lower() burada SESSİZ bir körlüktü: 'BEKLETİCİ'
+        # küçültülünce 'bekleti̇ci̇' olur (İ -> i + U+0307) ve "bekletici"
+        # eşleşmez. Büyük harfle yazılmış bir "BEKLETİCİ ... FERAGAT
+        # EDİLEBİLİR" ihlali satır hiç İNCELENMEDEN atlanıyordu — §12'nin
+        # B-10 kusurunun kendi takımımdaki hâli.
+        d = _tr(satir)
+        if "bekletici" not in d:
             continue
         bekletici[yol] = bekletici.get(yol, 0) + 1
-        d = satir.lower()
         if FERAGAT.search(d) and "edilemez" not in d and "edilmez" not in d:
             ihlal.append("%s: %s" % (yol, satir.strip()[:90]))
 vaka("U-09", "bekletici etki hiçbir birimde feragat edilebilir sayılmıyor",

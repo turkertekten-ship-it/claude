@@ -236,7 +236,7 @@ fi
 echo "=== açık doğrulama bulguları ==="
 if [ -f "$M/hafiza/dogrulama-bulgulari.md" ]; then
   eng=$(grep -c '| ENGELLEYICI |' "$M/hafiza/dogrulama-bulgulari.md" | head -1); eng=${eng:-0}
-  tum=$(grep -cE '^[A-Z]-[0-9]+ \|' "$M/hafiza/dogrulama-bulgulari.md" | head -1); tum=${tum:-0}
+  tum=$(grep -cE '^[A-Z]{1,2}-[0-9]+ \|' "$M/hafiza/dogrulama-bulgulari.md" | head -1); tum=${tum:-0}
   echo "  $tum açık bulgu, $eng tanesi ENGELLEYİCİ"
   grep '| ENGELLEYICI |' "$M/hafiza/dogrulama-bulgulari.md" \
     | cut -d'|' -f1,4 | sed 's/^/    /'

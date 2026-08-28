@@ -80,6 +80,8 @@ python3 "$S/ks_ac_ortam.py"; topla "AC · ortam bağımsızlığı" $?
 echo
 python3 "$S/ks_ad_komut.py"; topla "AD · komutların iddiaları" $?
 echo
+python3 "$S/ks_ae_desen.py"; topla "AE · desen sınıfı taraması" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"
