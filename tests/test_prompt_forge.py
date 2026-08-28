@@ -269,6 +269,41 @@ def test_escape_is_required_everywhere() -> None:
 # --------------------------------------------------------------------------
 
 
+def test_structure_alone_never_raises_a_score() -> None:
+    """Compiling a prompt must not improve it. Only content can.
+
+    `compile` writes the seven headings over whatever it was given. The presence
+    checks used to accept a heading as the slot, so restructuring a prompt that
+    said nothing new scored 24 points higher — the tool rewarding ceremony,
+    which is the one thing this standard argues against.
+    """
+    print("\nstructure without content earns nothing")
+    for fixture in sorted(FIXTURES.glob("*.md")):
+        text = fixture.read_text()
+        raw = pf.analyse(text, "task")
+        skeleton = "\n".join(
+            line for line in pf.compile_prompt(text, "task").splitlines()
+            if not line.startswith(pf.MISSING_PREFIX)
+        )
+        compiled = pf.analyse(skeleton, "task")
+        check(f"{fixture.name}: empty sections do not raise the score",
+              compiled.score <= raw.score, f"{raw.score} -> {compiled.score}")
+
+    print("\na heading is a label, not a slot")
+    heading_only = "Write the parser.\n\n## ACCEPTANCE TEST\n\n## OUTPUT CONTRACT\n"
+    fired = rules_for(heading_only)
+    check("an empty ACCEPTANCE section still reports the slot absent",
+          "NO_ACCEPTANCE" in fired, fired)
+    check("an empty OUTPUT section too", "NO_OUTPUT" in fired, fired)
+    with_content = ("Write the parser.\n\n## ACCEPTANCE TEST\n`run_all.sh` passes.\n"
+                    "\n## OUTPUT CONTRACT\nA unified diff.\n")
+    filled = rules_for(with_content)
+    check("a section with content counts as present",
+          "NO_ACCEPTANCE" not in filled and "NO_OUTPUT" not in filled, filled)
+    check("the same content without headings counts too",
+          "NO_ACCEPTANCE" not in rules_for("Write it. Acceptance: `run_all.sh` passes."))
+
+
 def test_compile_preserves_every_line() -> None:
     print("\ncompile keeps every line the author wrote")
     for fixture in sorted(FIXTURES.glob("*.md")):
@@ -492,6 +527,7 @@ def main() -> int:
     test_slots()
     test_profiles_grade_differently()
     test_escape_is_required_everywhere()
+    test_structure_alone_never_raises_a_score()
     test_compile_preserves_every_line()
     test_compile_adds_nothing_else()
     test_compile_marks_gaps_rather_than_filling_them()

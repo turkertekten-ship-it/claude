@@ -71,6 +71,7 @@ TARGETS=(
     "$PREFIX/tools/learn_rule.py"
     "$PREFIX/tools/check_output.py"
     "$PREFIX/tools/_phrases.py"
+    "$PREFIX/tools/_slots.py"
     "$BIN_DIR/prompt-forge"
     "$BIN_DIR/prompt-habits"
     "$BIN_DIR/learn-rule"
@@ -91,7 +92,7 @@ source_for() {
     while IFS='|' read -r pair dst2; do
         [ "$dst2" = "$dst" ] && { printf '%s' "$pair"; return 0; }
     done < <(markdown_pairs)
-    for tool in prompt_forge.py prompt_habits.py learn_rule.py check_output.py _phrases.py; do
+    for tool in prompt_forge.py prompt_habits.py learn_rule.py check_output.py _phrases.py _slots.py; do
         [ "$dst" = "$PREFIX/tools/$tool" ] && { printf '%s' "$REPO/tools/$tool"; return 0; }
     done
     return 1
@@ -186,7 +187,7 @@ if [ "$CHECK" -eq 1 ]; then
         fi
     done < <(markdown_pairs)
 
-    for tool in prompt_forge.py prompt_habits.py learn_rule.py check_output.py _phrases.py; do
+    for tool in prompt_forge.py prompt_habits.py learn_rule.py check_output.py _phrases.py _slots.py; do
         if [ ! -f "$PREFIX/tools/$tool" ]; then
             say "  MISSING  tools/$tool"; drifted=$((drifted + 1))
         elif cmp -s "$REPO/tools/$tool" "$PREFIX/tools/$tool"; then
@@ -263,7 +264,7 @@ while IFS='|' read -r src dst; do
     install_rewritten "$src" "$dst" || exit 1
 done < <(markdown_pairs)
 
-for tool in prompt_forge.py prompt_habits.py learn_rule.py check_output.py _phrases.py; do
+for tool in prompt_forge.py prompt_habits.py learn_rule.py check_output.py _phrases.py _slots.py; do
     if [ "$DRY" -eq 0 ]; then
         guard_target "$REPO/tools/$tool" "$PREFIX/tools/$tool" || exit 1
     fi

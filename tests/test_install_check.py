@@ -145,7 +145,7 @@ def main() -> int:
         "commands/prompt.md", "commands/prompt-audit.md", "commands/prompt-habits.md",
         "agents/prompt-critic.md", "skills/prompt-forge/SKILL.md",
         "tools/prompt_forge.py", "tools/prompt_habits.py", "tools/learn_rule.py",
-        "tools/check_output.py", "tools/_phrases.py",
+        "tools/check_output.py", "tools/_phrases.py", "tools/_slots.py",
     ]
     shims = ["prompt-forge", "prompt-habits", "learn-rule", "check-output"]
     check("the test list covers every declared target",

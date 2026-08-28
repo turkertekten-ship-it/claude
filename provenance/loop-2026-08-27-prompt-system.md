@@ -462,6 +462,42 @@ for the raw ask. Its slots are filled from what was built and not corrected over
 thirteen loops rather than from a reconstruction of the owner's intent, and its
 escape clause says exactly that.
 
+## Fourteenth loop — the tool rewarding its own ceremony
+
+Loop thirteen ended on the observation that the system had never been tested in
+the shape it recommends. `compile` produces exactly that shape, so Observe ran
+the round trip over every fixture: compile a prompt, empty the markers, score
+both.
+
+Two fixtures scored **higher** compiled than raw. `worked_raw.md` went from 38
+to 62 with not one word of content added.
+
+> The surprise: the presence checks were satisfied by the heading. `compile`
+> writes `## ACCEPTANCE TEST` over a gap, and the linter read the label as the
+> thing. So the tool paid 24 points for structure alone — in a repository whose
+> own skill says that padding a prompt with ceremonial sections makes it worse,
+> and whose linter has a rule against unfalsifiable acceptance tests. It was
+> rewarding the exact behaviour it argues against, and no fixture caught it
+> because no fixture had ever been compiled and re-scored.
+
+Slot presence is now judged on content, with the label stripped before the cue
+runs. An empty skeleton now scores *below* the raw ask, which is right: it says
+the same thing and has unfilled structure to fill. The property is a test —
+compiling must never raise a score, checked over every fixture.
+
+Fixing it required the slot-label parser in two tools, so it moved to
+`tools/_slots.py` on the `_phrases.py` precedent. That immediately broke every
+terminal but this one: the installer did not ship the new module, and the
+repository kept working only because the file is on disk here. The installer's
+tool list was a sixth list nobody checked, and `check_consistency.py` now
+derives that invariant from the source — every private module an installed tool
+imports must itself be shipped.
+
+Three guards caught this loop's own mistakes in sequence: the installer's
+self-verification refused to install a linter that crashed on import, the
+target-count assertion from loop eleven noticed a target added without a test,
+and the consistency check named the missing module.
+
 ## Still open
 
 `U-6`, `U-7` and `U-8` in [unknowns.md](unknowns.md): what Saraev actually

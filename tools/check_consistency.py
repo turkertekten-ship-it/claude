@@ -113,12 +113,38 @@ def check_rules_are_mapped(root: Path = REPO) -> list[str]:
     return out
 
 
+def check_installed_tools_have_their_imports(root: Path = REPO) -> list[str]:
+    """Everything an installed tool imports has to be installed with it.
+
+    A shared module added for two tools, and left out of the installer's list,
+    breaks every terminal but this one — the repository keeps working because
+    the module is on disk here. This is derived from the source rather than
+    enumerated, so the next shared module cannot be forgotten.
+    """
+    script = (root / "tools" / "install_prompt_system.sh").read_text()
+    m = re.search(r"for tool in ([^;]+); do", script)
+    if not m:
+        return ["the installer's tool list could not be read"]
+    shipped = set(m.group(1).split())
+    out = []
+    for tool in sorted(shipped):
+        path = root / "tools" / tool
+        if not path.exists():
+            out.append(f"the installer ships {tool}, which does not exist")
+            continue
+        for module in re.findall(r"^from (_(?!_)\w+) import", path.read_text(), re.M):
+            if f"{module}.py" not in shipped:
+                out.append(f"{tool} imports {module}, which the installer does not ship")
+    return out
+
+
 CHECKS = {
     "tests are run": check_tests_are_run,
     "tools are documented": check_tools_are_documented,
     "profiles are documented": check_profiles_are_documented,
     "emitted rules have templates": check_emitted_rules_have_templates,
     "rules are mapped": check_rules_are_mapped,
+    "installed tools have their imports": check_installed_tools_have_their_imports,
 }
 
 

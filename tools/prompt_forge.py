@@ -57,6 +57,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _phrases import FALSE_MEMORY  # noqa: E402
+from _slots import slot_of  # noqa: E402
 
 SEVERITIES = ("error", "warn", "info", "off")
 WEIGHTS = {"error": 12, "warn": 6, "info": 2, "off": 0}
@@ -738,12 +739,16 @@ def analyse(text: str, profile: str = DEFAULT_PROFILE, source: str = "-") -> Rep
 
     prose = strip_fences(text)
     lines = prose.splitlines()
+    # Slot presence is judged on content, never on the label above it.
+    unlabelled = "\n".join(
+        "" if (slot_of(line) and not slot_of(line)[1]) else line for line in lines
+    )
     report = Report(source=source, profile=profile, words=len(re.findall(r"\w+", prose)))
 
     # Absent slots.
     grading = PROFILES[profile]
     for slot in SLOTS:
-        present = bool(slot.cue.search(prose)) or any(slot.cue.search(l) for l in lines)
+        present = bool(slot.cue.search(unlabelled))
         report.slots_present[slot.key] = present
         severity = grading.get(slot.key, "warn")
         if present or severity == "off":
