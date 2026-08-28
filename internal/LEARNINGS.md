@@ -1608,3 +1608,49 @@ reason until the documents were given a date.
 3. A constant delta across every element is a signal in itself. Hash-order
    effects are erratic; a fixed offset points at something shared, and here it
    pointed straight at the clock.
+
+---
+
+## L43 - A scoring component the regression gate cannot see
+
+**Evidence.** Having made the recency clock injectable (L42), the obvious next
+move was to freeze it in the eval so the gate stopped measuring the calendar.
+Measured first, and the measurement said not to bother - then said something
+more interesting.
+
+    corpus    documents with a date   age spread
+    external  91 of 91                0.00 days
+    primary   81 of 81                0.91 days
+
+Both corpora are written in one pass, so their documents share a timestamp, and
+a factor identical across every candidate cannot reorder anything. Confirmed
+three ways: recency switched off entirely leaves external at 48/54 and primary
+at 18/20 with every metric unchanged to four decimals, and moving the clock five
+years forward changes nothing at all.
+
+So the eval was never time-dependent and the fix was unnecessary. What the
+measurement did establish is that **`recency_weight = 0.08` is carried by unit
+tests alone**: 8% of the reranker's score, on by default, and provably invisible
+to both regression gates. A regression in it would not show up anywhere the
+project looks.
+
+Recorded rather than removed. The factor is right for a corpus of mixed ages -
+a crawl, a chat archive, a repository's commit history - and those are simply
+not what the gates run on. What it needed was tests that actually fire: a
+fresher document must outrank an identical stale one, that ordering must
+disappear when the weight is zero (or the first test proves nothing about
+recency), and an undated document must read as neither fresh nor stale rather
+than as infinitely old, which would bury every document from a source that
+carries no timestamps.
+
+**Rules.**
+1. **Measure the effect before building the fix**, even when the fix is
+   obviously correct. This one was correct, unnecessary, and the measurement
+   that showed it unnecessary is the only reason the real gap was found.
+2. A component that no gate can see is not tested by the gate being green.
+   Uniform inputs make a weighted factor a constant, and a constant multiplied
+   through every candidate is indistinguishable from the feature being absent.
+3. When a test shows a component working, add the one that shows the component
+   *causing* it. "The fresher document ranked first" is satisfied by insertion
+   order; it means something only alongside "and it does not, with the weight
+   at zero".

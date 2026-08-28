@@ -89,6 +89,17 @@ class HeuristicReranker(Reranker):
     coverage_weight: float = 0.45
     phrase_weight: float = 0.25
     authority_weight: float = 0.12
+    #: Neither eval gate can see this. Both corpora are written in one pass, so
+    #: their documents share a timestamp - spread 0.00 days external, 0.91 days
+    #: primary - and a factor identical across every candidate cannot reorder
+    #: anything. Measured: switching recency off entirely leaves both sets at
+    #: 48/54 and 18/20 with every metric unchanged, and moving the clock five
+    #: years forward does nothing either.
+    #:
+    #: So this weight is carried by unit tests alone, and a regression in it
+    #: would not show up in the regression gate. Recorded rather than removed:
+    #: the factor is right for a corpus of mixed ages, which is what a crawl or
+    #: a chat archive produces, and those are not what the gates run on.
     recency_weight: float = 0.08
     position_weight: float = 0.05
     base_weight: float = 1.0

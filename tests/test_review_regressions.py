@@ -2110,3 +2110,70 @@ class PipelineDeterminismTest(unittest.TestCase):
         self.assertEqual(len(outputs), 1,
                          f"retrieval differed across hash seeds: {outputs}")
         self.assertTrue(json.loads(outputs.pop())[0], "the subprocess retrieved nothing")
+
+
+class RecencyTest(unittest.TestCase):
+    """The recency factor is inert on both eval corpora and tested only here.
+
+    Both are written in one pass, so their documents share a timestamp - 0.00
+    days of spread on the external corpus, 0.91 on the primary one - and a
+    factor identical across every candidate cannot reorder anything. Measured,
+    switching it off leaves both sets at 48/54 and 18/20 with every metric
+    unchanged. The gates cannot see this weight, so these tests are the whole of
+    its coverage.
+    """
+
+    NOW = 1_700_000_000.0
+
+    def _ranked(self, ages_days, weight=0.08):
+        """Identical documents differing only in age; returns their order."""
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        pipeline = IndexPipeline(store)
+        text = "Reciprocal rank fusion combines a dense arm and a lexical arm by rank."
+        docs = []
+        for i, age in enumerate(ages_days):
+            doc = _doc(f"d{i}", f"{i}.md", text)
+            doc.updated_at = self.NOW - age * 86_400
+            docs.append(doc)
+        store.upsert_documents(docs)
+        pipeline.embedder.fit([d.text for d in docs])
+        for d in docs:
+            store.replace_chunks(d.doc_id, chunk_document(d))
+        pipeline.embed_missing()
+
+        retriever = HybridRetriever(store, pipeline.embedder)
+        retriever.reranker.clock = lambda: self.NOW
+        retriever.reranker.recency_weight = weight
+        results, _ = retriever.retrieve("how are dense and lexical arms combined")
+        return [r.chunk.doc_id for r in results]
+
+    def test_a_fresher_document_outranks_an_identical_stale_one(self):
+        """The feature's entire purpose, asserted on documents that differ in
+        nothing else - same text, same terms, same authority."""
+        order = self._ranked([2000, 1000, 1])
+        self.assertEqual(order[0], "d2", f"the newest document did not win: {order}")
+        self.assertEqual(order[-1], "d0", f"the oldest document did not lose: {order}")
+
+    def test_with_the_weight_at_zero_age_stops_mattering(self):
+        """The other half: the ordering above must come from the weight, not
+        from insertion order or some other tiebreak."""
+        aged = self._ranked([2000, 1000, 1], weight=0.08)
+        flat = self._ranked([2000, 1000, 1], weight=0.0)
+        self.assertNotEqual(aged, flat,
+                            "the ranking was the same with recency switched off, "
+                            "so the test above proves nothing about recency")
+
+    def test_a_document_with_no_date_is_neither_fresh_nor_stale(self):
+        """Unknown age must not read as infinitely old, which would bury every
+        document from a source that carries no timestamps."""
+        from oodarag.models import ScoredChunk
+        from oodarag.retrieve.rerank import HeuristicReranker
+
+        reranker = HeuristicReranker(idf=lambda t: 1.0, vocabulary=set())
+        reranker.clock = lambda: self.NOW
+        chunk = Chunk(chunk_id="c", doc_id="d", ordinal=0, text="text",
+                      context_header="", metadata={})
+        scored = ScoredChunk(chunk=chunk, score=1.0, components={})
+        reranker.rerank("text", [scored])
+        self.assertAlmostEqual(scored.components["rerank_recency"], 0.5, places=6)
