@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>62 çalıştırılabilir takım · 441 vaka · 0 sinyal</span>
+    <span>63 çalıştırılabilir takım · 446 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -3670,6 +3670,48 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Altmış üçüncü tur</span>
+  <h2>En ağır kuralın yarısı hiç çalıştırılmamıştı</h2>
+  <p>Kural 6 sistemin en yüksek bedelli kuralıdır. Sır kapısının iki ayağı
+  var: <strong>desen</strong> ayağı ve <strong>ad kaydı</strong> ayağı. Desen
+  sınanıyordu. Ad kaydı ayağı <strong>hiç sınanmamıştı</strong> — çünkü kayıt
+  kurulumda <strong>boş</strong> gelir ve boş bir kayıtla o ayağın kodu hiç
+  çalışmaz.</p>
+
+  <div class="hero" style="border-left-color:var(--fail)">
+    <div class="num">ş<span style="font-size:30px;color:var(--muted)">→s</span></div>
+    <p class="say">Kayıtta <b>"Işık Holding"</b>, dışarı giden metinde
+    <b>"Isik Holding"</b> — kapı sessizce geçiriyordu. Aksan katlaması bir
+    büyük/küçük varyantı değildir; ve bir Türk adını aksansız yazmak, tam da
+    arama kutusuna yapıştırılırken en sık yapılan şeydir.</p>
+  </div>
+
+  <p>Katlama eklendi; sekiz yazım varyantının sekizi de yakalanıyor —
+  birebir, tümü büyük, noktasız <code>I</code>, aksansız, aksansız+büyük,
+  satır kaydırmalı, URL (web adresi) kodlu. Yanlış pozitif yönü de sınanıyor: kayıtta
+  olmayan ad ve kurum adları <strong>bloklanmıyor</strong>, çünkü doğru işi
+  bloklayan bir kapı bir gün içinde kapatılır.</p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">kural 1</span>
+      <span class="pill p">Öz-sınama kapsanmayanı söylüyor</span></div>
+    <h3>"Ad kaydı boş — kural 6'nın kayıt ayağı sınanmadı"</h3>
+    <p>Kayıt boşken öz-sınama artık bunu satırın sonunda yazıyor. Kuralın
+    kendi buyruğu buydu: <em>eksik olduğunu bilmek, eksik olduğunu
+    bilmemekten iyidir.</em> Takım kaydı kum havuzunda kurar ve canlı dosyaya
+    hiç dokunmaz — o fixture bir zamanlar canlı müvekkil kaydını yok etmişti;
+    bir vaka bunu her koşumda doğruluyor.</p>
+  </div>
+
+  <p><strong>Bir yan etki anında görüldü:</strong> öz-sınamanın çıktı biçimi
+  değişince ölçüm kaydı kırmızıya döndü — deseni kapanış parantezine
+  bağlıydı. <em>Bir ölçütü çıktının biçimine değil, taşıdığı sayıya bağlamak
+  gerekir.</em> Tam koşumda <strong>ikinci</strong> bir gözcü aynı sebeple
+  kırıldı: kapı kapsaması da sayıyı kapanış parantezinden okuyordu. Tek bir
+  biçim değişikliği iki ölçütü birden düşürdü.</p>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -3872,7 +3914,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 62 takım · 441 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 63 takım · 446 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:

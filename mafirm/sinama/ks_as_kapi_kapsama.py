@@ -90,7 +90,11 @@ vaka("AS-02", "her kapının öz-sınamada en az bir ateşleyen vakası var",
 # --- AS-03 · öz-sınamanın bildirdiği sayı gerçek sayı mı ------------
 r = subprocess.run([sys.executable, KAPI_YOL, "--self-test"],
                    capture_output=True, text=True, timeout=60)
-m = re.search(r"SELFTEST\s+\S+\s+\((\d+) vaka\)", r.stdout)
+# [BN · altmış üçüncü tur] Desen kapanış parantezine bağlıydı ve
+# öz-sınama artık aynı satırda KAPSANMAYAN kuralı da söylüyor
+# ("… · ad kaydı boş: … SINANMADI"). Ölçüt, çıktının BİÇİMİNE değil
+# taşıdığı SAYIYA bağlanmalı; aynı kusur BF takımında da çıktı.
+m = re.search(r"SELFTEST\s+\S+\s+\((\d+) vaka", r.stdout)
 _bildirilen = int(m.group(1)) if m else -1
 _gercek = len(re.findall(r"^\s*\(\"", OZ, re.M))
 vaka("AS-03", "öz-sınamanın bildirdiği vaka sayısı gerçek vaka sayısıyla tutarlı",

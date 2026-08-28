@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** altmış iki çalıştırılabilir takım — **441
+**Yamalı hâlde sistem çalışıyor:** altmış üç çalıştırılabilir takım — **446
 vaka, 27 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15 → **27/27** (mutasyon kümesi otuz
 sekizinci turda on beşten yirmi yediye çıkarıldı: 26 kontrolün dokuzu hiç
@@ -2692,7 +2692,7 @@ içinde kırmızı, koşumdan sonra yeşil görünüyordu. Onuncu ve on altınc�
 turların katman kuralı — *denetim, kendini denetleyen takımı denetleyemez* —
 **üçüncü kez**, bu kez veri yoluyla çiğnenmişti. Sayı artık durağan ölçülüyor:
 `hepsi.sh`'e bağlı her takımın kendi `BEKLENEN_VAKA` beyanı toplanıyor
-— bugün toplam 441 vaka — ve her takımın kendi sıfırıncı vakası o beyanın
+— bugün toplam 446 vaka — ve her takımın kendi sıfırıncı vakası o beyanın
 gerçeğe eşit olduğunu ayrıca güvenceye alıyor. Bozulmuş bir `SAYIM.txt` ile BB'nin çıktısı
 **birebir aynı** kalıyor; bağımsızlık ölçülerek gösterildi.
 
@@ -3271,6 +3271,47 @@ tarayıcı için onu okumaktan ayırt edilemez.** Dışlama artık yapıyla yaz�
 sınama dizinindeki ham çıktılar zaten teslimat değil, aparattır. *Anmak ile
 okumak arasındaki fark, ölçen taraf için yoktur.*
 
+### En ağır kuralın yarısı hiç çalıştırılmamıştı
+
+Kural 6 sistemin en yüksek bedelli kuralıdır. Sır kapısının iki ayağı var:
+**desen** ayağı (kod adı, `A.Ş.`, dosya yolu) ve **ad kaydı** ayağı
+(`hafiza/muvekkil-adlari.txt`). B takımı deseni sınıyor. Ad kaydı ayağı
+**hiç sınanmamıştı** — çünkü kayıt kurulumda **boş** gelir ve boş bir kayıtla
+o ayağın kodu hiç çalışmaz. Yani en ağır kuralın yarısı, altmış üç tur
+boyunca ölçülmemiş durdu.
+
+Dolu bir kayıtla ölçüldü ve bir kaçak çıktı:
+
+> kayıtta **"Işık Holding"** · dışarı giden metinde **"Isik Holding"** →
+> kapı **sessizce geçiriyor**
+
+`ş→s` bir büyük/küçük varyantı **değildir**, bu yüzden `re.I` onu yakalayamaz;
+homoglif tablosu da yalnızca Kiril ve Yunan harflerini katlıyordu. Oysa bir
+Türk müvekkil adını **aksansız** yazmak Türkçe metinde en sık yapılan şeydir
+— hele bir arama kutusuna yapıştırılırken, yani **tam olarak bu kapının
+koruduğu yolda.**
+
+Katlama eklendi ve sekiz yazım varyantının sekizi de yakalanıyor: birebir,
+tümü büyük, noktasız `I`, aksansız, aksansız+büyük, satır kaydırmalı, URL (web adresi) kodlu. Yanlış pozitif yönü de sınanıyor — kayıtta olmayan bir ad ve kurum
+adları **bloklanmıyor**, çünkü doğru işi bloklayan bir kapı bir gün içinde
+kapatılır.
+
+**Ve öz-sınama artık kapsanmayan kuralı söylüyor.** Kayıt boşken satır şöyle
+bitiyor: *ad kaydı boş — kural 6'nın kayıt ayağı SINANMADI.* Kuralın kendi
+buyruğu buydu: eksik olduğunu bilmek, eksik olduğunu bilmemekten iyidir.
+
+Takım kaydı **kum havuzunda** kurar ve canlı dosyaya hiç dokunmaz — B-34'ün
+dersi: o fixture bir zamanlar canlı müvekkil kaydını yok etmişti. BN-05 bunu
+her koşumda doğruluyor.
+
+**Bir yan etki de anında görüldü:** öz-sınamanın çıktı biçimi değişince ölçüm
+kaydı (BF) kırmızıya döndü — deseni `vaka)` kapanışına bağlıydı. Düzeltildi:
+**bir ölçütü çıktının biçimine değil, taşıdığı sayıya bağlamak gerekir.**
+Ve tam koşumda **ikinci** bir gözcü aynı sebeple kırıldı: kapı kapsaması da
+sayıyı kapanış parantezinden okuyordu. Tek bir biçim değişikliği iki ölçütü
+birden düşürdü — **biçime bağlanan her ölçüt, ölçtüğü şeyin görünüşüne
+bağlanmıştır.**
+
 ---
 
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
@@ -3413,6 +3454,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | BK · hüküm atıflarının kapsaması | *BJ elle seçilmiş tek bir çelişkiye bakıyordu; I-05 hiçbir yöntem dosyasında anılmıyordu* | **temiz** — çoklu atıflar keşifle, açık sorular dosyasında işaretli |
 | BL · kapılar anma ile taşımayı ayırıyor mu | *kapsam kapısı, başlığın adını anan bir cümleyle susturulabiliyordu* | **temiz** — üç kapının üçü de ayırt ediyor, sağlama duruyor |
 | BM · aracın gerçek çıktısı | *kabul sınaması elle yazılmış bir örneği sınıyordu; aracın gerçek çıktısı üç kapıdan bloklanıyordu* | **temiz** — beş cevap biçimi de geçiyor |
+| BN · sır kapısının ad kaydı ayağı | *kayıtlı bir ad, aksansız yazılınca kapıdan sessizce geçiyordu* | **temiz** — sekiz yazım varyantı da yakalanıyor |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -3470,8 +3512,8 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # 62 çalıştırılabilir takım:
-                                  #   441 vaka + 27 mutasyon (D)
+./sinama/hepsi.sh                 # 63 çalıştırılabilir takım:
+                                  #   446 vaka + 27 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -3505,7 +3547,7 @@ vakalardır ve hepsi geçer. Kör sınama o aklın dışında kalanı arar: bir
 hukukçunun gerçekten yazacağı cümleyi, kancanın gerçekten göreceği veriyi,
 bozulduğunda denetimin gerçekten yakalayıp yakalamadığını.
 
-Altmış beş takım, 441 vaka:
+Altmış altı takım, 446 vaka:
 
 | Takım | Neyi sınar | Kaynağı |
 |---|---|---|
@@ -3574,9 +3616,10 @@ Altmış beş takım, 441 vaka:
 | BK | **Hüküm atıflarının kapsaması** — birden fazla dosyada nitelendirilen her hüküm beyanlı mı; açık nitelendirme soruları dosyasında işaretli mi | §5, §6, kural 1, kural 9 |
 | BL | **Anma/taşıma ayrımı** — her kapı, istediği şeyi TAŞIYAN metinle ondan SÖZ EDEN metni ayırt ediyor mu | §12, §14, §16 |
 | BM | **Çıktı sözleşmesi** — `esik.py`'nin GERÇEK çıktısı, sistemin kendi kapılarından geçiyor mu | §12, §14, §19, kural 1 |
+| BN | **Ad kaydı ayağı** — dolu bir müvekkil kaydıyla sır kapısı, yazım varyantlarını yakalıyor mu | §12, kural 6 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**441 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On üç**
+**446 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On üç**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)

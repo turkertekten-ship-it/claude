@@ -85,8 +85,12 @@ OLCUMLER = [
                if False else "m._toplam - len(m.BEYAN)"), "AZ"),
     ("AZ toplam satır", r"\d+/(\d+) birebir",
      _degisken("ks_az_sadik", "m._toplam"), "AZ"),
-    ("kapı öz-sınama vakası", r"SELFTEST OK \((\d+) vaka\)",
-     _sayi(_kapi, r"SELFTEST OK \((\d+) vaka\)"), "kapi.py"),
+    # [BN] Desen "vaka)" kapanışına bağlıydı. Öz-sınama artık kapsanmayan
+    # kuralı da aynı satırda söylüyor ("… · ad kaydı boş: … SINANMADI") ve
+    # kapanış parantezi kaydı. Bir ölçütü çıktının BİÇİMİNE değil, taşıdığı
+    # SAYIYA bağlamak gerekir.
+    ("kapı öz-sınama vakası", r"SELFTEST OK \((\d+) vaka",
+     _sayi(_kapi, r"SELFTEST OK \((\d+) vaka"), "kapi.py"),
 ]
 
 # Geçmişi ANLATAN bir sayı, güncel bir iddia değildir: artifact otuz altıncı
@@ -142,7 +146,7 @@ def _iskelet(d):
 
 BILINEN = {_iskelet(d) for _a, d, _c, _k in OLCUMLER}
 ARANAN = [r"\d+ alıntı doğrulandı", r"\d+/\d+ birebir",
-          r"SELFTEST OK \(\d+ vaka\)"]
+          r"SELFTEST OK \(\d+ vaka"]
 _kayitsiz = [k for k in ARANAN
              if any(re.search(k, p) for m in TESLIMAT.values()
                     for p in _cumlecikler(m))

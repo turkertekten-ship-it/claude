@@ -150,6 +150,8 @@ python3 "$S/ks_bl_anma_kapilari.py"; topla "BL · kapılar anma ile taşımayı 
 echo
 python3 "$S/ks_bm_cikti_sozlesmesi.py"; topla "BM · aracın gerçek çıktısı kendi kapılarından geçiyor mu" $?
 echo
+python3 "$S/ks_bn_ad_kaydi.py"; topla "BN · sır kapısının ad kaydı ayağı" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

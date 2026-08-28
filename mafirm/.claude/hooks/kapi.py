@@ -397,13 +397,34 @@ def _ad_kaydi():
         return []
 
 
+# [BN · altmış üçüncü tur] Türkçe aksanları ASCII'ye katlama tablosu.
+#
+# Ölçüldü: kayıtta "Işık Holding" varken dışarı giden metinde "Isik Holding"
+# yazılması kapıyı SESSİZCE geçiyordu. ş→s bir BÜYÜK/KÜÇÜK varyantı değildir,
+# bu yüzden re.I onu yakalayamaz; homoglif tablosu da yalnızca Kiril/Yunan
+# harflerini katlıyordu. Oysa bir müvekkil adını aksansız yazmak, Türkçe
+# metinde en sık yapılan şeydir — hele arama kutusuna yapıştırılırken, yani
+# tam olarak bu kapının koruduğu yolda.
+#
+# Katlama YALNIZCA ad kaydı karşılaştırmasında uygulanır: desen ayağındaki
+# kalıplar (A.Ş., Ltd. Şti.) Türkçe harf İÇERİR ve metni katlayıp deseni
+# katlamamak onları kırardı.
+TR_ASCII = str.maketrans("ıİşŞğĞçÇöÖüÜâÂîÎûÛ", "iIsSgGcCoOuUaAiIuU")
+
+
+def _aksansiz(s):
+    return s.translate(TR_ASCII)
+
+
 def kapi_sir(metin, disari=False):
     """Müvekkili tanıtan bilgi makineden çıkmamalı."""
     if not disari:
         return None
     metin = _temizle(metin)          # [O takımı] kaçırma yüzeyini kapat
+    _duz = _aksansiz(metin)
     for ad in _ad_kaydi():
-        if re.search(re.escape(ad).replace(r"\ ", AYR), metin, re.I):
+        _desen = re.escape(_aksansiz(ad)).replace(r"\ ", AYR)
+        if re.search(_desen, _duz, re.I):
             return ("sir", "kayıtlı müvekkil/karşı taraf adı makineden çıkıyor: %r"
                     "  → sorguyu soyutlayın: adı çıkarın, yalnızca "
                     "mevzuatı/olguyu sorun (kural 6)."
@@ -711,8 +732,22 @@ def _selftest():
             print("HATA [kapsam/%s] beklenen %s, gerçek %s"
                   % (_ad, _bekle, _ates))
             h += 1
-    print("SELFTEST %s (%d vaka)" % ("OK" if not h else "HATA %d" % h,
-                                     len(V) + len(KV) + 2))
+    # [BN · altmış üçüncü tur] Aksan katlaması, kapının KENDİ öz-sınamasında
+    # da durmalı: kaydı okumayan bir öz-sınama, kuralın en ağır ayağını
+    # sessizce kaybedebilir. Kayıt dolu değilse vaka atlanır ve bunu SÖYLER.
+    _ek = 0
+    if _ad_kaydi():
+        _ilk = _ad_kaydi()[0]
+        if _aksansiz(_ilk) != _ilk:      # yalnızca aksanlı bir ad varsa
+            _ek = 1
+            if kapi_sir(_aksansiz(_ilk), disari=True) is None:
+                print("HATA [sir/aksansız ad] kayıtlı ad aksansız yazılınca "
+                      "kaçıyor: %r" % _aksansiz(_ilk))
+                h += 1
+    print("SELFTEST %s (%d vaka%s)"
+          % ("OK" if not h else "HATA %d" % h, len(V) + len(KV) + 2 + _ek,
+             "" if _ek else " · ad kaydı boş: kural 6'nın kayıt ayağı "
+                            "SINANMADI"))
     return h
 
 
