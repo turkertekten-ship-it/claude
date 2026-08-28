@@ -108,7 +108,8 @@ MUAF_KALINTI = {
     "BITTI": "Türkçe 'bitti' sözcüğünün aksansız yazımı",
     "FERAGAT": "Türkçe hukuk terimi, İngilizce değil",
     "ABA": "kitaptaki vaka kimliği öneki",
-    "YILLIK": "Türkçe 'yıllık' sözcüğünün aksansız yazımı",
+    "HER": "Türkçe 'her' sözcüğünün vurgulu yazımı; çekimli akrabası yok",
+    "ERRATA": "Türkçe metinde yerleşik alıntı sözcük; çekimli akrabası yok",
 }
 MUAF = dict(MUAF_KURUM, **MUAF_KALINTI)
 
@@ -123,10 +124,16 @@ def _turkce_vurgu(k):
     if re.search(r"[ÇĞİÖŞÜ]", k):
         return True
     kk = tr_kucult(k)
-    if kk in _kucuk:
-        return True
-    kok = kk[:max(4, len(kk) - 1)]
-    return len(kk) >= 4 and any(w.startswith(kok) for w in _kucuk)
+    # AYIRICI: Türkçe bir sözcük düzyazıda ÇEKİMLİ hâlleriyle de geçer
+    # ("saklama/saklanabilir", "dayanaksız/dayanan"); bir kısaltma ise
+    # yalnızca KENDİSİ olarak geçer ("json" → yine "json").
+    #
+    # Yalnızca birebir eşleşmeye bakmak JSON'u Türkçe vurgu sanıyordu;
+    # yalnızca gövdeye bakmak da aynı hatayı yapar. Ölçüt bu yüzden
+    # BAŞKA bir çekimli akraba arar. Bulamadığı kalanlar tahmin edilmez,
+    # MUAF_KALINTI'da gerekçesiyle BEYAN edilir.
+    kok = kk[:4] if len(kk) >= 5 else kk
+    return len(kk) >= 3 and any(w.startswith(kok) and w != kk for w in _kucuk)
 
 
 ADAYLAR = sorted({k for _a, _m in BELGELER

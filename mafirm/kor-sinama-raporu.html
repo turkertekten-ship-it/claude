@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>54 çalıştırılabilir takım · 399 vaka · 0 sinyal</span>
+    <span>55 çalıştırılabilir takım · 403 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -387,7 +387,8 @@ SELFTEST HATA 2</span>
       <span class="pill f">Kapı işlevsiz</span></div>
     <h3>Beşinci kapı üretimde asla geçilemiyor</h3>
     <p>Bu yalnızca üretim yolunu sınayarak görülüyor. Öz-sınama fonksiyona ham Python
-    dizesi veriyor; gerçek kanca stdin'den JSON okuyor ve kitabın kodu metni
+    dizesi veriyor; gerçek kanca stdin'den JSON (programlar arasında veri taşıyan metin
+    biçimi) okuyor ve kitabın kodu metni
     <em class="term">json.dumps(tool_input)</em> ile düzleştiriyor. <strong>json.dumps
     gerçek satır sonlarını iki karakterlik <em class="term">\n</em> dizisine
     çevirir.</strong> <em class="term">re.M</em> ile <em class="term">^</em> artık
@@ -3199,6 +3200,48 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Elli ikinci tur</span>
+  <h2>Ölçüm değişti, iddia yerinde kaldı</h2>
+  <p>Bir önceki tur kitabın metnini 1038 karakter değiştirdi. Kitaptan
+  <strong>türetilen</strong> her sayı o gün bozuk metin üzerinde ölçülmüştü —
+  ama teslimatlardaki karşılıkları kimse yeniden ölçmedi. Sayı ölçütü bu
+  boşluğu kapatmıyor: o yalnızca vaka ve takım sayımlarına bakar.</p>
+
+  <div class="hero" style="border-left-color:var(--warn-mark)">
+    <div class="num">13<span style="font-size:30px;color:var(--muted)">→21</span></div>
+    <p class="say">Rapor <b>"13 alıntı doğrulandı"</b> diyordu; alıntı takımı
+    <b>21</b> alıntı doğruluyor. Sayı, ölçtüğü şey büyürken yerinde kalmıştı.</p>
+  </div>
+
+  <p>Bunu iki iddia için yapan bir vaka zaten vardı — ama <strong>elle
+  seçilmiş</strong> iki iddia için. Artık bir <strong>kayıt</strong> var: her
+  ölçüm iddiası, o değeri gerçekten üreten takımdan okunuyor ve kayıtta
+  karşılığı olmayan bir ölçüm kalıbı vakayı kırıyor.</p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">BF-04</span>
+      <span class="pill p">Katman kuralı</span></div>
+    <h3>Takımlar geçtiklerinde ölçtükleri sayıyı saklıyor</h3>
+    <p>Kanıt sütunu yalnızca vaka kırmızıyken basılıyor; oysa denetlenmesi
+    gereken tam olarak o sayıdır. Bu yüzden değer çıktıdan değil, üreten
+    modülün kendisinden okunuyor — <strong>yeniden hesaplanarak değil.</strong>
+    Ölçtüğü şeyi kendi hesaplayan bir gözcü iki farklı doğru üretir ve
+    hangisinin bozulduğu anlaşılmaz.</p>
+  </div>
+
+  <div class="callout">
+    <strong>Ve ölçüt beş kez yanıldı.</strong> Biri en saf hâliyle tanıdıktı:
+    yasak listesini arayan desen <strong>kendi tanım satırını</strong> buldu.
+    Bir başkası daha öğreticiydi — Türkçe vurgu ile İngilizce terimi ayıran
+    kural bir kısaltmayı Türkçe sandı, çünkü sözcük belgede küçük harfle de
+    geçiyordu: <em>kendisi olarak.</em> Ayırıcı artık <strong>çekimli
+    akraba</strong> arıyor: Türkçe bir sözcük çekimlenmiş hâlleriyle de geçer,
+    bir kısaltma yalnızca kendisi olarak. Kuralın karar veremediği kalıntılar
+    tahmin edilmedi, gerekçesiyle beyan edildi.
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -3384,7 +3427,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 54 takım · 399 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 55 takım · 403 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:

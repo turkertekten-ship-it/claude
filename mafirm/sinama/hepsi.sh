@@ -134,6 +134,8 @@ python3 "$S/ks_bd_artifact_sozlesme.py"; topla "BD · yayımlanan belgenin sözl
 echo
 python3 "$S/ks_be_kitap_atif.py"; topla "BE · kitabın kendi iç atıfları" $?
 echo
+python3 "$S/ks_bf_olcum_iddiasi.py"; topla "BF · ölçüm iddiaları canlı değerle" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"
