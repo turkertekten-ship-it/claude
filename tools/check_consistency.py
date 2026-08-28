@@ -138,6 +138,44 @@ def check_installed_tools_have_their_imports(root: Path = REPO) -> list[str]:
     return out
 
 
+def check_hooks_preserve_status(root: Path = REPO) -> list[str]:
+    """A hook that runs a checker must exit with the checker's status.
+
+    `... | tail -20` makes the exit code the pager's, so the hook prints a
+    failure and reports success. The Stop hook did this for the whole of this
+    session, and the fix for it missed PostToolUse one loop later. Structural,
+    so unlike a prose rule it can be exact: a command that runs a checker and
+    pipes it must also capture `$?`.
+    """
+    import json
+    settings = root / ".claude" / "settings.json"
+    if not settings.exists():
+        return []
+    try:
+        config = json.loads(settings.read_text())
+    except json.JSONDecodeError as exc:
+        return [f".claude/settings.json does not parse: {exc}"]
+
+    checkers = ("run_all.sh", "verify_provenance.py", "check_consistency.py",
+                "verify_measurements.py", "check_output.py", "prompt_forge.py")
+    out = []
+    for event, entries in (config.get("hooks") or {}).items():
+        for entry in entries:
+            for hook in entry.get("hooks", []):
+                command = hook.get("command", "")
+                if not any(c in command for c in checkers):
+                    continue
+                piped = "| tail" in command or "| head" in command
+                keeps_status = "$?" in command or "PIPESTATUS" in command
+                declared = "not a gate" in command
+                if piped and not keeps_status and not declared:
+                    out.append(
+                        f"the {event} hook runs a checker through a pager without keeping "
+                        f"its status, so it reports success on failure"
+                    )
+    return out
+
+
 CHECKS = {
     "tests are run": check_tests_are_run,
     "tools are documented": check_tools_are_documented,
@@ -145,6 +183,7 @@ CHECKS = {
     "emitted rules have templates": check_emitted_rules_have_templates,
     "rules are mapped": check_rules_are_mapped,
     "installed tools have their imports": check_installed_tools_have_their_imports,
+    "hooks preserve exit status": check_hooks_preserve_status,
 }
 
 

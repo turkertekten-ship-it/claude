@@ -93,6 +93,39 @@ def main() -> int:
         co.RULE_TEMPLATES["MAX_COUNT"] = saved_template
     check("restoring it clears the finding", cc.check_emitted_rules_have_templates() == [])
 
+    print("\na hook that runs a checker must exit with its status")
+    import json as _json
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / ".claude").mkdir(parents=True)
+        settings = root / ".claude" / "settings.json"
+
+        def hooks(command: str) -> None:
+            settings.write_text(_json.dumps(
+                {"hooks": {"PostToolUse": [{"hooks": [{"type": "command", "command": command}]}]}}
+            ))
+
+        hooks('python3 tools/verify_provenance.py 2>&1 | tail -20')
+        found = cc.check_hooks_preserve_status(root)
+        check("a piped checker is caught", found, found)
+        check("and the event is named", any("PostToolUse" in f for f in found), found)
+
+        hooks('out=$(python3 tools/verify_provenance.py 2>&1); status=$?; echo "$out" | tail -20; exit $status')
+        check("capturing the status clears it",
+              cc.check_hooks_preserve_status(root) == [], cc.check_hooks_preserve_status(root))
+
+        hooks('python3 tools/verify_provenance.py 2>&1 | tail -3 # briefing only: not a gate')
+        check("a hook that declares itself not a gate is allowed",
+              cc.check_hooks_preserve_status(root) == [], cc.check_hooks_preserve_status(root))
+
+        hooks('printf "hello" | tail -1')
+        check("a pipe with no checker in it is not this rule's business",
+              cc.check_hooks_preserve_status(root) == [], cc.check_hooks_preserve_status(root))
+
+        settings.write_text("{not json")
+        check("unparseable settings are reported",
+              cc.check_hooks_preserve_status(root), cc.check_hooks_preserve_status(root))
+
     print("\nthe profile check cannot be satisfied by prose")
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)

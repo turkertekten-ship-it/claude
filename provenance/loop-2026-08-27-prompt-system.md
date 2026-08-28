@@ -670,6 +670,31 @@ tested — the work and the sabotage went out together. Redone the right way
 round: commit the work, then break, test, and restore with `git checkout --`.
 Rule 11 records it.
 
+## Twentieth loop — the same fix, missed twice in a row
+
+Loop nineteen fixed the Stop hook, which piped the suite into `tail` and so
+reported success over a failure. Observe asked the only sensible follow-up:
+were there others?
+
+There were. `PostToolUse` runs the verifier after every write and piped it the
+same way, so a provenance violation could never signal.
+
+> The surprise is whose mistake it was. Loop eleven wrote up this exact trap —
+> a fix applied to the instances being looked at, shipped alongside a test suite
+> that agreed the job was done — and loop nineteen reproduced it one loop later,
+> in the same file, on the same defect. Writing the lesson down did not transfer
+> it. Rule 12 exists because the write-up did not.
+
+`PostToolUse` now exits with the verifier's status. `SessionStart` keeps its
+pipe and says `not a gate` in the command, because it is a briefing and blocking
+every session on an unrelated violation would be worse.
+
+The durable part is the seventh invariant in `check_consistency.py`: a hook
+command that runs a checker must keep its exit status, unless it declares
+itself not a gate. Structural, so unlike the prose rule backed out in loop
+seventeen it can be exact — and it now fails the suite rather than waiting for
+somebody to notice.
+
 ## Still open
 
 `U-6`, `U-7` and `U-8` in [unknowns.md](unknowns.md): what Saraev actually

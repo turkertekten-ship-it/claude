@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$CLAUDE_PROJECT_DIR\" && printf '\\n== operating doctrine ==\\nRead CLAUDE.md, then provenance/observations.md.\\nA claim is either tagged [src:ID] or it is not written down.\\nOpen questions go in provenance/unknowns.md.\\n' && python3 tools/verify_provenance.py 2>&1 | tail -3"
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && printf '\\n== operating doctrine ==\\nRead CLAUDE.md, then provenance/observations.md.\\nA claim is either tagged [src:ID] or it is not written down.\\nOpen questions go in provenance/unknowns.md.\\n' && { python3 tools/verify_provenance.py 2>&1 | tail -3; } # briefing only: not a gate"
           }
         ]
       }
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$CLAUDE_PROJECT_DIR\" && python3 tools/verify_provenance.py 2>&1 | tail -20"
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && out=$(python3 tools/verify_provenance.py 2>&1); status=$?; printf '%s\\n' \"$out\" | tail -20; exit $status"
           }
         ]
       }
