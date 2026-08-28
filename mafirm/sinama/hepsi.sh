@@ -120,6 +120,8 @@ python3 "$S/ks_aw_alinti.py"; topla "AW · kitap alıntılarının doğruluğu" 
 echo
 python3 "$S/ks_ax_yapi.py"; topla "AX · kitap yapısı iddiaları" $?
 echo
+python3 "$S/ks_ay_olumsuz_kitap.py"; topla "AY · kitap hakkında olumsuz iddialar" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

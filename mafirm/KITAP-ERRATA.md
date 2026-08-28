@@ -233,7 +233,7 @@ Kurulumun ikinci adımı `git init` çalıştırır ve `.gitignore`'a yalnızca
 makineden ÇIKARIR — kural 6'nın ("müvekkil kimliği makineden çıkmaz")
 yasakladığı şey tam budur. Korunmayanlar: `dosyalar/<is>/` altındaki kapsam
 notu, taslaklar ve yazışma (§2'ye göre CANLI İŞ; yalnızca `veri/` dışlanmış)
-ve §8'in gerektirdiği çıkar çatışması listesi. §12'nin sır kapısı ön kapıyı
+ve kural 8'in gerektirdiği çıkar çatışması listesi. §12'nin sır kapısı ön kapıyı
 tutarken §2 yükleme rampasını açık bırakıyor.
 → `dosyalar/` tamamı ve kimlik taşıyan her `hafiza/` dosyası dışlanmalı;
 izlenen sürüm olarak yalnızca ŞABLON bırakılmalı. Dikkat: bir yolu
@@ -363,7 +363,7 @@ DOĞRULANMASINI istemiyor.** Kural "bir koltuğun ağzına belgelenmiş görüş
 çelişen söz konmaz" der; mekanizma (bu kurulumda eklenen altıncı kapı) beyanın
 VARLIĞINI görür. Beyan ise adı geçen ESERLERE dayanır — ve o eserlerin gerçekten
 var olup olmadığı, doğru kişiye ait olup olmadığı hiçbir yerde sorulmaz. On üç
-koltuk gerçek ve çoğu yaşayan hukukçuların adını taşıdığı için bu, §1'in kanıt
+koltuk gerçek ve çoğu yaşayan hukukçuların adını taşıdığı için bu, kural 1'in kanıt
 kuralının en çok gerektiği yerde uygulanmaması demektir. Bu kurulumda altı eserin
 altısı da doğrulandı ve kayda bağlandı; biri (ortak yazarlı bir kitap tek kişiye
 atfediliyordu) düzeltildi. → Koltuk beyanındaki her eser, doğrulama kaydına
@@ -471,7 +471,7 @@ ETKİLENEN ve SÜRÜMSÜZ işaretleri tanımlandı), "hiçbir dosyayı düzenlem
 kuralı aynen korundu ve tablonun makinede kalması kural 6 gereği açıkça
 yazıldı. Kitaba sadık sürüm `yamalar/kitaba-sadik/esik-denetle.md`.
 
-## §8 · Çıkar çatışması
+## kural 8 · Çıkar çatışması
 
 **[A] Çatışma kontrolü tek yönlü ve yalnızca açılış anına bağlı.**
 §8 tek cümledir: *"Bir dosya **açılmadan önce** `hafiza/cikar-catismasi.md`
@@ -552,7 +552,7 @@ olarak geçtiğini her koşumda sorar. Örnek değil, sınıf kapatıldı.
 
 ## §12 · Kapılar — onay ihtiyacının beyanı, onayın kendisi değildir
 
-**[A] §9 "adı belli bir insan onaylamadan kullanılmaz" diyor; hiçbir kapı
+**[A] kural 9 "adı belli bir insan onaylamadan kullanılmaz" diyor; hiçbir kapı
 onay durumuna bakmıyor.**
 §12'nin kapsam kapısı *"Yetkili avukat görüşü gereken konular"* başlığının
 varlığını arıyor. Ama o başlık bir onay **kaydı** değil, onay
@@ -695,10 +695,10 @@ okunamadığında kanalın dışarı gidip gitmediği bilinemez. *(C-08)*
 **[C] §4, §9 ve §10 "kapı konusu değil" sayılmış; oysa üçü de kısmen makinece
 kontrol edilebilir.** Kitap dört (sonra beş) kapı kuruyor ve kalan yedi kuralı
 mekanizmasız bırakıyor. Ama:
-- **§4 (önce cevap, en sonda yöntem)** bir BAŞLIK SIRASI kuralıdır ve doğrudan
+- **kural 4 (önce cevap, en sonda yöntem)** bir BAŞLIK SIRASI kuralıdır ve doğrudan
   görülebilir. Bu raporun kendisi dokuz tur boyunca `## Yöntem` ile başladı ve
   cevabı 818. satırda tuttu; hiçbir şey uyarmadı.
-- **§9 (insan onayı)** onayın kendisini izleyemez ama ONAY DURUMUNUN BEYANINI
+- **kural 9 (insan onayı)** onayın kendisini izleyemez ama ONAY DURUMUNUN BEYANINI
   isteyebilir. Sessizlik onaylanmış gibi okunur.
 - **§10 (ilk geçişte açıklama)** tanımlı bir terim listesi için kontrol
   edilebilir.

@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** kırk yedi çalıştırılabilir takım — **364
+**Yamalı hâlde sistem çalışıyor:** kırk sekiz çalıştırılabilir takım — **368
 vaka, 27 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15 → **27/27** (mutasyon kümesi otuz
 sekizinci turda on beşten yirmi yediye çıkarıldı: 26 kontrolün dokuzu hiç
@@ -702,7 +702,7 @@ satırda tutuyordu — kuralın önlemek için var olduğu şeyin ta kendisi. Ar
 `## Cevap` ile başlıyor, yöntem bulguların sonrasına indi, ve iki zorunlu
 başlık en sonda kaldı.
 
-Aynı turda §9 ve §10 da uygulandı: raporun **onaysız olduğu ilk bölümde**
+Aynı turda kural 9 ve §10 da uygulandı: raporun **onaysız olduğu ilk bölümde**
 yazılı (sessizlik onaylanmış gibi okunur), ve NFKC, CONNECT, homoglif gibi
 terimler ilk geçtiklerinde açıklandı.
 
@@ -710,7 +710,7 @@ terimler ilk geçtiklerinde açıklandı.
 
 F matrisinde §4, §9 ve §10 "hiç kapsanmayan" diye duruyordu — kitap onları
 "biçim kuralı, kapı konusu değil" diye geçmişti. Oysa üçü de kısmen makinece
-kontrol edilebilir: §4 bir başlık sırası kuralıdır, §9 onayın kendisini değil
+kontrol edilebilir: kural 4 bir başlık sırası kuralıdır, kural 9 onayın kendisini değil
 ama **beyanını** isteyebilir, §10 tanımlı bir terim listesi için denetlenebilir.
 Kitap, uygulanabilir olanı uygulanamaz saymış. Matris güncellendi: kapsanmayan
 kural sayısı **altıdan üçe** indi.
@@ -1600,7 +1600,7 @@ Drafting*, *Tools and Weapons*. On üç koltuk, **gerçek ve çoğu yaşayan**
 hukukçuların adını taşıyor.
 
 Yirmi altı tur boyunca hiç kimse o eserlerin **var olup olmadığını** sormadı.
-§1'in kanıt kuralı — *"Her rakam, tarih, eşik, süre ve alıntı dayanağını
+kural 1'in kanıt kuralı — *"Her rakam, tarih, eşik, süre ve alıntı dayanağını
 yanında taşır"* — §7'nin en çok
 önemsediği iddialara **uygulanmamıştı**: gerçek kişilerin ağzına konan bir
 mercek, **doğrulanmamış bir bibliyografyaya** dayanıyordu.
@@ -1983,7 +1983,7 @@ bozdu. Ölçüt bir *cümleyi* değil bir *anlamı* sınamalıydı; öyle yapıl
 ### Kök üçüncü kez göründü — ve bu kez kontrol kurulmuyordu bile
 
 Otuz üçüncü tur bir kök adlandırdı: **kitap kontrolleri olaylara değil
-anlara bağlıyor.** İki örneği vardı (§11 eşikler, §8 çatışma). Kök mü,
+anlara bağlıyor.** İki örneği vardı (§11 eşikler, kural 8 çatışma). Kök mü,
 tesadüf mü? Üçüncü bir yere bakıldı: §13 araç kataloğu — kaydettiği her alan
 (lisans, yıldız, son güncelleme) zamanla bozulur ve kitabın **Karar** sütunu
 onlara dayanır.
@@ -2107,7 +2107,7 @@ Otuz beşinci turun taraması her kontrolü *neye bağlı* diye sınıfladı.
 Sormadığı soru şuydu: bir kontrol, **onay gerektiğini söylemekle onayın
 verildiğini kaydetmeyi** ayırt edebiliyor mu?
 
-§9 açık: *"Şu çıktılar **adı belli bir insan onaylamadan kullanılmaz**:
+kural 9 açık: *"Şu çıktılar **adı belli bir insan onaylamadan kullanılmaz**:
 müvekkile ya da karşı tarafa gidecek her şey, her başvuru metni, yönetim
 kuruluna sunulacak her rakam ve süreye bağlı bir adımda dayanılacak her Türk
 hukuku beyanı."* §12'nin kapsam kapısı ise *"Yetkili avukat görüşü gereken
@@ -2456,6 +2456,47 @@ bölünmüştü. Mutasyon birini bozduğunda ölçüt ötekini bulup yeşil kal�
 Artık **tüm** eşleşmelerin aynı sayıyı söylemesi isteniyor — iki teslimat
 birbirinden ayrışırsa da kırmızı verir.
 
+### On iki atıf, bir kural numarasını bölüm numarası sanıyordu
+
+AW alıntıları, AX sayıları sınadı. Üçüncü kardeş en tehlikelisiydi: raporun
+kitabın **ne söylemediğine** dair iddiaları. Kitabın kendi 2. kuralı olumsuz
+iddiadan daha yüksek bir kanıt eşiği ister — ve kırk birinci tur, kitap
+olgularını ters yönde de yanlış bilebildiğimi göstermişti.
+
+**Birinci bulgu: çürütücü, iddianın kapsamında aranmalı.** *"§11'in eşik
+denetimi `dosyalar/` dizinini taramıyor"* iddiasını kitabın **tamamında**
+arayınca `dosyalar/*/` bulundu ve iddia çürümüş göründü. Oysa o dize §2'nin
+`.gitignore` satırında (`'dosyalar/*/veri/'`), §11'in komut metninde değil.
+**İddia ayakta — ama ölçüt yanlış yerde arıyordu.** Olumsuz bir iddia ancak
+kendi bölümünde çürütülebilir.
+
+**İkinci bulgu daha ağır.** Rapor, çıkar çatışması kuralını **sekizinci
+bölüm**, insan onayını **dokuzuncu bölüm** diye anıyordu. Kitapta o numaralar
+başka şeyler:
+
+| işletim sözleşmesi kuralı | rapor onu şöyle anıyordu | kitapta o numara gerçekte |
+|---|---|---|
+| çıkar çatışması *(kural 8)* | bölüm sekiz | **İşlem el kitapları** |
+| insan onayı *(kural 9)* | bölüm dokuz | **Beceriler** |
+| kanıt kuralı *(kural 1)* | bölüm bir | **Ne kuruyoruz** |
+| yön / başlık sırası *(kural 4)* | bölüm dört | **Uzmanlık birimleri** |
+
+Çatışma, onay, kanıt ve yön **işletim sözleşmesinin kurallarıdır** ve
+sözleşme kitabın **§3**'ünde durur. Yani rapor **on iki yerde** bir kural
+numarasını bölüm numarası gibi yazmıştı. Rapor zaten "kural 6" ve "kural 2"
+diye doğru yazıyordu — yani doğru gösterim vardı, **tek tip
+uygulanmamıştı**; bu incelemenin en sık tekrar eden şekli.
+
+**AX-05 bunu göremezdi**, ve sebebi öğretici: AX-05 anılan bölümün kitapta
+*var olduğunu* sınıyor. §8 ve §9 gerçekten var — sadece iddia edilen konuda
+değil. **Var olmak, o konuda olmak değildir** — kırkıncı turun sınıfının
+atıf tarafındaki hâli. AY-03 artık bölüm haritasını başlıklarıyla sınıyor;
+bir atıf yanlış bölümü gösterirse kırmızı verir.
+
+On iki atıf `kural N` biçimine çevrildi. `CLAUDE.md §1` gibi açıkça
+nitelenmiş olanlar olduğu gibi bırakıldı: orada hangi belgenin §1'i olduğu
+zaten yazıyor.
+
 ---
 
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
@@ -2583,6 +2624,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | AV · anma/tanım sınıfı taraması | *iki ölçüt yorumla/düzyazıyla tatmin oluyordu* | **temiz** — ikisi de koda bağlandı, sınıf taranıyor |
 | AW · kitap alıntılarının doğruluğu | *dört alıntı yanlış; biri kitaba ait olmayan bir cümleyi kitaba mal ediyordu* | **temiz** — düzeltildi, 13 alıntı doğrulandı |
 | AX · kitap yapısı iddiaları | *sayısal iddialar hiç sınanmamıştı* | **temiz** — dördü de doğru çıktı, doğrulama kalıcı |
+| AY · kitap hakkında olumsuz iddialar | *on iki atıf kural numarasını bölüm numarası sanıyordu* | **temiz** — atıflar düzeltildi, çürütücüler bölüm kapsamlı |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -2641,7 +2683,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 ### Nasıl yeniden koşulur
 ```
 ./sinama/hepsi.sh                 # 34 çalıştırılabilir takım:
-                                  #   364 vaka + 27 mutasyon (D)
+                                  #   368 vaka + 27 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -2729,9 +2771,10 @@ Dokuz takım, 96 vaka:
 | AV | **Anma/tanım sınıfı taraması** — ölçüt kodu mu, kodu anlatan cümleyi mi ölçüyor | §12, §16 |
 | AW | **Kitap alıntılarının doğruluğu** — raporun kitaba atfettiği her cümle kitapta var mı | §1, §13.3, §14 |
 | AX | **Kitap yapısı iddiaları** — raporun verdiği sayılar kitapla uyuşuyor mu | §12, §14, §16, §18 |
+| AY | **Kitap hakkında olumsuz iddialar** — "kitap bunu söylemiyor" doğru mu, ve § atıfları doğru bölümü mü gösteriyor | §3, §8, §9, §16 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**364 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**368 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)
