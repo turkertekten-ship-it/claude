@@ -39,9 +39,12 @@ bash tests/run_all.sh                  # every gate, one command
 ```
 
 It rejects unsourced claims in enforced files, unresolvable ids, malformed
-ledger entries, and false-memory phrases like `as we discussed`. It also warns
-when a declared source is no longer cited anywhere — a claim can vanish from a
-document without breaking any tag.
+ledger entries, digits a claim asserts that appear nowhere in the evidence it
+cites, and false-memory phrases like `as we discussed` — which assert a shared
+history this repository has no record of. Quoting one in `inline code` is
+allowed; asserting it in prose is not. It also warns when a declared source is
+no longer cited anywhere, because a claim can vanish from a document without
+breaking any tag.
 
 **The specific trap.** A session *title* is a generated label; never expand one
 into content. A session *goal string* is different in kind — text the owner
@@ -111,9 +114,11 @@ roster (regenerate with `tools/fleet_snapshot.py --write`).
 
 - **Stay on your branch**, the one named in your session record.
 - **Assume concurrency.** Fetch before assuming remote state holds; it moved
-  from 2 branches to 11 in twenty-one minutes.
+  from 2 branches to 14 in under a day, and both branches this one was built
+  from advanced underneath it twice.
 - **Diff file lists before merging.** `comm -12` over the two trees predicts
   conflicts exactly, and silent clobbering is the likeliest way work disappears.
+  It is also how you find out that two sessions built the same subsystem.
 - **Doctrine has one home**, this repository. `claude-ai` points here.
 - **Second-hand work is unread work.** A branch is real once pushed *and* read.
 - **Known defects that spread by copying** go in `KNOWN_ISSUES.md`, with a

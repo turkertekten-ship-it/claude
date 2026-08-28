@@ -2,10 +2,24 @@
 
 Open questions that were **not** answered, kept here so that nothing
 downstream quietly invents an answer. Each entry says what is unknown, why,
-and what would resolve it.
+what would resolve it, and its **disposition**.
 
 An empty unknowns register is a red flag, not an achievement. If you close an
 entry, move the resolved fact into `observations.md` with a new source id.
+
+## Dispositions
+
+| Disposition | Meaning |
+|---|---|
+| **Resolved** | answered; the fact has moved to `observations.md` |
+| **Blocked on owner** | only the owner can supply this; no session can close it by working harder |
+| **Actionable** | someone could close this with work available to them |
+
+Current state: **U-6 resolved · U-5 decided (interim) · U-1, U-2, U-3, U-4
+blocked on owner · 0 actionable.**
+
+Nothing here is waiting on effort. Four entries are waiting on information only
+the owner has, and that is their correct resting state, not a task in progress.
 
 ---
 
@@ -42,6 +56,9 @@ faster than it is being closed.
 **Do not:** infer their contents from their titles. A title is a label the
 system generated, not a record of the work.
 
+**Disposition: blocked on owner.** Pushed code has been read where it exists;
+the reasoning behind it lives only in transcripts this session cannot reach.
+
 ---
 
 ### U-2 — Any Claude conversation history predating 2026-08-27
@@ -57,15 +74,29 @@ threads exists on this container or in the connected Drive.
 Privacy → Export data) and drops `conversations.json` into `archive/`.
 `tools/ingest_chat_archive.py` reads that format directly.
 
-**Researched, and still unknown.** A search for a field-level specification of
-the claude.ai export returned only third-party exporter tools and how-to
-articles; the one document that looked like a specification described a proposed
-universal import format rather than Claude's actual export.
-[src:EXPORT-SCHEMA-UNVERIFIED-2026-08-27] The reader's candidate-field approach —
-trying `uuid`/`id`/`conversation_id`, `chat_messages`/`messages`, `sender`/`role`
-in turn and reporting what it cannot map — is therefore the correct hedge on
-evidence rather than merely on caution. It has still only been exercised against
-synthetic fixtures.
+**Schema question now closed.** The export shape was established from public
+sources rather than guessed: conversations carry `uuid`, `name`, `created_at`,
+`updated_at`, `chat_messages[]`; messages carry `uuid`, `sender`, `created_at`,
+a flat `text`, a `content[]` block list, and `attachments[]` with `file_name`
+and `extracted_content`. [src:CLAUDE-EXPORT-SCHEMA-2026-08-27] The parser was
+tested against that shape and one real gap was found and fixed — attachment
+bodies were being dropped. [src:EXPORT-PARSER-TESTED-2026-08-27]
+
+**Corroborated by a failed search.** An independent search from this branch for
+a *field-level specification* returned only third-party exporter tools and
+how-to articles, and the one document that looked like a specification described
+a proposed universal import format instead.
+[src:EXPORT-SCHEMA-UNVERIFIED-2026-08-27] Two sessions looking separately found
+no official publication, which is why the shape above is reconstructed from
+parsers rather than read from documentation.
+
+**Still second-hand.** That schema comes from third-party parsers, not from
+Anthropic documentation, and no real export has been run through this code. The
+format has changed across versions, so treat a first real ingest as a test of
+the parser, not only of the data.
+
+**Disposition: blocked on owner.** The schema question is answered; only the
+owner can supply the export itself.
 
 **Partly addressed:** Claude *Code* history is a different store, and it is
 reachable — `ingest --include-projects` reads `~/.claude/projects` directly. On
@@ -87,6 +118,9 @@ The document itself was never in reach of this session.
 **Resolves when:** the source document is committed to a repository, or the
 owner names it.
 
+**Disposition: blocked on owner.** No search can identify a document known only
+by the word "book" inside another session's status line.
+
 ---
 
 ### U-4 — What "imb youtube" designates
@@ -99,6 +133,27 @@ definition, and this session did not reach the source.
 
 **Resolves when:** the owner expands the term, or that session commits a
 resolved source list.
+
+**What research established.** A sibling session reported verifying a
+"Docling/Granite IBM hypothesis". Those are real IBM projects: Docling was
+initiated by IBM Research Zurich and is now hosted in the LF AI & Data
+Foundation — 65.7k stars, MIT, converting PDF/DOCX/PPTX/XLSX/HTML/EPUB into
+Markdown and JSON — and GraniteDocling is its vision-language model.
+[src:DOCLING-IBM-2026-08-27]
+
+**What research did NOT establish.** That "imb" means IBM. It is a plausible
+transposition, and the sibling's hypothesis points the same way, but the owner
+has not said so and a plausible reading is not a fact. Nothing in this
+repository depends on the expansion.
+
+**Also unreachable:** `www.youtube.com` is blocked at the proxy for both curl
+and WebFetch, so no YouTube source can be read here regardless of what "imb"
+means. [src:EGRESS-MAP-2026-08-27] This confirms first-hand what the RAG
+session had reported second-hand.
+
+**Disposition: blocked on owner.** Research established what Docling and
+Granite are; only the owner can confirm the expansion, and the source is
+unreachable either way.
 
 ---
 
@@ -224,3 +279,9 @@ holds no evidence about it.
 **Do not:** let `profile/OWNER-PROFILE.md` acquire a professional persona by
 inference. It grades what the owner asked for; it establishes nothing about who
 they are.
+**Disposition: resolved — no action outstanding.** The origin is not
+determinable, but nothing depends on it: content from a non-user source is
+treated as data under the standing rule either way. The search was scoped
+strictly to locating a Claude export, no personal Drive file was opened, and
+nothing was written to Drive. Recording the event was the whole of the
+required response.

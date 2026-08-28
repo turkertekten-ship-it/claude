@@ -284,6 +284,139 @@ sources:
       The branch head is still merge commit e7ab452 with parents e37b4c2 and
       1d7ce8f. Its copy of tools/ingest_chat_archive.py still has zero
       occurrences of the "path.stem == session" fix.
+
+  - id: CLAUDE-EXPORT-SCHEMA-2026-08-27
+    kind: api
+    collected_at: "2026-08-27T15:30Z"
+    method: "WebSearch for the claude.ai export format; mcp__github__search_code for chat_messages/conversations.json (554 hits); WebFetch of two independent public parsers"
+    evidence: >-
+      Converging across independent implementations: conversations.json is a
+      JSON array; each conversation carries uuid, name, created_at, updated_at
+      and chat_messages[]; each message carries uuid, sender ("human" or
+      "assistant"), created_at, a flat text field, a content[] block list, and
+      attachments[] whose entries carry file_name and extracted_content.
+      basicmachines-co/basic-memory reads text first then joins content blocks,
+      and separately reads attachments' file_name and extracted_content.
+      nobody174/claude-search-library uses the same text-then-content fallback,
+      documenting that "the real export has used both across format versions".
+      Second-hand: these are third-party parsers of the format, not Anthropic
+      documentation, and no real export was available here to confirm against.
+
+  - id: EXPORT-PARSER-TESTED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:33Z"
+    method: "parse_claude_ai_export run against a fixture built to the schema above, probing for content-block-only text and attachment extracted_content"
+    evidence: >-
+      Before the change: 3 conversations parsed, 0 skipped; content-block
+      fallback RETAINED (the existing first_of/flatten_content path already
+      handled an empty text field); attachment extracted_content LOST. After
+      adding attachment handling: both RETAINED, with the stored text carrying
+      "[attachment:spec.txt]" and block_types recording "attachment".
+
+  - id: EGRESS-MAP-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:40Z"
+    method: "curl -o /dev/null -w %{http_code} against eight domains; WebFetch against arxiv.org and www.youtube.com; curl error detail"
+    evidence: >-
+      curl reached pypi.org (200), raw.githubusercontent.com (301) and
+      github.com (400 — an HTTP response, so the host was reached). It failed
+      with "curl: (56) CONNECT tunnel failed, response 403" for arxiv.org,
+      docling.org, www.youtube.com, huggingface.co and ibm.com. WebFetch
+      returned EGRESS_BLOCKED for both arxiv.org and www.youtube.com, but
+      succeeded on github.com and raw.githubusercontent.com. WebSearch returned
+      results summarising pages on ibm.com, infoq.com and arxiv.org despite
+      those hosts being unreachable directly.
+
+  - id: DOCLING-IBM-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:38Z"
+    method: "WebFetch of https://github.com/docling-project/docling"
+    evidence: >-
+      The repository page states the project was initiated by IBM Research
+      Zurich's AI for knowledge team and is now hosted within the LF AI & Data
+      Foundation. 65.7k stars, MIT licence, description "Get your documents
+      ready for gen AI". It parses PDF, DOCX, PPTX, XLSX, HTML and EPUB to
+      Markdown and JSON, and supports GraniteDocling, a vision-language model
+      distributed on Hugging Face. A secondary blog source had given the star
+      count as 37k; the repository page is preferred.
+
+  - id: PROVENANCE-PRIOR-ART-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:37Z"
+    method: "WebSearch for provenance verification / citation linting prior art"
+    evidence: >-
+      The search surfaced sciwrite-lint (a local linter that checks references
+      exist and support the claims made), SemanticCite (classifies citations as
+      supported / partially supported / unsupported / uncertain), PaperTrail (a
+      claim-evidence interface decomposing answers and sources into claims), and
+      ProvenanceGuard (described as a fail-closed gate for unsupported claims in
+      MCP-based agents).
+    note: >-
+      Second-hand. These are the search engine's summaries of papers on
+      arxiv.org, which is egress-blocked here, so none of the papers was read.
+      Treat every characterisation above as unverified until a paper is opened.
+
+  - id: QUANTITY-CHECK-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:50Z"
+    method: "iterative runs of python3 tools/verify_provenance.py over this repository while developing the UNSUPPORTED_QUANTITY check"
+    evidence: >-
+      First implementation reported 20 violations. Reading the cited entries
+      showed the check compared against the evidence *path* rather than the
+      capture file; resolving the file dropped it to 17. A regex using
+      lookarounds refused to match digits after a word character, so it missed
+      the hour in ISO stamps like T14:07; replacing it with bare digit runs
+      dropped it to 3. All 3 remaining were spelled-out counts ("the three
+      later commits") whose evidence enumerated the items without ever writing
+      a digit. Removing spelled-out expansion left 0 violations, with the tests
+      confirming an absent digit is still caught.
+
+  - id: FLEET-REFS-20260828T075105
+    kind: repo_state
+    collected_at: "2026-08-28T07:51:05+00:00"
+    method: "git fetch --all --prune; git for-each-ref refs/remotes/origin; git ls-tree -r --name-only per branch"
+    evidence: provenance/raw/fleet-refs-2026-08-28T075105+0000.txt
+
+  - id: KI1-BRANCH-SCAN-2026-08-28
+    kind: repo_state
+    collected_at: "2026-08-28T07:52Z"
+    method: "tools/fleet_selfcheck.sh — extracts each remote branch's copy of tools/ingest_chat_archive.py and runs its selfcheck"
+    evidence: >-
+      Of 14 remote branches, 8 carried the ingester. Passing:
+      code-playground-parity-xw0snj, reverse-engineer-chat-setup-husv9h, and
+      review-chat-archive-zrynr4. Failing the selfcheck, and so still carrying
+      KI-1: great-euler-6tx6y6, personal-skills-repos-research-dxmflq,
+      research-skill-mastery-mwjs01, and session-y42cyg. The remaining 6
+      branches do not have the file. The parity branch had taken the fix at
+      commit a8f5236, "Fix KI-1: the chat ingester was silently discarding
+      transcripts".
+
+  - id: KI1-PROBE-SCAN-2026-08-28
+    kind: repo_state
+    collected_at: "2026-08-28T08:05Z"
+    method: "tools/fleet_probe.py — imports each remote branch's copy and runs two transcripts sharing a sessionId through parse_claude_code_jsonl"
+    evidence: >-
+      Of 14 remote branches, 7 carry the ingester. Sound, keeping both
+      transcripts as 2 conversations and 2 messages:
+      code-playground-parity-xw0snj, reverse-engineer-chat-setup-husv9h,
+      review-chat-archive-zrynr4, session-y42cyg. Affected, collapsing them to
+      1 conversation: great-euler-6tx6y6,
+      personal-skills-repos-research-dxmflq, research-skill-mastery-mwjs01.
+    note: >-
+      Supersedes KI1-BRANCH-SCAN-2026-08-28, which wrongly listed
+      session-y42cyg as affected. That scan used each copy's selfcheck
+      subcommand as the oracle; session-y42cyg carries the keying fix but
+      predates the subcommand, so it exited non-zero for "invalid choice".
+
+  - id: KI1-FIXER-VERIFIED-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T08:04Z"
+    method: "python3 tools/fix_ki1.py on a copy extracted from origin/claude/great-euler-6tx6y6, dry run then --write then re-run"
+    evidence: >-
+      Dry run reported the copy affected and the fix verified by behaviour,
+      exit 0. --write patched it, reported both transcripts surviving, kept a
+      .ki1.bak, exit 0. A third run reported "already sound — both transcripts
+      survive, nothing to do", exit 0, confirming idempotence.
   # --- captured by session_01FQvAGnEvu2XY7hGtWRkMG3 (reverse-engineer chat setup) ---
 
   - id: FLEET-13-2026-08-27
@@ -875,3 +1008,54 @@ sources:
       is nine documents and the golden set 26 questions, so the end-to-end
       signal remains thin; internal/PLAN.md states this as the pipeline being
       well specified and only thinly evaluated.
+
+  - id: FLEET-REFS-20260828T080150
+    kind: repo_state
+    collected_at: "2026-08-28T08:01:50+00:00"
+    method: "git fetch --all --prune; git for-each-ref refs/remotes/origin; git ls-tree -r --name-only per branch"
+    evidence: provenance/raw/fleet-refs-2026-08-28T080150+0000.txt
+
+  - id: PIPELINE-COLLISION-2026-08-28
+    kind: repo_state
+    collected_at: "2026-08-28T08:00Z"
+    method: "git fetch --prune; git log and git diff --stat over 177128a..origin/claude/rag-system-data-pipeline-rdkde9; comm -12 over the two branches' file listings"
+    evidence: >-
+      The pipeline branch advanced by three commits adding 7,234 insertions
+      across 59 files, including a complete second implementation of the same
+      stages this branch built: src/oodarag/chunking.py, embedding/,
+      store/sqlite_store.py, retrieve/{hybrid,fusion,mmr,rerank}.py,
+      generate/{extractive,answer,claude,contract}.py and eval/{harness,metrics}.py.
+      This branch has the same stages at different paths - chunk.py, embed/,
+      index/store.py, retrieve.py, rerank.py, generate.py, evals/harness.py.
+      The two trees additionally collide directly on cli.py, pipeline.py,
+      ooda/loop.py, models.py, util/text.py and util/http.py. The substrate
+      branch was merged; the pipeline branch was NOT.
+    note: >-
+      Two sessions independently built the same subsystem against the same
+      frozen contract, in incompatible module layouts. Merging them would put
+      two complete pipelines in one package with cli.py and pipeline.py
+      disagreeing about which one they wire. Choosing which implementation
+      survives is an architectural decision over another session's 7,234 lines,
+      not a merge conflict to resolve, so it is recorded and left to the owner.
+      This is the failure FLEET.md predicts when branches are not read before
+      being built on, and the file-list diff is what surfaced it.
+
+  - id: QUANTITY-CHECK-FALSE-POSITIVE-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T08:05Z"
+    method: "python3 tools/verify_provenance.py after merging the substrate branch; then vp.check_quantities on three hand-built lines"
+    evidence: >-
+      The merged-in UNSUPPORTED_QUANTITY check raised two findings. One was
+      real - an observation asserted the fleet "tripled in 37 minutes", a
+      duration derived from two timestamps rather than present in the cited
+      evidence, now restated as the two timestamps themselves. The other was a
+      false positive: it read the digit in "KI-1" as an asserted quantity.
+      Identifier vocabularies (KI-n, U-n, L-n, P-n, ADR n) are now stripped
+      before numbers are extracted. Re-tested in three directions afterwards -
+      an unsupported "9999" is still flagged, a line of pure identifiers is not,
+      and a supported "13" is not - and tests/test_verify_provenance.py still
+      passes.
+    note: >-
+      Treated as a defect in the check rather than as the price of rigour, on
+      the rule already written into .claude/hooks/README.md: a checker that
+      fires on legitimate work is one the next person switches off.

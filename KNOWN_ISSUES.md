@@ -95,6 +95,32 @@ Re-ingest afterwards. Stored roles do not correct themselves.
 - That branch carries the affected version: its copy keys on `session` alone and has no `selfcheck` subcommand. [src:PARITY-MERGE-2026-08-27]
 - It does not contain the three later commits on `claude/review-chat-archive-zrynr4`, including the fix. [src:PARITY-MERGE-2026-08-27]
 
+### Observed — who is still affected (2026-08-28T08:05Z)
+
+> How to reproduce: `python3 tools/fleet_probe.py`. It imports each remote
+> branch's copy and runs two transcripts sharing a sessionId through its
+> parser, checking both survive. Behaviour is the oracle — see the correction
+> below for why the copy's own `selfcheck` subcommand is not.
+
+- Of 14 remote branches, 7 carry the ingester. [src:KI1-PROBE-SCAN-2026-08-28]
+- Sound: `code-playground-parity-xw0snj`, `reverse-engineer-chat-setup-husv9h`, `review-chat-archive-zrynr4`, `session-y42cyg`. [src:KI1-PROBE-SCAN-2026-08-28]
+- Affected: `great-euler-6tx6y6`, `personal-skills-repos-research-dxmflq`, `research-skill-mastery-mwjs01`. [src:KI1-PROBE-SCAN-2026-08-28]
+
+### Fixing an affected copy
+
+> One command, and it declines to act when it is unsure:
+> `python3 tools/fix_ki1.py tools/ingest_chat_archive.py --write`
+
+- The fixer does nothing when the copy is already sound, refuses to write unless the patched source demonstrably keeps both transcripts, keeps a `.ki1.bak`, and prints the change rather than guessing when the code has drifted. Verified against a copy taken from `great-euler-6tx6y6`, including that a second run is a no-op. [src:KI1-FIXER-VERIFIED-2026-08-28]
+
+### Correction — an earlier scan was wrong
+
+- A first scan reported `session-y42cyg` as affected. It is not: it carries the keying fix but predates the `selfcheck` subcommand, so asking for `selfcheck` returned "invalid choice" and the script read that as failure. [src:KI1-PROBE-SCAN-2026-08-28]
+
+> "Has no detector" is not "is defective". The script that made that mistake
+> has been removed rather than left to mislead, and the correction is posted on
+> issue #1 where the wrong list was published.
+
 ### Observed — how this was notified
 
 - Sessions in this fleet run in separate containers and no peer messaging reaches them; `ListAgents` reports no reachable agents. [src:NO-TRANSCRIPT-TOOL-CONFIRMED-2026-08-27]

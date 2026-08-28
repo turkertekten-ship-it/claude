@@ -46,7 +46,7 @@ verified lives in [unknowns.md](unknowns.md), not here.
 
 ## Observed — the fleet at 15:04Z
 
-- The session listing returned 13 sessions, up from 4 at 14:27Z; the fleet more than tripled in 37 minutes. [src:FLEET-13-2026-08-27]
+- The session listing returned 13 sessions at 15:04Z, up from 4 at 14:27Z. [src:FLEET-13-2026-08-27] [src:SESSIONS-2026-08-27]
 - All 13 were `RUNNING`, all on `claude-opus-5`, `permission_mode: auto`, environment `env_01GEni7AgBA7NiyMBecyt7K1`, origin `web_claude_ai`. [src:FLEET-13-2026-08-27]
 - 11 of the 13 carry a non-null goal string, up from 2 of 4 at the earlier capture. [src:GOALS-2026-08-27] [src:GOAL-COVERAGE-2026-08-27]
 - At 15:04Z only two branches existed on the `claude` remote, so 11 of the 13 sessions had pushed nothing. [src:BRANCHES-2026-08-27T15-04Z]
@@ -76,6 +76,12 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - The two pushed branches' file listings overlapped on exactly `.gitignore` and `README.md`, matching the prediction recorded in FLEET.md before the merge was attempted. [src:SUBSTRATE-MERGED-2026-08-27]
 - `git merge --allow-unrelated-histories` reported those two paths as add/add conflicts and auto-merged the remaining 32 files with no conflict. [src:SUBSTRATE-MERGED-2026-08-27]
 - Both conflicts were resolved by union and no file from either branch was dropped; the result is commit `46adea6` on `claude/reverse-engineer-chat-setup-husv9h`. [src:SUBSTRATE-MERGED-2026-08-27]
+## Observed — network egress
+
+- `curl` reached pypi.org, raw.githubusercontent.com and github.com, and failed with `CONNECT tunnel failed, response 403` for arxiv.org, docling.org, www.youtube.com, huggingface.co and ibm.com. [src:EGRESS-MAP-2026-08-27]
+- `WebFetch` was blocked on arxiv.org and www.youtube.com but succeeded on github.com and raw.githubusercontent.com. [src:EGRESS-MAP-2026-08-27]
+- `WebSearch` returned summaries of pages on hosts that are unreachable directly. [src:EGRESS-MAP-2026-08-27]
+- This confirms first-hand the YouTube block that the RAG session had reported second-hand. [src:EGRESS-MAP-2026-08-27]
 
 ## Observed — environment
 
@@ -226,6 +232,18 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - Complete coverage is not evidence of retrieval quality: the corpus is nine documents and the golden set 26 questions, so the pipeline is well specified and only thinly evaluated. [src:CLI-CONTRACT-TESTED-2026-08-27]
 - The eval harness's arithmetic was checked against hand-computed textbook values for RR, recall@k, DCG, nDCG and URI matching, so the retrieval numbers reported elsewhere in this file are sound as arithmetic. [src:COVERAGE-CLOSED-2026-08-27]
 - One assertion failed first and was wrong rather than finding a bug: content-free input embeds to a zero vector by design, and cosine returns 0.0 for it rather than dividing by zero. [src:COVERAGE-CLOSED-2026-08-27]
+
+## Observed — two sessions built the same pipeline
+
+- The pipeline branch advanced by 7,234 insertions across 59 files, including a complete second implementation of the stages this branch already built, at different module paths. [src:PIPELINE-COLLISION-2026-08-28]
+- The two trees also collide directly on `cli.py`, `pipeline.py`, `ooda/loop.py`, `models.py`, `util/text.py` and `util/http.py`. [src:PIPELINE-COLLISION-2026-08-28]
+- The substrate branch was merged and the pipeline branch was not: choosing which implementation survives is an architectural decision over another session's work, not a conflict to resolve. [src:PIPELINE-COLLISION-2026-08-28]
+- The file-list diff `FLEET.md` prescribes is what surfaced it, before any merge was attempted. [src:PIPELINE-COLLISION-2026-08-28]
+
+## Observed — the merged-in quantity check, and its one false positive
+
+- The substrate branch's new `UNSUPPORTED_QUANTITY` check found a real defect here: a claim asserted a duration derived from two timestamps rather than present in its evidence. [src:QUANTITY-CHECK-FALSE-POSITIVE-2026-08-28]
+- It also misread the digit in an identifier as an asserted quantity; identifier vocabularies are now stripped before extraction, and the check was re-tested in three directions afterwards. [src:QUANTITY-CHECK-FALSE-POSITIVE-2026-08-28]
 
 ## Conclusion
 
