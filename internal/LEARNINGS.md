@@ -4118,3 +4118,48 @@ files already on disk.
 3. **When the first measurement refutes the hypothesis, the second is usually
    in the same data.** The missing-terms list that disproved the paraphrase
    story is what pointed at term rarity.
+
+---
+
+## L82 - I threw away the failure names, then reasoned about them
+
+A suite run came back `FAILED (failures=2)` on a tree whose diff touched no
+source at all - one new script and a learnings file. Two clean runs of the
+identical tree since have given 392 OK, and CI on the pushed commit is green
+across three Python versions, so nothing was broken.
+
+**I cannot say which two failed.** The command was
+`python3 -m unittest discover -s tests 2>&1 | tail -3`, which keeps
+`Ran 392 tests`, `FAILED (failures=2)` and a blank line, and discards every
+`FAIL:` line above them. The one run that had the information is the one whose
+information I filtered out.
+
+Second time in this session that a pipe destroyed what I needed. L69 was `$?`
+after a pipeline reporting `tail`'s status, so a command that exited 2 was
+recorded as exit 0. Same shape: a convenience wrapper around a command whose
+*whole* output was the point.
+
+**What can be said, bounded.** The only network-dependent tests are the ten live
+GitHub cross-checks; a token is present in this environment, so they run rather
+than skip, and they occupy 124 of the run's ~200 seconds. During the failing run
+a monitor of mine was polling `api.github.com` every 30 seconds. That makes
+contention on a shared rate limit a plausible cause and nothing more - it is not
+established, the two runs since have passed, and "flake" is not a root cause.
+Recorded as an open question rather than a closed one.
+
+**And the near-miss.** I had committed that tree before its verifying suite
+finished, reasoning that a diff touching no source could only affect the one
+test that reads documentation. The reasoning was right about the diff and the
+wrong call: the measurement was already running, and I substituted an argument
+for it. CI agreeing afterwards is luck confirming a shortcut, not the shortcut
+being sound.
+
+**Rules.**
+1. **Never pipe a test run through `tail`, `head` or a narrow `grep`.** Capture
+   the whole output to a file and filter when reading. You need the failure
+   names exactly on the runs where you did not expect any.
+2. **A summary line is not a diagnosis.** `FAILED (failures=2)` names a count;
+   the two names were three lines further up and are now unrecoverable.
+3. **Do not commit while the run that verifies it is still going**, however
+   safe the diff looks. The cost of waiting is minutes; the cost of being wrong
+   is a green history that means nothing.
