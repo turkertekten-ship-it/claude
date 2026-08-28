@@ -834,3 +834,73 @@ sources:
       One pre-existing test changed expectation as a consequence: a transcript
       whose filename does not match its session id is now `cc:S1:t` rather than
       `cc:S1`. That compound key is the fix, not a regression.
+
+  - id: BOOK-IDENTIFIED-2026-08-28
+    kind: repo_state
+    collected_at: "2026-08-28T01:05Z"
+    method: >-
+      git show of mafirm/KURULUM.md and README.md on two sibling branches, read
+      directly by this session after a delegate located them
+    evidence: >-
+      claude/go-page-ultrathink-ooda-kqxvnc, mafirm/KURULUM.md: "Kurulum tarihi:
+      2026-08-27. Kaynak: *Uluslararası M&A Hukuku · Kurulum Kitabı*, Arel
+      Barzilay, Sürüm 1.0." claude/blind-testing-ooda-5o3s67, README.md heading:
+      "Kör sınama · Uluslararası M&A Hukuku Kurulum Kitabı", body: 'Bu depo,
+      "RePie Arel M&A Avukat Claude Kurulum Kitabı" (Sürüm 1.0, 27 Ağustos
+      2026)'. Neither branch commits the book: a filename search for
+      kitap/pdf/epub returns nothing on go-page and one file on blind-testing,
+      mafirm/KITAP-ERRATA.md, whose own first line reads "Kitap için errata ·
+      Sürüm 1.0 → 1.1" — corrections FOR the book, not the book.
+    note: >-
+      The two branches print different title strings, which a delegate reported
+      as an unreconciled conflict. They reconcile: blind-testing's own heading
+      uses go-page's title, and its body gives the longer form. Same version-1.0
+      document, two names for it. Structure established as nineteen sections
+      §0–§19 from KURULUM.md's "Kontrol edildi: kitabın tamamı §0–§19".
+
+  - id: IMB-IBM-BEHAVIOUR-2026-08-28
+    kind: repo_state
+    collected_at: "2026-08-28T01:08Z"
+    method: >-
+      git show of corpus/ibm-technology/manifest.json on
+      claude/rag-system-data-pipeline-rdkde9 — the branch of the session whose
+      goal string contains "imb youtube"
+    evidence: >-
+      That session built a manifest of IBM Technology YouTube videos, headed
+      "IBM Technology video manifest for the YouTube connector", grading each
+      entry's channel attribution as search_confirmed or search_listed and
+      recording that youtube.com was unreachable so no captions were fetched.
+      The string "imb" appears nowhere on that branch, and no commit states an
+      expansion.
+    note: >-
+      SECOND-HAND AS TO MEANING. That session evidently read "imb" as "IBM" and
+      built accordingly, but acting on a reading is not stating it. U-4 asks
+      what the term designates, and the honest answer remains that the owner has
+      not said. This is strong behavioural evidence, recorded as evidence rather
+      than promoted to a definition.
+
+  - id: SIBLING-BRANCHES-READ-2026-08-28
+    kind: repo_state
+    collected_at: "2026-08-28T01:00Z"
+    method: >-
+      git fetch and git ls-tree over the three sibling branches U-1 named, after
+      a delegate read their diffs in detail
+    evidence: >-
+      claude/rag-system-data-pipeline-rdkde9: 5 commits, 87 files, an
+      src/oodarag/ tree far ahead of the root this branch shares with it —
+      access/probe.py, eval/contamination.py, generate/contract.py,
+      ooda/loop.py, ingest/youtube.py — plus corpus/ibm-technology/manifest.json
+      and internal/ACCESS.md. claude/blind-testing-ooda-5o3s67: 12 commits, 101
+      files, entirely a Turkish M&A practice under mafirm/ with a thirteen-suite
+      blind test; `git merge-base` against this branch is empty, confirming an
+      unrelated root. claude/go-page-ultrathink-ooda-kqxvnc: 58 commits, 128
+      files, a second independent installation of the same book with its own
+      gate hooks and audit script.
+    note: >-
+      The detailed reading of these diffs was delegated and is SECOND-HAND. What
+      this session verified first-hand: the branches exist with these shapes,
+      blind-testing has no merge base with this branch, the two book titles as
+      quoted, the IBM manifest's provenance block, and KI-1's claim about this
+      branch's ingester — which held and has been fixed. Findings the delegate
+      reported from those branches' own prose, including their test counts, are
+      those branches' reports of their own runs and were not reproduced here.

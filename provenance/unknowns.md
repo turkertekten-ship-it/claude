@@ -9,22 +9,27 @@ entry, move the resolved fact into `observations.md` with a new source id.
 
 ---
 
-### U-1 — Contents of the three sibling sessions
+### U-1 — RESOLVED: the three sibling branches were pushed and read
 
-**Unknown:** what was actually said, decided, or built in
-`RAG system and data pipeline`, `Blind testing and OODA analysis`, and
-`Go page review and ultrathink OODA`.
+**Answered** 2026-08-28. All three sessions the entry named have pushed, and
+their diffs have been read. [src:SIBLING-BRANCHES-READ-2026-08-28]
 
-**Why:** only session metadata was retrievable; no transcript-reading tool was
-exposed, the sessions run in other containers, and none had pushed a commit.
+- `RAG system and data pipeline` built an end-to-end retrieval system on the
+  shared `oodarag` root: a runnable capability prober, a citation contract that
+  checks answers against retrieved chunks, a contamination detector, a literal
+  OODA loop, and an IBM Technology video manifest whose entries ingest as
+  metadata-only because youtube.com was unreachable.
+- `Blind testing and OODA analysis` installed a Turkish M&A legal practice from
+  a book, then blind-tested the installation, then patched it while keeping the
+  unpatched original. Its own root commit is unrelated to this branch's.
+- `Go page review and ultrathink OODA` is a second, independent installation of
+  the same book, with gate hooks, an audit script and a limits declaration.
 
-**Resolves when:** the sessions push their branches (then read the diffs), or a
-transcript export is placed in `archive/` and ingested.
-
-**Do not:** infer their contents from their titles. A title is a label the
-system generated, not a record of the work.
-
----
+**What that does not license.** The detailed reading was delegated and is
+second-hand; what this session verified itself is listed in the source entry.
+Those branches' test counts are their own reports of their own runs and were
+not reproduced here. The entry's own warning still applies in a new form: a
+delegate's summary of a diff is not the diff.
 
 ### U-2 — Any Claude conversation history predating 2026-08-27
 
@@ -41,32 +46,41 @@ Privacy → Export data) and drops `conversations.json` into `archive/`.
 
 ---
 
-### U-3 — What "the book" refers to
+### U-3 — RESOLVED: the book is identified, though its text is not held here
 
-**Unknown:** two sessions reference a book — "M&A installation guide per book
-§2–§7" and "encoding book corrections". Which book, and what those sections
-require, is not known here.
+**Answered** 2026-08-28. Two sibling branches install the same document and both
+name it: *Uluslararası M&A Hukuku · Kurulum Kitabı*, Arel Barzilay, Sürüm 1.0
+(`go-page`, `mafirm/KURULUM.md`), also given as "RePie Arel M&A Avukat Claude
+Kurulum Kitabı", Sürüm 1.0, 27 Ağustos 2026 (`blind-testing`, `README.md`).
+Nineteen sections, §0–§19. [src:BOOK-IDENTIFIED-2026-08-28]
 
-**Why:** the reference appears only inside another session's one-line summary.
-The document itself was never in reach of this session.
+The two title strings reconcile rather than conflict: blind-testing's own
+heading uses go-page's title and its body gives the longer form.
 
-**Resolves when:** the source document is committed to a repository, or the
-owner names it.
+**Still not held:** the book's text is committed nowhere. The nearest thing is
+`mafirm/KITAP-ERRATA.md`, which is corrections *for* it. So the earlier session
+summaries — "M&A installation guide per book §2–§7", "encoding book
+corrections" — now resolve to a named document with a known structure, and its
+contents remain unread by this session.
 
----
+### U-4 — Advanced, not closed: "imb" was read as IBM, never defined
 
-### U-4 — What "imb youtube" designates
+**Unknown still:** what "imb youtube" designates, as a statement rather than an
+inference.
 
-**Unknown:** the `RAG system and data pipeline` goal names "imb youtube" as a
-data source. The expansion of "imb" is not established.
+**What is now established:** the session whose goal string contains the phrase
+built `corpus/ibm-technology/manifest.json` — a manifest of IBM Technology
+YouTube videos, with each entry's channel attribution graded
+`search_confirmed` or `search_listed`, and youtube.com recorded as unreachable
+so no captions were fetched. The string "imb" appears nowhere on that branch,
+and no commit states an expansion. [src:IMB-IBM-BEHAVIOUR-2026-08-28]
 
-**Why:** it appears only in that session's goal string, with no accompanying
-definition, and this session did not reach the source.
+**Why it stays open:** acting on a reading is not stating one. That session
+evidently read "imb" as "IBM"; it did not record that it had. The distinction
+matters here more than usual, because the whole point of this register is that
+a plausible expansion adopted silently is indistinguishable from a fact.
 
-**Resolves when:** the owner expands the term, or that session commits a
-resolved source list.
-
----
+**Resolves when:** the owner expands the term.
 
 ### U-5 — Intended relationship between the two repositories
 
