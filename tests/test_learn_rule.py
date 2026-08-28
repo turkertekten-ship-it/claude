@@ -241,6 +241,33 @@ def main() -> int:
                   "--never", "y", "--because", "z", "--dry-run")
         check("--dry-run writes nothing", path.read_text() == before and dry.returncode == 0)
 
+    print("\nprune removes what was retired, and nothing else")
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "CLAUDE.md"
+        path.write_text(BASE)
+        empty = run("prune", "--file", str(path))
+        check("nothing to prune is not an error", empty.returncode == 0, empty.returncode)
+        check("and says so", "nothing superseded" in empty.stdout, empty.stdout[:80])
+
+        run("add", "--file", str(path), "--category", "a", "--never", "one thing",
+            "--because", "a reason")
+        run("add", "--file", str(path), "--category", "b", "--never", "two thing",
+            "--because", "b reason")
+        run("supersede", "1", "--file", str(path), "--category", "a",
+            "--never", "one thing, more precisely", "--because", "the first was too broad")
+        before = path.read_text()
+        dry = run("prune", "--file", str(path), "--dry-run")
+        check("--dry-run writes nothing", path.read_text() == before and dry.returncode == 0)
+        check("and names what it would remove", "1. [a]" in dry.stdout, dry.stdout[:120])
+
+        run("prune", "--file", str(path))
+        rules = lr.read_rules(path.read_text())
+        check("the superseded rule is gone", len(rules) == 2, rules)
+        check("the live rules survive", all("superseded" not in r for r in rules), rules)
+        check("numbering is left alone, so the gap shows",
+              rules[0].startswith("2.") and rules[1].startswith("3."), rules)
+        check("the pre-existing document is untouched", "## House rules" in path.read_text())
+
     print("\nthe thresholds are the ones the real collisions sit at")
     check("contradiction threshold is 0.5", lr.CONTRADICTION == 0.5, lr.CONTRADICTION)
     check("near-duplicate threshold is 0.5", lr.NEAR_DUPLICATE == 0.5, lr.NEAR_DUPLICATE)

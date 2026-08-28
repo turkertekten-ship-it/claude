@@ -97,6 +97,34 @@ def can_supersede(path: Path, number: int) -> tuple[int, str]:
     return 1, f"learn_rule: no rule numbered {number} in {path}"
 
 
+def prune(path: Path, dry_run: bool) -> tuple[int, str]:
+    """Remove superseded rules from the always-loaded file.
+
+    They were kept because a rule records something that went wrong, and that is
+    worth knowing. But this file is loaded into every prompt, and the same
+    sources that describe self-annealing also warn against stuffing the context.
+    A retired rule's reason survives in the loop log and in git history, which
+    is where history belongs; the live file should carry what is live.
+
+    Numbering is left alone. A gap is a legible signal that something was
+    retired, and renumbering would break the references rules make to each
+    other.
+    """
+    text = path.read_text(encoding="utf-8")
+    lines = text.splitlines()
+    removed = [l.strip() for l in lines if RULE.match(l.strip()) and SUPERSEDED.search(l)]
+    if not removed:
+        return 0, "learn_rule: nothing superseded to prune."
+    if dry_run:
+        return 0, "learn_rule: would remove\n  " + "\n  ".join(r[:90] for r in removed)
+    kept = [l for l in lines if not (RULE.match(l.strip()) and SUPERSEDED.search(l))]
+    path.write_text("\n".join(kept).rstrip() + "\n", encoding="utf-8")
+    return 0, ("learn_rule: removed %d superseded rule(s); their reasons survive in the\n"
+               "loop log and in git history. Numbering is unchanged, so the gaps show\n"
+               "where something was retired:\n  " % len(removed)
+               + "\n  ".join(r[:90] for r in removed))
+
+
 def annotate(path: Path, number: int, enforced_by: str | None = None,
              routed_to: str | None = None) -> tuple[int, str]:
     """Record which guard catches a breach of an existing rule.
@@ -239,9 +267,10 @@ def review(path: Path, max_words: int, max_share: int) -> tuple[int, list[str]]:
         findings += 1
         lines.append(f"  OVER BUDGET: {section_words} words / {share}% "
                      f"exceeds {max_words} words / {max_share}%")
-        lines.append("  Nothing here will delete a rule for you. Merge the ones that say the")
-        lines.append("  same thing, and retire any whose `because` no longer describes a risk")
-        lines.append("  this repository still runs — by editing the file, deliberately.")
+        lines.append("  `learn_rule.py prune` removes superseded rules, whose reasons survive")
+        lines.append("  in the loop log and in git history. Beyond that, nothing here deletes a")
+        lines.append("  live rule for you: merge the ones that say the same thing, and retire any")
+        lines.append("  whose `because` no longer describes a risk this repository still runs.")
 
     live = [r for r in rules if not SUPERSEDED.search(r)]
     enforced = [r for r in live if ENFORCED_BY.search(r)]
@@ -316,6 +345,10 @@ def main(argv: list[str]) -> int:
     anngroup.add_argument("--enforced-by", help="the guard that catches a breach")
     anngroup.add_argument("--routed-to", help="the document read when the rule applies")
 
+    pr = sub.add_parser("prune", help="remove superseded rules from the loaded file")
+    pr.add_argument("--file", default=str(DEFAULT_FILE))
+    pr.add_argument("--dry-run", action="store_true")
+
     listing = sub.add_parser("list", help="print the rules already recorded")
     listing.add_argument("--file", default=str(DEFAULT_FILE))
 
@@ -326,6 +359,14 @@ def main(argv: list[str]) -> int:
 
     args = parser.parse_args(argv[1:])
     path = Path(args.file).expanduser()
+
+    if args.command == "prune":
+        if not path.exists():
+            print(f"learn_rule: no such file: {path}", file=sys.stderr)
+            return 2
+        code, message = prune(path, args.dry_run)
+        print(message, file=sys.stderr if code else sys.stdout)
+        return code
 
     if args.command == "annotate":
         if not path.exists():

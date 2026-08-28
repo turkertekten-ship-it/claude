@@ -72,6 +72,15 @@ honest process produces a dishonest artifact.
 State one decision, in one sentence, plus the cheapest thing that would prove
 it wrong. A decision with no falsifier is a preference.
 
+**Check the decision against the request, not only against the last loop.** The
+loop asks what the previous Act opened, and what an Act opens is usually a
+consequence of that Act — so a chain of honest loops walks into its own
+machinery and stays there. In this repository nineteen of twenty consecutive
+commits went to internal hygiene while the request had been a prompt system.
+Every finding was real; the sequence still drifted. Every few loops, count what
+the recent ones delivered against what was asked for, and if the answer is
+mostly upkeep, spend the next one on the request.
+
 Prefer the action that produces evidence over the action that produces output.
 If the situation is genuinely ambiguous and the readings lead to materially
 different work, this is where you ask — not after building the wrong thing.

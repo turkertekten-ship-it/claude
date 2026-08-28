@@ -3,6 +3,9 @@
 Operating rules, prompts, provenance, and tooling for a fleet of Claude
 sessions working on one owner's behalf.
 
+**If you just want to use it: [docs/using-it.md](docs/using-it.md).** One page,
+three situations — a chat, a terminal, the prompts you have already written.
+
 Start with **[CLAUDE.md](CLAUDE.md)**. Then read
 **[provenance/observations.md](provenance/observations.md)** — it is the only
 file here that states established fact, and everything else is built on it.
@@ -44,6 +47,7 @@ bash tools/install_git_hooks.sh    # once per clone: pre-push refuses a red suit
 | `.claude/agents/` | `observer`, `fact-checker`, and `prompt-critic` subagents. |
 | `.claude/` | Hooks and the OODA skill. |
 | `docs/workflows.md` | How the workflows and subagents fit together. |
+| `docs/using-it.md` | How to use it, in order, for someone new. |
 | `docs/prompting.md` | The prompt standard, and where each rule came from. |
 
 ## Prompts that can be checked

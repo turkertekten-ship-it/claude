@@ -786,6 +786,44 @@ Naming a test is a claim that something is enforced, so the eighth invariant
 checks it: a document naming `test_x` must name one that exists. Renaming a
 test would otherwise leave the document promising enforcement that had gone.
 
+## Twenty-fourth loop — counting what the loops delivered
+
+Observe asked a question that should have come sooner: of the last twenty
+commits, how many served the request that started this?
+
+One. Nineteen were internal hygiene — guards, invariants, hooks, registers.
+
+> The surprise is that no individual loop was wrong. Each Observe found a real
+> defect and each Act fixed it. The drift is structural: the loop asks what the
+> previous Act opened, and what an Act opens is almost always a consequence of
+> *that Act*. A chain of honest loops therefore walks into its own machinery and
+> stays there, each step justified by the step before, the request receding
+> without anyone deciding to leave it.
+
+The machinery is not waste — the guards caught this session's own mistakes in
+five of six consecutive loops, and two of those were destructive. But a person
+arriving at this repository now meets twelve tools, nine commands, two skills
+and three agents, with a README that opens on doctrine and a file inventory and
+never says what to do with a prompt.
+
+So this loop went to the request. `docs/using-it.md` is one page and three
+situations — a chat, a terminal, the prompts already written — with the seven
+slots and both CLEAR frameworks on it, linked from the top of the README. Every
+command in it was run as written before it was committed, including the two that
+exit 1 because they report findings.
+
+Rule 13 makes the count a habit rather than a realisation, and the Decide phase
+of the OODA skill now says to check a decision against the request and not only
+against the last loop.
+
+Adding it pushed the learned-rules section past the word budget set in loop
+eight, and the gate refused the commit — the budget mechanism firing on the
+mechanism that fills it. The resolution was the operation the loop-eight design
+had left out: `prune` removes rules already superseded, since a retired rule's
+reason belongs in the loop log and in git history rather than in the context of
+every prompt. Numbering is left alone, so a gap in the sequence is a legible
+mark that something was retired. Add, supersede, prune — the cycle is closed.
+
 ## Still open
 
 `U-6`, `U-7` and `U-8` in [unknowns.md](unknowns.md): what Saraev actually
