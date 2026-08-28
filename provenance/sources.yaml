@@ -841,3 +841,29 @@ sources:
       available off the shelf. What genuinely remains unavailable is a trained
       table-structure model of TableFormer's kind, for merged cells, spanning
       headers and complex layouts.
+
+  - id: ARCHIVE-DIR-MISSING-2026-08-27
+    kind: filesystem
+    collected_at: "2026-08-28T08:00Z"
+    method: "find over /mnt/attach, /mnt/user-data, /mnt/skills, /home, /root for *conversation*/*chat*export*/conversations.json; ls archive/; git ls-files archive/; grep archive .gitignore README.md; python3 tools/ingest_chat_archive.py ingest --archive archive over a copy of this session's own transcript, then search"
+    evidence: >-
+      No conversation export exists anywhere on this container: /mnt/attach and
+      /mnt/user-data are both empty, /mnt/skills holds only the 417 files of
+      the public skill bundle, and the filesystem sweep matched nothing. The
+      only transcript present is this session's own JSONL.
+      Separately, `archive/` did not exist and `git ls-files archive/`
+      returned nothing, while .gitignore line 4 carries `!archive/.gitkeep` -
+      a negation with no committed file to preserve - and README.md lines
+      47-48 instruct the reader to unzip an export into `archive/`.
+      With the directory created and this session's own transcript copied in,
+      the tool indexed 585 messages across 1 conversation, and a search for
+      "docling" and for "kitap" returned correctly attributed verbatim
+      excerpts carrying timestamps, message ids and the source filename.
+    note: >-
+      Two things. The documented workflow was broken in a fresh clone - the
+      directory the README tells you to use did not exist - and archive/.gitkeep
+      is now committed so it does. And the ingest path itself is verified
+      working end to end against a real Claude Code transcript, not only
+      against fixtures, so U-2 is blocked solely on the owner producing an
+      export. The copied transcript was deleted after the test and is not
+      committed; archive/ is git-ignored.

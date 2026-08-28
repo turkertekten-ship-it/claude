@@ -1,0 +1,12 @@
+Conversation exports go here, and are never committed.
+
+  claude.ai    Settings -> Privacy -> Export data, then unzip conversations.json here
+  Claude Code  cp ~/.claude/projects/**/*.jsonl archive/
+
+Then:  python3 tools/ingest_chat_archive.py ingest
+       python3 tools/ingest_chat_archive.py search "some phrase"
+
+This file exists so the directory the README tells you to use is actually
+present. `.gitignore` ignores archive/ and negates this one path; without the
+file committed, that negation had nothing to preserve and the directory did
+not exist in a fresh clone.

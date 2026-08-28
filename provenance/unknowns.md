@@ -45,6 +45,28 @@ threads exists on this container or in the connected Drive.
 Privacy → Export data) and drops `conversations.json` into `archive/`.
 `tools/ingest_chat_archive.py` reads that format directly.
 
+**Re-checked and unblocked on everything except the export itself
+(2026-08-28T08:00Z).** The container was swept again first-hand rather than
+inherited: `/mnt/attach` and `/mnt/user-data` are both empty, and no export
+exists anywhere on disk [src:ARCHIVE-DIR-MISSING-2026-08-27].
+
+**One thing standing in the way was ours, and is fixed.** `archive/` did not
+exist. `.gitignore` carried `!archive/.gitkeep`, a negation with no committed
+file to preserve, while the README instructed the reader to unzip an export
+into that directory — so the documented workflow failed at step one in a fresh
+clone. `archive/.gitkeep` is now committed
+[src:ARCHIVE-DIR-MISSING-2026-08-27].
+
+**The path is verified working, not merely written.** Run against a real
+Claude Code transcript rather than fixtures, the tool indexed 585 messages
+across 1 conversation, and searches returned correctly attributed verbatim
+excerpts with timestamps, message ids and source filenames
+[src:ARCHIVE-DIR-MISSING-2026-08-27]. The test copy was deleted afterwards and
+is not committed.
+
+So this entry now rests on exactly one action, and it is the owner's: produce
+the export. Nothing else is in the way.
+
 ---
 
 ### U-3 — What "the book" refers to
