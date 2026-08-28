@@ -135,7 +135,11 @@ vaka("AA-05", "dayanıklılık yaması doğruluğu bozmadı",
      else "üç davranış vakası da beklendiği gibi")
 
 
-BEKLENEN_VAKA = len(BICIMLER) + 6
+# [AF-02] Bu sayı ÖNCE `len(BICIMLER) + 6` diye hesaplanıyordu — yani
+# kendi kendine atıf. BICIMLER'den bir vaka düşerse beyan da düşer ve
+# koruma tam olarak korumak için var olduğu şeyi göremez. Beyan, ölçtüğü
+# şeyden BAĞIMSIZ olmalıdır; sabit yazılır.
+BEKLENEN_VAKA = 18
 
 
 def rapor():

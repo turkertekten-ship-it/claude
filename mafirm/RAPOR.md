@@ -25,7 +25,7 @@ kendi §16 denetimi yeşile dönmedi.
 3. **Denetim on beş bozmadan on birini görmüyor**; sıfır beceri, kancasız
    ayarlar ve tamamen boş bir `esik.py` taşıyan bir sistemde "DENETİM OK" diyor.
 
-**Yamalı hâlde sistem çalışıyor:** yirmi sekiz çalıştırılabilir takım — **265
+**Yamalı hâlde sistem çalışıyor:** yirmi dokuz çalıştırılabilir takım — **270
 vaka, 15 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15, birimler arası tutarlılık takımının
 kendi mutasyon yakalaması 10/10. Ama **üç mevzuat bulgusu ile kitabın kendi içindeki bir çelişki açık kalır**
@@ -1428,6 +1428,56 @@ bakıyor.
 
 ---
 
+## Yedi buçuk artı yirmi üç · Ölçen şeyi kim ölçüyor
+
+Yirmi üç tur boyunca sistemi ölçtüm. **Ölçen şeyin kendisi** — koşum betiği,
+beyan edilmiş taban, raporun ölçüm cümleleri — büyük ölçüde ölçülmedi.
+
+**Bulgu: on beş takım korumasızdı.** On üçüncü turda bir vaka **iki kez**
+sessizce kayboldu ve `BEKLENEN_VAKA` koruması eklendi — ama **yalnızca o
+turdan sonra yazılan takımlara**. On bir takım korunuyordu, **on beşi
+korunmuyordu**: aralarında B (34 vaka), A (24), O (17), K (15). B'de bir
+vakanın kaybolması tamamen görünmez olurdu.
+
+Düzeltme **ileriye uygulanmış, geriye doldurulmamıştı** — yirmi üçüncü turun
+bulgusunun aynısı: *bir sınıfı örnek örnek düzeltmek, sınıfı kapatmaz.*
+Yirmi yedi takımın hepsi artık vaka sayısını beyan ediyor.
+
+**Ve koruma iki yerde sahteymiş.** `ks_aa` sayıyı `len(BICIMLER) + 6` diye
+**hesaplıyordu** — kendi kendine atıf. Listeden bir vaka düşerse beyan da
+düşer ve koruma, korumak için var olduğu şeyi göremez. Beyan, ölçtüğü şeyden
+**bağımsız** olmalıdır. `ks_f` ise `sonuclar` listesi tutmuyor; toplu geriye
+doldurma bunu görmedi ve **F'i çökertti** — kör bir toplu düzenlemenin bedeli,
+kendi elimle.
+
+### Beyan bir vakanın GEÇMESİNİ yakalıyordu; BAŞKA SEBEPLE düşmesini değil
+
+`beklenen.json` bir vakanın geçmeye başlamasını yakalar (BEKLENMEDİK GEÇİŞ).
+Ama bir vaka **başka bir sebeple** düşmeye başlarsa hâlâ BEKLENEN raporlanır:
+**yeni bir kusur, eski bir beyanın arkasına saklanabilir.**
+
+İlk çözümüm yanlıştı: beyan metniyle canlı ayrıntıyı kelime örtüşmesiyle
+kıyasladım ve **on iki beyanın onunu** işaretledi — oysa elle kıyasladığımda
+hepsi doğruydu. Beyan bir **gerekçedir** (neden bırakıldı), canlı ayrıntı bir
+**ölçümdür** (ne oldu); ikisi haklı olarak farklı kelimeler kullanır. Onda
+sekizi yanlış işaretleyen bir ölçüt, kırmızıyı görmezden gelmeyi öğretir.
+
+Doğru mekanizma: beyan anında görülen ayrıntı **belirti** olarak kaydedilir ve
+her koşumda karşılaştırılır. Artık *"vaka hâlâ düşüyor"* değil, *"vaka hâlâ
+**aynı sebeple** düşüyor"* ölçülüyor.
+
+> Ve AF-02'nin ilk hâli de dizge varlığına bakıyordu: beyan satırı silindiğinde
+> `rapor()` içindeki **kullanım** hâlâ o dizgeyi taşıyor ve kontrol boşuna
+> geçiyordu. Mutasyon tam olarak böyle sağ kaldı. Ölçüt modül düzeyinde bir
+> **atamaya** bağlandı.
+
+Temiz çıkan iki şey de ölçüldü: diskteki yirmi dokuz takımın hepsi koşum
+betiği tarafından **çağrılıyor** (bir takım eklenip bağlanmazsa diskte durur,
+raporda anılır ve hiç koşmaz), ve raporun ölçüm iddiaları canlı çıktıyla
+uyuşuyor.
+
+---
+
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
 
 | Bölüm | Beklenen | Gerçek | Sebep |
@@ -1534,6 +1584,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | AC · ortam bağımsızlığı | *hiç ölçülmemişti* | **temiz** — yedi dilim, beş yerel ayar, tek karar |
 | AD · komutların iddiaları | *hiç okunmamıştı* | **temiz** — canlı kusur yok; iddialar artık kilitli |
 | AE · desen sınıfı | *örnek örnek düzeltiliyordu* | **temiz** — sınıf tarandı, üç kusur çıktı |
+| AF · aparatın iddiaları | *15 takım korumasızdı* | **temiz** — koruma geriye dolduruldu |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -1591,8 +1642,8 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # 28 çalıştırılabilir takım:
-                                  #   265 vaka + 15 mutasyon (D)
+./sinama/hepsi.sh                 # 29 çalıştırılabilir takım:
+                                  #   270 vaka + 15 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -1661,9 +1712,10 @@ Dokuz takım, 96 vaka:
 | AC | **Ortam bağımsızlığı** — cevap makineye göre değişiyor mu | §6, §3, §12 |
 | AD | **Komutların iddiaları** — §15 başka bileşenler hakkında ne söylüyor | §15, §9, §0 |
 | AE | **Desen sınıfı taraması** — Türkçeyi ve kendi kimliklerini okumak | §12, B-10, U-05, AD-01 |
+| AF | **Aparatın kendi iddiaları** — ölçen şeyi kim ölçüyor | §16, beklenen.json |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**265 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**270 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)

@@ -162,7 +162,17 @@ finally:
         f.write(_yedek)
 
 
+# [AF-02] Kaybolan bir vaka, kırmızı bir vakadan kötüdür: kimse aramaz.
+# Bu koruma on üçüncü turda eklendi ama YALNIZCA sonrasında yazılan
+# takımlara; on beş takım korumasız kaldı. Geriye doldurma.
+BEKLENEN_VAKA = 34
+
+
 def rapor():
+    if len(sonuclar) != BEKLENEN_VAKA:
+        vaka("B-00", "takım beyan ettiği vaka sayısını taşıyor", False,
+             "beyan %d, bulunan %d" % (BEKLENEN_VAKA, len(sonuclar)))
+
     print("=" * 100)
     print("KÖR SINAMA B — beş kapı, on bir doktrin kuralına karşı")
     print("=" * 100)

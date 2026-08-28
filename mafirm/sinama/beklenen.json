@@ -3,51 +3,63 @@
   "vakalar": {
     "A-07": {
       "sinif": "eski-api-kaydi",
-      "neden": "Eski bildirilmeli() birim taşımaz; §19 pilotunda yanlış cevap verir. Kusurun KAYDI olarak bırakıldı; yeni API (degerlendir) A-08y ile doğru cevabı veriyor ve eski API artık uyarıyor."
+      "neden": "Eski bildirilmeli() birim taşımaz; §19 pilotunda yanlış cevap verir. Kusurun KAYDI olarak bırakıldı; yeni API (degerlendir) A-08y ile doğru cevabı veriyor ve eski API artık uyarıyor.",
+      "belirti": "beklenen : bildirime tabi (B)"
     },
     "A-09": {
       "sinif": "eski-api-kaydi",
-      "neden": "Eski imza aynı işlemi iki bağlantısız biçimde ister. A-09y tek modelden doğru sonucu gösteriyor."
+      "neden": "Eski imza aynı işlemi iki bağlantısız biçimde ister. A-09y tek modelden doğru sonucu gösteriyor.",
+      "belirti": "beklenen : True"
     },
     "A-10": {
       "sinif": "eski-api-kaydi",
-      "neden": "Eski imza iki değerlidir; üç değerli cevap A-10y'de."
+      "neden": "Eski imza iki değerlidir; üç değerli cevap A-10y'de.",
+      "belirti": "beklenen : belirlenemiyor"
     },
     "A-11": {
       "sinif": "eski-api-kaydi",
-      "neden": "Eski imza None'ı TypeError'a çevirir; yeni API BILINMIYOR'u modeller."
+      "neden": "Eski imza None'ı TypeError'a çevirir; yeni API BILINMIYOR'u modeller.",
+      "belirti": "beklenen : belirlenemiyor sonucu ya da açık hata iletisi"
     },
     "A-13": {
       "sinif": "eski-api-kaydi",
-      "neden": "Eski imzada 'diğer taraflar' koruması yok; A-13y'de var."
+      "neden": "Eski imzada 'diğer taraflar' koruması yok; A-13y'de var.",
+      "belirti": "beklenen : karşılayamamalı"
     },
     "A-14": {
       "sinif": "eski-api-kaydi",
-      "neden": "Eski çağrı biçiminde komut satırı yok; A-14y gerçek CLI'yi gösteriyor."
+      "neden": "Eski çağrı biçiminde komut satırı yok; A-14y gerçek CLI'yi gösteriyor.",
+      "belirti": "beklenen : hesap çıktısı"
     },
     "A-15": {
       "sinif": "eski-api-kaydi",
-      "neden": "Eski imza birleşme/devralma ayrımı taşımaz; A-15y taşıyor."
+      "neden": "Eski imza birleşme/devralma ayrımı taşımaz; A-15y taşıyor.",
+      "belirti": "beklenen : ayrım var"
     },
     "B-28": {
       "sinif": "ontanimli-bosluk",
-      "neden": "Gerçek kişi adı desenle yakalanamaz; mekanizma bir KAYITTIR ve öntanımlı olarak boştur. B-34 kayıt doluyken kapının ateşlediğini kanıtlıyor; denetim boş kaydı her koşumda sesli bildiriyor."
+      "neden": "Gerçek kişi adı desenle yakalanamaz; mekanizma bir KAYITTIR ve öntanımlı olarak boştur. B-34 kayıt doluyken kapının ateşlediğini kanıtlıyor; denetim boş kaydı her koşumda sesli bildiriyor.",
+      "belirti": "ateşlemeli: True   ateşledi: False  ateşleyen kapılar: hiçbiri"
     },
     "J-01s": {
       "sinif": "kitaba-sadik-karsilastirma",
-      "neden": "Kitaba sadık esik.py'nin komut satırı arayüzü yoktur. Bu vaka kitabın davranışını ÖLÇER; yamalı sürüm J-01y ile geçiyor."
+      "neden": "Kitaba sadık esik.py'nin komut satırı arayüzü yoktur. Bu vaka kitabın davranışını ÖLÇER; yamalı sürüm J-01y ile geçiyor.",
+      "belirti": "beklenen: hesap çıktısı          gerçek: hesap yok"
     },
     "J-07s": {
       "sinif": "kitaba-sadik-karsilastirma",
-      "neden": "Kitaba sadık kapılar §19'un DOĞRU cevabını da bloklar. Raporun merkezi bulgusu; yamalı sürüm J-07y ile geçiyor."
+      "neden": "Kitaba sadık kapılar §19'un DOĞRU cevabını da bloklar. Raporun merkezi bulgusu; yamalı sürüm J-07y ile geçiyor.",
+      "belirti": "beklenen: geçer (0)              gerçek: BLOKLANDI ['arastirma']"
     },
     "T-06": {
       "sinif": "kitabin-sinir-hatasi",
-      "neden": "§18.6 'üç sözleşme deposundan BİRİ AGPL' diyor; oysa katalogda iki AGPL depo var — lexpredict-lexnlp (§13.4) ve courtlistener (§13.5, kitap ona 'açık (depoya bakın)' diyor, bkz. G-01). Bu KİTABIN metnindeki bir kusurdur, kurulumun değil; düzeltmesi KITAP-ERRATA.md'de yazılı. Vaka, sınır düzeltilene kadar kitabın davranışının kaydı olarak açık kalır."
+      "neden": "§18.6 'üç sözleşme deposundan BİRİ AGPL' diyor; oysa katalogda iki AGPL depo var — lexpredict-lexnlp (§13.4) ve courtlistener (§13.5, kitap ona 'açık (depoya bakın)' diyor, bkz. G-01). Bu KİTABIN metnindeki bir kusurdur, kurulumun değil; düzeltmesi KITAP-ERRATA.md'de yazılı. Vaka, sınır düzeltilene kadar kitabın davranışının kaydı olarak açık kalır.",
+      "belirti": "PyMuPDF zaten §13.7'de KURULMAYAN olarak ayrı sayılıyor. Kalan AGPL depolar: ['LexPredict/lexpredict-lexnlp', 'freelawpr"
     },
     "U-02": {
       "sinif": "kitabin-ic-celiskisi",
-      "neden": "Bulgu KİTABA SADIK metindedir: §6 mimari.md'nin kapanış öncesi koşul listesindeki 5. madde, işlemi YETKİLENDİREN organ kararı ile Ltd. Şti.'de TTK m.595/2 genel kurul onayını tek satırda topluyor. Kitabın KENDİ pay-devri.md'si ikincisini 'devri tamamlayan kurucu işlem' sayar — kurucu bir işlem, kapanışın ÖNKOŞULU olamaz; aksi hâlde kapanış günü 1. adımı ('koşulların karşılandığının teyidi') hiçbir zaman doğrulanamaz. İki tarafı da kitabın içinde olduğu için dış kaynak gerekmiyor; hangisinin doğru olduğu ise bir hukuki nitelendirmedir ve §9/§11 uyarınca yetkili bir insana aittir. Kitabın düzyazısı bu yüzden AYNEN bırakıldı. Türetilmiş dosyalar (kosul-takibi, kapanis-listesi — bu kurulumda yazılanlar) ayrımı açıkça taşır, dolayısıyla becerileri kullanan kişi doğru sırayı görür. Önerilen tek satırlık düzeltmenin U-02'yi ve U-01'i birlikte yeşile aldığı kum havuzunda gösterildi; uygulanması onay bekliyor. KITAP-ERRATA.md §6 kaydına bakınız."
+      "neden": "Bulgu KİTABA SADIK metindedir: §6 mimari.md'nin kapanış öncesi koşul listesindeki 5. madde, işlemi YETKİLENDİREN organ kararı ile Ltd. Şti.'de TTK m.595/2 genel kurul onayını tek satırda topluyor. Kitabın KENDİ pay-devri.md'si ikincisini 'devri tamamlayan kurucu işlem' sayar — kurucu bir işlem, kapanışın ÖNKOŞULU olamaz; aksi hâlde kapanış günü 1. adımı ('koşulların karşılandığının teyidi') hiçbir zaman doğrulanamaz. İki tarafı da kitabın içinde olduğu için dış kaynak gerekmiyor; hangisinin doğru olduğu ise bir hukuki nitelendirmedir ve §9/§11 uyarınca yetkili bir insana aittir. Kitabın düzyazısı bu yüzden AYNEN bırakıldı. Türetilmiş dosyalar (kosul-takibi, kapanis-listesi — bu kurulumda yazılanlar) ayrımı açıkça taşır, dolayısıyla becerileri kullanan kişi doğru sırayı görür. Önerilen tek satırlık düzeltmenin U-02'yi ve U-01'i birlikte yeşile aldığı kum havuzunda gösterildi; uygulanması onay bekliyor. KITAP-ERRATA.md §6 kaydına bakınız.",
+      "belirti": "İKİ LİSTEDE BİRDEN: genel kurul onayı. Kapanış günü 1. adımı 'koşulların karşılandığının teyidi'dir; koşul sayılan bir i"
     }
   },
   "kabuk_takimlari": {
@@ -58,5 +70,6 @@
     }
   },
   "_dogrulama": "2026-08-28",
-  "_bozulma_sinifi": "KURULUMA BAĞLI — her beyan, kurulum değiştiğinde yeniden gerekçelendirilmelidir"
+  "_bozulma_sinifi": "KURULUMA BAĞLI — her beyan, kurulum değiştiğinde yeniden gerekçelendirilmelidir",
+  "_belirti_aciklama": "Her beyanın BELİRTİSİ: vaka beyan edildiğinde koşumda görünen ayrıntı satırının parmak izi. beklenen.json bir vakanın GEÇMEYE başlamasını zaten yakalar (BEKLENMEDİK GEÇİŞ); belirti, vakanın BAŞKA BİR SEBEPLE düşmeye başlamasını yakalar — yani yeni bir kusurun eski bir beyanın arkasına saklanmasını. AF-04 bunu her koşumda karşılaştırır."
 }

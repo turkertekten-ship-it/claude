@@ -241,7 +241,17 @@ vaka("K-15", "koltuk kapısı yöntem dosyalarını bloklamıyor", rc3 == 0,
      "yöntem dosyası -> çıkış %d" % rc3)
 
 
+# [AF-02] Kaybolan bir vaka, kırmızı bir vakadan kötüdür: kimse aramaz.
+# Bu koruma on üçüncü turda eklendi ama YALNIZCA sonrasında yazılan
+# takımlara; on beş takım korumasız kaldı. Geriye doldurma.
+BEKLENEN_VAKA = 15
+
+
 def rapor():
+    if len(sonuclar) != BEKLENEN_VAKA:
+        vaka("K-00", "takım beyan ettiği vaka sayısını taşıyor", False,
+             "beyan %d, bulunan %d" % (BEKLENEN_VAKA, len(sonuclar)))
+
     print("=" * 96)
     print("KÖR SINAMA K — yönlendirme, üst bilgi ve koltuk sağlaması")
     print("=" * 96)

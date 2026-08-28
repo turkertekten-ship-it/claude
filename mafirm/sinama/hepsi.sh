@@ -82,6 +82,8 @@ python3 "$S/ks_ad_komut.py"; topla "AD · komutların iddiaları" $?
 echo
 python3 "$S/ks_ae_desen.py"; topla "AE · desen sınıfı taraması" $?
 echo
+python3 "$S/ks_af_aparat.py"; topla "AF · aparatın kendi iddiaları" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

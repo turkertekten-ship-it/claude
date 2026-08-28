@@ -1,5 +1,5 @@
 # hepsi.sh koşum kaydı — denetim.sh bu dosyayı okur.
 # ATOMİK yazılır (mktemp + mv): yarım hâli hiçbir zaman görünmez.
-tarih: 2026-08-28T10:47:28Z
-vaka: 265
+tarih: 2026-08-28T10:59:37Z
+vaka: 270
 sinyal: 0

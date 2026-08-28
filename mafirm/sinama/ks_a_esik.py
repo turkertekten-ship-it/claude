@@ -241,7 +241,17 @@ y_vaka("A-15y", "birleşme işlemi modelleniyor mu", "evet", _m.sonuc,
 
 
 
+# [AF-02] Kaybolan bir vaka, kırmızı bir vakadan kötüdür: kimse aramaz.
+# Bu koruma on üçüncü turda eklendi ama YALNIZCA sonrasında yazılan
+# takımlara; on beş takım korumasız kaldı. Geriye doldurma.
+BEKLENEN_VAKA = 24
+
+
 def rapor():
+    if len(sonuclar) != BEKLENEN_VAKA:
+        vaka("A-00", "takım beyan ettiği vaka sayısını taşıyor", False,
+             "beyan %d, bulunan %d" % (BEKLENEN_VAKA, len(sonuclar)))
+
     print("=" * 78)
     print("KÖR SINAMA A — rekabet eşiği (şartnameden türetilmiş, koddan değil)")
     print("=" * 78)

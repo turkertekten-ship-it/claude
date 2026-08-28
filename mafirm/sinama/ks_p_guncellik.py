@@ -134,7 +134,17 @@ vaka("P-06", "yıldız sayıları taşıyan dosya GÜNLÜK sınıfında",
      "uygulanır ve bu kez sınıf onu görünür kılıyor" % gs)
 
 
+# [AF-02] Kaybolan bir vaka, kırmızı bir vakadan kötüdür: kimse aramaz.
+# Bu koruma on üçüncü turda eklendi ama YALNIZCA sonrasında yazılan
+# takımlara; on beş takım korumasız kaldı. Geriye doldurma.
+BEKLENEN_VAKA = 6
+
+
 def rapor():
+    if len(sonuclar) != BEKLENEN_VAKA:
+        vaka("P-00", "takım beyan ettiği vaka sayısını taşıyor", False,
+             "beyan %d, bulunan %d" % (BEKLENEN_VAKA, len(sonuclar)))
+
     print("=" * 96)
     print("KÖR SINAMA P — raporun kendi teslimatlarına güncellik kuralı")
     print("=" * 96)

@@ -149,7 +149,17 @@ vaka("M-04", "sadık sistemde kalan her vaka errata'da ya da raporda açıklanm�
      % (len(kaldi_once), aciklanmamis or "yok"))
 
 
+# [AF-02] Kaybolan bir vaka, kırmızı bir vakadan kötüdür: kimse aramaz.
+# Bu koruma on üçüncü turda eklendi ama YALNIZCA sonrasında yazılan
+# takımlara; on beş takım korumasız kaldı. Geriye doldurma.
+BEKLENEN_VAKA = 4
+
+
 def rapor():
+    if len(sonuclar) != BEKLENEN_VAKA:
+        vaka("M-00", "takım beyan ettiği vaka sayısını taşıyor", False,
+             "beyan %d, bulunan %d" % (BEKLENEN_VAKA, len(sonuclar)))
+
     print("=" * 96)
     print("KÖR SINAMA M — errata ↔ sınama izlenebilirliği")
     print("=" * 96)

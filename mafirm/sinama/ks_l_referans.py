@@ -128,7 +128,17 @@ yok = [g for g in gerekli if not os.path.exists(os.path.join(_KOK_COZ, g))]
 vaka("L-06", "hafiza/ dosyalarının hepsi var", not yok, "eksik: %s" % (yok or "yok"))
 
 
+# [AF-02] Kaybolan bir vaka, kırmızı bir vakadan kötüdür: kimse aramaz.
+# Bu koruma on üçüncü turda eklendi ama YALNIZCA sonrasında yazılan
+# takımlara; on beş takım korumasız kaldı. Geriye doldurma.
+BEKLENEN_VAKA = 6
+
+
 def rapor():
+    if len(sonuclar) != BEKLENEN_VAKA:
+        vaka("L-00", "takım beyan ettiği vaka sayısını taşıyor", False,
+             "beyan %d, bulunan %d" % (BEKLENEN_VAKA, len(sonuclar)))
+
     print("=" * 96)
     print("KÖR SINAMA L — çapraz referans bütünlüğü")
     print("=" * 96)

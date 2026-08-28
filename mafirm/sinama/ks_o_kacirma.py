@@ -96,7 +96,17 @@ vaka("O-17", "normalleştirme kapının öz-sınamasını bozmadı",
      kapi._selftest() == 0)
 
 
+# [AF-02] Kaybolan bir vaka, kırmızı bir vakadan kötüdür: kimse aramaz.
+# Bu koruma on üçüncü turda eklendi ama YALNIZCA sonrasında yazılan
+# takımlara; on beş takım korumasız kaldı. Geriye doldurma.
+BEKLENEN_VAKA = 17
+
+
 def rapor():
+    if len(sonuclar) != BEKLENEN_VAKA:
+        vaka("O-00", "takım beyan ettiği vaka sayısını taşıyor", False,
+             "beyan %d, bulunan %d" % (BEKLENEN_VAKA, len(sonuclar)))
+
     print("=" * 96)
     print("KÖR SINAMA O — sır kapısının kaçırma yüzeyi (Unicode)")
     print("=" * 96)

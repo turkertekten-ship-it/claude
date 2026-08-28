@@ -97,7 +97,16 @@ vaka("N-08", "kanıt, üç mevzuat bulgusunu çözdüğünü İDDİA ETMİYOR",
      "erişimin neden yok olduğunu kanıtlamak, bulguyu kapatmaz")
 
 
+# [AF-02] Kaybolan bir vaka, kırmızı bir vakadan kötüdür: kimse aramaz.
+# Koruma on üçüncü turda eklendi ama yalnızca sonrasında yazılan takımlara.
+BEKLENEN_VAKA = 8
+
+
 def rapor_yaz():
+    if len(sonuclar) != BEKLENEN_VAKA:
+        vaka("N-00", "takım beyan ettiği vaka sayısını taşıyor", False,
+             "beyan %d, bulunan %d" % (BEKLENEN_VAKA, len(sonuclar)))
+
     print("=" * 96)
     print("KÖR SINAMA N — raporun olumsuz iddialarının kanıtı (CLAUDE.md §2)")
     print("=" * 96)

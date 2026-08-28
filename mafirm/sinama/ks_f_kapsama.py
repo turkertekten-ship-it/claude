@@ -113,7 +113,21 @@ EK = [
 ]
 
 
+# [AF-02] Kaybolan bir vaka, kırmızı bir vakadan kötüdür: kimse aramaz.
+# Koruma on üçüncü turda eklendi ama yalnızca sonrasında yazılan takımlara.
+BEKLENEN_VAKA = 2   # F-01 ve F-02; dogrula() içinde basılır
+BEKLENEN_KURAL = 11   # işletim sözleşmesinin kural sayısı
+
+
 def rapor():
+    # F, diğer takımlar gibi bir `sonuclar` listesi TUTMAZ: matris KURALLAR
+    # üzerinde yürür ve iki doğrulama vakasını dogrula() basar. Toplu geriye
+    # doldurma bunu görmedi ve F'i çökertti — kör bir toplu düzenlemenin
+    # bedeli. Koruma F'in KENDİ yapısına göre yazıldı.
+    if len(KURALLAR) != BEKLENEN_KURAL:
+        print("KALDI  F-00  matris beyan ettiği kural sayısını taşıyor")
+        print("        beyan %d, bulunan %d" % (BEKLENEN_KURAL, len(KURALLAR)))
+
     print("=" * 96)
     print("KÖR SINAMA F — doktrin kapsama matrisi")
     print("=" * 96)
