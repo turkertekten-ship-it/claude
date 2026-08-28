@@ -12,7 +12,13 @@
 # uygulanır. Ölçülen şey artık yalnızca mutasyonun etkisidir.
 set -u
 KAYNAK="${MAFIRM:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
-KUM="${TMPDIR:-/tmp}/ks_d_kum"
+# [AL-08 · kırkıncı tur] Kum havuzu yolu SABİTTİ ve iki koşum birbirini
+# eziyordu. Ölçüldü: D arka planda koşarken önde tekrar çağrıldığında taban
+# çizgisi "5 hata" verdi ve mutasyon sınaması geçersiz sayıldı — sistemde
+# hiçbir şey bozuk olmadığı hâlde. Otuzuncu turun yan etki sınıfı, ağacın
+# DIŞINDA olduğu için AL'in göremediği yerde. Her koşum kendi havuzunu alır.
+KUM="$(mktemp -d)/ks_d_kum"
+trap 'rm -rf "$(dirname "$KUM")"' EXIT
 gecti=0; kaldi=0
 
 kur() {

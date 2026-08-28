@@ -1,5 +1,5 @@
 ###############################################################
-#  KÖR SINAMA TAKIMI — 2026-08-28T14:42:52Z
+#  KÖR SINAMA TAKIMI — 2026-08-28T14:58:32Z
 ###############################################################
 
 /root/mafirm/sinama/ks_a_esik.py:45: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
@@ -306,9 +306,9 @@ KÖR SINAMA M — errata ↔ sınama izlenebilirliği
 GEÇTİ M-01   her errata maddesi bir sınama vakasına atıf yapıyor
         65 madde · atıfsız 0: yok
 GEÇTİ M-02   atıf yapılan her vaka kimliği gerçekten tanımlı
-        422 tanımlı kimlik · uydurma dayanak: yok
+        423 tanımlı kimlik · uydurma dayanak: yok
 GEÇTİ M-03   [A] ve [B] maddelerinin atıfları gerçek vakalara bağlı
-        sadık koşumda kalan: 51 · tanımlı vaka: 426 · bağsız madde: yok
+        sadık koşumda kalan: 51 · tanımlı vaka: 427 · bağsız madde: yok
 GEÇTİ M-04   sadık sistemde kalan her vaka errata'da ya da raporda açıklanmış
         51 vaka kaldı · açıklanmamış: yok
 ------------------------------------------------------------------------------------------------
@@ -614,39 +614,39 @@ GEÇTİ Z-08   denetim beyan edilen asgari kontrol sayısını taşıyor
 KÖR SINAMA AA — kapı arızalandığında hangi yöne düşüyor
 ================================================================================================
 GEÇTİ AA-01a    bozuk olay: bozuk JSON
-        çıkış 2 (29 ms)
+        çıkış 2 (43 ms)
 GEÇTİ AA-01b    bozuk olay: boş girdi
-        çıkış 2 (29 ms)
+        çıkış 2 (32 ms)
 GEÇTİ AA-01c    bozuk olay: tool_input yok
-        çıkış 0 (32 ms)
+        çıkış 0 (37 ms)
 GEÇTİ AA-01d    bozuk olay: tool_input dizge
-        çıkış 0 (31 ms)
+        çıkış 0 (36 ms)
 GEÇTİ AA-01e    bozuk olay: tool_input liste
         çıkış 0 (33 ms)
 GEÇTİ AA-01f    bozuk olay: tool_name yok
-        çıkış 0 (30 ms)
+        çıkış 0 (34 ms)
 GEÇTİ AA-01g    bozuk olay: tool_name None
-        çıkış 0 (36 ms)
+        çıkış 0 (33 ms)
 GEÇTİ AA-01h    bozuk olay: içerik None
-        çıkış 0 (32 ms)
+        çıkış 0 (31 ms)
 GEÇTİ AA-01i    bozuk olay: içerik sayı
-        çıkış 0 (30 ms)
+        çıkış 0 (32 ms)
 GEÇTİ AA-01j    bozuk olay: derin iç içe
-        çıkış 0 (30 ms)
+        çıkış 0 (37 ms)
 GEÇTİ AA-01k    bozuk olay: JSON dizi (nesne değil)
-        çıkış 2 (29 ms)
+        çıkış 2 (37 ms)
 GEÇTİ AA-01l    bozuk olay: JSON null
-        çıkış 2 (30 ms)
+        çıkış 2 (36 ms)
 GEÇTİ AA-02     ayrıştırma SONRASI arıza politikası yazılı ve dışarıda kapalı
         kanca, ayrıştırma sonrası istisnayı yakalayıp dışarı kanalında 2 döndürüyor
 GEÇTİ AA-03-20  boşluksuz 20000 karakter bütçe içinde bitiyor
-        61 ms (bütçe 5000 ms) çıkış 0
+        66 ms (bütçe 5000 ms) çıkış 0
 GEÇTİ AA-03-80  boşluksuz 80000 karakter bütçe içinde bitiyor
-        157 ms (bütçe 5000 ms) çıkış 0
+        182 ms (bütçe 5000 ms) çıkış 0
 GEÇTİ AA-03-200 boşluksuz 200000 karakter bütçe içinde bitiyor
-        344 ms (bütçe 5000 ms) çıkış 0
+        391 ms (bütçe 5000 ms) çıkış 0
 GEÇTİ AA-04     400 KB gerçek düzyazı bütçe içinde
-        435 ms çıkış 0
+        513 ms çıkış 0
 GEÇTİ AA-05     dayanıklılık yaması doğruluğu bozmadı
         üç davranış vakası da beklendiği gibi
 ------------------------------------------------------------------------------------------------
@@ -816,15 +816,16 @@ GEÇTİ AK-05   deposu erişilebilir hiçbir bulgu doğrulanmamış bekletilmiyo
 ------------------------------------------------------------------------------------------------
 5 vaka · 5 geçti · 0 beklenen · 0 SİNYAL
 
-GEÇTİ          AL-01  hiçbir takım korunan canlı yola yazmıyor                  
-GEÇTİ          AL-02  korunan dosyalar koşum SIRASINDA hiçbir an değişmiyor     
-GEÇTİ          AL-03  takım koşumu ağacı değiştirmiyor                          
-GEÇTİ          AL-04  sinama/ dizininde kalıntı .py yok                         
-GEÇTİ          AL-05  alarm yük taşıyor: kalıntı uyarıyı susturur               
-GEÇTİ          AL-06  hiçbir takım başka bir takımın koşum kaydını okumuyor     
-GEÇTİ          AL-07  SONUC-once.txt donmuş arşiv: hiçbir koşucu onu yazmıyor   
+GEÇTİ          AL-01  hiçbir takım korunan canlı yola yazmıyor                   
+GEÇTİ          AL-02  korunan dosyalar koşum SIRASINDA hiçbir an değişmiyor      
+GEÇTİ          AL-03  takım koşumu ağacı değiştirmiyor                           
+GEÇTİ          AL-04  sinama/ dizininde kalıntı .py yok                          
+GEÇTİ          AL-05  alarm yük taşıyor: kalıntı uyarıyı susturur                
+GEÇTİ          AL-06  hiçbir takım başka bir takımın koşum kaydını okumuyor      
+GEÇTİ          AL-08  hiçbir takım ağaç dışında sabit adlı bir yol paylaşmıyor   
+GEÇTİ          AL-07  SONUC-once.txt donmuş arşiv: hiçbir koşucu onu yazmıyor    
 ----------------------------------------------------------------------------------------------------
-7 vaka · 7 geçti · 0 beklenen · 0 SİNYAL
+8 vaka · 8 geçti · 0 beklenen · 0 SİNYAL
 
 GEÇTİ          AM-01  eşik denetiminin vaadi ile taradığı kapsam örtüşüyor       
 GEÇTİ          AM-02  eşik bayatlığını fark eden bir mekanizma var               

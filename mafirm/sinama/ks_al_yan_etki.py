@@ -258,6 +258,30 @@ vaka("AL-06", "hiçbir takım başka bir takımın koşum kaydını okumuyor",
      not okuyan, "okuyan: %s" % (okuyan or "yok"))
 
 
+# --- AL-08 · takımlar ağacın DIŞINDA da sabit yol paylaşmıyor ---------
+# AL-01..03 ağacı koruyor; ama bir takım `${TMPDIR}/sabit-ad` gibi PAYLAŞILAN
+# bir yol kullanırsa iki koşum birbirini ezer ve takım, sistemde hiçbir şey
+# bozuk olmadığı hâlde kırmızı verir. Ölçüldü: D'nin kum havuzu sabitti ve
+# eşzamanlı iki koşumda taban çizgisi "5 hata" verdi. Yan etki sınıfının
+# ağaç dışındaki hâli.
+_sabit_kum = []
+for _t in _takimlar() + ["ks_d_denetim.sh", "ks_e_tutarlilik.sh"]:
+    _y = os.path.join(_SINAMA, _t)
+    if not os.path.exists(_y):
+        continue
+    _k = open(_y, encoding="utf-8", errors="replace").read()
+    _kod = "\n".join(r for r in _k.splitlines()
+                     if not r.lstrip().startswith("#"))
+    # TMPDIR/tmp altında SABİT adlı bir yol (mktemp değil)
+    if re.search(r'\$\{TMPDIR:-/tmp\}/[\w.-]+"|"/tmp/[\w.-]+"', _kod) and \
+       "mktemp" not in _kod:
+        _sabit_kum.append(_t)
+vaka("AL-08", "hiçbir takım ağaç dışında sabit adlı bir yol paylaşmıyor",
+     not _sabit_kum,
+     "sabit yol kullanan: %s — eşzamanlı iki koşum birbirini ezer"
+     % (_sabit_kum or "yok"))
+
+
 # --- AL-07 · MUAFİYETİN SINANMASI: SONUC-once.txt gerçekten arşiv mi ---
 # AL-06, M-03'ün SONUC-once.txt okumasını muaf tutuyor. Muafiyetin dayanağı
 # şu iddiadır: o dosyayı hiçbir koşucu YAZMAZ, donmuş bir arşivdir. Sınanmamış
@@ -282,7 +306,7 @@ vaka("AL-07", "SONUC-once.txt donmuş arşiv: hiçbir koşucu onu yazmıyor",
 
 
 # [AF-02] Kaybolan bir vaka, kırmızı bir vakadan kötüdür: kimse aramaz.
-BEKLENEN_VAKA = 7
+BEKLENEN_VAKA = 8
 
 
 def rapor():

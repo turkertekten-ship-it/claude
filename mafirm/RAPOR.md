@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** kırk beş çalıştırılabilir takım — **354
+**Yamalı hâlde sistem çalışıyor:** kırk beş çalıştırılabilir takım — **355
 vaka, 27 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15 → **27/27** (mutasyon kümesi otuz
 sekizinci turda on beşten yirmi yediye çıkarıldı: 26 kontrolün dokuzu hiç
@@ -2338,6 +2338,22 @@ değil, **ölçülen olgunun kendisidir.** Ayrım otomatikleştirilemez, bu yüz
 (P'nin MUAF deseni). K-12 gerekçesini yazdı; beyansız yeni bir pencere
 kırmızı verir.
 
+### Ve doğrulama sırasında bir tuzak daha açıldı
+
+Kırkıncı turu doğrularken D taban çizgisi **"5 hata"** verdi ve mutasyon
+sınaması geçersiz sayıldı — oysa canlı denetim yeşildi ve sistemde hiçbir şey
+bozuk değildi. Sebep: D'nin kum havuzu yolu **sabitti**
+(`${TMPDIR}/ks_d_kum`), ve o sırada arka planda koşan başka bir D örneği aynı
+havuzu kullanıyordu. **İki koşum birbirini eziyordu.**
+
+Bu, otuzuncu turun yan etki sınıfının **ağacın dışındaki** hâlidir: AL-01..03
+ağacı koruyor, ama `/tmp` altındaki paylaşılan bir yol onların görüş alanının
+dışında. AL-08 o boşluğu kapatır ve her koşum kendi havuzunu alır.
+
+Ders, bu incelemenin en sık tekrar edeni: **bir takım kırmızı verdiğinde ilk
+şüpheli sistem değil, ölçümün kendi koşullarıdır.** Burada "5 hata" ne kitabın
+ne yamanın kusuruydu — ölçümün kendi eşzamanlılığıydı.
+
 ---
 
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
@@ -2521,7 +2537,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 ### Nasıl yeniden koşulur
 ```
 ./sinama/hepsi.sh                 # 34 çalıştırılabilir takım:
-                                  #   354 vaka + 27 mutasyon (D)
+                                  #   355 vaka + 27 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -2609,7 +2625,7 @@ Dokuz takım, 96 vaka:
 | AV | **Anma/tanım sınıfı taraması** — ölçüt kodu mu, kodu anlatan cümleyi mi ölçüyor | §12, §16 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**354 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**355 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)
