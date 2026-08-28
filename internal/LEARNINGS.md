@@ -3775,3 +3775,57 @@ been doing very much, and which way the noise falls is what has been changing.
    its sign.** One multiplication showed MMR's ceiling here is ~0.02, which
    explains three contradictory readings across three corpora better than any of
    the individual explanations did.
+
+---
+
+## L76 - Four parameters swept, four plateaus, one pattern
+
+`rrf_k` was the last untouched retrieval parameter: 60, the value from the
+original RRF paper, inherited rather than chosen. It sets how sharply rank 1
+beats rank 10 - 1.15x at 60, 5.5x at 1.
+
+The prediction, stated before the sweep: it would measure flat, for the reason
+`base_weight` did (L58) - the reranker's adjustment outweighs the fused score
+34.5x, so fusion is largely a candidate generator and its constant has little
+left to decide. Mostly right, with one exception worth having:
+
+    rrf_k             1      5      20     60*    200
+    external pass     48/54  49/54  49/54  49/54  49/54
+    external nDCG@8   .7683  .7993  .7899  .7958  .7996
+    held-out pass     19/22  19/22  19/22  19/22  19/22
+    primary pass      17/20  18/20  18/20  18/20  18/20
+    primary nDCG@8    .6865  .7013  .7353  .7230  .7211
+
+Above the degenerate value the pass rate is flat on both corpora across a 40x
+range, held-out does not move at all, and primary's recall@8 is 0.8750 for every
+value tried. `rrf_k=1` costs exactly one case on each. The ordering metrics move
+about 0.03, non-monotonically, and the two corpora peak in opposite places -
+external at 200 and 5, primary at 20.
+
+**Four sweeps this session, all the same shape.** `target_tokens`,
+`hard_max_tokens`, `overlap_tokens`, the embedder's `dim`, and now `rrf_k`: each
+sits on a plateau, each moves only at an extreme, and each has ordering metrics
+that wobble non-monotonically inside the plateau. Held-out has read 19/22 for
+every configuration of every one of them.
+
+That is a finding about the system, not five null results. **The reranker
+decides the ordering, and everything upstream of it is a candidate generator**
+whose parameters matter only when set badly enough to lose the answer entirely.
+It also means the six retrieval parameters tuned earlier are not fragile
+artifacts of one chunking or one embedding space - they are robust across
+2x-40x variation in everything feeding them.
+
+The corollary is where the remaining headroom is. Ablation says reranking is
+worth +10 cases; dense-only 42/54 against hybrid 49/54; and every knob outside
+the reranker is flat. The next real improvement is in the reranker or in the
+corpus, not in another sweep of a fusion or windowing constant.
+
+**Rules.**
+1. **When the nth sweep of a component finds a plateau, stop sweeping that
+   component and write down why they are all flat.** Five plateaus is evidence
+   about where the decisions are being made.
+2. **A plateau is a robustness result, not a wasted measurement.** It is what
+   licenses trusting earlier tuning that was done at one point on it.
+3. **State the prediction before the sweep even when you expect nothing.**
+   "Flat, because the reranker dominates" survived four of five values and
+   failed at `rrf_k=1`, which is more informative than "flat" would have been.

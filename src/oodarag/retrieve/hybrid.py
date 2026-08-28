@@ -90,6 +90,36 @@ class RetrievalConfig:
     candidate_k: int = 20
     dense_weight: float = 1.0
     lexical_weight: float = 1.0
+    #: The Reciprocal Rank Fusion constant: a document at rank r in an arm
+    #: contributes 1/(rrf_k + r). It controls how sharply rank 1 is preferred
+    #: over rank 10 - at 60 that ratio is 1.15, so fusion is close to "appeared
+    #: in both arms" voting; at 1 it is 5.5, so one arm's top hit outweighs
+    #: agreement everywhere else.
+    #:
+    #: 60 is the value from the original RRF paper. It was inherited rather than
+    #: chosen, and is now measured (`scripts/rrf_k_sweep.py`):
+    #:
+    #:   rrf_k             1      5      20     60*    200
+    #:   external pass     48/54  49/54  49/54  49/54  49/54
+    #:   external nDCG@8   .7683  .7993  .7899  .7958  .7996
+    #:   held-out pass     19/22  19/22  19/22  19/22  19/22
+    #:   primary pass      17/20  18/20  18/20  18/20  18/20
+    #:   primary nDCG@8    .6865  .7013  .7353  .7230  .7211
+    #:
+    #: **Only the degenerate value costs anything.** Above rrf_k=1 the pass rate
+    #: is flat on both corpora across a 40x range, the held-out set does not move
+    #: at all, and primary's recall@8 is 0.8750 for every value tried. rrf_k=1
+    #: costs exactly one case on each.
+    #:
+    #: The ordering metrics do move, by about 0.03, and they move
+    #: non-monotonically and in opposite directions on the two corpora: external
+    #: is best at 200 and 5, primary at 20. That is the shape of noise, and the
+    #: shape L58 found for `base_weight` and L75 for MMR - the reranker's
+    #: adjustment outweighs the fused score 34.5x, so fusion is largely a
+    #: candidate generator and its tuning constant has little left to decide.
+    #:
+    #: Unchanged at 60: no value is better on both corpora, and none is better
+    #: on the metric the gates read.
     rrf_k: int = 60
     use_mmr: bool = True
     mmr_lambda: float = 0.7
