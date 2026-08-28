@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>19 takım · 182 vaka · 0 sinyal</span>
+    <span>20 takım · 192 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -997,6 +997,38 @@ connect_rejected  <span class="bad">www.spk.gov.tr:443</span>         gateway an
 </section>
 
 <section>
+  <span class="sec-tag">On ikinci tur</span>
+  <h2>Dürüstlük bölümünde fazla dar bir sınır</h2>
+  <p>İstek "hepsine kör test" idi. On bir tur sonra kapsamı saydım: dört bölüm
+  hiç sınanmamıştı — §6, §8, §15 ve <strong>§18</strong>.</p>
+  <p>§18 kitabın <strong>dürüstlük bölümüdür</strong> ve gerekçesini kendisi
+  yazar: <em>"Sınırları yazılmamış bir sistem, o sınırların ötesinde kullanılır
+  ve sınırı ilk bulan kişi onu bir müvekkilin karşısında bulur."</em> Dokuz
+  maddesinin <strong>dokuzu da olumsuz iddiadır</strong> — "yapmaz", "yoktur",
+  "kanıt yoktur" — ve kitabın kendi §2'si olumsuz iddiadan olumludan yüksek
+  kanıt ister. On bir tur boyunca hiçbirini sınamamıştım.</p>
+  <p><strong>Sekizi doğru çıktı. Biri değil.</strong></p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">T-06</span>
+      <span class="pill f">Sınır fazla dar</span></div>
+    <h3>Katalogda iki AGPL bağımlılık var, bir değil</h3>
+    <p>Kitap <em>"üç sözleşme çözümleme deposundan ikisi bakımsızdır,
+    <strong>biri</strong> AGPL-3.0'dır"</em> diyor ve §13.4'teki
+    <em class="term">lexpredict-lexnlp</em>'yi kastediyor. Ama §13.5'teki
+    <em class="term">freelawproject/courtlistener</em> <strong>de
+    AGPL-3.0-or-later</strong> — G-01'de doğrulandı — ve kitap ona "açık (depoya
+    bakın)" diyor.</p>
+    <p>Bu bir rakam hatasından fazlasıdır. Fazla dar yazılmış bir sınır, §18'in
+    <strong>var olma sebebini ortadan kaldırır</strong>: okuyucu sınırın
+    kapsadığından fazlasına güvenir. Ve kitabın §13.7'si tam da bu soruyu
+    ciddiye alıyor — <em>"copyleft lisanslı bir bağımlılığı ticari bir pratiğin
+    yığınına sokan cümle"</em> — yani kitap riski biliyor, yalnızca ikinci
+    örneğini kaçırıyor.</p>
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -1114,7 +1146,7 @@ connect_rejected  <span class="bad">www.spk.gov.tr:443</span>         gateway an
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># on dokuz takım, 182 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># yirmi takım, 192 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
