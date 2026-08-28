@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>46 çalıştırılabilir takım · 359 vaka · 0 sinyal</span>
+    <span>47 çalıştırılabilir takım · 364 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -2692,6 +2692,45 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Kırk ikinci tur</span>
+  <h2>Sayılar doğru çıktı — ve doğrulanmış olmak sınanmamış olmaktan farklıdır</h2>
+  <p>Kırk birinci tur raporun <strong>alıntılarını</strong> sınadı ve dört
+  yanlış buldu. Kardeş eksen sınanmamıştı: raporun kitabın <strong>yapısı</strong>
+  hakkındaki <strong>sayısal</strong> iddiaları — bulguların ağırlığı bu
+  sayılara asılı.</p>
+
+  <table><thead><tr><th>iddia</th><th>kitapta ölçülen</th><th></th></tr></thead><tbody>
+  <tr><td>§16'nın <strong>on bir</strong> kontrolü</td><td>11 <span class="dim">(imza şablonu hariç)</span></td><td>✓</td></tr>
+  <tr><td>§18'in <strong>dokuz</strong> sınırı</td><td>9 numaralı madde</td><td>✓</td></tr>
+  <tr><td>§12 <strong>dört</strong> kapı kuruyor</td><td><code>kapsam · kanit · sir · guncellik</code> + metinde "dört kapı"</td><td>✓</td></tr>
+  <tr><td>§14 beşinciyi ekliyor, <strong>yedi</strong> vaka</td><td><em>"…diğer dördün yanına eklenir ve <code>_selftest</code> şu <strong>yedi</strong> vakayla genişletilir"</em></td><td>✓</td></tr>
+  </tbody></table>
+
+  <div class="callout">
+    <strong>Dördü de doğru.</strong> Bu takım bir kusur bulmadı; bir iddiayı
+    <strong>doğruladı</strong> ve doğrulamayı kalıcı hâle getirdi. İkisi aynı
+    şey değil — kırk birinci tur tam olarak bunu gösterdi: o güne kadar
+    alıntılar da "doğru sanılıyordu".
+  </div>
+
+  <h3>Ve sayarken üç kez kendi ölçütüm yanıldı</h3>
+  <table><thead><tr><th>ölçüt hatası</th><th>ne oldu</th></tr></thead><tbody>
+  <tr><td><code>kontrol "</code> sayımı <strong>12</strong> verdi</td>
+      <td>birincisi fonksiyonun <strong>imza yorumuydu</strong> — şablonu kontrol saymak</td></tr>
+  <tr><td>§18 maddeleri <strong>10</strong> çıktı</td>
+      <td>bölüm <strong>başlığı</strong> da <code>18.</code> ile başlıyor ve madde sanıldı</td></tr>
+  <tr><td>"N kontrol" kalıbı <strong>26</strong> buldu</td>
+      <td>o benim <strong>yamalı</strong> denetimimin sayısı, kitabınki değil</td></tr>
+  </tbody></table>
+  <p>Üçü de tek bir şeyin türevi: <strong>tanım ile örneği, başlık ile
+  maddeyi, kendi sistemim ile kitabı karıştırmak.</strong> Ve bir dördüncüsü
+  mutasyonda çıktı: ölçüt <strong>ilk</strong> eşleşmeyi alıyordu, oysa aynı
+  iddia iki teslimatta geçiyor ve biri <strong>satır kırılmasıyla</strong>
+  bölünmüştü. Artık <strong>tüm</strong> eşleşmelerin aynı sayıyı söylemesi
+  isteniyor.</p>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -2809,7 +2848,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 46 takım · 359 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 47 takım · 364 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
