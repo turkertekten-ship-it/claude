@@ -2610,3 +2610,64 @@ incomplete description of it, and I wrote that before decomposing.
 3. **Report a shipped change by what it did to the members, at least once.** The
    aggregate justifies the decision; the decomposition tells you what you now
    own.
+
+---
+
+## L57 - I measured the wrong unit and it named the wrong fix
+
+Chasing L56's structlog failure, I computed coverage per *document* and found
+something striking: `black.md` matches **all ten** query terms, coverage 1.000,
+while structlog ranks 11th. Black's PyPI page is long prose about code
+formatting and contains every ordinary English word in the question. The obvious
+reading is that coverage rewards long documents, and the obvious fix is the one
+BM25 already has - length normalisation.
+
+**The reranker does not score documents. It scores chunks.** Recomputing at the
+unit the code actually uses:
+
+| coverage@p2 | chunk vocab | document | terms matched |
+| --- | --- | --- | --- |
+| 0.409 | 144 | h11 | 5/10 |
+| 0.407 | 139 | black | 3/10 |
+| **0.220** | 59 | **structlog** | **4/10** |
+
+structlog's best chunk matches *more* terms than black's and scores half as
+much, so the story is not length. Decomposed: black's chunk matches `chain`
+(35.97) and `treat` (17.85) - 53.8 between them - while structlog's matches
+`event` (14.44) and `dictionari` (14.08) - 28.5. **The two heaviest terms in the
+query are both words from the question's register that are irrelevant to the
+answer, and together they outweigh the answer's actual signature.**
+
+Length is real but secondary: the top 50 chunks by coverage have median
+vocabulary 78 against a corpus median of 36. So I swept a BM25-style penalty,
+`coverage / (1 - b + b·|chunk|/median)`:
+
+| b | 0.00 | 0.25 | 0.50 | 0.75 | 1.00 |
+| --- | --- | --- | --- | --- | --- |
+| structlog rank | 15 | 15 | 17 | 14 | 16 |
+| top result | h11 | black | black | regex | regex |
+
+Flat. The top document churns without ever becoming the right one. **Falsified -
+the fourth fix from this diagnosis to be measured and rejected**, after IDF
+clipping, corpus widening and co-occurrence.
+
+**The thing worth keeping is the sequence.** The document-level number was not
+wrong; it was about the wrong object, and it pointed confidently at a fix that
+does nothing. Had I implemented length normalisation on that evidence it would
+have passed review - it is a real technique, addressing a real effect that the
+measurement genuinely showed - and bought nothing.
+
+This is the same rule this project has recorded about comparing stages that
+analyse data differently (L24), turned inward: **a diagnostic must compute over
+the same unit as the code it is diagnosing.** Documents and chunks are both
+defensible things to measure and only one of them is what the reranker sees.
+
+**Rules.**
+1. **Diagnose at the granularity the code operates on.** Not the one that is
+   convenient to compute, and not the one the corpus is stored in.
+2. **A measurement can be correct, striking, and about the wrong object.**
+   "Black matches all ten terms" is true and irrelevant, and it was more
+   persuasive than the number that mattered.
+3. **Four falsified fixes from one diagnosis is information.** Clipping,
+   widening, co-occurrence and length normalisation all fail on the same cases.
+   The diagnosis keeps being confirmed and keeps not implying a lexical remedy.
