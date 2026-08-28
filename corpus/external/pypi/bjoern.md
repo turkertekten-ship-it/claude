@@ -1,0 +1,86 @@
+---
+date: 2022-09-11T18:48:13+0000
+source: https://pypi.org/project/bjoern/
+---
+[image: Join the chat at https://gitter.im/jonashaag/bjoern]
+
+A screamingly fast, ultra-lightweight WSGI server for CPython 2 and CPython 3,
+written in C using Marc Lehmann’s high performance libev event loop and
+Ryan Dahl’s http-parser.
+
+## Why It’s Cool
+
+bjoern is the fastest, smallest and most lightweight WSGI server out there,
+featuring
+
+- ~ 1000 lines of C code
+- Memory footprint ~ 600KB
+- Python 2 and Python 3 support (thanks @yanghao!)
+- Single-threaded and without coroutines or other crap
+- Can bind to TCP host:port addresses and Unix sockets (thanks @k3d3!)
+- Full persistent connection (”keep-alive”) support in both HTTP/1.0 and 1.1,
+including support for HTTP/1.1 chunked responses
+
+## Installation
+
+pip install bjoern. See wiki for details.
+
+## Usage
+
+### Flask example
+
+```
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route("/")
+def hello_world():
+    return "Hello, World!"
+
+if __name__ == "__main__":
+    import bjoern
+
+    bjoern.run(app, "127.0.0.1", 8000)
+```
+
+### Advanced usage
+
+```
+# Bind to TCP host/port pair:
+bjoern.run(wsgi_application, host, port)
+
+# TCP host/port pair, enabling SO_REUSEPORT if available.
+bjoern.run(wsgi_application, host, port, reuse_port=True)
+
+# Bind to Unix socket:
+bjoern.run(wsgi_application, 'unix:/path/to/socket')
+
+# Bind to abstract Unix socket: (Linux only)
+bjoern.run(wsgi_application, 'unix:@socket_name')
+
+# Enable statsd metrics. See instrumentation.md for details.
+bjoern.run(wsgi_application, host, port, statsd=...)
+```
+
+Alternatively, the mainloop can be run separately:
+
+```
+bjoern.listen(wsgi_application, host, port)
+bjoern.run()
+
+# With metrics. See instrumentation.md for details.
+bjoern.listen(wsgi_application, host, port)
+bjoern.run(statsd=...)
+```
+
+You can also simply pass a Python socket(-like) object. Note that you are responsible
+for initializing and cleaning up the socket in that case.
+
+```
+bjoern.server_run(socket_object, wsgi_application)
+bjoern.server_run(filedescriptor_as_integer, wsgi_application)
+
+# This needs manual compilation with `WANT_STATSD=yes`
+bjoern.server_run(socket_object, wsgi_application, enable_statsd=True)
+```

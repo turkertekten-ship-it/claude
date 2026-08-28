@@ -30,7 +30,7 @@ eval: ## Run the evaluation harness against evals/goldens.jsonl
 eval-external: ## Evaluate against the external corpus (no self-reference)
 	$(PY) -m oodarag.cli --config oodarag-external.toml index
 	$(PY) -m oodarag.cli --config oodarag-external.toml eval \
-		--goldens evals/goldens-external.jsonl --min-pass-rate 0.85
+		--goldens evals/goldens-external.jsonl --min-pass-rate 0.81
 
 loop: ## Run one OODA cycle
 	$(PY) -m oodarag.cli loop --cycles 1

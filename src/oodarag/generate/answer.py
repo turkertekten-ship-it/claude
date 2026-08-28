@@ -73,12 +73,23 @@ class AnswerConfig:
     #: corpus, not of the algorithm. It has now been re-swept twice for exactly
     #: that reason, and moved neither time.
     #: The abstention floor, applied to `rerank_relevance * arm agreement`.
-    #: Re-derived when agreement entered the signal (L71): on the external
-    #: corpus the old floor refused 5 of 11 unanswerable questions and one
-    #: answerable one; 0.08 refuses 8 and two, and the primary corpus refuses
-    #: all four of its negatives and nothing else anywhere between 0.08 and
-    #: 0.15. Sweeping it alone is `scripts/floor_sweep.py`.
-    min_relevance: float = 0.08
+    #:
+    #: Chosen at 0.08 on a 266-page corpus, where both corpora were flat there,
+    #: and **corrected to 0.03 within the same session** when the corpus grew to
+    #: 349 and 0.08 began refusing four answerable questions instead of two
+    #: (L72). Agreement is bounded 0..1 but its *distribution* is not fixed: the
+    #: more documents there are, the less two arms' top-8 lists overlap, so a
+    #: floor on the product drifts with corpus size even though every input is
+    #: bounded.
+    #:
+    #:     floor        0.02  0.03  0.04  0.06  0.08
+    #:     266 pages     +7    +7    +7    +6    +6
+    #:     349 pages     +6    +6    +4    +4    +3
+    #:
+    #: (net = unanswerable questions correctly refused, minus answerable ones
+    #: wrongly refused). 0.03 is the value that survives both sizes; 0.08 was a
+    #: fit to one of them. Sweeping it is `scripts/floor_sweep.py`.
+    min_relevance: float = 0.03
     generator: str = "auto"  # "auto" | "extractive" | "claude"
 
 

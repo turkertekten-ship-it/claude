@@ -1,0 +1,69 @@
+---
+date: 2024-06-28T19:56:05+0000
+source: https://pypi.org/project/pympler/
+---
+# README for pympler
+
+Pympler is a development tool to measure, monitor and analyze the memory
+behavior of Python objects in a running Python application.
+
+By pympling a Python application, detailed insight in the size and the lifetime
+of Python objects can be obtained. Undesirable or unexpected runtime behavior
+like memory bloat and other "pymples" can easily be identified.
+
+Pympler integrates three previously separate projects into a single,
+comprehensive profiling tool. Asizeof provides basic size information for one
+or several Python objects, muppy is used for on-line monitoring of a Python
+application and the class tracker provides off-line analysis of the lifetime of
+selected Python objects. A web profiling frontend exposes process statistics,
+garbage visualisation and class tracker statistics.
+
+Pympler is written entirely in Python, with no dependencies to external
+libraries on Linux and MacOS. On Windows, pywin32 is required.
+
+## Installation from PyPI
+
+To install the latest version of Pympler from the Python package index run:
+
+```
+pip install Pympler
+```
+
+## Installation from source
+
+Before installing Pympler, try it with your Python version:
+
+```
+python setup.py try
+```
+
+If any errors are reported, check whether your Python version is supported.
+Pympler is written entirely in Python, with no dependencies other than standard
+Python modules and libraries. Pympler works with Python 3.6, 3.7, 3.8, 3.9,
+3.10, 3.11 and 3.12.
+
+For a system-wide installation from source run:
+
+```
+pip install .
+```
+
+Test the installed Pympler package:
+
+```
+python setup.py test
+```
+
+## Usage
+
+The usage of pympler is described in the documentation. It is
+available either in this distribution at doc/index.html or
+you can read it online.
+
+## Contributing
+
+You can post wishes, bug reports or patches at our
+issue tracker or
+write an email to pympler-dev@googlegroups.com.
+
+[image: Latest Version] [image: License] [image: Coverage Status]

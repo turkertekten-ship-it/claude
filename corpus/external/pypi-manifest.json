@@ -82,6 +82,17 @@
       "released_at": "2026-07-12T20:29:05+0000"
     },
     {
+      "name": "apispec",
+      "url": "https://pypi.org/project/apispec/",
+      "title": "apispec",
+      "words": 678,
+      "content_hash": "c3964bb7237d8b91",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-03-06T21:48:39+0000",
+      "raw_words": 1868,
+      "raw_content_hash": "895934536dec8286"
+    },
+    {
       "name": "apscheduler",
       "url": "https://pypi.org/project/apscheduler/",
       "title": "APScheduler",
@@ -115,6 +126,17 @@
       "raw_content_hash": "dd97715b5b7742af"
     },
     {
+      "name": "argparse-addons",
+      "url": "https://pypi.org/project/argparse-addons/",
+      "title": "argparse-addons",
+      "words": 256,
+      "content_hash": "6d6d2115b32f8711",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2023-01-29T15:52:12+0000",
+      "raw_words": 568,
+      "raw_content_hash": "83c7d7fcd8375811"
+    },
+    {
       "name": "arrow",
       "url": "https://pypi.org/project/arrow/",
       "title": "arrow",
@@ -137,6 +159,17 @@
       "raw_content_hash": "323050fa46ff9f31"
     },
     {
+      "name": "async-timeout",
+      "url": "https://pypi.org/project/async-timeout/",
+      "title": "async-timeout",
+      "words": 476,
+      "content_hash": "ee1a4fc83cca569c",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2024-11-06T16:41:37+0000",
+      "raw_words": 846,
+      "raw_content_hash": "8e4d46b4736b9747"
+    },
+    {
       "name": "asyncpg",
       "url": "https://pypi.org/project/asyncpg/",
       "title": "asyncpg",
@@ -146,6 +179,17 @@
       "raw_words": 11552,
       "raw_content_hash": "4b01bdcc35ce9427",
       "released_at": "2025-11-24T23:25:23+0000"
+    },
+    {
+      "name": "asynctest",
+      "url": "https://pypi.org/project/asynctest/",
+      "title": "asynctest",
+      "words": 547,
+      "content_hash": "13db4ef1c312bf2e",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2019-05-14T16:42:22+0000",
+      "raw_words": 929,
+      "raw_content_hash": "dee3fda0bf92acf2"
     },
     {
       "name": "attrs",
@@ -247,6 +291,28 @@
       "released_at": "2026-06-07T16:44:20+0000"
     },
     {
+      "name": "bidict",
+      "url": "https://pypi.org/project/bidict/",
+      "title": "bidict",
+      "words": 671,
+      "content_hash": "4eaf219fa365a831",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-08-25T23:45:51+0000",
+      "raw_words": 1186,
+      "raw_content_hash": "c08843719d9c530c"
+    },
+    {
+      "name": "bjoern",
+      "url": "https://pypi.org/project/bjoern/",
+      "title": "bjoern",
+      "words": 265,
+      "content_hash": "8328f7a71fbf1259",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2022-09-11T18:48:13+0000",
+      "raw_words": 568,
+      "raw_content_hash": "053141e8308fbc59"
+    },
+    {
       "name": "black",
       "url": "https://pypi.org/project/black/",
       "title": "black",
@@ -322,6 +388,17 @@
       "released_at": "2026-08-27T20:08:34+0000",
       "raw_words": 15692,
       "raw_content_hash": "789a150d20c826a5"
+    },
+    {
+      "name": "brotli",
+      "url": "https://pypi.org/project/brotli/",
+      "title": "brotli",
+      "words": 466,
+      "content_hash": "e41d8a67b2406d04",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2025-11-05T18:37:53+0000",
+      "raw_words": 10199,
+      "raw_content_hash": "cf6501bd8abceccc"
     },
     {
       "name": "build",
@@ -423,6 +500,17 @@
       "released_at": "2026-08-15T08:16:22+0000"
     },
     {
+      "name": "cleo",
+      "url": "https://pypi.org/project/cleo/",
+      "title": "cleo",
+      "words": 1408,
+      "content_hash": "dd65841f9de89b8f",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2023-10-30T18:54:08+0000",
+      "raw_words": 1879,
+      "raw_content_hash": "648f642bee02adc3"
+    },
+    {
       "name": "click",
       "url": "https://pypi.org/project/click/",
       "title": "click",
@@ -465,6 +553,39 @@
       "released_at": "2026-07-23T13:40:39+0000",
       "raw_words": 2037,
       "raw_content_hash": "10243576fbb7b5d1"
+    },
+    {
+      "name": "configargparse",
+      "url": "https://pypi.org/project/configargparse/",
+      "title": "ConfigArgParse",
+      "words": 2750,
+      "content_hash": "604ca3ccf06cd2d3",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-03-11T02:19:36+0000",
+      "raw_words": 3382,
+      "raw_content_hash": "e32e23c3feaa3020"
+    },
+    {
+      "name": "confluent-kafka",
+      "url": "https://pypi.org/project/confluent-kafka/",
+      "title": "confluent-kafka",
+      "words": 1882,
+      "content_hash": "7a9c27a9b9100ea2",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-06-30T19:47:43+0000",
+      "raw_words": 5732,
+      "raw_content_hash": "c537b093c3818096"
+    },
+    {
+      "name": "connexion",
+      "url": "https://pypi.org/project/connexion/",
+      "title": "connexion",
+      "words": 1023,
+      "content_hash": "a6c419b512232076",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2025-10-13T12:41:48+0000",
+      "raw_words": 2270,
+      "raw_content_hash": "ab462b47b3567604"
     },
     {
       "name": "coverage",
@@ -544,6 +665,17 @@
       "raw_content_hash": "f5f276727987e48b"
     },
     {
+      "name": "datadog",
+      "url": "https://pypi.org/project/datadog/",
+      "title": "datadog",
+      "words": 1018,
+      "content_hash": "ebfa68d27b4bdb74",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-07-24T15:11:55+0000",
+      "raw_words": 1862,
+      "raw_content_hash": "4cfd061ba5d521be"
+    },
+    {
       "name": "dateparser",
       "url": "https://pypi.org/project/dateparser/",
       "title": "dateparser",
@@ -586,6 +718,17 @@
       "raw_words": 4168,
       "raw_content_hash": "2ecf4c30b494ab79",
       "released_at": "2021-03-08T10:59:24+0000"
+    },
+    {
+      "name": "devtools",
+      "url": "https://pypi.org/project/devtools/",
+      "title": "devtools",
+      "words": 156,
+      "content_hash": "11b0f53222598bbb",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2023-09-03T16:56:59+0000",
+      "raw_words": 510,
+      "raw_content_hash": "9579dcfa325043e9"
     },
     {
       "name": "diskcache",
@@ -665,6 +808,17 @@
       "released_at": "2026-05-27T17:40:58+0000"
     },
     {
+      "name": "dotenv-linter",
+      "url": "https://pypi.org/project/dotenv-linter/",
+      "title": "dotenv-linter",
+      "words": 246,
+      "content_hash": "6d9ea4fb842f67a1",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-07-31T06:41:20+0000",
+      "raw_words": 584,
+      "raw_content_hash": "9bae079fe7d2737b"
+    },
+    {
       "name": "dramatiq",
       "url": "https://pypi.org/project/dramatiq/",
       "title": "dramatiq",
@@ -707,6 +861,28 @@
       "raw_words": 1897,
       "raw_content_hash": "e6b1eb08f5d63b85",
       "released_at": "2026-08-04T17:55:54+0000"
+    },
+    {
+      "name": "elasticsearch-dsl",
+      "url": "https://pypi.org/project/elasticsearch-dsl/",
+      "title": "elasticsearch-dsl",
+      "words": 1160,
+      "content_hash": "bf2ac73fe1364870",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2025-04-16T11:54:12+0000",
+      "raw_words": 1690,
+      "raw_content_hash": "62e2ff2b50c0d6c3"
+    },
+    {
+      "name": "email-validator",
+      "url": "https://pypi.org/project/email-validator/",
+      "title": "email-validator",
+      "words": 3354,
+      "content_hash": "185207d25c37ca94",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2025-08-26T13:09:05+0000",
+      "raw_words": 3801,
+      "raw_content_hash": "69e7ee5994790b50"
     },
     {
       "name": "environs",
@@ -775,6 +951,17 @@
       "released_at": "2026-07-29T17:18:04+0000"
     },
     {
+      "name": "filetype",
+      "url": "https://pypi.org/project/filetype/",
+      "title": "filetype",
+      "words": 499,
+      "content_hash": "9f77c81df6cc8519",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2022-11-02T17:34:01+0000",
+      "raw_words": 888,
+      "raw_content_hash": "456fa2d0071c3c4c"
+    },
+    {
       "name": "fire",
       "url": "https://pypi.org/project/fire/",
       "title": "fire",
@@ -808,6 +995,17 @@
       "released_at": "2026-02-19T05:00:56+0000"
     },
     {
+      "name": "flask-caching",
+      "url": "https://pypi.org/project/flask-caching/",
+      "title": "Flask-Caching",
+      "words": 120,
+      "content_hash": "c4585647e397dc91",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-08-24T18:52:00+0000",
+      "raw_words": 744,
+      "raw_content_hash": "3d2045edbe11b988"
+    },
+    {
       "name": "flask-cors",
       "url": "https://pypi.org/project/flask-cors/",
       "title": "flask-cors",
@@ -817,6 +1015,17 @@
       "released_at": "2026-06-08T20:20:16+0000",
       "raw_words": 1251,
       "raw_content_hash": "94ec1c825543c9a0"
+    },
+    {
+      "name": "flask-limiter",
+      "url": "https://pypi.org/project/flask-limiter/",
+      "title": "Flask-Limiter",
+      "words": 358,
+      "content_hash": "061955119623f831",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2025-12-06T17:38:59+0000",
+      "raw_words": 1474,
+      "raw_content_hash": "459b6d0e5fd8032f"
     },
     {
       "name": "flask-login",
@@ -885,6 +1094,28 @@
       "released_at": "2025-08-09T10:39:06+0000"
     },
     {
+      "name": "frozendict",
+      "url": "https://pypi.org/project/frozendict/",
+      "title": "frozendict",
+      "words": 2319,
+      "content_hash": "f93703f6038cf10c",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2025-11-11T22:37:10+0000",
+      "raw_words": 11460,
+      "raw_content_hash": "f6748b37c5119069"
+    },
+    {
+      "name": "fsspec",
+      "url": "https://pypi.org/project/fsspec/",
+      "title": "fsspec",
+      "words": 529,
+      "content_hash": "06e50b92218ac8cf",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-07-28T16:34:49+0000",
+      "raw_words": 1384,
+      "raw_content_hash": "814f53657cd06e86"
+    },
+    {
       "name": "ftfy",
       "url": "https://pypi.org/project/ftfy/",
       "title": "ftfy",
@@ -894,6 +1125,28 @@
       "raw_words": 1443,
       "raw_content_hash": "3afc7cffd8880d86",
       "released_at": "2024-10-26T00:50:33+0000"
+    },
+    {
+      "name": "fuzzywuzzy",
+      "url": "https://pypi.org/project/fuzzywuzzy/",
+      "title": "fuzzywuzzy",
+      "words": 396,
+      "content_hash": "828226ff7c047f55",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2020-02-13T21:06:25+0000",
+      "raw_words": 817,
+      "raw_content_hash": "676fab22ba1943a5"
+    },
+    {
+      "name": "gensim",
+      "url": "https://pypi.org/project/gensim/",
+      "title": "gensim",
+      "words": 521,
+      "content_hash": "29869e3b3775c36b",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2025-10-18T01:47:12+0000",
+      "raw_words": 3588,
+      "raw_content_hash": "82b23a036b40decf"
     },
     {
       "name": "gevent",
@@ -1072,6 +1325,39 @@
       "raw_content_hash": "bbb7feb218c9b8e1"
     },
     {
+      "name": "immutables",
+      "url": "https://pypi.org/project/immutables/",
+      "title": "immutables",
+      "words": 352,
+      "content_hash": "9a2ac110e5f2e63d",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2024-10-10T00:53:56+0000",
+      "raw_words": 5213,
+      "raw_content_hash": "8f7ac8b365cfd126"
+    },
+    {
+      "name": "inflect",
+      "url": "https://pypi.org/project/inflect/",
+      "title": "inflect",
+      "words": 2734,
+      "content_hash": "6ff0f819137ba473",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2024-12-28T17:11:15+0000",
+      "raw_words": 3310,
+      "raw_content_hash": "58f879cbfcd99049"
+    },
+    {
+      "name": "influxdb-client",
+      "url": "https://pypi.org/project/influxdb-client/",
+      "title": "influxdb-client",
+      "words": 5291,
+      "content_hash": "32d41a1bdf5ccd60",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-01-23T09:39:37+0000",
+      "raw_words": 5867,
+      "raw_content_hash": "fe77bef2cc907725"
+    },
+    {
       "name": "iniconfig",
       "url": "https://pypi.org/project/iniconfig/",
       "title": "iniconfig",
@@ -1193,6 +1479,17 @@
       "raw_content_hash": "f06030622af3745f"
     },
     {
+      "name": "langdetect",
+      "url": "https://pypi.org/project/langdetect/",
+      "title": "langdetect",
+      "words": 387,
+      "content_hash": "d2e678a5fe3230ff",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2021-05-07T07:54:10+0000",
+      "raw_words": 709,
+      "raw_content_hash": "e27676c09567f48b"
+    },
+    {
       "name": "lark",
       "url": "https://pypi.org/project/lark/",
       "title": "lark",
@@ -1202,6 +1499,17 @@
       "raw_words": 487,
       "raw_content_hash": "602c99780408b3ed",
       "released_at": "2025-10-27T18:25:54+0000"
+    },
+    {
+      "name": "line-profiler",
+      "url": "https://pypi.org/project/line-profiler/",
+      "title": "line-profiler",
+      "words": 2707,
+      "content_hash": "7503ce8f5aa8db9a",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-02-23T23:29:45+0000",
+      "raw_words": 8878,
+      "raw_content_hash": "b1fe0918b2886dc4"
     },
     {
       "name": "loguru",
@@ -1224,6 +1532,17 @@
       "raw_words": 18032,
       "raw_content_hash": "2a81ca37266658b0",
       "released_at": "2026-08-19T04:58:15+0000"
+    },
+    {
+      "name": "lz4",
+      "url": "https://pypi.org/project/lz4/",
+      "title": "lz4",
+      "words": 212,
+      "content_hash": "aa0b7527877c88cd",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2025-11-03T13:01:24+0000",
+      "raw_words": 6294,
+      "raw_content_hash": "e85cbfd85d54e1a7"
     },
     {
       "name": "markdown",
@@ -1279,6 +1598,28 @@
       "raw_words": 854,
       "raw_content_hash": "3d92812f5028ab90",
       "released_at": "2022-01-24T01:14:49+0000"
+    },
+    {
+      "name": "meinheld",
+      "url": "https://pypi.org/project/meinheld/",
+      "title": "meinheld",
+      "words": 412,
+      "content_hash": "6b0b97db79eec0ba",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2020-05-17T13:09:14+0000",
+      "raw_words": 780,
+      "raw_content_hash": "6191bfab3b3a1c44"
+    },
+    {
+      "name": "memory-profiler",
+      "url": "https://pypi.org/project/memory-profiler/",
+      "title": "memory-profiler",
+      "words": 2494,
+      "content_hash": "f4155f455bf685ac",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2022-11-15T17:57:27+0000",
+      "raw_words": 3088,
+      "raw_content_hash": "888ca445734c0d8f"
     },
     {
       "name": "minio",
@@ -1369,6 +1710,28 @@
       "released_at": "2026-08-27T10:01:34+0000"
     },
     {
+      "name": "msgspec",
+      "url": "https://pypi.org/project/msgspec/",
+      "title": "msgspec",
+      "words": 331,
+      "content_hash": "3f3261e6ac0e96fe",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-04-12T21:43:45+0000",
+      "raw_words": 10053,
+      "raw_content_hash": "ebfe28dba98192e3"
+    },
+    {
+      "name": "multidict",
+      "url": "https://pypi.org/project/multidict/",
+      "title": "multidict",
+      "words": 312,
+      "content_hash": "5bf17426a6b3d322",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-01-26T02:42:59+0000",
+      "raw_words": 29602,
+      "raw_content_hash": "784a71dbf9a3c089"
+    },
+    {
       "name": "mypy",
       "url": "https://pypi.org/project/mypy/",
       "title": "mypy",
@@ -1378,6 +1741,17 @@
       "raw_words": 5975,
       "raw_content_hash": "7a70ca8be812c082",
       "released_at": "2026-08-15T03:01:23+0000"
+    },
+    {
+      "name": "ndjson",
+      "url": "https://pypi.org/project/ndjson/",
+      "title": "ndjson",
+      "words": 224,
+      "content_hash": "021275052993b4cf",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2020-02-25T05:01:06+0000",
+      "raw_words": 507,
+      "raw_content_hash": "ae127fdc60fb212d"
     },
     {
       "name": "neo4j",
@@ -1402,6 +1776,17 @@
       "released_at": "2025-12-08T17:02:38+0000"
     },
     {
+      "name": "newrelic",
+      "url": "https://pypi.org/project/newrelic/",
+      "title": "newrelic",
+      "words": 860,
+      "content_hash": "f187e361be824d88",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-08-21T00:09:40+0000",
+      "raw_words": 10242,
+      "raw_content_hash": "0b596a3461743e57"
+    },
+    {
       "name": "nox",
       "url": "https://pypi.org/project/nox/",
       "title": "nox",
@@ -1411,6 +1796,17 @@
       "raw_words": 892,
       "raw_content_hash": "dcd7b0061ab0622d",
       "released_at": "2026-08-18T03:09:55+0000"
+    },
+    {
+      "name": "num2words",
+      "url": "https://pypi.org/project/num2words/",
+      "title": "num2words",
+      "words": 1692,
+      "content_hash": "4abde5817ed602d5",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2024-12-17T20:17:06+0000",
+      "raw_words": 2028,
+      "raw_content_hash": "cea9d6871f138b23"
     },
     {
       "name": "numba",
@@ -1457,6 +1853,17 @@
       "raw_content_hash": "90a61d9789bba5f0"
     },
     {
+      "name": "objgraph",
+      "url": "https://pypi.org/project/objgraph/",
+      "title": "objgraph",
+      "words": 1233,
+      "content_hash": "10070ce50d51ef8f",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2024-10-10T12:00:41+0000",
+      "raw_words": 1648,
+      "raw_content_hash": "94161c116ae36e61"
+    },
+    {
       "name": "omegaconf",
       "url": "https://pypi.org/project/omegaconf/",
       "title": "omegaconf",
@@ -1479,6 +1886,17 @@
       "raw_content_hash": "a4ab7bafd6836732"
     },
     {
+      "name": "opensearch-py",
+      "url": "https://pypi.org/project/opensearch-py/",
+      "title": "opensearch-py",
+      "words": 180,
+      "content_hash": "0ec395b175f36947",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-04-27T18:17:48+0000",
+      "raw_words": 744,
+      "raw_content_hash": "c7728ac21dcaad68"
+    },
+    {
       "name": "orjson",
       "url": "https://pypi.org/project/orjson/",
       "title": "orjson",
@@ -1490,6 +1908,17 @@
       "released_at": "2026-08-14T16:12:00+0000"
     },
     {
+      "name": "outcome",
+      "url": "https://pypi.org/project/outcome/",
+      "title": "outcome",
+      "words": 47,
+      "content_hash": "3464559a269e710c",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2023-10-26T04:26:02+0000",
+      "raw_words": 345,
+      "raw_content_hash": "f631cc17b4215ee6"
+    },
+    {
       "name": "packaging",
       "url": "https://pypi.org/project/packaging/",
       "title": "packaging",
@@ -1499,6 +1928,17 @@
       "raw_words": 990,
       "raw_content_hash": "620c5c3d156943a8",
       "released_at": "2026-08-04T18:15:27+0000"
+    },
+    {
+      "name": "paho-mqtt",
+      "url": "https://pypi.org/project/paho-mqtt/",
+      "title": "paho-mqtt",
+      "words": 2732,
+      "content_hash": "4d6f51bbe8225962",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2024-04-29T19:52:48+0000",
+      "raw_words": 3111,
+      "raw_content_hash": "ec31848c5cc83e45"
     },
     {
       "name": "pandas",
@@ -1600,6 +2040,39 @@
       "raw_content_hash": "1a827f175dd59a45"
     },
     {
+      "name": "pexpect",
+      "url": "https://pypi.org/project/pexpect/",
+      "title": "pexpect",
+      "words": 132,
+      "content_hash": "6d908ce4e0ad8ee8",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2023-11-25T06:56:14+0000",
+      "raw_words": 497,
+      "raw_content_hash": "f92af83493f861b3"
+    },
+    {
+      "name": "phonenumbers",
+      "url": "https://pypi.org/project/phonenumbers/",
+      "title": "phonenumbers",
+      "words": 1128,
+      "content_hash": "da603ba4e818a971",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-08-28T09:48:48+0000",
+      "raw_words": 3217,
+      "raw_content_hash": "e1a4cc567253ac8b"
+    },
+    {
+      "name": "pika",
+      "url": "https://pypi.org/project/pika/",
+      "title": "pika",
+      "words": 1161,
+      "content_hash": "7e55faacb5911167",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-08-06T21:33:38+0000",
+      "raw_words": 1730,
+      "raw_content_hash": "7217c2c949331fad"
+    },
+    {
       "name": "pillow",
       "url": "https://pypi.org/project/pillow/",
       "title": "pillow",
@@ -1666,6 +2139,17 @@
       "released_at": "2025-05-15T12:30:06+0000"
     },
     {
+      "name": "plumbum",
+      "url": "https://pypi.org/project/plumbum/",
+      "title": "plumbum",
+      "words": 625,
+      "content_hash": "dfb0049f6e780914",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-07-22T04:13:10+0000",
+      "raw_words": 1259,
+      "raw_content_hash": "2c6eabd4ca071059"
+    },
+    {
       "name": "poetry",
       "url": "https://pypi.org/project/poetry/",
       "title": "poetry",
@@ -1688,6 +2172,17 @@
       "raw_content_hash": "2bccc40b3da6e91b"
     },
     {
+      "name": "polyglot",
+      "url": "https://pypi.org/project/polyglot/",
+      "title": "polyglot",
+      "words": 510,
+      "content_hash": "1e4c78d5f5b6f58d",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2016-07-03T20:05:40+0000",
+      "raw_words": 680,
+      "raw_content_hash": "78ac33628f2f7923"
+    },
+    {
       "name": "portalocker",
       "url": "https://pypi.org/project/portalocker/",
       "title": "portalocker",
@@ -1697,6 +2192,17 @@
       "released_at": "2026-08-25T18:05:18+0000",
       "raw_words": 1756,
       "raw_content_hash": "fadd6b1e2c190ccd"
+    },
+    {
+      "name": "pretty-errors",
+      "url": "https://pypi.org/project/pretty-errors/",
+      "title": "pretty-errors",
+      "words": 1628,
+      "content_hash": "17ba6d0fbad7eb8f",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2021-11-24T14:32:07+0000",
+      "raw_words": 2172,
+      "raw_content_hash": "5b8772ba7f2cac36"
     },
     {
       "name": "prettytable",
@@ -1710,6 +2216,17 @@
       "raw_content_hash": "e64ee8a3f8f9c122"
     },
     {
+      "name": "price-parser",
+      "url": "https://pypi.org/project/price-parser/",
+      "title": "price-parser",
+      "words": 523,
+      "content_hash": "0e482fd19059f3fa",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-03-19T11:33:22+0000",
+      "raw_words": 859,
+      "raw_content_hash": "3f3f4203e862d23d"
+    },
+    {
       "name": "prometheus-client",
       "url": "https://pypi.org/project/prometheus-client/",
       "title": "prometheus-client",
@@ -1719,6 +2236,17 @@
       "raw_words": 658,
       "raw_content_hash": "6383ff7fa75b44ae",
       "released_at": "2026-07-24T19:36:40+0000"
+    },
+    {
+      "name": "prometheus-flask-exporter",
+      "url": "https://pypi.org/project/prometheus-flask-exporter/",
+      "title": "prometheus-flask-exporter",
+      "words": 2067,
+      "content_hash": "62d02ffa477b82cc",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2025-03-11T23:05:29+0000",
+      "raw_words": 2745,
+      "raw_content_hash": "ffbfd837be2e43cf"
     },
     {
       "name": "prompt-toolkit",
@@ -1764,6 +2292,17 @@
       "released_at": "2026-04-20T23:33:31+0000"
     },
     {
+      "name": "puremagic",
+      "url": "https://pypi.org/project/puremagic/",
+      "title": "puremagic",
+      "words": 801,
+      "content_hash": "4750fbb6a45dd8c8",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-04-08T01:39:54+0000",
+      "raw_words": 1261,
+      "raw_content_hash": "5b325d2c8a3ccbd7"
+    },
+    {
       "name": "py-cpuinfo",
       "url": "https://pypi.org/project/py-cpuinfo/",
       "title": "py-cpuinfo",
@@ -1795,6 +2334,17 @@
       "raw_words": 701,
       "raw_content_hash": "62aff1ea320aa6de",
       "released_at": "2025-06-20T18:49:47+0000"
+    },
+    {
+      "name": "pycountry",
+      "url": "https://pypi.org/project/pycountry/",
+      "title": "pycountry",
+      "words": 1035,
+      "content_hash": "73e3ff4ecbcacc76",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-02-17T03:42:49+0000",
+      "raw_words": 1860,
+      "raw_content_hash": "7e0cb8afab8b0927"
     },
     {
       "name": "pycparser",
@@ -1851,6 +2401,17 @@
       "released_at": "2026-08-17T08:02:44+0000"
     },
     {
+      "name": "pyinstrument",
+      "url": "https://pypi.org/project/pyinstrument/",
+      "title": "pyinstrument",
+      "words": 3524,
+      "content_hash": "593f3a0301501224",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-07-29T17:17:16+0000",
+      "raw_words": 15680,
+      "raw_content_hash": "051d28be057f5011"
+    },
+    {
       "name": "pyjwt",
       "url": "https://pypi.org/project/pyjwt/",
       "title": "PyJWT",
@@ -1860,6 +2421,17 @@
       "raw_words": 881,
       "raw_content_hash": "a92e1d244b37b82b",
       "released_at": "2026-05-21T19:54:35+0000"
+    },
+    {
+      "name": "pyjwt-key-fetcher",
+      "url": "https://pypi.org/project/pyjwt-key-fetcher/",
+      "title": "pyjwt-key-fetcher",
+      "words": 553,
+      "content_hash": "1faef9a2dadde166",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2024-08-07T09:31:41+0000",
+      "raw_words": 855,
+      "raw_content_hash": "ff6aa94b2b0c8b6d"
     },
     {
       "name": "pylint",
@@ -1882,6 +2454,17 @@
       "raw_words": 15559,
       "raw_content_hash": "433f7bc996b1c166",
       "released_at": "2026-04-20T16:37:20+0000"
+    },
+    {
+      "name": "pympler",
+      "url": "https://pypi.org/project/pympler/",
+      "title": "Pympler",
+      "words": 296,
+      "content_hash": "5c8bcf7468976760",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2024-06-28T19:56:05+0000",
+      "raw_words": 650,
+      "raw_content_hash": "0baf396960bb1743"
     },
     {
       "name": "pymysql",
@@ -1939,6 +2522,28 @@
       "raw_content_hash": "169a3856c95302a2"
     },
     {
+      "name": "pyramid",
+      "url": "https://pypi.org/project/pyramid/",
+      "title": "pyramid",
+      "words": 167,
+      "content_hash": "bdb04c57c0987b6e",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-03-11T01:23:56+0000",
+      "raw_words": 1435,
+      "raw_content_hash": "1e69aeedb7b58a1a"
+    },
+    {
+      "name": "pyspellchecker",
+      "url": "https://pypi.org/project/pyspellchecker/",
+      "title": "pyspellchecker",
+      "words": 900,
+      "content_hash": "105c5037c281a511",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-03-07T17:14:51+0000",
+      "raw_words": 1350,
+      "raw_content_hash": "541880b32125c8ba"
+    },
+    {
       "name": "pytest",
       "url": "https://pypi.org/project/pytest/",
       "title": "pytest",
@@ -1948,6 +2553,17 @@
       "raw_words": 2010,
       "raw_content_hash": "1db8e4e68c57397f",
       "released_at": "2026-06-19T10:58:31+0000"
+    },
+    {
+      "name": "pytest-aiohttp",
+      "url": "https://pypi.org/project/pytest-aiohttp/",
+      "title": "pytest-aiohttp",
+      "words": 128,
+      "content_hash": "aaaa9d7c9f4af868",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-06-07T23:56:33+0000",
+      "raw_words": 465,
+      "raw_content_hash": "4528f402142e0d43"
     },
     {
       "name": "pytest-asyncio",
@@ -1994,6 +2610,28 @@
       "raw_content_hash": "a09cdb5763e194cf"
     },
     {
+      "name": "pytest-freezegun",
+      "url": "https://pypi.org/project/pytest-freezegun/",
+      "title": "pytest-freezegun",
+      "words": 283,
+      "content_hash": "c784ec37d20ae0fb",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2020-07-19T17:50:02+0000",
+      "raw_words": 578,
+      "raw_content_hash": "7da5b0b5b365b2ee"
+    },
+    {
+      "name": "pytest-httpx",
+      "url": "https://pypi.org/project/pytest-httpx/",
+      "title": "pytest-httpx",
+      "words": 3328,
+      "content_hash": "58b710889e85d87e",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-04-09T13:57:18+0000",
+      "raw_words": 4090,
+      "raw_content_hash": "bc57971037a54c72"
+    },
+    {
       "name": "pytest-mock",
       "url": "https://pypi.org/project/pytest-mock/",
       "title": "pytest-mock",
@@ -2038,6 +2676,17 @@
       "released_at": "2025-07-01T13:30:56+0000"
     },
     {
+      "name": "python-daemon",
+      "url": "https://pypi.org/project/python-daemon/",
+      "title": "python-daemon",
+      "words": 101,
+      "content_hash": "46f17abafdb68ce6",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2024-12-03T08:41:03+0000",
+      "raw_words": 633,
+      "raw_content_hash": "03b7be98fb9e5cde"
+    },
+    {
       "name": "python-dateutil",
       "url": "https://pypi.org/project/python-dateutil/",
       "title": "python-dateutil",
@@ -2047,6 +2696,17 @@
       "raw_words": 1111,
       "raw_content_hash": "791ddcfc9a5438d7",
       "released_at": "2024-03-01T18:36:18+0000"
+    },
+    {
+      "name": "python-decouple",
+      "url": "https://pypi.org/project/python-decouple/",
+      "title": "python-decouple",
+      "words": 1565,
+      "content_hash": "09af852e0865c8a8",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2023-03-01T19:38:36+0000",
+      "raw_words": 1883,
+      "raw_content_hash": "3419126eb593a126"
     },
     {
       "name": "python-dotenv",
@@ -2069,6 +2729,17 @@
       "released_at": "2025-05-28T17:31:52+0000",
       "raw_words": 799,
       "raw_content_hash": "9867e99dcdd62bab"
+    },
+    {
+      "name": "python-magic",
+      "url": "https://pypi.org/project/python-magic/",
+      "title": "python-magic",
+      "words": 644,
+      "content_hash": "5fb70859e52a7ec1",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2022-06-07T20:16:57+0000",
+      "raw_words": 1081,
+      "raw_content_hash": "4586fb12a1d11ba0"
     },
     {
       "name": "python-slugify",
@@ -2115,6 +2786,17 @@
       "released_at": "2025-09-25T21:31:46+0000"
     },
     {
+      "name": "pyzmq",
+      "url": "https://pypi.org/project/pyzmq/",
+      "title": "pyzmq",
+      "words": 416,
+      "content_hash": "fd2dd692c52403e3",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-08-20T19:06:11+0000",
+      "raw_words": 17665,
+      "raw_content_hash": "ec26b85cde8f8ba8"
+    },
+    {
       "name": "qrcode",
       "url": "https://pypi.org/project/qrcode/",
       "title": "qrcode",
@@ -2157,6 +2839,17 @@
       "raw_words": 1374,
       "raw_content_hash": "4d497281f8e5c913",
       "released_at": "2023-03-26T06:24:33+0000"
+    },
+    {
+      "name": "rapidfuzz",
+      "url": "https://pypi.org/project/rapidfuzz/",
+      "title": "RapidFuzz",
+      "words": 1375,
+      "content_hash": "882e6035b2a265de",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-04-07T11:13:37+0000",
+      "raw_words": 18400,
+      "raw_content_hash": "f38e31de51cd95aa"
     },
     {
       "name": "redis",
@@ -2258,6 +2951,17 @@
       "raw_content_hash": "09a7e8140fe6b2b7"
     },
     {
+      "name": "rtoml",
+      "url": "https://pypi.org/project/rtoml/",
+      "title": "rtoml",
+      "words": 624,
+      "content_hash": "5870a6917a482cae",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2025-10-19T04:57:52+0000",
+      "raw_words": 6886,
+      "raw_content_hash": "d328ddbd6ba56776"
+    },
+    {
       "name": "ruamel-yaml",
       "url": "https://pypi.org/project/ruamel-yaml/",
       "title": "ruamel.yaml",
@@ -2357,6 +3061,17 @@
       "released_at": "2026-08-24T13:09:36+0000"
     },
     {
+      "name": "setproctitle",
+      "url": "https://pypi.org/project/setproctitle/",
+      "title": "setproctitle",
+      "words": 1187,
+      "content_hash": "327ebf4442a69de2",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2025-09-05T12:49:07+0000",
+      "raw_words": 10841,
+      "raw_content_hash": "4706c3e7149976d7"
+    },
+    {
       "name": "setuptools",
       "url": "https://pypi.org/project/setuptools/",
       "title": "setuptools",
@@ -2410,6 +3125,28 @@
       "raw_words": 490,
       "raw_content_hash": "c3b488cf9ab6caec",
       "released_at": "2024-02-25T23:20:01+0000"
+    },
+    {
+      "name": "snoop",
+      "url": "https://pypi.org/project/snoop/",
+      "title": "snoop",
+      "words": 2944,
+      "content_hash": "acb5c8d87d53f174",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-07-18T11:47:45+0000",
+      "raw_words": 3292,
+      "raw_content_hash": "79b0877da297a718"
+    },
+    {
+      "name": "sortedcollections",
+      "url": "https://pypi.org/project/sortedcollections/",
+      "title": "sortedcollections",
+      "words": 303,
+      "content_hash": "54f51bfdfdce2820",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2021-01-18T22:15:15+0000",
+      "raw_words": 631,
+      "raw_content_hash": "68910c730c251acc"
     },
     {
       "name": "sortedcontainers",
@@ -2467,6 +3204,17 @@
       "raw_content_hash": "827ce69fdc58c781"
     },
     {
+      "name": "stackprinter",
+      "url": "https://pypi.org/project/stackprinter/",
+      "title": "stackprinter",
+      "words": 1275,
+      "content_hash": "4e9d5f2112935d80",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-04-17T07:09:53+0000",
+      "raw_words": 1653,
+      "raw_content_hash": "5de3cad631cec86b"
+    },
+    {
       "name": "starlette",
       "url": "https://pypi.org/project/starlette/",
       "title": "starlette",
@@ -2478,6 +3226,17 @@
       "released_at": "2026-08-08T18:27:56+0000"
     },
     {
+      "name": "statsd",
+      "url": "https://pypi.org/project/statsd/",
+      "title": "statsd",
+      "words": 159,
+      "content_hash": "c514bb878c63611d",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2022-11-06T14:17:34+0000",
+      "raw_words": 552,
+      "raw_content_hash": "b644ad1836fee063"
+    },
+    {
       "name": "statsmodels",
       "url": "https://pypi.org/project/statsmodels/",
       "title": "statsmodels",
@@ -2487,6 +3246,17 @@
       "released_at": "2026-08-27T10:34:19+0000",
       "raw_words": 4934,
       "raw_content_hash": "9f51a44a81ad19a4"
+    },
+    {
+      "name": "strictyaml",
+      "url": "https://pypi.org/project/strictyaml/",
+      "title": "strictyaml",
+      "words": 978,
+      "content_hash": "eb6d42b168d1dc75",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2023-03-10T12:50:17+0000",
+      "raw_words": 1733,
+      "raw_content_hash": "615afa503f588238"
     },
     {
       "name": "structlog",
@@ -2533,6 +3303,17 @@
       "released_at": "2026-03-04T18:55:31+0000"
     },
     {
+      "name": "tblib",
+      "url": "https://pypi.org/project/tblib/",
+      "title": "tblib",
+      "words": 2759,
+      "content_hash": "3c69fe1b9ff86cca",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2025-11-12T12:21:14+0000",
+      "raw_words": 3127,
+      "raw_content_hash": "7f229a529c567243"
+    },
+    {
       "name": "termcolor",
       "url": "https://pypi.org/project/termcolor/",
       "title": "termcolor",
@@ -2542,6 +3323,39 @@
       "raw_words": 1125,
       "raw_content_hash": "07555911e5d89a85",
       "released_at": "2025-12-29T12:55:20+0000"
+    },
+    {
+      "name": "testcontainers",
+      "url": "https://pypi.org/project/testcontainers/",
+      "title": "testcontainers",
+      "words": 232,
+      "content_hash": "51d2eb53ba668a88",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-07-24T23:08:00+0000",
+      "raw_words": 1113,
+      "raw_content_hash": "a632c4b36a1d1223"
+    },
+    {
+      "name": "text-unidecode",
+      "url": "https://pypi.org/project/text-unidecode/",
+      "title": "text-unidecode",
+      "words": 107,
+      "content_hash": "04d57bfd9b1f95db",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2019-08-30T21:36:45+0000",
+      "raw_words": 396,
+      "raw_content_hash": "dcca247bb7e26094"
+    },
+    {
+      "name": "textblob",
+      "url": "https://pypi.org/project/textblob/",
+      "title": "textblob",
+      "words": 290,
+      "content_hash": "b0626e47cbc1ac6a",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-07-18T17:42:28+0000",
+      "raw_words": 1100,
+      "raw_content_hash": "d58cdae79ed599a1"
     },
     {
       "name": "texttable",
@@ -2643,6 +3457,17 @@
       "released_at": "2026-07-27T11:33:13+0000"
     },
     {
+      "name": "transaction",
+      "url": "https://pypi.org/project/transaction/",
+      "title": "transaction",
+      "words": 1587,
+      "content_hash": "30d4f945202c9f89",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-03-17T07:46:59+0000",
+      "raw_words": 2033,
+      "raw_content_hash": "fdef758e60f55d39"
+    },
+    {
       "name": "trio",
       "url": "https://pypi.org/project/trio/",
       "title": "trio",
@@ -2652,6 +3477,17 @@
       "raw_words": 1401,
       "raw_content_hash": "5d67ec6f06ed8b84",
       "released_at": "2026-08-11T00:33:40+0000"
+    },
+    {
+      "name": "trio-asyncio",
+      "url": "https://pypi.org/project/trio-asyncio/",
+      "title": "trio-asyncio",
+      "words": 222,
+      "content_hash": "2adc0db78ac57a52",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-05-15T21:27:41+0000",
+      "raw_words": 582,
+      "raw_content_hash": "0e8ccc86de324b42"
     },
     {
       "name": "twine",
@@ -2720,6 +3556,28 @@
       "raw_content_hash": "0a187b28239ab44e"
     },
     {
+      "name": "unidecode",
+      "url": "https://pypi.org/project/unidecode/",
+      "title": "Unidecode",
+      "words": 1780,
+      "content_hash": "c5e25eb2fcd0ec25",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2025-04-24T08:45:01+0000",
+      "raw_words": 2231,
+      "raw_content_hash": "a2965abc73f10736"
+    },
+    {
+      "name": "universal-pathlib",
+      "url": "https://pypi.org/project/universal-pathlib/",
+      "title": "universal-pathlib",
+      "words": 4895,
+      "content_hash": "e3698576d28f0cb7",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-02-22T14:40:57+0000",
+      "raw_words": 5591,
+      "raw_content_hash": "e308177c9439d6d2"
+    },
+    {
       "name": "urllib3",
       "url": "https://pypi.org/project/urllib3/",
       "title": "urllib3",
@@ -2762,6 +3620,17 @@
       "raw_words": 5704,
       "raw_content_hash": "0ff1dda4aee82c77",
       "released_at": "2025-10-16T22:16:11+0000"
+    },
+    {
+      "name": "vcrpy",
+      "url": "https://pypi.org/project/vcrpy/",
+      "title": "vcrpy",
+      "words": 256,
+      "content_hash": "2e81845cfe8b2da8",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-07-04T14:27:00+0000",
+      "raw_words": 982,
+      "raw_content_hash": "1f90d4a6a34bfe79"
     },
     {
       "name": "virtualenv",
@@ -2817,6 +3686,17 @@
       "raw_words": 10667,
       "raw_content_hash": "d5d195f1e3080406",
       "released_at": "2026-05-18T04:30:05+0000"
+    },
+    {
+      "name": "webargs",
+      "url": "https://pypi.org/project/webargs/",
+      "title": "webargs",
+      "words": 238,
+      "content_hash": "169d109c468bcb93",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2025-10-29T16:07:47+0000",
+      "raw_words": 1310,
+      "raw_content_hash": "36053aa64b4141fd"
     },
     {
       "name": "webencodings",
@@ -2918,6 +3798,28 @@
       "released_at": "2026-02-22T02:21:21+0000"
     },
     {
+      "name": "yappi",
+      "url": "https://pypi.org/project/yappi/",
+      "title": "yappi",
+      "words": 997,
+      "content_hash": "27f971e446b692f4",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-03-17T22:30:39+0000",
+      "raw_words": 7256,
+      "raw_content_hash": "293b5d7e00753ff1"
+    },
+    {
+      "name": "yarl",
+      "url": "https://pypi.org/project/yarl/",
+      "title": "yarl",
+      "words": 9869,
+      "content_hash": "9081dc776783d988",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2026-07-20T02:04:21+0000",
+      "raw_words": 30936,
+      "raw_content_hash": "fd1acaaefbb574a6"
+    },
+    {
       "name": "zope-interface",
       "url": "https://pypi.org/project/zope-interface/",
       "title": "zope.interface",
@@ -2927,6 +3829,17 @@
       "raw_words": 13573,
       "raw_content_hash": "0d24a86428f0c759",
       "released_at": "2026-08-20T11:16:52+0000"
+    },
+    {
+      "name": "zstandard",
+      "url": "https://pypi.org/project/zstandard/",
+      "title": "zstandard",
+      "words": 92,
+      "content_hash": "ffc291b49071793a",
+      "fetched_at": "2026-08-28T19:59:08Z",
+      "released_at": "2025-09-14T22:15:54+0000",
+      "raw_words": 9792,
+      "raw_content_hash": "1ac68ab9373b7686"
     }
   ],
   "_template_removal": {
@@ -2942,7 +3855,7 @@
       "release history release notifications |",
       "source distribution"
     ],
-    "bytes_before": 3975326,
-    "bytes_after": 1952637
+    "bytes_before": 4990171,
+    "bytes_after": 2667483
   }
 }
