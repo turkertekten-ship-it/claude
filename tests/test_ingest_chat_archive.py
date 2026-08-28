@@ -113,12 +113,55 @@ def main() -> int:
         check("conversation title is kept", exported[0].title == "Titled chat")
         check("idless and non-object records are skipped", report2.skipped == 2, report2.skipped)
 
+        print("real claude.ai export schema cases")
+        # Field names and shapes confirmed against several independent public
+        # parsers of the official export; see ledger CLAUDE-EXPORT-SCHEMA.
+        (archive / "conversations.json").write_text(json.dumps([
+            {"uuid": "R1", "name": "flat text", "created_at": "2026-03-01T10:00:00Z",
+             "updated_at": "2026-03-01T10:05:00Z", "chat_messages": [
+                {"uuid": "rm1", "sender": "human", "created_at": "2026-03-01T10:00:00Z",
+                 "text": "flat text message",
+                 "content": [{"type": "text", "text": "flat text message"}]}]},
+            {"uuid": "R2", "name": "blocks only", "created_at": "2026-03-02T10:00:00Z",
+             "updated_at": "2026-03-02T10:05:00Z", "chat_messages": [
+                {"uuid": "rm2", "sender": "assistant", "created_at": "2026-03-02T10:00:00Z",
+                 "text": "", "content": [{"type": "text", "text": "BLOCK ONLY CONTENT"}]}]},
+            {"uuid": "R3", "name": "attachment", "created_at": "2026-03-03T10:00:00Z",
+             "updated_at": "2026-03-03T10:05:00Z", "chat_messages": [
+                {"uuid": "rm3", "sender": "human", "created_at": "2026-03-03T10:00:00Z",
+                 "text": "see attached", "attachments": [
+                    {"file_name": "spec.txt", "extracted_content": "ATTACHED FILE BODY"}]}]},
+        ]))
+        rep3 = ica.Report()
+        real = ica.parse_claude_ai_export(archive / "conversations.json", rep3)
+        texts = [m.text for c in real for m in c.messages]
+        check("all three real-schema conversations parse", len(real) == 3, len(real))
+        check("nothing skipped on the real schema", rep3.skipped == 0, rep3.problems)
+        check("flat text field is read", any(t == "flat text message" for t in texts))
+        check("content blocks are read when text is empty",
+              any("BLOCK ONLY CONTENT" in t for t in texts), texts)
+        check("attachment extracted_content is retained",
+              any("ATTACHED FILE BODY" in t for t in texts), texts)
+        check("attachment is named in the stored text",
+              any("[attachment:spec.txt]" in t for t in texts))
+        check("attachment is recorded in block_types",
+              any("attachment" in m.block_types for c in real for m in c.messages))
+        check("sender values are preserved verbatim",
+              {m.role for c in real for m in c.messages} == {"human", "assistant"},
+              {m.role for c in real for m in c.messages})
+        check("export timestamps are kept",
+              all(m.timestamp for c in real for m in c.messages))
+
         print("index and search cases")
         rc = ica.cmd_ingest(Args(archive=str(archive), db=str(db)))
         check("parse failures make ingest exit 1", rc == 1, rc)
         conn = ica.connect(db)
         total = conn.execute("SELECT COUNT(*) n FROM messages").fetchone()["n"]
-        check("all readable messages are indexed", total == 5, total)
+        # Composition, not a magic number: t.jsonl contributes 3 readable
+        # messages (2 in session S1, 1 in S2) and conversations.json
+        # contributes 3 (one per real-schema conversation).
+        expected = 3 + 3
+        check("all readable messages are indexed", total == expected, total)
 
         hits = conn.execute(
             "SELECT m.text FROM messages_fts f JOIN messages m ON m.id = f.message_id"

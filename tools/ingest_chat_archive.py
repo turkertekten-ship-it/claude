@@ -282,6 +282,21 @@ def parse_claude_ai_export(path: Path, report: Report) -> list[Conversation]:
             kinds: list[str] = []
             if not isinstance(text, str):
                 text, kinds = flatten_content(text if text is not None else raw.get("content"))
+
+            # Uploaded files ride along as attachments carrying extracted_content.
+            # That is conversation content the user actually supplied, so losing it
+            # would make a search over the index quietly incomplete.
+            for attachment in raw.get("attachments") or []:
+                if not isinstance(attachment, dict):
+                    continue
+                extracted = attachment.get("extracted_content")
+                if not extracted:
+                    continue
+                name = attachment.get("file_name") or "attachment"
+                text = f"{text}\n[attachment:{name}]\n{extracted}" if text else \
+                       f"[attachment:{name}]\n{extracted}"
+                kinds.append("attachment")
+
             if not text:
                 continue
             msg_id = first_of(raw, MSG_ID_FIELDS) or f"{conv_id}:{position}"

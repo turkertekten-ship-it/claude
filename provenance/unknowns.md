@@ -50,6 +50,19 @@ threads exists on this container or in the connected Drive.
 Privacy → Export data) and drops `conversations.json` into `archive/`.
 `tools/ingest_chat_archive.py` reads that format directly.
 
+**Schema question now closed.** The export shape was established from public
+sources rather than guessed: conversations carry `uuid`, `name`, `created_at`,
+`updated_at`, `chat_messages[]`; messages carry `uuid`, `sender`, `created_at`,
+a flat `text`, a `content[]` block list, and `attachments[]` with `file_name`
+and `extracted_content`. [src:CLAUDE-EXPORT-SCHEMA-2026-08-27] The parser was
+tested against that shape and one real gap was found and fixed — attachment
+bodies were being dropped. [src:EXPORT-PARSER-TESTED-2026-08-27]
+
+**Still second-hand.** That schema comes from third-party parsers, not from
+Anthropic documentation, and no real export has been run through this code. The
+format has changed across versions, so treat a first real ingest as a test of
+the parser, not only of the data.
+
 **Partly addressed:** Claude *Code* history is a different store, and it is
 reachable — `ingest --include-projects` reads `~/.claude/projects` directly. On
 the machine that ran those sessions that is the full Claude Code history; on

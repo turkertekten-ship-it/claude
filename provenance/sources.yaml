@@ -284,3 +284,31 @@ sources:
       The branch head is still merge commit e7ab452 with parents e37b4c2 and
       1d7ce8f. Its copy of tools/ingest_chat_archive.py still has zero
       occurrences of the "path.stem == session" fix.
+
+  - id: CLAUDE-EXPORT-SCHEMA-2026-08-27
+    kind: api
+    collected_at: "2026-08-27T15:30Z"
+    method: "WebSearch for the claude.ai export format; mcp__github__search_code for chat_messages/conversations.json (554 hits); WebFetch of two independent public parsers"
+    evidence: >-
+      Converging across independent implementations: conversations.json is a
+      JSON array; each conversation carries uuid, name, created_at, updated_at
+      and chat_messages[]; each message carries uuid, sender ("human" or
+      "assistant"), created_at, a flat text field, a content[] block list, and
+      attachments[] whose entries carry file_name and extracted_content.
+      basicmachines-co/basic-memory reads text first then joins content blocks,
+      and separately reads attachments' file_name and extracted_content.
+      nobody174/claude-search-library uses the same text-then-content fallback,
+      documenting that "the real export has used both across format versions".
+      Second-hand: these are third-party parsers of the format, not Anthropic
+      documentation, and no real export was available here to confirm against.
+
+  - id: EXPORT-PARSER-TESTED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T15:33Z"
+    method: "parse_claude_ai_export run against a fixture built to the schema above, probing for content-block-only text and attachment extracted_content"
+    evidence: >-
+      Before the change: 3 conversations parsed, 0 skipped; content-block
+      fallback RETAINED (the existing first_of/flatten_content path already
+      handled an empty text field); attachment extracted_content LOST. After
+      adding attachment handling: both RETAINED, with the stored text carrying
+      "[attachment:spec.txt]" and block_types recording "attachment".
