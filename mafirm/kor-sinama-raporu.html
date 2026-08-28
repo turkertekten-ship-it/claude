@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>55 çalıştırılabilir takım · 404 vaka · 0 sinyal</span>
+    <span>56 çalıştırılabilir takım · 409 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -3284,6 +3284,54 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Elli dördüncü tur</span>
+  <h2>İkinci dosya: uyarı, "evet" cevabına takılıydı</h2>
+  <p>Elli üç tur boyunca sistem <strong>tek bir işlem biçiminde</strong>
+  sınandı — kitabın kendi pilotu: yabancı alıcı, B ayağı, evet cevabı.
+  Yöntem bundan fazlasını iddia ediyor. İkinci bir dosya kitabın
+  <strong>düzyazısından</strong> türetildi ve iki okumanın aynı olgularda
+  <strong>ters cevap</strong> verdiği bant seçildi.</p>
+
+  <table><thead><tr><th>Okuma</th><th>A ayağının ikinci bacağı</th><th>Cevap</th></tr></thead>
+  <tbody>
+    <tr><td>Kitabın yazdığı</td><td>iki taraf <em>ayrı ayrı</em> 1 milyar TL;
+    hedef 300 milyon → karşılanmaz</td><td><b>HAYIR</b></td></tr>
+    <tr><td>Kayıtlı alternatif okuma</td><td>teknoloji indirimi (250 milyon)
+    A ayağına da uygulanır; 300 milyon → karşılanır</td><td><b>EVET, bildirime
+    tabi</b></td></tr>
+  </tbody></table>
+
+  <div class="callout">
+    Aynı rakamlarda cevap tersine dönüyor ve fark <strong>izinsiz
+    kapanış</strong> demektir. Sistem ise <em>"Eşik aşılmıyor"</em> diyordu ve
+    açık bulguyu <strong>hiç anmıyordu</strong>: uyarı yöntem dosyasında
+    duruyor, çıktıya ulaşmıyordu.
+  </div>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">kural 2</span>
+      <span class="pill f">Uyarı, en çok gerektiği cevaptan eksikti</span></div>
+    <h3>Mevzuat belirsizliği yalnızca olumlu cevaba ekleniyordu</h3>
+    <p>İşletim sözleşmesinin ikinci kuralı tam tersini söyler — <em>olumsuz
+    bir iddia, olumludan daha yüksek bir kanıt eşiği ister</em> — ve kuralın
+    kariyer bitiren örneği olarak andığı cümle tam olarak
+    <em>"bildirim gerekmez"</em>dir.</p>
+    <p>Kod artık itirazlı bandı hesaplıyor ve açık soruyu <strong>olumsuz
+    cevabın yanına</strong> koyuyor. <strong>Cevabı değiştirmiyor:</strong>
+    onu çevirmek bir hukuki nitelendirmedir ve insan onayına aittir; çıktı
+    bunu açıkça yazıyor, ve bir vaka kodun kendiliğinden çevirmesini
+    yasaklıyor.</p>
+  </div>
+
+  <p><strong>Ölçüt bir kez yanıldı.</strong> İlk sürüm yalnızca bulgunun
+  kimliğinin çıktıda geçip geçmediğini soruyordu. Belirgin uyarı bloğu
+  tamamen bastırıldığında bile kimlik alt listede geçmeye devam ediyor ve
+  vaka yeşil kalıyordu: ölçüt uyarının <strong>görünürlüğünü</strong> değil
+  yalnızca varlığını ölçüyordu — oysa bulgunun bütün değeri olumsuz cevabın
+  <em>yanında</em> durmasıdır.</p>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -3469,7 +3517,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 55 takım · 404 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 56 takım · 409 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:

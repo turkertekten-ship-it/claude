@@ -111,9 +111,16 @@ class Taraf:
 
 
 class Sonuc:
-    def __init__(self, sonuc, ayak, gerekce, eksik, kullanilan):
+    def __init__(self, sonuc, ayak, gerekce, eksik, kullanilan, itiraz=None):
         self.sonuc, self.ayak = sonuc, ayak
         self.gerekce, self.eksik, self.kullanilan = gerekce, eksik, kullanilan
+        # [BG · elli dördüncü tur] KAYITLI bir açık sorunun bu olguda cevabı
+        # TERSİNE çevirdiği hâller. Uyarı yöntem dosyasında duruyordu ama
+        # çıktıya hiç ulaşmıyordu; üstelik mevzuat belirsizliği yalnızca
+        # EVET cevabına ekleniyordu. İşletim sözleşmesinin 2. kuralı tam
+        # tersini ister: "bildirime tabi değil" cümlesi daha yüksek kanıt
+        # eşiğine tabidir.
+        self.itiraz = itiraz or []
 
     def yazdir(self):
         print("Bildirime tabi mi : %s" % self.sonuc.upper())
@@ -127,6 +134,11 @@ class Sonuc:
             for e in self.eksik:
                 print("  - %s" % e)
         print("Eşiklerin doğrulama tarihi: %s" % DOGRULAMA)
+        if self.itiraz:
+            print()
+            print("AÇIK MEVZUAT SORUSU — BU CEVABI TERSİNE ÇEVİREBİLİR:")
+            for i in self.itiraz:
+                print("  ! %s" % i)
         print()
         print("Şimdi ne yapılmalı")
         if self.sonuc == EVET:
@@ -136,6 +148,11 @@ class Sonuc:
         elif self.sonuc == BELIRSIZ:
             print("  Yukarıdaki bilinmeyen rakamlar temin edilir. Bu hâliyle "
                   "cevap verilmez.")
+        elif self.itiraz:
+            print("  Eşik, KİTABIN YAZDIĞI okumaya göre aşılmıyor. Yukarıdaki "
+                  "açık soru çözülmeden 'bildirim gerekmez' sonucuna "
+                  "DAYANILMAZ ve kapanış yapılmaz; teyit, adı belli bir "
+                  "yetkili avukatın kararıdır (insan onayı).")
         else:
             print("  Eşik aşılmıyor. Rakamların kaynağı ve tarihi kayda geçirilir.")
         print()
@@ -143,6 +160,8 @@ class Sonuc:
         print("  Ciro rakamlarının hangi mali tablodan ve hangi kurdan alındığı; "
               "kontrol değişikliği niteliği; ortak girişim analizi; "
               "olumsuz sonucun teyidi.")
+        for i in self.itiraz:
+            print("  - %s" % i)
 
 
 # --- Geriye dönük uyumlu ilkel ayaklar --------------------------------------
@@ -291,9 +310,28 @@ def degerlendir(taraflar, islem_turu="devralma"):
                      "Olumsuz iddia kuralı (CLAUDE.md §2): bu hâliyle "
                      "'bildirim gerekmez' YAZILMAZ.",
                      eksik, kullanilan)
+    # ---- İTİRAZLI BANT: kayıtlı açık soru cevabı tersine çevirir mi ----
+    # I-01: teknoloji indirimi (250 milyon) A ayağının ikinci bacağına da
+    # uygulanıyorsa, burada "aşmıyor" görünen hedef aşıyor demektir ve A
+    # ayağı KARŞILANIR. Bu bir hukuki nitelendirmedir; kod cevabı
+    # DEĞİŞTİRMEZ, yalnızca soruyu görünür kılar (§9 · insan onayı).
+    itiraz = []
+    if not a_var and toplam > BIRLESIK_TR:
+        for t in taraflar:
+            if (t.teknoloji and t.tr_ciro is not BILINMIYOR
+                    and HEDEF_TR_TEKNOLOJI < t.tr_ciro <= IKI_TARAF_TR
+                    and len([v for v in bilinen_tr if v > IKI_TARAF_TR]) >= 1):
+                itiraz.append(
+                    "I-01 · %s Türkiye cirosu %s: teknoloji indirimi (%s) A "
+                    "ayağının 'ayrı ayrı' bacağına da uygulanıyorsa A eşiği "
+                    "KARŞILANIR ve işlem BİLDİRİME TABİDİR — bu okumada cevap "
+                    "TERS DÖNER. Dayanak DOĞRULANAMADI (birincil metin egress "
+                    "ile engelli); bkz. birimler/rekabet/yontem/tr-esikler.md "
+                    "ve hafiza/dogrulama-bulgulari.md I-01."
+                    % (t.ad, _bicim(t.tr_ciro), _bicim(HEDEF_TR_TEKNOLOJI)))
     return Sonuc(HAYIR, "hiçbir eşik",
                  "bütün rakamlar bilindi ve iki ayak da karşılanmadı",
-                 eksik, kullanilan)
+                 eksik, kullanilan, itiraz)
 
 
 def _bicim(v):

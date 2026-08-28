@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** elli beş çalıştırılabilir takım — **404
+**Yamalı hâlde sistem çalışıyor:** elli altı çalıştırılabilir takım — **409
 vaka, 27 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15 → **27/27** (mutasyon kümesi otuz
 sekizinci turda on beşten yirmi yediye çıkarıldı: 26 kontrolün dokuzu hiç
@@ -2692,7 +2692,7 @@ içinde kırmızı, koşumdan sonra yeşil görünüyordu. Onuncu ve on altınc�
 turların katman kuralı — *denetim, kendini denetleyen takımı denetleyemez* —
 **üçüncü kez**, bu kez veri yoluyla çiğnenmişti. Sayı artık durağan ölçülüyor:
 `hepsi.sh`'e bağlı her takımın kendi `BEKLENEN_VAKA` beyanı toplanıyor
-— bugün toplam 404 vaka — ve her takımın kendi sıfırıncı vakası o beyanın
+— bugün toplam 409 vaka — ve her takımın kendi sıfırıncı vakası o beyanın
 gerçeğe eşit olduğunu ayrıca güvenceye alıyor. Bozulmuş bir `SAYIM.txt` ile BB'nin çıktısı
 **birebir aynı** kalıyor; bağımsızlık ölçülerek gösterildi.
 
@@ -2953,6 +2953,55 @@ iddiayı boşlukta geçirmesin diye ayrıca sınanıyor.
 Ve AY-05 kapsamayı kalıcı kıldı: yeni bir yokluk iddiası yazmak, o iddia
 çürütücüsüyle tabloya girene kadar takımı kırar.
 
+### İkinci dosya: uyarı, "evet" cevabına takılıydı
+
+Elli üç tur boyunca sistem **tek bir işlem biçiminde** sınandı — §19'un
+pilotu: yabancı alıcı, B ayağı, EVET. Kitabın yöntemi bundan fazlasını iddia
+ediyor. İkinci bir dosya kitabın **düzyazısından** türetildi ve iki okumanın
+aynı olgularda **ters cevap** verdiği bant seçildi:
+
+> Türk alıcı — Türkiye cirosu **2,8 milyar TL**
+> Türk hedef — teknoloji teşebbüsü, Türkiye cirosu **300 milyon TL**
+>
+> *(Kurgu olgu; eşikler 2010/4 sayılı Tebliğ'in 2026/2 ile değişik m.7
+> hükmünden, doğrulama 2026-08-27 — `birimler/rekabet/yontem/tr-esikler.md`.)*
+
+* **Kitabın yazdığı okuma:** A ayağının ikinci bacağı iki tarafın *ayrı ayrı*
+  1 milyar TL'yi aşmasını ister; hedef 300 milyon → A karşılanmaz. B'de diğer
+  tarafın dünya cirosu 9 milyarın altında → B karşılanmaz. **Cevap: HAYIR.**
+* **I-01'in kayıtlı alternatif okuması:** teknoloji indirimi — 2010/4 sayılı
+  Tebliğ m.7 (2026/2 ile değişik), doğrulama 2026-08-27 — A ayağına da
+  uygulanıyorsa hedef 300 milyon > 250 milyon → A **karşılanır.**
+  **Cevap: EVET, bildirime tabi.**
+
+Aynı rakamlarda cevap tersine dönüyor ve fark **izinsiz kapanış** demektir.
+Sistem ise *"HAYIR — Eşik aşılmıyor"* diyordu ve I-01'i **hiç anmıyordu.**
+Uyarı yöntem dosyasında duruyor, çıktıya ulaşmıyordu.
+
+**Ve biçimi daha keskin:** kod, mevzuat belirsizliği uyarısını **yalnızca
+EVET cevabına** ekliyordu. İşletim sözleşmesinin **2. kuralı** tam tersini
+söyler — *olumsuz bir iddia, olumludan daha yüksek bir kanıt eşiği ister* —
+ve kuralın kariyer bitiren örneği olarak andığı cümle tam olarak
+*"bildirim gerekmez"*dir. Uyarı, en çok gerektiği cevaptan eksikti.
+
+Kod artık itirazlı bandı hesaplıyor ve açık soruyu **olumsuz cevabın yanına**
+koyuyor. **Cevabı değiştirmiyor:** HAYIR'ı EVET'e çevirmek bir hukuki
+nitelendirmedir ve kural 9 uyarınca insana aittir; çıktı bunu açıkça yazıyor.
+BG-04 bu sınırı kalıcı kılıyor — kod cevabı kendiliğinden çevirmeye
+kalkarsa vaka kırmızıya döner.
+
+**Ölçüt bir kez yanıldı.** İlk sürüm yalnızca *"I-01 çıktıda geçiyor mu"*
+diye soruyordu. Belirgin uyarı bloğu tamamen bastırıldığında bile kimlik
+"Yetkili avukat görüşü" listesinde geçmeye devam ediyor ve vaka yeşil
+kalıyordu: ölçüt uyarının **görünürlüğünü** değil yalnızca varlığını
+ölçüyordu. Oysa bulgunun bütün değeri, olumsuz cevabın **yanında**
+durmasıdır.
+
+Ve tur kapanırken **raporun kendi kanıt kapısı** ateşledi: ikinci dosyanın
+rakamlarını düzyazıya yazarken dayanaklarını yanlarına koymamıştım. Kural 1
+tam olarak bunu ister ve kapı bunu kendi raporumda yakaladı — bu incelemenin
+en sade doğrulaması: **kurulan sistem, onu kuran metni de denetliyor.**
+
 **Ve mutasyon tarafında üç kez yanıldım — üçü de aynı biçimde.** Üç mutasyon
 "kaçtı" göründü; hiçbiri kaçmamıştı. Zorunlu başlıkların **önüne** bölüm
 ekledim, oysa sınanan şey sonda olmalarıydı. Onay ifadesinin **birini**
@@ -3097,6 +3146,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | BD · yayımlanan belgenin sözleşme uyumu | *artifact, kural 5'in iki zorunlu başlığını, kapsam beyanını ve kural 9 onay durumunu hiç taşımıyordu* | **temiz** — üçü de eklendi |
 | BE · kitabın kendi iç atıfları | *§18.1 bir kural numarasını bölüm sigiliyle anıyor* | **bir beyanlı taban** — kitabın metnindeki kusur, ERRATA'ya yazıldı |
 | BF · ölçüm iddiaları canlı değerle | *rapor "13 alıntı doğrulandı" diyordu; takım 21 alıntı doğruluyordu* | **temiz** — iddia canlı değerden okunuyor |
+| BG · ikinci dosya | *"bildirime tabi değil" cevabı, onu tersine çeviren açık soruyu hiç anmıyordu* | **temiz** — uyarı olumsuz cevabın yanında |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -3154,8 +3204,8 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # 55 çalıştırılabilir takım:
-                                  #   404 vaka + 27 mutasyon (D)
+./sinama/hepsi.sh                 # 56 çalıştırılabilir takım:
+                                  #   409 vaka + 27 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -3189,7 +3239,7 @@ vakalardır ve hepsi geçer. Kör sınama o aklın dışında kalanı arar: bir
 hukukçunun gerçekten yazacağı cümleyi, kancanın gerçekten göreceği veriyi,
 bozulduğunda denetimin gerçekten yakalayıp yakalamadığını.
 
-Elli sekiz takım, 404 vaka:
+Elli dokuz takım, 409 vaka:
 
 | Takım | Neyi sınar | Kaynağı |
 |---|---|---|
@@ -3251,9 +3301,10 @@ Elli sekiz takım, 404 vaka:
 | BD | **Yayımlanan belgenin sözleşme uyumu** — artifact kural 4, 5 ve 9'a uyuyor mu; iki teslimat aynı cevabı mı veriyor | kural 4, 5, 9 |
 | BE | **Kitabın kendi iç atıfları** — her §N ve §N.M atfı var olan bir bölüme/maddeye çözülüyor mu | §3, §5, §13, §17, §18 |
 | BF | **Ölçüm iddiaları** — teslimattaki her ölçüm sayısı, o değeri üreten takımdan okunanla aynı mı | kural 1, §16 |
+| BG | **İkinci dosya** — kayıtlı bir açık soru cevabı tersine çeviriyorsa, uyarı olumsuz cevabın yanında duruyor mu | §5, §19, kural 2 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**404 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On üç**
+**409 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On üç**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)
