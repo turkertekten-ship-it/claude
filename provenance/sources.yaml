@@ -806,3 +806,31 @@ sources:
       any mechanism. It cannot catch a parameter added after the snapshot date.
       What it does is make the snapshot the thing that goes stale, which is
       visible and fixable, rather than a belief, which is neither.
+
+  - id: KI-1-CONFIRMED-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T00:45Z"
+    method: >-
+      github issue #1 on turkertekten-ship-it/claude read, then the defect
+      reproduced locally on this branch before being fixed
+    evidence: >-
+      The issue names this branch as affected and identifies its merge commit
+      e7ab452 correctly. Verified independently rather than taken on trust:
+      `tools/ingest_chat_archive.py selfcheck` did not exist here; line 200 read
+      `session = record.get("sessionId") or path.stem` with the conversation
+      keyed on `session` alone; and none of f304fce, b11a6fa, e392678 is an
+      ancestor of HEAD. Reproduced with two transcripts sharing a session id, 12
+      messages on disk: the run printed "Indexed 12 message(s) across 2
+      conversation(s)" and stored 1 conversation with 5 messages. After keying
+      on session AND transcript stem: 2 conversations, 12 of 12 messages.
+    note: >-
+      A cross-session advisory, filed as an issue because these sessions run in
+      separate containers and cannot message each other. It was right, and the
+      claim was still verified before acting on it — an advisory is a lead.
+      Fixed here with a regression test and a `selfcheck` subcommand that
+      rebuilds the failing case and compares stored against on-disk, so an
+      inherited copy can test itself without having read any notice. The
+      selfcheck was watched rejecting a copy with only the assignment reverted.
+      One pre-existing test changed expectation as a consequence: a transcript
+      whose filename does not match its session id is now `cc:S1:t` rather than
+      `cc:S1`. That compound key is the fix, not a regression.

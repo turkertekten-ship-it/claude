@@ -148,6 +148,19 @@ verified lives in [unknowns.md](unknowns.md), not here.
 > before the run. The prompt may still help — fourteen held-out cases cannot
 > show a small effect either way — but nothing here demonstrates that it does.
 
+## Observed — a defect inherited by merging
+
+- The chat ingester on this branch silently discarded transcripts: keyed on `sessionId` alone, and subagent transcripts carry their parent's session id, so each file overwrote the last. Reproduced before fixing — 12 messages on disk, "Indexed 12 message(s) across 2 conversation(s)" reported, 5 stored. [src:KI-1-CONFIRMED-2026-08-28]
+- The failure was invisible in the output because the run reports what it read, not what survived storage. [src:KI-1-CONFIRMED-2026-08-28]
+- It arrived by merging commit `e37b4c2`, and the fix that landed later on another branch never propagated. [src:KI-1-CONFIRMED-2026-08-28]
+
+> Reading, not a claim: merging a snapshot is not tracking it. A merge freezes
+> code at an instant, and a branch that took the snapshot has no channel through
+> which a later fix reaches it — which is why the session that found this filed
+> a GitHub issue rather than assuming anyone would notice. The durable answer is
+> the one it proposed: tools carry a self-check, so an inherited copy can test
+> itself without having read any notice at all.
+
 ## Conclusion
 
 The honest answer to "look through all my previous claude chats" is bounded:

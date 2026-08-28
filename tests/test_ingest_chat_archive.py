@@ -56,7 +56,104 @@ def write_cc_transcript(path: Path) -> str:
     return verbatim
 
 
+def subagent_transcript_cases() -> None:
+    """Two transcripts sharing a session id must both survive storage.
+
+    Subagent transcripts carry their PARENT's sessionId. Keying a conversation
+    on the session alone collapses every transcript of a session onto one id,
+    and each file overwrites the last. The loss is silent: the run reports what
+    it READ, not what survived, so an affected copy prints a healthy count over
+    a mostly-empty index.
+
+    Reported against this repository as KI-1 (issue #1), reproduced here before
+    fixing: 12 messages on disk, "Indexed 12 message(s) across 2
+    conversation(s)", 5 stored.
+    """
+    print("subagent transcript cases")
+    import sqlite3
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        archive = root / "archive"
+        archive.mkdir()
+        session = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+
+        def record(text: str, i: int) -> str:
+            return json.dumps({
+                "sessionId": session, "uuid": f"t{i}", "type": "user",
+                "timestamp": f"2026-01-01T00:00:{i:02d}Z",
+                "message": {"role": "user", "content": text},
+            })
+
+        (archive / f"{session}.jsonl").write_text(
+            "\n".join(record(f"parent {i}", i) for i in range(5)), encoding="utf-8")
+        (archive / "11111111-2222-3333-4444-555555555555.jsonl").write_text(
+            "\n".join(record(f"subagent {i}", i + 50) for i in range(7)), encoding="utf-8")
+
+        db = root / "index.db"
+        import contextlib
+        import io
+        with contextlib.redirect_stdout(io.StringIO()):
+            ica.cmd_ingest(Args(archive=str(archive), db=str(db)))
+        connection = sqlite3.connect(db)
+        try:
+            messages = connection.execute("SELECT COUNT(*) FROM messages").fetchone()[0]
+            conversations = connection.execute(
+                "SELECT COUNT(*) FROM conversations").fetchone()[0]
+            subagent_kept = connection.execute(
+                "SELECT COUNT(*) FROM messages WHERE text LIKE 'subagent%'").fetchone()[0]
+        finally:
+            connection.close()
+
+    check("every message on disk is stored, not just the ones read",
+          messages == 12, f"stored {messages} of 12")
+    check("the two transcripts stay two conversations",
+          conversations == 2, f"got {conversations}")
+    check("the subagent transcript is not overwritten by its parent",
+          subagent_kept == 7, f"kept {subagent_kept} of 7")
+
+
+def selfcheck_cases() -> None:
+    """The selfcheck must pass a sound copy and fail one with the defect.
+
+    A guard nobody has watched reject is a hope. This reinstates exactly the
+    one line the fix changed, in a copy of the tool, and requires the check to
+    catch it.
+    """
+    print("selfcheck cases")
+    import shutil
+    import subprocess
+
+    tool = REPO / "tools" / "ingest_chat_archive.py"
+    ok = subprocess.run([sys.executable, str(tool), "selfcheck"],
+                        capture_output=True, text=True)
+    check("selfcheck passes on this copy", ok.returncode == 0, ok.stderr[:160])
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        shutil.copytree(tool.parent, root / "tools")
+        broken = root / "tools" / tool.name
+        source = broken.read_text(encoding="utf-8")
+        # Only the assignment, matched with its indentation. The same text also
+        # appears inside the diagnostic the check prints, and blanket-replacing
+        # it would silently gut the very message this test asserts on -- which
+        # is what happened on the first attempt.
+        defect = ('\n        key = session if path.stem == session '
+                  'else f"{session}:{path.stem}"\n')
+        assert defect in source, "the fix line moved; update this test"
+        broken.write_text(source.replace(defect, "\n        key = session\n"),
+                          encoding="utf-8")
+        bad = subprocess.run([sys.executable, str(broken), "selfcheck"],
+                             capture_output=True, text=True)
+    check("selfcheck FAILS a copy with only the fix line reverted",
+          bad.returncode == 1, f"exit {bad.returncode}")
+    check("and it names the change that fixes it",
+          "path.stem" in bad.stderr, bad.stderr[:160])
+
+
 def main() -> int:
+    subagent_transcript_cases()
+    selfcheck_cases()
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
         archive = tmp / "archive"
@@ -77,7 +174,12 @@ def main() -> int:
         check("skip is explained", bool(report.problems), report.problems)
 
         by_id = {c.id: c for c in convs}
-        s1 = by_id["cc:S1"]
+        # `cc:S1:t`, not `cc:S1`: the transcript file is t.jsonl and its stem
+        # does not match the session id, so the conversation is keyed on both.
+        # That is the fix for KI-1 -- a subagent transcript carries its parent's
+        # sessionId, and keying on the session alone let one file overwrite
+        # another. A compound key here is the visible cost of that.
+        s1 = by_id["cc:S1:t"]
         check("sidecar records are not indexed as messages", len(s1.messages) == 2, len(s1.messages))
         check("text is stored verbatim", s1.messages[0].text == verbatim, repr(s1.messages[0].text))
         check("block types are recorded",

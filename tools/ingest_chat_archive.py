@@ -198,11 +198,20 @@ def parse_claude_code_jsonl(path: Path, report: Report) -> list[Conversation]:
             continue                     # no textual content to index
 
         session = record.get("sessionId") or path.stem
+        # A subagent transcript carries its PARENT's sessionId, so keying a
+        # conversation on the session alone collapses every transcript of a
+        # session onto one id and each file overwrites the last. The loss is
+        # silent: the run reports what it READ, not what survived storage, so
+        # an affected copy prints a healthy count over a mostly-empty index.
+        # Reproduced here before fixing: two transcripts, 12 messages, reported
+        # "Indexed 12 message(s) across 2 conversation(s)", stored 5.
+        # Reported against this repository as KI-1, issue #1.
+        key = session if path.stem == session else f"{session}:{path.stem}"
         conv = grouped.setdefault(
-            session,
-            Conversation(id=f"cc:{session}", kind="claude_code", title=None, source_file=rel),
+            key,
+            Conversation(id=f"cc:{key}", kind="claude_code", title=None, source_file=rel),
         )
-        uuid = record.get("uuid") or f"{session}:{lineno}"
+        uuid = record.get("uuid") or f"{key}:{lineno}"
         conv.messages.append(
             Message(
                 id=f"cc:{uuid}",
@@ -448,6 +457,87 @@ def cmd_show(args) -> int:
     return 0
 
 
+def selfcheck() -> int:
+    """Ingest two transcripts that share a session id, and count what survived.
+
+    A merge freezes code at an instant and a later fix never propagates, so an
+    inherited copy of this tool has no way to learn it is broken. This gives it
+    one that needs no notice, no network and no trust: it builds the failing
+    case, runs the real ingest, and compares what was stored against what was
+    on disk.
+
+    The specific defect it detects: keying a conversation on `sessionId` alone.
+    Subagent transcripts carry their parent's session id, so every transcript
+    of a session collapses onto one key and each file overwrites the last. The
+    loss is silent, because the run reports what it READ rather than what
+    survived storage.
+    """
+    import sqlite3
+    import tempfile
+
+    with tempfile.TemporaryDirectory(prefix="ingest-selfcheck-") as tmp:
+        root = Path(tmp)
+        archive = root / "archive"
+        archive.mkdir()
+        session = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+        subagent = "11111111-2222-3333-4444-555555555555"
+
+        def record(text: str, i: int) -> str:
+            return json.dumps({
+                "sessionId": session, "uuid": f"sc{i}", "type": "user",
+                "timestamp": f"2026-01-01T00:00:{i:02d}Z",
+                "message": {"role": "user", "content": text},
+            })
+
+        parent_n, sub_n = 5, 7
+        (archive / f"{session}.jsonl").write_text(
+            "\n".join(record(f"parent {i}", i) for i in range(parent_n)), encoding="utf-8")
+        # The subagent transcript: its own file, its parent's session id.
+        (archive / f"{subagent}.jsonl").write_text(
+            "\n".join(record(f"subagent {i}", i + 50) for i in range(sub_n)), encoding="utf-8")
+
+        expected = parent_n + sub_n
+        db = root / "selfcheck.db"
+        # Drive the real ingest path, not a reimplementation of it: a check
+        # that exercises its own copy of the logic proves nothing about the
+        # copy that runs.
+        import argparse
+        import contextlib
+        import io
+
+        with contextlib.redirect_stdout(io.StringIO()):
+            cmd_ingest(argparse.Namespace(archive=str(archive), db=str(db)))
+        connection = sqlite3.connect(db)
+        try:
+            stored = connection.execute("SELECT COUNT(*) FROM messages").fetchone()[0]
+            conversations = connection.execute(
+                "SELECT COUNT(*) FROM conversations").fetchone()[0]
+        finally:
+            connection.close()
+
+    if stored == expected and conversations == 2:
+        print(f"ingest_chat_archive: OK — {expected} message(s) across 2 transcripts "
+              f"sharing a session id were all stored")
+        return 0
+
+    print(f"ingest_chat_archive: AFFECTED — {expected} message(s) on disk across 2 "
+          f"transcripts, {stored} stored across {conversations} conversation(s).",
+          file=sys.stderr)
+    print("", file=sys.stderr)
+    print("Subagent transcripts carry their parent's sessionId. Keying a "
+          "conversation on\nthe session alone collapses them and each file "
+          "overwrites the last. In\n`parse_claude_code_jsonl`, key on the session "
+          "AND the transcript file:", file=sys.stderr)
+    print("", file=sys.stderr)
+    print('    key = session if path.stem == session else f"{session}:{path.stem}"',
+          file=sys.stderr)
+    print("", file=sys.stderr)
+    print("then build the conversation id and message ids from `key`. Re-ingest "
+          "afterwards:\nstored counts do not correct themselves, and any search over "
+          "an index built\nby an affected copy is unverified until re-run.", file=sys.stderr)
+    return 1
+
+
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--db", default=str(DEFAULT_DB), help="index database path")
@@ -463,6 +553,11 @@ def main(argv: list[str]) -> int:
     p_search.set_defaults(func=cmd_search)
 
     sub.add_parser("stats", help="index summary").set_defaults(func=cmd_stats)
+    # No arguments and no database: a copy of this tool testing itself.
+    sub.add_parser(
+        "selfcheck",
+        help="prove this copy stores every transcript it reads (0 sound, 1 affected)",
+    ).set_defaults(func=lambda args: selfcheck())
 
     p_show = sub.add_parser("show", help="print one conversation in full")
     p_show.add_argument("conversation_id")

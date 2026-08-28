@@ -13,6 +13,8 @@ run() {
 run python3 tools/verify_provenance.py
 run python3 tests/test_verify_provenance.py
 run python3 tests/test_ingest_chat_archive.py
+# An inherited copy of the ingester proving it stores what it reads.
+run python3 tools/ingest_chat_archive.py selfcheck
 run python3 tests/test_workbench.py
 # Offline half of the parity conformance harness. The live half costs
 # money, so it is run deliberately: python3 tools/parity_check.py
