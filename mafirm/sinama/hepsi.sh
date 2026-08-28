@@ -74,6 +74,8 @@ python3 "$S/ks_z_kurulum_butunlugu.py"; topla "Z · kurulum bütünlüğü" $?
 echo
 python3 "$S/ks_aa_dayaniklilik.py"; topla "AA · kapının arıza yönü" $?
 echo
+python3 "$S/ks_ab_care.py"; topla "AB · blok iletisinin çaresi" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

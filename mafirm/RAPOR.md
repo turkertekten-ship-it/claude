@@ -25,7 +25,7 @@ kendi §16 denetimi yeşile dönmedi.
 3. **Denetim on beş bozmadan on birini görmüyor**; sıfır beceri, kancasız
    ayarlar ve tamamen boş bir `esik.py` taşıyan bir sistemde "DENETİM OK" diyor.
 
-**Yamalı hâlde sistem çalışıyor:** yirmi dört çalıştırılabilir takım — **243
+**Yamalı hâlde sistem çalışıyor:** yirmi beş çalıştırılabilir takım — **249
 vaka, 15 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15, birimler arası tutarlılık takımının
 kendi mutasyon yakalaması 10/10. Ama **üç mevzuat bulgusu ile kitabın kendi içindeki bir çelişki açık kalır**
@@ -1228,6 +1228,65 @@ Bir kapsama kontrolünün kendisi, kapsamadığını söylemez.
 
 ---
 
+## Yedi buçuk artı on dokuz · Kapı teşhis koyuyordu, çare söylemiyordu
+
+§14 bir kapının nasıl öldüğünü kendisi yazar:
+
+> *"Doğru işi bloklayan bir kapı bir gün içinde kapatılır; sonra hiçbir şey
+> uygulanmaz."*
+
+On dördüncü tur bunu **yanlış pozitif** ekseninde ölçtü. Ama ekonomi aynıdır:
+**doğru** bir blok da, uyulacak yolu söylemiyorsa her seferinde zaman yakar ve
+en ucuz çözüm kapıyı kapatmaktır. Teşhis koyup çare söylemeyen bir kapı,
+yanlış ateşleyen bir kapıyla **aynı yerde biter**.
+
+Bloklanan kişinin gördüğü şey buydu:
+
+    BLOKLANDI [guncellik] eşik rakamı var ama doğrulama tarihi yok
+
+Doğru ve eksiksiz bir teşhis — ve **hangi biçimin kabul edildiğine dair tek
+kelime yok**. Üstelik bu, kitabın **iki** biçim kabul ettiği yer: yöntem
+dosyalarında `Doğrulama: <tarih>`, çıktılarda `Kontrol edildi: <kaynak>
+(<tarih>)`. On dördüncü tur bu ikiliğin kitabın kendi çelişkisi olduğunu
+bulmuştu; bloklanan kişi hangisinin işe yaradığını **deneyerek** bulmak
+zorundaydı.
+
+Altı kapının iletisine çare eklendi. Artık:
+
+    BLOKLANDI [guncellik] eşik rakamı var ama doğrulama tarihi yok
+      → şu iki biçimden birini ekleyin: 'Doğrulama: YYYY-AA-GG' (yöntem
+        dosyaları, §3/§5.3) ya da 'Kontrol edildi: <kaynak> (YYYY-AA-GG)'
+        (çıktılar, §14).
+
+Ve iki şey ölçüldü ki bunlar zaten iyiydi: çok kapılı bir blokta **bütün**
+ihlaller tek seferde bildiriliyor (kullanıcı üç tur değil bir tur harcıyor,
+AB-04), ve kapı **determinist** — aynı girdi beş koşumda aynı kapı kümesini
+veriyor (AB-05). İkisini de hiç ölçmemiştim.
+
+### Takımın kusuru: kendi niyetimi sınamışım
+
+AB-03 "çare uygulanınca kapı susuyor mu" diye soruyordu ve **geçiyordu**. Ama
+mutasyon onu **sağ kaldı**: kapıya kasten yanlış bir çare yazdım — *"dosyanın
+sonuna 'BITTI' yazın"* — ve takım yeşil kaldı.
+
+Sebebi şuydu: AB-03, **sınamaya benim yazdığım** düzeltilmiş metinleri
+deniyordu, **iletinin önerdiği** biçimi değil. Yani sistemin iddiasını değil,
+kendi niyetimi ölçüyordum. İleti ne söylerse söylesin vaka yeşil kalırdı.
+
+AB-03b bunu düzeltti: iletideki tek tırnaklı **her biçim örneği** çıkarılıyor,
+yer tutucuları dolduruluyor, ihlalli metne ekleniyor ve o kapının **susması**
+bekleniyor. Yanlış çare mutasyonu artık yakalanıyor.
+
+Ve AB-03b'nin kendisi de bir kez **boşa geçti**: kitaba sadık kapıda hiçbir
+ileti çare taşımadığı için döngü hiç dönmüyor ve vaka yeşil kalıyordu.
+Sınanacak bir iddianın **bulunmaması**, iddianın doğrulanması değildir; vaka
+artık bunu ayrı bir sonuç olarak yazıyor.
+
+> Bir çareyi sınamak, kendi niyetimi değil **sistemin iddiasını** sınamak
+> demektir. Aradaki fark, mutasyon koşmadan görünmüyor.
+
+---
+
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
 
 | Bölüm | Beklenen | Gerçek | Sebep |
@@ -1330,6 +1389,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | Y · sırrın kalıcı deposu | *hiç sorulmamıştı* | **temiz** — üç yol dışlandı, geçmiş temiz |
 | Z · kurulum bütünlüğü | *kitap iki kez hiç koşulmamıştı* | **temiz** — sessiz geri alma artık görülüyor |
 | AA · kapının arıza yönü | *hiç ölçülmemişti* | **temiz** — her arıza 0 ya da 2, süre sınırlı |
+| AB · blok iletisinin çaresi | *teşhis vardı, çare yoktu* | **temiz** — altı kapı da çare gösteriyor |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -1387,8 +1447,8 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # 24 çalıştırılabilir takım:
-                                  #   243 vaka + 15 mutasyon (D)
+./sinama/hepsi.sh                 # 25 çalıştırılabilir takım:
+                                  #   249 vaka + 15 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -1453,9 +1513,10 @@ Dokuz takım, 96 vaka:
 | Y | **Sırrın kalıcı deposu** — sistem neyi versiyonluyor | §2, kural 6 |
 | Z | **Kurulum bütünlüğü** — kitap ikinci kez koşulursa | §2, §0 kural 4 |
 | AA | **Kapının arıza yönü** — çökünce açık mı kapalı mı | §12, kural 6 |
+| AB | **Blok iletisinin çaresi** — bloklanan ne yapacağını öğreniyor mu | §14, §12 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**243 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**249 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)

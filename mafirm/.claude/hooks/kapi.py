@@ -275,6 +275,8 @@ def kapi_kapsam(metin, yol=None, disari=False):
     tur = "olumsuz iddia" if OLUMSUZ.match(m.group(0)) or OLUMSUZ.search(m.group(0)) \
         else "görüş"
     return ("kapsam", "%s gibi okunuyor, avukat başlığı yok: %r"
+            "  → çıktıyı '## Yetkili avukat görüşü gereken konular' "
+            "başlığıyla bitirin (§0 çıktı sözleşmesi)."
             % (tur, metin[max(0, m.start() - 30):m.end() + 30].strip()))
 
 
@@ -336,6 +338,9 @@ def kapi_kanit(metin, yol=None):
             continue
         if not _dayanak_var(pencere):
             return ("kanit", "dayanaksız eşik (±%d karakterde atıf yok): %r"
+                    "  → rakamın yanına mevzuat atfı yazın "
+                    "(ör. '2010/4 sayılı Tebliğ m.7'); başvuru "
+                    "malzemesinde dosya başına 'Dayanak: ...' satırı da yeter."
                     % (YAKINLIK, metin[max(0, m.start() - 40):m.end() + 20].strip()))
     return None
 
@@ -369,11 +374,16 @@ def kapi_sir(metin, disari=False):
     for ad in _ad_kaydi():
         if re.search(re.escape(ad).replace(r"\ ", AYR), metin, re.I):
             return ("sir", "kayıtlı müvekkil/karşı taraf adı makineden çıkıyor: %r"
+                    "  → sorguyu soyutlayın: adı çıkarın, yalnızca "
+                    "mevzuatı/olguyu sorun (kural 6)."
                     % ad)
     for kalip, ad in SIR_KALIPLARI:
         m = re.search(kalip, metin)
         if m:
-            return ("sir", "%s makineden çıkıyor: %r" % (ad, m.group(0).strip()))
+            return ("sir", "%s makineden çıkıyor: %r"
+                          "  → sorguyu soyutlayın: adı/kod adını çıkarın, "
+                          "yalnızca mevzuatı sorun (kural 6)."
+                          % (ad, m.group(0).strip()))
     return None
 
 
@@ -409,7 +419,10 @@ def kapi_guncellik(metin, bugun=None):
         # [B-22] Tarihsiz bir eşik, bayat bir eşikten kötüdür: hiç kontrol
         # edilmemiş olduğu bile bilinmez.
         if esik_var(metin):
-            return ("guncellik", "eşik rakamı var ama doğrulama tarihi yok")
+            return ("guncellik", "eşik rakamı var ama doğrulama tarihi yok"
+                "  → şu iki biçimden birini ekleyin: "
+                "'Doğrulama: YYYY-AA-GG' (yöntem dosyaları, §3/§5.3) ya da "
+                "'Kontrol edildi: <kaynak> (YYYY-AA-GG)' (çıktılar, §14).")
         return None
     for ham, d in bulunan:
         yas = (bugun - d).days
@@ -426,7 +439,9 @@ def kapi_arastirma(metin, yol=None, disari=False):
     if _basvuru_malzemesi(yol) and not disari:
         return None
     if (esik_var(metin) or GITHUB.search(metin)) and not KONTROL.search(metin):
-        return ("arastirma", "rakam ya da depo anıldı, Kontrol edildi satırı yok")
+        return ("arastirma", "rakam ya da depo anıldı, Kontrol edildi satırı yok"
+                "  → sütun sıfırdan şu satırı yazın: "
+                "'Kontrol edildi: <kaynak> (<tarih>) · bulunamayan: <ne>'.")
     return None
 
 

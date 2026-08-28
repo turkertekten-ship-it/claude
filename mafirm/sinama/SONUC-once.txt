@@ -273,3 +273,12 @@ GEÇTİ AA-03-200 boşluksuz 200000 karakter bütçe içinde bitiyor
 GEÇTİ AA-04     400 KB gerçek düzyazı bütçe içinde
 GEÇTİ AA-05     dayanıklılık yaması doğruluğu bozmadı
 18 vaka · 14 geçti · 0 beklenen · 4 SİNYAL
+
+### AB takımı — KİTABA SADIK kapı üzerinde (sonradan eklendi)
+KALDI AB-01   her blok iletisi bir ÇARE adlandırıyor (teşhis değil eylem)
+KALDI AB-02   birden çok kabul edilen biçim varsa ileti hepsini sayıyor
+KALDI AB-03   iletinin gösterdiği çare uygulanınca o kapı susuyor
+KALDI AB-03b  iletinin ÖNERDİĞİ biçim gerçekten o kapıyı susturuyor
+KALDI AB-04   çok kapılı blokta bütün ihlaller tek seferde bildiriliyor
+GEÇTİ AB-05   aynı girdi beş koşumda aynı kapı kümesini veriyor
+6 vaka · 1 geçti · 0 beklenen · 5 SİNYAL

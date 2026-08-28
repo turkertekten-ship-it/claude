@@ -248,6 +248,18 @@ yalnızca tek harfli takım adlarını sayar; yirmi altıncı takımdan sonra ek
 her takım sessizce kapsam dışı kalır ve "her takım raporda anılıyor" kontrolü
 onları hiç istemez. Bir kapsama kontrolü, kapsamadığını söylemez. *(AA-01g, AA-03-20)*
 
+**[B] Kapılar teşhis koyuyor, çare söylemiyor.** §12'nin beş kapısının hiçbir
+iletisi uyulacak yolu göstermiyor: "dayanaksız eşik", "avukat başlığı yok",
+"doğrulama tarihi yok" doğru teşhislerdir ama bloklanan kişi NE YAZACAĞINI
+iletiden öğrenemez. §14 bir kapının nasıl öldüğünü kendisi yazar — "doğru işi
+bloklayan bir kapı bir gün içinde kapatılır" — ve ekonomi DOĞRU bloklar için de
+aynıdır: yolu söylemeyen bir kapı her seferinde zaman yakar, en ucuz çözüm onu
+kapatmaktır. En kötüsü güncellik kapısıdır: kitap İKİ biçim kabul eder
+(`Doğrulama: <tarih>` yöntem dosyalarında, `Kontrol edildi: <kaynak> (<tarih>)`
+çıktılarda) ve ileti ikisini de saymaz; kullanıcı deneyerek bulmak zorunda
+kalır. → Her blok iletisi bir EYLEM göstermeli ve birden çok kabul edilen
+biçim varsa hepsini saymalı. *(AB-01, AB-02, AB-03b)*
+
 ## §7 · Ortak koltukları
 
 **[B] Kitabın en yüksek itibar riskli kuralının hiçbir mekanizması yok.**
