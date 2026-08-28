@@ -3799,3 +3799,57 @@ It bit on neither. It bit because someone changed a weight in a different file.
    it.** L60 was right that the inconsistency would bite and wrong about what
    would set it off, which cost nothing here only because the fix is the same
    either way.
+
+---
+
+## L70 - The audit that found nothing, and what "nothing" measured
+
+L69's first rule is to grep for the divisors when a scoring weight moves. Doing
+that across the tree: `min_top_score` is scale-dependent and has 200x of margin,
+`authority/1.5`, `df/total`, the IDF normaliser and `_code_likeness` are all
+bounded by construction, and nothing thresholds the reported confidence - it is
+printed and journalled and gates nothing, which is exactly why it could rot.
+
+That leaves the reranker's own two weights, swept at `base_weight` 1.0 and never
+since. Both are flat now - 44/54 and 19/20 at every setting, nDCG wobbling in
+the third decimal - so nothing moved. **The flatness is the finding.** Measured
+on the same index, one knob, two configurations:
+
+| coverage_weight | 0.25 | 0.45 (shipped) | 0.8 |
+|---|---|---|---|
+| old: `base_weight` 1, `rrf_k` 60, old priors | **44/54** | 41/54 | 40/54 |
+| now: `base_weight` 5, `rrf_k` 16 | 44/54 | 44/54 | 44/54 |
+
+A knob with a four-case span became inert. This session moved the ordering's
+centre of gravity off the lexical re-scorer and onto the fusion, and that is
+what it looks like from the inside: `rrf_k`, previously never examined, became
+worth two cases; `coverage_weight` and `phrase_weight`, previously worth four,
+became worth none.
+
+**And the uncomfortable half.** The old configuration reaches 44/54 too, by
+dropping `coverage_weight` to 0.25 - one knob, not three. Two different routes
+to the same pass rate, and a session that reports only the route it took has
+credited the wrong cause. The shipped route is still the better one, on evidence
+rather than on ownership:
+
+|  | pass | recall@8 | nDCG@8 | neighbours |
+|---|---|---|---|---|
+| old config, `coverage_weight` 0.25 | 44/54 | 0.8837 | 0.7188 | 41/54 and 40/54 |
+| shipped | 44/54 | **0.8953** | **0.7505** | **44/54 either side** |
+
+Better on both metric columns, and sitting in a region where its neighbours
+score the same rather than three cases worse. A configuration whose neighbours
+agree with it is one whose next corpus change is less likely to move it - which
+is the property this repository has been buying, one sweep at a time, for
+sixty-odd learnings.
+
+**Rules.**
+1. **Report the routes you did not take.** A gain reachable by a knob you did
+   not touch is a fact about the system, and omitting it credits your change
+   with someone else's effect.
+2. **Prefer the flat neighbourhood to the equal peak.** Two settings with the
+   same pass rate are not equivalent if one of them is surrounded by worse ones:
+   flatness is robustness against the next corpus.
+3. **An audit that finds nothing has still measured something** - here, that the
+   knobs a previous session tuned no longer do anything, which is the clearest
+   statement available of what this session actually changed.

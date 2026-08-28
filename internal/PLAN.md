@@ -198,7 +198,12 @@ its current failures are that artefact. See docs/EVALUATION.md.
   itself the finding. It currently buys a case and costs ordering quality on
   both corpora. The table is in `retrieve/rerank.py`.
 
-- **Retuning `candidate_k`, `mmr_lambda` or `coverage_weight`.** Swept over both
+- **Retuning the reranker's `coverage_weight` or `phrase_weight`.** Both are now
+  *inert*: 44/54 and 19/20 at every setting across a 3x range, where
+  `coverage_weight` spanned four cases before this session moved the ordering
+  onto the fusion (L70). Tuning them is tuning nothing.
+
+- **Retuning `candidate_k` or `mmr_lambda`.** Swept over both
   corpora and confirmed on plateaus (L33), then re-swept after `base_weight` and
   `rrf_k` moved, because a constant confirmed under a different configuration is
   a stale constant (L68). `rrf_k` did move, 60 to 16. `candidate_k` stays at 40
