@@ -534,3 +534,62 @@ sources:
       persistent storage, so a new container starts without these and must run
       the installer again - which is why it is a committed script and not a
       one-time action.
+
+  - id: YOUTUBE-CAPTIONS-OAUTH-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T16:25Z"
+    method: "curl https://www.googleapis.com/youtube/v3/captions?part=snippet&videoId=...; WebSearch of developers.google.com/youtube/v3/guides/implementation/captions"
+    evidence: >-
+      The captions endpoint is reachable and returns the same
+      "Method doesn't allow unregistered callers" 403 as the videos endpoint.
+      Google's own implementation guide states that captions.list requires
+      OAuth 2.0 authorisation, and that captions.download requires OAuth 2.0
+      and that the authenticated user own the video, returning 403 for
+      third-party public videos.
+    note: >-
+      CORRECTS YOUTUBE-API-REACHABLE-2026-08-27, which said the only thing
+      standing between this container and "YouTube metadata or caption tracks"
+      was an API key. That is true of metadata and false of captions. An API
+      key alone yields video metadata; caption tracks need OAuth, and caption
+      bodies need OAuth as the owning channel, which is unobtainable for
+      someone else's video by any means.
+
+  - id: DOCLING-MODELS-BLOCKED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T16:30Z"
+    method: "curl over 5 Hugging Face hosts; pypi.org/pypi/<pkg>/json for docling, docling-core, docling-ibm-models, docling-parse; raw.githubusercontent.com fetch of docling/utils/model_downloader.py and docling-ibm-models/README.md; pip install huggingface_hub then snapshot_download('ds4sd/docling-models')"
+    evidence: >-
+      huggingface.co, hf.co, cdn-lfs.huggingface.co, cdn-lfs-us-1.hf.co and
+      huggingface.co/ds4sd/docling-models all return 000 - refused at CONNECT.
+      The packages themselves are on PyPI, which is reachable: docling 2.123.0,
+      docling-core 2.92.0, docling-ibm-models 3.15.0, and docling-parse 7.16.0
+      at 265.3 MB across 26 files. docling/utils/model_downloader.py fetches by
+      repo_id, and the docling-ibm-models README points the TableFormer
+      checkpoint and the layout beehive_v0.0.5 weights at
+      huggingface.co/ds4sd/docling-models. Reproduced directly:
+      huggingface_hub 1.29.0 snapshot_download(repo_id="ds4sd/docling-models")
+      raised ProxyError - 403 Forbidden.
+    note: >-
+      Docling installs here and cannot run PDF conversion here. The pip half
+      succeeds because PyPI is on the allowlist; the model half fails because
+      Hugging Face is not. Docling supports fully air-gapped operation via a
+      pre-staged artifacts directory and DOCLING_SERVE_ARTIFACTS_PATH, but no
+      route to obtain those artifacts exists from this container, so the
+      workaround needs a machine that can reach Hugging Face.
+
+  - id: IBM-YOUTUBE-CHANNEL-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T16:28Z"
+    method: "WebSearch '\"IBM Technology\" YouTube channel RAG retrieval augmented generation explainer videos'"
+    evidence: >-
+      An "IBM Technology" YouTube channel exists and publishes
+      retrieval-augmented-generation explainers, including one presented by
+      Marina Danilevsky, a Senior Research Scientist at IBM Research. IBM also
+      hosts written RAG material at ibm.com/think/topics/retrieval-augmented-generation
+      and recorded video at video.ibm.com.
+    note: >-
+      Third supporting leg for the U-4 reading, alongside Docling being IBM's
+      and the Granite model line being IBM's. It establishes that an IBM
+      YouTube channel producing exactly the material a RAG session would want
+      does exist. It still does not establish that "imb youtube" denotes it;
+      only the owner can close that.

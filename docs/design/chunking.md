@@ -95,11 +95,20 @@ Two constraints follow that the rest of this document does not carry:
 
 - **Parsing is the hard part here, not chunking.** These arrive as PDFs and as
   `.note` archives from a handwriting app [src:DRIVE-OWNED-FILES-2026-08-27],
-  neither of which the current connectors read. This is where Docling is
-  relevant: it is IBM Research's document converter, and it handles PDF layout,
-  tables and reading order [src:DOCLING-IBM-2026-08-27]. It is also a heavy
-  dependency, which collides directly with design principle 1 — so it belongs
-  behind the connector interface as an optional extra, never in the core.
+  neither of which the current connectors read. Docling is the obvious
+  candidate — IBM Research's document converter, handling PDF layout, tables
+  and reading order [src:DOCLING-IBM-2026-08-27] — and it is a heavy
+  dependency, which collides with design principle 1, so it would belong behind
+  the connector interface as an optional extra rather than in the core.
+
+  **But it cannot run in this environment, and that is not a design choice.**
+  Docling installs from PyPI and then fetches its layout and TableFormer
+  weights from Hugging Face, which is refused at CONNECT here;
+  `snapshot_download("ds4sd/docling-models")` was run and raised
+  `ProxyError: 403 Forbidden` [src:DOCLING-MODELS-BLOCKED-2026-08-27]. The
+  install succeeding proves nothing about the conversion working. Treat PDF
+  parsing as blocked on U-9 rather than as a library choice, and do not put
+  Docling in a dependency list until artifacts are staged.
 - **Redaction matters more here than anywhere else in this corpus.** These
   documents name private counterparties, and `redact_secrets` catches
   credentials, not names [src:AUDIT-OODARAG-2026-08-27]. Anything indexing this

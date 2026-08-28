@@ -97,10 +97,22 @@ not read are not a definition, and `www.ibm.com` and `research.ibm.com` are
 both unreachable from here [src:EGRESS-2026-08-27], so the guess could not be
 checked against the source even in principle.
 
+**Third leg (2026-08-27).** An "IBM Technology" YouTube channel exists and
+publishes retrieval-augmented-generation explainers, one of them presented by a
+Senior Research Scientist at IBM Research [src:IBM-YOUTUBE-CHANNEL-2026-08-27].
+So a channel matching the description does exist and carries exactly the
+material a RAG session would want. Three independent legs now point the same
+way — Docling is IBM's, Granite is IBM's, and IBM publishes RAG video.
+
+That raises the confidence and does not change the grade. Establishing that a
+plausible referent exists is not establishing that the owner meant it; the
+phrase still appears only inside one goal string this session did not write.
+
 **Do not** write IBM into a source list, a connector name, or a config default
 on the strength of this. If the expansion is wrong, every artifact built on it
 inherits the error silently — which is the exact failure this register exists
-to prevent.
+to prevent. Note also that even if the reading is right, the transcripts of
+that channel are not reachable through the Data API — see U-7.
 
 **Separately, and independently of what "imb" means:** the blocker recorded
 against that goal has moved. `www.youtube.com` is genuinely unreachable, but
@@ -122,9 +134,50 @@ tracks. No key is present in this environment, and none was requested.
 **Resolves when:** the owner either supplies a key through the environment's
 secret configuration, or says YouTube is not wanted as a source after all.
 
-**Note:** the API serves video metadata and the caption *track list*. Whether
-caption *bodies* can be downloaded with an API key alone, rather than OAuth as
-the owning channel, was not tested here.
+**Answered, and the answer is worse than assumed (2026-08-27).** A key does
+*not* reach captions. Google's implementation guide requires OAuth 2.0 for
+`captions.list`, and OAuth plus ownership of the video for
+`captions.download`, which returns 403 for third-party public videos
+[src:YOUTUBE-CAPTIONS-OAUTH-2026-08-27]. So:
+
+- **Video metadata** — titles, descriptions, durations, playlists: an API key
+  is sufficient, and that part of U-7 stands.
+- **Transcripts of someone else's videos** — not obtainable through the Data
+  API at all, by any credential the owner can hold. Ownership cannot be
+  granted.
+
+**What this closes.** A pipeline that planned to ingest transcripts from a
+third-party channel through the official API should stop planning that. The
+remaining honest routes are a transcript source that is not `youtube.com` (that
+host is refused at CONNECT [src:EGRESS-2026-08-27]), a commercial extraction
+vendor of the kind already recorded and rejected in `SKILLS.md`
+[src:PLUGIN-CATALOG-2026-08-27], or the owner supplying transcripts directly.
+
+---
+
+### U-9 — How Docling model artifacts could reach this environment
+
+**Unknown:** whether there is any route to the Docling model weights from a
+container on this egress allowlist.
+
+**Why:** Docling installs cleanly from PyPI, which is allowlisted, but fetches
+its layout and TableFormer weights by `repo_id` from Hugging Face, which is
+refused at CONNECT. `snapshot_download("ds4sd/docling-models")` was run and
+raised `ProxyError: 403 Forbidden` [src:DOCLING-MODELS-BLOCKED-2026-08-27].
+
+**Why it matters now:** a sibling session reports "docling building"
+[src:SESSIONS-2026-08-27]. The pip half of that will succeed and the
+conversion half cannot, so the failure will appear late and look like a Docling
+bug rather than an environment policy.
+
+**Resolves when:** either Hugging Face is added to the environment's network
+policy, or the artifacts are staged from a machine that can reach it and
+`DOCLING_SERVE_ARTIFACTS_PATH` is pointed at them. Docling supports fully
+air-gapped operation given a pre-staged directory; nothing here can produce
+that directory.
+
+**Do not:** add Docling to a dependency list on the strength of it installing.
+Installation is not capability here.
 
 ---
 

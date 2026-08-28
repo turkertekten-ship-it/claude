@@ -1,0 +1,161 @@
+{
+  "budget_s": 180.0,
+  "collected_at": "2026-08-28T07:46:22Z",
+  "not_probed": [],
+  "results": [
+    {
+      "detail": "Tunnel connection failed: 403 Forbidden",
+      "elapsed_ms": 170,
+      "group": "video",
+      "state": "blocked",
+      "status": null,
+      "url": "https://www.youtube.com/",
+      "why": "page scraping - the obvious path"
+    },
+    {
+      "detail": "HTTP 403 Forbidden",
+      "elapsed_ms": 314,
+      "group": "video",
+      "state": "reachable",
+      "status": 403,
+      "url": "https://www.googleapis.com/youtube/v3/videos?part=id&id=X",
+      "why": "YouTube Data API - metadata and caption tracks"
+    },
+    {
+      "detail": "HTTP 403 Forbidden",
+      "elapsed_ms": 139,
+      "group": "video",
+      "state": "reachable",
+      "status": 403,
+      "url": "https://www.googleapis.com/youtube/v3/captions?part=snippet&videoId=X",
+      "why": "caption track list - reachable, but needs OAuth, not just a key"
+    },
+    {
+      "detail": "Tunnel connection failed: 403 Forbidden",
+      "elapsed_ms": 56,
+      "group": "video",
+      "state": "blocked",
+      "status": null,
+      "url": "https://i.ytimg.com/",
+      "why": "thumbnail CDN"
+    },
+    {
+      "detail": "HTTP 400 Bad Request",
+      "elapsed_ms": 241,
+      "group": "code",
+      "state": "reachable",
+      "status": 400,
+      "url": "https://github.com/",
+      "why": "repository browsing"
+    },
+    {
+      "detail": "",
+      "elapsed_ms": 184,
+      "group": "code",
+      "state": "reachable",
+      "status": 200,
+      "url": "https://api.github.com/",
+      "why": "GitHub REST API"
+    },
+    {
+      "detail": "HTTP 400 Bad Request",
+      "elapsed_ms": 473,
+      "group": "code",
+      "state": "reachable",
+      "status": 400,
+      "url": "https://raw.githubusercontent.com/",
+      "why": "raw file fetch - skill install path"
+    },
+    {
+      "detail": "",
+      "elapsed_ms": 61,
+      "group": "packages",
+      "state": "reachable",
+      "status": 200,
+      "url": "https://pypi.org/simple/",
+      "why": "Python package index"
+    },
+    {
+      "detail": "",
+      "elapsed_ms": 71,
+      "group": "packages",
+      "state": "reachable",
+      "status": 200,
+      "url": "https://files.pythonhosted.org/",
+      "why": "Python package payloads"
+    },
+    {
+      "detail": "",
+      "elapsed_ms": 75,
+      "group": "packages",
+      "state": "reachable",
+      "status": 200,
+      "url": "https://registry.npmjs.org/",
+      "why": "npm registry"
+    },
+    {
+      "detail": "Tunnel connection failed: 403 Forbidden",
+      "elapsed_ms": 157,
+      "group": "models",
+      "state": "blocked",
+      "status": null,
+      "url": "https://huggingface.co/",
+      "why": "model and tokenizer downloads"
+    },
+    {
+      "detail": "Tunnel connection failed: 403 Forbidden",
+      "elapsed_ms": 232,
+      "group": "models",
+      "state": "blocked",
+      "status": null,
+      "url": "https://huggingface.co/ds4sd/docling-models",
+      "why": "Docling layout + TableFormer weights - blocks Docling PDF conversion"
+    },
+    {
+      "detail": "Tunnel connection failed: 403 Forbidden",
+      "elapsed_ms": 231,
+      "group": "models",
+      "state": "blocked",
+      "status": null,
+      "url": "https://cdn-lfs.huggingface.co/",
+      "why": "HF large-file CDN"
+    },
+    {
+      "detail": "Tunnel connection failed: 403 Forbidden",
+      "elapsed_ms": 234,
+      "group": "papers",
+      "state": "blocked",
+      "status": null,
+      "url": "https://arxiv.org/",
+      "why": "paper source"
+    },
+    {
+      "detail": "Tunnel connection failed: 403 Forbidden",
+      "elapsed_ms": 247,
+      "group": "vendor",
+      "state": "blocked",
+      "status": null,
+      "url": "https://research.ibm.com/",
+      "why": "Docling / Granite documentation"
+    },
+    {
+      "detail": "Tunnel connection failed: 403 Forbidden",
+      "elapsed_ms": 230,
+      "group": "vendor",
+      "state": "blocked",
+      "status": null,
+      "url": "https://www.ibm.com/",
+      "why": "vendor documentation"
+    },
+    {
+      "detail": "HTTP 404 Not Found",
+      "elapsed_ms": 68,
+      "group": "api",
+      "state": "reachable",
+      "status": 404,
+      "url": "https://api.anthropic.com/",
+      "why": "Claude API"
+    }
+  ],
+  "timeout_s": 15.0
+}

@@ -99,6 +99,15 @@ contents were not reconstructed, summarised, or guessed at.
 - Of the 12 branches, only this session's vendors skills from outside the account, so the find-install-route overlap between sessions is in mandate rather than in output. [src:FLEET-SKILLS-2026-08-27]
 - A trial merge of one sibling branch conflicted on 7 files and produced two different questions sharing the id `U-7`, because unknown ids are allocated per branch with no shared counter; the merge was aborted rather than resolved. [src:LEDGER-ID-COLLISION-2026-08-27]
 
+## Observed — what the egress allowlist actually costs
+
+- The YouTube captions endpoint is reachable, but Google's implementation guide requires OAuth 2.0 for `captions.list` and OAuth plus video ownership for `captions.download`, which returns 403 for third-party public videos. [src:YOUTUBE-CAPTIONS-OAUTH-2026-08-27]
+- An API key therefore buys video metadata and not transcripts; this corrects an earlier claim here that a key was the only thing standing between this container and caption tracks. [src:YOUTUBE-CAPTIONS-OAUTH-2026-08-27]
+- All five Hugging Face hosts tried are refused at CONNECT, including the `ds4sd/docling-models` repository page. [src:DOCLING-MODELS-BLOCKED-2026-08-27]
+- Docling installs from PyPI — `docling` 2.123.0 and `docling-parse` 7.16.0 at 265 MB — but its layout and TableFormer weights are fetched by `repo_id` from Hugging Face, so conversion cannot run here. [src:DOCLING-MODELS-BLOCKED-2026-08-27]
+- Reproduced directly rather than inferred: `snapshot_download("ds4sd/docling-models")` raised `ProxyError: 403 Forbidden`. [src:DOCLING-MODELS-BLOCKED-2026-08-27]
+- An "IBM Technology" YouTube channel exists and publishes RAG explainers, including one by a Senior Research Scientist at IBM Research. [src:IBM-YOUTUBE-CHANNEL-2026-08-27]
+
 ## Observed — scope of the skill install
 
 - A sibling branch carries a 206-line owner profile derived from 11 goal strings, whose Strong-graded P4 is "all prompts, all chats, all terminals" and which states that configuration meant to change behaviour generally belongs at user scope rather than in one repository. [src:OWNER-PROFILE-SIBLING-2026-08-27]
