@@ -44,6 +44,10 @@
     "T-06": {
       "sinif": "kitabin-sinir-hatasi",
       "neden": "§18.6 'üç sözleşme deposundan BİRİ AGPL' diyor; oysa katalogda iki AGPL depo var — lexpredict-lexnlp (§13.4) ve courtlistener (§13.5, kitap ona 'açık (depoya bakın)' diyor, bkz. G-01). Bu KİTABIN metnindeki bir kusurdur, kurulumun değil; düzeltmesi KITAP-ERRATA.md'de yazılı. Vaka, sınır düzeltilene kadar kitabın davranışının kaydı olarak açık kalır."
+    },
+    "U-02": {
+      "sinif": "kitabin-ic-celiskisi",
+      "neden": "Bulgu KİTABA SADIK metindedir: §6 mimari.md'nin kapanış öncesi koşul listesindeki 5. madde, işlemi YETKİLENDİREN organ kararı ile Ltd. Şti.'de TTK m.595/2 genel kurul onayını tek satırda topluyor. Kitabın KENDİ pay-devri.md'si ikincisini 'devri tamamlayan kurucu işlem' sayar — kurucu bir işlem, kapanışın ÖNKOŞULU olamaz; aksi hâlde kapanış günü 1. adımı ('koşulların karşılandığının teyidi') hiçbir zaman doğrulanamaz. İki tarafı da kitabın içinde olduğu için dış kaynak gerekmiyor; hangisinin doğru olduğu ise bir hukuki nitelendirmedir ve §9/§11 uyarınca yetkili bir insana aittir. Kitabın düzyazısı bu yüzden AYNEN bırakıldı. Türetilmiş dosyalar (kosul-takibi, kapanis-listesi — bu kurulumda yazılanlar) ayrımı açıkça taşır, dolayısıyla becerileri kullanan kişi doğru sırayı görür. Önerilen tek satırlık düzeltmenin U-02'yi ve U-01'i birlikte yeşile aldığı kum havuzunda gösterildi; uygulanması onay bekliyor. KITAP-ERRATA.md §6 kaydına bakınız."
     }
   },
   "kabuk_takimlari": {

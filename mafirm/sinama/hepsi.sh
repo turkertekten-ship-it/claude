@@ -51,6 +51,8 @@ python3 "$S/ks_s_yalitim.py";     topla "S · yalıtım (klon yalnız mı)" $?
 echo
 python3 "$S/ks_t_sinirlar.py";   topla "T · §18'in dokuz sınırı" $?
 echo
+python3 "$S/ks_u_birimler_arasi.py"; topla "U · birimler arası tutarlılık" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

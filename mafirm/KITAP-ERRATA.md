@@ -106,6 +106,39 @@ ayrımı modellenmiyor** (şartname birleşme için ayrı ölçüt veriyor).
 - **TTK 595/1** tarafların **imzalarının** noterce onanmasını ister, noterin
   düzenlediği senet değil. *(I-05)*
 
+## §6 · Sınır ötesi mimari
+
+**[B] Kitap kendi içinde çelişiyor: kurucu bir işlem, önkoşul listesinde.**
+§6 `mimari.md`'nin "Kapanış öncesi koşullar" listesinin **5. maddesi**,
+işlemi *yetkilendiren* organ kararı ile Ltd. Şti.'de **TTK m.595/2 genel kurul
+onayını** tek satırda topluyor. Kitabın kendi §5.3 `pay-devri.md`'si ikincisini
+"devri tamamlayan **kurucu** işlem" sayar. Kurucu bir işlem kapanışın önkoşulu
+olamaz: kapanış günü sırasının ilk adımı "koşulların karşılandığının teyidi"
+olduğunda, o adım hiçbir zaman doğrulanamaz — koşul, kendisinden sonra gelecek
+işleme bağlanmış olur.
+
+Çelişkinin iki tarafı da kitabın içindedir; görmek için dış kaynak gerekmez.
+Hangisinin doğru olduğu ise bir hukuki nitelendirmedir; §9 ve §11 uyarınca
+kitabın düzyazısı **aynen bırakıldı** ve karar yetkili bir insana bırakıldı.
+Önerilen tek satırlık düzeltme kum havuzunda uygulandı; U-01 ile U-02'yi
+birlikte yeşile alıyor:
+
+    5. Şirket organ kararları — işlemi yetkilendiren kararlar
+       (Ltd. Şti.'de TTK m.595/2 genel kurul onayı bir koşul değil,
+       kapanış günü devri tamamlayan kurucu işlemdir; bkz.
+       `birimler/tr-sirketler/yontem/pay-devri.md`)
+
+Bu kurulumda türetilmiş dosyalar (`kosul-takibi`, `kapanis-listesi`) ayrımı
+zaten taşır, dolayısıyla becerileri kullanan kişi doğru sırayı görür. *(U-02)*
+
+**[B] Birimler arası tutarlılık hiçbir yerde sınanmıyor.**
+§4 birim yapısının gerekçesini "birimler aynı YAPIYI paylaşır" diye yazar ve
+denetim yalnızca yapıyı sayar: INDEX var mı, `yontem/` dolu mu, üst bilgi
+yerinde mi. İki birimin aynı hukuki işlemi farklı sıraya koyması ya da aynı
+hükme farklı nitelik atfetmesi denetimi **yeşil bırakır**. Yapısal denetim,
+içeriği hiç okumadığı için bu sınıfa kördür.
+*(U-01, U-02, U-03, U-05, U-06, U-07, U-08, U-09, U-10, U-11)*
+
 ## §7 · Ortak koltukları
 
 **[B] Kitabın en yüksek itibar riskli kuralının hiçbir mekanizması yok.**
@@ -289,6 +322,14 @@ onlarda ateşliyor: `SELFTEST HATA 2`. Zincir: §14 kırmızı → §16 kırmız
 **[C] Belgelenen biçim, kapının reddettiği biçim.** `once-arastir` çıktı
 satırını dört boşluk girintili gösteriyor; `^Kontrol edildi:` sütun sıfır
 istiyor. *(B-33)*
+
+**[C] `once-arastir` §0'ın çıktı sözleşmesini taşımıyor.** §0 "her esaslı
+çıktı iki başlıkla biter" der; kitabın verdiği `once-arastir` gövdesi ikisini de
+adlandırmaz. Kusur DEĞİL sayıldı — beceri bir araştırma notu üretir, müvekkile
+giden bir teslim değil — ama bu bir kanaat olarak bırakılmadı: muafiyet
+`beklenen.json` yerine sınamanın içinde BEYAN edildi ve U-11 muafiyeti
+kapının kendisiyle sınıyor (belgelenen çıktı biçimi kapsam kapısına verilir;
+kapı susarsa muafiyet doğrudur). *(U-10, U-11)*
 
 **[C] Önerilen doğrulama komutu her ortamda çalışmıyor.**
 `curl https://api.github.com/...` ajan vekili arkasında 403 dönebilir; beceri

@@ -13,7 +13,11 @@ description: Kapanış öncesi koşullar listelenip sahiplendirilip tarihlenirke
 3. Yabancı yatırım / millî güvenlik incelemesi (alıcının ya da üçüncü bir
    ülkenin).
 4. Üçüncü taraf kontrol değişikliği onayları.
-5. Şirket organ kararları; Ltd. Şti. için genel kurul onayı.
+5. Şirket organ kararları — yalnızca işlemi **yetkilendiren** kararlar.
+   Ltd. Şti.'de TTK m.595/2 genel kurul onayı bu listeye YAZILMAZ: o bir
+   koşul değil, kapanış günü devri tamamlayan kurucu işlemdir
+   (`kapanis-listesi`). Kitabın §6 mimari.md'si ikisini tek maddede topluyor;
+   bkz. KITAP-ERRATA.md.
 
 ## Her koşul için yazılacak dört alan
 koşul | sahibi (adı belli bir kişi) | tahmini saat | feragat edilebilir mi

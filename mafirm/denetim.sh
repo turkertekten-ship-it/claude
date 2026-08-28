@@ -127,6 +127,45 @@ kontrol "olumsuz iddia kanıtlı (kural 2)" \
 # Taban eşleşmesi hepsi.sh'in KENDİ çıkış kodudur (0 = sinyal yok) ve orada
 # kalır; denetim yalnızca kendi katmanına bakar.
 
+# Raporun EL YAZISI sayıları, ölçtükleri şeyden bağımsız bayatlıyor: rapor
+# bir kez "on üç bilinen sapma" dedi, gerçek on birdi — kitabın §9'daki
+# "10 beceri" beklentisiyle aynı kusur. Yalnızca DURAĞAN olarak türetilebilen
+# şey burada kontrol edilir; vaka sayıları hepsi.sh'in kendi çıktısıdır ve
+# oradan çağrılırsa yukarıda anlatılan özyineleme geri gelir.
+kontrol "raporun beyan sayısı beklenen.json ile uyuşuyor" \
+  "MAFIRM_KOK='$M' python3 - <<'PYX'
+import json, os, re, sys
+kok = os.environ['MAFIRM_KOK']
+n = len(json.load(open(kok + '/sinama/beklenen.json', encoding='utf-8'))['vakalar'])
+metin = open(kok + '/RAPOR.md', encoding='utf-8').read()
+SAYI = {'on': 10, 'on bir': 11, 'on iki': 12, 'on üç': 13, 'on dört': 14,
+        'on beş': 15, 'on altı': 16, 'dokuz': 9, 'sekiz': 8}
+m = re.search(r'\*\*([A-Za-zÇĞİÖŞÜçğıöşü ]+?)\*\*\s*\n?bilinen sapma', metin)
+if not m:
+    print('raporda beyan cümlesi bulunamadı'); sys.exit(1)
+yazi = m.group(1).strip().lower()
+d = SAYI.get(yazi)
+if d is None:
+    print('sayı sözcüğü çözülemedi: ' + yazi); sys.exit(1)
+if d != n:
+    print('rapor %d diyor, beklenen.json %d taşıyor' % (d, n)); sys.exit(1)
+print('%d = %d' % (d, n))
+PYX"
+
+kontrol "her sınama takımı raporun tablosunda anılıyor" \
+  "MAFIRM_KOK='$M' python3 - <<'PYX'
+import glob, os, re, sys
+kok = os.environ['MAFIRM_KOK']
+metin = open(kok + '/RAPOR.md', encoding='utf-8').read()
+harfler = sorted({os.path.basename(p).split('_')[1].upper()
+                  for p in glob.glob(kok + '/sinama/ks_*')
+                  if re.match(r'ks_[a-z]_', os.path.basename(p))})
+eksik = [h for h in harfler if not re.search(r'^\| %s \|' % h, metin, re.M)]
+if eksik:
+    print('tabloda yok: ' + ', '.join(eksik)); sys.exit(1)
+print('%d takımın hepsi tabloda' % len(harfler))
+PYX"
+
 kontrol "teslimatlar tarih ve bozulma sınıfı taşıyor" \
   "python3 $M/sinama/ks_p_guncellik.py >/dev/null 2>&1 && echo 'hepsi tarihli'"
 

@@ -14,7 +14,11 @@ Kurallar:
 3. **Bire bir karşılığı olmayan Türk hukuku terimi ÇEVRİLMEZ.** Özgün terim
    bırakılır, yanına işlevsel açıklama yazılır ve "tam karşılık değildir" notu
    düşülür. Örnek: "pay defteri" bir share register değildir; TTK m.499
-   bakımından kurucu bir işlevi vardır.
+   bakımından devrin **şirkete karşı** hüküm ifade etmesi buna bağlıdır.
+   Devrin kendisi taraflar arasında ciro ve zilyetliğin devriyle gerçekleşir
+   (TTK m.490/2); pay defteri kaydı onu kuran işlem DEĞİLDİR
+   (`birimler/tr-sirketler/yontem/pay-devri.md`). Kurucu olan tek onay
+   Ltd. Şti.'de genel kurul onayıdır (TTK m.595/2).
 4. Madde numarası ve dayanak her zaman korunur.
 5. Çeviri hukuki görüş değildir; bir metnin başka dildeki hâli, o metnin başka
    ülkedeki sonucunu göstermez.

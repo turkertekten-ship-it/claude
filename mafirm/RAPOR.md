@@ -25,10 +25,15 @@ kendi §16 denetimi yeşile dönmedi.
 3. **Denetim on beş bozmadan on birini görmüyor**; sıfır beceri, kancasız
    ayarlar ve tamamen boş bir `esik.py` taşıyan bir sistemde "DENETİM OK" diyor.
 
-**Yamalı hâlde sistem çalışıyor:** 170 vaka, 0 sinyal; mutasyon yakalama 4/15
-→ 15/15. Ama **üç mevzuat bulgusu açık kalır** ve bunlar kod düzeltmesiyle
-kapanmaz: ikisi bir işlemin bildirime tabi olup olmadığını değiştirir ve
-birincil kaynak erişimi olan bir insan gerektirir.
+**Yamalı hâlde sistem çalışıyor:** on sekiz çalıştırılabilir takım — **175
+vaka, 15 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
+denetimin mutasyon yakalaması 4/15 → 15/15, birimler arası tutarlılık takımının
+kendi mutasyon yakalaması 10/10. Ama **üç mevzuat bulgusu ile kitabın kendi içindeki bir çelişki açık kalır**
+ve bunlar kod düzeltmesiyle kapanmaz: ikisi bir işlemin bildirime tabi olup olmadığını değiştirir ve
+birincil kaynak erişimi olan bir insan gerektirir; dördüncüsü (§6'nın koşul
+listesi ile §5.3'ün pay devri anlatısı arasındaki çelişki) bir hukuki
+nitelendirmedir ve §9 uyarınca kitabın düzyazısı aynen bırakılmıştır —
+önerilen düzeltme kum havuzunda gösterildi.
 
 **Bu rapor hukuki görüş değildir ve adı belli bir insan tarafından
 onaylanmamıştır** (işletim sözleşmesi §9). Mevzuat katmanı birincil kaynakla
@@ -761,6 +766,87 @@ düzeltmesi errata'da.
 
 ---
 
+## Yedi buçuk artı on iki · Birimler birbiriyle çelişiyordu
+
+Kapsamı yeniden saydım. Geriye tek bir sınıf kalmıştı: **birimler arası
+tutarlılık**. §4 birim yapısının gerekçesini kendisi yazar — birimler aynı
+**yapıyı** paylaşır — ve kitabın denetimi tam olarak o yapıyı sayar: INDEX var
+mı, `yontem/` dolu mu, üst bilgi yerinde mi. Hiçbir yerde bir birimin
+**söylediği** ile başka bir birimin söylediği karşılaştırılmaz. On iki tur
+boyunca ben de bunu yapmamıştım: §6 ve §8 içeriği yalnızca referans bütünlüğü
+için okunmuştu.
+
+On vakalık U takımı yazıldı. Üç gerçek çelişki çıktı, üçü de **benim
+yazdığım** dosyalarda.
+
+**Bir · `hukuki-cevirmen` TTK m.499'a kurucu nitelik atfediyordu.** Ajan,
+yabancı hukukçuya "pay defteri … TTK m.499 bakımından **kurucu** bir işlevi
+vardır" diyordu. Kitabın kendi `pay-devri.md`'si tersini söyler: devir taraflar
+arasında ciro ve zilyetliğin devriyle tamamlanır (m.490/2); pay defteri kaydı
+devrin **şirkete karşı** hüküm ifade etmesini sağlar, onu **kurmaz**. Bir
+çevirmen ajanının bunu ters söylemesi, `pay-devri.md`'nin açılış paragrafının
+uyardığı hatanın ta kendisidir: *"yabancı bir hukukçunun en yaygın hatası."*
+
+Bunun kaydı **zaten errata'mda vardı** (I-05, §5.3: "TTK 499 açıklayıcıdır,
+kurucu değil"). Uyarı yazılıydı; metin yine kaydı. Çünkü hiçbir şey bakıyordu.
+
+**İki · Kapanış günü sırası TTK m.595'i ters çeviriyordu.** `kapanis-listesi`
+"2. Organ kararları → 3. Noter işlemleri" diyordu. `pay-devri.md` ise
+m.595/1'de noter onaylı devir sözleşmesini, m.595/2'de onu **tamamlayan**
+genel kurul onayını sıralar. Listeyi izleyen bir uygulamacı, henüz noter
+onaylı hâli bulunmayan bir devri onaylamak için genel kurul toplardı.
+
+**Üç · Bir koşul, aynı anda kapanış günü adımıydı.** Kapanış günü sırasının
+1. adımı "kapanış öncesi koşulların karşılandığının teyidi"dir. "Organ
+kararları" hem o koşul listesinde hem de 2. adımdaydı: 1. adım hiçbir zaman
+doğrulanamazdı.
+
+Üçü de düzeltildi. Dördüncü bulgu düzeltilmedi ve sebebi önemli.
+
+### Kitabın kendi içindeki çelişki — ve neden dokunulmadı
+
+U-02 düzeltmeden sonra da kırmızı kaldı, çünkü kalan taraf **kitaba sadık
+metindedir**: §6 `mimari.md`'nin koşul listesindeki 5. madde, işlemi
+*yetkilendiren* organ kararı ile Ltd. Şti.'de **TTK m.595/2 genel kurul
+onayını** tek satırda topluyor — ve kitabın kendi §5.3'ü ikincisini "devri
+tamamlayan **kurucu** işlem" sayar. Kurucu bir işlem kapanışın önkoşulu olamaz.
+
+Çelişkinin iki tarafı da kitabın içinde; görmek için dış kaynak gerekmiyor.
+Ama **hangisinin doğru olduğu bir hukuki nitelendirmedir** ve §9 ile §11 onu
+yetkili bir insana bırakır. Kitabın düzyazısı bu yüzden **aynen bırakıldı**.
+Bunun yerine:
+
+- Önerilen tek satırlık düzeltme bir **kum havuzunda uygulandı** ve U-01 ile
+  U-02'yi birlikte yeşile aldığı gösterildi — öneri iddia değil, gösterim.
+- Türetilmiş dosyalar (`kosul-takibi`, `kapanis-listesi`) ayrımı açıkça taşır,
+  dolayısıyla becerileri kullanan kişi doğru sırayı görür.
+- U-02, gerekçesiyle **beyan edilmiş tabana** yazıldı; errata'da §6 kaydı var.
+
+### Takımın kendi iki kusuru — ikisi de kitapta bulduğum sınıflardan
+
+U takımı yazılırken **iki kör nokta** üretildi; mutasyon sınaması ikisini de
+yakaladı ve ikisi de bu raporun kitapta işaret ettiği sınıflardandır:
+
+- **U-09 sabit `True` yazılmıştı.** Tarama bir ihlal bulsa bile vaka yeşil
+  kalıyordu — §16'da bulduğum `topla "F" 0` kusurunun birebir aynısı, kendi
+  elimle.
+- **`bas()` Türkçe kısaltmada kırpıyordu.** İşlem adı ilk noktada kesiliyordu
+  ("Şirket organ kararları ve **Ltd**"), dolayısıyla "genel kurul onayı"
+  hiçbir başlıkta görünmüyor ve **kitabın gerçek çelişkisi gizleniyordu**.
+  §12'nin İ/nokta tuzaklarıyla aynı aile.
+
+Ayrıca U-03 bir kez **boşa geçti**: aradığı adım listede bulunmayınca "çakışma
+yok" deyip yeşile döndü. Yeniden yazıldı; adımı bulamamak artık başarısızlıktır.
+
+Ve iki kez bir vaka **sessizce kayboldu** (yama, hedefini zaten silmiş bir
+ikinci `replace` yüzünden). İlkinden sonra takıma **beyan edilmiş vaka sayısı**
+kondu; ikincisini o yakaladı. Kaybolan bir vaka, kırmızı bir vakadan kötüdür:
+kimse aramaz.
+
+Mutasyon sonucu: **10 mutasyonun 10'u yakalandı.**
+
+---
+
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
 
 | Bölüm | Beklenen | Gerçek | Sebep |
@@ -891,7 +977,10 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # yirmi takım, 192 vaka
+./sinama/hepsi.sh                 # 18 çalıştırılabilir takım:
+                                  #   175 vaka + 15 mutasyon (D)
+                                  #   + 12 bağımlılık doğrulaması (E)
+                                  # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
 ./denetim.sh                      # mevzuat bulguları dâhil
 ```
@@ -947,11 +1036,20 @@ Dokuz takım, 96 vaka:
 | R | **Yön, insan onayı ve dil** — raporun kendi biçimi | CLAUDE.md §4, §9, §10 |
 | S | **Yalıtım** — klon gerçekten yalnız mı | §16'nın taşınabilirliği |
 | T | **§18'in dokuz sınırı doğru mu** | §18, CLAUDE.md §2 |
+| U | **Birimler arası tutarlılık** — bir birim ötekiyle çelişiyor mu | §4, §6, §5.3 |
 
-**Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamadan ve iki
-takım eklendikten sonra **192 vaka, 0 SİNYAL** — on üç bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve BEKLENEN olarak raporlanıyor — ve on üçünün her biri ya
-kitabın davranışının bilerek bırakılmış kaydıdır ya da belgelenmiş bir
-öntanımlı boşluktur; hiçbiri yamalı sistemde çözülmemiş bir kusur değildir.
+**Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
+**175 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
+BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
+bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)
+insana bırakılmış bir hukuki nitelendirmedir. Hiçbiri yamalı sistemde
+çözülmemiş bir mühendislik kusuru değildir.
+
+> Bu satırdaki sayılar bir kez **bayatladı**: rapor "on üç" diyordu, gerçek
+> on birdi. El yazısı bir sayı, ölçtüğü şeyden bağımsız yaşar — kitabın
+> §9'daki "10 beceri" beklentisiyle aynı kusur. `denetim.sh` artık bu üç
+> sayıyı `beklenen.json` ve `hepsi.sh` çıktısıyla karşılaştırıyor.
 
 ---
 
@@ -973,7 +1071,13 @@ kitabın davranışının bilerek bırakılmış kaydıdır ya da belgelenmiş b
 4. **`ks_g_depolar.md`'deki yıldız sayılarına dayanmadan önce yeniden çekin** —
    dosya GÜNLÜK bozulma sınıfındadır ve bu rapor yazıldığında zaten bir gün
    eskimişti.
-5. **Bir sonraki kurulumda `sinama/hepsi.sh` koşun.** 0 SİNYAL, raporun hâlâ
+5. **§6 `mimari.md`'nin 5. maddesine karar verin.** Kapanış öncesi koşul
+   listesi, Ltd. Şti.'de TTK m.595/2 genel kurul onayını bir *koşul* sayıyor;
+   kitabın kendi §5.3'ü onu devri *tamamlayan kurucu işlem* sayıyor. İkisi bir
+   arada olamaz. Önerilen tek satırlık düzeltme `KITAP-ERRATA.md` §6'da yazılı
+   ve kum havuzunda U-01 ile U-02'yi birlikte yeşile aldığı gösterildi;
+   uygulanması bir hukuki nitelendirme kararıdır ve bu yüzden **yapılmadı**.
+6. **Bir sonraki kurulumda `sinama/hepsi.sh` koşun.** 0 SİNYAL, raporun hâlâ
    ölçtüğü sistemi anlattığının tek kanıtıdır.
 
 ## Yetkili avukat görüşü gereken konular
@@ -990,6 +1094,10 @@ kaleme alanı hiçbir ülkede baroya kayıtlı değildir. Aşağıdakiler dayan�
 - **Bekletici etkinin dayanağı** (I-03): 4054 m.10 mu m.11 mi.
 - **TTK 499 ve 595/1'in nitelendirilmesi** (I-05): pay defteri kaydının
   açıklayıcı mı kurucu mu olduğu, ve noter onayının kapsamı.
+- **Ltd. Şti.'de TTK m.595/2 genel kurul onayının niteliği** (U-02): kapanış
+  öncesi bir *koşul* mu, yoksa kapanış günü devri tamamlayan *kurucu* işlem mi?
+  Cevap kapanış sırasını ve nihai tarih hesabını değiştirir; kitabın §6'sı ile
+  §5.3'ü bu noktada birbiriyle çelişiyor.
 - **§5'teki her eşiğin bugünkü değeri.** Bu raporun mevzuat katmanı
   **birincil kaynakla doğrulanmadı**; kanıt katmanı arama motoru özetidir ve
   bunun gerekçesi `hafiza/egress-kaniti.md` içinde kanıtlıdır.
@@ -997,6 +1105,7 @@ kaleme alanı hiçbir ülkede baroya kayıtlı değildir. Aşağıdakiler dayan�
 
 Kontrol edildi: rekabet.gov.tr arama sonuçları (2026-08-27) · GitHub MCP depo
 çözümlemesi (2026-08-27) · yayıncı kayıtları (2026-08-27) · vekil egress ret
-kaydı (2026-08-28) · yerel kurulum ve sınama takımı (2026-08-28) ·
+kaydı (2026-08-28) · yerel kurulum ve sınama takımı (2026-08-28) · birimler arası
+tutarlılık taraması, 18 çalıştırılabilir takım (2026-08-28) ·
 bulunamayan: 4054 sayılı Kanun ve 2026/2 sayılı Tebliğ'in birebir Resmî Gazete
 metni (kuruluş egress politikası reddi)

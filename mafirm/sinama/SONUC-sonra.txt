@@ -1,5 +1,5 @@
 ###############################################################
-#  KÖR SINAMA TAKIMI — 2026-08-28T08:36:47Z
+#  KÖR SINAMA TAKIMI — 2026-08-28T09:01:36Z
 ###############################################################
 
 /root/mafirm/sinama/ks_a_esik.py:45: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
@@ -274,7 +274,7 @@ GEÇTİ K-15   koltuk kapısı yöntem dosyalarını bloklamıyor
 KÖR SINAMA L — çapraz referans bütünlüğü
 ================================================================================================
 GEÇTİ L-01   belgelerdeki her yol atfının hedefi var
-        46 atıf incelendi, kırık: yok
+        47 atıf incelendi, kırık: yok
 GEÇTİ L-02   her INDEX kendi yöntem dosyalarının hepsini anıyor
         anılmayan: yok
 GEÇTİ L-03   belgelerde sabit ~/mafirm yolu kalmamış
@@ -292,9 +292,9 @@ GEÇTİ L-06   hafiza/ dosyalarının hepsi var
 KÖR SINAMA M — errata ↔ sınama izlenebilirliği
 ================================================================================================
 GEÇTİ M-01   her errata maddesi bir sınama vakasına atıf yapıyor
-        47 madde · atıfsız 0: yok
+        50 madde · atıfsız 0: yok
 GEÇTİ M-02   atıf yapılan her vaka kimliği gerçekten tanımlı
-        192 tanımlı kimlik · uydurma dayanak: yok
+        203 tanımlı kimlik · uydurma dayanak: yok
 GEÇTİ M-03   [A] ve [B] maddelerinin atıfları sadık sistemde gerçekten kaldı
         sadık koşumda kalan vaka: 41 · sınanmamış ağır madde: yok
 GEÇTİ M-04   sadık sistemde kalan her vaka errata'da ya da raporda açıklanmış
@@ -393,7 +393,7 @@ KÖR SINAMA R — yön, insan onayı ve dil kuralları
 GEÇTİ R-01   rapor cevapla başlıyor, yöntemle değil
         ilk bölüm: 'Cevap' — §4: 'cevabı merak eden ilk paragrafta bulur'
 GEÇTİ R-02   yöntem bölümü bulgulardan sonra geliyor
-        yöntem 25. başlık, ilk bulgu 1. başlık
+        yöntem 26. başlık, ilk bulgu 1. başlık
 GEÇTİ R-03   iki zorunlu başlık en sonda ve doğru sırada
         son iki başlık: ['Şimdi ne yapılmalı', 'Yetkili avukat görüşü gereken konular']
 GEÇTİ R-04   raporun onay durumu açıkça yazılı (§9)
@@ -446,6 +446,32 @@ GEÇTİ T-10   §18'in maddeleri kitabın kendi §2 eşiğine tabi
 ------------------------------------------------------------------------------------------------
 10 vaka · 9 geçti · 1 beklenen · 0 SİNYAL
 
+================================================================================================
+KÖR SINAMA U — birimler birbiriyle çelişiyor mu
+================================================================================================
+GEÇTİ U-01   kapanış öncesi koşul sırası mimari.md ≡ kosul-takibi
+        5 madde, aynı sırada
+BEKLENEN U-02   kapanış öncesi koşul listesi ile kapanış günü sırası ayrık
+        İKİ LİSTEDE BİRDEN: genel kurul onayı. Kapanış günü 1. adımı 'koşulların karşılandığının teyidi'dir; koşul sayılan bir işlem 2. adımda YAPILAMAZ — 1. adım hiçbir zaman doğrulanamaz.
+GEÇTİ U-03   TTK m.595 sırası pay-devri.md ≡ kapanis-listesi
+        pay-devri.md: 595/1 noter → 595/2 genel kurul (kurucu). kapanis-listesi: 2. noter → 3. genel kurul onayı.
+GEÇTİ U-05   aynı hükmün her anımı aynı önermeyi taşıyor
+        4 hüküm birden çok dosyada anılıyor, hiçbir anım ayrık değil
+GEÇTİ U-06   eşik rakamları tek kaynaklı ya da anlamı örtüşüyor
+        4 büyük rakam; birden çok dosyada geçen: 0
+GEÇTİ U-07   KULLANMA yönlendirmeleri var olan beceriyi gösteriyor
+        11 beceri tarandı
+GEÇTİ U-08   birimler/ atıfları çözülüyor
+        tüm atıflar var olan dosyayı gösteriyor
+GEÇTİ U-09   bekletici etki hiçbir birimde feragat edilebilir sayılmıyor
+        8 dosyada geçiyor, hiçbirinde feragat edilebilir denmiyor
+GEÇTİ U-10   müvekkile giden her beceri §0 çıktı sözleşmesini adlandırıyor
+        10 beceri (1 muaf: once-arastir — araştırma notu üretir, müvekkile giden teslim değil)
+GEÇTİ U-11   muaf becerinin belgelediği çıktı biçimi kapsam kapısını ateşlemiyor
+        kapı sustu — muafiyet doğrulandı
+------------------------------------------------------------------------------------------------
+10 vaka · 9 geçti · 1 beklenen · 0 SİNYAL
+
 ###############################################################
 #  ÖZET
 ###############################################################
@@ -466,6 +492,7 @@ GEÇTİ T-10   §18'in maddeleri kitabın kendi §2 eşiğine tabi
   R · yön, onay ve dil kuralları      temiz
   S · yalıtım (klon yalnız mı)      temiz
   T · §18'in dokuz sınırı           temiz
+  U · birimler arası tutarlılık      temiz
   ------------------------------------------------------------
   TOPLAM SİNYAL                         0
 
