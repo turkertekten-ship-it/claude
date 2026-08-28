@@ -6,9 +6,13 @@ Resmî Gazete: 11 Şubat 2026, sayı 33165. Yürürlük: 11 Şubat 2026.
 Doğrulama: 2026-08-27.
 
 Kontrol edildi: 2026/2 sayılı Tebliğ üzerine yayımlanmış uygulamacı
-çözümlemeleri, web araması (2026-08-27) · bulunamayan: Resmî Gazete ve
-rekabet.gov.tr birincil metni — bu kurulumun ağ çıkışı bu alan adlarını
-engelliyor; madde metni birincil kaynaktan TEYİT EDİLMEDİ.
+çözümlemeleri, web araması (2026-08-27) · 4054 sayılı Kanun m.10, m.11 ve m.16
+ile 2010/4 sayılı Tebliğ m.10 üzerine uygulamacı çözümlemeleri ve Rekabet
+Kurumu idari para cezaları sayfasına yapılan atıflar (2026-08-27) · 2026/1
+sayılı Tebliğ ile belirlenen idari para cezası alt sınırı (2026-08-27) ·
+bulunamayan: Resmî Gazete, mevzuat.gov.tr ve rekabet.gov.tr birincil metinleri
+— bu kurulumun ağ çıkışı bu alan adlarını engelliyor; madde metni BİRİNCİL
+KAYNAKTAN OKUNMADI, ikincil kaynaklardan çapraz doğrulandı.
 
 ## İki alternatif eşik
 
@@ -68,20 +72,52 @@ işaretlenmiştir, çünkü kitabın kendi güncellik kuralı bunu emreder:
 
 Bu üç ayrım `kod/esik.py` içinde uygulanmıştır ve orada da işaretlidir.
 
-## Bekletici etki
+## Bekletici etki — doğru madde numarası
 
-4054 sayılı Kanun, madde 11: bildirime tabi bir işlem, Kurul açıkça ya da
-inceleme süresinin dolmasıyla zımnen karar vermeden hukuken geçerlilik
-kazanmaz. İmza serbesttir; kapanış değildir.
+**2010/4 sayılı Tebliğ, madde 10**: izne tabi bir birleşme veya devralma
+işlemi, açıkça veya zımnen bir karar verilmeden önce **hukuki geçerlilik
+kazanamaz**. Bu hüküm bekletici şart (suspensif koşul) niteliğindedir.
+
+**4054 sayılı Kanun, madde 10** mekaniği kurar:
+- Bildirimden itibaren **on beş gün** içinde Kurul ön inceleme yapar.
+- İşlemi nihai incelemeye alırsa, işlemin **nihai karara kadar askıda**
+  olduğunu ve uygulamaya sokulamayacağını ilgililere tebliğ eder.
+- Kurul süresi içinde cevap vermezse, anlaşma bildirim tarihinden **otuz gün**
+  sonra yürürlüğe girerek hukuki geçerlilik kazanır (zımni izin).
+
+**4054 sayılı Kanun, madde 11** ise ayrı bir hâli düzenler: bildirilmesi
+zorunlu bir işlemin Kurula **hiç bildirilmemesi** ya da işlem
+gerçekleştirildikten **sonra** bildirilmesi. Bu hâlde Kurul işlemi
+kendiliğinden incelemeye alır.
+
+> **Kitap ve bu dosyanın ilk sürümü bekletici etkiyi madde 11'e bağlıyordu.
+> Yanlıştı.** Bekletici şart Tebliğ m.10 ve Kanun m.10'dadır; m.11 hiç
+> bildirilmemiş işlemin sonucudur. Ayrım pratikte önemlidir: bildirim yapılmış
+> ama izinden önce kapatılmış bir işlem m.10'u, hiç bildirilmemiş bir işlem
+> m.11'i ilgilendirir.
 
 Yabancı bir alıcı için Türk işlem pratiğindeki en sonuçlu cümle budur, çünkü
 gönüllü bildirim rejimi olan ülkelerden taşınan sezgiden daha katıdır.
 
 ## İzinsiz kapanışın yaptırımı
 
-4054 sayılı Kanun, madde 16: bildirimde bulunmama hâlinde yıllık gayrisafi
-gelirin **binde biri** oranında idari para cezası. Yerinde incelemenin
-engellenmesi **binde beş**.
+4054 sayılı Kanun, madde 16:
+
+| Fiil | Oran |
+|---|---|
+| İzne tabi işlemin **Kurul izni olmaksızın gerçekleştirilmesi** | yıllık gayrisafi gelirin **binde biri** |
+| Eksik, yanlış ya da yanıltıcı bilgi verilmesi; bilginin süresinde verilmemesi | **binde biri** |
+| **Yerinde incelemenin engellenmesi ya da zorlaştırılması** | **binde beşi** |
+
+**Alt sınır — bu rakam her yıl güncellenir.** Kanun metni "on bin Türk
+Lirasından az olamaz" der; tutar her yıl yeniden değerleme oranıyla artırılır.
+**2026/1 sayılı Tebliğ ile 1 Ocak 2026'dan itibaren 302.484,86 TL.**
+Doğrulama: 2026-08-27. Bu tutar takvim yılı başında değişir; Ocak ayında
+yeniden çekilmelidir.
+
+**Cezayı kim öder:** birleşme işlemlerinde tarafların **her birine**, devralma
+işlemlerinde ise **sadece devralana** verilir. Kitapta bu ayrım yoktu ve alıcı
+tarafı için doğrudan sonucu vardır.
 
 Ceza ciro üzerinden hesaplanır, işlem değeri üzerinden değil. Yani küçük bir
 devralma için ölçeklenmez: Türkiye cirosu 40 milyar TL olan bir grubun erken
