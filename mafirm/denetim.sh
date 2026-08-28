@@ -168,7 +168,7 @@ kok = os.environ['MAFIRM_KOK']
 metin = open(kok + '/RAPOR.md', encoding='utf-8').read()
 harfler = sorted({os.path.basename(p).split('_')[1].upper()
                   for p in glob.glob(kok + '/sinama/ks_*')
-                  if re.match(r'ks_[a-z]_', os.path.basename(p))})
+                  if re.match(r'ks_[a-z]{1,2}_', os.path.basename(p))})
 eksik = [h for h in harfler if not re.search(r'^\| %s \|' % h, metin, re.M)]
 if eksik:
     print('tabloda yok: ' + ', '.join(eksik)); sys.exit(1)

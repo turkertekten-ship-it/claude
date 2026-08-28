@@ -250,3 +250,26 @@ uyulan şeydir.' Ölçüm: on bir kuralın 7 tanesi baskı altında
   G · §13 depo kataloğu       -> sinama/ks_g_depolar.md
   H · §17 kaynak doğrulaması  -> sinama/ks_h_kaynaklar.md
   I · §5 mevzuat doğrulaması  -> sinama/ks_i_mevzuat.md
+
+### AA takımı — KİTABA SADIK kapı üzerinde (sonradan eklendi)
+# AA takımı on dokuzuncu turda yazıldı; kitaba sadık taban çizgisi
+# yamalar/kitaba-sadik/kapi.py geri konularak AYRICA ölçüldü.
+GEÇTİ AA-01a    bozuk olay: bozuk JSON
+GEÇTİ AA-01b    bozuk olay: boş girdi
+GEÇTİ AA-01c    bozuk olay: tool_input yok
+GEÇTİ AA-01d    bozuk olay: tool_input dizge
+GEÇTİ AA-01e    bozuk olay: tool_input liste
+GEÇTİ AA-01f    bozuk olay: tool_name yok
+KALDI AA-01g    bozuk olay: tool_name None
+GEÇTİ AA-01h    bozuk olay: içerik None
+GEÇTİ AA-01i    bozuk olay: içerik sayı
+GEÇTİ AA-01j    bozuk olay: derin iç içe
+KALDI AA-01k    bozuk olay: JSON dizi (nesne değil)
+KALDI AA-01l    bozuk olay: JSON null
+KALDI AA-02     ayrıştırma SONRASI arıza politikası yazılı ve dışarıda kapalı
+GEÇTİ AA-03-20  boşluksuz 20000 karakter bütçe içinde bitiyor
+GEÇTİ AA-03-80  boşluksuz 80000 karakter bütçe içinde bitiyor
+GEÇTİ AA-03-200 boşluksuz 200000 karakter bütçe içinde bitiyor
+GEÇTİ AA-04     400 KB gerçek düzyazı bütçe içinde
+GEÇTİ AA-05     dayanıklılık yaması doğruluğu bozmadı
+18 vaka · 14 geçti · 0 beklenen · 4 SİNYAL

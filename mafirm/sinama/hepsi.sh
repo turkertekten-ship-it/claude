@@ -72,6 +72,8 @@ python3 "$S/ks_y_sirrin_deposu.py"; topla "Y · sırrın kalıcı deposu" $?
 echo
 python3 "$S/ks_z_kurulum_butunlugu.py"; topla "Z · kurulum bütünlüğü" $?
 echo
+python3 "$S/ks_aa_dayaniklilik.py"; topla "AA · kapının arıza yönü" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

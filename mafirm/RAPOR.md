@@ -25,7 +25,7 @@ kendi §16 denetimi yeşile dönmedi.
 3. **Denetim on beş bozmadan on birini görmüyor**; sıfır beceri, kancasız
    ayarlar ve tamamen boş bir `esik.py` taşıyan bir sistemde "DENETİM OK" diyor.
 
-**Yamalı hâlde sistem çalışıyor:** yirmi üç çalıştırılabilir takım — **225
+**Yamalı hâlde sistem çalışıyor:** yirmi dört çalıştırılabilir takım — **243
 vaka, 15 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15, birimler arası tutarlılık takımının
 kendi mutasyon yakalaması 10/10. Ama **üç mevzuat bulgusu ile kitabın kendi içindeki bir çelişki açık kalır**
@@ -1170,6 +1170,64 @@ eden şey budur.
 
 ---
 
+## Yedi buçuk artı on sekiz · Kapı çöktüğünde AÇIK yöne düşüyordu
+
+Kanca her Write, Edit, Bash, WebSearch ve WebFetch çağrısının önünde durur.
+§12 çıkış kodunu yazar: **2 bloklar**. PreToolUse sözleşmesinde 2 **dışında**
+her sıfırdan farklı kod "bloklamayan hata"dır — araç çağrısı **devam eder**.
+
+Bunun anlamı, on sekiz tur boyunca yazmadığım şey: **kancadaki işlenmemiş her
+istisna sessizce AÇIK yönde çözülür.** Kural 6 uygulanmaz ve kimse görmez.
+
+Bu teorik değil. Bu kurulumda **iki kez** oldu ve ikisi de benim yamalarımdı:
+on dördüncü turda `bugun` dizge geldiğinde `TypeError`, on yedincide `_Bulgu`
+nesnesinde `group()` yokluğunda `AttributeError`. İkisi de **düzenleyici
+bağlamda yüzde geçen her belgede** kapıyı devre dışı bıraktı. O turlarda
+"çöken kapı kötüdür" diye yazdım — ama **yönünü ölçmedim**. Ölçseydim,
+"kötü"nün "kural 6 sessizce uygulanmıyor" demek olduğunu görürdüm.
+
+§12'nin C-08'de yazdığı arıza politikası doğru ve iyi gerekçelendirilmişti:
+*ayrıştırılamayan bir olayda kanal bilinmez, dolayısıyla dışarı giden yönde
+kapalı çözülür.* Ama o politika **yalnızca ayrıştırmayı** kapsıyordu.
+Ayrıştırmadan sonraki her şey korumasızdı. Politika artık gerçekten
+uygulanıyor: iç arıza, kanal dışarıysa **bloklar**, yerelse uyarır ve
+sürdürür — pratiği durdurmadan sırrı korur.
+
+### Üçüncü arıza biçimi: hiç bitmemek
+
+Bloklayan da olsa açan da olsa, **dönmeyen bir kapı pratiği durdurur** — ve
+bunu hiç ölçmemiştim. Ölçtüm:
+
+| girdi | önce | sonra |
+|---|---|---|
+| boşluksuz 20 000 karakter | 6 186 ms | **62 ms** |
+| boşluksuz 40 000 karakter | **25 s+ (bitmedi)** | ~90 ms |
+| boşluksuz 200 000 karakter | ölçülemedi | **330 ms** |
+| 400 KB gerçek düzyazı | 433 ms | 406 ms |
+
+Sebep `TAVSIYE` desenindeki üç `\w+` dalıydı: boşluksuz uzun bir dizgede
+regex her başlangıç noktasından geri izliyor. Ve bu desen **kitabın değil,
+benim**: kitabın kapsam kapısı sekiz sabit ifade arıyordu, Türkçe kip
+çeşitliliğini kapatmak için (B-02..B-06) deseni ben genişlettim.
+
+> **İkinci kez aynı hata.** On dördüncü turda kaçırma yüzeyini kapatmak için
+> `ESIK`'i genişlettim ve **yanlış pozitif** yüzeyi açtım. Burada `TAVSIYE`'yi
+> genişlettim ve **sınırsız süre** yüzeyi açtım. Bir kapıyı genişletmek, tek
+> bir eksen üzerinde iyileştirme değildir; ölçülmeyen her eksende bir borçtur.
+> Türkçe bir kelime otuz karakterden uzun değildir — sınır konuldu, doğruluk
+> korundu (AA-05 üç davranış vakasıyla sabitliyor).
+
+Ayrıca `[1,2,3]` ve `null` **geçerli JSON'dur ama nesne değildir**;
+`.get()` çağrısı ayrıştırma `try`'ının dışında kalıyordu ve yine çıkış 1
+veriyordu. Ayrıştırmanın başarılı olması, olayın **kullanılabilir** olduğu
+anlamına gelmiyor.
+
+Ve denetimin takım listesi deseni `ks_[a-z]_` idi: **iki harfli bir takım adı
+sessizce kapsam dışıydı.** AA takımı eklendiğinde denetim onu istemeyecekti.
+Bir kapsama kontrolünün kendisi, kapsamadığını söylemez.
+
+---
+
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
 
 | Bölüm | Beklenen | Gerçek | Sebep |
@@ -1271,6 +1329,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | X · yetki ↔ kapsam | *hiç sorulmamıştı* | **temiz** — beyan ile uygulama hizalandı |
 | Y · sırrın kalıcı deposu | *hiç sorulmamıştı* | **temiz** — üç yol dışlandı, geçmiş temiz |
 | Z · kurulum bütünlüğü | *kitap iki kez hiç koşulmamıştı* | **temiz** — sessiz geri alma artık görülüyor |
+| AA · kapının arıza yönü | *hiç ölçülmemişti* | **temiz** — her arıza 0 ya da 2, süre sınırlı |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -1328,8 +1387,8 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # 23 çalıştırılabilir takım:
-                                  #   225 vaka + 15 mutasyon (D)
+./sinama/hepsi.sh                 # 24 çalıştırılabilir takım:
+                                  #   243 vaka + 15 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -1393,9 +1452,10 @@ Dokuz takım, 96 vaka:
 | X | **Alt ajan yetkisi ↔ kapı kapsamı** — yetki var, kural var mı | §10, §12, kural 6 |
 | Y | **Sırrın kalıcı deposu** — sistem neyi versiyonluyor | §2, kural 6 |
 | Z | **Kurulum bütünlüğü** — kitap ikinci kez koşulursa | §2, §0 kural 4 |
+| AA | **Kapının arıza yönü** — çökünce açık mı kapalı mı | §12, kural 6 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**225 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**243 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)

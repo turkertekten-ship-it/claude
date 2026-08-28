@@ -85,9 +85,19 @@ def _temizle(s):
 # cümlelerin çoğu o sekizin dışında kalıyordu.
 TAVSIYE = re.compile(
     r"("
-    r"\w+m[ae](?:nız|niz|nuz|nüz)\s+gerek"          # bildirimde bulunmanız gerekir
-    r"|\w+(?:manız|meniz|manız)\s+(?:şart|zorunlu)"  # imzalamanız şarttır
-    r"|\w+(?:malısınız|melisiniz)"                   # bildirim yapmalısınız
+    # [AA-03] Bu üç dal önce `\w+` ile başlıyordu. Kitabın kapsam kapısı
+    # SEKİZ SABİT İFADE arıyordu; Türkçe kip çeşitliliğini kapatmak için
+    # deseni ben genişlettim (B-02..B-06) ve sonucunu ölçmedim. `\w+`,
+    # boşluksuz uzun bir dizgede her başlangıç noktasından geri izler:
+    # 16.000 karakterlik tek bir belirteç kapıyı 4 saniye, 40.000 karakter
+    # 25 saniyeden fazla meşgul ediyordu. base64 bir blok, küçültülmüş bir
+    # dosya ya da boşluksuz çıkarılmış PDF metni pratiği DURDURUR.
+    # İkinci kez aynı hata: kaçırma yüzeyini kapatırken ölçmediğim başka bir
+    # yüzey açtım (on dördüncü turda yanlış pozitif, burada sınırsız süre).
+    # Türkçe bir kelime otuz karakterden uzun değildir.
+    r"\w{1,30}m[ae](?:nız|niz|nuz|nüz)\s+gerek"      # bildirimde bulunmanız gerekir
+    r"|\w{1,30}(?:manız|meniz)\s+(?:şart|zorunlu)"   # imzalamanız şarttır
+    r"|\w{1,30}(?:malısınız|melisiniz)"               # bildirim yapmalısınız
     r"|\btabidir\b|\btabi\s+olacak"                  # bildirime tabidir
     r"|\bzorunludur\b|\bzorunlu\s+hale\s+gel"
     r"|\bşarttır\b|\bgereklidir\b"
@@ -575,13 +585,43 @@ def main():
         print("BLOKLANDI [ayrıstirma] olay ayrıştırılamadı, kanal bilinmiyor: %s"
               % e, file=sys.stderr)
         return 2
+    # [AA-01] C-08'in yazdığı hata politikası YALNIZCA ayrıştırmayı
+    # kapsıyordu. Ayrıştırmadan sonraki her arıza işlenmemiş bir istisnaydı:
+    # Python geri izleme basar ve çıkış kodu 1 olur. PreToolUse sözleşmesinde
+    # BLOKLAYAN kod 2'dir; 1 "bloklamayan hata"dır ve araç çağrısı DEVAM
+    # EDER. Yani her çökme SESSİZCE AÇIK yönde çözülüyordu.
+    # Bu teorik değil: on dördüncü turda dizge tarih, on yedincide _Bulgu
+    # nesnesi tam olarak bunu yaptı — düzenleyici yüzde geçen HER belgede
+    # kural 6 uygulanmadan geçti ve hiçbir şey söylenmedi.
+    # Politika artık gerçekten uygulanıyor: dışarı giden kanalda KAPALI.
+    # [AA-01k, AA-01l] `[1,2,3]` ve `null` GEÇERLİ JSON'dur ama nesne
+    # değildir; `.get()` çağrısı ayrıştırma try'ının DIŞINDA kalıyordu ve
+    # AttributeError ile çıkış 1 veriyordu — yani AÇIK yönde. Ayrıştırmanın
+    # başarılı olması, olayın KULLANILABİLİR olduğu anlamına gelmez.
+    if not isinstance(olay, dict):
+        print("BLOKLANDI [ayrıstirma] olay bir nesne değil (%s), kanal "
+              "bilinmiyor" % type(olay).__name__, file=sys.stderr)
+        return 2
     tool_input = olay.get("tool_input", {})
-    arac = olay.get("tool_name", "")
-    metin = "\n".join(metni_cikar(tool_input))
-    yol = tool_input.get("file_path") or tool_input.get("path") \
-        if isinstance(tool_input, dict) else None
-    disari = disari_mi(arac, tool_input)
-    bulgular = denetle(metin, disari, yol=yol)
+    arac = olay.get("tool_name") or ""      # None gelirse '' — çökme değil
+    try:
+        metin = "\n".join(metni_cikar(tool_input))
+        yol = tool_input.get("file_path") or tool_input.get("path") \
+            if isinstance(tool_input, dict) else None
+        disari = disari_mi(arac, tool_input)
+        bulgular = denetle(metin, disari, yol=yol)
+    except Exception as e:                                   # noqa: BLE001
+        try:
+            disari = disari_mi(arac, tool_input)
+        except Exception:                                    # noqa: BLE001
+            disari = True        # kanal bilinmiyorsa dışarı VARSAY
+        if disari:
+            print("BLOKLANDI [ic-ariza] kapı çalışamadı, kanal dışarı: %r" % e,
+                  file=sys.stderr)
+            return 2
+        print("UYARI [ic-ariza] kapı çalışamadı, kanal yerel; işlem sürüyor: "
+              "%r" % e, file=sys.stderr)
+        return 0
     if bulgular:
         for k, m in bulgular:
             print("BLOKLANDI [%s] %s" % (k, m), file=sys.stderr)

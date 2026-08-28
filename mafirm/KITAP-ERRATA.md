@@ -220,6 +220,34 @@ bile. Yani denetçiyi ezmek, denetçinin yapacağı bütün kontrolleri devre d�
 bırakır ve uygulayıcı korumasız bir sisteme YEŞİL bir denetimle bakar.
 Doğrulama, ezilen dosyanın DIŞINDA bir katmanda durmalıdır. *(Z-07, Z-08)*
 
+**[A] Arıza politikası yalnızca ayrıştırmayı kapsıyor; gerisi AÇIK düşüyor.**
+§12'nin C-08 gerekçesi doğrudur — ayrıştırılamayan bir olayda kanal bilinmez,
+dolayısıyla dışarı yönde kapalı çözülür. Ama politika yalnızca `json.load`
+çevresindedir. Ayrıştırmadan SONRAKİ her istisna işlenmez: Python geri izleme
+basar, çıkış kodu 1 olur ve PreToolUse sözleşmesinde 1 "bloklamayan hata"dır —
+araç çağrısı DEVAM EDER. Yani kancadaki her çökme kural 6'yı SESSİZCE devre
+dışı bırakır. → İç arıza da politikaya tabi olmalı: kanal dışarıysa blokla,
+yerelse uyar ve sürdür. Ayrıca geçerli JSON'un NESNE olduğu doğrulanmalı
+(`[1,2,3]` ve `null` ayrıştırılır ama `.get()` çağrısında çöker).
+*(AA-01g, AA-01k, AA-01l, AA-02)*
+
+**[C] Kapsam kapısının deseni genişletilirse kanca donuyor — kitabın kusuru
+değil, kitabı izleyenin düşeceği tuzak.** Kitabın kapsam kapısı sekiz sabit ifade arar. Türkçe kip
+çeşitliliğini kapatmak için desen `\w+` ile genişletilirse (bu kurulumda
+yapıldı), boşluksuz uzun bir dizgede felaket geri izleme oluşur: 20.000
+karakter 6 saniye, 40.000 karakter 25 saniyeden fazla. base64 bir blok,
+küçültülmüş bir dosya ya da boşluksuz çıkarılmış PDF metni pratiği DURDURUR —
+bloklayan ya da açan bir kapıdan da kötüdür. → Nicelik belirteci sınırlanmalı;
+Türkçe bir kelime otuz karakterden uzun değildir. Kitabın KENDİ deseni bu
+kusuru taşımaz (AA-03 kitaba sadık kapıda GEÇİYOR); kusur, deseni bu kurulumda
+genişletmemle doğdu ve buraya bir UYARI olarak yazıldı.
+*(AA-03-20, AA-03-80, AA-03-200)*
+
+**[C] Denetimin takım listesi deseni iki harfli adı görmüyor.** `ks_[a-z]_`
+yalnızca tek harfli takım adlarını sayar; yirmi altıncı takımdan sonra eklenen
+her takım sessizce kapsam dışı kalır ve "her takım raporda anılıyor" kontrolü
+onları hiç istemez. Bir kapsama kontrolü, kapsamadığını söylemez. *(AA-01g, AA-03-20)*
+
 ## §7 · Ortak koltukları
 
 **[B] Kitabın en yüksek itibar riskli kuralının hiçbir mekanizması yok.**

@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""KÖR SINAMA M — errata ↔ sınama izlenebilirliği.
+"""[AA-01] Takım adları TEK HARF varsayımı bu dosyada beş desende,
+denetim.sh'te bir desende ve kapi.py'de bir yerde gömülüydü. Alfabe bitip
+iki harfli takım (AA) eklenene kadar hiçbiri görünmedi: üç ayrı bileşen aynı
+sessiz varsayımı taşıyordu ve üçü de "kapsıyorum" diyordu.
+
+KÖR SINAMA M — errata ↔ sınama izlenebilirliği.
 
 Bu rapor kitaba kırk küsur düzeltme öneriyor. Bir düzeltme önerisi, arkasında
 onu gösteren çalışan bir sınama yoksa **bir kanaattir, bir bulgu değildir** —
@@ -56,11 +61,11 @@ while i < len(satirlar):
                 # ARALIK biçimi: B-07…B-09 / B-02..B-06  [M'nin kendi kusuru:
                 # ilk sürüm yalnızca virgülle ayrılmışları görüyordu ve yedi
                 # maddeyi "atıfsız" sanıyordu.]
-                ar = re.match(r"^([A-Z])-(\d+)\s*(?:…|\.\.\.|\.\.)\s*(?:[A-Z]-)?(\d+)$", p)
+                ar = re.match(r"^([A-Z]{1,2})-(\d+)\s*(?:…|\.\.\.|\.\.)\s*(?:[A-Z]{1,2}-)?(\d+)$", p)
                 if ar:
                     h, b1, b2 = ar.group(1), int(ar.group(2)), int(ar.group(3))
                     kimlikler += ["%s-%02d" % (h, n) for n in range(b1, b2 + 1)]
-                elif re.match(r"^[A-Z](-\d+[a-z]?)?$", p):
+                elif re.match(r"^[A-Z]{1,2}(-\d+[a-z]?)?$", p):
                     kimlikler.append(p)
         maddeler.append((baslik, agirlik, kimlikler))
         i = j
@@ -77,9 +82,9 @@ for f in os.listdir(os.path.join(_KOK_COZ, "sinama")):
     # [M'nin kendi kusuru] İlk sürüm yalnızca vaka("X-NN" biçimini görüyordu.
     # Gerçekte kimlikler üç biçimde doğuyor: doğrudan çağrı, sonuclar.append
     # ile ve BİÇİMLENDİRME ile ("J-07%s" % etiket). Üçü de taranır.
-    for k in re.findall(r'"([A-Z]-\d+[a-z]?)"', icerik):
+    for k in re.findall(r'"([A-Z]{1,2}-\d+[a-z]?)"', icerik):
         tanimli.add(k); takimlar.add(k[0])
-    for kok_id, sonek in re.findall(r'"([A-Z]-\d+)%s"\s*%\s*(\w+)', icerik):
+    for kok_id, sonek in re.findall(r'"([A-Z]{1,2}-\d+)%s"\s*%\s*(\w+)', icerik):
         for e in re.findall(r'\("(\w)",', icerik):
             tanimli.add(kok_id + e)
         tanimli.add(kok_id)
@@ -118,7 +123,7 @@ vaka("M-02", "atıf yapılan her vaka kimliği gerçekten tanımlı",
 once = os.path.join(_KOK_COZ, "sinama", "SONUC-once.txt")
 kaldi_once = set()
 if os.path.exists(once):
-    kaldi_once = set(re.findall(r"^KALDI\s+([A-Z]-\d+[a-z]?)", 
+    kaldi_once = set(re.findall(r"^KALDI\s+([A-Z]{1,2}-\d+[a-z]?)", 
                                 open(once, encoding="utf-8").read(), re.M))
 agir = [(b, k) for b, a, k in maddeler if a in ("A", "B") and k]
 sinanmamis = []
