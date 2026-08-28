@@ -77,10 +77,12 @@ class AnswerConfig:
     #: Chosen at 0.08 on a 266-page corpus, where both corpora were flat there,
     #: and **corrected to 0.03 within the same session** when the corpus grew to
     #: 349 and 0.08 began refusing four answerable questions instead of two
-    #: (L72). Agreement is bounded 0..1 but its *distribution* is not fixed: the
-    #: more documents there are, the less two arms' top-8 lists overlap, so a
-    #: floor on the product drifts with corpus size even though every input is
-    #: bounded.
+    #: (L72). The reason is not a scaling law: measured over four subsampled
+    #: corpora, agreement falls with N and relevance rises, and the product this
+    #: floor thresholds stays flat - 0.232 to 0.255 for answerable questions
+    #: across a corpus that quadrupled (L73). What moves is *which* few
+    #: questions sit near the floor, which is a small-sample effect that more
+    #: golden cases would fix and no normalisation will.
     #:
     #:     floor        0.02  0.03  0.04  0.06  0.08
     #:     266 pages     +7    +7    +7    +6    +6

@@ -4002,3 +4002,75 @@ failing it (L66), and 44/54 passes where 43/54 fails.
 4. **When a metric holds and a pass rate falls, the fault is downstream of the
    metric.** Recall identical to four decimals across a 31% corpus increase
    pointed straight at the gate and skipped an afternoon of retrieval debugging.
+
+---
+
+## L73 - The mechanism I gave for L72 was wrong, and the measurement was cheap
+
+L72 recorded that the abstention floor had to come down when the corpus grew,
+and explained it: *"the more documents there are, the less two arms' top-8 lists
+overlap by construction, so the product falls for every question and a fixed
+floor climbs relative to the distribution."* Plausible, consistent with the
+numbers I had - two corpus sizes - and I filed the normalisation as future work
+rather than guessing at a correction curve.
+
+The curve was measurable. Four subsampled corpora, medians over the 54 golden
+questions, split by whether the question's target document survived the
+subsample - the split matters, because L28 established that shrinking a corpus
+removes the documents goldens point at, so mixing the two populations measures
+which targets survived rather than corpus size:
+
+| N | population | agreement | relevance | product |
+|---|---|---|---|---|
+| 90 | target present | 0.625 | 0.355 | 0.232 |
+| 175 | target present | 0.625 | 0.441 | 0.304 |
+| 260 | target present | 0.500 | 0.516 | 0.291 |
+| 349 | target present | 0.500 | 0.514 | 0.255 |
+| 90 | no target | 0.625 | 0.150 | 0.087 |
+| 175 | no target | 0.500 | 0.274 | 0.172 |
+| 260 | no target | 0.375 | 0.224 | 0.112 |
+| 349 | no target | 0.250 | 0.298 | 0.112 |
+
+**Agreement does fall with N - and relevance rises, and the product does not
+move.** 0.232 to 0.255 for answerable questions across a corpus that quadrupled;
+0.087 to 0.112 for unanswerable ones. The half of the mechanism I could see was
+real and the conclusion drawn from it was not: there is no scaling law pushing
+the product down, so there is nothing to normalise away.
+
+What actually moved between the 266-page and 349-page corpora is *which
+questions sit near the floor*. Four answerable questions fell below 0.08 where
+two had before, out of 43 - the decision boundary lives in a tail of a
+few cases, and a handful of new documents reshuffles it. That is a small-sample
+effect, not a property of size, and the fix for it is not a normalisation but
+more golden cases.
+
+**The signal gets better as the corpus grows, which is the finding worth
+keeping.** At 90 documents agreement is 0.625 for answerable and unanswerable
+questions alike - no signal at all. By 349 it is 0.500 against 0.250. The
+unanswerable population's agreement collapses while the answerable population's
+barely moves, so the separation this gate depends on is *created* by corpus
+size. A gate feature measured on a small corpus can look worthless and be the
+best one available two widenings later.
+
+**Chance-normalisation, tried and refuted.** If overlap fell because two arms
+pick k of N documents, dividing by the chance rate k/N would stabilise it.
+Measured, the ratio runs 7.0, 13.7, 16.2, 21.8 - it over-corrects by more than
+it corrects. The derivation was tidy and the data disagreed.
+
+Nothing shipped: the floor stays at 0.03, chosen on the two real corpora rather
+than on a mechanism.
+
+**Rules.**
+1. **A mechanism that explains two data points is a story.** Both of L72's
+   corpus sizes fit it; the third and fourth killed it, and they cost one
+   afternoon of compute in a script that already existed.
+2. **When a compound signal drifts, measure the factors separately.** Agreement
+   fell 20%, relevance rose 45%, and the product - the thing the gate actually
+   thresholds - was flat. Reporting the drift I had noticed would have been
+   accurate about the part and wrong about the whole.
+3. **Subsampling is invalid for questions about coverage and fine for questions
+   about distributions**, as long as the populations it disturbs are reported
+   separately. L28's trap is real and is not a ban on subsampling.
+4. **A feature's worth can be a function of corpus size in the direction that
+   helps.** This one had no signal at 90 documents. Anything measured once, on
+   the smallest corpus anyone had, deserves re-measuring when the corpus grows.
