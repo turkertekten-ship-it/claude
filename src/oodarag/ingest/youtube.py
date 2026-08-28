@@ -40,6 +40,7 @@ from typing import Any
 
 from oodarag.ingest.base import Connector
 from oodarag.models import RawDocument
+from oodarag.util.dates import to_timestamp
 from oodarag.util.http import HttpClient, HttpError, TransportError
 from oodarag.util.logging import get_logger
 from oodarag.util.text import clean
@@ -216,6 +217,7 @@ class YouTubeConnector(Connector):
                 uri=watch_url(vid),
                 title=metadata.get("title") or f"YouTube video {vid}",
                 text=text,
+                source_updated_at=to_timestamp(metadata.get("published")),
                 metadata={
                     "kind": "transcript",
                     "video_id": vid,

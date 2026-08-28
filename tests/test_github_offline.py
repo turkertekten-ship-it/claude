@@ -18,6 +18,7 @@ from oodarag.ingest.base import MemoryStateStore
 from oodarag.ingest.github import GitHubClient, GitHubConnector
 from oodarag.util.http import HttpClient, RetryPolicy
 from tests.support.httpserver import Route, TestSite
+from tests.test_dates import utc_epoch
 
 SLUG = "acme/widgets"
 HEAD = "a" * 40
@@ -266,6 +267,59 @@ class GitHubOfflineTest(unittest.TestCase):
         self.assertTrue(any("404" in e for e in result.delta.errors), result.delta.errors)
 
 
+class EveryGitHubDocumentKindCarriesItsOwnDateTest(unittest.TestCase):
+    """Issues were one of four. The repo, each commit and each release also
+    state a date, and all three filed it in metadata where nothing scores it.
+
+    L43: when a fix applies to one member of a family, ask the question of
+    every sibling before closing the cycle.
+    """
+
+    def _site(self, extra: dict[str, Route] | None = None) -> TestSite:
+        routes = build_api_routes()
+        routes.update(extra or {})
+        site = TestSite(routes)
+        site.__enter__()
+        self.addCleanup(site.__exit__, None, None, None)
+        return site
+
+    def test_the_repository_is_dated_by_its_last_push(self):
+        site = self._site()
+        docs = make_connector(site, resources=("repo",)).run(MemoryStateStore()).documents
+        self.assertEqual(len(docs), 1)
+        # The fixture's own pushed_at, read back from the route rather than
+        # restated here, so the two cannot drift apart.
+        pushed = json.loads(site.server.routes[f"/repos/{SLUG}"].body)["pushed_at"]
+        self.assertEqual(docs[0].source_updated_at, utc_epoch(pushed.rstrip("Z")))
+        self.assertLess(docs[0].source_updated_at, docs[0].fetched_at)
+
+    def test_a_commit_is_dated_by_when_it_was_authored(self):
+        authored = "2026-05-06T07:08:09Z"
+        commits = [{"sha": "c" * 40, "html_url": f"https://github.com/{SLUG}/commit/{'c'*40}",
+                    "commit": {"message": "Bound the crawler by wall clock as well as pages",
+                               "author": {"name": "alice", "date": authored}}}]
+        site = self._site({f"/repos/{SLUG}/commits": Route(
+            body=json.dumps(commits), content_type="application/json")})
+        docs = make_connector(site, resources=("commits",)).run(MemoryStateStore()).documents
+        self.assertEqual(len(docs), 1)
+        self.assertEqual(docs[0].source_updated_at, utc_epoch(authored.rstrip("Z")),
+                         "the commit stated its date and the connector discarded it")
+
+    def test_a_release_is_dated_by_its_publication(self):
+        published = "2026-04-05T06:07:08Z"
+        releases = [{"tag_name": "v2.0.0", "name": "Widgets 2.0",
+                     "body": "Budgets now bound fetches rather than accepted pages.",
+                     "html_url": f"https://github.com/{SLUG}/releases/tag/v2.0.0",
+                     "draft": False, "prerelease": False,
+                     "published_at": published}]
+        site = self._site({f"/repos/{SLUG}/releases": Route(
+            body=json.dumps(releases), content_type="application/json")})
+        docs = make_connector(site, resources=("releases",)).run(MemoryStateStore()).documents
+        self.assertEqual(len(docs), 1)
+        self.assertEqual(docs[0].source_updated_at, utc_epoch(published.rstrip("Z")),
+                         "the release stated its date and the connector discarded it")
+
+
 if __name__ == "__main__":
     unittest.main()
 
@@ -319,12 +373,27 @@ class IssueDateReachesRetrievalTest(unittest.TestCase):
     def test_an_absent_date_is_not_invented(self):
         """None means the source did not say, which is a different claim from
         "it changed now" - and the document then falls back to the fetch time
-        rather than to zero."""
-        from oodarag.ingest.github import _iso_to_timestamp
+        rather than to zero.
 
-        for absent in (None, "", "not a date"):
-            with self.subTest(value=absent):
-                self.assertIsNone(_iso_to_timestamp(absent))
+        Asserted through the connector rather than against the parser: the
+        parser is unit-tested in `tests/test_dates.py`, and what is at issue
+        here is whether the connector passes the field along at all.
+        """
+        routes = build_api_routes()
+        issues = [{"number": 2, "title": "Undated issue", "state": "open",
+                   "body": "An issue whose payload carries no updated_at at all.",
+                   "user": {"login": "bob"}, "labels": [], "comments": 0,
+                   "html_url": f"https://github.com/{SLUG}/issues/2"}]
+        site = TestSite(routes)
+        site.__enter__()
+        self.addCleanup(site.__exit__, None, None, None)
+        site.add(f"/repos/{SLUG}/issues",
+                 Route(body=json.dumps(issues), content_type="application/json"))
+        docs = make_connector(site, resources=("issues",)).run(MemoryStateStore()).documents
+
+        self.assertEqual(len(docs), 1)
+        self.assertIsNone(docs[0].source_updated_at,
+                          "a date the API never sent was invented")
 
     def test_an_issue_is_scored_on_its_own_date_not_the_fetch_time(self):
         from oodarag.pipeline import IndexPipeline

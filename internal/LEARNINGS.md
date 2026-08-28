@@ -1724,3 +1724,62 @@ labelled as a guard rather than a repair.
    mistake in both directions in one session: concluding a rule was dead from
    scenarios that were too narrow (L36), and concluding a crash was live from a
    scenario the pipeline cannot produce.
+
+---
+
+## L45 - GitHub issues were one of seven, and there were two parsers
+
+**Evidence.** L44 wired `source_updated_at` for GitHub *issues*. L43's own rule
+says to ask the question of every sibling before closing a cycle, so I did.
+Six more sites read a real date from their source and filed it in metadata,
+where nothing scores it:
+
+| document kind | field the source states |
+| --- | --- |
+| GitHub repo | `pushed_at` |
+| GitHub commit | `commit.author.date` |
+| GitHub release | `published_at` |
+| web page | `<time datetime>`, `article:published_time`, `dc.date` |
+| YouTube video | manifest `published` |
+| chat session | the timestamp of its **last** turn |
+
+So the fix I had just measured as working covered one seventh of the surface.
+The recency factor stayed a constant for six of seven document kinds, and no
+test would have said so.
+
+**Two parsers, quietly disagreeing.** Wiring them turned up a second problem.
+`rerank._as_timestamp` parsed ISO dates one way; `github._iso_to_timestamp`,
+which I had added in the previous cycle, parsed them another. They differed on
+naive timestamps: the reranker's `datetime.fromisoformat(text).timestamp()`
+reads a stamp with no offset as **local time**, the connector's as UTC. Under
+`TZ=Asia/Kolkata` that is a five-and-a-half hour disagreement about the same
+string, and nothing errors - one stage simply sees a date the other cannot.
+This is L24 (tokenizing that differed between indexing and querying) in a new
+field. Both now delegate to one `util.dates.to_timestamp`, and a test asserts
+that every shape the parser accepts is a date the scorer can read.
+
+**Measured.** Primary 18/20, external 48/54 - **unchanged**, before and after.
+That is the honest result and not a disappointing one: both eval corpora are
+built by the filesystem connector, which has no source date, so neither corpus
+can see this change at all. A correct fix that the evals cannot measure is a
+gap in the evals, not evidence of value. It is recorded here as such rather
+than claimed as an improvement.
+
+Thirteen mutations were applied and all thirteen were caught - each connector
+dropping its date, chat dating a session by its first turn instead of its last,
+the parser reading naive stamps as local time, an offset parsed away instead of
+applied, a boolean flag counting as a date, and the reranker going back to
+parsing dates its own way.
+
+**Rules.**
+1. **A fix applied to one member of a family is a survey, not a fix.** Before
+   closing the cycle, enumerate the siblings and check each. Seven sites, one
+   wired: the measurement that said "it works" was true and almost entirely
+   beside the point.
+2. **When two stages parse the same field, they must share the parser, not
+   agree by inspection.** A second copy is a divergence that has not happened
+   yet. The divergence here was invisible in UTC and five hours wide elsewhere.
+3. **"Unchanged" is a result worth reporting with its reason.** Empty is always
+   blocked, filtered, deduplicated or genuinely absent; unchanged is always
+   ineffective, already-correct or *unmeasurable by this eval*. Saying which
+   costs a sentence and stops the next cycle re-deriving it.

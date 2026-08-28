@@ -13,14 +13,14 @@ implements the same interface and can replace it where the latency is affordable
 
 from __future__ import annotations
 
-import datetime
 import math
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Callable
+from typing import Any, Callable
 
 from oodarag.models import ScoredChunk
+from oodarag.util.dates import to_timestamp
 from oodarag.util.text import expand_compounds, is_compound, tokenize
 
 
@@ -58,24 +58,15 @@ def _as_timestamp(value: Any) -> float:
     The parse stays because metadata is whatever a connector chose to write and
     a scorer should not raise on it, but it is a guard rather than a repair.
 
+    It delegates to `util.dates.to_timestamp` so that a date this scorer can
+    read is exactly a date the connectors can write. Two stages that parse the
+    same field differently is the shape of L24: nothing errors, one side simply
+    sees a date the other cannot.
+
     0.0 means unknown, which the caller reads as "neither fresh nor stale" -
     the right answer for a date nobody can parse.
     """
-    if value is None or value == "":
-        return 0.0
-    if isinstance(value, (int, float)):
-        return float(value)
-    text = str(value).strip()
-    try:
-        return float(text)
-    except ValueError:
-        pass
-    try:
-        # `fromisoformat` handles the trailing Z from Python 3.11 on, which is
-        # the floor this project targets.
-        return datetime.datetime.fromisoformat(text).timestamp()
-    except ValueError:
-        return 0.0
+    return to_timestamp(value) or 0.0
 
 
 @dataclass

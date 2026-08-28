@@ -21,7 +21,6 @@ token. Three things keep it cheap:
 
 from __future__ import annotations
 
-import datetime
 
 import base64
 import os
@@ -36,6 +35,7 @@ from oodarag.ingest.base import Connector
 from oodarag.models import RawDocument
 from oodarag.util.http import HttpClient, HttpError, TransportError
 from oodarag.util.logging import get_logger
+from oodarag.util.dates import to_timestamp
 from oodarag.util.text import redact_secrets
 
 log = get_logger("ingest.github")
@@ -145,21 +145,6 @@ def _next_link(link_header: str) -> str | None:
         if 'rel="next"' in segments[1].replace(" ", "").replace("'", '"'):
             return segments[0].strip().strip("<>")
     return None
-
-
-def _iso_to_timestamp(value: Any) -> float | None:
-    """GitHub's ISO-8601 dates as a POSIX timestamp, or None if absent/unparsable.
-
-    The API returns `"2026-01-02T00:00:00Z"`. Returning None rather than a
-    fallback matters: `RawDocument.source_updated_at` left unset means "the
-    source did not say", which is a different claim from "it changed now".
-    """
-    if not value:
-        return None
-    try:
-        return datetime.datetime.fromisoformat(str(value)).timestamp()
-    except ValueError:
-        return None
 
 
 @dataclass
@@ -419,6 +404,7 @@ class GitHubConnector(Connector):
                 "license": (meta.get("license") or {}).get("spdx_id"),
                 "pushed_at": meta.get("pushed_at"),
             },
+            source_updated_at=to_timestamp(meta.get("pushed_at")),
         )
 
     def _readme_document(self, head_sha: str) -> RawDocument | None:
@@ -484,7 +470,7 @@ class GitHubConnector(Connector):
             uri=issue.get("html_url", ""),
             title=f"{self.slug} {'PR' if is_pr else 'issue'} #{number}: {issue.get('title','')}",
             text=redact_secrets("\n".join(parts)),
-            source_updated_at=_iso_to_timestamp(issue.get("updated_at")),
+            source_updated_at=to_timestamp(issue.get("updated_at")),
             metadata={
                 **self._base_meta("pull_request" if is_pr else "issue"),
                 "number": number,
@@ -515,6 +501,7 @@ class GitHubConnector(Connector):
                 "author": author.get("name"),
                 "date": author.get("date"),
             },
+            source_updated_at=to_timestamp(author.get("date")),
         )
 
     def _release_document(self, release: dict[str, Any]) -> RawDocument | None:
@@ -534,4 +521,5 @@ class GitHubConnector(Connector):
                 "prerelease": release.get("prerelease", False),
                 "published_at": release.get("published_at"),
             },
+            source_updated_at=to_timestamp(release.get("published_at")),
         )

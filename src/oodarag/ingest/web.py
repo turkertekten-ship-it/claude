@@ -18,6 +18,7 @@ from oodarag.models import RawDocument
 from oodarag.scrape.crawler import Crawler, CrawlConfig
 from oodarag.util.http import HttpClient
 from oodarag.util.logging import get_logger
+from oodarag.util.dates import to_timestamp
 from oodarag.util.text import redact_secrets, summarize
 
 log = get_logger("ingest.web")
@@ -63,6 +64,8 @@ class WebConnector(Connector):
                 title=page.title or result.url,
                 text=text,
                 fetched_at=result.fetched_at,
+                # The page's own <time datetime> or meta date when it has one.
+                source_updated_at=to_timestamp(page.published),
                 metadata={
                     "depth": result.depth,
                     "status": result.status,

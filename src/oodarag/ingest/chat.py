@@ -34,6 +34,7 @@ from typing import Any
 from oodarag.ingest.base import Connector
 from oodarag.models import RawDocument
 from oodarag.util.logging import get_logger
+from oodarag.util.dates import to_timestamp
 from oodarag.util.text import clean, redact_secrets, summarize
 
 log = get_logger("ingest.chat")
@@ -133,6 +134,8 @@ class ChatTranscriptConnector(Connector):
             uri=path.as_uri(),
             title=f"Session: {title}",
             text=redact_secrets(body),
+            # The last turn in the session, not when the file was read.
+            source_updated_at=to_timestamp(last_ts),
             metadata={
                 "kind": "chat_session",
                 "session_id": session_id,
