@@ -32,14 +32,6 @@ tamamlayan **kurucu** işlemdir: noter onaylı devir sözleşmesinden SONRA geli
 (`birimler/tr-sirketler/yontem/pay-devri.md`). İkisini tek satırda toplamak,
 1. adımda hiçbir zaman doğrulanamayacak bir koşul yaratır.
 
-0. **Yaptırım yeniden taraması** (`yaptirim-taramasi`). İmzadan bu yana
-   geçen sürede tarafların listelere girip girmediği yeniden sorulur.
-   İmzadaki temiz sonuç kapanıştaki temizliğin kanıtı değildir: §5.1'in izin
-   beklemesi aylar sürebilir, listelere atama ise haftalıktır. Sorgu
-   soyutlama kuralı burada da mutlaktır (§6) ve **tarama bir karar
-   değildir** — eşleşme yetkili avukata gider, kapanış onun kararıyla
-   sürer ya da durur.
-
 1. Kapanış öncesi koşulların karşılandığının teyidi — izin yazısı elde,
    yetkilendirici organ kararları alınmış.
 2. Noter işlemleri (Ltd. Şti.: TTK m.595/1 noter onaylı devir sözleşmesi).

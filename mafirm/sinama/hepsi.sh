@@ -104,6 +104,8 @@ python3 "$S/ks_ao_catisma.py"; topla "AO · çatışmanın yönü ve zamanı" $?
 echo
 python3 "$S/ks_ap_katalog.py"; topla "AP · araç kataloğunun kurulumdaki hâli" $?
 echo
+python3 "$S/ks_aq_zaman.py"; topla "AQ · yaptırım taramasının zaman ekseni" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

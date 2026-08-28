@@ -13,27 +13,7 @@ hukuki soruya soyutlanır ve çıktı bunu yaptığını yazar (işletim sözle�
 Bir adın taranması gerekiyorsa bu, insan kararıdır ve makinenin dışında yapılır.
 
 ## Ne taranır, ne zaman
-**Dört** nokta: gizlilik sözleşmesinden önce, münhasırlıktan önce, imzadan
-önce, **ve kapanıştan hemen önce.**
-
-<!-- [AQ-01 · otuz beşinci tur] Kitaba sadık sürüm
-     yamalar/kitaba-sadik/yaptirim-taramasi-SKILL.md; üç nokta yazıyordu ve
-     üçü de imzaya kadardı. Oysa kitabın KENDİ §5.1'i imza ile kapanış
-     arasına bir bekleme koyuyor: bildirime tabi bir işlem izin alınana
-     kadar askıdadır ve o aralık ayları bulabilir. Yaptırım listelerine
-     atama ise haftalık yapılır. İmzada temiz olan bir taraf, izin
-     beklenirken listeye girebilir ve işlem kapatılır — bu, yanlış bir eşik
-     hesabından farklı olarak işlemin TAMAMLANMASININ hukuka uygun olup
-     olmadığını etkiler. Dördüncü nokta bu aralığı kapatır. -->
-
-**Neden dördüncü nokta var.** İmza ile kapanış arasındaki aralık kitabın
-kendi tasarımından doğar (§5.1: bildirime tabi işlem izin alınana kadar
-askıdadır) ve aylar sürebilir. Listelere atama haftalıktır. **İmzadaki temiz
-sonuç, kapanıştaki temizliğin kanıtı değildir** — §14'ün ikinci tuzağının
-zaman eksenindeki hâli.
-
-Aralık uzunsa (izin beklemesi sürüyorsa) tarama imza ile kapanış arasında da
-tekrarlanır; sıklığı işin süresine göre yetkili avukatla belirlenir.
+Üç nokta: gizlilik sözleşmesinden önce, münhasırlıktan önce, imzadan önce.
 
 | Nesne | Kontroller |
 |---|---|

@@ -369,6 +369,39 @@ altısı da doğrulandı ve kayda bağlandı; biri (ortak yazarlı bir kitap tek
 atfediliyordu) düzeltildi. → Koltuk beyanındaki her eser, doğrulama kaydına
 girmeli ve bir sonuç taşımalı. *(AI-02, AI-03, AI-04)*
 
+## §9 · Beceriler — yaptırım taramasının zaman ekseni
+
+**[A] Yaptırım taramasının son kontrol noktası İMZA; oysa en uzun maruziyet
+aralığını kitabın kendi §5.1'i imza ile kapanış arasına koyuyor.**
+`yaptirim-taramasi` becerisi zaman sorusunu kitapta en iyi soran yerdir —
+üç kontrol noktası verir: *"gizlilik sözleşmesinden önce, münhasırlıktan
+önce, imzadan önce."* Ama üçü de imzaya kadardır. §5.1 ise şunu yazıyor:
+bildirime tabi bir işlem *"Kurul açıkça ya da inceleme süresinin dolmasıyla
+zımnen karar vermeden hukuken geçerlilik kazanmaz. **İmza serbesttir;
+kapanış değildir.**"*
+
+Yani aralık kitabın **kendi tasarımından** doğuyor ve izin beklemesi ayları
+bulabilir. Yaptırım listelerine atama ise haftalık yapılır. Kapanış kontrol
+listesinde (`kapanis-listesi`) yeniden tarama adımı **yok**: liste izin
+yazısını ve yetkilendirici organ kararlarını teyit ediyor, tarafların hâlâ
+temiz olup olmadığını sormuyor.
+
+Sonuç, bu incelemede bulunan **en ağır sonuçlu** boşluktur. Yanlış bir eşik
+hesabı bir bildirim yükümlülüğünü etkiler; bu boşluk, işlemin
+**tamamlanmasının hukuka uygun olup olmadığını** etkiler: imzada temiz olan
+bir taraf izin beklenirken listeye girebilir ve işlem kapatılır.
+
+Kitap burada iki şeyi de doğru yapıyor ve ikisi de olumlu kontrol olarak
+tutuldu: *"eşleşmenin yokluğu temizlik kanıtı değildir"* ve *"tarama karar
+değildir"* — gerçek bir adın taranması insan kararıdır ve makinenin dışında
+yapılır (kural 6). *(AQ-01, AQ-02)*
+
+→CEVAP: YOK — cevabın "yamalı hâlde sistem çalışıyor" cümlesi kapsıyor:
+kontrol noktaları **dörde** çıkarıldı (kapanıştan hemen önce) ve
+`kapanis-listesi`ne 0. adım olarak yaptırım yeniden taraması eklendi. Sorgu
+soyutlama kuralı orada da mutlaktır ve tarama yine bir karar değildir —
+eşleşme yetkili avukata gider.
+
 ## §9 · Beceriler
 
 **[C] Beklenen değer bayat:** "10" yazıyor, §14 `once-arastir` ekleyince **11**

@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** otuz dokuz çalıştırılabilir takım — **322
+**Yamalı hâlde sistem çalışıyor:** kırk çalıştırılabilir takım — **327
 vaka, 15 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15, birimler arası tutarlılık takımının
 kendi mutasyon yakalaması 10/10. Ama **üç mevzuat bulgusu ile kitabın kendi içindeki bir çelişki açık kalır**
@@ -2036,6 +2036,60 @@ bu örnek zararsız" muhakemesi tam olarak sınıfı dört kez besleyen
 muhakemedir; **AH-03** ise iki `[A]` maddesinden birinin cevap beyanı
 taşımadığını gösterdi.
 
+### Sınıf tarandı — ve en ağır sonuçlu boşluk imzayla kapanış arasındaydı
+
+Kök üç kez göründüğüne göre artık bir sınıftı, ve yirmi yedinci turun dersi
+şuydu: **bir örneği düzeltmek sınıfı kapatmaz.** Bu yüzden sistemdeki bütün
+kontrol noktaları tarandı:
+
+| kontrol | neye bağlı | hüküm |
+|---|---|---|
+| altı **kapı** | yazma anı | **doğru** — saklanan sonuç yok, metni üretildiği anda denetler |
+| **denetim** (26 kontrol) | çağrılma anı | **doğru** — yapıya bakar; yapı dış olayla bozulmaz |
+| eşik · çatışma · katalog | an | 31, 33, 34. turlarda yamalandı |
+| **`yaptirim-taramasi`** | üç an | sonucu **en hızlı** bozulan kontrol |
+
+Yaptırım taraması kitabın zaman sorusunu **en iyi sorduğu** yerdir: üç
+kontrol noktası verir — *"gizlilik sözleşmesinden önce, münhasırlıktan önce,
+imzadan önce."* Ama üçü de **imzaya kadardır.** Ve kitabın kendi §5.1'i
+şunu yazıyor:
+
+> "…Kurul açıkça ya da inceleme süresinin dolmasıyla zımnen karar vermeden
+> hukuken geçerlilik kazanmaz. **İmza serbesttir; kapanış değildir.**"
+
+Yani en uzun maruziyet aralığını **kitabın kendi tasarımı** yaratıyor: izin
+beklemesi ayları bulabilir, yaptırım listelerine atama ise haftalıktır. Ve
+kapanış kontrol listesinde yeniden tarama adımı **yok** — liste izin
+yazısını ve organ kararlarını teyit ediyor, tarafların **hâlâ temiz olup
+olmadığını** sormuyor.
+
+**Bu, incelemede bulunan en ağır sonuçlu boşluktur.** Yanlış bir eşik hesabı
+bir bildirim yükümlülüğünü etkiler; bu boşluk işlemin **tamamlanmasının
+hukuka uygun olup olmadığını** etkiler. Kontrol noktaları dörde çıkarıldı ve
+`kapanis-listesi`ne 0. adım olarak yeniden tarama eklendi — tarama yine bir
+karar değil, ve sorgu soyutlama kuralı orada da mutlak.
+
+Kitabın burada doğru yaptığı iki şey olumlu kontrol olarak tutuldu:
+*"eşleşmenin yokluğu temizlik kanıtı değildir"* ve *"tarama karar
+değildir"*.
+
+### Yakınlık tuzağı bu oturumda dördüncü kez — hep kendi ölçütümde
+
+AQ-01 ilk sürümde başlıktan sonraki **300 karaktere** bakıyordu. Yama o
+pencereye bir açıklama paragrafı ekleyince, mutasyonda kontrol noktası geri
+alınsa bile pencerede "kapanış" kaldığı için vaka yeşil kalıyordu. AQ-03 ise
+`re.I` yüzünden bir **başlığa** ("İzin Alın") takılıyordu — kuralın kendisine
+değil.
+
+Dördüncü kez aynı ders, artık kural olarak yazıldı: **iddiayı taşıyan en
+küçük sözdizimsel birimi ölç — cümle ya da cümlecik — asla bir karakter
+penceresi. Pencere, komşuyu kanıt sanar.**
+
+Ve mutasyonun kendisi de iki kez satır kırılmasına takıldı: dosyada
+`geçerlilik\nkazanmaz` diye bölünmüş olan ifadeyi ham metinde aradığım için
+mutasyon inmedi. Takım metni düzleştirip baktığı için **doğru** olan taraftı;
+yanılan ölçüm değil, mutasyondu.
+
 ---
 
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
@@ -2155,6 +2209,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | AN · yamanın kabul sınaması | *yamanın tablosu kapıya görünmüyordu* | **temiz** — sır kapısına canlı iş yolu kuralı eklendi |
 | AO · çatışmanın yönü ve zamanı | *kontrol tek yönlü ve yalnız açılışta* | **temiz** — iki yönlü ve geriye dönük hâle getirildi |
 | AP · araç kataloğunun kurulumdaki hâli | *katalog kurulumda hiç yok; arşiv ve veri lisansı okunmuyor* | **temiz** — katalog kuruldu, iki alan eklendi |
+| AQ · yaptırım taramasının zaman ekseni | *son kontrol noktası imza; kapanışta yeniden tarama yok* | **temiz** — dördüncü nokta ve kapanış adımı eklendi |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -2213,7 +2268,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 ### Nasıl yeniden koşulur
 ```
 ./sinama/hepsi.sh                 # 34 çalıştırılabilir takım:
-                                  #   322 vaka + 15 mutasyon (D)
+                                  #   327 vaka + 15 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -2293,9 +2348,10 @@ Dokuz takım, 96 vaka:
 | AN | **Yamanın kabul sınaması** — eklenen katman gerçekten karar verdiriyor mu | §15.1, kural 6 |
 | AO | **Çıkar çatışmasının yönü ve zamanı** — kontrol simetrik mi, geriye bakıyor mu | §8, §9, §18.9 |
 | AP | **Araç kataloğunun kurulumdaki hâli** — §13'ün kararları nerede yaşıyor | §13, §14, §3 |
+| AQ | **Yaptırım taramasının zaman ekseni** — imza ile kapanış arasında ne oluyor | §9, §5.1, §6 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**322 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**327 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)
