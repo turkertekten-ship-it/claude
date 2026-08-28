@@ -3,6 +3,15 @@
 Kitaba sadık sürümler `yamalar/kitaba-sadik/` altındadır. Karşılaştırma
 denetlenebilir olsun diye hiçbiri silinmedi.
 
+> **Bu söz bir süre DOĞRU DEĞİLDİ.** Yirmi beşinci turda AG takımı iki
+> eksik buldu: `.gitignore` (§2, on yedinci turda kural 6 için değiştirildi)
+> ve `birimler/rekabet/yontem/tr-esikler.md` (§5, DOĞRULANAMADI işaretleri
+> konuldu). İkisinin de özgünü **kitabın kendi metninden yeniden kuruldu** ve
+> `kitaba-sadik/` altına konuldu. `.gitignore` özgünü, kendini yoksaymaması
+> için `gitignore` adıyla saklanıyor. Söz artık AG-01 ve AG-02 ile her
+> koşumda kontrol ediliyor — çünkü kontrol edilmeyen bir söz, verilmemiş bir
+> sözdür.
+
 Kural: **mevzuat rakamlarına ve madde numaralarına DOKUNULMADI.** Bir eşik
 değişikliği insan kararıdır (§11, `/esik-denetle`) ve mevzuat bulguları yalnızca
 ikincil kaynakla desteklendi. Onlar `hafiza/dogrulama-bulgulari.md` içinde açık

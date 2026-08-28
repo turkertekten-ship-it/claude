@@ -295,6 +295,15 @@ bileşende ele almalı. → Türkçe metni desenle okuyan her bileşen için: k�
 `tr_kucult` üzerinden, karakter sınıfları tam alfabe, ekler dört ünlü
 varyantıyla. *(B-10, U-05, AD-01, AE-02, AE-03)*
 
+**[C] Kitap, kendi dosyalarının özgün sürümünü saklamayı hiçbir yerde
+söylemiyor.** §2 `git init` çalıştırır ama kurulumun ilerleyen bölümlerinde
+§5, §12 ve §16'nın yazdığı dosyalar okuyucu tarafından yamalandığında "kitap ne
+yazıyordu" sorusunu cevaplayacak bir referans kalmaz. Bu kurulumda taban elle
+tutuldu ve yine de iki dosya (§2'nin `.gitignore`'u, §5'in `tr-esikler.md`'si)
+gözden kaçtı; ikisi de kitabın metninden yeniden kuruldu. → Kitap, yamalanan
+her dosyanın özgününü saklamayı ve bu tabanın eksiksizliğini denetlemeyi
+söylemeli. *(AG-01, AG-02)*
+
 ## §7 · Ortak koltukları
 
 **[B] Kitabın en yüksek itibar riskli kuralının hiçbir mekanizması yok.**

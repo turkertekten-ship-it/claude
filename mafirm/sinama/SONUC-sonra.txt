@@ -1,5 +1,5 @@
 ###############################################################
-#  KÖR SINAMA TAKIMI — 2026-08-28T10:59:03Z
+#  KÖR SINAMA TAKIMI — 2026-08-28T11:06:09Z
 ###############################################################
 
 /root/mafirm/sinama/ks_a_esik.py:45: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
@@ -274,7 +274,7 @@ GEÇTİ K-15   koltuk kapısı yöntem dosyalarını bloklamıyor
 KÖR SINAMA L — çapraz referans bütünlüğü
 ================================================================================================
 GEÇTİ L-01   belgelerdeki her yol atfının hedefi var
-        51 atıf incelendi, kırık: yok
+        52 atıf incelendi, kırık: yok
 GEÇTİ L-02   her INDEX kendi yöntem dosyalarının hepsini anıyor
         anılmayan: yok
 GEÇTİ L-03   belgelerde sabit ~/mafirm yolu kalmamış
@@ -294,7 +294,7 @@ KÖR SINAMA M — errata ↔ sınama izlenebilirliği
 GEÇTİ M-01   her errata maddesi bir sınama vakasına atıf yapıyor
         62 madde · atıfsız 0: yok
 GEÇTİ M-02   atıf yapılan her vaka kimliği gerçekten tanımlı
-        320 tanımlı kimlik · uydurma dayanak: yok
+        326 tanımlı kimlik · uydurma dayanak: yok
 GEÇTİ M-03   [A] ve [B] maddelerinin atıfları sadık sistemde gerçekten kaldı
         sadık koşumda kalan vaka: 51 · sınanmamış ağır madde: yok
 GEÇTİ M-04   sadık sistemde kalan her vaka errata'da ya da raporda açıklanmış
@@ -393,7 +393,7 @@ KÖR SINAMA R — yön, insan onayı ve dil kuralları
 GEÇTİ R-01   rapor cevapla başlıyor, yöntemle değil
         ilk bölüm: 'Cevap' — §4: 'cevabı merak eden ilk paragrafta bulur'
 GEÇTİ R-02   yöntem bölümü bulgulardan sonra geliyor
-        yöntem 38. başlık, ilk bulgu 1. başlık
+        yöntem 39. başlık, ilk bulgu 1. başlık
 GEÇTİ R-03   iki zorunlu başlık en sonda ve doğru sırada
         son iki başlık: ['Şimdi ne yapılmalı', 'Yetkili avukat görüşü gereken konular']
 GEÇTİ R-04   raporun onay durumu açıkça yazılı (§9)
@@ -602,39 +602,39 @@ GEÇTİ Z-08   denetim beyan edilen asgari kontrol sayısını taşıyor
 KÖR SINAMA AA — kapı arızalandığında hangi yöne düşüyor
 ================================================================================================
 GEÇTİ AA-01a    bozuk olay: bozuk JSON
-        çıkış 2 (30 ms)
+        çıkış 2 (34 ms)
 GEÇTİ AA-01b    bozuk olay: boş girdi
         çıkış 2 (31 ms)
 GEÇTİ AA-01c    bozuk olay: tool_input yok
-        çıkış 0 (33 ms)
-GEÇTİ AA-01d    bozuk olay: tool_input dizge
         çıkış 0 (32 ms)
-GEÇTİ AA-01e    bozuk olay: tool_input liste
-        çıkış 0 (30 ms)
-GEÇTİ AA-01f    bozuk olay: tool_name yok
+GEÇTİ AA-01d    bozuk olay: tool_input dizge
         çıkış 0 (31 ms)
+GEÇTİ AA-01e    bozuk olay: tool_input liste
+        çıkış 0 (35 ms)
+GEÇTİ AA-01f    bozuk olay: tool_name yok
+        çıkış 0 (30 ms)
 GEÇTİ AA-01g    bozuk olay: tool_name None
         çıkış 0 (33 ms)
 GEÇTİ AA-01h    bozuk olay: içerik None
-        çıkış 0 (32 ms)
+        çıkış 0 (30 ms)
 GEÇTİ AA-01i    bozuk olay: içerik sayı
-        çıkış 0 (32 ms)
+        çıkış 0 (31 ms)
 GEÇTİ AA-01j    bozuk olay: derin iç içe
         çıkış 0 (30 ms)
 GEÇTİ AA-01k    bozuk olay: JSON dizi (nesne değil)
-        çıkış 2 (30 ms)
+        çıkış 2 (34 ms)
 GEÇTİ AA-01l    bozuk olay: JSON null
-        çıkış 2 (31 ms)
+        çıkış 2 (30 ms)
 GEÇTİ AA-02     ayrıştırma SONRASI arıza politikası yazılı ve dışarıda kapalı
         kanca, ayrıştırma sonrası istisnayı yakalayıp dışarı kanalında 2 döndürüyor
 GEÇTİ AA-03-20  boşluksuz 20000 karakter bütçe içinde bitiyor
-        68 ms (bütçe 5000 ms) çıkış 0
+        66 ms (bütçe 5000 ms) çıkış 0
 GEÇTİ AA-03-80  boşluksuz 80000 karakter bütçe içinde bitiyor
-        156 ms (bütçe 5000 ms) çıkış 0
+        155 ms (bütçe 5000 ms) çıkış 0
 GEÇTİ AA-03-200 boşluksuz 200000 karakter bütçe içinde bitiyor
-        342 ms (bütçe 5000 ms) çıkış 0
+        335 ms (bütçe 5000 ms) çıkış 0
 GEÇTİ AA-04     400 KB gerçek düzyazı bütçe içinde
-        415 ms çıkış 0
+        431 ms çıkış 0
 GEÇTİ AA-05     dayanıklılık yaması doğruluğu bozmadı
         üç davranış vakası da beklendiği gibi
 ------------------------------------------------------------------------------------------------
@@ -696,7 +696,7 @@ GEÇTİ AD-06   riskli ajan dağıtan her komut sır sınırını yazıyor
 KÖR SINAMA AE — Türkçeyi ve kendi kimliklerini desenle okumak
 ================================================================================================
 GEÇTİ AE-01   vaka kimliği desenleri iki harfli öneki de görüyor
-        33 dosya tarandı, tek harf varsayan desen yok
+        34 dosya tarandı, tek harf varsayan desen yok
 GEÇTİ AE-02   Türkçe harf içeren her karakter sınıfı TAM
         yarım Türkçe alfabe taşıyan sınıf yok
 GEÇTİ AE-03   Türkçe metin üzerinde çıplak .lower() yok
@@ -712,15 +712,31 @@ GEÇTİ AE-05   Türkçe küçültme dört köşede de doğru
 KÖR SINAMA AF — aparatın kendi hakkındaki iddiaları
 ================================================================================================
 GEÇTİ AF-01   diskteki her takım hepsi.sh tarafından çağrılıyor
-        29 takımın hepsi çağrılıyor
+        30 takımın hepsi çağrılıyor
 GEÇTİ AF-02   her python takımı kaybolan vaka korumasını taşıyor
-        27 python takımının hepsi vaka sayısını beyan ediyor
+        28 python takımının hepsi vaka sayısını beyan ediyor
 GEÇTİ AF-03   beyan edilmiş her vaka koşumda BEKLENEN olarak görünüyor
         12 beyanın hepsi koşumda yerinde
 GEÇTİ AF-04   beyan edilen belirti hâlâ canlı belirtiyle aynı
         12 beyanın belirtisi değişmemiş
 GEÇTİ AF-05   raporun ölçüm iddiaları canlı çıktıyla uyuşuyor
         2 ölçüm iddiası canlı koşumla doğrulandı (denetim mutasyonu=15/15, V meşru korpus=17)
+------------------------------------------------------------------------------------------------
+5 vaka · 5 geçti · 0 beklenen · 0 SİNYAL
+
+================================================================================================
+KÖR SINAMA AG — kitaba sadık karşılaştırma tabanı
+================================================================================================
+GEÇTİ AG-01   kitaba ait her dosyanın özgün sürümü korunmuş
+        6 dosyanın özgünü yerinde
+GEÇTİ AG-02   'hiçbiri silinmedi' sözü tutuluyor
+        söz veriliyor ve tutuluyor
+GEÇTİ AG-03   korunan her özgün, canlı dosyadan farklı
+        korunan sürümlerin hepsi canlıdan farklı
+GEÇTİ AG-04   korunan kapi.py kitabın bilinen kusurlarını taşıyor
+        dört bilinen kusurun dördü de özgün dosyada mevcut
+GEÇTİ AG-05   derleme artıkları .gitignore ile dışlanmış
+        derleme artığı yok ya da dışlanmış
 ------------------------------------------------------------------------------------------------
 5 vaka · 5 geçti · 0 beklenen · 0 SİNYAL
 
@@ -756,6 +772,7 @@ GEÇTİ AF-05   raporun ölçüm iddiaları canlı çıktıyla uyuşuyor
   AD · komutların iddiaları           temiz
   AE · desen sınıfı taraması        temiz
   AF · aparatın kendi iddiaları       temiz
+  AG · kitaba sadık taban              temiz
   ------------------------------------------------------------
   TOPLAM SİNYAL                         0
 

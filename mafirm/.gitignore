@@ -20,3 +20,8 @@ dosyalar/
 # dosyalar şablondan kopyalanır ve depoya hiç girmez.
 hafiza/muvekkil-adlari.txt
 hafiza/cikar-catismasi.md
+
+# [AG-05] Derleme artığı. Depoya hiç girmedi ama dışlanmamıştı da;
+# dışlanmayan bir artık, bir gün eklenen bir artıktır.
+__pycache__/
+*.pyc

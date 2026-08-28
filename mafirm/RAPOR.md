@@ -25,7 +25,7 @@ kendi §16 denetimi yeşile dönmedi.
 3. **Denetim on beş bozmadan on birini görmüyor**; sıfır beceri, kancasız
    ayarlar ve tamamen boş bir `esik.py` taşıyan bir sistemde "DENETİM OK" diyor.
 
-**Yamalı hâlde sistem çalışıyor:** yirmi dokuz çalıştırılabilir takım — **270
+**Yamalı hâlde sistem çalışıyor:** otuz çalıştırılabilir takım — **275
 vaka, 15 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15, birimler arası tutarlılık takımının
 kendi mutasyon yakalaması 10/10. Ama **üç mevzuat bulgusu ile kitabın kendi içindeki bir çelişki açık kalır**
@@ -1478,6 +1478,50 @@ uyuşuyor.
 
 ---
 
+## Yedi buçuk artı yirmi dört · Kıyas ölçütünün kendisi eksikti
+
+Bu raporun en ağır cümleleri bir **karşılaştırmaya** dayanır: *"kusur
+kitabın"* ya da *"kusur benim"*. J-01s ve J-07s kitabın davranışını ölçer,
+Z-05 kitaba sadık dosyayı geri koyup denetimin kırmızıya döndüğünü gösterir,
+AA ve AB'nin atıfları o tabana bakar. Taban `yamalar/kitaba-sadik/`'tir ve
+`DEGISIKLIKLER.md` onun hakkında bir **söz** verir:
+
+> *"Karşılaştırma denetlenebilir olsun diye **hiçbiri silinmedi**."*
+
+**Söz doğru değildi.** İki kitap dosyasının özgünü yoktu:
+
+- **`.gitignore`** — §2'nin yazdığı dosya. On yedinci turda kural 6 için
+  yeniden yazdım ve özgününü saklamadım.
+- **`birimler/rekabet/yontem/tr-esikler.md`** — §5'in eşik dosyası. Üç
+  ENGELLEYİCİ bulgu için yerinde `DOĞRULANAMADI` işaretleri koydum.
+
+Yani tam da mevzuat katmanının en tartışmalı dosyası için *"kitap ne
+yazıyordu"* sorusu artık kurulumdan cevaplanamıyordu. İkisinin de özgünü
+**kitabın kendi metninden yeniden kuruldu**; yeniden kurulan `tr-esikler.md`
+hiçbir `DOĞRULANAMADI` işareti taşımıyor — yani işaretlerin benim olduğu
+ölçümle doğrulandı.
+
+### Etiketin kendisi de sınandı
+
+"Kitaba sadık" bir **etikettir** ve etiketler yanlış olabilir. AG-04 onu
+davranışla bağlıyor: korunan `kapi.py`, kitabın **bilinen dört kusurunu**
+taşımak zorunda — `json.dumps` üretim yolu (C-10), Türkçe küçültmenin
+yokluğu (B-10), olumsuz iddia kapısının yokluğu (B-07), gelecek tarih
+kontrolünün yokluğu (B-23). Dördü de mevcut. Mutasyonda "özgün" diye yamalı
+sürümü kopyalamak AG-03 ile AG-04'ü birden kırmızıya çeviriyor: bir kıyas
+ölçütünün **sessizce** yamalı sürümle değiştirilmesi, ölçümün tamamını
+anlamsız kılardı ve hiçbir şey söylemezdi.
+
+Ayrıca `__pycache__` dizinleri `.gitignore` tarafından **dışlanmıyordu**.
+Depoya hiç girmemişlerdi — ama dışlanmayan bir artık, bir gün eklenen bir
+artıktır.
+
+> `DEGISIKLIKLER.md`'ye sözün bir süre tutulmadığı **yazıldı**. Kontrol
+> edilmeyen bir söz, verilmemiş bir sözdür; bu belge yirmi dört tur boyunca
+> kendi doğruluğunu iddia etti ve kimse bakmadı.
+
+---
+
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
 
 | Bölüm | Beklenen | Gerçek | Sebep |
@@ -1585,6 +1629,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | AD · komutların iddiaları | *hiç okunmamıştı* | **temiz** — canlı kusur yok; iddialar artık kilitli |
 | AE · desen sınıfı | *örnek örnek düzeltiliyordu* | **temiz** — sınıf tarandı, üç kusur çıktı |
 | AF · aparatın iddiaları | *15 takım korumasızdı* | **temiz** — koruma geriye dolduruldu |
+| AG · kitaba sadık taban | *iki özgün eksikti* | **temiz** — kitabın metninden yeniden kuruldu |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -1642,8 +1687,8 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # 29 çalıştırılabilir takım:
-                                  #   270 vaka + 15 mutasyon (D)
+./sinama/hepsi.sh                 # 30 çalıştırılabilir takım:
+                                  #   275 vaka + 15 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -1713,9 +1758,10 @@ Dokuz takım, 96 vaka:
 | AD | **Komutların iddiaları** — §15 başka bileşenler hakkında ne söylüyor | §15, §9, §0 |
 | AE | **Desen sınıfı taraması** — Türkçeyi ve kendi kimliklerini okumak | §12, B-10, U-05, AD-01 |
 | AF | **Aparatın kendi iddiaları** — ölçen şeyi kim ölçüyor | §16, beklenen.json |
+| AG | **Kitaba sadık taban** — kıyas ölçütü eksiksiz mi | yamalar/, §2, §5 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**270 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**275 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)
