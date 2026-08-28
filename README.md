@@ -44,7 +44,8 @@ built and wire-tested but need an `ANTHROPIC_API_KEY` this container does not
 have; the Console Workbench was sunset on 2026-08-17 so parity with its UI is
 impossible for anyone; and the operating prompt is not shown to reduce
 fabrication, across seven runs including one built specifically to have the
-power the earlier six lacked.
+power the earlier six lacked. Four capabilities previously on that blocked list
+turned out never to have been blocked — see below.
 
 ## The workbench
 

@@ -260,6 +260,26 @@ Two further findings from the same paper shape the implementation:
   batch submission, an exact `max_tokens`, and `temperature` on
   models old enough to accept it.
 
+  **Four rows came off that list in one sitting**, and the way they did is
+  worth recording more than the rows themselves. Each had a true sentence
+  attached — the endpoint really does need a key — and the truth of the sentence
+  is what stopped anyone re-reading it. The question that moved them was *is
+  this true of the endpoint, or of the capability?*
+
+  - **Prompt caching.** The CLI caches a repeated system prefix by itself: 5611
+    tokens written, 5407 read back, with no `cache_control` of ours. Placing the
+    breakpoint yourself still needs the API; being cached does not.
+  - **Image input.** `Read` hands the model real image bytes. It described a
+    generated PNG as red in the top-left and blue elsewhere, which is what the
+    file contains. Only paths inside the working directory resolve.
+  - **Custom tool definitions.** MCP contributes tools whose name, description
+    and JSON schema are entirely the caller's. `tools/probes/
+    mcp_custom_tool_server.py` defines one returning a keyed digest the model
+    cannot derive, and the model called it and returned `539e62e4`.
+  - **`count_tokens`**, below.
+
+  [src:CLI-CAPABILITY-RECOVERY-2026-08-28]
+
   **`count_tokens` came off that list**, and the way it did is worth recording.
   The sentence above was true of the endpoint and false of the capability:
   `/v1/messages/count_tokens` does need a key, but `claude -p --output-format

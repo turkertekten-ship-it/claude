@@ -1065,3 +1065,50 @@ sources:
       which is the move the doctrine asks for. Worth noting how wrong the
       guesses were -- the doctrine arm hedged 2500-3500 and the plain arm
       150-180, bracketing the true value without either being close.
+
+  - id: CLI-CAPABILITY-RECOVERY-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T10:35Z"
+    method: >-
+      live rows of python3 tools/parity_check.py — "Prompt caching actually
+      happens", "Image input through the CLI", "Custom tool definitions (via
+      MCP)" — each exercising the capability against the real CLI rather than
+      inspecting a request body.
+    evidence: >-
+      Caching: a repeated system prefix reported 5611 cache_creation_input_tokens
+      on the first call and 5407 cache_read_input_tokens on the second, with no
+      cache_control set by us. Image: the model described a generated 64x64 PNG
+      it had never seen as red in the top-left and blue elsewhere, which is what
+      the file contains. Tools: a tool named, described and schema'd by
+      tools/probes/mcp_custom_tool_server.py was offered over --mcp-config,
+      chosen by the model and called, returning the keyed digest 539e62e4 that
+      cannot be derived from its arguments. Matrix went from 20 passed / 8
+      unreachable to 24 passed / 0 failed / 8 unreachable.
+    note: >-
+      All three were listed as unreachable-pending-a-credential, and all three
+      were reachable without one. The API-side rows still exist and are still
+      honestly unreachable — placing a cache_control breakpoint yourself, an
+      image as a content block, `tools` in the request body — but they now name
+      the endpoint rather than standing in for the capability. Two constraints
+      found while proving it: an image path outside the CLI's working directory
+      returns "the file doesn't exist", and a system prefix under the model's
+      minimum cacheable length reports zeroes in every cache field, which is not
+      caching failing.
+
+  - id: PARITY-PROBE-OVERSPEC-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T10:40Z"
+    method: two consecutive runs of python3 tools/parity_check.py
+    evidence: >-
+      The caching row passed on the first run (created=5611, read=5407) and
+      FAILED on the second with created=0, read=5611, because the cache entry
+      written by the first run was still live and there was nothing left to
+      write.
+    note: >-
+      The capability was working both times; the assertion was wrong. It
+      required the first call to WRITE, which demands a cold cache and so makes
+      the result depend on how recently anything else exercised the feature. The
+      claim is that a repeated prefix is served from cache, and the second call
+      reading is what establishes that. Recorded because the failure was
+      informative: a check that goes red for being run twice is testing the
+      schedule rather than the feature.

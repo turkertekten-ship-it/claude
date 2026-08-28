@@ -263,11 +263,11 @@ def c_tool_defs(backend) -> Result:
                                 tool_defs=(tool,), tool_choice={"type": "any"}))
     ok = body.get("tools", [{}])[0].get("name") == "get_weather" \
         and body.get("tool_choice") == {"type": "any"}
-    return Result("Custom tool definitions", UNREACHABLE if ok else FAIL,
-                  "the CLI can switch its own built-in tools on and off but cannot "
-                  "define one with your schema. Built on the anthropic-api backend "
-                  "and driven over real HTTP in the test suite, including surfacing "
-                  "the resulting tool_use block. Missing: a credential."
+    return Result("Custom tool definitions (via the API)", UNREACHABLE if ok else FAIL,
+                  "`tools` in the request body, built on the anthropic-api backend "
+                  "and driven over real HTTP in the test suite including the "
+                  "resulting tool_use block. Missing: a credential. The CAPABILITY "
+                  "is reachable another way — see the MCP row."
                   if ok else "tool definitions did not reach the request body")
 
 
@@ -278,11 +278,10 @@ def c_caching(backend) -> Result:
     body = b.build_body(Request(prompt="x", model="claude-haiku-4-5",
                                 system="stable prefix", cache_system=True))
     ok = body["system"][0].get("cache_control") == {"type": "ephemeral"}
-    return Result("Prompt caching", UNREACHABLE if ok else FAIL,
-                  "cache_control on the system prompt — the largest cost lever for a "
-                  "suite that re-sends the same prefix on every case. Built and "
-                  "wire-tested; the response's cache_read_input_tokens is already "
-                  "parsed. Missing: a credential."
+    return Result("Explicit cache_control breakpoints", UNREACHABLE if ok else FAIL,
+                  "placing the breakpoint yourself needs the API. Built and "
+                  "wire-tested. Missing: a credential. Caching ITSELF is not "
+                  "missing — see the next row."
                   if ok else "cache_control did not reach the request body")
 
 
@@ -296,10 +295,167 @@ def c_attachments(backend) -> Result:
                       "media_type": "image/png", "data": "iVBOR"}},)))
     kinds = [c["type"] for c in body["messages"][0]["content"]]
     ok = kinds == ["image", "text"]
-    return Result("Image and document input", UNREACHABLE if ok else FAIL,
+    return Result("Image input as a content block", UNREACHABLE if ok else FAIL,
                   f"attachments lead the first user turn before the text, which is "
                   f"the documented order ({kinds}). Built and wire-tested. Missing: "
                   f"a credential." if ok else f"wrong block order: {kinds}")
+
+
+@check("Prompt caching actually happens")
+def c_caching_live(backend) -> Result:
+    """Caching does not need the API. It needs a prefix over the minimum.
+
+    The first version of this probe sent a 573-token system prompt, saw zeroes
+    in every cache field, and would have recorded a negative result. That was
+    not caching failing; it was a prefix under the model's minimum cacheable
+    length. The lesson is kept in the code because a probe that cannot fail for
+    the reason you think it failed is worse than no probe.
+    """
+    import subprocess
+    prompts = sorted((REPO / "prompts").glob("*.md"))
+    if not prompts:
+        return Result("Prompt caching actually happens", UNREACHABLE, "no prompts/ to send")
+    system = ("\n\n".join(f.read_text(encoding="utf-8") for f in prompts)) * 2
+
+    def send(text: str) -> dict:
+        proc = subprocess.run(
+            ["claude", "-p", text, "--model", "claude-haiku-4-5",
+             "--output-format", "json", "--tools", "", "--setting-sources", "",
+             "--system-prompt", system],
+            capture_output=True, text=True, timeout=180)
+        return (json.loads(proc.stdout).get("usage") or {}) if proc.returncode == 0 else {}
+
+    try:
+        first = send("say A")
+        second = send("say B")
+    except Exception as exc:  # noqa: BLE001
+        return Result("Prompt caching actually happens", UNREACHABLE, str(exc)[:200])
+
+    created = first.get("cache_creation_input_tokens", 0)
+    read = second.get("cache_read_input_tokens", 0)
+    first_read = first.get("cache_read_input_tokens", 0)
+
+    # The claim is "a repeated prefix is served from cache", and the second
+    # call reading is what establishes it. Requiring the FIRST call to write
+    # was an over-specification that demanded a cold cache: run this check
+    # twice within the cache window and the second run legitimately reports
+    # created=0, because the entry the earlier run wrote is still live. That
+    # failed here, on a capability that was working. A check whose green
+    # depends on nothing else having exercised the feature recently is testing
+    # the schedule, not the feature.
+    ok = read > 0
+    origin = (f"{created} tokens written on the first call"
+              if created else
+              f"the first call read {first_read} from an entry still live from "
+              f"an earlier run, so there was nothing to write")
+    return Result("Prompt caching actually happens", PASS if ok else FAIL,
+                  f"the CLI cached a repeated system prefix without any "
+                  f"cache_control of ours: {origin}, and {read} tokens were read "
+                  f"back on the second. Cache reads bill at a fraction of input, "
+                  f"which is the cost lever this row was listed as missing"
+                  if ok else
+                  f"no caching observed: created={created} read={read} — a prefix "
+                  f"under the model's minimum cacheable length will do this")
+
+
+@check("Image input through the CLI")
+def c_image_live(backend) -> Result:
+    """Read hands the model real image bytes, which is the capability.
+
+    Proved by content rather than by the absence of an error: the probe image is
+    a red quadrant on blue, and an answer that does not name both colours in the
+    right places did not see it.
+    """
+    import struct
+    import subprocess
+    import zlib
+
+    W = H = 64
+    raw = b"".join(
+        bytes([0]) + b"".join(bytes((255, 0, 0) if (x < 32 and y < 32) else (0, 0, 255))
+                              for x in range(W))
+        for y in range(H))
+
+    def chunk(tag: bytes, data: bytes) -> bytes:
+        return (struct.pack(">I", len(data)) + tag + data
+                + struct.pack(">I", zlib.crc32(tag + data)))
+
+    png = (b"\x89PNG\r\n\x1a\n"
+           + chunk(b"IHDR", struct.pack(">IIBBBBB", W, H, 8, 2, 0, 0, 0))
+           + chunk(b"IDAT", zlib.compress(raw))
+           + chunk(b"IEND", b""))
+
+    # Inside the repository: a path outside the CLI's working directory comes
+    # back as "the file doesn't exist", which is a sandbox boundary and not an
+    # absent capability. That distinction cost one confused probe to learn.
+    target = REPO / ".parity-probe.png"
+    target.write_bytes(png)
+    try:
+        proc = subprocess.run(
+            ["claude", "-p", f"Read ./{target.name} and answer in one short "
+             "sentence: what two colours are in this image, and where is each?",
+             "--model", "claude-haiku-4-5", "--output-format", "json",
+             "--setting-sources", ""],
+            capture_output=True, text=True, timeout=240, cwd=str(REPO))
+        answer = json.loads(proc.stdout).get("result", "") if proc.returncode == 0 else ""
+    except Exception as exc:  # noqa: BLE001
+        return Result("Image input through the CLI", UNREACHABLE, str(exc)[:200])
+    finally:
+        target.unlink(missing_ok=True)
+
+    low = answer.lower()
+    ok = "red" in low and "blue" in low and ("upper" in low or "top" in low)
+    return Result("Image input through the CLI", PASS if ok else FAIL,
+                  f"the model described a generated PNG it had never seen: "
+                  f"{answer.strip()[:110]!r}. Read passes image bytes to the model, "
+                  f"so image input does not need the API — only a path inside the "
+                  f"working directory"
+                  if ok else f"the image was not described correctly: {answer[:150]!r}")
+
+
+@check("Custom tool definitions (via MCP)")
+def c_mcp_tools(backend) -> Result:
+    """Your schema, your name, your description — contributed over MCP.
+
+    The tool returns a keyed digest the model cannot derive from the arguments,
+    so a correct answer is only obtainable by actually calling it. A tool that
+    could be guessed would prove nothing.
+    """
+    import subprocess
+    import tempfile
+
+    server = REPO / "tools" / "probes" / "mcp_custom_tool_server.py"
+    if not server.exists():
+        return Result("Custom tool definitions (via MCP)", FAIL, f"missing {server}")
+    sys.path.insert(0, str(server.parent))
+    import mcp_custom_tool_server as probe_server
+    expected = probe_server.keyed_digest("parity", 8)
+
+    with tempfile.TemporaryDirectory(prefix="parity-mcp-") as tmp:
+        config = Path(tmp) / "mcp.json"
+        config.write_text(json.dumps({"mcpServers": {"parity": {
+            "command": "python3", "args": [str(server)]}}}), encoding="utf-8")
+        try:
+            proc = subprocess.run(
+                ["claude", "-p", "Use the keyed_digest tool to compute the digest "
+                 "of the phrase 'parity' with length 8. Reply with only the digest.",
+                 "--model", "claude-haiku-4-5", "--output-format", "json",
+                 "--setting-sources", "", "--mcp-config", str(config),
+                 "--allowed-tools", "mcp__parity__keyed_digest"],
+                capture_output=True, text=True, timeout=300, cwd=str(REPO))
+            answer = json.loads(proc.stdout).get("result", "") if proc.returncode == 0 else ""
+        except Exception as exc:  # noqa: BLE001
+            return Result("Custom tool definitions (via MCP)", UNREACHABLE, str(exc)[:200])
+
+    ok = expected in answer
+    return Result("Custom tool definitions (via MCP)", PASS if ok else FAIL,
+                  f"a tool named, described and schema'd entirely by this "
+                  f"repository was offered to the model, chosen by it, and called: "
+                  f"it returned {expected}, which is a keyed digest it could not "
+                  f"derive from the arguments. Custom tool definitions do not need "
+                  f"the API"
+                  if ok else
+                  f"expected {expected} in the answer, got {answer.strip()[:120]!r}")
 
 
 @check("Direct Messages API access", live=False)

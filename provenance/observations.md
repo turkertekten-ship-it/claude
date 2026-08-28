@@ -208,6 +208,29 @@ verified lives in [unknowns.md](unknowns.md), not here.
 > it as unknown — and this repository had been taking the second one for a day
 > without re-checking whether the first had become available.
 
+## Observed — three more capabilities that were never actually blocked
+
+- Asking the count_tokens question of every other blocked row — *is this true of the endpoint, or of the capability?* — moved three of the remaining seven. [src:CLI-CAPABILITY-RECOVERY-2026-08-28]
+- **Prompt caching works through the CLI**, unprompted. A repeated system prefix wrote 5611 tokens to cache on the first call and read 5407 back on the second, with no `cache_control` set by us. This was listed as "the largest cost lever" and missing. [src:CLI-CAPABILITY-RECOVERY-2026-08-28]
+- **Image input works through the CLI.** The model described a generated 64×64 PNG it had never seen as red in the top-left and blue elsewhere, which is what the file contains. [src:CLI-CAPABILITY-RECOVERY-2026-08-28]
+- **Custom tool definitions work over MCP.** A tool named, described and schema'd entirely by this repository was offered to the model, chosen by it, and called — returning a keyed digest, `539e62e4`, that cannot be derived from its arguments. [src:CLI-CAPABILITY-RECOVERY-2026-08-28]
+- The matrix moved from 20 passed / 8 unreachable to **24 passed, 0 failed, 8 unreachable**. [src:CLI-CAPABILITY-RECOVERY-2026-08-28]
+- Two constraints found while proving it: an image path outside the CLI's working directory returns "the file doesn't exist", and a system prefix under the model's minimum cacheable length reports zeroes in every cache field — which is not caching failing. [src:CLI-CAPABILITY-RECOVERY-2026-08-28]
+- The caching probe passed, then failed on a second run with `created=0, read=5611`, because the first run's cache entry was still live. The capability was working both times; the assertion required a cold cache. [src:PARITY-PROBE-OVERSPEC-2026-08-28]
+
+> Reading, not a claim: four rows in total came off the blocked list in one
+> sitting, and not one of them needed a credential, a purchase, or a new
+> feature. They needed the question asked in the other direction. Every one of
+> those rows had a *true* sentence attached — the endpoint really does need a
+> key — and the truth of the sentence is what stopped anyone re-reading it. A
+> falsehood would have been caught by the guard this repository is built
+> around; a true statement standing in for a question nobody re-asked is
+> invisible to it. That is the more dangerous of the two, and there is no tool
+> here that detects it.
+>
+> The over-specified caching probe is the same lesson turned inward: a check
+> that goes red for being run twice is testing the schedule, not the feature.
+
 ## Conclusion
 
 The honest answer to "look through all my previous claude chats" is bounded:
