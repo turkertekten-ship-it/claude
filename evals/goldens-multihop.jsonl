@@ -1,0 +1,25 @@
+# Multi-hop golden cases: the answer needs a document the question cannot reach.
+#
+# Kept OUT of goldens-external.jsonl on purpose. These measure a capability the
+# pipeline does not have - a second retrieval round seeded by the first - so
+# mixing them into the regression gate would depress its pass rate permanently
+# for a limitation rather than a regression.
+#
+# The shape matters, and the first version of this file got it wrong. Questions
+# that *describe* the second package ("which URL library does aiohttp build
+# on?") are answered single-shot at 7/7, because describing a package is exactly
+# the retrieval signal that finds it. These identify the second package only by
+# its relationship to the first, and ask for an attribute - a licence, a
+# supported version, a maintainer - that its description does not contain. Both
+# documents are expected, so recall@8 reads 0.5 when only the reachable one is
+# found. Every link below is verified present: aiohttp's page names yarl and
+# multidict, httpx names httpcore, flask names werkzeug, fastapi names pydantic
+# and starlette, uvicorn names uvloop, pandas names numpy, black names pathspec.
+{"question": "Which licence covers the package aiohttp depends on for building web addresses?", "expect_sources": ["aiohttp", "yarl"], "tags": ["multi-hop"]}
+{"question": "What licence does the transport package underneath httpx carry?", "expect_sources": ["httpx", "httpcore"], "tags": ["multi-hop"]}
+{"question": "Which Python versions does the event loop replacement recommended by uvicorn support?", "expect_sources": ["uvicorn", "uvloop"], "tags": ["multi-hop"]}
+{"question": "What does the package Flask is built on top of provide?", "expect_sources": ["flask", "werkzeug"], "tags": ["multi-hop"]}
+{"question": "Which company or project maintains the validation library FastAPI relies on?", "expect_sources": ["fastapi", "pydantic"], "tags": ["multi-hop"]}
+{"question": "How is the ASGI framework that FastAPI sits on top of licensed?", "expect_sources": ["fastapi", "starlette"], "tags": ["multi-hop"]}
+{"question": "What licence applies to the array library that pandas is built on?", "expect_sources": ["pandas", "numpy"], "tags": ["multi-hop"]}
+{"question": "Which licence covers the file-pattern package that black uses?", "expect_sources": ["black", "pathspec"], "tags": ["multi-hop"]}

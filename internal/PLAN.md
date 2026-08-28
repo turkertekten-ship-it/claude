@@ -176,9 +176,28 @@ its current failures are that artefact. See docs/EVALUATION.md.
    **ok** while wikipedia, youtube, ibm.com and arxiv are refused CONNECT, so
    PyPI remains the only reachable source.
 
-4. **Multi-hop retrieval**, once single-shot recall is well characterised.
-   Adding a loop over a retriever with unknown recall multiplies every failure.
-   Single-shot recall on the external set is 0.8953.
+4. **Multi-hop retrieval**, which now has a target to hit.
+   `evals/goldens-multihop.jsonl` holds eight questions whose answer needs a
+   document the question cannot reach: each names one package and asks for an
+   attribute of a *second* package that only the first page identifies - the
+   licence of what aiohttp uses for web addresses, the Python versions of the
+   event loop uvicorn recommends. Both documents are expected, so the metric is
+   recall.
+
+   **Single-shot baseline: recall@8 0.75, minimum 0.50** - four of eight cases
+   retrieve only the package the question names. Run it with
+   `ooda --config oodarag-external.toml eval --goldens evals/goldens-multihop.jsonl`.
+   It is deliberately outside the regression gate: a permanent limitation in the
+   gate would force a floor rebase that means nothing.
+
+   Two things had to be learned to make that number honest (L76). Questions that
+   *describe* the second package - "which URL library does aiohttp build on?" -
+   are answered single-shot at 7/7, because describing a package is the
+   retrieval signal that finds it; the description has to be withheld for the
+   hop to be required. And the harness's pass rule cannot see the failure: a
+   case passes when *any* expected source is retrieved, so all eight "pass"
+   while half of them return one document of two. Recall is the number to watch,
+   and a pass rate would have hidden the whole problem.
 
 5. **Give `char_start` a reader.** Fixed and pinned in L64 - code chunks went
    from 55% to 100% located, with chunk ids and lengths byte-identical - but the

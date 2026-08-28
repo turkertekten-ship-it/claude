@@ -4180,3 +4180,54 @@ the evidence does.
 3. **A 0.09 AUC gap on 473 pairs is a tie.** Small samples make ties look like
    winners, which is how a session ends up defending the right decision with the
    wrong argument.
+
+---
+
+## L76 - A multi-hop test that the single-shot retriever passed 7/7
+
+PLAN item 4 has been waiting on "single-shot recall well characterised" for
+several sessions. It is characterised now, so the next step is a set of
+questions that need two documents - and the corpus supports it: 80% of the 349
+pages mention another package, and the links are real (fastapi's page names
+pydantic ten times, aiohttp names yarl, httpx names httpcore).
+
+**The first set measured nothing.** Seven questions of the shape *"which URL
+library does aiohttp build on, and what does it model?"* - single-shot pass
+7/7, recall@8 0.857. Obvious in hindsight: a question that *describes* the
+second package is a question that retrieves it directly. "URL library" is what
+`yarl`'s own page says it is. The hop was never required, because the
+description did the hop's work.
+
+**The shape that requires a hop names one package and withholds the other's
+description**, asking instead for an attribute the description does not carry -
+a licence, a supported version, a maintainer:
+
+    Which licence covers the package aiohttp depends on for building web addresses?
+    Which Python versions does the event loop replacement recommended by uvicorn support?
+    Which company or project maintains the validation library FastAPI relies on?
+
+Probed one at a time, three of five missed the second document entirely and two
+found it incidentally, through vocabulary the two pages happen to share. As a
+set of eight: **recall@8 0.75, minimum 0.50** - four cases retrieve both
+documents, four retrieve only the package the question names.
+
+**And the harness cannot see the failure.** All eight cases "pass", because a
+case passes when *any* expected source is retrieved. The pass column - the
+number every gate, floor and ratchet in this repository is built on - reads
+100% on a set where half the answers are missing half their evidence. Recall is
+the only metric that sees it, which is a good argument for the harness reporting
+both and a better one for reading the one that matches the question shape.
+
+The set lives outside the regression gate on purpose: a permanent limitation
+inside a gate forces floor rebases that mean nothing.
+
+**Rules.**
+1. **A test for a capability must fail without it.** Check that first, before
+   the number becomes a baseline. Seven of seven passing was the finding, not
+   the result.
+2. **You cannot ask about a thing without describing it, and the description is
+   the retrieval signal.** Multi-hop questions have to identify the target by
+   relationship and ask for an attribute its description omits.
+3. **A pass rate is a threshold on a metric, and thresholds hide partial
+   failure.** Eight of eight passed while recall said 0.75; the metric was there
+   all along and only the shape of the questions made it worth reading.
