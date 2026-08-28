@@ -471,9 +471,16 @@ sources:
       mode, routing permission prompts to a model-based classifier, as "a safer
       alternative" to that flag.
     note: >-
-      A reversal in the same author's advice across roughly 21 months, both ends
-      sourced. Recorded because a corpus assembled from undated fragments would
-      have presented these as simultaneous and contradictory guidance.
+      RETRACTED 2026-08-27. This entry claimed a reversal. It was wrong, and the
+      error came from trusting a lossy secondary source. The compilation's
+      2026-01-03 file omits the second half of tip 12, in which Cherny says he
+      DOES use the flag: "I will also use either --permission-mode=dontAsk or
+      --dangerously-skip-permissions in a sandbox to avoid permission prompts
+      for the session, so Claude can cook without being blocked on me." Tips 10
+      and 12 are in the same thread, minutes apart. There is no reversal; there
+      is a conditional practice the compilation flattened into a prohibition.
+      Superseded by CHERNY-PERMISSIONS-CONDITIONAL-2026-08-27. Kept, rather than
+      deleted, because the record of the mistake is the point of the ledger.
 
   - id: SESSION-SELF-2026-08-27
     kind: api
@@ -584,3 +591,101 @@ sources:
       had their verification stage die, so the claims from those angles were
       never adversarially re-checked and none of them was used in the corpus.
       No claim here rests on an unverified sweep angle.
+
+  - id: CHERNY-X-2026-05-24
+    kind: tool_output
+    collected_at: "2026-08-27T15:56Z"
+    method: >-
+      curl of a third-party X-digest JSON mirrored on GitHub
+      (wxyz-claw/clawd-pages, x-digest/home-300-2026-05-24-1800.json), filtered
+      to records whose author.username is "bcherny"; the matching record was
+      extracted verbatim to provenance/raw/
+    evidence: provenance/raw/cherny/x-digest-2026-05-24-bcherny.json
+    note: >-
+      Recovers the post that U-10 recorded as unreachable. Record id
+      2058519809214607704, author {"username":"bcherny","name":"Boris Cherny"},
+      authorId 159337660, createdAt "Sun May 24 12:05:42 +0000 2026", 3657
+      likes. Text verbatim: "People often ask what my biggest tip is for getting
+      the most out of Claude Code. // These days my #1 tip is: use auto mode //
+      Auto mode means no more permission prompts. It is the key building block
+      for multi-clauding: start a session, then while it runs, work on another
+      session in parallel." It quotes an earlier post of 2026-05-22: "Two
+      updates to auto mode: · Now available on the Pro plan · Sonnet 4.6 is now
+      supported, alongside Opus 4.7. Shift+tab, and let Claude run."
+      SECOND-HAND: this is a scraper's capture, not x.com itself, which remains
+      blocked. It carries structured metadata (author id, timestamps, engagement
+      counts, a quoted-tweet object) that a hand-written fake would be unlikely
+      to fabricate consistently, but it has not been checked against the
+      original.
+
+  - id: CHERNY-PERMISSIONS-CONDITIONAL-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T16:02Z"
+    method: >-
+      curl of an independent GitHub-hosted transcription of the 2026-01-02
+      thread (januff/claude-code-tips), read in full by this session, and
+      cross-checked against assets/boris-26-1-3/12.png in the compilation clone
+    evidence: provenance/raw/cherny/x-thread-2026-01-02-januff-mirror.md
+    note: >-
+      Cherny's position on skipping permissions is one consistent conditional
+      practice, not a reversal. Same thread, 2026-01-02. Tip 10 verbatim: "I
+      don't use --dangerously-skip-permissions. Instead, I use /permissions to
+      pre-allow common bash commands that I know are safe in my environment".
+      Tip 12 verbatim: "I will also use either --permission-mode=dontAsk or
+      --dangerously-skip-permissions in a sandbox to avoid permission prompts
+      for the session, so Claude can cook without being blocked on me." The
+      2025-04-13 draft says the same thing — use the flag "in a container
+      without internet access" — so the position is stable across 21 months:
+      not as a default, yes inside a sandbox for long-running work.
+
+  - id: SCREENSHOT-AUDIT-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T16:00Z"
+    method: >-
+      four Agent(subagent) passes, one per group of collections, each reading
+      every bundled screenshot in
+      /home/user/shanraisshan/claude-code-best-practice/tips/assets/ (65 images,
+      52 png and 13 webp) and comparing it against the corresponding
+      transcription; every correction acted on below was then re-derived by this
+      session against the screenshots or the independent januff mirror
+    evidence: >-
+      All 60 tips checked. Roughly 35 transcribe faithfully. The rest fail in
+      BOTH directions. Omissions that change meaning: tip 12 of 2026-01-03 (the
+      sandbox exception, above); "Other teams maintain their own CLAUDE.md's"
+      dropped from tip 4; the whole design-rationale paragraph dropped from the
+      2026-02-12 intro. Additions in Cherny's voice that appear in no post: four
+      separate invented bullets in the 2026-03-30 collection (e.g. "You can
+      review changes, approve PRs, and write code directly from your phone",
+      "Each worktree agent works independently on its own copy of the
+      codebase"), and the entire squash-merge rationale in the 2026-03-25 file.
+      Attribution changes: "It's our version of @danshipper's Compounding
+      Engineering" rendered as "it's Boris's version of Compounding
+      Engineering"; "We call this test time compute" rendered as "Boris calls
+      this"; first-person-plural "we/our team" repeatedly rewritten to "the
+      team". Transcription errors: shell aliases "za, zb, zc" rendered "2a, 2b,
+      2c"; the handle "@amorriscode" rendered "@amorisscode". Material
+      alteration in the 2026-04-16 file: "This has always been a way to 2-3x
+      what you get out of Claude, and with 4.7 it's more important than ever"
+      rendered as "now 4.7 is 2-3x what you get out of Claude", moving the
+      multiplier from the practice to the model. Confirmed correct: every PR
+      statistic in the 2026-03-25 file (266, 141, p50 118, p90 498, p99 2,978,
+      45,032, min 2, max 10,459) and every test-time-compute quotation.
+    note: >-
+      This closes U-8, and falsifies the conclusion drawn from the earlier
+      one-tip sample. The compilation does not merely understate: it also
+      invents. Its numbers held up perfectly; its attributions and its framing
+      did not.
+
+  - id: CHERNY-THREAD-MIRROR-2026-01-02
+    kind: tool_output
+    collected_at: "2026-08-27T16:01Z"
+    method: >-
+      curl("https://raw.githubusercontent.com/januff/claude-code-tips/79d6ce49.../Claude%20Code%20Tips/2026-01-02-vanilla-setup.md")
+    evidence: provenance/raw/cherny/x-thread-2026-01-02-januff-mirror.md
+    note: >-
+      An independent transcription of the 2026-01-02 thread carrying 23 posts
+      with per-post timestamps, tweet id 2007179832300581177. Stronger than the
+      compilation for this thread: it preserves the full text of each post
+      including the parts the compilation drops, and it agrees with the
+      screenshots wherever both were checked. Still SECOND-HAND — a scrape, not
+      x.com, which remains blocked.

@@ -26,7 +26,25 @@ The bulk of the corpus comes from a third-party GitHub compilation that transcri
 
 That compilation is **not a primary source**. Cherny's own posts on `x.com`, every long-form interview about him, and Anthropic's own `anthropic.com` engineering blog were all unreachable from this container: the egress proxy refused them. [src:EGRESS-BLOCKED-2026-08-27]
 
-One tip of the 60 was checked against a screenshot of the original post bundled in the compilation. The transcription was faithful in substance but **abridged** — it dropped the post's third paragraph entirely and compressed the second to a single sentence. So the compilation understates rather than embellishes, on a sample of one; the other 59 remain unchecked (U-8). [src:CHERNY-TWEET13-SCREENSHOT-2026-08-27]
+All 60 tips have now been checked against the screenshots of the original posts bundled in the compilation. Roughly 35 transcribe faithfully; the rest fail, and they fail in **both** directions. [src:SCREENSHOT-AUDIT-2026-08-27]
+
+It drops material that changes meaning — most seriously the sandbox exception in tip 12 of the January thread, and the line "Other teams maintain their own CLAUDE.md's". [src:SCREENSHOT-AUDIT-2026-08-27]
+
+It also **invents**: four separate bullets in the 2026-03-30 collection appear in no post, written in Cherny's voice, and the entire squash-merge rationale in the 2026-03-25 file is the compiler's own. [src:SCREENSHOT-AUDIT-2026-08-27]
+
+It reassigns attribution, turning "our version of @danshipper's Compounding Engineering" into "Boris's version", and "We call this test time compute" into "Boris calls this". [src:SCREENSHOT-AUDIT-2026-08-27]
+
+And it mis-transcribes: the shell aliases `za, zb, zc` became `2a, 2b, 2c`, and the handle `@amorriscode` became `@amorisscode`. [src:SCREENSHOT-AUDIT-2026-08-27]
+
+What held up perfectly was the numbers: every PR statistic and every test-time-compute quotation checked out exactly. [src:SCREENSHOT-AUDIT-2026-08-27]
+
+> An earlier version of this document, working from a single checked tip,
+> concluded that "the compilation understates rather than embellishes". The
+> full audit falsified that. A sample of one told us the direction of the error
+> and was wrong about it, which is a fair warning about what a single
+> spot-check buys you.
+
+For the January thread specifically there is a better secondary source than the compilation: an independent transcription carrying all 23 posts with per-post timestamps, which preserves what the compilation drops. [src:CHERNY-THREAD-MIRROR-2026-01-02]
 
 One **primary** source was reachable and was read in full: an unpublished draft, `_drafts/Tips-for-Using-Claude-Code.md`, in Cherny's own blog repository `bcherny/bcherny.github.io`, front matter dated 2025-04-13, which opens "I created Claude Code as a research project". [src:CHERNY-OWN-DRAFT-2025-04-13]
 
@@ -66,7 +84,9 @@ By April, Cherny's own prompts had collapsed this into a single reusable step �
 
 Cherny's headline practice is running many sessions at once: five Claude sessions in the terminal, tabs numbered 1–5, with system notifications signalling which one needs input. [src:CHERNY-TIPS-REPO-2026-08-27]
 
-On top of the local five, he runs a further 5–10 sessions on `claude.ai/code`, handing work back and forth between local and web. [src:CHERNY-TIPS-REPO-2026-08-27]
+On top of the local five, he runs a further 5–10 sessions on `claude.ai/code`, handing local sessions off to web "using `&`", kicking others off manually in Chrome, and using `--teleport` to move back and forth. [src:CHERNY-THREAD-MIRROR-2026-01-02]
+
+He also starts sessions from the Claude iOS app "every morning and throughout the day, and check[s] in on them later" — a detail the compilation omits entirely. [src:CHERNY-THREAD-MIRROR-2026-01-02] [src:SCREENSHOT-AUDIT-2026-08-27]
 
 By March this had grown: he describes having "dozens of Claudes running at all times", with git worktrees as the mechanism. [src:CHERNY-TIPS-REPO-2026-08-27]
 
@@ -84,7 +104,7 @@ The two sources give different bounds for that fan-out: the documentation says "
 
 The documented rationale for parallel *review* is not throughput but independence: "A fresh context improves code review since Claude won't be biased toward code it just wrote." [src:DOCS-BESTPRACTICES-2026-08-27]
 
-Cherny generalises that into a theory he calls test time compute: more tokens on a coding problem gives a better result, and **separate context windows** make it better still — which is why "one agent can cause bugs and another (using the same exact model) can find them". [src:CHERNY-TIPS-REPO-2026-08-27]
+Anthropic generalises that into a theory they call test time compute — the post says "We call this", not "I call this": more tokens on a coding problem gives a better result, and **separate context windows** make it better still — which is why "one agent can cause bugs and another (using the same exact model) can find them". [src:CHERNY-TIPS-REPO-2026-08-27]
 
 He draws the analogy explicitly to human teams, and concludes that "multiple uncorrelated context windows" — in his hedged wording, "tends to be a good approach" — will hold until agents "probably" write bug-free code. [src:CHERNY-TIPS-REPO-2026-08-27]
 
@@ -136,28 +156,51 @@ It also describes the `#` key as the way to have Claude fold an instruction into
 
 And it warns against the mistake it expects readers to make: "A common mistake I see is people dumping content into their CLAUDE.md without taking the time to iterate on that content." [src:CHERNY-OWN-DRAFT-2025-04-13]
 
-## Observed — one place his advice reverses
+## Observed — the permissions question, and a retracted claim
 
-In 2025 he recommended a "Safe yolo mode": `claude --dangerously-skip-permissions` "to bypass all permission checks and let Claude keep going", with the mitigation being to run it in a container without internet access. [src:CHERNY-OWN-DRAFT-2025-04-13]
+> An earlier version of this document reported a reversal here: that he
+> recommended `--dangerously-skip-permissions` in 2025 and prohibited it in
+> 2026. **That was wrong, and it is retracted.** It came from trusting the
+> compilation, which drops the half of the January post that resolves it.
 
-By January 2026 that had inverted to "Don't use `--dangerously-skip-permissions`", replaced by pre-allowing known-safe commands via `/permissions`. [src:CHERNY-PERMISSIONS-REVERSAL-2026-08-27]
+His position is one conditional practice, held consistently for 21 months. In the same January 2026 thread, minutes apart, tip 10 says "I don't use `--dangerously-skip-permissions`. Instead, I use `/permissions` to pre-allow common bash commands that I know are safe in my environment", and tip 12 says "I will also use either `--permission-mode=dontAsk` or `--dangerously-skip-permissions` in a sandbox to avoid permission prompts for the session, so Claude can cook without being blocked on me." [src:CHERNY-PERMISSIONS-CONDITIONAL-2026-08-27]
 
-By April 2026 the gap was filled by auto mode — a model-based classifier that approves safe commands and pauses on risky ones — described as the safer alternative to the flag. [src:CHERNY-PERMISSIONS-REVERSAL-2026-08-27]
+The 2025 draft says the same thing — use the flag, but "in a container without internet access", because the risks are "data loss, your system getting borked, or even data exfiltration". [src:CHERNY-OWN-DRAFT-2025-04-13]
 
-> This is why the corpus is dated throughout. Assembled without dates, these
-> three positions read as one author contradicting himself; with dates, they
-> read as a practice that improved as the tool got a safer mechanism. Treat any
-> undated collection of "Cherny tips" with this in mind.
+So the rule is not "never" and not "always": **not as your default, yes inside a sandbox for long-running work.** The compilation flattened that into a prohibition by omitting one sentence. [src:CHERNY-PERMISSIONS-CONDITIONAL-2026-08-27]
+
+> This is the single most instructive failure in the whole exercise. The
+> retracted claim was well-formed, dated, double-sourced and wrong, because
+> both its sources were the same lossy compilation wearing two hats. A citation
+> that resolves is not the same as a citation that is independent.
+
+## Observed — what he says most recently, and how it changed
+
+The corpus's most recent primary-derived statement is from 2026-05-24, recovered from a mirrored X digest after `x.com` itself proved unreachable. [src:CHERNY-X-2026-05-24]
+
+Asked what his biggest tip is, he answers: "These days my #1 tip is: use auto mode", explaining that "Auto mode means no more permission prompts. It is the key building block for multi-clauding: start a session, then while it runs, work on another session in parallel." [src:CHERNY-X-2026-05-24]
+
+Two days earlier he noted auto mode had reached the Pro plan and gained Sonnet 4.6 support alongside Opus 4.7. [src:CHERNY-X-2026-05-24]
+
+> Note what moved. In January, March and April his headline was verification.
+> By May the headline is auto mode — but read the reason: auto mode is offered
+> as the enabler of *parallelism*, not as a replacement for verification. The
+> two sit in different layers, and this document keeps verification as the
+> spine because that is what every source, including the documentation, treats
+> as the quality lever.
 
 ## Observed — CLAUDE.md is a living artifact, not a config file
 
-The Claude Code team shares a single `CLAUDE.md` for the whole repository, checked into git, with the whole team contributing multiple times a week. [src:CHERNY-TIPS-REPO-2026-08-27]
+His team shares a single `CLAUDE.md` **for the Claude Code repo**, checked into git, with the whole team contributing multiple times a week — and other teams at Anthropic maintain their own, each responsible for keeping theirs current. [src:CHERNY-THREAD-MIRROR-2026-01-02] [src:SCREENSHOT-AUDIT-2026-08-27]
+
+> That second half matters and the compilation dropped it. "One shared
+> CLAUDE.md" is a rule about one repository, not a company-wide single file.
 
 The maintenance loop is the point: whenever Claude does something wrong, add it to `CLAUDE.md` so it does not repeat. [src:CHERNY-TIPS-REPO-2026-08-27]
 
 The team's sharper phrasing is to end every correction with "Update your CLAUDE.md so you don't make that mistake again", and to keep editing until the mistake rate measurably drops. [src:CHERNY-TIPS-REPO-2026-08-27]
 
-Cherny extends the loop into code review: tag `@claude` on a coworker's PR to fold a lesson into `CLAUDE.md` as part of that PR — he calls this his version of compounding engineering. [src:CHERNY-TIPS-REPO-2026-08-27]
+Cherny extends the loop into code review: tag `@claude` on a coworker's PR to fold a lesson into `CLAUDE.md` as part of that PR. He calls it "our version of @danshipper's Compounding Engineering" — the team's application of a concept he credits to Dan Shipper, not his own coinage. [src:CHERNY-PERMISSIONS-CONDITIONAL-2026-08-27] [src:SCREENSHOT-AUDIT-2026-08-27]
 
 The documentation pushes hard the other way, on size: "target under 200 lines per CLAUDE.md file. Longer files consume more context and reduce adherence." [src:DOCS-MEMORY-2026-08-27]
 
@@ -175,7 +218,13 @@ Which is why the documentation is explicit that enforcement is a different mecha
 
 Cherny's stated position is that his setup is "surprisingly vanilla" and that Claude Code works well out of the box, with no one correct way to use it. [src:CHERNY-TIPS-REPO-2026-08-27]
 
-**Slash commands** are for every inner-loop workflow done many times a day; they live in `.claude/commands/`, are checked into git, and save repeated prompting — his example is `/commit-push-pr`. [src:CHERNY-TIPS-REPO-2026-08-27]
+**Slash commands** are for every inner-loop workflow done many times a day; they live in `.claude/commands/`, are checked into git, and save repeated prompting. [src:CHERNY-TIPS-REPO-2026-08-27]
+
+His worked example, which the compilation dropped: he and Claude use `/commit-push-pr` "dozens of times every day", and the command "uses inline bash to pre-compute git status and a few other pieces of info to make the command run quickly and avoid back-and-forth with the model". [src:CHERNY-THREAD-MIRROR-2026-01-02] [src:SCREENSHOT-AUDIT-2026-08-27]
+
+> That second sentence is the transferable part, and it is the part that went
+> missing: a command is faster when it hands the model the state up front
+> instead of making it go and look.
 
 **Subagents** live in `.claude/agents/` and automate common workflows; his named examples are `code-simplifier`, which cleans up after Claude finishes, and `verify-app`, which holds detailed end-to-end testing instructions. [src:CHERNY-TIPS-REPO-2026-08-27]
 
@@ -193,7 +242,9 @@ His other named hook uses are loading context at `SessionStart`, logging every b
 
 **Permissions**: he is explicit that you should *not* use `--dangerously-skip-permissions`, and should instead pre-allow known-safe commands via `/permissions`, checked into the team's `.claude/settings.json`. [src:CHERNY-TIPS-REPO-2026-08-27]
 
-By April this had moved on: auto mode routes permission prompts to a model-based classifier that approves safe commands and pauses on risky ones, which he frames as the safer alternative to skipping permissions — and as what makes running more parallel sessions practical. [src:CHERNY-TIPS-REPO-2026-08-27]
+By April, auto mode had arrived, and he frames it as the safer alternative to skipping permissions and as what makes running more parallel sessions practical. [src:CHERNY-TIPS-REPO-2026-08-27]
+
+The documentation, rather than the compilation, is the source for what the classifier does: it "reviews most actions instead of you and blocks only what looks risky". The compilation's gloss that it will "pause and ask" on risky commands appears in no post. [src:DOCS-BESTPRACTICES-2026-08-27] [src:SCREENSHOT-AUDIT-2026-08-27]
 
 The through-line across all five primitives is that configuration is checked into git and shared with the team, not kept personal. [src:CHERNY-TIPS-REPO-2026-08-27]
 
@@ -223,7 +274,11 @@ The volume claim is specific and self-reported via a contribution graph: 266 con
 
 Those PRs are always squash-merged, and their size distribution was a median of 118 lines, p90 of 498, and p99 of 2,978, across 45,032 lines changed. [src:CHERNY-TIPS-REPO-2026-08-27]
 
-The practice to extract is not the volume but the shape: small, single-purpose PRs, one commit each, which stay reviewable and revertible at any rate of output. [src:CHERNY-TIPS-REPO-2026-08-27]
+What he actually said about those PRs was four words — "141 PRs, always squashed" — offered in reply to someone asking how big his PRs were, not volunteered as advice. Everything the compilation adds about clean history, `git bisect` and keeping PRs small is the compiler's commentary, not his. [src:SCREENSHOT-AUDIT-2026-08-27]
+
+> Reading small-PR discipline out of that distribution is a reasonable
+> inference, and it is *our* inference. It is left here as an inference rather
+> than promoted into something he recommended.
 
 He also reports that Anthropic built its Code Review feature because code output per engineer was "up 200% this year" as of 2026-03-10, i.e. across roughly ten weeks and review became the bottleneck. [src:CHERNY-TIPS-REPO-2026-08-27]
 
@@ -277,10 +332,17 @@ Several tips describe features, settings and model versions as of early 2026; fe
 > documentation uses neither. Anything citing them as present-day guidance is
 > citing a rename that already happened.
 >
-> **He reversed himself, and the reversal is the most useful thing here.** The
-> 2025 draft recommends the exact flag the 2026 tips tell you not to use. Any
-> undated "Cherny tips" collection — and most of them are undated — silently
-> merges those two positions into one incoherent one.
+> **The reversal I thought I had found was not real.** The 2025 draft and the
+> 2026 thread say the same conditional thing; the compilation had dropped the
+> sentence that reconciles them, and I wrote up the artifact as a finding. It
+> took reading 65 screenshots to catch. The lesson is not "check your sources"
+> — it is that two citations drawn from one secondary source are one citation,
+> however different their ids look.
+>
+> **The compilation invents, and I had concluded it only omits.** One
+> spot-check said "understates rather than embellishes"; sixty said it also
+> writes new bullets in Cherny's voice. A single sample can tell you an error
+> exists and still mislead you about its direction.
 
 ## How this repository applies it
 

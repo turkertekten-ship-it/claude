@@ -94,3 +94,19 @@ contents were not reconstructed, summarised, or guessed at.
 - `make test` passed vacuously, running unittest discovery over test scripts that define no `TestCase` subclass. [src:AUDIT-SUBAGENTS-2026-08-27]
 - The fabrication guard crashed rather than reporting when a violation lay outside the repository root, so it failed at the moment it found something. [src:AUDIT-SUBAGENTS-2026-08-27]
 - The document auditor separately confirmed clean what it was asked to attack hardest: the 60-tip count, every PR statistic, both screenshot quotations, and the absence of any invented content under the draft's empty headings. [src:AUDIT-SUBAGENTS-2026-08-27]
+
+## Observed — the tip compilation, fully audited
+
+- All 60 tips were compared against the 65 bundled screenshots of the original posts. Roughly 35 transcribe faithfully; the rest fail in both directions. [src:SCREENSHOT-AUDIT-2026-08-27]
+- The compilation invents. Four bullets in the 2026-03-30 collection appear in no post while reading as Cherny's words, and the entire squash-merge rationale in the 2026-03-25 file is the compiler's commentary on a four-word statement. [src:SCREENSHOT-AUDIT-2026-08-27]
+- It reassigns attribution: "our version of @danshipper's Compounding Engineering" became "Boris's version", "We call this test time compute" became "Boris calls this", and first-person-plural was repeatedly rewritten as third-person about "the team". [src:SCREENSHOT-AUDIT-2026-08-27]
+- It mis-transcribes: the shell aliases `za, zb, zc` were rendered `2a, 2b, 2c`, and the handle `@amorriscode` as `@amorisscode`. [src:SCREENSHOT-AUDIT-2026-08-27]
+- Every numeric claim survived the audit exactly, including all eight PR statistics and the "200% this year" figure. [src:SCREENSHOT-AUDIT-2026-08-27]
+- The claim that his advice on `--dangerously-skip-permissions` reversed between 2025 and 2026 was **wrong and is retracted**. Tips 10 and 12 of the same January 2026 thread state the conditional practice in full: not as a default, yes inside a sandbox for long-running work — which is what the 2025 draft also says. [src:CHERNY-PERMISSIONS-CONDITIONAL-2026-08-27]
+- The error arose because two apparently independent citations both resolved to the same lossy compilation. [src:SCREENSHOT-AUDIT-2026-08-27]
+
+## Observed — material recovered past the egress block
+
+- The 2026-05-24 post recorded as unreachable was recovered from a mirrored X digest on GitHub: he states "These days my #1 tip is: use auto mode", framing it as "the key building block for multi-clauding". [src:CHERNY-X-2026-05-24]
+- An independent transcription of the 2026-01-02 thread, carrying all 23 posts with per-post timestamps, was recovered the same way and preserves text the compilation drops. [src:CHERNY-THREAD-MIRROR-2026-01-02]
+- Both recoveries came through `raw.githubusercontent.com`, which is reachable while every host actually serving the posts is not. Third-party mirrors on GitHub are the only route to this material from this container. [src:CHERNY-X-2026-05-24] [src:CHERNY-THREAD-MIRROR-2026-01-02]

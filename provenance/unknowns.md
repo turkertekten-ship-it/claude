@@ -124,22 +124,20 @@ title, so a wrong identification is visible immediately rather than buried.
 
 ---
 
-### U-8 — Fidelity of the tip compilation to Cherny's original posts
+### U-8 — Fidelity of the tip compilation to Cherny's original posts — **CLOSED**
 
-**Unknown:** whether all 60 transcribed tips faithfully represent what Cherny
-actually posted.
+**Resolved 2026-08-27.** All 60 tips were checked against the 65 screenshots of
+the original posts bundled in the compilation. The finding moved to
+`observations.md`. Summary: roughly 35 transcribe faithfully; the remainder
+fail in both directions — meaning-changing omissions, four invented bullets
+written in Cherny's voice, reassigned attributions, and two mis-transcriptions.
+Every numeric claim held. [src:SCREENSHOT-AUDIT-2026-08-27]
 
-**Why:** `x.com` is unreachable from this container
-[src:EGRESS-BLOCKED-2026-08-27], so the linked originals could not be opened.
-One tip of 60 was checked against a screenshot bundled in the compilation and
-was faithful but abridged [src:CHERNY-TWEET13-SCREENSHOT-2026-08-27]. The
-other 59 are unchecked.
-
-**Resolves when:** the originals become reachable, or the remaining bundled
-screenshots are read and compared.
-
-**Do not:** describe the corpus as "Cherny's words". It is a third-party
-transcription of them, and the corpus labels it that way throughout.
+**What this closed does not cover:** the screenshots themselves are images
+supplied by the same compiler, so they are not independent of him. They agree
+with a separately-sourced transcription of the January thread wherever both
+were checked [src:CHERNY-THREAD-MIRROR-2026-01-02], which is the best
+corroboration available while `x.com` is blocked.
 
 ---
 
@@ -161,21 +159,23 @@ decided.
 
 ---
 
-### U-10 — Cherny material published after 2026-04-16
+### U-10 — Cherny material published after 2026-04-16 — **PARTLY CLOSED**
 
-**Unknown:** what he has said since the last collection in the compilation.
-Two specific leads surfaced and neither could be opened: an X post dated
-2026-05-24 referenced as covering auto mode and "multi-clauding", and a
-Threads post of 2025-12-27 cited second-hand as claiming "259 PRs in 30 days".
+**Resolved in part 2026-08-27.** One of the two leads was recovered: the
+2026-05-24 post is in hand, via a mirrored X digest on GitHub after `x.com`
+itself stayed blocked. Its content — that his "#1 tip" is now auto mode, as the
+enabler of multi-clauding — is recorded in `observations.md`.
+[src:CHERNY-X-2026-05-24]
 
-**Why:** `x.com` and `threads.com` are both refused by the egress proxy
-[src:EGRESS-BLOCKED-2026-08-27], and the sweep confirmed the same for every
-mirror it tried [src:SWEEP-COVERAGE-2026-08-27]. His own About page lists
-Threads and X as two of his four channels [src:CHERNY-BLOG-REPO-2026-08-27],
-so the material most likely to be current is exactly the material out of reach.
+**Still unknown:** the Threads post of 2025-12-27 cited second-hand as claiming
+"259 PRs in 30 days" was not recovered; `threads.com` is blocked and no mirror
+of it was found. Anything he has published after 2026-05-24 is also unchecked —
+the digest that supplied the May post covers a single day.
 
-**Resolves when:** those hosts become reachable, or an export of the posts is
+**Why it stays open:** the recovery route was a third-party scrape, not the
+source. It carries structured metadata (author id, timestamps, engagement
+counts, a quoted-tweet object) consistent with a real capture, but it has not
+been checked against x.com and cannot be from here.
+
+**Resolves when:** `x.com` or `threads.com` become reachable, or an export is
 placed in `archive/`.
-
-**Do not:** treat the corpus as current. It ends on 2026-04-16, which is over
-four months before it was assembled.
