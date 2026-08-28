@@ -1,0 +1,108 @@
+name: ci
+
+# The whole point of ADR 0001 is that this needs no install step: standard
+# library only, so CI is a checkout, a Python, and PYTHONPATH=src. If a job here
+# ever needs `pip install`, that is the signal a dependency crept into the core.
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 3.11 is the floor declared in pyproject; 3.12 catches the deprecations
+        # that would otherwise land as a surprise on somebody's laptop.
+        python-version: ['3.11', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Assert the core has no third-party imports
+        run: |
+          # Cheap and load-bearing: the zero-dependency promise is what makes the
+          # nightly loop safe to schedule, and it is easy to break by accident.
+          python - <<'PY'
+          import ast, pathlib, sys
+
+          STDLIB = set(sys.stdlib_module_names)
+          offenders = []
+          for path in pathlib.Path("src").rglob("*.py"):
+              tree = ast.parse(path.read_text("utf-8"), filename=str(path))
+              for node in ast.walk(tree):
+                  if isinstance(node, ast.Import):
+                      names = [a.name for a in node.names]
+                  elif isinstance(node, ast.ImportFrom):
+                      names = [node.module or ""] if node.level == 0 else []
+                  else:
+                      continue
+                  for name in names:
+                      root = name.split(".")[0]
+                      if root and root not in STDLIB and root != "oodarag":
+                          offenders.append(f"{path}:{node.lineno}: {name}")
+          if offenders:
+              print("third-party imports in the core:")
+              print("\n".join(offenders))
+              raise SystemExit(1)
+          print("core is import-clean")
+          PY
+
+      - name: Compile every module
+        run: make lint
+
+      - name: Run the test suite
+        run: make test
+
+  reflect-smoke:
+    # The unit tests exercise the loop's stages; this proves the whole cycle
+    # still runs against a real checkout, which is the thing a scheduled job
+    # actually does. It is a dry run, so it cannot change anything.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The loop reads git history to date findings and checks that the tree
+          # is clean; a shallow clone makes both of those lie.
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run one cycle, dry
+        env:
+          PYTHONPATH: src
+        run: python -m oodarag.cli reflect run --since all --quiet
+
+      - name: Every rule must load
+        env:
+          PYTHONPATH: src
+        run: |
+          python - <<'PY'
+          import oodarag.reflect.detect as detect
+
+          errors = detect.load_errors()
+          if errors:
+              # A rule module that fails to import costs that rule silently: the
+              # loop degrades rather than dying, which is right at 22:30 and
+              # wrong in CI.
+              for module, err in sorted(errors.items()):
+                  print(f"rule module failed to load: {module}: {err}")
+              raise SystemExit(1)
+          print(f"{len(detect.registry())} rules loaded")
+          PY
