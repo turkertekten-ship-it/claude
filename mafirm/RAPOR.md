@@ -34,7 +34,7 @@ Beş cümlede sebebi:
    Denetçiyi ezmek, denetçinin yapacağı bütün kontrolleri devre dışı bırakır
    ve uygulayıcı korumasız bir sisteme **yeşil** bir denetimle bakar.
 
-**Yamalı hâlde sistem çalışıyor:** otuz üç çalıştırılabilir takım — **290
+**Yamalı hâlde sistem çalışıyor:** otuz dört çalıştırılabilir takım — **295
 vaka, 15 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15, birimler arası tutarlılık takımının
 kendi mutasyon yakalaması 10/10. Ama **üç mevzuat bulgusu ile kitabın kendi içindeki bir çelişki açık kalır**
@@ -1662,6 +1662,47 @@ farktır.
 
 ---
 
+## Yedi buçuk artı yirmi sekiz · "Engelleyici değil", "doğrulanmış" demek değildir
+
+Yirmi sekizinci tur, çalıştığı **kayıtlı** olan bir kanalın üç ENGELLEYİCİ
+bulgu için yirmi yedi tur kullanılmadığını buldu ve AJ-02 bunu artık her
+koşumda soruyor. **Ama AJ-02 yalnızca ENGELLEYİCİ satırlara bakıyordu.**
+
+Kayıtta dokuz bulgu daha vardı ve hepsi *"hayır"* — engelleyici değil — diye
+işaretliydi. Engelleyici olmamak, denetimi kırmızıya çevirmediğini söyler;
+**doğrulanmış olduğunu söylemez.** Raporun içinde duran her açık iddia,
+okuyucunun güveneceği bir iddiadır.
+
+**Dördü bu turda doğrulandı, üçü yetkili kaynağından okundu:**
+
+| Bulgu | Doğrulama |
+|---|---|
+| **G-01** | courtlistener AGPL — deponun kendi README'si: *"…copyright Free Law Project under the Affero GPL."* |
+| **G-02** | *"This repository was archived by the owner on **Aug 5, 2024**."* — errata'daki tarih **birebir** doğru |
+| **G-03** | kod MIT, **veri CC BY-NC 4.0** — ticari kullanım **açıkça yasak** |
+| **I-04** | m.16 alt sınırı **302.484,86 TL** (2026/1 sayılı Tebliğ; %25,49 yeniden değerleme) — errata'daki rakam **birebir** doğru |
+
+**G-03 doğrulamayla ağırlaştı.** Errata *"ticari pratikte lisans sorusu
+doğurur"* diyordu. Depo *"Data files produced by OpenSanctions are licensed
+under CC BY-NC 4.0"* diyor: bu bir **soru değil, yasak**. Kitap bu aracı
+§13.3'te **ticari bir hukuk pratiği** için öneriyor.
+
+### Bir bulguyu kapatmak, kanıtın TÜRÜNE bakmayı gerektirir
+
+G-01..G-03 **depo olgusudur**; yetkili kaynağı deponun kendisidir, erişildi,
+okundu — **kapatılabilir**. I-01..I-03 **hukuk metnidir**; yetkili kaynağı
+birincil mevzuattır, engellidir, ve düzeltmesi §9 uyarınca insana aittir —
+ikincil kaynakla ne kadar güçlenirse güçlensin **kapatılamaz**. I-04 ise
+doğrulandı ama rakamı dosyaya yazmak bir mevzuat katmanı değişikliğidir;
+bulgu bu yüzden silinmedi.
+
+AK-03 bir depo olgusunun **deposundan** doğrulanmasını, AK-04 bir hukuk
+bulgusunun ikincil kaynakla **kapatılmamasını** ölçüyor. Mutasyonda I-02'yi
+"DOĞRULANDI" yapmak AK-04'ü kırmızıya çeviriyor — yani kanıtın türünü
+karıştırmak artık sessiz kalamıyor.
+
+---
+
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
 
 | Bölüm | Beklenen | Gerçek | Sebep |
@@ -1773,6 +1814,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | AH · cevabın güncelliği | *dört ağır bulgu cevapta yoktu* | **temiz** — cevap güncellendi, eşleme beyanlı |
 | AI · koltuk dayanakları | *hiç doğrulanmamıştı* | **temiz** — altı eser doğrulandı, kayda bağlandı |
 | AJ · çalışan kanalın kullanımı | *kanal 27 tur kullanılmadı* | **temiz** — üç bulgunun kanıtı yükseltildi |
+| AK · bulgu statüsü | *dokuz bulgu doğrulanmamıştı* | **temiz** — dördü doğrulandı, üçü yetkili kaynağından |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -1830,8 +1872,8 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # 33 çalıştırılabilir takım:
-                                  #   290 vaka + 15 mutasyon (D)
+./sinama/hepsi.sh                 # 34 çalıştırılabilir takım:
+                                  #   295 vaka + 15 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -1905,9 +1947,10 @@ Dokuz takım, 96 vaka:
 | AH | **Cevabın güncelliği** — ilk ekran en tehlikeliyi söylüyor mu | §4, KITAP-ERRATA |
 | AI | **Koltuk dayanakları** — gerçek kişilerin ağzına konan mercek neye dayanıyor | §7, §1 |
 | AJ | **Çalışan kanalın kullanımı** — açık bulgu neyle ilerletilebilirdi | §2, §11 |
+| AK | **Bulgu statüsü ve kanıt türü** — neyi neyle kapatabilirsin | §1, §9, §13 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**290 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**295 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)

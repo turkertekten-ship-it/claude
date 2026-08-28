@@ -92,6 +92,8 @@ python3 "$S/ks_ai_koltuk_dayanak.py"; topla "AI · koltuk dayanakları" $?
 echo
 python3 "$S/ks_aj_kanal.py"; topla "AJ · çalışan kanalın kullanımı" $?
 echo
+python3 "$S/ks_ak_bulgu_statu.py"; topla "AK · bulgu statüsü ve kanıt türü" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"
