@@ -258,6 +258,35 @@ verified lives in [unknowns.md](unknowns.md), not here.
 > both halves an hour apart. Something that had not read them being written was
 > what caught it.
 
+## Observed — an adversarial review, and a correction to what was published
+
+- A five-dimension review with an independent refutation pass produced 15 candidate findings; 8 were verified and 8 confirmed. Nothing was refuted, which is a caution about the method rather than a compliment to it, so every finding was re-derived by hand before being acted on. [src:ADVERSARIAL-REVIEW-2026-08-28]
+- **Two holes in the provenance guard itself.** A claim carrying a malformed `[src:` satisfied the sourcing check, because the check tested for the substring while the regex that resolves ids never matched it — so an invented statistic passed the whole guard and it exited 0. And a `### ` subheading under `## Observed` ended the enforced region, disabling the check for everything below it; an indented fence did the same file-wide. [src:ADVERSARIAL-REVIEW-2026-08-28]
+- **The stratified analysis had never run.** `RunResult.to_dict()` never wrote the `cases` key the stratum lookup read, so all 40 cases were labelled tuned and the held-out block never printed. [src:STRATIFICATION-NEVER-RAN-2026-08-28]
+- Repaired on the same run data: ALL CASES unchanged at −0.0500 [−0.1550, +0.0256]; **tuned, 26 cases: −0.0256 [−0.1000, +0.0400], sign test p = 1.0000**; **heldout, 14 cases: −0.0952 [−0.2667, +0.0000], 3 better, 0 worse, 11 tied, sign test p = 0.2500**. Both strata span zero. [src:STRATIFICATION-NEVER-RAN-2026-08-28]
+- `compare()` pooled runs for blind judging without consulting `CaseRun.errored` — the one path that never did — so the earlier claim that errored runs are excluded was true of grading and false of judging. [src:ADVERSARIAL-REVIEW-2026-08-28]
+- `bradley_terry` ranked an undefeated 10-0 player third, with strength 3.67e-09, because absolute-scale smoothing was combined with per-iteration renormalisation. [src:ADVERSARIAL-REVIEW-2026-08-28]
+- `contains_any` given a scalar `values: hello` iterated it character by character and reported "matched 5/5" against unrelated English text. [src:ADVERSARIAL-REVIEW-2026-08-28]
+
+> Reading, not a claim: the correction that matters is the stratification. The
+> headline never moved, but a block headed "stratum: tuned (40 cases)" was
+> printed and reported as though the pre-registered held-out check had run,
+> and it had not. The signal was there to be read — that block reproduced the
+> ALL CASES numbers to the digit — and reproducing them exactly is what a
+> stratum containing every case does. It was noticed and not pursued.
+>
+> The held-out numbers now available are the ones the pre-registration wanted
+> and they are still null: p = 0.25 on fourteen cases, an interval whose upper
+> bound touches zero only because a percentile bootstrap over discrete data
+> has an atom there. The direction is cleaner on the held-out set than the
+> tuned one, which is the opposite of the overfitting pattern found in an
+> earlier run, and at fourteen cases it is not something to build on.
+>
+> Two of the eight defects were in the fabrication guard, and both made it
+> exit 0 while missing an invented claim. A guard that fails loudly is a bug;
+> a guard that certifies wrongly is the thing it was built to prevent, wearing
+> its own uniform.
+
 ## Conclusion
 
 The honest answer to "look through all my previous claude chats" is bounded:

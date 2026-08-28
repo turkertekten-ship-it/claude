@@ -160,6 +160,12 @@ committed *before* the run and executed unmodified afterwards.
 - **All 16 failing runs were audited by hand.** 13 gradings upheld, 3
   overturned — and two of the three favoured the *plain* arm, so the audit
   moved the estimate toward zero. Corrected: −0.042, [−0.132, +0.026].
+- **The stratified half of that analysis had not actually run**, and was
+  reported as though it had. A later review found the run file never carried
+  the key the stratum lookup read, so all 40 cases were labelled "tuned" and
+  the held-out block never printed. Repaired on the same data: tuned (26
+  cases) −0.026, [−0.100, +0.040], p = 1.0; held-out (14 cases) −0.095,
+  [−0.267, +0.000], p = 0.25. Both span zero; the headline did not move.
 
 Seven runs, seven negative point estimates, seven intervals containing zero.
 That is not seven hints of an effect; it is one consistent finding that any

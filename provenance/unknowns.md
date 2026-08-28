@@ -157,6 +157,11 @@ family-clustered analysis before the run. The interval spans zero
 audited by hand [src:POWERED-FAB-AUDIT-2026-08-28]. Moved to
 `observations.md` under "the adequately powered test, pre-registered".
 
+The stratified half of that analysis was reported before it had actually run;
+repaired, both strata span zero — tuned −0.0256 [−0.1000, +0.0400] and
+held-out −0.0952 [−0.2667, +0.0000], p = 0.25 on fourteen cases.
+[src:STRATIFICATION-NEVER-RAN-2026-08-28]
+
 **Still unknown:** whether the same holds on a second model family. Every run
 in this repository used one. A prompt written against one model's failure modes
 is exactly the thing that might not transfer, and nothing here tests that.

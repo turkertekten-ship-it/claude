@@ -114,6 +114,12 @@ auditing all 16 failures moved it to −0.042, [−0.132, +0.026] — toward zer
 because two of the three overturned gradings favoured the plain arm.
 [src:POWERED-FAB-2026-08-28] [src:POWERED-FAB-AUDIT-2026-08-28]
 
+The stratified half of that analysis had silently never run — the run file
+never carried the key the stratum lookup read. Repaired: tuned (26 cases)
+−0.0256 [−0.1000, +0.0400], p = 1.0; held-out (14 cases) −0.0952
+[−0.2667, +0.0000], p = 0.25. Both span zero, and the headline is unchanged.
+[src:STRATIFICATION-NEVER-RAN-2026-08-28]
+
 So the state is now: answered in the negative across seven runs, one of them
 adequately powered for the effect size the earlier six suggested. Any real
 effect is under roughly five percentage points.
