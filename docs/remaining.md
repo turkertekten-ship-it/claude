@@ -6,15 +6,28 @@ what would close each, because "not done" without that is just a complaint.
 
 ---
 
-## 1. Eight capabilities need a credential this container does not have
+## 1. Four capabilities need a credential this container does not have
 
 **State:** implemented, wire-tested against a conforming local server, blocked
 on authentication to Anthropic's endpoint.
 
-`stop_sequences`, an exact `max_tokens`, `count_tokens` before sending, batch
-submission at half price, custom tool definitions with your own schema, prompt
-caching, image and document input, and `temperature`/`top_p`/`top_k` on models
-old enough to accept them.
+`stop_sequences`, an exact `max_tokens`, batch submission at half price, and
+`temperature`/`top_p`/`top_k` on models old enough to accept them.
+
+This list used to have eight items. Four came off it without a credential —
+`count_tokens`, prompt caching, image input and custom tool definitions — and
+they are not on it because the *endpoint* for each is still unreachable while
+the *capability* is not. `usage.input_tokens` counts tokens, the CLI caches a
+repeated prefix by itself, `Read` passes image bytes to the model, and MCP
+contributes tools with your own schema. All four are proved live by
+`tools/parity_check.py`. [src:TOKEN-COUNT-DIFFERENTIAL-2026-08-28]
+[src:CLI-CAPABILITY-RECOVERY-2026-08-28]
+
+What remains genuinely API-only is the *request-body* form of each: placing a
+`cache_control` breakpoint where you choose, an image as a content block,
+`tools` in the body. Those rows are still UNREACHABLE and say so, and they name
+the endpoint rather than standing in for the capability — which is exactly the
+confusion that kept the other four on this list for a day.
 
 Every documented credential path was checked and all are closed:
 `ANTHROPIC_API_KEY` unset, no `ant` CLI, no `~/.config/anthropic`, no
@@ -26,7 +39,7 @@ environment advertises resolves to a pipe the CLI consumed at startup.
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...
 python3 -m workbench doctor                       # should now report the API backend usable
-python3 tools/parity_check.py                     # the eight rows move off UNREACHABLE
+python3 tools/parity_check.py                     # the remaining rows move off UNREACHABLE
 python3 -m workbench run suites/mine.yaml --backend anthropic-api
 ```
 
@@ -124,8 +137,10 @@ caught.
 > 573 tokens. [src:TOKEN-COUNT-DIFFERENTIAL-2026-08-28]
 > [src:OPERATING-PROMPT-TOKENS-2026-08-28] Asking the same question of the rest
 > moved prompt caching, image input and custom tool definitions too: all three
-> work through the CLI, none needs a key, and the matrix now reads 24 passed,
-> 0 failed. [src:CLI-CAPABILITY-RECOVERY-2026-08-28]
+> work through the CLI, none needs a key, and the matrix now reads 26 passed,
+> 0 failed, 9 unreachable — three rows added for playground fields it had no
+> row for at all. [src:CLI-CAPABILITY-RECOVERY-2026-08-28]
+> [src:CLI-TRANSPORT-ROWS-2026-08-28]
 >
 > The lesson is not about tokens: an item can sit on a blocked list because the
 > sentence justifying it is true about the thing it names and false about the

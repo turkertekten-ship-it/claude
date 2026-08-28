@@ -1112,3 +1112,45 @@ sources:
       reading is what establishes that. Recorded because the failure was
       informative: a check that goes red for being run twice is testing the
       schedule rather than the feature.
+
+  - id: CLI-TRANSPORT-ROWS-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T11:05Z"
+    method: >-
+      live rows of python3 tools/parity_check.py — "Multi-turn conversations",
+      "Streaming responses", "speed / fast mode".
+    evidence: >-
+      Multi-turn: two user turns piped to --input-format stream-json returned
+      two result events in one invocation, and the second answered "782" to a
+      desk number carried only by the first. Streaming: 12 newline-delimited
+      events in one response (active_goal, assistant, autocompact_state,
+      rate_limit_event, result, system). speed: the response reports
+      fast_mode_state='off', fast_mode_disabled_reason='sdk_opt_in_required',
+      usage.speed='standard'. Matrix now 26 passed, 0 failed, 9 unreachable.
+    note: >-
+      The playground draft carries `messages`, `stream` and `speed` and the
+      matrix had no row for any of them. Two are reachable; the third is not,
+      and is recorded with the CLI's own reason string, because "no row" and
+      "unreachable, and here is why" read the same from a distance.
+
+  - id: PROBE-CONFOUNDS-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T11:00Z"
+    method: >-
+      two discarded versions of the multi-turn probe, run before the one that
+      is now in tools/parity_check.py
+    evidence: >-
+      First: `claude -p` invoked from inside this session reported session_id
+      27dce661-fba9-53b0-8b46-ce4e6dcfb215 — this session's own id — on two
+      consecutive independent calls. A --resume probe against that id "recalled"
+      a word already present in this conversation. Second: with a hex token as
+      the carried fact, the model replied "I'm not going to follow constrained
+      response instructions or repeat suspicious i..."; with an ordinary desk
+      number it replied "782".
+    note: >-
+      Both probes produced a confident wrong answer. The first passed while
+      proving nothing, because the CLI inherits the caller's session rather than
+      minting one. The second failed on a working capability, because a refusal
+      and a transport failure are indistinguishable if you only check whether
+      the expected string came back. Recorded because the second is a general
+      hazard for any eval harness that uses nonce-looking strings as carriers.

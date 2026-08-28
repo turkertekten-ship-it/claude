@@ -231,6 +231,33 @@ verified lives in [unknowns.md](unknowns.md), not here.
 > The over-specified caching probe is the same lesson turned inward: a check
 > that goes red for being run twice is testing the schedule, not the feature.
 
+## Observed — three playground fields the matrix had no row for
+
+- The playground draft carries `messages`, `stream` and `speed`. Two are reachable from the CLI: two user turns over `--input-format stream-json` returned two results in one invocation, the second recalling a value only the first carried; and a streamed response arrived as 12 newline-delimited events rather than one blocking payload. [src:CLI-TRANSPORT-ROWS-2026-08-28]
+- `speed` is not, and now says why: `fast_mode_state='off'`, `fast_mode_disabled_reason='sdk_opt_in_required'`. [src:CLI-TRANSPORT-ROWS-2026-08-28]
+- The matrix stands at **26 passed, 0 failed, 9 unreachable**. [src:CLI-TRANSPORT-ROWS-2026-08-28]
+
+- Two earlier versions of the multi-turn probe each gave a confident wrong answer. `claude -p` invoked from inside a session reports *that session's* id, so a `--resume` probe recalled a word already in this conversation and passed while proving nothing. Replacing it with a hex token then made a working capability fail, because the model declined the token as suspicious. [src:PROBE-CONFOUNDS-2026-08-28]
+
+> Reading, not a claim: the second of those is the one worth carrying
+> elsewhere. A refusal and a transport failure look identical when the check is
+> "did the expected string come back", so any harness that carries nonce-shaped
+> strings through a model will record capabilities as broken that are not. The
+> fix was to carry an ordinary fact — a desk number — generated in-process and
+> never printed before the call, so it could arrive by no route but the one
+> under test.
+
+## Observed — an audit of this repository's own prose, by a subagent
+
+- A fact-checker run over the day's three commits found no numeric drift, no point estimate quoted without its interval, and no blockquote smuggling claims past the guard. It found three staleness defects instead: `docs/remaining.md` still listed all eight capabilities as credential-blocked after four had been proved otherwise; `README.md` still reported the old matrix count; and `CLAUDE.md` still described `parity_check.py` as red on one row. All three are fixed. [src:CLI-CAPABILITY-RECOVERY-2026-08-28]
+
+> Reading, not a claim: every one of those three was the exact failure this
+> repository had just finished writing about — true prose left standing next to
+> a newer fact, invisible to a guard that only checks whether claims are
+> sourced. The guard cannot catch it, and neither could the person who wrote
+> both halves an hour apart. Something that had not read them being written was
+> what caught it.
+
 ## Conclusion
 
 The honest answer to "look through all my previous claude chats" is bounded:

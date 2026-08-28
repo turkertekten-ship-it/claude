@@ -458,6 +458,125 @@ def c_mcp_tools(backend) -> Result:
                   f"expected {expected} in the answer, got {answer.strip()[:120]!r}")
 
 
+@check("Multi-turn conversations")
+def c_multiturn(backend) -> Result:
+    """The playground's `messages` array: does context survive between turns?
+
+    Two earlier versions of this probe were wrong in different ways, and both
+    are worth keeping in view because each produced a confident wrong answer.
+
+    The first used `--resume` with the session id the CLI reported. Every
+    `claude -p` invocation from inside a session reports that session's OWN id,
+    so the probe resumed this conversation and "recalled" a word that was
+    already in it. It passed, and proved nothing.
+
+    The second generated a hex nonce. The model declined it as suspicious, and a
+    refusal is indistinguishable from a transport failure if you only check
+    whether the answer came back. So the fact carried here is an ordinary one,
+    generated in-process and never printed before the call: it cannot arrive by
+    any route but turn one.
+    """
+    import random
+    import subprocess
+
+    floor, desk = random.randint(11, 89), random.randint(101, 999)
+    turns = "\n".join(json.dumps({
+        "type": "user",
+        "message": {"role": "user", "content": [{"type": "text", "text": t}]}})
+        for t in (f"I work on floor {floor}, at desk {desk}. Reply with only: noted.",
+                  "Which desk number did I say I work at? Reply with only the number."))
+    try:
+        proc = subprocess.run(
+            ["claude", "-p", "--input-format", "stream-json", "--output-format",
+             "stream-json", "--verbose", "--model", "claude-haiku-4-5",
+             "--tools", "", "--setting-sources", ""],
+            input=turns, capture_output=True, text=True, timeout=300)
+    except Exception as exc:  # noqa: BLE001
+        return Result("Multi-turn conversations", UNREACHABLE, str(exc)[:200])
+
+    results = []
+    for line in proc.stdout.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            d = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if d.get("type") == "result":
+            results.append(d.get("result", ""))
+
+    ok = len(results) == 2 and str(desk) in results[1]
+    return Result("Multi-turn conversations", PASS if ok else FAIL,
+                  f"two user turns in one invocation over --input-format "
+                  f"stream-json, and the second recalled a value only the first "
+                  f"carried ({desk}). Prior context reaches the model without the "
+                  f"API's messages array"
+                  if ok else
+                  f"{len(results)} result turn(s); second was "
+                  f"{results[1][:80]!r} and did not carry {desk}"
+                  if len(results) > 1 else f"{len(results)} result turn(s)")
+
+
+@check("Streaming responses")
+def c_streaming(backend) -> Result:
+    """Incremental events, which is what the playground's `stream` field buys."""
+    import subprocess
+    try:
+        proc = subprocess.run(
+            ["claude", "-p", "count to three", "--model", "claude-haiku-4-5",
+             "--output-format", "stream-json", "--verbose",
+             "--tools", "", "--setting-sources", ""],
+            capture_output=True, text=True, timeout=180)
+    except Exception as exc:  # noqa: BLE001
+        return Result("Streaming responses", UNREACHABLE, str(exc)[:200])
+
+    kinds = []
+    for line in proc.stdout.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            kinds.append(json.loads(line).get("type"))
+        except json.JSONDecodeError:
+            pass
+    ok = len(kinds) > 1 and "result" in kinds and "assistant" in kinds
+    return Result("Streaming responses", PASS if ok else FAIL,
+                  f"{len(kinds)} newline-delimited events in one response "
+                  f"({', '.join(sorted(set(k for k in kinds if k)))}), not a single "
+                  f"blocking payload"
+                  if ok else f"no incremental events: {kinds}")
+
+
+@check("speed / fast mode")
+def c_speed(backend) -> Result:
+    """The playground carries a `speed` field. Headless CLI will not set it.
+
+    Recorded with the CLI's own reason string rather than left off the matrix,
+    because "no row" and "unreachable, and here is exactly why" read the same
+    from a distance and are not the same thing.
+    """
+    import subprocess
+    try:
+        proc = subprocess.run(
+            ["claude", "-p", "hi", "--model", "claude-haiku-4-5",
+             "--output-format", "json", "--tools", "", "--setting-sources", ""],
+            capture_output=True, text=True, timeout=180)
+        payload = json.loads(proc.stdout)
+    except Exception as exc:  # noqa: BLE001
+        return Result("speed / fast mode", UNREACHABLE, str(exc)[:200])
+
+    state = payload.get("fast_mode_state")
+    reason = payload.get("fast_mode_disabled_reason")
+    speed = (payload.get("usage") or {}).get("speed")
+    return Result("speed / fast mode", UNREACHABLE,
+                  f"the response reports fast_mode_state={state!r} with "
+                  f"fast_mode_disabled_reason={reason!r} and usage.speed={speed!r}. "
+                  f"No CLI flag sets it; the reason names an SDK opt-in this "
+                  f"harness does not go through. Unreachable with a stated cause, "
+                  f"not merely absent")
+
+
 @check("Direct Messages API access", live=False)
 def c_api_access(backend) -> Result:
     """Checked positively, not inferred from an unset variable."""

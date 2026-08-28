@@ -39,13 +39,13 @@ bash tests/run_all.sh        # verifier + every test suite
 ## What is not done
 
 Three things, with exactly what would close each:
-[`docs/remaining.md`](docs/remaining.md). Short version — eight capabilities are
+[`docs/remaining.md`](docs/remaining.md). Short version — four capabilities are
 built and wire-tested but need an `ANTHROPIC_API_KEY` this container does not
-have; the Console Workbench was sunset on 2026-08-17 so parity with its UI is
+have (it was eight until four of them turned out never to have been blocked);
+the Console Workbench was sunset on 2026-08-17 so parity with its UI is
 impossible for anyone; and the operating prompt is not shown to reduce
 fabrication, across seven runs including one built specifically to have the
-power the earlier six lacked. Four capabilities previously on that blocked list
-turned out never to have been blocked — see below.
+power the earlier six lacked.
 
 ## The workbench
 
@@ -68,7 +68,7 @@ python3 tools/count_tokens.py --selfcheck       # prove the counter, then use it
 `parity_check.py` is the part worth pointing at. `docs/parity.md` is a table of
 claims, and a table is not evidence — so this exercises each capability against
 the live backend and reports PASS, FAIL, or UNREACHABLE with the reason. It
-currently records **20 passed, 0 failed, 8 unreachable**.
+currently records **26 passed, 0 failed, 9 unreachable**.
 
 Its most useful result so far was a wrong one it later caught. For several
 commits it recorded `CLAUDE_CODE_MAX_OUTPUT_TOKENS` as a broken platform
