@@ -176,6 +176,23 @@ def check_hooks_preserve_status(root: Path = REPO) -> list[str]:
     return out
 
 
+def check_named_tests_exist(root: Path = REPO) -> list[str]:
+    """A document naming the test that enforces a property must name a real one.
+
+    docs/prompting.md tells a rule-writer which test holds each property. If the
+    test is renamed or removed, the document keeps promising enforcement that is
+    no longer there - the same shape as a measurement that has stopped
+    reproducing.
+    """
+    out = []
+    sources = " ".join(p.read_text() for p in sorted((root / "tests").glob("test_*.py")))
+    for doc in sorted((root / "docs").glob("*.md")):
+        for name in set(re.findall(r"`(test_\w+)`", doc.read_text())):
+            if f"def {name}(" not in sources:
+                out.append(f"{doc.name} names {name}, which no test file defines")
+    return out
+
+
 CHECKS = {
     "tests are run": check_tests_are_run,
     "tools are documented": check_tools_are_documented,
@@ -184,6 +201,7 @@ CHECKS = {
     "rules are mapped": check_rules_are_mapped,
     "installed tools have their imports": check_installed_tools_have_their_imports,
     "hooks preserve exit status": check_hooks_preserve_status,
+    "named tests exist": check_named_tests_exist,
 }
 
 

@@ -243,6 +243,28 @@ the model judge found by reading [src:CHECK-OUTPUT-TRIAL-2026-08-27]. That is
 the whole argument for it: the constraint was written down, and until now
 nothing counted it.
 
+## If you add a rule
+
+Four properties hold across the whole rule set, each because breaking one of
+them was a real defect here. A new rule must not break them, and each is a test
+rather than an intention:
+
+| Property | Why it exists | Test |
+|---|---|---|
+| Structure earns nothing | Compiling a prompt into headings raised its score 24 points with no content added — the tool paying for the ceremony its own standard argues against | `test_structure_alone_never_raises_a_score` |
+| Filling a gap never lowers the score | Otherwise the tool punishes doing what it just asked for | `test_filling_a_gap_never_lowers_the_score` |
+| A slot needs content, not a label | `## ACCEPTANCE TEST` over an empty section is not an acceptance test; a label with a line under it is | `test_line_breaks_do_not_hide_a_slot` |
+| A statement of fact is not a criterion | "The suite currently passes" satisfied the acceptance slot, so the rule silently never fired on any prompt with decent context | `test_a_statement_of_fact_is_not_an_acceptance_test` |
+
+Two further habits, learned the hard way rather than derived:
+
+- **Every rule must be watched rejecting something.** `tests/test_prompt_forge.py`
+  fails if a declared hazard has no case, which is how three rules that had
+  quietly stopped firing were found.
+- **A rule wrong about a real file is a bug in the rule.** Five detector bugs
+  surfaced by pointing the linter at this repository's own prompts. None was
+  fixed by exempting a file.
+
 ## What the linter cannot check
 
 Stated plainly, because a guard whose limits are unstated gets trusted past

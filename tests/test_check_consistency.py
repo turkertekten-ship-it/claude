@@ -126,6 +126,20 @@ def main() -> int:
         check("unparseable settings are reported",
               cc.check_hooks_preserve_status(root), cc.check_hooks_preserve_status(root))
 
+    print("\na document naming a test must name a real one")
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "docs").mkdir(parents=True)
+        (root / "tests").mkdir()
+        (root / "tests" / "test_x.py").write_text("def test_real_property():\n    pass\n")
+        (root / "docs" / "d.md").write_text("held by `test_real_property`.\n")
+        check("a real test name is accepted", cc.check_named_tests_exist(root) == [],
+              cc.check_named_tests_exist(root))
+        (root / "docs" / "d.md").write_text("held by `test_renamed_away`.\n")
+        found = cc.check_named_tests_exist(root)
+        check("a stale test name is caught", found, found)
+        check("and the document is named", any("d.md" in f for f in found), found)
+
     print("\nthe profile check cannot be satisfied by prose")
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)

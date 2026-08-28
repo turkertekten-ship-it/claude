@@ -753,6 +753,39 @@ rule lives somewhere is a claim. The review now reads:
 
     11 live: 6 enforced by a guard, 5 routed to where they are read, 0 in this list only
 
+## Twenty-third loop — harvesting a loop log, and failing to do it mechanically
+
+Loop twenty-two found the session's most expensive lesson recorded in a list
+and missing from the procedure it concerned. Observe asked the general version:
+of the twenty surprises this log has named, how many became something a future
+session would actually read?
+
+The first attempt answered by keyword search and reported two lessons as
+unrouted. Reading them showed one of those was a false positive — my probe
+looked for my own phrasing rather than the rule's — which is rule 9 recurring
+inside the check written to audit rule coverage. A loop log is prose; it is
+read, not grepped.
+
+Read rather than matched, one real gap remained. "Structure earns nothing" is
+stated for prompt *authors* in two prompts and held by a test, but nowhere for
+the person adding the *next scoring rule*. The test would catch a regression
+through `compile`; a new rule that credited a heading directly might never
+touch it.
+
+> The surprise: the properties this linter must not break were discovered one
+> at a time, each by breaking one — and were recorded only as test functions.
+> A test states a property to whoever runs it, never to whoever is about to
+> write the thing that violates it.
+
+`docs/prompting.md` now opens the rule set with the four properties and the
+test holding each: structure earns nothing, filling a gap never lowers a score,
+a slot needs content rather than a label, a statement of fact is not a
+criterion.
+
+Naming a test is a claim that something is enforced, so the eighth invariant
+checks it: a document naming `test_x` must name one that exists. Renaming a
+test would otherwise leave the document promising enforcement that had gone.
+
 ## Still open
 
 `U-6`, `U-7` and `U-8` in [unknowns.md](unknowns.md): what Saraev actually
