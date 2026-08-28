@@ -18,29 +18,44 @@ MMR.
 ## Measured
 
 The argument above is an argument. These are the numbers, from
-`scripts/ablation.py` on the external corpus (33 documents, 2,615 chunks,
+`scripts/ablation.py` on the external corpus (33 documents, 253 chunks,
 36 golden cases), each configuration differing in one thing:
 
 | configuration | pass | recall@8 | prec@8 | MRR | nDCG@8 |
 |---|---|---|---|---|---|
-| hybrid | **32/36** | **0.929** | 0.295 | 0.874 | **0.863** |
-| lexical only | 31/36 | 0.893 | 0.272 | **0.878** | 0.850 |
-| dense only | 31/36 | 0.821 | **0.339** | 0.780 | 0.785 |
-| no rerank | 31/36 | 0.857 | 0.165 | 0.798 | 0.792 |
-| no MMR | 32/36 | 0.911 | 0.304 | 0.874 | 0.863 |
+| hybrid | **33/36** | **0.982** | 0.281 | 0.879 | 0.883 |
+| lexical only | 32/36 | 0.946 | 0.268 | 0.874 | 0.871 |
+| dense only | **33/36** | **0.982** | 0.299 | **0.884** | **0.901** |
+| no rerank | 32/36 | 0.893 | 0.152 | 0.833 | 0.817 |
+| no MMR | **33/36** | **0.982** | **0.313** | 0.879 | 0.888 |
 
-Hybrid beats either arm alone on pass rate and recall, which is the claim. The
-arms are complementary in the way predicted but not symmetric: **dense is more
-precise, lexical has better recall**, and dense alone loses 0.11 of recall.
+**This table no longer says what it used to, and the honest reading is that the
+case for the lexical arm is now weak.** On the corpus as it stands, dense alone
+matches hybrid on pass rate and recall and beats it on precision, MRR and nDCG.
+Lexical alone is the worst of the three. Reranking remains clearly load-bearing
+(+1 case, +0.09 recall, +0.13 precision); MMR costs precision and buys nothing
+measurable here.
 
-Reranking is worth +1 case, +0.07 recall and +0.13 precision. MMR is worth
-+0.02 recall - small here, larger on the primary corpus (0.75 to 0.81), because
-that corpus has more near-duplicate chunks per document.
+The previous table, taken before the corpus was cleaned (L26), showed hybrid
+ahead of dense-only by 0.11 of recall. That corpus was 90.9% PyPI download
+boilerplate, and the lexical arm's apparent advantage was largely its ability to
+find a rare literal string in a haystack of hex digests - a property of the
+haystack, not of the queries anyone asks. Removing the boilerplate removed the
+advantage.
 
-A coarser measurement said something different: hit@8 was 26/28 for both hybrid
-and lexical-only, because hit@8 saturates on a corpus this size. A metric at
-ceiling cannot show a difference, and reading one as "no difference" is how a
-component gets removed for being useless when it is not.
+What this ADR should be judged on has therefore not been measured yet: whether
+the two arms fail in uncorrelated ways on questions a person would ask, over a
+corpus big enough for it to matter. 36 questions over 33 documents cannot settle
+it, and `recall@8` on this corpus is now 0.982 with a median of 1.0 - close
+enough to its ceiling that it can no longer show a regression. **Hybrid stays
+for now because removing an arm on 36 questions would be the same mistake in the
+other direction, and the decision is deferred to a wider corpus** (PLAN, "next").
+
+A coarser measurement said something different again: hit@8 was 26/28 for both
+hybrid and lexical-only, because hit@8 saturates on a corpus this size. A metric
+at ceiling cannot show a difference, and reading one as "no difference" is how a
+component gets removed for being useless when it is not. That is now true of
+recall@8 here too.
 
 ## Consequences
 

@@ -141,7 +141,8 @@ class IndexPipeline:
         # IDF table no longer describes it. Refitting invalidates every vector,
         # so it is a deliberate act, not a per-run default.
         indexed_docs = self.store.all_documents()
-        if refit or self._should_refit(len(documents), len(indexed_docs)):
+        indexed_bytes = sum(len(d.text) for d in indexed_docs)
+        if refit or self._should_refit(len(documents), len(indexed_docs), indexed_bytes):
             self.embedder.fit([d.text for d in indexed_docs])
             self.store.set_meta("embedder_state",
                                 {"name": self.embedder.name, "state": self.embedder.state()})
@@ -152,6 +153,8 @@ class IndexPipeline:
             # statistics stayed fitted on the original documents, and the OODA
             # loop's REFIT_EMBEDDER rule could never fire either.
             self.store.set_meta("fitted_doc_count", len(indexed_docs))
+            self.store.set_meta("fitted_text_bytes",
+                                sum(len(d.text) for d in indexed_docs))
             report.refit = True
             log.info("refit embedder", docs=len(indexed_docs),
                      fingerprint=self.embedder.fingerprint)
@@ -206,7 +209,8 @@ class IndexPipeline:
         log.warn("cursor referenced documents missing from the index; they will be "
                  "re-fetched", source=connector.key, missing=len(missing))
 
-    def _should_refit(self, new_docs: int, total_docs: int) -> bool:
+    def _should_refit(self, new_docs: int, total_docs: int,
+                      total_bytes: int = 0) -> bool:
         if not total_docs:
             return False
         if not getattr(self.embedder, "fitted", True):
@@ -215,7 +219,21 @@ class IndexPipeline:
         if not fitted_on:
             return True
         # 25% corpus growth is enough for the term distribution to have shifted.
-        return (total_docs - fitted_on) / max(1, fitted_on) > 0.25
+        if (total_docs - fitted_on) / max(1, fitted_on) > 0.25:
+            return True
+        # Document count alone cannot see a corpus rewritten in place. Removing
+        # the site template from the 33-page external corpus deleted 90.9% of
+        # its text and left the count at 33, so no refit fired and the embedder
+        # stayed fitted on a term distribution that no longer existed. The same
+        # corpus then scored recall 1.0 through the incremental path and 0.9821
+        # rebuilt from scratch - identical inputs, different answers, no error.
+        # This is the reasoning idf_table already applies to itself.
+        fitted_bytes = self.store.get_meta("fitted_text_bytes", 0)
+        if fitted_bytes and total_bytes:
+            # Symmetric: a corpus that shrinks by 25% has moved as far as one
+            # that grows by 25%, and only the growth case was ever checked.
+            return abs(total_bytes - fitted_bytes) / fitted_bytes > 0.25
+        return False
 
     def embed_missing(self, batch_size: int = 256) -> int:
         """Embed chunks with no vector, or a vector from another space."""
@@ -299,6 +317,7 @@ class IndexPipeline:
         self.store.set_meta("embedder_state",
                             {"name": self.embedder.name, "state": self.embedder.state()})
         self.store.set_meta("fitted_doc_count", len(documents))
+        self.store.set_meta("fitted_text_bytes", sum(len(d.text) for d in documents))
         report.refit = True
         all_chunks = []
         for document in documents:

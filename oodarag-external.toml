@@ -3,8 +3,12 @@
 # The primary corpus is the repository itself, which documents its own
 # evaluation - so golden questions leak into it, get quarantined, and the eval
 # measures a progressively smaller corpus. Nothing here describes oodarag, so
-# contamination is reported clean and the numbers need no quarantine to be
-# trustworthy. See docs/EVALUATION.md.
+# contamination stays small: one question of 36, holding out two documents,
+# against four questions and 26 documents on the primary corpus.
+#
+# The pages are stored with their site template removed - see
+# scripts/strip_corpus_template.py and LEARNINGS L26. Left in, it was 90.9% of
+# the corpus, and IDF is computed over it. See docs/EVALUATION.md.
 
 [oodarag]
 index_path   = ".oodarag/external.db"

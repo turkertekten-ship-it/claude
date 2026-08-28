@@ -675,3 +675,109 @@ a scoring change, so no further scoring change should be attempted for it.
 **On the sweep itself.** Eight unanswerable cases is a small sample and AUC will
 happily rank noise. It was used to *reject* candidates, which is what a small
 sample can support; nothing was adopted on it.
+
+---
+
+## L26 - The regression gate was 90.9% site template
+
+**Evidence.** `blinker.md` is 5,269 bytes. About 350 of them describe blinker;
+the rest is PyPI's download table, wheel filenames, SHA256 and BLAKE2b digests,
+Sigstore transparency entries and the full release history back to 2010.
+Measured across the whole external corpus - the one this project relies on
+*because* it is uncontaminated - **90.9% of it was that furniture**.
+`coverage.md` was 252KB of which 1,962 bytes described the project;
+`cffi.md` 90KB of which 653.
+
+`scrape/html.py` is not at fault, and this was checked rather than assumed:
+run against the live page it turns 75,768 bytes of HTML into 5,205, and the
+sections it keeps sit inside the page's main content area. No single-page
+extractor can tell them from the article.
+
+**Why it mattered more than wasted space.** IDF is computed over that text. The
+word `file` - in every page's "Download files", "File details" and "File
+hashes" - had an IDF of 0.08, so a corpus of hex digests and upload dates set
+the scale deciding what counts as a rare term. Every downstream stage reads that
+scale: the reranker's coverage, the abstention gate's answerability, the
+extractive generator.
+
+**The fix.** Cross-document repetition is the signal one page cannot see. A
+heading present in at least half the documents from one host is that host's
+template (`scrape/boilerplate.py`). On this corpus the separation is wide: the
+eight template headings are in 67-100% of pages, and the next-most-common
+heading, "Contributing", is in 27%.
+
+**Measured, external corpus, everything else held constant:**
+
+    corpus         chunks  pass   recall  prec    MRR     nDCG   latency
+    as committed    2,615  32/36  0.9286  0.2946  0.8741  0.8633   112ms
+    template off      253  33/36  0.9821  0.2812  0.8793  0.8833    42ms
+
+Recall rose 0.054, nDCG 0.020, one more case passed, the index shrank tenfold
+and queries got 2.7x faster. Precision fell 0.013. Two of the four standing
+failures were boilerplate dilution: `pluggy` now retrieves, and `blinker` moved
+from "not retrieved" to "retrieved but gated".
+
+**A rejected variant, recorded because it was tempting.** A second trigger -
+"a heading repeated many times inside one document is template" - caught the
+real furniture (172 repeats) but also ate changelogs, which repeat "Fixed" 37
+times and "Changed" 35. There is no threshold between 37 and 172 that is
+anything but a number fitted to this corpus, and the rule contradicted the
+premise: the signal a single page cannot see is repetition *across* pages.
+Dropped.
+
+**Rules.**
+1. Look at the corpus. Not a sample of one document - the byte counts. A
+   250KB page describing a Python library is a fact about the extractor, and it
+   was sitting in `wc -c` for the whole time the retrieval scores were being
+   tuned.
+2. Boilerplate is defined by repetition across a site, not by position in a
+   page. An extractor that only sees one document cannot apply the definition,
+   so the filter belongs to corpus construction.
+3. **A conclusion measured on a corpus is a conclusion about that corpus.**
+   Cleaning this one reversed the coverage_power finding recorded in L23's
+   neighbourhood (the exponent widened the gate's overlap monotonically before,
+   and narrows it after) and inverted ADR 0004's arm comparison. Every
+   measurement table in this repository now names the corpus it was taken on.
+
+---
+
+## L27 - The corpus was rewritten and the embedder never noticed
+
+**Evidence.** After removing the template, the same corpus and the same code
+gave `recall@8 = 1.0` through the incremental index and `0.9821` rebuilt from
+scratch. Identical inputs, different answers, nothing logged.
+
+`_should_refit` compared document *counts*. Rewriting all 33 documents deleted
+90.9% of their text and left the count at 33, so growth was 0.0 and no refit
+fired: the embedder stayed fitted on a term distribution that no longer existed.
+
+This is the reasoning `idf_table` already applies to itself, in a comment
+directly above the code - *"Keyed on a content digest, not just the count.
+Re-indexing a document with reworded text of the same chunk count leaves the
+count identical while every term changes"* - which had never been carried across
+to the fit that the same corpus feeds.
+
+The rule was also asymmetric. `(total - fitted) / fitted > 0.25` fires on 25%
+growth and never on shrinkage, and a corpus that loses a quarter of its text has
+moved exactly as far as one that gains a quarter.
+
+**The fix.** Record the corpus volume at each fit alongside the count, and refit
+when either moves more than 25% in either direction. Verified end to end by
+replaying the actual scenario from git: index the pre-cleaning corpus, swap in
+the cleaned one, and compare against a fresh build. Before, the two paths
+disagreed and no refit fired; after, they agree exactly. Reverting the fix makes
+the check fail again, so the check can see the bug it is there for.
+
+**Note the direction.** The stale index scored *better* - 1.0 against 0.9821.
+The fix does not improve the metric; it makes the metric mean something. A
+number that depends on the history of the index rather than on its contents is
+not a measurement.
+
+**Rules.**
+1. When a cache is invalidated on a content digest, ask what *else* was derived
+   from that content. Here it was the thing the digest was invented to protect.
+2. A threshold on change should be symmetric unless there is a stated reason it
+   is not. "Grew by a quarter" and "shrank by a quarter" are the same distance.
+3. Build the same thing twice, once incrementally and once from scratch, and
+   compare. Any difference is a bug, and it is a class of bug no unit test on
+   either path alone can find.

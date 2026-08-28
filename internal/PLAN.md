@@ -27,12 +27,12 @@ negative case look like a retrieval regression.
 
 | | primary (this repo) | external (33 PyPI pages) |
 |---|---|---|
-| golden cases | 17/20 | **32/36** |
-| recall@8 | 0.8125 | 0.9286 |
-| precision@8 | 0.2031 | 0.2946 |
-| hit@8 | 0.8750 | 0.9286 |
-| MRR | 0.5766 | 0.8741 |
-| nDCG@8 | 0.6126 | 0.8633 |
+| golden cases | 17/20 | **33/36** |
+| recall@8 | 0.8125 | 0.9821 |
+| precision@8 | 0.2031 | 0.2812 |
+| hit@8 | 0.8750 | 1.0000 |
+| MRR | 0.5766 | 0.8793 |
+| nDCG@8 | 0.6126 | 0.8833 |
 | citation coverage | 1.00 | 1.00 |
 | contamination | 4/20 questions, 26 documents held out | 1/36 questions, 2 documents |
 | role | smoke test | **regression gate** |
@@ -41,16 +41,23 @@ What each retrieval arm is worth, on the external set (`scripts/ablation.py`):
 
 | configuration | pass | recall@8 | prec@8 | MRR | nDCG@8 |
 |---|---|---|---|---|---|
-| hybrid | 32/36 | 0.9286 | 0.2946 | 0.8741 | 0.8633 |
-| lexical only | 32/36 | 0.8929 | 0.2723 | 0.8762 | 0.8486 |
-| dense only | 31/36 | 0.8214 | 0.3393 | 0.7798 | 0.7847 |
-| no rerank | 31/36 | 0.8571 | 0.1652 | 0.7976 | 0.7923 |
-| no mmr | 32/36 | 0.9107 | 0.3036 | 0.8741 | 0.8634 |
+| hybrid | 33/36 | 0.9821 | 0.2812 | 0.8793 | 0.8833 |
+| lexical only | 32/36 | 0.9464 | 0.2679 | 0.8735 | 0.8707 |
+| dense only | 33/36 | 0.9821 | 0.2991 | 0.8839 | 0.9008 |
+| no rerank | 32/36 | 0.8929 | 0.1518 | 0.8333 | 0.8169 |
+| no mmr | 33/36 | 0.9821 | 0.3125 | 0.8786 | 0.8880 |
 
-Dense-only has the best precision and the worst recall, which is the argument
-for hybrid stated as a measurement rather than a belief. Note that hit@8 is not
-in this table: it read 26/28 for both hybrid and lexical-only, because it
-saturates on a corpus this size (L23).
+Reranking is clearly load-bearing. **The case for the lexical arm is not**: on
+this corpus dense-only matches hybrid on pass rate and recall and beats it on
+precision, MRR and nDCG. That is a reversal - before the corpus was cleaned
+(L26) hybrid led dense-only by 0.11 of recall - and ADR 0004 now records it as
+deferred rather than settled, because 36 questions over 33 documents cannot
+settle it either way.
+
+Two metrics here are at or near their ceiling and can no longer show a
+regression: hit@8 reads 1.0, and recall@8 reads 0.9821 with a median of 1.0.
+That is the same trap as L23, and it is the strongest argument for item 2
+below.
 
 The gap between the columns is the self-reference problem, not a difference in
 difficulty: the primary corpus contains the questions, so its best matches are

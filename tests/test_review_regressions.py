@@ -16,6 +16,7 @@ import sqlite3
 import unittest
 
 from oodarag.chunking import chunk_document
+from oodarag.ingest.base import Connector
 from oodarag.eval.contamination import _longest_run, _normalize, detect
 from oodarag.eval.harness import EvalHarness, Golden
 from oodarag.generate.answer import AnswerConfig, AnswerGenerator
@@ -865,3 +866,75 @@ class GhostCompoundTest(unittest.TestCase):
         self.assertAlmostEqual(with_ghost, 2.0 / 10.56, places=4)
         self.assertAlmostEqual(repaired, 1.0, places=4)
         self.assertGreater(repaired, with_ghost)
+
+
+class StaleFitTest(unittest.TestCase):
+    """A corpus rewritten in place left the embedder fitted on the old text.
+
+    `_should_refit` compared document counts. Removing the site template from
+    the 33-page external corpus deleted 90.9% of its text and left the count at
+    33, so no refit fired. The same corpus and the same code then produced
+    recall 1.0 through the incremental path and 0.9821 rebuilt from scratch -
+    identical inputs, different answers, and nothing logged. `idf_table` already
+    keys itself on corpus content for exactly this reason; the fit did not.
+    """
+
+    def _connector(self, texts: dict[str, str]):
+        """A real Connector subclass, not a stand-in: the pipeline reads
+        `source_system` and the cursor protocol off this interface, and a stub
+        that omits them tests the stub."""
+        docs = [RawDocument(source_system="test", external_id=name, uri=f"mem://{name}",
+                            title=name, text=text, metadata={})
+                for name, text in texts.items()]
+
+        class _MemoryConnector(Connector):
+            key = "test:stale"
+            source_system = "test"
+
+            def fetch(self, cursor):
+                yield from docs
+
+        return _MemoryConnector()
+
+    def _pipeline(self):
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        return IndexPipeline(store), store
+
+    def test_a_corpus_rewritten_in_place_forces_a_refit(self):
+        pipeline, store = self._pipeline()
+        verbose = {f"d{i}.md": f"Package {i} does something. " + ("filler text " * 200)
+                   for i in range(8)}
+        pipeline.run([self._connector(verbose)])
+        fitted_before = store.get_meta("fitted_text_bytes", 0)
+        self.assertGreater(fitted_before, 0, "the fit did not record the corpus volume")
+
+        # Same document count, same names, 90% less text - the shape of the
+        # boilerplate removal that exposed this.
+        terse = {f"d{i}.md": f"Package {i} does something." for i in range(8)}
+        report = pipeline.run([self._connector(terse)])
+        self.assertTrue(report.refit,
+                        "the corpus lost 90% of its text and the embedder was not refit")
+        self.assertLess(store.get_meta("fitted_text_bytes", 0), fitted_before)
+
+    def test_an_ordinary_edit_does_not_force_a_refit(self):
+        """Refitting invalidates every vector, so it must not fire on noise -
+        otherwise the incremental path costs the same as a full rebuild."""
+        pipeline, store = self._pipeline()
+        texts = {f"d{i}.md": f"Package {i} does something. " + ("filler text " * 200)
+                 for i in range(8)}
+        pipeline.run([self._connector(texts)])
+        texts["d0.md"] = texts["d0.md"] + " One more sentence."
+        report = pipeline.run([self._connector(texts)])
+        self.assertFalse(report.refit,
+                         "a single-sentence edit triggered a full refit")
+
+    def test_growth_still_triggers_a_refit(self):
+        """The original rule must survive the new one."""
+        pipeline, store = self._pipeline()
+        texts = {f"d{i}.md": f"Package {i} does something distinct." for i in range(8)}
+        pipeline.run([self._connector(texts)])
+        texts.update({f"e{i}.md": f"New package {i} with its own vocabulary."
+                      for i in range(6)})
+        report = pipeline.run([self._connector(texts)])
+        self.assertTrue(report.refit, "75% corpus growth did not trigger a refit")

@@ -56,21 +56,27 @@ class HeuristicReranker(Reranker):
     #: its generic ones ("how does one Python library let other packages *hook*
     #: into it" was outvoted by python/library/package).
     #:
-    #: Measured, and left at 1.0 - the evidence is genuinely mixed:
+    #: Measured, and left at 1.0. Re-measured after the external corpus turned
+    #: out to be 90.9% site template (L26); the first table was taken on that
+    #: corpus and its conclusion did not survive cleaning it, which is the
+    #: reason this one names the corpus it was taken on.
     #:
     #:   corpus    power  pass   recall  prec    MRR     nDCG
-    #:   external  1.0    32/36  0.9286  0.2946  0.8741  0.8633
-    #:   external  2.0    33/36  0.9643  0.3080  0.8676  0.8653
-    #:   external  3.0    33/36  0.9643  0.3036  0.8861  0.8782
-    #:   primary   1.0    17/20  0.7812  0.1953  0.5573  0.5911
-    #:   primary   2.0    18/20  0.7500  0.2109  0.5698  0.5832
-    #:   primary   3.0    18/20  0.7500  0.2031  0.5631  0.5797
+    #:   external  1.0    33/36  0.9821  0.2812  0.8793  0.8833
+    #:   external  2.0    32/36  0.9821  0.2946  0.9092  0.9029
+    #:   external  3.0    31/36  0.9464  0.2946  0.8869  0.8900
+    #:   primary   1.0    17/20  0.8125  0.2109  0.5573  0.6032
+    #:   primary   2.0    18/20  0.7500  0.2109  0.5677  0.5823
+    #:   primary   3.0    18/20  0.7500  0.2031  0.5214  0.5494
     #:
-    #: Pass rate and precision improve on both corpora; primary recall falls by
-    #: 0.031 and primary nDCG dips. Recall is documented here as the ceiling on
-    #: everything downstream, and trading it for pass rate on one corpus is the
-    #: local optimisation the eval exists to prevent - so the default does not
-    #: move on evidence this mixed. Raise it only with an A/B on your own corpus.
+    #: 1.0 wins the two figures this project ranks highest: the external pass
+    #: rate, which is the regression gate, and primary recall, documented as the
+    #: ceiling on everything downstream. Raising the exponent buys ordering
+    #: quality on the external set (nDCG 0.8833 to 0.9029) at the cost of a case
+    #: there and 0.06 of recall on the primary set. Reproduce with
+    #: `scripts/ablation.py --sweep-coverage-power 1.0 2.0 3.0`, and re-measure
+    #: on your own corpus before moving it - on the pre-cleaning corpus this
+    #: same sweep pointed the other way.
     coverage_power: float = 1.0
     coverage_weight: float = 0.45
     phrase_weight: float = 0.25

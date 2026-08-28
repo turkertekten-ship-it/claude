@@ -48,6 +48,34 @@ ARMS = {
 }
 
 
+def sweep_coverage_power(name: str, root: str, patterns: tuple[str, ...],
+                         goldens: str, powers: list[float]) -> None:
+    """The coverage exponent is a documented measurement in rerank.py, so it has
+    to be re-measurable. Its first table was taken on a corpus that turned out to
+    be 90.9% site template, and the conclusion moved when that was removed."""
+    workdir = tempfile.mkdtemp(prefix=f"power-{name}-")
+    try:
+        store = SqliteStore(f"{workdir}/index.db")
+        pipeline = IndexPipeline(store)
+        pipeline.run([FilesystemConnector(root, patterns=patterns, key=f"fs:{name}")])
+        cases = load_goldens(goldens)
+        print(f"\n## {name}: coverage_power\n")
+        print(f"| power | pass | recall@8 | prec@8 | MRR | nDCG@8 |")
+        print("|-------|------|----------|--------|-----|--------|")
+        for power in powers:
+            retriever = HybridRetriever(store, pipeline.embedder, RetrievalConfig())
+            retriever.reranker.coverage_power = power
+            generator = AnswerGenerator(retriever, AnswerConfig(generator="extractive"))
+            report = EvalHarness(generator, k=8).run(cases)
+            agg = report.aggregate()
+            print(f"| {power:<5} | {report.passed}/{len(report.cases)} "
+                  f"| {agg['recall@8']['mean']:.4f} | {agg['precision@8']['mean']:.4f} "
+                  f"| {agg['mrr']['mean']:.4f} | {agg['ndcg@8']['mean']:.4f} |")
+        store.close()
+    finally:
+        shutil.rmtree(workdir, ignore_errors=True)
+
+
 def run(name: str, root: str, patterns: tuple[str, ...], goldens: str) -> None:
     workdir = tempfile.mkdtemp(prefix=f"ablation-{name}-")
     try:
@@ -77,9 +105,16 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--corpus", choices=sorted(CORPORA), action="append",
                         help="which corpus to ablate (repeatable; default: all)")
+    parser.add_argument("--sweep-coverage-power", type=float, nargs="+",
+                        metavar="P",
+                        help="sweep the reranker's coverage exponent instead of "
+                             "ablating arms, e.g. --sweep-coverage-power 1.0 2.0 3.0")
     args = parser.parse_args(argv)
     for name in args.corpus or sorted(CORPORA):
-        run(name, *CORPORA[name])
+        if args.sweep_coverage_power:
+            sweep_coverage_power(name, *CORPORA[name], args.sweep_coverage_power)
+        else:
+            run(name, *CORPORA[name])
     return 0
 
 

@@ -8,265 +8,347 @@
       "name": "alembic",
       "url": "https://pypi.org/project/alembic/",
       "title": "alembic",
-      "words": 1937,
-      "content_hash": "0fe536da34d387a3",
-      "fetched_at": "2026-08-28T08:43:13Z"
+      "words": 829,
+      "content_hash": "475827e3f09c1fa3",
+      "fetched_at": "2026-08-28T08:43:13Z",
+      "raw_words": 1951,
+      "raw_content_hash": "0fe536da34d387a3"
     },
     {
       "name": "annotated-types",
       "url": "https://pypi.org/project/annotated-types/",
       "title": "annotated-types",
-      "words": 2014,
-      "content_hash": "4610ac8b9640b573",
-      "fetched_at": "2026-08-28T08:43:17Z"
+      "words": 1746,
+      "content_hash": "423c88139cb42e79",
+      "fetched_at": "2026-08-28T08:43:17Z",
+      "raw_words": 2046,
+      "raw_content_hash": "4610ac8b9640b573"
     },
     {
       "name": "attrs",
       "url": "https://pypi.org/project/attrs/",
       "title": "attrs",
-      "words": 1279,
-      "content_hash": "4f2c8ee1887e2a1f",
-      "fetched_at": "2026-08-28T08:18:13Z"
+      "words": 644,
+      "content_hash": "97b7f80ed056ca77",
+      "fetched_at": "2026-08-28T08:18:13Z",
+      "raw_words": 1300,
+      "raw_content_hash": "4f2c8ee1887e2a1f"
     },
     {
       "name": "blinker",
       "url": "https://pypi.org/project/blinker/",
       "title": "blinker",
-      "words": 665,
-      "content_hash": "dfabce439977eccd",
-      "fetched_at": "2026-08-28T08:43:12Z"
+      "words": 140,
+      "content_hash": "1c628f071dc827dc",
+      "fetched_at": "2026-08-28T08:43:12Z",
+      "raw_words": 680,
+      "raw_content_hash": "dfabce439977eccd"
     },
     {
       "name": "certifi",
       "url": "https://pypi.org/project/certifi/",
       "title": "certifi",
-      "words": 1010,
-      "content_hash": "1ab878702ecea2ca",
-      "fetched_at": "2026-08-28T08:18:09Z"
+      "words": 132,
+      "content_hash": "e0faa1b73268b19e",
+      "fetched_at": "2026-08-28T08:18:09Z",
+      "raw_words": 1025,
+      "raw_content_hash": "1ab878702ecea2ca"
     },
     {
       "name": "cffi",
       "url": "https://pypi.org/project/cffi/",
       "title": "cffi",
-      "words": 9846,
-      "content_hash": "e467e886ec44b054",
-      "fetched_at": "2026-08-28T08:43:14Z"
+      "words": 103,
+      "content_hash": "0ac5ceb10b4fd246",
+      "fetched_at": "2026-08-28T08:43:14Z",
+      "raw_words": 10155,
+      "raw_content_hash": "e467e886ec44b054"
     },
     {
       "name": "charset-normalizer",
       "url": "https://pypi.org/project/charset-normalizer/",
       "title": "charset-normalizer",
-      "words": 38240,
-      "content_hash": "ebcef956440522da",
-      "fetched_at": "2026-08-28T08:18:10Z"
+      "words": 5297,
+      "content_hash": "81f7b6a093e3d41f",
+      "fetched_at": "2026-08-28T08:18:10Z",
+      "raw_words": 39102,
+      "raw_content_hash": "ebcef956440522da"
     },
     {
       "name": "click",
       "url": "https://pypi.org/project/click/",
       "title": "click",
-      "words": 1031,
-      "content_hash": "711846344fff5f41",
-      "fetched_at": "2026-08-28T08:18:11Z"
+      "words": 215,
+      "content_hash": "3d8ea5ca9a3fc619",
+      "fetched_at": "2026-08-28T08:18:11Z",
+      "raw_words": 1047,
+      "raw_content_hash": "711846344fff5f41"
     },
     {
       "name": "coverage",
       "url": "https://pypi.org/project/coverage/",
       "title": "coverage",
-      "words": 24435,
-      "content_hash": "61fa37d69b57626d",
-      "fetched_at": "2026-08-28T08:43:18Z"
+      "words": 298,
+      "content_hash": "02e91d048cee9802",
+      "fetched_at": "2026-08-28T08:43:18Z",
+      "raw_words": 24930,
+      "raw_content_hash": "61fa37d69b57626d"
     },
     {
       "name": "cryptography",
       "url": "https://pypi.org/project/cryptography/",
       "title": "cryptography",
-      "words": 9821,
-      "content_hash": "a69b78bb8d2c7563",
-      "fetched_at": "2026-08-28T08:43:14Z"
+      "words": 197,
+      "content_hash": "98ed699ffeebf116",
+      "fetched_at": "2026-08-28T08:43:14Z",
+      "raw_words": 10011,
+      "raw_content_hash": "a69b78bb8d2c7563"
     },
     {
       "name": "filelock",
       "url": "https://pypi.org/project/filelock/",
       "title": "filelock",
-      "words": 1133,
-      "content_hash": "11a4f5e028b0471b",
-      "fetched_at": "2026-08-28T08:43:19Z"
+      "words": 22,
+      "content_hash": "1af73fa7d93bbc41",
+      "fetched_at": "2026-08-28T08:43:19Z",
+      "raw_words": 1146,
+      "raw_content_hash": "11a4f5e028b0471b"
     },
     {
       "name": "flask",
       "url": "https://pypi.org/project/Flask/",
       "title": "Flask",
-      "words": 998,
-      "content_hash": "b02319d32d75d89c",
-      "fetched_at": "2026-08-28T08:43:12Z"
+      "words": 191,
+      "content_hash": "6841bd2a8ea2f4c8",
+      "fetched_at": "2026-08-28T08:43:12Z",
+      "raw_words": 1015,
+      "raw_content_hash": "b02319d32d75d89c"
     },
     {
       "name": "idna",
       "url": "https://pypi.org/project/idna/",
       "title": "idna",
-      "words": 1738,
-      "content_hash": "9f81324cebd38231",
-      "fetched_at": "2026-08-28T08:18:09Z"
+      "words": 1068,
+      "content_hash": "e21b36c578c9e01b",
+      "fetched_at": "2026-08-28T08:18:09Z",
+      "raw_words": 1756,
+      "raw_content_hash": "9f81324cebd38231"
     },
     {
       "name": "iniconfig",
       "url": "https://pypi.org/project/iniconfig/",
       "title": "iniconfig",
-      "words": 664,
-      "content_hash": "6a17eedb13ff0e0c",
-      "fetched_at": "2026-08-28T08:43:15Z"
+      "words": 176,
+      "content_hash": "99b67a450f72d368",
+      "fetched_at": "2026-08-28T08:43:15Z",
+      "raw_words": 679,
+      "raw_content_hash": "6a17eedb13ff0e0c"
     },
     {
       "name": "itsdangerous",
       "url": "https://pypi.org/project/itsdangerous/",
       "title": "itsdangerous",
-      "words": 542,
-      "content_hash": "bd44d94ff64d532a",
-      "fetched_at": "2026-08-28T08:43:12Z"
+      "words": 146,
+      "content_hash": "cb79ae53663d3ead",
+      "fetched_at": "2026-08-28T08:43:12Z",
+      "raw_words": 557,
+      "raw_content_hash": "bd44d94ff64d532a"
     },
     {
       "name": "markupsafe",
       "url": "https://pypi.org/project/MarkupSafe/",
       "title": "MarkupSafe",
-      "words": 17214,
-      "content_hash": "e13903d477aaab52",
-      "fetched_at": "2026-08-28T08:18:11Z"
+      "words": 176,
+      "content_hash": "4b62c945757e4ef6",
+      "fetched_at": "2026-08-28T08:18:11Z",
+      "raw_words": 17578,
+      "raw_content_hash": "e13903d477aaab52"
     },
     {
       "name": "packaging",
       "url": "https://pypi.org/project/packaging/",
       "title": "packaging",
-      "words": 972,
-      "content_hash": "620c5c3d156943a8",
-      "fetched_at": "2026-08-28T08:18:10Z"
+      "words": 224,
+      "content_hash": "f488861039159dda",
+      "fetched_at": "2026-08-28T08:18:10Z",
+      "raw_words": 990,
+      "raw_content_hash": "620c5c3d156943a8"
     },
     {
       "name": "platformdirs",
       "url": "https://pypi.org/project/platformdirs/",
       "title": "platformdirs",
-      "words": 1166,
-      "content_hash": "7ea47d4653d40258",
-      "fetched_at": "2026-08-28T08:43:20Z"
+      "words": 321,
+      "content_hash": "a7191e79bfb96538",
+      "fetched_at": "2026-08-28T08:43:20Z",
+      "raw_words": 1182,
+      "raw_content_hash": "7ea47d4653d40258"
     },
     {
       "name": "pluggy",
       "url": "https://pypi.org/project/pluggy/",
       "title": "pluggy",
-      "words": 782,
-      "content_hash": "07fd7469311bb52c",
-      "fetched_at": "2026-08-28T08:43:16Z"
+      "words": 215,
+      "content_hash": "d9f2065121658dcf",
+      "fetched_at": "2026-08-28T08:43:16Z",
+      "raw_words": 799,
+      "raw_content_hash": "07fd7469311bb52c"
     },
     {
       "name": "pycparser",
       "url": "https://pypi.org/project/pycparser/",
       "title": "pycparser",
-      "words": 1354,
-      "content_hash": "b4ffdd2a1bccf948",
-      "fetched_at": "2026-08-28T08:43:14Z"
+      "words": 994,
+      "content_hash": "cddb60fee1811234",
+      "fetched_at": "2026-08-28T08:43:14Z",
+      "raw_words": 1382,
+      "raw_content_hash": "b4ffdd2a1bccf948"
     },
     {
       "name": "pytest",
       "url": "https://pypi.org/project/pytest/",
       "title": "pytest",
-      "words": 1989,
-      "content_hash": "1db8e4e68c57397f",
-      "fetched_at": "2026-08-28T08:18:13Z"
+      "words": 415,
+      "content_hash": "ca7d9bcb6b632051",
+      "fetched_at": "2026-08-28T08:18:13Z",
+      "raw_words": 2010,
+      "raw_content_hash": "1db8e4e68c57397f"
     },
     {
       "name": "python-dateutil",
       "url": "https://pypi.org/project/python-dateutil/",
       "title": "python-dateutil",
-      "words": 1091,
-      "content_hash": "791ddcfc9a5438d7",
-      "fetched_at": "2026-08-28T08:18:15Z"
+      "words": 674,
+      "content_hash": "b2217938b89d99ac",
+      "fetched_at": "2026-08-28T08:18:15Z",
+      "raw_words": 1111,
+      "raw_content_hash": "791ddcfc9a5438d7"
     },
     {
       "name": "pyyaml",
       "url": "https://pypi.org/project/PyYAML/",
       "title": "PyYAML",
-      "words": 7226,
-      "content_hash": "634ad011428fbc90",
-      "fetched_at": "2026-08-28T08:18:14Z"
+      "words": 77,
+      "content_hash": "678d8c40d7815752",
+      "fetched_at": "2026-08-28T08:18:14Z",
+      "raw_words": 7449,
+      "raw_content_hash": "634ad011428fbc90"
     },
     {
       "name": "requests",
       "url": "https://pypi.org/project/requests/",
       "title": "requests",
-      "words": 1684,
-      "content_hash": "904d0112c85429cb",
-      "fetched_at": "2026-08-28T08:18:08Z"
+      "words": 287,
+      "content_hash": "0c795098d5e05475",
+      "fetched_at": "2026-08-28T08:18:08Z",
+      "raw_words": 1700,
+      "raw_content_hash": "904d0112c85429cb"
     },
     {
       "name": "rich",
       "url": "https://pypi.org/project/rich/",
       "title": "rich",
-      "words": 3214,
-      "content_hash": "c0c8ee5753c07e53",
-      "fetched_at": "2026-08-28T08:18:12Z"
+      "words": 1731,
+      "content_hash": "bb9521de0439f5f2",
+      "fetched_at": "2026-08-28T08:18:12Z",
+      "raw_words": 3234,
+      "raw_content_hash": "c0c8ee5753c07e53"
     },
     {
       "name": "six",
       "url": "https://pypi.org/project/six/",
       "title": "six",
-      "words": 524,
-      "content_hash": "4f603cdc96f8d42f",
-      "fetched_at": "2026-08-28T08:18:15Z"
+      "words": 110,
+      "content_hash": "8e25fe6fe67f202b",
+      "fetched_at": "2026-08-28T08:18:15Z",
+      "raw_words": 534,
+      "raw_content_hash": "4f603cdc96f8d42f"
     },
     {
       "name": "sqlalchemy",
       "url": "https://pypi.org/project/SQLAlchemy/",
       "title": "SQLAlchemy",
-      "words": 7639,
-      "content_hash": "e43df50c22202883",
-      "fetched_at": "2026-08-28T08:43:13Z"
+      "words": 728,
+      "content_hash": "8404f8ec685599d5",
+      "fetched_at": "2026-08-28T08:43:13Z",
+      "raw_words": 7805,
+      "raw_content_hash": "e43df50c22202883"
     },
     {
       "name": "tomli",
       "url": "https://pypi.org/project/tomli/",
       "title": "tomli",
-      "words": 5540,
-      "content_hash": "cf6259b11e665b7e",
-      "fetched_at": "2026-08-28T08:43:15Z"
+      "words": 966,
+      "content_hash": "5c87d306a85969b5",
+      "fetched_at": "2026-08-28T08:43:15Z",
+      "raw_words": 5702,
+      "raw_content_hash": "cf6259b11e665b7e"
     },
     {
       "name": "tox",
       "url": "https://pypi.org/project/tox/",
       "title": "tox",
-      "words": 2392,
-      "content_hash": "ec6c5d8cc016bfc7",
-      "fetched_at": "2026-08-28T08:43:18Z"
+      "words": 142,
+      "content_hash": "8f8ad7b0fc0ff496",
+      "fetched_at": "2026-08-28T08:43:18Z",
+      "raw_words": 2405,
+      "raw_content_hash": "ec6c5d8cc016bfc7"
     },
     {
       "name": "typing-extensions",
       "url": "https://pypi.org/project/typing-extensions/",
       "title": "typing-extensions",
-      "words": 929,
-      "content_hash": "aafe1eb69ab2f541",
-      "fetched_at": "2026-08-28T08:43:16Z"
+      "words": 183,
+      "content_hash": "3e319a54e84b4c99",
+      "fetched_at": "2026-08-28T08:43:16Z",
+      "raw_words": 945,
+      "raw_content_hash": "aafe1eb69ab2f541"
     },
     {
       "name": "urllib3",
       "url": "https://pypi.org/project/urllib3/",
       "title": "urllib3",
-      "words": 1448,
-      "content_hash": "b8205a6b921dc0ba",
-      "fetched_at": "2026-08-28T08:18:09Z"
+      "words": 383,
+      "content_hash": "77203d1e9f954902",
+      "fetched_at": "2026-08-28T08:18:09Z",
+      "raw_words": 1469,
+      "raw_content_hash": "b8205a6b921dc0ba"
     },
     {
       "name": "virtualenv",
       "url": "https://pypi.org/project/virtualenv/",
       "title": "virtualenv",
-      "words": 2154,
-      "content_hash": "4af6c9c8f32883af",
-      "fetched_at": "2026-08-28T08:43:19Z"
+      "words": 72,
+      "content_hash": "0d67e381fcd7595a",
+      "fetched_at": "2026-08-28T08:43:19Z",
+      "raw_words": 2168,
+      "raw_content_hash": "4af6c9c8f32883af"
     },
     {
       "name": "werkzeug",
       "url": "https://pypi.org/project/Werkzeug/",
       "title": "Werkzeug",
-      "words": 1403,
-      "content_hash": "5d1020ebdf0b5f83",
-      "fetched_at": "2026-08-28T08:43:12Z"
+      "words": 341,
+      "content_hash": "8ad9f0eae8e01b13",
+      "fetched_at": "2026-08-28T08:43:12Z",
+      "raw_words": 1420,
+      "raw_content_hash": "5d1020ebdf0b5f83"
     }
-  ]
+  ],
+  "_template_removal": {
+    "why": "PyPI project pages carry their download table, per-file hashes, attestations and release history inside the main content area, so a single-page extractor keeps them. They were 90.9% of this corpus, and IDF is computed over that text.",
+    "how": "scrape/boilerplate.py: a heading present in at least half the documents from one host is that host's template; its section is dropped down to the next heading of the same or a higher level.",
+    "headings_removed": [
+      "built distribution",
+      "download files",
+      "file details",
+      "file hashes",
+      "file metadata",
+      "provenance",
+      "release history release notifications |",
+      "source distribution"
+    ],
+    "bytes_before": 1434968,
+    "bytes_after": 130063
+  }
 }
