@@ -379,6 +379,44 @@ def _detect_no_example(lines: list[str], text: str, raw: str) -> list[tuple[int,
     return []
 
 
+def _detect_unverifiable_acceptance(lines: list[str], text: str, raw: str) -> list[tuple[int, str]]:
+    """An acceptance test with nothing in it that could ever be run or counted.
+
+    The slot rule only asks whether an acceptance test is *present*. "It should
+    be good" satisfies that and settles nothing. A test earns its place by
+    naming a handle: a command, a number, or an exact comparison — something
+    that can come back false.
+    """
+    handle = re.compile(
+        r"`[^`]{3,}`"                                  # a command or an identifier
+        r"|\b\d+\b"                                     # a count or a threshold
+        r"|\b(exactly|identical|matches?|equals?|parses?|passes|fails?|exits?\s+0"
+        r"|green|clean|byte[- ]for[- ]byte|no \w+)\b",
+        re.I,
+    )
+    # The slot cue is deliberately loose so that a present test is rarely
+    # missed. That looseness cannot be inherited here: "never promote it to
+    # verified" mentions verification without stating a test, and judging it as
+    # a weak test is a false positive. This rule needs the stating, not the
+    # vocabulary.
+    framing = re.compile(
+        r"\bacceptance\b|\bdone when\b|\bsuccess (is|means|criteria)\b|\bcriteri(a|on)\b"
+        r"|\bmust pass\b|\bit works when\b|\bcorrect (if|when)\b|\bjudged? (by|on)\b"
+        r"|\b(right|correct|valid|accepted|complete|done) only (if|when)\b"
+        r"|\bdefinition of done\b|\bthe check that\b",
+        re.I,
+    )
+    buckets = classify(lines)
+    stated = [line for line in buckets["ACCEPTANCE"] if line.strip() and framing.search(line)]
+    if not stated:
+        return []                                      # absence is NO_ACCEPTANCE's job
+    if any(handle.search(line) for line in stated):
+        return []
+    first = stated[0]
+    lineno = next((i for i, l in enumerate(lines, start=1) if l.strip() == first.strip()), 0)
+    return [(lineno, first.strip()[:70])]
+
+
 def _detect_iceberg(lines: list[str], text: str, raw: str) -> list[tuple[int, str]]:
     """A whole document pasted into the prompt, where a path would have done.
 
@@ -521,6 +559,12 @@ HAZARDS: tuple[Hazard, ...] = (
         detector=_detect_pronoun_start,
     ),
     Hazard(
+        "UNVERIFIABLE_ACCEPTANCE", "an acceptance test nothing could fail", "warn", "verification",
+        "A test that names no command, number, or exact comparison cannot come back false, so it settles nothing after the answer arrives.",
+        "Name the handle: the command that must pass, the count it must hit, or the string it must match exactly.",
+        detector=_detect_unverifiable_acceptance,
+    ),
+    Hazard(
         "ICEBERG", "a whole document pasted where a path would do", "info", "economy",
         "A long context costs tokens on every turn and degrades the answer; a file the model can read on demand costs neither until it is needed.",
         "If the model can read files, name the path and let it fetch what it needs. If it cannot — a chat window, another vendor — pasting is correct and this finding is noise.",
@@ -570,7 +614,7 @@ FRAMEWORKS = {
             "NO_OUTPUT": "E", "NO_CONSTRAINTS": "E", "UNBOUNDED": "E", "NO_STOP": "E",
             "VAGUE_QUALITY": "E", "VAGUE_QUANT": "E", "HEDGE": "E",
             "PLACEHOLDER": "E", "NO_EXAMPLE": "E",
-            "NO_ACCEPTANCE": "R",
+            "NO_ACCEPTANCE": "R", "UNVERIFIABLE_ACCEPTANCE": "R",
         },
         "unmapped": ["NO_ESCAPE", "FALSE_MEMORY", "FALSE_PREMISE", "ICEBERG"],
         "unchecked": ["A"],
@@ -595,7 +639,7 @@ FRAMEWORKS = {
             # the edge case named in the prompt, which is why NO_ESCAPE maps here
             # under this framework and nowhere under Lo's.
             "NO_EXAMPLE": "E", "NO_ESCAPE": "E",
-            "NO_OUTPUT": "R", "NO_ACCEPTANCE": "R",
+            "NO_OUTPUT": "R", "NO_ACCEPTANCE": "R", "UNVERIFIABLE_ACCEPTANCE": "R",
         },
         "unmapped": ["FILLER", "ROLE_INFLATION", "FALSE_MEMORY"],
         "unchecked": ["A"],
@@ -939,7 +983,7 @@ def _by_dimension(report: Report) -> dict[str, int]:
 
     Dimensions are this repository's own axes, not an outside framework's.
     """
-    dims = ("structure", "precision", "bounds", "honesty", "economy")
+    dims = ("structure", "precision", "bounds", "honesty", "economy", "verification")
     out = {d: 100 for d in dims}
     seen = set()
     for f in report.findings:

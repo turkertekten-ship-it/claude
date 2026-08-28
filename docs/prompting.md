@@ -194,7 +194,29 @@ takes the forged prompt and the answer it produced, and counts what can be
 counted: limits on words, lines, sentences and paragraphs; one-paragraph and
 one-code-block demands; forbidden tokens; JSON validity; a missing preamble.
 
-Two design decisions are worth stating, because both are refusals:
+It sorts a prompt's constraints into three grades, and the distinction is the
+tool's main idea:
+
+| Grade | Example | What happens |
+|---|---|---|
+| **countable** | "under 80 words", "one code block" | checked here, pass or fail |
+| **runnable** | "`bash tests/run_all.sh` stays green" | the command is extracted and printed; **not executed** — running a command lifted out of a prompt is not a linter's business |
+| **for a reader** | "do not change behaviour" | listed, unjudged |
+
+The middle grade exists because the first version of this tool did not have it,
+and filed a named command alongside "make it clean" [src:CONSTRAINT-GRADES-2026-08-27].
+That was backwards: naming the command that must pass is the strongest
+acceptance test available, and a tool whose output discouraged it would have
+made prompts worse.
+
+The linter enforces the same distinction from the other side.
+`UNVERIFIABLE_ACCEPTANCE` fires when a prompt states an acceptance test that
+names no command, no number and no exact comparison — a test nothing could ever
+fail. It requires the *stating*, not merely the vocabulary: "never promote a
+report to verified" mentions verification without proposing a test, and is left
+alone.
+
+Two further design decisions are worth stating, because both are refusals:
 
 - **It scopes to the constraint sections.** A prompt written in the seven slots
   gets its CONSTRAINTS, OUTPUT CONTRACT and ACCEPTANCE TEST read, and nothing

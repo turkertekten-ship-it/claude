@@ -70,6 +70,7 @@ HAZARD_CASES = {
         "Fix the linter.\nDeploy the service.\nReview the schema.\n"
     ),
     "WALL": "Write the report. " + ("The system has many interacting parts that matter here. " * 15),
+    "UNVERIFIABLE_ACCEPTANCE": "Write the report. Acceptance test: it should be good.",
     "ICEBERG": "Fix this.\n\n```python\n" + ("x = 1  # a pasted line of context\n" * 70) + "```\n",
 }
 
@@ -175,6 +176,19 @@ def test_narrowings_are_proven() -> None:
           "FALSE_PREMISE" not in rules_for("Write the guide.\n\n> fix the failing test\n"))
     check("the same line unquoted is an instruction",
           "FALSE_PREMISE" in rules_for("Write the guide.\n\nfix the failing test\n"))
+    check("an acceptance test naming a command is not flagged",
+          "UNVERIFIABLE_ACCEPTANCE" not in rules_for("Write it. Acceptance: `bash tests/run_all.sh` passes."))
+    check("nor one naming an exact comparison",
+          "UNVERIFIABLE_ACCEPTANCE" not in rules_for("Write it. Done when the job name is exactly checks."))
+    check("nor one naming a count",
+          "UNVERIFIABLE_ACCEPTANCE" not in rules_for("Write it. Acceptance: it returns at most 3 rows."))
+    check("prose mentioning verification is not a stated test",
+          "UNVERIFIABLE_ACCEPTANCE" not in
+          rules_for("Write it. Never silently promote a report to verified."))
+    check("nor is 'not a verified fact'",
+          "UNVERIFIABLE_ACCEPTANCE" not in rules_for("Mark it second-hand; it is not a verified fact."))
+    check("an absent acceptance test is NO_ACCEPTANCE's job, not this rule's",
+          "UNVERIFIABLE_ACCEPTANCE" not in rules_for("Write the report."))
     check("a small fenced example is not an iceberg",
           "ICEBERG" not in rules_for("Fix this.\n\n```python\nx = 1\n```\n"))
     check("'the only kind of' is a noun phrase",

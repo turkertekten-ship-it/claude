@@ -118,3 +118,9 @@ contents were not reconstructed, summarised, or guessed at.
 - Run against the A/B trial's stored answers, `tools/check_output.py` reports the winning arm's 86 words against its prompt's written 80-word limit, and the losing arm's five paragraphs, ninety words and bold label. [src:CHECK-OUTPUT-TRIAL-2026-08-27]
 - It reproduces mechanically what the model judge found by reading, and additionally flags the bold label the judge folded into a prose note. [src:CHECK-OUTPUT-TRIAL-2026-08-27]
 - Of the six constraints that prompt states, five are countable and one is not; the uncountable one is listed rather than passed over. [src:CHECK-OUTPUT-TRIAL-2026-08-27]
+
+## Observed — what a good prompt's constraints are actually made of
+
+- The exemplar prompt in `.claude/skills/prompt-forge/SKILL.md`, documented at 100/100, has zero countable constraints; two of its seven name a command and are runnable, and five are prose for a reader to judge. [src:CONSTRAINT-GRADES-2026-08-27]
+- `tests/fixtures/prompts/clean_task.md` has one countable constraint, one runnable, and eight for a reader. [src:CONSTRAINT-GRADES-2026-08-27]
+- The first version of `check_output.py` reported the runnable constraints identically to unverifiable prose, which would have steered authors away from naming a command — the strongest form of acceptance test available. [src:CONSTRAINT-GRADES-2026-08-27]

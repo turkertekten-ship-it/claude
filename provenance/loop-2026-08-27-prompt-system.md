@@ -223,6 +223,40 @@ in two sections were checked twice, and only the first clause of *"No bullet
 points, no headings, no bold labels"* was ever evaluated — an early `continue`
 had silently dropped two thirds of that sentence.
 
+## Sixth loop — the checker was built backwards
+
+Observe asked a simple question of the previous loop's tool: across this
+repository's own forged prompts, how many constraints can actually be checked?
+
+The answer was worse than expected and then more interesting than expected. The
+exemplar in the skill — the prompt documented at 100/100 — has **zero**
+countable constraints [src:CONSTRAINT-GRADES-2026-08-27].
+
+> The surprise: that prompt is not weak. Two of its seven constraints name a
+> command — `python3 -m unittest ...`, `bash tests/run_all.sh` — which is the
+> strongest acceptance test there is, because something can run it and get a
+> verdict. The tool built one loop ago reported them identically to "make it
+> clean". Its output would have taught authors to prefer trivially countable
+> constraints over runnable ones, which is the opposite of the point.
+
+So constraints now sort into three grades: countable, runnable, and for a
+reader to judge. Runnable commands are extracted and printed but never
+executed — running a command lifted out of a prompt is not a linter's business.
+
+The linter gained the same distinction from the other side.
+`UNVERIFIABLE_ACCEPTANCE` fires on a stated acceptance test that names no
+command, number, or exact comparison. It found two false positives on this
+repository's own prompts within a minute of existing, both from the same cause:
+the slot cue is loose enough to file "never promote it to verified" as an
+acceptance test. The rule now requires the framing, not the vocabulary, and
+both files returned to their previous scores.
+
+Also fixed here: `check_output.py` recognised `## HEADING` and `**Bold.**`
+slots but not `Constraints:` prose labels, so a prompt written that way fell
+through to whole-prompt scanning and reported its own ROLE and TASK sentences
+as unchecked constraints. Word-number limits ("at most two sentences") were
+invisible to it as well.
+
 ## Still open
 
 `U-6`, `U-7` and `U-8` in [unknowns.md](unknowns.md): what Saraev actually

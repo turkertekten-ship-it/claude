@@ -104,6 +104,23 @@ def main() -> int:
     check("exact count",
           rules("## CONSTRAINTS\nExactly 3 lines.", "a\nb")["EXACT_COUNT"] is False)
 
+    print("\na named command is reported as runnable, not as uncheckable")
+    r = co.check("## ACCEPTANCE TEST\n`bash tests/run_all.sh` passes.", "anything")
+    check("the command is extracted", r.runnable and r.runnable[0][0] == "bash tests/run_all.sh",
+          r.runnable)
+    check("and it is not filed as unchecked", not r.unchecked, r.unchecked)
+    check("prose with no command still goes to unchecked",
+          co.check("## CONSTRAINTS\nDo not change behaviour.", "x").unchecked)
+    check("a backticked identifier without a run verb is not a command",
+          not co.check("## CONSTRAINTS\nTouch only `base.py`.", "x").runnable)
+    check("all three labelling styles scope the same way",
+          co.check("## CONSTRAINTS\nUnder 5 words.", "a b c").scoped
+          and co.check("**Constraints.** Under 5 words.", "a b c").scoped
+          and co.check("Constraints: under 5 words.", "a b c").scoped)
+    check("a word-number limit is read",
+          any(c.rule == "MAX_COUNT" for c in
+              co.check("## CONSTRAINTS\nAt most two sentences.", "One. Two. Three.").checks))
+
     print("\nwhat it could not check is shown, not swallowed")
     r = co.check(SLOTTED, "a paragraph")
     check("the uninterpretable constraint is listed", r.unchecked, r.unchecked)

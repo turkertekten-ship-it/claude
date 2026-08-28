@@ -336,3 +336,13 @@ sources:
       The checker was written after the trial and run against its stored
       answers. It reproduces mechanically the word-limit breach the model judge
       found by reading, and additionally flags the raw arm's bold label.
+
+  - id: CONSTRAINT-GRADES-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T19:10Z"
+    method: "python3 tools/check_output.py over this repository's own forged prompts, against a dummy answer"
+    evidence: provenance/raw/constraint-grades-2026-08-27.md
+    note: >-
+      An inventory of what the prompts constrain, not of whether an answer met
+      it. The exemplar in the skill has zero countable constraints and two
+      runnable ones.

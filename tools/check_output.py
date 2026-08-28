@@ -36,12 +36,46 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 FENCE = re.compile(r"^\s*(```|~~~)")
-SLOT_HEADING = re.compile(
-    r"^\s*(?:#{1,6}\s*|\*\*)(CONSTRAINTS?|OUTPUT(?:\s+CONTRACT)?|ACCEPTANCE(?:\s+TEST)?"
-    r"|ROLE|CONTEXT|TASK|IF\s+YOU\s+CANNOT)\b",
+# A slot gets labelled three ways in real prompts: a markdown heading
+# (`## CONSTRAINTS`), a bold label (`**Constraints.**`), or plain prose
+# (`Constraints: no third-party actions`). One regex covering all three kept
+# breaking one of them, so this is a function with the cases named.
+SLOT_WORDS = re.compile(
+    r"^(CONSTRAINTS?|OUTPUT(?:\s+CONTRACT)?|ACCEPTANCE(?:\s+TESTS?)?|SUCCESS\s+CRITERIA"
+    r"|ROLE|CONTEXT|BACKGROUND|TASK|IF\s+YOU\s+CANNOT|ESCAPE)",
     re.I,
 )
+MARKER = re.compile(r"^(#{1,6}\s+|\*\*|-\s+\*\*)")
+
+
+def slot_of(line: str) -> tuple[str, str] | None:
+    """(slot name, rest of the line) if this line labels a slot, else None."""
+    stripped = line.strip()
+    marked = bool(MARKER.match(stripped))
+    core = MARKER.sub("", stripped, count=1)
+    m = SLOT_WORDS.match(core)
+    if not m:
+        return None
+    rest = core[m.end():]
+    # A prose label has to be punctuated, or every sentence starting with the
+    # word "Context" would open a section.
+    if not marked and not rest.lstrip("*").startswith((":", ".")):
+        return None
+    return m.group(1).upper(), rest.lstrip("*:. ").strip()
+
+
 CHECKED_SECTIONS = ("CONSTRAINT", "OUTPUT", "ACCEPTANCE")
+
+WORD_NUMBERS = {
+    "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
+    "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11, "twelve": 12,
+}
+NUMBER = r"(\d+|" + "|".join(WORD_NUMBERS) + r")"
+
+
+def as_number(token: str) -> int:
+    return int(token) if token.isdigit() else WORD_NUMBERS[token]
+
 
 UNITS = {
     "word": lambda t: len(t.split()),
@@ -68,6 +102,7 @@ class Check:
 @dataclass
 class Report:
     checks: list[Check] = field(default_factory=list)
+    runnable: list[tuple[str, str]] = field(default_factory=list)
     unchecked: list[str] = field(default_factory=list)
     scoped: bool = True
 
@@ -89,15 +124,16 @@ def sentences_of(text: str) -> list[str]:
 def constraint_text(prompt: str) -> tuple[str, bool]:
     """The sections whose statements are about the answer, if they are marked."""
     lines = prompt.splitlines()
-    if not any(SLOT_HEADING.match(l) for l in lines):
+    if not any(slot_of(l) for l in lines):
         return prompt, False
     kept, keeping = [], False
     for line in lines:
-        m = SLOT_HEADING.match(line)
-        if m:
-            keeping = any(m.group(1).upper().startswith(s) for s in CHECKED_SECTIONS)
-            if keeping:
-                kept.append(re.sub(r"^\s*(?:#{1,6}\s*|\*\*)[A-Z ]+\**\.?\**", "", line))
+        slot = slot_of(line)
+        if slot:
+            name, rest = slot
+            keeping = any(name.startswith(s) for s in CHECKED_SECTIONS)
+            if keeping and rest:
+                kept.append(rest)
             continue
         if keeping:
             kept.append(line)
@@ -148,14 +184,14 @@ def check(prompt: str, output: str) -> Report:
     def counts(sentence: str, low: str) -> bool:
         fired = False
         m = re.search(r"\b(?:under|below|at most|no more than|fewer than|less than|"
-                      r"maximum of|max(?:imum)?|up to|within)\s+(\d+)\s+(\w+)", low)
+                      r"maximum of|max(?:imum)?|up to|within)\s+" + NUMBER + r"\s+(\w+)", low)
         if m and m.group(2) in UNITS:
-            limit, unit = int(m.group(1)), m.group(2)
+            limit, unit = as_number(m.group(1)), m.group(2)
             actual = UNITS[unit](body)
             fired = add("MAX_COUNT", f"at most {limit} {unit}", actual <= limit, f"{actual} {unit}")
-        m = re.search(r"\bexactly\s+(\d+)\s+(\w+)", low)
+        m = re.search(r"\bexactly\s+" + NUMBER + r"\s+(\w+)", low)
         if m and m.group(2) in UNITS:
-            want, unit = int(m.group(1)), m.group(2)
+            want, unit = as_number(m.group(1)), m.group(2)
             actual = UNITS[unit](body)
             fired = add("EXACT_COUNT", f"exactly {want} {unit}", actual == want, f"{actual} {unit}") or fired
         return fired
@@ -202,6 +238,30 @@ def check(prompt: str, output: str) -> Report:
                         f"{hits} occurrence(s)") or fired
         return fired
 
+    COMMAND = re.compile(r"`([^`]{4,120})`")
+    RUNNABLE_VERB = re.compile(
+        r"\b(pass(?:es|ed)?|fail(?:s|ed)?|green|exits?\s+0|succeeds?|returns?|parses?|"
+        r"compiles?|runs?|is clean|reports?)\b", re.I)
+
+    def runnable(sentence: str, low: str) -> bool:
+        """A constraint naming a command is verifiable by running it.
+
+        This tool does not run it - executing a command lifted out of a prompt
+        is not something a linter should do - so it reports the command and
+        says it was not run. That is a different answer from "cannot be
+        checked", and the difference is the whole point.
+        """
+        if not RUNNABLE_VERB.search(low):
+            return False
+        commands = [c for c in COMMAND.findall(sentence) if re.search(r"[ /.]", c)]
+        if not commands:
+            return False
+        for command in commands:
+            entry = (command, sentence)
+            if entry not in report.runnable:
+                report.runnable.append(entry)
+        return True
+
     def formats(sentence: str, low: str) -> bool:
         if re.search(r"\b(?:as|valid|in)\s+json\b", low):
             probe = strip_fences(output).strip() if fenced_blocks(output) else output.strip()
@@ -215,7 +275,7 @@ def check(prompt: str, output: str) -> Report:
     for sentence in sentences_of(scope):
         low = sentence.lower()
         fired = False
-        for matcher in (counts, structure, forbidden, formats):
+        for matcher in (counts, structure, forbidden, formats, runnable):
             fired = matcher(sentence, low) or fired
         if not fired:
             report.unchecked.append(sentence)
@@ -226,8 +286,9 @@ def check(prompt: str, output: str) -> Report:
 def render(report: Report, quiet: bool = False) -> str:
     lines = []
     passed = [c for c in report.checks if c.ok]
-    lines.append(f"{len(passed)}/{len(report.checks)} checkable constraint(s) held, "
-                 f"{len(report.unchecked)} not machine-checkable")
+    lines.append(f"{len(passed)}/{len(report.checks)} countable constraint(s) held, "
+                 f"{len(report.runnable)} runnable but not run here, "
+                 f"{len(report.unchecked)} for a reader to judge")
     if not report.scoped:
         lines.append("note: the prompt has no slot headings, so the whole of it was scanned "
                      "for constraints — a number describing the input may be read as a limit")
@@ -235,9 +296,15 @@ def render(report: Report, quiet: bool = False) -> str:
     for c in report.checks:
         mark = "ok  " if c.ok else "FAIL"
         lines.append(f"  {mark} {c.rule:<16} {c.demand:<28} {c.detail}")
+    if report.runnable:
+        lines.append("")
+        lines.append("  runnable — this tool does not execute commands; run these yourself:")
+        for command, sentence in report.runnable:
+            lines.append(f"    $ {command}")
+            lines.append(f"      to satisfy: {sentence[:88]}")
     if report.unchecked and not quiet:
         lines.append("")
-        lines.append("  not machine-checkable — read these yourself:")
+        lines.append("  for a reader to judge — no command named, nothing countable:")
         for sentence in report.unchecked:
             lines.append(f"    · {sentence[:96]}")
     return "\n".join(lines)
@@ -274,6 +341,7 @@ def main(argv: list[str]) -> int:
         print(json.dumps({
             "scoped": report.scoped,
             "checks": [vars(c) for c in report.checks],
+            "runnable": [{"command": c, "sentence": s} for c, s in report.runnable],
             "unchecked": report.unchecked,
         }, indent=2))
     else:
