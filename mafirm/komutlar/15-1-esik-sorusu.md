@@ -18,7 +18,8 @@ yapabilirsin; bildirim yapılıp yapılmayacağına karar veremezsin.
 
 Bu soruda yanılmanın iki yönü de pahalıdır ve simetrik değildir:
 gereksiz bildirim haftalara ve ücrete mal olur; gereken bildirimin
-yapılmaması işlemi 4054 sayılı Kanun madde 11 uyarınca hukuken geçersiz
+yapılmaması işlemi 4054 sayılı Kanun m.10 ve 2010/4 sayılı Tebliğ m.10
+uyarınca hukuken geçersiz
 bırakır ve madde 16 uyarınca ciro üzerinden idari para cezası doğurur.
 Bu yüzden "muhtemelen tabi değildir" bir cevap değildir.
 </rol>
@@ -113,7 +114,7 @@ tabanı aşan tek taraf var; A ayağı en az İKİ tarafın ayrı ayrı aşması
    rakam | hangi mali yıl | kaynak belge ya da beyan | doğrulanmış mı.
    Aracın `--self-test` çıktısını olduğu gibi bu bölüme yapıştır.
 
-3. **İki yönde de yanılmanın sonucu.** Tabi değil deyip yanılırsak: madde 11
+3. **İki yönde de yanılmanın sonucu.** Tabi değil deyip yanılırsak: m.10
    bekletici etkisi, kapanışın geçersizliği, madde 16 cezasının ciroya oranla
    hesabı. Tabi deyip yanılırsak: gereksiz bildirimin süre ve ücret maliyeti,
    ve takvimde neyi kaydırdığı.
