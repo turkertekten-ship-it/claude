@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>38 çalıştırılabilir takım · 317 vaka · 0 sinyal</span>
+    <span>39 çalıştırılabilir takım · 322 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -2252,6 +2252,65 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Otuz dördüncü tur</span>
+  <h2>Kök üçüncü kez göründü — ve bu kez kontrol kurulmuyordu bile</h2>
+  <p>Otuz üçüncü tur bir kök adlandırdı: <strong>kitap kontrolleri olaylara
+  değil anlara bağlıyor.</strong> İki örneği vardı. Kök mü, tesadüf mü?
+  Üçüncü bir yere bakıldı: §13 araç kataloğu — kaydettiği her alan zamanla
+  bozulur ve kitabın <strong>Karar</strong> sütunu onlara dayanır.</p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AP-01</span>
+      <span class="pill a">Katalog kurulumda yok</span></div>
+    <h3>§13'ün bütün araç kararları yalnızca kitapta yaşıyor</h3>
+    <p>§2 yalnızca <code>birimler</code>, <code>emsal</code>,
+    <code>hafiza</code>, <code>dosyalar</code>, <code>cikti</code>
+    klasörlerini açıyor; hiçbiri araç kataloğu için değil. Kitap <em>"Hepsi
+    27 Ağustos 2026 tarihinde GitHub API'siyle doğrulandı"</em> diyor — ama o
+    cümle <strong>kitapta</strong>, kurulan sistemde değil. Kurulumu yapan
+    hukukçunun elinde hangi aracın incelendiğine dair yerel bir kayıt,
+    eskiyecek bir doğrulama tarihi ve §16'nın bakabileceği bir şey yok.</p>
+    <p><strong>Karar yazılı; kararın dayandığı olgular bozuluyor; ikisi
+    arasındaki bağ kurulumda hiç yok.</strong></p>
+  </div>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AP-02 · AP-03</span>
+      <span class="pill a">Tazeleme aracı kör</span></div>
+    <h3>Kararı değiştiren iki alan hiç okunmuyor</h3>
+    <table><thead><tr><th>alan</th><th>var mı</th><th>neden önemli</th></tr></thead><tbody>
+    <tr><td><code>license.spdx_id</code></td><td>✓</td><td>yalnızca <strong>kod</strong> lisansı</td></tr>
+    <tr><td><code>stargazers_count</code></td><td>✓</td><td>—</td></tr>
+    <tr><td><code>pushed_at</code></td><td>✓</td><td>bakımın <strong>vekili</strong></td></tr>
+    <tr><td><code>archived</code></td><td><strong>yok</strong></td><td>bakımın <strong>olgusu</strong></td></tr>
+    <tr><td>veri lisansı</td><td><strong>yok</strong></td><td>ticari kullanımı yasaklayabilir</td></tr>
+    </tbody></table>
+    <p>İkisi de varsayımsal değil. §13.4'ün <code>google/diff-match-patch</code>
+    için yazdığı <em>"eskime burada bozulma değildir"</em> gerekçesi, deponun
+    <strong>5 Ağustos 2024'te arşivlendiği bilinmeden</strong> yazılmış — ve
+    kitabın kendi aracı çalıştırılsaydı <strong>bile</strong> bunu göremezdi.
+    <code>opensanctions</code> ise kodu MIT iken <strong>verisi CC BY-NC
+    4.0</strong>: ticari kullanıma kapalı, ve kitap onu ticari bir hukuk
+    pratiği için öneriyor.</p>
+  </div>
+
+  <div class="callout">
+    <strong>Kendi yamalarım ölçümü kirletiyordu.</strong> AP-01 ilk koşumda
+    <em>yeşil</em> verdi ve yakaladığı dosya <code>hafiza/dogrulama-bulgulari.md</code>
+    idi — yani <em>benim</em> kör sınama sırasında ürettiğim bir teslimat,
+    kitabın kurduğu bir şey değil. Kendi yamalarım ağaçta dururken kitabı
+    ölçmek, ikisini birbirine karıştırır ve <strong>kitabı olduğundan iyi
+    gösterir.</strong> Ölçüt §13'ün kendi yapısına indirildi.
+    <br><br>
+    Takım yazıldığı turda iki kez daha yakalandı: <strong>AE-03</strong> yeni
+    takımdaki çıplak <code>.lower()</code>'ı buldu — sınıfın altıncı sızması,
+    ve <em>"depo adları ASCII, bu örnek zararsız"</em> muhakemesi tam olarak
+    sınıfı besleyen muhakemedir; <strong>AH-03</strong> ise iki
+    <code>[A]</code> maddesinden birinin cevap beyanı taşımadığını gösterdi.
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -2369,7 +2428,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 38 takım · 317 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 39 takım · 322 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
