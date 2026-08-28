@@ -3725,3 +3725,53 @@ measurement of the whole could see it. The same sweep also shows lexical-only
 4. **When the falsification leaves a gap, leave it open.** The real cause of the
    MMR reversal is unmeasured. Writing a second plausible story in place of the
    first is how the first one got there.
+
+---
+
+## L75 - The mechanism was real and the named cause was wrong
+
+L74 left a gap deliberately: MMR is worth a case on the primary corpus and a
+precision cost on the external one, and the `candidate_k` story that would have
+explained it had just been falsified. Rather than write a second plausible
+story, the thing to do was measure the mechanism MMR's own docstring already
+claims - "a well-written document says the important thing in the introduction,
+the summary and the conclusion, and all three are excellent matches."
+
+That is within-document repetition, and it is directly observable. Over each
+corpus's goldens, on the top 8 that relevance alone returns - the list MMR would
+be replacing, which bounds what it can improve, and deliberately not the same as
+MMR's choice set of ~20 reranked candidates:
+
+                                     external   primary
+    mean pairwise token overlap        0.0480    0.0790
+    median                             0.0435    0.0772
+    share of pairs same document       0.1085    0.1214
+    distinct documents / results       0.7986    0.7312
+
+**Direction confirmed, cause refuted.** The corpus where MMR pays is 1.6-1.8x
+more redundant, so redundancy is the mechanism. But same-document pairs are
+almost equally common in both - 0.121 against 0.109, a 12% relative difference
+carrying a 65% difference in overlap. The extra redundancy is *across*
+documents, not within them: a repository whose README, ARCHITECTURE, PLAN and
+LEARNINGS all discuss chunking, against 153 PyPI pages that each describe a
+different package. The docstring's story is a real phenomenon that is not what
+distinguishes these two corpora.
+
+**And the ruler says how much any of this can matter.** Both overlaps are tiny.
+At lambda 0.7 the redundancy term is `0.3 * max_similarity`, so MMR's largest
+possible influence is about 0.024 on primary and 0.014 on external - a
+tie-breaker in both directions. That is consistent with a component that has now
+been measured as neutral, then worth a case, then a precision cost: it has never
+been doing very much, and which way the noise falls is what has been changing.
+
+**Rules.**
+1. **When a component's docstring names a mechanism, that is a hypothesis with
+   an address.** Measuring the named quantity is cheaper than inventing a new
+   explanation, and it can confirm the effect while refuting the story.
+2. **A confirmed direction is not a confirmed cause.** Primary is more
+   redundant, as predicted; the predicted *kind* of redundancy accounts for
+   almost none of the difference.
+3. **Compute the maximum the mechanism could contribute before arguing about
+   its sign.** One multiplication showed MMR's ceiling here is ~0.02, which
+   explains three contradictory readings across three corpora better than any of
+   the individual explanations did.
