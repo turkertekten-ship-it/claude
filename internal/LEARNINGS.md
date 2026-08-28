@@ -2269,3 +2269,58 @@ finding. The margin is now 0.020 rather than 0.039, and that is the cost.
 3. **A negative case that passes because a word happens to be absent is passing
    by luck.** It looked like a working abstention gate for as long as the
    vocabulary happened not to collide.
+
+---
+
+## L51 - Three cheap fixes falsified, all pointing the same way
+
+L48 diagnosed the coverage weighting: IDF measures rarity in a corpus of PyPI
+prose, a question is written in another register, and the ranking inverts on 30%
+of queries. Three corrections followed from that diagnosis. All three were
+measured. All three failed, and the pattern in *how* they failed is the finding.
+
+**1. Clip the IDF weight** so no single rare-in-corpus word dominates. Flat at
+48/54 from no cap down to 5.0, then worse. Clipping compresses magnitudes and
+the defect is ordering (L48).
+
+**2. Widen the corpus**, in case rarity is a small-N artifact. 91 to 153
+documents moved discrimination 28/40 to 29/40. The function words are absent
+from that register at any N (L50).
+
+**3. Require the query's discriminating terms to co-occur** in one document -
+motivated by "What is the capital of France?", where `capit` is in idna.md
+("capital letters") and `franc` in chardet.md (a French sample string) and no
+document holds both. Measured over all 54 goldens at six rarity cutoffs:
+
+| content-term cutoff | best threshold | TPR-FPR | answerable median | negative median |
+| --- | --- | --- | --- | --- |
+| df <= 33% | 0.60 | 0.159 | 1.00 | 1.00 |
+| df <= 10% | 0.65 | 0.112 | 1.00 | 1.00 |
+| df <= 3% | 0.50 | 0.000 | 1.00 | 1.00 |
+
+No separation. The France case is real and does not generalise: most of the
+negatives are ordinary English - "Who won the 1998 FIFA World Cup final?",
+"Which package sends mail over SMTP?" - whose terms do co-occur somewhere in a
+large enough body of developer prose. Nothing was built.
+
+**What the three failures have in common.** Each tried to separate *relevant*
+from *irrelevant* using a statistic over term occurrence, and each failed on the
+same class of case: a query whose words are individually present and collectively
+meaningless in this corpus. "Capital letters" and a French sample string are a
+perfect lexical match for "capital" and "France" and have nothing to do with the
+question. No amount of counting where terms appear recovers that, because the
+information needed is what the terms *mean* here - which is what an embedder is
+for, and the hosted ones are unreachable from this environment.
+
+That is a convergent result rather than three separate dead ends, and it is
+worth more than any of the three individually: the remaining failures on this
+corpus are not reachable by cheaper term statistics.
+
+**Rules.**
+1. **When several independent fixes fail on the same subset, stop proposing
+   fixes of that kind.** Three attempts from one diagnosis is enough evidence
+   that the diagnosis, while correct, does not imply a lexical remedy.
+2. **A mechanism that explains one case is a hypothesis, not a feature.**
+   Co-occurrence explains the France case exactly and separates nothing over 54.
+   The measurement that would have justified building it took twenty lines and
+   ran before any code was written.
