@@ -371,6 +371,27 @@ Several tips describe features, settings and model versions as of early 2026; fe
 > writes new bullets in Cherny's voice. A single sample can tell you an error
 > exists and still mislead you about its direction.
 
+> **The evidence that closed the biggest unknown had been on disk for hours.**
+> U-8 asked whether the transcription was faithful, and was left open because
+> `x.com` is blocked. The compilation ships 65 screenshots of the original
+> posts; they came down with the clone made to read the tips in the first
+> place. Nothing was fetched to close it. The unknown survived because the
+> question was framed as "can I reach the source" instead of "what do I already
+> have".
+>
+> **GitHub is the way past the egress block.** Every host that actually serves
+> this material — `x.com`, `threads.com`, Substack, Medium, the interview sites,
+> `anthropic.com` — is refused. `raw.githubusercontent.com` is not, and other
+> people mirror the same content into repositories. The May 2026 post, an
+> independent transcription of the January thread, and a sourced knowledge base
+> all came through that one door.
+>
+> **The first-party source was thinner than the third-party one.** Chasing the
+> auto-mode figures into the official documentation found no numbers at all —
+> only a qualitative warning. The tertiary source had more detail than the
+> primary; the primary had more authority. Neither was substitutable for the
+> other, which is the argument for grading sources rather than ranking them.
+
 ## How this repository applies it
 
 > This section states decisions, not facts, so it is outside the enforced
