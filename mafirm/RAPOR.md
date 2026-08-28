@@ -43,9 +43,10 @@ Dokuz takım, 96 vaka:
 | N | **Olumsuz iddia kanıtı** — raporun kendisine olumsuz iddia kuralı | CLAUDE.md §2 |
 | O | **Sır kapısının kaçırma yüzeyi** — Unicode | CLAUDE.md §6 |
 | P | **Teslimatların güncelliği** — raporun kendisine güncellik kuralı | CLAUDE.md §3 |
+| Q | **Rapor kendi kapılarından geçiyor mu** | CLAUDE.md §5, §14 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamadan ve iki
-takım eklendikten sonra **163 vaka, 0 SİNYAL** — on üç bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve BEKLENEN olarak raporlanıyor — ve on üçünün her biri ya
+takım eklendikten sonra **170 vaka, 0 SİNYAL** — on üç bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve BEKLENEN olarak raporlanıyor — ve on üçünün her biri ya
 kitabın davranışının bilerek bırakılmış kaydıdır ya da belgelenmiş bir
 öntanımlı boşluktur; hiçbiri yamalı sistemde çözülmemiş bir kusur değildir.
 
@@ -227,9 +228,10 @@ yapılıyor.** Kodun varlık sebebi buydu.
 
 **A-07 · Para birimi modeli yok, ve bu kitabın kendi pilotunu ters çeviriyor.**
 §19'un ilk dosyası: dünya cirosu **2,4 milyar avro** olan bir Alman alıcı,
-Türkiye cirosu 1,4 milyar TL olan bir hedefi alıyor. B eşiği "diğer taraflardan
-birinin dünya cirosunun **9.000.000.000 TL**'yi aşması" diyor — eşik TL
-cinsinden. Rakam çevrilmeden verilirse:
+Türkiye cirosu 1,4 milyar TL olan bir hedefi alıyor. 2010/4 sayılı Tebliğ'i
+değiştiren 2026/2 sayılı Tebliğ'in B eşiği (kitapta yazıldığı hâliyle; bkz.
+I-01/I-02 çekinceleri) "diğer taraflardan birinin dünya cirosunun
+**9.000.000.000 TL**'yi aşması" diyor — eşik TL cinsinden. Rakam çevrilmeden verilirse:
 
 ```
 KALDI A-07  §19 pilotu: 2,4 milyar AVRO çevrilmeden verilirse
@@ -276,7 +278,8 @@ yapısı: hepsi doğru. **Kitabın savını taşıyan dört olumsuz bulgunun dö
 doğrulandı**, akıl yürütme modelinin insan kontrol kolundan daha fazla
 uydurduğu (11'e 4) dâhil. Üç aktarım hatası:
 - Süre düşüşü aralıkları (%20–28 / %20–34) hiçbir kaynakla uyuşmuyor; bulunan
-  her kaynak %14–37 / %12–28 diyor ve geniş aralığı ters kola veriyor.
+  her kaynak %14–37 / %12–28 diyor ve geniş aralığı ters kola veriyor
+  (H-03; ayrıntı `sinama/ks_h_kaynaklar.md`).
 - **+0,26 puan bir karıştırma:** o rakam iki AI kolu ARASINDAKİ farktır,
   erişim destekli kolun kontrol grubuna karşı etkisi değil (o 0,25'tir).
 - **"%19 daha düşük" → "19 YÜZDE PUANI daha düşük."** Mevcut ifade, kitabın
@@ -332,7 +335,8 @@ Bu ölçülebilir bir iddiadır. İki cevap da üretilip beş kapıdan geçirild
 
 Kitaba sadık sistemde **her ikisi de bloklanıyor.** Kapı sistemi, §19'un
 "kurulumun tamamının sebebi" dediği farkı ifade edemiyor: eşik rakamı içeren
-her şeyi durduruyor. Duyarlılık %100, isabet %0.
+her şeyi durduruyor. Kaynak: J-07s ve J-08s vakalarının
+çıkış kodları — duyarlılık %100, isabet %0.
 
 Pilot ayrıca **hiç hesaplanamıyor**: `esik.py`'nin komut satırı arayüzü yok,
 avro çevirisi modellenmemiş, ve §14 sonrası öz-sınama kırmızı olduğu için §0'ın
@@ -625,6 +629,51 @@ kendi başlığında yazıyor. Uyarısı silinirse P-05 yakalıyor.
 
 ---
 
+## Yedi buçuk artı sekiz · Sistem kendi raporunu reddediyordu
+
+Sekiz tur boyunca kitabın kapılarını sertleştirdim. Dokuzuncu turda o kapıları
+kendi raporuma tuttum:
+
+```
+RAPOR.md  [kapsam] görüş gibi okunuyor, avukat başlığı yok
+```
+
+Kapı haklıydı. Bu rapor Türk hukuku ifadeleri taşıyor — *"izinsiz kapanış
+maruziyeti"*, *"bildirime tabidir"* — ve `## Sonuç` ile bitiyordu; işletim
+sözleşmesi §5'in istediği iki zorunlu başlıkla değil.
+
+**Daha kötüsü: bu çıktıyı sekizinci turda ekranda gördüm ve üzerinden geçtim.**
+§12'nin öngördüğü kusurun ta kendisi: *"belgedeki bir kurala model sakinken
+uyulur, görev uzayınca atlanır."* Sekiz tur, tam da "görev uzayınca"dır.
+
+Rapor artık iki zorunlu başlıkla bitiyor ve avukat başlığı **boş değil**: beş
+mevzuat kalemi ve bu raporun mevzuat katmanının birincil kaynakla
+doğrulanmadığı, adlarıyla yazılı.
+
+### Ve kapıyı raporun üzerinde koşturmak, kapıda üç kusur daha buldu
+
+1. **DAYANAK yalnızca mevzuat atfını tanıyor.** Kanıt kuralı "her rakam
+   dayanağını taşır" der — dayanağını, ille de bir *kanun maddesini* değil.
+   Doğru kaynaklanmış bir akademik etki büyüklüğü ("%19 daha düşük,
+   *Organization Science* 2026") kapıyı **asla geçemezdi**. Kitabın kendi §17'si
+   bu türden onlarca rakam taşır: §17 biçiminde yazılmış bir çıktı sonsuza
+   kadar bloklanırdı. Dayanağın türü artık rakamın türüne bağlı — para tutarı
+   mevzuat atfı ister, oran kaynak atfıyla yetinir.
+2. **Cycle 3'te eklediğim `Dayanak:` kuralı belge düzeyi gevşekliğini geri
+   getirmişti.** C-01'i çözmek için koyduğum kural, uzun bir raporun başındaki
+   tek bir beyanla sonundaki dayanaksız her eşiği aklıyordu — B-17/B-18'de
+   teşhis ettiğim kusurun aynısı, bir `Dayanak:` satırının arkasına saklanmış.
+   Kapsam artık ikili: başvuru malzemesinde dosyanın tamamı, başka her yerde
+   bir sonraki `##` başlığa kadar. İkisi de gerekliydi — yalnızca birincisi
+   §19'un doğru cevabını bloklardı, yalnızca ikincisi kitabın tr-esikler.md'sini.
+3. **§14'ün zorunlu kıldığı satırın kendisi kapıyı kandırıyordu.**
+   `bulunamayan: 4054 sayılı Kanun metni` ibaresi — bir kaynağın BULUNAMADIĞINI
+   söyleyen alan — yakınlık penceresinde bir mevzuat atfı olarak okunuyor ve
+   yanındaki her eşiği aklıyordu. Alan artık dayanak aranırken metinden
+   düşülüyor.
+
+---
+
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
 
 | Bölüm | Beklenen | Gerçek | Sebep |
@@ -684,7 +733,11 @@ Bir sınama takımı da sınanmalıdır. Üç hata yapıldı ve üçü de düzel
    doğrulayan bir adım eklendi. Bu, D takımında bir kez daha yaşandığı için
    artık bir alışkanlık: **bir mutasyon sınaması, mutasyonun olduğunu
    kanıtlamadan geçerli değildir.**
-7. **İzlenebilirlik denetleyicimin ayrıştırıcısını da yanlış yazdım** —
+7. **Kapımın kendi raporumu reddettiğini gördüm ve üzerinden geçtim.**
+   Sekizinci turda `RAPOR.md [kapsam] avukat başlığı yok` çıktısı ekrandaydı;
+   okudum, başka bir şeye baktım. Bir turu bu yüzden kaybettim ve kitabın §12'de
+   tarif ettiği kusuru birebir yaşadım.
+8. **İzlenebilirlik denetleyicimin ayrıştırıcısını da yanlış yazdım** —
    aralık atıflarını ve dinamik kimlikleri görmüyordu, yedi maddeyi haksız yere
    "dayanaksız" ilan etti. Bu, bu oturumdaki yedinci ayrıştırıcı kusurum ve
    hepsi aynı yönde: **bir dedektör, ölçtüğü şeyin gerçek biçimini görmeden
@@ -747,7 +800,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # on altı takım, 163 vaka
+./sinama/hepsi.sh                 # on yedi takım, 170 vaka
 ./denetim.sh --yapisal            # mühendislik katmanı
 ./denetim.sh                      # mevzuat bulguları dâhil
 ```
@@ -759,3 +812,51 @@ Ham çıktılar: `sinama/SONUC-once.txt` (kitaba sadık) ve
 `ks_h_kaynaklar.md`, `ks_i_mevzuat.md`.
 Kitabın metni için düzeltme listesi: **`KITAP-ERRATA.md`** — bölüm bölüm,
 ağırlık işaretli, her madde onu bulan sınama vakasıyla.
+
+---
+
+## Şimdi ne yapılmalı
+
+1. **Üç ENGELLEYİCİ mevzuat bulgusunu birincil kaynaktan teyit ettirin.**
+   Erişimi olan bir insan `resmigazete.gov.tr/eskiler/2026/02/20260211-5.htm`
+   ve 4054 sayılı Kanun metnini açmalı. I-01 ve I-02 bildirime tabilik
+   sonucunu **iki ayrı yönde** değiştirir; I-03 dört dosyaya yayılmış bir
+   atıftır. Teyide kadar `birimler/rekabet/` çıktılarına canlı bir dosyada
+   dayanılmaz.
+2. **Kitabın §14 yamasını uygulamadan önce §12'nin dokuz beklenen kümesini
+   güncelleyin.** Aksi hâlde kurulum kendi denetimini geçemez ve §19 hiç
+   çalışmaz.
+3. **Sır kapısını Bash'i kapsayacak biçimde kurun** ve müvekkil ad kaydını
+   (`hafiza/muvekkil-adlari.txt`) doldurun; boş kayıt, kural 6'nın gerçek
+   kişi ayağının kapsanmadığı anlamına gelir ve denetim bunu her koşumda
+   söyler.
+4. **`ks_g_depolar.md`'deki yıldız sayılarına dayanmadan önce yeniden çekin** —
+   dosya GÜNLÜK bozulma sınıfındadır ve bu rapor yazıldığında zaten bir gün
+   eskimişti.
+5. **Bir sonraki kurulumda `sinama/hepsi.sh` koşun.** 0 SİNYAL, raporun hâlâ
+   ölçtüğü sistemi anlattığının tek kanıtıdır.
+
+## Yetkili avukat görüşü gereken konular
+
+Bu rapor bir hukuk pratiğinin sistemini sınar; **hukuki görüş değildir** ve
+kaleme alanı hiçbir ülkede baroya kayıtlı değildir. Aşağıdakiler dayanılmadan
+önce yetkili avukat görüşü ister ve bu liste boş değildir:
+
+- **Teknoloji teşebbüsü istisnasının kapsamı** (I-01): indirim 2026/2 m.7(2)
+  uyarınca birinci fıkranın (a) ve (b) bentlerinin ikisine birden mi uygulanır?
+  Cevap, bir işlemin bildirime tabi olup olmadığını değiştirir.
+- **Teknoloji bağlantı ölçütü** (I-02): "Türkiye'de yerleşik" mi, yoksa
+  kitaptaki "faaliyet gösteren ya da Ar-Ge yürüten" mi?
+- **Bekletici etkinin dayanağı** (I-03): 4054 m.10 mu m.11 mi.
+- **TTK 499 ve 595/1'in nitelendirilmesi** (I-05): pay defteri kaydının
+  açıklayıcı mı kurucu mu olduğu, ve noter onayının kapsamı.
+- **§5'teki her eşiğin bugünkü değeri.** Bu raporun mevzuat katmanı
+  **birincil kaynakla doğrulanmadı**; kanıt katmanı arama motoru özetidir ve
+  bunun gerekçesi `hafiza/egress-kaniti.md` içinde kanıtlıdır.
+- **Bu raporun bulgularına dayanarak canlı bir dosyada atılacak her adım.**
+
+Kontrol edildi: rekabet.gov.tr arama sonuçları (2026-08-27) · GitHub MCP depo
+çözümlemesi (2026-08-27) · yayıncı kayıtları (2026-08-27) · vekil egress ret
+kaydı (2026-08-28) · yerel kurulum ve sınama takımı (2026-08-28) ·
+bulunamayan: 4054 sayılı Kanun ve 2026/2 sayılı Tebliğ'in birebir Resmî Gazete
+metni (kuruluş egress politikası reddi)

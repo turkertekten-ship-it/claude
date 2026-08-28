@@ -1,5 +1,5 @@
 ###############################################################
-#  KÖR SINAMA TAKIMI — 2026-08-28T08:05:58Z
+#  KÖR SINAMA TAKIMI — 2026-08-28T08:16:49Z
 ###############################################################
 
 /root/mafirm/sinama/ks_a_esik.py:45: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
@@ -274,7 +274,7 @@ GEÇTİ K-15   koltuk kapısı yöntem dosyalarını bloklamıyor
 KÖR SINAMA L — çapraz referans bütünlüğü
 ================================================================================================
 GEÇTİ L-01   belgelerdeki her yol atfının hedefi var
-        38 atıf incelendi, kırık: yok
+        45 atıf incelendi, kırık: yok
 GEÇTİ L-02   her INDEX kendi yöntem dosyalarının hepsini anıyor
         anılmayan: yok
 GEÇTİ L-03   belgelerde sabit ~/mafirm yolu kalmamış
@@ -292,9 +292,9 @@ GEÇTİ L-06   hafiza/ dosyalarının hepsi var
 KÖR SINAMA M — errata ↔ sınama izlenebilirliği
 ================================================================================================
 GEÇTİ M-01   her errata maddesi bir sınama vakasına atıf yapıyor
-        43 madde · atıfsız 0: yok
+        45 madde · atıfsız 0: yok
 GEÇTİ M-02   atıf yapılan her vaka kimliği gerçekten tanımlı
-        163 tanımlı kimlik · uydurma dayanak: yok
+        170 tanımlı kimlik · uydurma dayanak: yok
 GEÇTİ M-03   [A] ve [B] maddelerinin atıfları sadık sistemde gerçekten kaldı
         sadık koşumda kalan vaka: 41 · sınanmamış ağır madde: yok
 GEÇTİ M-04   sadık sistemde kalan her vaka errata'da ya da raporda açıklanmış
@@ -369,6 +369,24 @@ GEÇTİ P-06   yıldız sayıları taşıyan dosya GÜNLÜK sınıfında
 ------------------------------------------------------------------------------------------------
 6 vaka · 6 geçti · 0 beklenen · 0 SİNYAL
 
+================================================================================================
+KÖR SINAMA Q — rapor kendi kapılarından geçiyor mu
+================================================================================================
+GEÇTİ Q-01   hiçbir teslimat kendi kapılarını ateşlemiyor
+        8 teslimat · ateşleyen: yok
+GEÇTİ Q-02   esaslı çıktılar iki zorunlu başlıkla, bu sırayla bitiyor
+        eksik: yok
+GEÇTİ Q-03   avukat başlığı gerçek kalemler taşıyor (§5: asla boş kalmaz)
+        yetersiz: yok
+GEÇTİ Q-04   Kontrol edildi satırı var ve 'bulunamayan' alanı dolu
+        §14: 'bulunamayan isteğe bağlı değil zorunlu bir alandır' · eksik: yok
+GEÇTİ Q-05   mutasyon: avukat başlığı silinirse kapsam kapısı yakalar
+GEÇTİ Q-06   mutasyon: dayanaksız eşik eklenirse kanıt kapısı yakalar
+GEÇTİ Q-07   akademik dayanak bir MEVZUAT eşiğini aklamıyor
+        Dayanağın TÜRÜ rakamın türüne bağlıdır: para tutarı mevzuat atfı ister, oran/yüzde kaynak atfıyla yetinir. İlk sürümde akademik dayanak her rakamı aklıyordu ve Q-06 bunu yakaladı. Şu anki davranış: ['arastirma', 'guncellik', 'kanit']
+------------------------------------------------------------------------------------------------
+7 vaka · 7 geçti · 0 beklenen · 0 SİNYAL
+
 ###############################################################
 #  ÖZET
 ###############################################################
@@ -385,6 +403,7 @@ GEÇTİ P-06   yıldız sayıları taşıyan dosya GÜNLÜK sınıfında
   N · olumsuz iddia kanıtı            temiz
   O · sır kapısı kaçırma yüzeyi   temiz
   P · teslimatların güncelliği       temiz
+  Q · rapor kendi kapılarından geçiyor mu temiz
   ------------------------------------------------------------
   TOPLAM SİNYAL                         0
 

@@ -37,6 +37,8 @@ python3 "$S/ks_o_kacirma.py";     topla "O · sır kapısı kaçırma yüzeyi" $
 echo
 python3 "$S/ks_p_guncellik.py";  topla "P · teslimatların güncelliği" $?
 echo
+python3 "$S/ks_q_kendi_kapisi.py"; topla "Q · rapor kendi kapılarından geçiyor mu" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

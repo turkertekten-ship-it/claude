@@ -177,7 +177,9 @@ dışarıda: `-malısınız`, `zorunludur`, `şarttır`, `tabidir`, `başvurman�
 gerek`. *(B-02…B-06)*
 
 **[C] ESIK deseni iki grup istiyor** (`{2,}`), yani 1.000.000 altındaki her
-rakama kör: `250.000 TL` görünmüyor. Sözle yazılmış rakam (`3 milyar TL`),
+rakama kör. Örnek olarak 2026/2 sayılı Tebliğ'in kendi teknoloji eşiği
+(250.000.000 TL) görünür ama bir noter harcı ya da damga vergisi ölçeğindeki
+`250.000 TL` görünmez. Sözle yazılmış rakam (`3 milyar TL`),
 `TRY` ve oran biçimleri (`binde bir`, `yüzde 98`) de görünmüyor. *(B-13…B-16)*
 
 **[C] DAYANAK belge düzeyinde.** Metnin herhangi bir yerinde "Tebliğ" kelimesi
@@ -187,6 +189,24 @@ beyanı. *(B-17, B-18)*
 
 **[C] Güncellik kapısı** Türkçe tarih biçimini (`01.01.2020`), **tarihi hiç
 olmayan bir eşiği** ve gelecek tarihli doğrulamayı görmüyor. *(B-21…B-23)*
+
+**[B] DAYANAK yalnızca Türk mevzuat atfını tanıyor.** Kanıt kuralı "her rakam
+dayanağını yanında taşır" der — dayanağını, ille de bir KANUN MADDESİNİ değil.
+Kitabın deseni yalnızca `madde N`, `NNNN/N sayılı`, `Resmî Gazete` gibi mevzuat
+biçimlerini görüyor. Sonuç: doğru kaynaklanmış bir akademik etki büyüklüğü
+("%19 daha düşük, *Organization Science* 2026") kanıt kapısını **asla geçemez**.
+Kitabın kendi §17'si bu türden onlarca rakam taşır; §17 biçiminde yazılmış bir
+çıktı kapı tarafından sonsuza kadar bloklanırdı.
+→ Dayanağın TÜRÜ rakamın türüne bağlanmalı: para tutarı mevzuat atfı ister,
+oran ve yüzde kaynak atfıyla yetinir. Gevşetme değil — kapı hâlâ bir dayanak
+ister, doğru türdekini de tanır. *(Q-07)*
+
+**[C] "bulunamayan:" alanı, atıf sanılıyor.** §14 her esaslı çıktının
+`Kontrol edildi: … bulunamayan: <ne>` satırıyla bitmesini ZORUNLU kılıyor. Ama
+o alan bulunAMAYAN kaynakları sayar; içindeki bir mevzuat adı bir atıf değil,
+bir yokluk beyanıdır. Yakınlık penceresi ikisini ayırt etmediği için, §14'ün
+zorunlu kıldığı satırın kendisi yanındaki her eşiği aklıyor.
+→ Dayanak aranırken `bulunamayan:` alanı metinden düşülmeli. *(Q-06)*
 
 **[C] Bozuk olayda kapı AÇIK başarısız oluyor** (`return 0`). Araç adı
 okunamadığında kanalın dışarı gidip gitmediği bilinemez. *(C-08)*
@@ -298,3 +318,51 @@ Kapılar **biçimi** denetler, **muhakemeyi** değil. Bu bir kusur değil bir
 sınırdır ve §18'e onuncu madde olarak yazılmalıdır — çünkü §17.1'in kendi
 bulgusu tam olarak budur: kazanç açıklıkta ve düzendedir, **doğrulukta
 değildir.** Doğruluğu sağlayan şey kapılar değil, yetkili avukat onayıdır.
+
+---
+
+## Şimdi ne yapılmalı
+
+1. **Üç ENGELLEYİCİ mevzuat bulgusunu birincil kaynaktan teyit ettirin.**
+   Erişimi olan bir insan `resmigazete.gov.tr/eskiler/2026/02/20260211-5.htm`
+   ve 4054 sayılı Kanun metnini açmalı. I-01 ve I-02 bildirime tabilik
+   sonucunu **iki ayrı yönde** değiştirir; I-03 dört dosyaya yayılmış bir
+   atıftır. Teyide kadar `birimler/rekabet/` çıktılarına canlı bir dosyada
+   dayanılmaz.
+2. **Kitabın §14 yamasını uygulamadan önce §12'nin dokuz beklenen kümesini
+   güncelleyin.** Aksi hâlde kurulum kendi denetimini geçemez ve §19 hiç
+   çalışmaz.
+3. **Sır kapısını Bash'i kapsayacak biçimde kurun** ve müvekkil ad kaydını
+   (`hafiza/muvekkil-adlari.txt`) doldurun; boş kayıt, kural 6'nın gerçek
+   kişi ayağının kapsanmadığı anlamına gelir ve denetim bunu her koşumda
+   söyler.
+4. **`ks_g_depolar.md`'deki yıldız sayılarına dayanmadan önce yeniden çekin** —
+   dosya GÜNLÜK bozulma sınıfındadır ve bu rapor yazıldığında zaten bir gün
+   eskimişti.
+5. **Bir sonraki kurulumda `sinama/hepsi.sh` koşun.** 0 SİNYAL, raporun hâlâ
+   ölçtüğü sistemi anlattığının tek kanıtıdır.
+
+## Yetkili avukat görüşü gereken konular
+
+Bu rapor bir hukuk pratiğinin sistemini sınar; **hukuki görüş değildir** ve
+kaleme alanı hiçbir ülkede baroya kayıtlı değildir. Aşağıdakiler dayanılmadan
+önce yetkili avukat görüşü ister ve bu liste boş değildir:
+
+- **Teknoloji teşebbüsü istisnasının kapsamı** (I-01): indirim 2026/2 m.7(2)
+  uyarınca birinci fıkranın (a) ve (b) bentlerinin ikisine birden mi uygulanır?
+  Cevap, bir işlemin bildirime tabi olup olmadığını değiştirir.
+- **Teknoloji bağlantı ölçütü** (I-02): "Türkiye'de yerleşik" mi, yoksa
+  kitaptaki "faaliyet gösteren ya da Ar-Ge yürüten" mi?
+- **Bekletici etkinin dayanağı** (I-03): 4054 m.10 mu m.11 mi.
+- **TTK 499 ve 595/1'in nitelendirilmesi** (I-05): pay defteri kaydının
+  açıklayıcı mı kurucu mu olduğu, ve noter onayının kapsamı.
+- **§5'teki her eşiğin bugünkü değeri.** Bu raporun mevzuat katmanı
+  **birincil kaynakla doğrulanmadı**; kanıt katmanı arama motoru özetidir ve
+  bunun gerekçesi `hafiza/egress-kaniti.md` içinde kanıtlıdır.
+- **Bu raporun bulgularına dayanarak canlı bir dosyada atılacak her adım.**
+
+Kontrol edildi: rekabet.gov.tr arama sonuçları (2026-08-27) · GitHub MCP depo
+çözümlemesi (2026-08-27) · yayıncı kayıtları (2026-08-27) · vekil egress ret
+kaydı (2026-08-28) · yerel kurulum ve sınama takımı (2026-08-28) ·
+bulunamayan: 4054 sayılı Kanun ve 2026/2 sayılı Tebliğ'in birebir Resmî Gazete
+metni (kuruluş egress politikası reddi)

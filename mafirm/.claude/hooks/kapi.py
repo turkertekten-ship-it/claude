@@ -106,7 +106,20 @@ OLUMSUZ = re.compile(
     r"|\bmuaf(?:tır)?\b"
     r")", re.I)
 
-# --- Mevzuat dayanağı ------------------------------------------------------
+# --- Dayanak: mevzuat VE mevzuat-dışı ------------------------------------
+# [Q takımı] Kanıt kuralı "her rakam dayanağını yanında taşır" der — DAYANAĞINI,
+# ille de bir KANUN MADDESİNİ değil. Kitabın DAYANAK deseni yalnızca Türk
+# mevzuat atıflarını tanıyor; dolayısıyla doğru kaynaklanmış bir akademik etki
+# büyüklüğü ("%19 daha düşük, Organization Science 2026") kanıt kapısını ASLA
+# geçemez. Kitabın kendi §17'si bu türden onlarca rakam taşır: §17 biçiminde
+# yazılmış bir çıktı, kapı tarafından sonsuza kadar bloklanırdı.
+# Çözüm gevşetmek değil: kapı hâlâ bir dayanak İSTİYOR, yalnızca doğru
+# TÜRDEKİ dayanağı da tanıyor.
+AKADEMIK_DAYANAK = re.compile(
+    r"(DOI\b|doi\.org|10\.\d{4}/|\bScience\b|\bJournal\b|Organization Science"
+    r"|et\s+al\.?|ve\s+ark\.|Kaynak\s*:|Tasarım\s*:|[GHI]-\d+"
+    r"|ks_[ghi]_\w+\.md|§\s?17)", re.I)
+
 DAYANAK = re.compile(
     r"(madde\s+\d+|m\.\s?\d+|\d{4}/\d+\s+sayılı|sayılı\s+(?:Kanun|Tebliğ)"
     r"|Resmî\s+Gazete|II-\d+\.\d+|TTK\s+m\.?\s?\d+)", re.I)
@@ -182,18 +195,63 @@ def kapi_kapsam(metin, yol=None, disari=False):
             % (tur, metin[max(0, m.start() - 30):m.end() + 30].strip()))
 
 
-def kapi_kanit(metin):
-    """Bir eşik rakamı, YANINDA mevzuat dayanağı ister.
+# [Q-06] "bulunamayan:" alanı, BULUNAMAYAN kaynakları sayar. İçindeki bir
+# mevzuat adı bir ATIF değil, bir yokluk beyanıdır — ama yakınlık penceresi
+# ikisini ayırt edemiyordu ve §14'ün zorunlu kıldığı "bulunamayan: 4054
+# sayılı Kanun metni" ibaresi, yanındaki her eşiği aklıyordu. Dayanak
+# aranırken bu alan metinden düşülür.
+BULUNAMAYAN = re.compile(r"bulunamayan\s*:[^\n]*", re.I)
 
-    İki yoldan biri yeter: rakamın ±YAKINLIK karakterinde bir atıf, ya da
-    rakamdan ÖNCE gelen açık bir "Dayanak:" beyanı.
+
+def _dayanak_var(pencere):
+    return bool(DAYANAK.search(BULUNAMAYAN.sub(" ", pencere)))
+
+
+def kapi_kanit(metin, yol=None):
+    """Bir eşik rakamı, YANINDA dayanağını ister.
+
+    Üç yoldan biri yeter:
+      1. rakamın ±YAKINLIK karakterinde bir mevzuat atfı,
+      2. aynı pencerede akademik/kaynak atfı (bkz. AKADEMIK_DAYANAK),
+      3. YALNIZCA BAŞVURU MALZEMESİNDE: dosyanın başındaki açık "Dayanak:"
+         beyanı, dosyanın tamamını yönetir.
+
+    [Q-06] Üçüncü yol önce her dosyada geçerliydi ve bu, C-01'i çözerken
+    B-17/B-18'de teşhis ettiğim BELGE DÜZEYİ gevşekliğini geri getiriyordu:
+    uzun bir raporun başındaki tek bir "Dayanak:" satırı, sonundaki
+    dayanaksız bir eşiği akıyordu. Bir "Dayanak:" beyanı ancak TEK KONULU
+    bir başvuru dosyasını yönetebilir — `birimler/` ve `emsal/` altındakiler
+    yapısı gereği öyledir; bir rapor değildir.
     """
     for m in ESIK.finditer(metin):
         pencere = metin[max(0, m.start() - YAKINLIK):m.end() + YAKINLIK]
         onceki = metin[:m.start()]
-        if DAYANAK_BEYAN.search(onceki) and DAYANAK.search(onceki):
+        # 3. yol: açık bir "Dayanak:" beyanı. KAPSAMI iki türlüdür:
+        #   · başvuru malzemesinde (birimler/, emsal/) dosyanın TAMAMINI
+        #     yönetir — bu dosyalar yapısı gereği tek konuludur ve eşik
+        #     listeleri başlıkların altında gelir;
+        #   · başka her yerde yalnızca BİR SONRAKİ ## BAŞLIĞA KADAR yönetir.
+        # İkisi de gerekli: yalnızca birincisi olsaydı §19'un doğru cevabı
+        # (dayanağını başlıkta beyan eden kısa bir çıktı) bloklanırdı [J-07y];
+        # yalnızca ikincisi olsaydı kitabın kendi tr-esikler.md'si bloklanırdı
+        # [C-01]. Sınırsız belge kapsamı ise Q-06'nın yakaladığı gevşekliktir.
+        bey = None
+        for b in DAYANAK_BEYAN.finditer(onceki):
+            bey = b
+        if bey and _dayanak_var(onceki[bey.start():]):
+            if _basvuru_malzemesi(yol):
+                continue
+            if not re.search(r"^#{1,3} ", onceki[bey.end():], re.M):
+                continue
+        # [Q-07] Dayanağın TÜRÜ, rakamın türüne bağlıdır. Bir PARA tutarı
+        # mevzuat eşiğidir ve mevzuat atfı ister; bir ORAN ya da yüzde bir
+        # ölçüm olabilir ve kaynak atfı yeter. Akademik dayanağı her rakama
+        # açmak, "Kaynak:" ya da bir bulgu kimliği taşıyan her paragrafın
+        # yanındaki mevzuat eşiğini aklıyordu — Q-06 bunu yakaladı.
+        para_mi = re.search(PARA, m.group(0), re.I)
+        if not para_mi and AKADEMIK_DAYANAK.search(pencere):
             continue
-        if not DAYANAK.search(pencere):
+        if not _dayanak_var(pencere):
             return ("kanit", "dayanaksız eşik (±%d karakterde atıf yok): %r"
                     % (YAKINLIK, metin[max(0, m.start() - 40):m.end() + 20].strip()))
     return None
@@ -299,7 +357,7 @@ def kapi_koltuk(metin, yol=None):
 def denetle(metin, disari=False, bugun=None, yol=None):
     """Altı kapının hepsi. (kapı, ileti) listesi döner."""
     return [b for b in (kapi_kapsam(metin, yol, disari),
-                        kapi_kanit(metin),
+                        kapi_kanit(metin, yol),
                         kapi_sir(metin, disari),
                         kapi_guncellik(metin, bugun),
                         kapi_arastirma(metin, yol, disari),

@@ -28,3 +28,9 @@ G-03 | hayır | (kitap §13.3) | opensanctions kodu MIT ama VERİSİ CC BY-NC 4.
 Her ENGELLEYICI satır, birincil kaynak açılıp teyit edilene kadar açık kalır.
 Teyit edildiğinde satır silinir ve ilgili dosya güncellenip yeni bir doğrulama
 tarihi yazılır.
+
+Kontrol edildi: rekabet.gov.tr arama sonuçları (2026-08-27) · yayıncı kayıtları
+(2026-08-27) · GitHub MCP depo çözümlemesi (2026-08-27) · vekil egress ret
+kaydı (2026-08-28) · bulunamayan: 4054 sayılı Kanun ve 2026/2 sayılı Tebliğ'in
+birebir Resmî Gazete metni (kuruluş egress politikası reddi, bkz.
+hafiza/egress-kaniti.md)
