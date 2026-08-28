@@ -76,3 +76,35 @@ reading it would establish what was built, never what was discussed or decided.
 
 Everything downstream of this file is built on that record alone. The chat
 contents were not reconstructed, summarised, or guessed at.
+
+## Observed — the owner and his firm (session ai-system-research-3jpwda)
+
+- Türker Tekten has been CFO and Board Member of WAM Asset & Portfolio Management since 2022, and was CFO and Partner at Actera Group from 2007 to 2021. [src:SUBJECT-IDENTITY-2026-08-27]
+- The legal entity is WAM Gayrimenkul ve Girişim Sermayesi Portföy Yönetimi A.Ş., Istanbul/Teşvikiye, established 2022, managing GSYF and GYF vehicles for qualified investors only. [src:WAM-FIRM-2026-08-27]
+- Its paid-in capital is 30,000,000 TRY against a 75,000,000 TRY ceiling, held Mehmet İlhan Gülay 49%, İhsan Gülay 24.5%, Mehmet Gülay 24.5%, Can İkinci 1%, Türker Tekten 1%. [src:WAM-OWNERSHIP-2026-08-27]
+- It discloses to KAP under company code VPG and manages at least four funds: VBR, VBI, VIK and WQQ. [src:WAM-FUND-CODES-2026-08-27]
+- Turkish CPI ran 31.75% year-on-year in July 2026, the TCMB policy rate stood at 37%, and the lira reached a record low of about 47.2 per USD. [src:TCMB-MACRO-2026-08]
+- SPK decision 16.02.2024 no. 11/255 exempts investment funds from TMS 29 inflation accounting, while other capital-markets entities applied it from the period ending 31.12.2023. [src:SPK-FUND-TMS29-EXEMPTION]
+- SPK decision 23/07/2026 no. 45/1359, in bulletin 2026/38, requires exchange-traded GYF and GSYF participation units to be valued at the founder's last announced unit value, with compliance by 31/07/2026. [src:SPK-BULLETIN-45-1359-2026-08-28]
+- Tebliğ VII-128.10 requires a capital-markets institution to keep both its primary and secondary information systems inside Turkey, and its stated scope includes sermaye piyasası kurumları. [src:SPK-DATA-RESIDENCY-VII-128-10] [src:SPK-VII-128-10-SCOPE-2026-08-28]
+
+> Grade, not a hedge: the ownership split and the fund codes were re-run
+> first-hand after a delegated agent reported them. The Turkish regulatory lines
+> are search-derived and are held as supported reconstruction rather than
+> verified, because a sibling measured the same channel returning 50%, 90% and
+> 98% for one SPK threshold across four queries.
+> [src:WEBSEARCH-UNRELIABLE-ON-TR-REGULATION-2026-08-28]
+
+## Observed — the environment and the fleet
+
+- Thirteen Turkish domains answer 403 to CONNECT at the egress gateway, every failure of kind connect_rejected; the proxy's README instructs that such denials be reported rather than retried. [src:EGRESS-POLICY-DENIAL-2026-08-28]
+- No fund-level figure for VBR, VBI, VIK or WQQ was obtainable by search; every route named KAP, SPK or TEFAS, all of which are denied. [src:WAM-FUND-DATA-UNOBTAINABLE-2026-08-28]
+- This branch's CLAUDE.md was seven lines behind commit 4049525 and has been brought to parity; the fleet's newest doctrine is 288 lines on reverse-engineer-chat-setup-husv9h. [src:FLEET-DOCTRINE-DRIFT-2026-08-28]
+- Six sibling branches use U-7, U-8 and U-10 for unrelated questions; this branch's unknowns were renamed AIR-1 to AIR-5 across 47 references. [src:FLEET-UNKNOWN-ID-COLLISION-2026-08-28]
+- reverse-engineer-chat-setup-husv9h's U-9 names this branch as the owner of "where the owner works" and states it holds no evidence of its own. [src:FLEET-U9-ASSIGNED-TO-THIS-BRANCH-2026-08-28]
+- turkertekten-ship-it/claude had one open issue and no pull requests; claude-ai had neither. [src:GITHUB-ISSUES-PRS-2026-08-28]
+
+## Observed — what the system built here actually measures
+
+- The evaluation harness scores 17 of 20 goldens: recall@5 0.6583, MRR 0.4833, verified-citation coverage 0.7443, abstention rate 0.1000. Its first run scored an abstention rate of 0.0000, answering all four unanswerable questions. [src:EVAL-BASELINE-2026-08-28]
+- The crawler catches per-URL transport errors and continues, so an unreachable host produces neither an exception nor pages; the connector's failure verdict is therefore read from the crawl report. [src:CONNECTOR-FAILURE-DETECTION-2026-08-28]

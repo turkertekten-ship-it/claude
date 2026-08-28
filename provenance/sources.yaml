@@ -722,3 +722,20 @@ sources:
       Found by writing the failing test rather than by reading, and it is the
       exact silent-failure class this system exists to catch: a dark feed that
       looks like a quiet one.
+
+  - id: GITHUB-ISSUES-PRS-2026-08-28
+    kind: api
+    collected_at: "2026-08-28T08:50Z"
+    method: "mcp__github__list_issues and mcp__github__list_pull_requests on turkertekten-ship-it/claude and turkertekten-ship-it/claude-ai"
+    evidence: >-
+      turkertekten-ship-it/claude: totalCount 1 — issue #1, OPEN, "KI-1: chat
+      ingester silently discards transcripts in commit e37b4c2 (fixed in
+      e392678)", opened 2026-08-27T15:09:24Z. Pull requests: empty list.
+      turkertekten-ship-it/claude-ai: totalCount 0 issues, and no pull requests.
+      This session then filed issue #2 on turkertekten-ship-it/claude carrying
+      the unknown-id collision hazard and the answer to the fleet's U-9.
+    note: >-
+      KI-1 does not affect this branch, which carries no
+      tools/ingest_chat_archive.py. Issues are the fleet's only durable channel
+      to sessions that cannot be messaged, which is why the collision hazard was
+      filed there rather than left in a file only this branch reads.
