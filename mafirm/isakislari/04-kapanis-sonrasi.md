@@ -3,7 +3,7 @@
 Doğrulama: 2026-08-27.
 
 Kontrol edildi: `birimler/tr-sirketler/yontem/pay-devri.md` (TTK m.490, 499,
-595) · `birimler/rekabet/yontem/tr-esikler.md` (4054 sayılı Kanun m.11 ve m.16) ·
+595) · `birimler/rekabet/yontem/tr-esikler.md` (4054 sayılı Kanun m.10, m.11 ve m.16) ·
 `birimler/is-hukuku/yontem/isci-devri.md` (4857 m.6) ·
 `birimler/sinir-otesi/yontem/elkitabi-alici.md` Aşama 5 ve
 `birimler/sinir-otesi/yontem/elkitabi-satici.md` Aşama 6 ·
@@ -21,7 +21,7 @@ Görünmediği şey şudur — Türkiye'de devrin tamamlanması kapanış masas�
 tescil ve pay defteri kaydıyla olur; beyan talep süreleri sessizce dolar ve
 dolduğunda geri gelmez; emanet, kimse bir tarih yazmadıysa serbest bırakılmaz
 ya da erken bırakılır; ve bütünleşme, iznin tarihinden önce başlarsa kapanışın
-kendisi 4054 sayılı Kanun madde 11 bakımından sorgulanır. Bu akış, kapanıştan
+kendisi 4054 sayılı Kanun m.10 ve 2010/4 sayılı Tebliğ m.10 bakımından sorgulanır. Bu akış, kapanıştan
 sonraki her yükümlülüğü **tarihli bir takvime** çevirir ve dosyayı kapatır.
 
 ## Adımlar
@@ -31,7 +31,7 @@ sonraki her yükümlülüğü **tarihli bir takvime** çevirir ve dosyayı kapat
 | 1 | Kapanış listesinin gerçekleşene karşı sayılması | `/kapanis <dosya>` çıktısı ile fiilen imzalanan set karşılaştırılır: `python3 ~/mafirm/birimler/_araclar/kod/karsilastir.py <kapanis-listesi> <imzalanan-set>` (beceri: `kapanis-listesi`) | `dosyalar/<dosya>/cikti/kapanis-tutanagi.md` | Eksik ya da imzasız kalan her belge **adıyla** yazılır. "Sonra imzalatırız" bir takvim satırıdır, bir varsayım değil |
 | 2 | Türk şekil zincirinin tamamlandığının belgeyle doğrulanması | `birimler/tr-sirketler/yontem/pay-devri.md`; A.Ş.: ciro + zilyetliğin devri ya da yazılı temlik, **pay defterine kayıt** (TTK m.499), esas sözleşme arıyorsa yönetim kurulu kararı. Ltd. Şti.: noter onaylı devir sözleşmesi (TTK m.595/1), genel kurul onayı (m.595/2), pay defteri | `dosyalar/<dosya>/cikti/sekil-zinciri.md` | **Şekil, devrin kendisidir.** Zincirdeki bir halka belgeyle gösterilemiyorsa devir tamamlanmamıştır ve dosya kapatılmaz. Beyan yeterli değildir |
 | 3 | Ticaret Sicili Müdürlüğü tescili ve Gazete ilanı | `/kapanis <dosya>` listesinin tescil kalemleri (beceri: `kapanis-listesi`); Ltd. Şti. pay devri, yönetim değişikliği, unvan ve esas sözleşme değişiklikleri, temsile yetkililer | `dosyalar/<dosya>/cikti/tescil-takvimi.md` | Her tescil kaleminin **son tarihi** ve sorumlusu yazılır. Tescil ve ilan tamamlanmadan "kapandı" denmez; sicil zamanlaması fiziksel kısıttır |
-| 4 | Bütünleşmenin başlangıcı — ancak izinden sonra | `birimler/rekabet/yontem/tr-esikler.md` "Bekletici etki"; Rekabet Kurulu izin kararının **tarihi ve sayısı** dosyaya yazılır (beceri: `rekabet-esigi`) | `dosyalar/<dosya>/cikti/butunlesme-izni.md` | **İzin kararının tarihi belgelenmeden hiçbir bütünleşme adımı başlamaz** (4054 m.11): ortak fiyatlandırma, müşteri listelerinin birleştirilmesi, rekabete duyarlı bilgi paylaşımı, ortak satın alma, personel ve sistem entegrasyonu. İzin şarta bağlıysa, şart karşılanana kadar ilgili adımlar ayrıca beklemededir |
+| 4 | Bütünleşmenin başlangıcı — ancak izinden sonra | `birimler/rekabet/yontem/tr-esikler.md` "Bekletici etki"; Rekabet Kurulu izin kararının **tarihi ve sayısı** dosyaya yazılır (beceri: `rekabet-esigi`) | `dosyalar/<dosya>/cikti/butunlesme-izni.md` | **İzin kararının tarihi belgelenmeden hiçbir bütünleşme adımı başlamaz** (4054 m.10, Tebliğ m.10): ortak fiyatlandırma, müşteri listelerinin birleştirilmesi, rekabete duyarlı bilgi paylaşımı, ortak satın alma, personel ve sistem entegrasyonu. İzin şarta bağlıysa, şart karşılanana kadar ilgili adımlar ayrıca beklemededir |
 | 5 | Beyan talep sürelerinin sınıf sınıf takvime işlenmesi | Beceri: `kosul-takibi` (süre ve sahip mantığı) + `/spa-incele <dosya>` madde 5 çıktısı; her beyan sınıfı için ayrı bitiş tarihi | `dosyalar/<dosya>/cikti/beyan-sureleri.md` | Tek bir "beyan süresi" satırı yazılmaz: genel beyanlar, vergi beyanları, temel beyanlar ve özel tazminatlar **ayrı** sürelerdir. Süresi yazılmayan bir sınıf, dolduğunda geri gelmez |
 | 6 | Emanet serbest bırakma tarihleri ve tutarları | Beceri: `kosul-takibi` + emanet sözleşmesi; her dilim için tarih, tutar, serbest bırakma şartı ve talimatı kimin vereceği | `dosyalar/<dosya>/cikti/emanet-takvimi.md` | Serbest bırakma tarihi ile **beyan talep süresinin bitişi** karşılaştırılmadan takvim onaylanmaz: emanetin beyan süresinden önce boşalması, kalan tek tahsil kaynağını ortadan kaldırır. W&I varsa poliçe süresiyle de karşılaştırılır |
 | 7 | Rekabet etmeme ve ayartmama süresinin **başlangıcının** tespiti | Alt ajan `madde-avcisi` (rekabet etmeme, ayartmama, gizlilik maddeleri) + `dosyalar/<dosya>/cikti/kapanis-tutanagi.md` | `dosyalar/<dosya>/cikti/rekabet-etmeme-takvimi.md` | Sürenin **imza tarihinden mi kapanış tarihinden mi** başladığı madde metninden tespit edilir; ikisi arasında izin bekleme süresi kadar fark vardır. Kapsam ve coğrafya aşırı genişse ayrı bir rekabet hukuku sorusu doğar ve işaretlenir |
@@ -49,7 +49,7 @@ gider.
 | Duran nokta | Adım | Ne olur | Kim karar verir |
 |---|---|---|---|
 | **Türk şekil şartının karşılanmaması** | 2, 3 | Devir tamamlanmamıştır. Dosya kapatılmaz, "kapandı" denmez, müvekkile tamamlandı bilgisi verilmez; eksik halka giderilene kadar akış durur | Kapanışı yürüten Türk hukukçusu |
-| **Rekabet izni alınmadan (ya da izin tarihinden önce) bütünleşme** | 4 | Bütünleşme adımları durdurulur. İzin kararının tarihi belgelenmeden hiçbir entegrasyon, fiyat paylaşımı ya da rekabete duyarlı bilgi akışı başlamaz (4054 m.11); ihlalin cezası grup cirosu üzerinden hesaplanır (m.16) | Hiç kimse "başlayalım" diyemez. Tarih, Kurul kararının tarihidir; büro içindeki tek karar beklemektir |
+| **Rekabet izni alınmadan (ya da izin tarihinden önce) bütünleşme** | 4 | Bütünleşme adımları durdurulur. İzin kararının tarihi belgelenmeden hiçbir entegrasyon, fiyat paylaşımı ya da rekabete duyarlı bilgi akışı başlamaz (4054 m.10, Tebliğ m.10); ihlalin cezası grup cirosu üzerinden hesaplanır (m.16) | Hiç kimse "başlayalım" diyemez. Tarih, Kurul kararının tarihidir; büro içindeki tek karar beklemektir |
 | **İznin şarta bağlı verilmiş olması** | 4 | Şartın kapsadığı adımlar, şart karşılandığı belgelenene kadar ayrıca beklemededir | Dosya sorumlusu ortak ve müvekkilin karar vericisi |
 | **Giderilemeyen yaptırım eşleşmesi (kapanış sonrası)** | 10 | Yeni bir eşleşme, bütünleşmeyi ve ilgili ticari akışları durdurur; alıcının kendi rejiminde bir uyum olayı doğabilir | Uyum sorumlusu ile dosya sorumlusu ortak |
 | **Emanetin beyan süresinden önce boşalacak olması** | 5, 6 | Takvim onaylanmaz; iki tarih hizalanana kadar serbest bırakma talimatı verilmez | Dosya sorumlusu ortak; talimat müvekkilin karar vericisinden çıkar |
