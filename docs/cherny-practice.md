@@ -199,11 +199,15 @@ The name "loop engineering" is **not his**: it is a third-party coinage by Addy 
 
 Several widely-repeated numbers around this material are weaker than their circulation suggests. The "4% of all public GitHub commits" figure is SemiAnalysis's estimate, not Anthropic's measurement; his "200%" and "~70%" per-engineer productivity figures come from different interviews and do not agree; and Anthropic itself reportedly cautioned that the lines-of-code productivity framing was "almost certainly an overstatement". [src:LOOP-ENGINEERING-KB-2026-08-28]
 
-Auto mode, which the May post calls his #1 tip, has published limits: a measured 93% permission-acceptance rate against the rhetorical "99%", a 0.4% false-positive rate, and a **17% false-negative** rate. [src:LOOP-ENGINEERING-KB-2026-08-28]
+Auto mode, which the May post calls his #1 tip, carries a first-party caveat that the enthusiasm around it omits: "Auto mode reduces permission prompts but does not guarantee safety. Use it for tasks where you trust the general direction, not as a replacement for review on sensitive operations." [src:DOCS-AUTOMODE-2026-08-28]
 
-> That 17% is the number to carry. It is the documented cost of the practice he
-> now leads with, and no summary of his advice that this session found mentions
-> it. Reporting the #1 tip without it would be promotional rather than useful.
+A tertiary source additionally reports a measured 93% acceptance rate against the rhetorical "99%", a 0.4% false-positive rate and a 17% false-negative rate, citing an Anthropic engineering page that is unreachable from here. The reachable first-party documentation publishes no such figures, so those numbers are recorded but not relied on. [src:LOOP-ENGINEERING-KB-2026-08-28] [src:DOCS-AUTOMODE-2026-08-28]
+
+> The qualitative caveat is the one to carry, because it is the one that can be
+> cited: the tool's own documentation says auto mode is not a replacement for
+> review on sensitive operations, while the advice that made it a "#1 tip" says
+> it means "no more permission prompts". Both are accurate. Only one of them
+> mentions the cost.
 
 > Grading, stated plainly: this section is second-hand at best. Every
 > underlying talk and article sits on a host the proxy refuses, so none of it

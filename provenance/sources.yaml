@@ -824,3 +824,24 @@ sources:
       reads "imb" as a transposition of "ibm". That is that session's
       interpretation of its own instruction, not a statement by the owner, so it
       answers U-4 second-hand and does not close it.
+
+  - id: DOCS-AUTOMODE-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T08:28Z"
+    method: 'WebFetch("https://code.claude.com/docs/en/permission-modes"), searched for accuracy figures and stated limits'
+    evidence: >-
+      The page states, verbatim: "Auto mode reduces permission prompts but does
+      not guarantee safety. Use it for tasks where you trust the general
+      direction, not as a replacement for review on sensitive operations." It
+      also states: "On Pro, Max, and Team plans, the built-in starting
+      permission mode is auto mode", and that in auto mode "a second model, the
+      classifier, reviews actions instead of you". It directs users to
+      "/feedback to report false positives". It publishes NO accuracy,
+      false-positive or false-negative rate.
+    note: >-
+      First-party and fetched directly. Recorded partly for a negative finding:
+      the 93% acceptance and 17% false-negative figures this corpus carries come
+      from a tertiary source citing an Anthropic engineering page that is
+      blocked here, and the reachable first-party documentation does not confirm
+      them. The docs' own qualitative warning is the stronger citation and is
+      now used as such.
