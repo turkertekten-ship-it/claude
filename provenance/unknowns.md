@@ -148,7 +148,7 @@ general swap-consistency rates, and Claude-v1's 23.8% is partly a *name* bias
 that renaming moves to 56.2%. `docs/parity.md` now carries both — which is why
 "the numbers were right" was not a sufficient answer to this entry.
 
-### U-9 — PARTLY RESOLVED: powered, still null; second model family still open
+### U-9 — RESOLVED: powered, replicated on a second family, still null
 
 The power half is answered. `suites/fabrication-powered.yaml` extended the
 suite to 40 cases, raised `repeats` to 3, and pre-registered a paired,
@@ -162,15 +162,29 @@ repaired, both strata span zero — tuned −0.0256 [−0.1000, +0.0400] and
 held-out −0.0952 [−0.2667, +0.0000], p = 0.25 on fourteen cases.
 [src:STRATIFICATION-NEVER-RAN-2026-08-28]
 
-**Still unknown:** whether the same holds on a second model family. Every run
-in this repository used one. A prompt written against one model's failure modes
-is exactly the thing that might not transfer, and nothing here tests that.
+The transfer half is answered too. The same forty traps and the same two arms
+ran on a second model family: -0.0917, 95% CI [-0.2045, +0.0000], sign test
+p = 0.1250, with the operating prompt at 120/120 and a plain assistant at
+109/120 [src:SONNET-VALID-2026-08-28]. Negative again, interval containing zero
+again. The first attempt at that run was void — one arm answered with attempted
+tool calls in 47 of 120 runs — and is kept as
+[src:SONNET-RUN-VOID-2026-08-28] because the void is the more useful artifact.
 
-**Resolves when:** the same two arms and the same forty traps are run against a
-different model family, with the same pre-registered analysis.
+**What this now rests on:** the prompt does not buy its trap score by declining
+everything. On forty questions where declining would be wrong, both arms
+answered 80 of 80 [src:NO-OVER-REFUSAL-2026-08-28]. Before that control existed,
+every fabrication result here was compatible with a prompt that simply refuses.
 
-**Do not:** report the -0.0500 point estimate as an effect. Seven runs have
-produced a negative point estimate and seven intervals have contained zero;
+**Still unknown, and narrower:** why so few cases discriminate. Thirty-six of
+forty were ties on the second family, and four discordant cases against zero
+floors the two-sided sign test at p = 0.125 — the experiment is limited by how
+many cases separate the arms, not by how many were run.
+
+**Resolves when:** a suite is built whose cases discriminate more often, or the
+existing traps are made harder. More repeats will not do it.
+
+**Do not:** report any of these point estimates as an effect. Eight runs have
+produced a negative point estimate and eight intervals have contained zero;
 quoting the point without the interval turns a null into a finding, which is
 the specific failure this file exists to prevent.
 

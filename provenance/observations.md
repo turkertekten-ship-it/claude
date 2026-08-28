@@ -287,6 +287,41 @@ verified lives in [unknowns.md](unknowns.md), not here.
 > a guard that certifies wrongly is the thing it was built to prevent, wearing
 > its own uniform.
 
+## Observed — the second model family, and the control that was missing
+
+- The transfer question is answered. The same forty traps and two arms on a second family: the operating prompt 120/120, a plain assistant 109/120, mean paired difference −0.0917, 95% CI [−0.2045, +0.0000], sign test p = 0.1250. [src:SONNET-VALID-2026-08-28]
+- All 11 failures were the plain arm, and every one was read by hand. It invented `top_k` values for a parameter current models reject, invented Anthropic's reasoning for a thinking-budget default it was asked to summarise, and accepted two false premises about this repository's own tooling. [src:SONNET-VALID-2026-08-28]
+- **The first attempt at that run was void.** The operating prompt tells the model to read `CLAUDE.md` before answering; with no tools available it emitted the tool call and stopped, in 47 of 120 runs against 0 of 120 for the other arm — and 31 of those were scored as passes, because a fragment that asserts nothing also invents nothing. [src:SONNET-RUN-VOID-2026-08-28]
+- Nothing in the pipeline objected to that. An answer-rate control now measures it and voids the run, and the analysis prints the verdict before any number. [src:ANSWER-RATE-CONTROL-2026-08-28]
+- **Every trap suite here had the same blind spot.** The operating prompt produced refusal or hedging language in 120 of 120 runs, and all 40 cases are traps — so a perfect score is equally consistent with a prompt that spots traps and one that declines everything. [src:TRAP-SUITE-BLIND-SPOT-2026-08-28]
+- On forty questions where declining would be *wrong*, both arms answered 80 of 80. The prompt does not over-refuse. [src:NO-OVER-REFUSAL-2026-08-28]
+- The first draft of those graders scored 22 of 80 on echo nonsense, because several keyed on words that appear in the question — and a refusal restates the question, so refusals would have scored as passes. Rewritten to key on the answer, they score 0 of 80 on nonsense. [src:NO-OVER-REFUSAL-2026-08-28]
+
+> Reading, not a claim: eight runs, eight negative point estimates, eight
+> intervals containing zero. The second family is the cleanest of them — four
+> discordant cases to zero, a 0% fabrication rate against 9.2% — and it is
+> still not significant, because four discordant cases floor the two-sided sign
+> test at p = 0.125. That is worth stating precisely: this experiment is
+> limited by how many cases DISCRIMINATE, not by how many were run. Thirty-six
+> of forty were ties. Another thousand repeats would not move it.
+>
+> The specificity control matters more than the trap result. Before it, every
+> fabrication measurement in this repository was compatible with the reading
+> that the prompt simply refuses more. It is not — but that was luck rather
+> than design, because nothing here had been built to find out.
+
+## Observed — capabilities that were reachable all along
+
+- `stop_sequences` was recorded as needing a credential. The CLI backend now applies it client-side, and the same prompt returns "one two three FENCE four five six" unset and "one two three" set. Not equivalent — the API stops generating and bills less, this truncates what was produced — and the row says so. [src:STOP-SEQUENCES-CLI-2026-08-28]
+- Image input was passing on a probe that proved nothing: a fixed red-on-blue image and a question answerable from its own phrasing. Replaced by a random unguessable one, which also established that fine-detail fidelity is not reliable — a 24×24 three-band image came back "Red, White, Blue" when it was orange, blue and white. [src:VISION-ACUITY-2026-08-28]
+- The parity summary was overstating its own gap: 4 of 8 "unreachable" rows are the API *form* of a capability reachable another way. The honest count of capabilities absent here is 4, not 8. [src:PARITY-COUNT-CORRECTED-2026-08-28]
+
+> Reading, not a claim: three of these were sentences that were true about an
+> endpoint and false about the capability, which is the failure mode a written
+> capability table cannot catch and a check that runs does. The summary line
+> committing the same overstatement is the sharpest version of it — the tool
+> built to stop this repository overclaiming was quietly overclaiming a gap.
+
 ## Conclusion
 
 The honest answer to "look through all my previous claude chats" is bounded:

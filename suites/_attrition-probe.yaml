@@ -1,3 +1,16 @@
+# A cheap probe, not an experiment.
+#
+# The six cases whose full-doctrine runs most often went unanswered in the void
+# run 20260828T094932Z, at one repeat. Used to check the symmetric no-tools fix
+# for thirty cents before committing another $8 to the full suite -- the
+# previous attempt cost $7.73 and produced nothing usable.
+#
+# Six cases at one repeat cannot show attrition is gone across all forty. It
+# shows whether the mechanism was the one diagnosed. Regenerate it from
+# suites/fabrication-powered-sonnet.yaml rather than editing it here.
+#
+#   python3 -m workbench run suites/_attrition-probe.yaml
+
 name: attrition-probe
 description: Does the operating prompt reduce fabrication? Forty traps across six families, both arms,
   three samples each. Sized from the power analysis rather than from what was convenient.

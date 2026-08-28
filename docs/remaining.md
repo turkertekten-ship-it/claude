@@ -124,12 +124,24 @@ So the state is now: answered in the negative across seven runs, one of them
 adequately powered for the effect size the earlier six suggested. Any real
 effect is under roughly five percentage points.
 
-**What is still open:** one model family. Every run here used one, and a prompt
-written against one model's failure modes is precisely the thing that might not
-transfer. `provenance/unknowns.md` U-9 carries that half.
+**The second family ran too, and agrees.** Forty traps, two arms, on a
+different model family: the prompt 120/120 against 109/120, mean paired
+difference −0.0917, CI [−0.2045, +0.0000], p = 0.1250.
+[src:SONNET-VALID-2026-08-28] Negative again, spanning zero again.
 
-**What closes the remainder:** the same two arms and the same forty traps
-against a different model family, with the same pre-registered analysis.
+**And the control that was missing now exists.** Every trap suite here shared a
+blind spot: all cases are traps, so a perfect score could mean the prompt spots
+traps or that it declines everything. On forty questions where declining would
+be wrong, both arms answered 80 of 80 — it does not over-refuse.
+[src:NO-OVER-REFUSAL-2026-08-28]
+
+**What is still open, and it is narrower than before:** why so few cases
+discriminate. Thirty-six of forty were ties, and four discordant cases against
+zero floors the two-sided sign test at p = 0.125. The limit is the suite's
+discriminating power, not the sample size.
+
+**What closes the remainder:** traps that separate the arms more often. More
+repeats will not.
 
 **What does not close it:** re-running the same suites hoping for a different
 sign. That is the failure this repository exists to catch, and it would be

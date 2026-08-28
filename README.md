@@ -167,11 +167,44 @@ committed *before* the run and executed unmodified afterwards.
   cases) −0.026, [−0.100, +0.040], p = 1.0; held-out (14 cases) −0.095,
   [−0.267, +0.000], p = 0.25. Both span zero; the headline did not move.
 
-Seven runs, seven negative point estimates, seven intervals containing zero.
-That is not seven hints of an effect; it is one consistent finding that any
-effect is below this instrument's resolution of roughly five percentage points.
-The prompt may be worth keeping for other reasons. The measurement does not
-support it, and this README will not say otherwise until some measurement does.
+### A second model family, and the control that was missing
+
+Every run above used one model family, so the eighth ran the same forty traps
+on a second one. The operating prompt scored **120/120** against a plain
+assistant's 109/120 — a 0% fabrication rate against 9.2%, mean paired
+difference **−0.092, CI [−0.205, +0.000]**, sign test **p = 0.125**.
+
+The cleanest of the eight, and still not significant. Worth being precise about
+why: four discordant cases against zero *floors* the two-sided sign test at
+0.125. Thirty-six of forty cases were ties. **This experiment is limited by how
+many cases discriminate, not by how many were run** — another thousand repeats
+would not move it.
+
+The first attempt at that run was **void**, and the reason is instructive. The
+operating prompt tells the model to read `CLAUDE.md` before answering; with no
+tools available it emitted the tool call and stopped — in 47 of 120 runs
+against 0 of 120 for the other arm. Worse, 31 of those were scored as *passes*,
+because a fragment that asserts nothing also invents nothing. Every grader
+scored, the analysis printed rates and an interval, and it read exactly like a
+finding. There is now an answer-rate control that voids such a run and says so
+before printing a number.
+
+Then the check that mattered more. The prompt produced refusal or hedging
+language in **120 of 120** runs — and every case in that suite is a trap. So a
+perfect score was equally consistent with "spots traps and declines them" and
+"declines everything", and eight runs of trap-only suites could not tell those
+apart. `suites/over-refusal.yaml` is the missing half: forty questions where
+declining would be *wrong*.
+
+**Both arms answered 80/80.** The prompt does not over-refuse. That does not
+make the trap result significant; it removes the explanation that would have
+made it worthless.
+
+Eight runs, eight negative point estimates, eight intervals containing zero.
+That is not eight hints of an effect; it is one consistent finding that any
+effect is below this instrument's resolution. The prompt may be worth keeping
+for other reasons. The measurement does not support it, and this README will
+not say otherwise until some measurement does.
 
 The audit also caught something the headline misses: one answer **invented an
 entire agent transcript** — synthetic `<function_calls>` blocks and fabricated
