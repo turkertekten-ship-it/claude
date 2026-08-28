@@ -2830,3 +2830,62 @@ it while the reported confidence does not.
    ranges overlap 95%, which is the fact a caller needs.
 3. **A confidence that cannot be wrong at 1.0 is a different contract from one
    that can.** Whichever one you have, say so where the field is defined.
+
+---
+
+## L60 - The confidence breaks a rule the codebase states, and it costs nothing here
+
+L59 found the reported confidence badly calibrated. Reading how it is built
+turned up a documented inconsistency:
+
+`_confidence` uses `results[0].score` - the *total*. And `rerank.py` says of
+that number, in a comment above the line that produces it:
+
+> Authority, recency and position are query-independent: they raise a chunk's
+> score whether or not it has anything to do with the question. Fold them into
+> one number and the total stops being usable as an "is this relevant at all"
+> signal ... Ordering uses the total; the abstention gate uses
+> `rerank_relevance` alone.
+
+The abstention gate obeys that rule. The confidence reported to the caller
+breaks it, using exactly the number the comment says is unusable for judging
+relevance. That looked like a bug with an obvious fix.
+
+**Measured, and the fix is not supported** (`scripts/confidence_ab.py`, AUC over
+all right/wrong pairs of the 47 answered goldens):
+
+| formulation | AUC | best TPR-FPR |
+| --- | --- | --- |
+| **current** (0.5·top/0.6 + 0.2·sep + 0.3·cov) | **0.665** | 0.490 |
+| relevance only | 0.657 | 0.442 |
+| swap top → relevance | 0.634 | 0.497 |
+| current × relevance | 0.629 | **0.525** |
+| half top, half relevance | 0.641 | 0.490 |
+
+The current form has the best AUC. One alternative has a better threshold
+separation and a worse AUC, which is L22's split again - and here there is no
+shipping metric to break the tie, because nothing gates on confidence. With 11
+wrong answers, none of these differences is distinguishable from noise.
+
+**Why the inconsistency costs nothing.** L43 measured authority and recency as
+*inert on both corpora*: authority is constant because each corpus is a single
+source at 1.0, and recency is saturated because every document is the same age.
+So `top` is `relevance + phrase + a constant` here. Folding in priors that do
+not vary changes nothing - which is precisely why the violated rule has no
+victim, and precisely why it will have one on a corpus with mixed sources or
+real age spread. That is the corpus the priors exist for.
+
+**So: not changed, and now written down where the field is defined** - the
+inconsistency, the measurement showing it is currently harmless, and the
+condition under which it stops being harmless.
+
+**Rules.**
+1. **A rule stated in a comment is worth grepping for violations of.** This one
+   named its own targets - "the total", "authority, recency and position" - and
+   the violation was one file away, in the number users actually see.
+2. **"It violates our stated principle" is a reason to measure, not to change.**
+   The principle is right, the violation is real, and on this data the fix makes
+   things very slightly worse. Ship the measurement, not the tidiness.
+3. **An inert component makes a real defect invisible.** The bug and the reason
+   it does not bite have the same cause, so the corpus that would expose it is
+   the one where the feature finally works.
