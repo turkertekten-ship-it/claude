@@ -107,6 +107,9 @@ contents were not reconstructed, summarised, or guessed at.
 - Docling installs from PyPI — `docling` 2.123.0 and `docling-parse` 7.16.0 at 265 MB — but its layout and TableFormer weights are fetched by `repo_id` from Hugging Face, so conversion cannot run here. [src:DOCLING-MODELS-BLOCKED-2026-08-27]
 - Reproduced directly rather than inferred: `snapshot_download("ds4sd/docling-models")` raised `ProxyError: 403 Forbidden`. [src:DOCLING-MODELS-BLOCKED-2026-08-27]
 - An "IBM Technology" YouTube channel exists and publishes RAG explainers, including one by a Senior Research Scientist at IBM Research. [src:IBM-YOUTUBE-CHANNEL-2026-08-27]
+- The sibling YouTube connector resolves metadata via oEmbed and captions via `timedtext` rather than the Data API, and both of those endpoints are on `youtube.com` and refused at CONNECT, so only its offline hand-off can run here. [src:YOUTUBE-LIVE-PATH-BLOCKED-2026-08-27]
+- `pypdf` 6.16.2 installs from PyPI, downloads no models, and extracted the test document's text verbatim, so born-digital PDFs are parseable inside this allowlist; it does no layout, table or OCR work. [src:PYPDF-WORKS-2026-08-27]
+- The RAG sibling branch now carries `chunking.py`, `cli.py`, `config.py`, `pipeline.py` and `embedding/`, `retrieve/`, `store/`, `generate/`, `eval/`, `ooda/` and `access/` packages, so the stages recorded as absent were unpushed rather than unwritten. [src:RAG-BRANCH-COMPLETE-2026-08-27]
 
 ## Observed — scope of the skill install
 

@@ -109,6 +109,26 @@ Two constraints follow that the rest of this document does not carry:
   install succeeding proves nothing about the conversion working. Treat PDF
   parsing as blocked on U-9 rather than as a library choice, and do not put
   Docling in a dependency list until artifacts are staged.
+
+  **What does work here is `pypdf`.** It is pure Python, installs from PyPI,
+  downloads no models, and pulled `Clause 3.a Master Agreement` and
+  `Section 7.2 Indemnity` verbatim out of a test document
+  [src:PYPDF-WORKS-2026-08-27]. That is enough to make born-digital contracts
+  ingestable today, behind the same optional connector interface.
+
+  Be precise about what that buys, because the gap is exactly the part
+  contracts need most. `pypdf` extracts **text**, not layout, tables or reading
+  order, and it does no OCR [src:PYPDF-WORKS-2026-08-27]. So a born-digital
+  agreement parses; a scanned or photographed one yields nothing at all, and
+  an executed agreement is very often the scanned kind. Clause *numbering*
+  usually survives in the text stream, which is what the `context_header`
+  above needs; clause *indentation and nesting* generally do not.
+
+  The honest sequencing, then: ship `pypdf` for born-digital documents now,
+  detect the empty-extraction case and record it as a skipped document rather
+  than an empty one, and keep U-9 open for the scanned half. A silent empty
+  extraction is the worst outcome available — it indexes a contract as though
+  it contained nothing.
 - **Redaction matters more here than anywhere else in this corpus.** These
   documents name private counterparties, and `redact_secrets` catches
   credentials, not names [src:AUDIT-OODARAG-2026-08-27]. Anything indexing this

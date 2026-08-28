@@ -593,3 +593,64 @@ sources:
       YouTube channel producing exactly the material a RAG session would want
       does exist. It still does not establish that "imb youtube" denotes it;
       only the owner can close that.
+
+  - id: YOUTUBE-LIVE-PATH-BLOCKED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T16:45Z"
+    method: "git show origin/claude/rag-system-data-pipeline-rdkde9:src/oodarag/ingest/youtube.py; curl over the oEmbed and timedtext endpoints"
+    evidence: >-
+      The sibling connector's docstring describes two modes, "Live - resolve
+      metadata via oEmbed and captions via the timedtext" endpoint, and an
+      offline hand-off reading committed caption files or curated notes. It
+      sets TIMEDTEXT = "https://www.youtube.com/api/timedtext". Probing those
+      endpoints directly: the oEmbed URL, the timedtext URL and
+      youtube.com/oembed all return 000, refused at CONNECT.
+    note: >-
+      The connector does not use the YouTube Data API, so the OAuth finding in
+      YOUTUBE-CAPTIONS-OAUTH does not apply to it. Its constraint is simpler
+      and harder: both of its live endpoints are on youtube.com, which the
+      allowlist refuses. Only its offline path can function in this
+      environment. The connector already degrades explicitly rather than
+      silently, recording transcript_source and writing "No transcript
+      available in this environment" into the document.
+
+  - id: PYPDF-WORKS-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T16:50Z"
+    method: "python3 -m venv; pip install pypdf pdfminer.six; generated a valid minimal PDF with xref and %%EOF; extracted text with both libraries"
+    evidence: >-
+      Both libraries installed from PyPI without network error. pypdf 6.16.2
+      returned 'Clause 3.a Master Agreement\nSection 7.2 Indemnity' from the
+      test document - the exact text written into it. pdfminer.six 20260107
+      returned an empty string on the same file, emitting "Execute called on
+      non-indirect object (inline image?)". Note that installing pypdf into
+      the system interpreter fails at import with
+      "ModuleNotFoundError: No module named '_cffi_backend'" via a broken
+      system `cryptography`; the venv avoids it.
+    note: >-
+      pypdf is a working PDF text route inside this allowlist, and it is pure
+      Python with no model download. It is NOT a Docling replacement: it
+      extracts text, not layout, tables or reading order, and it does no OCR,
+      so a scanned or photographed agreement yields nothing. The pdfminer
+      result is one observation on one synthetic file and is not a general
+      verdict on that library.
+
+  - id: RAG-BRANCH-COMPLETE-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T16:40Z"
+    method: "git fetch --all; git log --oneline origin/claude/rag-system-data-pipeline-rdkde9; git ls-tree -r --name-only <branch> | grep '^src/oodarag/'"
+    evidence: >-
+      The branch now carries 4 commits, up from 1: 1d7ce8f, then
+      177128a "Add access probing, blind test suites, and the capability
+      protocol", 1a3e923 "Complete the pipeline: chunking, embedding, storage,
+      retrieval, generation, eval, OODA", and beb3b1b "Add YouTube connector,
+      docs, CI, and a circuit breaker for unreachable hosts". Under
+      src/oodarag/ there are now access/, chunking.py, cli.py, config.py,
+      embedding/, eval/, generate/, ingest/, models.py, ooda/, pipeline.py,
+      retrieve/, scrape/, store/ and util/. `src/oodarag/cli.py` exists.
+    note: >-
+      Closes U-8 and audit finding F-1. The stages recorded as absent at 15:20Z
+      were unpushed work, not missing work, and the console script declared in
+      pyproject.toml now has the module it pointed at. The audit in
+      docs/audits/ was accurate when written and is now superseded on those
+      two points; F-2 through F-5 were not re-checked against this commit.

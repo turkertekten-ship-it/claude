@@ -179,6 +179,14 @@ that directory.
 **Do not:** add Docling to a dependency list on the strength of it installing.
 Installation is not capability here.
 
+**Partially routed around (2026-08-27).** `pypdf` is pure Python, installs from
+PyPI, downloads no models, and extracted the test text verbatim
+[src:PYPDF-WORKS-2026-08-27]. Born-digital PDFs are therefore ingestable now
+without resolving this entry. What remains genuinely blocked is the half
+Docling was wanted for: layout, table structure, reading order, and OCR for
+scanned documents. Executed agreements are frequently scanned, so this is not a
+corner case for this corpus.
+
 ---
 
 ### U-8 — Why the pipeline README describes stages that do not exist
@@ -194,8 +202,22 @@ tense, while four have no module [src:AUDIT-OODARAG-2026-08-27]. It points at
 
 **Resolves when:** that session pushes again, or `internal/PLAN.md` lands.
 
-**Do not:** treat the README's table as a description of the tree. It is a
-description of the intent.
+**RESOLVED (2026-08-27T16:40Z) — unpushed, not unwritten.** That session pushed
+three further commits. `src/oodarag/` now carries `chunking.py`, `cli.py`,
+`config.py`, `pipeline.py` and the `embedding/`, `retrieve/`, `store/`,
+`generate/`, `eval/`, `ooda/` and `access/` packages
+[src:RAG-BRANCH-COMPLETE-2026-08-27]. The README was describing work in
+progress, not overclaiming.
+
+This also closes audit finding **F-1**: `src/oodarag/cli.py` now exists, so the
+console script declared in `pyproject.toml` resolves
+[src:RAG-BRANCH-COMPLETE-2026-08-27]. F-2 through F-5 were not re-checked
+against the new commit and should not be assumed fixed or unfixed.
+
+**The general lesson, which is the reusable part:** an absence observed in a
+repository where other sessions are actively working is a statement about what
+has been *pushed*, never about what exists. This register said "unpushed work
+is a live possibility" and that is exactly what it was.
 
 ---
 

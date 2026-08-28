@@ -23,6 +23,14 @@ gap between a document that reads as finished and a tree that is halfway.
 - `README.md` links `internal/PLAN.md` and `docs/adr/0001-zero-dependency-core.md`; neither path exists. [src:AUDIT-OODARAG-2026-08-27]
 - The `Makefile` declares `demo`, `index`, `query`, `eval` and `loop` targets. [src:AUDIT-OODARAG-2026-08-27]
 
+> **Superseded in part, 2026-08-27T16:40Z.** That session has since pushed
+> three more commits. F-1 and F-3 are fixed: `src/oodarag/cli.py` exists and
+> the stages this audit recorded as absent are present
+> [src:RAG-BRANCH-COMPLETE-2026-08-27]. The findings below were accurate
+> against commit `1d7ce8f` and are kept as written rather than edited, because
+> a rewritten audit is not a record. F-2, F-4 and F-5 were **not** re-checked
+> against the new commit; treat them as open, not as either fixed or standing.
+
 ## Findings
 
 ### F-1 — `pip install .` produces a console script that cannot run · blocking
