@@ -136,5 +136,15 @@ its current failures are that artefact. See docs/EVALUATION.md.
   itself the finding. It currently buys a case and costs ordering quality on
   both corpora. The table is in `retrieve/rerank.py`.
 
+- **Retuning `candidate_k`, `mmr_lambda`, `rrf_k` or `coverage_weight`.** All
+  four swept over both corpora and confirmed on plateaus at their current values
+  (L33, `scripts/constant_sweep.py`). `candidate_k` is the one worth knowing
+  about: a deeper candidate pool is *worse*, not better, because it gives the
+  reranker more chances to promote the wrong document.
+
+- **Term co-occurrence as a gate signal.** Measured and refuted: the terms of the
+  worst unanswerable case do co-occur, and three answerable cases have none
+  (L32).
+
 - **Query expansion.** Built, measured, and off by default because it made
   retrieval worse. The table is in `retrieve/expansion.py`.

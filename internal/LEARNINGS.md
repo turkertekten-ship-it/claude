@@ -1100,3 +1100,52 @@ so the higher plateau is better than its equal pass rate suggests.
 3. Report the failure *mix*, not just the count. Two settings with the same pass
    rate can be differently safe, and which direction is safe is a property of the
    system rather than of the metric.
+
+---
+
+## L33 - Auditing the other constants, and finding nothing
+
+L31 and L32 each found a threshold set against a 33-document corpus and stale on
+the 91-document one, within an hour of each other. Two of anything suggests a
+third, so `scripts/constant_sweep.py` sweeps any retrieval constant over both
+corpora and prints pass counts, failure mixes, recall and nDCG side by side.
+
+**Six constants swept. Four confirmed, none moved.**
+
+    constant                          swept over        verdict
+    candidate_k = 40                  20,40,80,120,200  keep
+    mmr_lambda = 0.7                  0.5 - 1.0         keep, wide plateau
+    rrf_k = 60                        10 - 200          keep, flat throughout
+    coverage_weight = 0.45            0.35 - 0.65       keep, best recall
+    min_vocabulary_for_answerability  0, 2000, 20000    keep, inactive by design
+    min_relevance = 0.15              0.10 - 0.30       **moved to 0.19** (L32)
+
+`candidate_k` is the interesting one. The intuition was that a 4.5x larger
+corpus needs a deeper candidate pool, and the opposite is true: 20 scores better
+than 40 on the external set (49/54, recall 0.9535) and worse on the primary one
+(17/20, recall 0.7500), while 80 and above are worse on both. A deeper pool
+gives the reranker and MMR more chances to promote the wrong document. 40 is the
+balance and stays, on evidence rather than inertia.
+
+`min_vocabulary_for_answerability` is inactive at both corpus sizes - 0 and 2000
+give identical results because both corpora have more than 2,000 terms - and
+20000 costs five external cases by disabling answerability entirely. It is a
+guard for small corpora, correctly set, and the sweep confirms it is not
+silently doing something else.
+
+**The audit also found the ratchet that was missing.** Both CI floors were left
+where they were after the pass rates improved, which lets a gain erode silently.
+Primary 0.80 to 0.85 and external 0.85 to 0.86, each set so exactly one
+regression is tolerated - the tightness the external floor had before the corpus
+grew and diluted it.
+
+**Rules.**
+1. A negative audit is a result. Four constants confirmed on plateaus is worth
+   the hour, because the alternative is suspecting all of them for ever.
+2. **Ratchet a threshold after an improvement, in the same change.** L31 is
+   about a floor left too high for a corpus that got harder; this is the same
+   mistake pointing the other way, and it is the quieter of the two because
+   nothing goes red.
+3. Sweeping is cheap enough to be routine once the harness exists. The first
+   sweep of `min_relevance` took an afternoon of hand-rolled scripts; the fifth
+   took one command.

@@ -75,9 +75,13 @@ jobs:
           # question are the files written *about* that question. Kept as a
           # smoke test and a contamination demonstrator, with a loose floor.
           # The external corpus below is the real regression gate.
+          # Ratcheted 0.80 -> 0.85 when the pass rate reached 18/20. A floor
+          # left where it was after an improvement lets the gain erode
+          # silently; a floor moved up locks it in. 17/20 = 0.85 still passes,
+          # so this tolerates exactly one regression, which is the intent.
           python -m oodarag.cli eval \
             --exclude-source chat \
-            --min-pass-rate 0.80 \
+            --min-pass-rate 0.85 \
             --out eval-report.md
       - name: Evaluate against the external corpus
         # No self-reference, so contamination is clean and the numbers need no
@@ -88,9 +92,12 @@ jobs:
           PYTHONPATH: src
         run: |
           python -m oodarag.cli --config oodarag-external.toml index
+          # Ratcheted 0.85 -> 0.86 at 48/54 = 0.889. 47/54 = 0.870 passes and
+          # 46/54 = 0.852 fails, so one regression is tolerated and two are
+          # not - the same tightness the floor had before the corpus grew.
           python -m oodarag.cli --config oodarag-external.toml eval \
             --goldens evals/goldens-external.jsonl \
-            --min-pass-rate 0.85 --out eval-external.md
+            --min-pass-rate 0.86 --out eval-external.md
 
       - uses: actions/upload-artifact@v4
         if: always()
