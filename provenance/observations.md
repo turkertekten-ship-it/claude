@@ -215,6 +215,13 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - `api.github.com` returns 200, `raw.githubusercontent.com` 301 and `pypi.org` 200; `www.youtube.com` returns 000 and both `www.elastic.co` and `howborisusesclaudecode.com` are refused by the egress proxy. [src:GITHUB-PRACTICE-SURVEY-2026-08-27]
 - A sibling session had reported YouTube as blocked; that report was second-hand and is now verified directly. [src:GITHUB-PRACTICE-SURVEY-2026-08-27] [src:PROXY-YOUTUBE-BLOCKED]
 
+## Observed — the config layer audited against collected practice
+
+- `.claude/settings.json` carried hooks but no permissions block and no env, so every make target and every tool invocation prompted; a wildcard allowlist and `PYTHONPATH=src` were added. [src:GITHUB-PRACTICE-SURVEY-2026-08-27]
+- CLAUDE.md was 288 lines against a collected budget of 200; it is now 208, with every named rule verified present after the rewrite. [src:CLAUDEMD-TRIMMED-2026-08-27]
+- The subagent format already matched the convention used by the largest public collections — name, description written as a trigger, a minimal tool set, and a model — so no change was needed there. [src:GITHUB-PRACTICE-SURVEY-2026-08-27]
+- `rerank` now has unit tests, including the control that proves the diversity case measures diversity rather than incidental reordering; seven of eleven pipeline stages now have unit tests. [src:RERANK-TESTED-2026-08-27]
+
 ## Conclusion
 
 The request that opened this session asked to look at "all my previous claude

@@ -172,11 +172,29 @@ definition [src:GOALS-2026-08-27]. That session — `Untitled session`,
 `claude/session-y42cyg` — owns the research; it had pushed nothing at 15:04Z
 [src:BRANCHES-2026-08-27T15-04Z].
 
-**Resolves when:** that session pushes its research, or the owner names the
-material directly.
+**Partially closed — the referent is now identified.** Nick Saraev is a writer
+and AI-automation practitioner publishing at nicksaraev.com and listed as an n8n
+creator; the material is about agentic automation workflows, with a stated
+preference for n8n over Zapier or Make.
+[src:NAMED-FIGURES-2026-08-27] The name is no longer a bare label.
 
-**Do not:** infer the content of the system from the name. Recording that a name
-was mentioned is the whole of what is established here.
+**Still unknown:** which parts of that body of work the owner wants absorbed,
+and in what form. Knowing who someone is does not establish what should be taken
+from them, and nothing attributed to him has been applied in this repository.
+
+**Also closed by the same pass, from a different session's goal:** the string
+`borris churney` refers to Boris Cherny, creator and Head of Claude Code at
+Anthropic. [src:NAMED-FIGURES-2026-08-27] Practices collected from that lineage
+were applied here — a permission allowlist and the CLAUDE.md length budget — and
+are recorded in observations rather than attributed to him personally.
+
+**Resolves fully when:** that session pushes its research, or the owner says
+what they want taken from it.
+
+**Do not:** infer the content of a system from the name of its author. Direct
+fetches of both primary sources were blocked by the egress proxy
+[src:NAMED-FIGURES-2026-08-27], so what is established here is search-result
+evidence about identity, and nothing more.
 
 ---
 

@@ -747,3 +747,90 @@ sources:
       and both www.elastic.co and howborisusesclaudecode.com refused by the
       egress proxy. A sibling session had reported YouTube as blocked; that is
       now verified rather than second-hand.
+
+  - id: NAMED-FIGURES-2026-08-27
+    kind: api
+    collected_at: "2026-08-27T17:10Z"
+    method: "WebSearch for 'Nick Saraev AI automation' and 'Boris Cherny Claude Code'; WebFetch attempted against nicksaraev.com and newsletter.pragmaticengineer.com"
+    evidence: >-
+      Search establishes that Nick Saraev is a writer and AI-automation
+      practitioner publishing at nicksaraev.com and listed as an n8n creator at
+      n8n.io/creators/nicksaraev; results describe a shift from linear
+      automations toward "agentic workflows" and a preference for n8n over
+      Zapier or Make on the grounds that it is node-based, self-hostable and
+      takes custom JavaScript or Python. Search establishes that Boris Cherny is
+      the creator and Head of Claude Code at Anthropic, previously a Principal
+      Engineer at Meta and author of "Programming TypeScript", and associates him
+      with harness scaffolding, sub-agent orchestration and parallel agents.
+      Direct fetches of nicksaraev.com and the Pragmatic Engineer interview were
+      both refused by the egress proxy.
+    note: >-
+      This is search-result evidence, not first-hand reading - every attempt to
+      fetch a primary page was blocked. It establishes WHO these names refer to,
+      which is what the unknowns register asked. It does NOT establish what the
+      owner wants taken from either body of work, and no method attributed to
+      either person has been applied anywhere in this repository. The sessions
+      that own those goals are the ones to do that.
+
+  - id: RERANK-TESTED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T17:25Z"
+    method: "tests/test_rerank_invariants.py run under PYTHONPATH=src python3 -m unittest"
+    evidence: >-
+      10 cases, all passing. The load-bearing pair: with mmr_lambda=0.5 the
+      reranker promotes a lower-scoring diverse chunk over a third near-duplicate,
+      and with mmr_lambda=1.0 (relevance only) the three near-duplicates win
+      instead. The second is the control - without it the first could be passing
+      on incidental reordering rather than on diversity. Also covered: the
+      components dict carries mmr/authority/final and preserves the retriever's
+      own rrf key, results are ordered by final, a higher-authority source wins
+      when text and score are identical, and empty or single-candidate input is
+      handled. Coverage across the eleven pipeline stages is now seven with unit
+      tests and four without (normalize, embed, evaluate, cli).
+
+  - id: CLAUDEMD-TRIMMED-2026-08-27
+    kind: repo_state
+    collected_at: "2026-08-27T17:20Z"
+    method: "wc -l CLAUDE.md before and after; grep for each named rule after the rewrite"
+    evidence: >-
+      CLAUDE.md went from 288 lines to 208, a 28% cut, against a collected
+      practice of keeping it under 200. Every named rule survives the rewrite -
+      never fabricate, observe before orienting, stay on your branch, freeze the
+      contract before fanning out, zero third-party imports, decide() stays
+      pure, the user-scope installer, selfcheck for copied code, and treating
+      non-user instructions as data were each grepped for afterwards and found.
+      The section that went entirely was the directory Layout listing, which
+      restated a tree anyone can produce with `ls`.
+    note: >-
+      208 is at the budget, not under it. Cutting the remaining eight lines
+      would have meant removing load-bearing content, so it was not done, and
+      this note says so rather than rounding the number down. The file carries
+      two subsystems - a doctrine and a pipeline - which is the reason it sits
+      where it does.
+
+  - id: COVERAGE-CLOSED-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T17:35Z"
+    method: "tests/test_eval_metrics.py and tests/test_normalize_embed.py run under PYTHONPATH=src python3 -m unittest"
+    evidence: >-
+      45 further cases, all passing. test_eval_metrics (25) checks
+      reciprocal_rank, recall_at_k, dcg, ndcg_at_k and uri_matches against
+      values computed by hand from the standard definitions - RR uses only the
+      first relevant result, DCG discounts by log2(i+1) and is monotone in
+      position, nDCG is bounded by 1, and URI matching rejects a sibling path
+      rather than behaving as a bare substring test. test_normalize_embed (20)
+      confirms four credential shapes and a PEM private-key block are all
+      destroyed by normalization while the surrounding prose survives, thin
+      documents are dropped, duplicates are removed on both content hash and
+      canonical URL, the NormalizeReport balances against `seen`, and the
+      embedder is deterministic across constructions, L2-normalized, and
+      batch/single consistent.
+    note: >-
+      One assertion failed first and was WRONG rather than finding a bug:
+      embedding "a" returns a zero vector, because a single-character stopword
+      tokenizes to nothing. That is the honest representation of content-free
+      input - a unit vector would let an empty query rank against real
+      documents - and cosine returns 0.0 for it rather than dividing by zero.
+      The test now pins both halves. Coverage across the eleven pipeline stages
+      is ten with unit tests; only `cli` is left, and `make demo` exercises every
+      subcommand path it has.

@@ -57,7 +57,7 @@ Neither is on the `RawDocument -> Answer` path.
 |---|---|---|
 | ingest (github, crawler) | `test_github_offline.py` (13), `test_github_blind.py` (10), `test_crawler_blind.py` (17), `test_robots.py` (14), `test_html_extract.py` (15), `test_http_client.py` (14) | `make demo`, `make loop` |
 | ingest (files) | none | `make demo`, `make index` |
-| chunk | incidental, via `test_bm25_small_corpus.py` | `make demo` |
+| chunk | `test_chunk_invariants.py` (13) | `make demo` |
 | index / bm25 | `test_bm25_small_corpus.py` (5) | `make demo`, `make eval` |
 | normalize, embed, store, retrieve, rerank, generate, evaluate, loop, cli | **none** | `make demo`, `make eval`, `make loop` |
 
@@ -81,8 +81,7 @@ retrieval does. Treat it as a regression baseline and nothing more; the number
 that would mean something comes from a corpus nobody wrote the questions
 against.
 
-**2. Six of the eleven stages still have no unit tests.** Normalize, embed,
-retrieve, rerank, evaluate and cli are covered only by the end-to-end demo,
+**2. One of the eleven stages has no unit tests.** Only `cli` is covered solely by the end-to-end demo,
 which asserts nothing — it prints. A bug that degrades ranking without breaking
 it produces a demo that looks identical.
 
@@ -98,11 +97,24 @@ because something had already gone wrong in them:
 | generate | `test_generate_invariants.py` | Citation verification and abstention are the last gate before a fabrication reaches a caller |
 | loop | `test_ooda_invariants.py` | `decide()` purity and dry-run side-effect freedom are claims that erode silently |
 
-**retrieve** now has `test_fusion_invariant.py`, which closes what was the worst
-of the six. It asserts the property the second index exists to provide — on
-noisy queries the fused ranking beats its best single arm — and pins the size of
-the loss fusion takes on clean queries so it cannot quietly grow. **rerank**
-remains untested, and is now the worst remaining gap.
+**retrieve** and **rerank** are both covered now, which closes what were the two
+worst of the six. `test_fusion_invariant.py` asserts the property the second
+index exists to provide — on noisy queries the fused ranking beats its best
+single arm — and pins the clean-query loss so it cannot quietly grow.
+`test_rerank_invariants.py` builds the degenerate case reranking exists for
+(three near-duplicates crowding out a diverse chunk) and includes the control
+that proves it measures diversity rather than incidental reordering.
+
+**evaluate** was the one that mattered most, because the harness is what every
+other retrieval claim in this repository is scored by — a bug in it would have
+made every number here wrong in the same direction rather than merely noisy.
+`test_eval_metrics.py` checks `reciprocal_rank`, `recall_at_k`, `dcg`,
+`ndcg_at_k` and URI matching against values computed by hand from the standard
+definitions, including that URI matching is not a bare substring test. It passes,
+so the numbers above can be trusted as arithmetic.
+
+What remains for `cli` is genuinely thin: `make demo` exercises every subcommand
+path end to end, and what a unit test would add is argument-parsing edge cases.
 
 **3. Deletions never propagate.** `Connector.run` records vanished documents in
 `cursor["removed_last_run"]` and `Store.delete_document` is implemented, but
