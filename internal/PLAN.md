@@ -57,10 +57,15 @@ deferred: at 33 documents dense-only matched hybrid, and the deferral rather
 than the removal of an arm was the right call (L29).
 
 On pass rate the two arms are level at 153 documents, while dense alone is
-seven cases behind - a gap that widened from three when `candidate_k` was
-halved, which is the ADR's leading hypothesis and not yet measured. MMR has
-been neutral, then worth a case, and is now corpus-dependent: it costs 0.0116
-of precision here and earns a case on the primary corpus.
+seven cases behind. That gap is `candidate_k`, now measured: at k=40 dense-only
+returns to 44/54 and recall 0.814, its value before the halving. Hybrid is flat
+at 49/54 across k=20-80, so the original sweep - run on hybrid alone - could not
+have seen it.
+
+MMR has been neutral, then worth a case, and is now corpus-dependent: it costs
+0.0116 of precision here and earns a case on the primary corpus. The same
+`candidate_k` explanation does **not** cover MMR - its cost grows with k rather
+than shrinking - and the real cause is still unmeasured (L74).
 The pass column is sensitive to the abstention gate and the metric columns are
 not, so a change to the floor moves one and leaves the other untouched.
 

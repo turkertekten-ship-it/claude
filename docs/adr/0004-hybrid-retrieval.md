@@ -54,14 +54,49 @@ encourages, since external is the gate - would have recorded "MMR costs
 precision for nothing" as a general fact about the component. It is a fact about
 one corpus.
 
-Nothing about MMR itself changed. `candidate_k` was halved to 20, leaving less
-redundancy in the candidate set for it to remove, which fits both directions:
-external's candidates were already diverse, primary's are not.
+### The `candidate_k` hypothesis, measured
 
-The dense arm's fall from 44/54 to 42/54 has the same likely cause and is worth
-naming as a hypothesis rather than a finding: halving `candidate_k` takes the
-most from the weaker arm, which needs more candidates to land a hit. Nobody has
-measured that; it is the obvious next question this table raises.
+Both reversals were first written up here with one explanation: `candidate_k`
+was halved 40 -> 20 this session, so the weaker arm has fewer chances to land a
+hit and MMR has less redundancy to remove. `scripts/candidate_k_arms.py` sweeps
+k with each arm disabled, on the external corpus:
+
+| configuration | k=10 | k=20 | k=40 | k=80 |
+|---|---|---|---|---|
+| hybrid | 46/54 r0.872 p0.253 | **49/54** r0.930 p0.247 | 49/54 r0.930 p0.247 | 49/54 **r0.942** p0.235 |
+| dense only | 39/54 r0.663 p0.203 | 42/54 r0.721 p0.212 | **44/54 r0.814** p0.209 | 43/54 r0.814 p0.203 |
+| lexical only | 48/54 r0.907 p0.244 | **49/54** r0.919 p0.244 | 49/54 r0.919 p0.227 | 48/54 r0.895 p0.218 |
+| no MMR | 46/54 r0.872 p0.253 | 49/54 r0.930 **p0.259** | 49/54 r0.930 **p0.262** | 49/54 r0.942 **p0.244** |
+
+**One hypothesis, two answers.**
+
+*For the dense arm it holds exactly.* Dense-only goes 39, 42, **44**, 43 as k
+rises, and at k=40 it reads 44/54 with recall 0.814 - the number this ADR
+recorded before `candidate_k` was halved, to three decimals. The arm never got
+worse; the window in front of it got smaller. Hybrid meanwhile is flat at 49/54
+for k=20, 40 and 80, which is why the original `candidate_k` sweep - run on the
+hybrid configuration alone - correctly saw nothing. A parameter can be neutral
+for the whole and decisive for a part.
+
+*For MMR it is false, in the direction that matters.* If MMR were starved of
+redundancy at k=20, more candidates would restore its value. Instead its cost
+**grows** with k:
+
+    k              |   10     20     40     80
+    MMR on pass    |   +0     +0     +0     +0
+    MMR on recall  | +0.000 +0.000 +0.000 +0.000
+    MMR on prec@8  | +0.000 -0.012 -0.015 -0.009
+
+Across an 8x range of candidate set size, MMR changes the pass rate and recall
+of this corpus **not at all**, and only ever costs precision. Whatever reversed
+it, `candidate_k` is not it - most likely the reranker changes earlier this
+session, which already order the top of the list by coverage and position, but
+that is unmeasured and is deliberately not written down as a second story to
+replace the first.
+
+A last thing this table says that the ablation could not: **lexical-only beats
+hybrid at k=10** (48/54 against 46/54). The dense arm is not merely weaker
+there, it is actively costing cases when the window is tight.
 
 For the primary corpus (84 documents, 868 chunks, 20 cases), same run:
 

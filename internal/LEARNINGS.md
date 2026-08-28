@@ -3675,3 +3675,53 @@ measured, and it is now the obvious next question.
 3. **When two corpora are measured, quote both or quote neither.** The gate
    corpus is the one in front of you, and a component's behaviour there is not
    the component's behaviour.
+
+---
+
+## L74 - One hypothesis, two reversals, and it only explained one
+
+L73 recorded two inversions in ADR 0004's ablation and offered a single cause
+for both: `candidate_k` had been halved 40 -> 20, so the weaker arm had fewer
+chances and MMR had less redundancy to remove. It was a tidy story that fit both
+facts, which is exactly the kind that deserves a measurement rather than a
+paragraph. `scripts/candidate_k_arms.py` sweeps k with each arm disabled:
+
+| configuration | k=10 | k=20 | k=40 | k=80 |
+|---|---|---|---|---|
+| hybrid | 46/54 r0.872 | 49/54 r0.930 | 49/54 r0.930 | 49/54 r0.942 |
+| dense only | 39/54 r0.663 | 42/54 r0.721 | **44/54 r0.814** | 43/54 r0.814 |
+| lexical only | **48/54** r0.907 | 49/54 r0.919 | 49/54 r0.919 | 48/54 r0.895 |
+| no MMR | 46/54 p0.253 | 49/54 p0.259 | 49/54 p0.262 | 49/54 p0.244 |
+
+**Confirmed for the dense arm, by a number I could not have fabricated.** At
+k=40 dense-only reads 44/54 with recall 0.814 - the value the ADR recorded
+before the halving, to three decimals, arrived at from a fresh index. The arm
+never degraded; its window shrank.
+
+**Falsified for MMR, in the direction that matters.** Starvation predicts that
+more candidates restore MMR's value. Its cost *grows* with k instead: pass +0
+and recall +0.000 at every k from 10 to 80, precision -0.000, -0.012, -0.015,
+-0.009. Over an 8x range of candidate set size MMR does nothing for this corpus
+except cost precision. I could have left the tidy story in the ADR and nobody
+would have checked it, because it was plausible and covered everything.
+
+**And the shape of why the original sweep missed this.** `candidate_k` 40 -> 20
+was measured on the *hybrid* configuration: same pass rates, better nDCG, 15-26%
+faster - a clean win, correctly measured. Hybrid is flat at 49/54 for k=20, 40
+and 80. The change cost the dense arm two cases and 0.09 of recall, and no
+measurement of the whole could see it. The same sweep also shows lexical-only
+*beating* hybrid at k=10, 48/54 to 46/54.
+
+**Rules.**
+1. **A hypothesis that explains two things at once is one hypothesis with two
+   chances to be wrong.** Test it against each separately; here it was right
+   about one and backwards about the other.
+2. **Measure the parts, not only the whole.** A parameter can be neutral for the
+   composed system and decisive for a component inside it, and the composed
+   measurement is the one you will naturally run.
+3. **Predict the direction before you sweep.** "More candidates restores MMR"
+   was falsifiable and false; without stating it first, the growing cost would
+   have read as noise rather than as a refutation.
+4. **When the falsification leaves a gap, leave it open.** The real cause of the
+   MMR reversal is unmeasured. Writing a second plausible story in place of the
+   first is how the first one got there.

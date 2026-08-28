@@ -40,9 +40,9 @@ log = get_logger("retrieve")
 @dataclass
 class RetrievalConfig:
     top_k: int = 8
-    #: How deep each arm searches before fusion. Wider than top_k on purpose:
-    #: fusion and reranking can only promote what they were given.
-    #: How many chunks each arm contributes before fusion and reranking.
+    #: How many chunks each arm contributes before fusion and reranking. Wider
+    #: than top_k on purpose: fusion and reranking can only promote what they
+    #: were given.
     #:
     #: **20, halved from 40**, which is faster *and* slightly better - not a
     #: trade. Swept on both corpora:
@@ -71,6 +71,22 @@ class RetrievalConfig:
     #: what the clock returns?", lexical rank 107, dense 331). Reaching it needs
     #: k >= 110, which costs a case on each corpus. That failure is a retrieval
     #: gap, not a windowing one.
+    #:
+    #: **The sweep above is of the composed system, and hid what the halving
+    #: did to the parts.** Re-run with each arm disabled
+    #: (`scripts/candidate_k_arms.py`), the dense arm alone reads:
+    #:
+    #:   candidate_k      10      20      40      80
+    #:   dense-only pass  39/54   42/54   44/54   43/54
+    #:   dense-only recall .663   .721    .814    .814
+    #:
+    #: Halving k cost the dense arm two cases and 0.09 of recall - and hybrid is
+    #: identical at 20 and 40, so no measurement of the whole could show it. At
+    #: k=10 lexical-only (48/54) actually *beats* hybrid (46/54).
+    #:
+    #: The value stays at 20: what ships is hybrid, hybrid is unchanged between
+    #: 20 and 40, and 20 is faster. That is now a measured decision about the
+    #: composed system rather than an unexamined one (L74).
     candidate_k: int = 20
     dense_weight: float = 1.0
     lexical_weight: float = 1.0
