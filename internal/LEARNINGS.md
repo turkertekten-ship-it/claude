@@ -538,3 +538,45 @@ external set is the regression gate.
 **The general shape:** when the measurement and the thing measured share a
 substrate, the measurement decays. Budget for an independent one early, while
 the corpus is still small enough that building it is cheap.
+
+---
+
+## L23 - A flag must degrade the thing it names, and a saturated metric hides that it didn't
+
+**Evidence.** `scripts/ablation.py` was written to answer "what is each retrieval
+arm actually worth?". Its first run said `use_rerank=False` answered **8 of 36**
+external golden cases, against 32 for the full hybrid - while recall stayed at
+0.857. The retriever was finding the right chunks and then refusing to answer.
+
+The cause: the abstention gate reads `rerank_relevance`, a feature only the
+reranker computes. Making the reranker call conditional on `use_rerank` left
+that feature at zero, so the gate abstained on nearly everything. A flag named
+for ranking had quietly disabled an unrelated safety check.
+
+The first fix restored the pre-rerank list *order* and looked correct. It was
+not: MMR and the score floor both read `result.score`, which still held the
+reranked value, so the arm came out byte-identical to full hybrid. Only
+restoring `score` from `pre_rerank_score` made the flag mean anything -
+`no rerank` then measured 31/36, recall 0.857, precision 0.165, nDCG 0.792
+against hybrid's 32/36, 0.929, 0.295, 0.863.
+
+**Why it survived so long.** The metric in use was hit@8, which read **26/28 for
+both hybrid and lexical-only**. On a corpus this size, eight slots are enough for
+almost anything to land somewhere in the list, so the metric was pinned at its
+ceiling and could not express the difference. nDCG and precision, which care
+where in the list a result lands, separated the arms immediately.
+
+**Rules.**
+1. A configuration flag must change the behaviour it names and nothing else.
+   Prove it: assert the flagged run differs from the unflagged one. A flag whose
+   two settings produce identical output is either dead or wired to the wrong
+   thing, and both look like success.
+2. When a feature computed by one stage is consumed by another, the consumer
+   owns the requirement. Compute the feature unconditionally and let the flag
+   govern only its use.
+3. Before trusting a comparison, check the metric is not saturated. If two arms
+   you expect to differ score the same, suspect the ruler before the arms.
+
+Both failure modes are pinned by `RerankCouplingTest`, and both were confirmed
+by mutation: re-introducing the conditional rerank fails 3 of its 3 tests;
+re-introducing the order-only fix fails 2 of 3.

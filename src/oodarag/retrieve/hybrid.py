@@ -187,10 +187,26 @@ class HybridRetriever:
             results.append(ScoredChunk(chunk=chunk, score=score,
                                        components=dict(components), document=document))
 
-        # --- rerank
-        if config.use_rerank and results:
+        # --- score features, then (optionally) reorder by them
+        #
+        # These are always computed. The abstention gate reads
+        # `rerank_relevance`, so making the feature pass conditional on
+        # `use_rerank` silently disabled the gate's only input: with reranking
+        # off, relevance defaulted to zero and the system abstained on almost
+        # everything - 8 of 36 golden cases instead of 32, while recall stayed
+        # at 0.857. A configuration flag has to degrade behaviour, not disable
+        # an unrelated safety check.
+        if results:
             mark = time.monotonic()
             results = self.reranker.rerank(query, results)
+            if not config.use_rerank:
+                # Restore the fused score itself, not merely the list order:
+                # MMR and the score floor below both read `score`, so re-sorting
+                # alone left reranking fully in control and made `use_rerank`
+                # look like it did nothing.
+                for result in results:
+                    result.score = result.components.get("pre_rerank_score", result.score)
+                results.sort(key=lambda r: r.score, reverse=True)
             trace.stages["rerank_ms"] = (time.monotonic() - mark) * 1000
 
         if config.min_score > 0:

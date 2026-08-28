@@ -708,3 +708,83 @@ class CursorIndexDesyncTest(unittest.TestCase):
         second = pipeline.run([self.connector])
         self.assertEqual(second.deltas[0].new, 0)
         self.assertEqual(second.deltas[0].unchanged, 6)
+
+
+class RerankCouplingTest(unittest.TestCase):
+    """Turning off reranking silently disabled the abstention gate.
+
+    The gate reads `rerank_relevance`, which only the reranker computes. Making
+    the feature pass conditional on `use_rerank` meant relevance defaulted to
+    zero and the system abstained on almost everything - 8 of 36 golden cases
+    instead of 32, while recall stayed at 0.857. A configuration flag must
+    degrade the behaviour it names, not disable an unrelated safety check.
+    """
+
+    def setUp(self):
+        self.store = SqliteStore(":memory:")
+        self.pipeline = IndexPipeline(self.store)
+        docs = [
+            _doc("d1", "fusion.md",
+                 "Reciprocal rank fusion combines a dense arm and a lexical arm by rank."),
+            _doc("d2", "budgets.md",
+                 "Budgets bound requests, bytes, depth and wall clock time for a crawl."),
+            _doc("d3", "citations.md",
+                 "Citation markers are verified against the chunks actually retrieved."),
+        ]
+        self.store.upsert_documents(docs)
+        self.pipeline.embedder.fit([d.text for d in docs])
+        for d in docs:
+            self.store.replace_chunks(d.doc_id, chunk_document(d))
+        self.pipeline.embed_missing()
+        self.addCleanup(self.store.close)
+
+    def _answer(self, use_rerank: bool):
+        from oodarag.retrieve.hybrid import RetrievalConfig
+
+        retriever = HybridRetriever(self.store, self.pipeline.embedder,
+                                    RetrievalConfig(use_rerank=use_rerank))
+        generator = AnswerGenerator(retriever, AnswerConfig(generator="extractive"))
+        return generator.answer("how are dense and lexical arms combined by rank?")
+
+    def test_relevance_is_computed_even_with_reranking_off(self):
+        """Every result must still carry the gate's input, and its score must be
+        the fused one - not the reranked one the flag was meant to suppress."""
+        from oodarag.retrieve.hybrid import RetrievalConfig
+
+        results, _ = HybridRetriever(
+            self.store, self.pipeline.embedder,
+            RetrievalConfig(use_rerank=False),
+        ).retrieve("dense and lexical arms")
+        self.assertTrue(results)
+        for result in results:
+            self.assertIn("rerank_relevance", result.components,
+                          "the abstention gate lost its only input")
+            self.assertIn("pre_rerank_score", result.components)
+            self.assertAlmostEqual(result.score, result.components["pre_rerank_score"],
+                                   places=6,
+                                   msg="use_rerank=False left the reranked score in place")
+        self.assertGreater(max(r.components["rerank_relevance"] for r in results), 0.0)
+
+    def test_disabling_rerank_does_not_cause_a_blanket_abstention(self):
+        with_rerank = self._answer(True)
+        without = self._answer(False)
+        self.assertFalse(with_rerank.abstained, with_rerank.text)
+        self.assertFalse(without.abstained,
+                         f"turning off reranking made the system abstain: {without.text[:120]}")
+        self.assertGreater(without.metrics["best_relevance"], 0.0,
+                           "relevance was not computed with reranking off")
+
+    def test_disabling_rerank_actually_changes_the_score(self):
+        """The first fix restored list order but not the score, so MMR and the
+        score floor still read the reranked value and the flag did nothing."""
+        from oodarag.retrieve.hybrid import RetrievalConfig
+
+        query = "how are dense and lexical arms combined by rank?"
+        reranked, _ = HybridRetriever(self.store, self.pipeline.embedder,
+                                      RetrievalConfig(use_rerank=True)).retrieve(query)
+        plain, _ = HybridRetriever(self.store, self.pipeline.embedder,
+                                   RetrievalConfig(use_rerank=False)).retrieve(query)
+        self.assertNotAlmostEqual(reranked[0].score, plain[0].score, places=4,
+                                  msg="use_rerank=False left the reranked score in place")
+        # The features are still there either way - the gate needs them.
+        self.assertIn("rerank_relevance", plain[0].components)
