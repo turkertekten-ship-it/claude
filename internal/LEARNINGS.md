@@ -2547,3 +2547,66 @@ workflow now says plainly what its run history does and does not mean.
 3. **A tooling default can quietly void a discipline.** Nobody chose "only the
    tip gets verified" - it arrived with a sensible cost-saving default, and it
    silently changed what a green history means.
+
+---
+
+## L56 - The +1 I shipped was a +2 and a -1, and the -1 is measurable to the word
+
+L54 shipped `coverage_power` 2.0 with the gate pinned at 1.0 and reported the
+external set going 47/54 to 48/54. That is true and it hides the shape of it.
+Comparing the failure lists rather than the counts:
+
+* **fixed:** `pluggy` ("let other packages hook into it") and `tomli` ("reads
+  TOML configuration files")
+* **broken:** `structlog` ("treats every event as a dictionary passed through a
+  chain of functions")
+
+Two fixed, one broken, net one. A pass rate cannot show that, and the broken one
+is the more instructive.
+
+**structlog is not a semantic gap.** Its page says *"Everything is about
+functions that take and return dictionaries"*, and it contains six of the query's
+ten terms including every one that identifies it: `log`, `event`, `dictionari`,
+`function`, `everi`, `librari`. It should be trivially retrievable. Traced:
+
+| term | IDF | IDF² | in structlog | documents containing it |
+| --- | --- | --- | --- | --- |
+| chain | **6.00** | **35.97** | **no** | **3** - black, responses, orjson |
+| treat | 4.22 | 17.85 | no | 14 |
+| everi | 3.90 | 15.24 | yes | 25 |
+| event | 3.80 | 14.44 | yes | 17 |
+| dictionari | 3.75 | 14.08 | yes | 17 |
+| through | 3.66 | 13.41 | no | 35 |
+
+`chain` is the single highest-weighted term in the query. It occurs in three
+documents out of 153, none of them about chaining functions - `black`,
+`responses`, `orjson`. It is a word from the question's register that the corpus
+happens to use three times, incidentally.
+
+At power 1 it carried 4.5% of the query's weight and structlog's coverage was
+0.523. At power 2 it carries **27%**, and coverage falls to **0.442**. Squaring
+IDF squares the influence of the term the corpus understands least.
+
+**This is L48 stated more sharply, and worse than I had it.** The problem is not
+only that IDF misranks query terms - it is that a term which is *rare and
+irrelevant* is indistinguishable from one that is *rare and discriminating*, and
+every mechanism that trusts rarity harder makes the confusion cost more. IDF
+cannot separate `password` from `chain`; sharpening multiplies whichever it got
+wrong.
+
+**Was shipping it still right?** Yes, and the reasoning is worth keeping
+explicit. +2/-1 on the gate corpus, +1 case on primary, recall 0.8721 -> 0.9070,
+nDCG up on both, one metric down 0.018. The trade is favourable and the loss is
+a single case with a fully understood cause. But "48/54, up one" was an
+incomplete description of it, and I wrote that before decomposing.
+
+**Rules.**
+1. **Diff the failure lists, not the pass counts.** Net +1 was two different
+   changes. The count is the summary; the set is the result.
+2. **An exponent on a weight is an exponent on the weight's errors.** Any
+   transform that concentrates influence concentrates misplaced influence too,
+   and the cases it breaks are the ones where the weight was wrong - which is
+   exactly where you cannot see it from an aggregate.
+3. **Report a shipped change by what it did to the members, at least once.** The
+   aggregate justifies the decision; the decomposition tells you what you now
+   own.
