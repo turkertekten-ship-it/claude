@@ -42,7 +42,8 @@ Sıra sabittir. Bir başlığı atlama, sırasını değiştirme.
 2. **Ara dönem taahhütleri.** Her taahhüt için tek soru: bu değer koruma mı,
    fiilî kontrol mü? Ortak fiyatlandırma, ortak müşteri görüşmesi, bütünleşme
    hazırlığı, alıcı onayına bağlanmış olağan iş kararları — 4054 sayılı Kanun
-   madde 11 bakımından izinsiz kapanış (gun-jumping) riski doğuran her
+   madde 10 ve 2010/4 sayılı Tebliğ madde 10 bakımından izinsiz kapanış
+   (gun-jumping) riski doğuran her
    taahhüdü ayrıca işaretle.
 3. **Beyanlar.** Kapsam (neyi kapsıyor, neyi kapsamıyor), sınırlayıcılar,
    bilgi kaydı (kimin bilgisi, araştırma yükümlülüğü var mı) ve önemlilik
