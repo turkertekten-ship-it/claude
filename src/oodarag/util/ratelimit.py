@@ -15,7 +15,25 @@ class TokenBucket:
         self._lock = threading.Lock()
 
     def acquire(self, tokens: float = 1.0) -> float:
-        """Block until `tokens` are available. Returns the seconds spent waiting."""
+        """Block until `tokens` are available. Returns the seconds spent waiting.
+
+        The wait is unbounded on purpose - a caller asking to be rate limited is
+        asking to wait - but it terminates, because tokens accrue at a rate that
+        is clamped above zero and the request is checked to be satisfiable.
+
+        Without that check the loop cannot end: `_tokens` is capped at
+        `capacity`, so asking for more than the capacity means the condition is
+        never true and the caller sleeps in five-second steps for ever, silently.
+        The only caller today asks for one token from a bucket of at least one,
+        so this was a hang waiting for the first weighted request.
+        """
+        if tokens > self.capacity:
+            raise ValueError(
+                f"asked for {tokens} tokens from a bucket that holds "
+                f"{self.capacity}; this can never be satisfied. Raise `burst` "
+                f"or ask for less.")
+        if tokens <= 0:
+            return 0.0
         waited = 0.0
         while True:
             with self._lock:

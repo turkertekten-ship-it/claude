@@ -315,7 +315,7 @@ class SqliteStore:
             self._purge_fts(doc_id)
             self.conn.execute("DELETE FROM documents WHERE doc_id=?", (doc_id,))
         self._vector_index = None
-        self._invalidate_idf()
+        self._invalidate_derived()
 
     # ------------------------------------------------------------------ chunks
 
@@ -350,7 +350,7 @@ class SqliteStore:
                         (cursor.lastrowid, chunk.text, chunk.context_header, title),
                     )
         self._vector_index = None
-        self._invalidate_idf()
+        self._invalidate_derived()
         return len(chunks)
 
     def get_chunks(self, chunk_ids: Sequence[str]) -> dict[str, Chunk]:
@@ -675,8 +675,18 @@ class SqliteStore:
         ).fetchone()
         return f"{row['n']}:{content_hash(row['h'])}:{analysis_fingerprint()}"
 
-    def _invalidate_idf(self) -> None:
-        self.conn.execute("DELETE FROM meta WHERE key='idf_table'")
+    #: Every cache in `meta` that is a function of the chunk corpus. Both
+    #: validate themselves against `_corpus_signature`, so this eager drop is
+    #: belt and braces - but it must name all of them. Dropping one and not the
+    #: other is the asymmetry that makes a reader assume "the derived caches are
+    #: cleared here" when only one of them is.
+    _DERIVED_CACHE_KEYS = ("idf_table", "surface_vocabulary")
+
+    def _invalidate_derived(self) -> None:
+        """Drop everything computed from the chunk corpus."""
+        placeholders = ",".join("?" * len(self._DERIVED_CACHE_KEYS))
+        self.conn.execute(f"DELETE FROM meta WHERE key IN ({placeholders})",
+                          self._DERIVED_CACHE_KEYS)
         self.conn.commit()
 
     def vocabulary(self) -> set[str]:

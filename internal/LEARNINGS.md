@@ -1198,3 +1198,54 @@ smell rather than an incident.
 3. Narrowing an exception type is only safe if the new type is a subclass -
    `PolicyDeniedError` extends `TransportError`, so every existing handler still
    catches it. There is a test asserting exactly that.
+
+---
+
+## L35 - Auditing the code against the learnings, as L34 said to
+
+L34's first rule was that writing a learning down is not applying it, and that a
+good learning names its own targets. This is that grep, run over the rules that
+name something greppable.
+
+**"Substring test on a status string" (L32, L34): clean.** Two instances were
+already fixed the same day; the sweep found no third. That closes it as an
+incident rather than leaving it as a suspicion.
+
+**"Bound the expensive operation" (L5): one unbounded loop, latent.**
+`TokenBucket.acquire` waits in a `while True` with no wall-clock bound, which is
+correct - a caller asking to be rate limited is asking to wait - but only
+because the loop can end. `_tokens` is capped at `capacity`, so a request larger
+than the capacity is never satisfiable and the caller sleeps in five-second
+steps for ever, silently. Reproduced: `TokenBucket(rate_per_sec=2).acquire(5)`
+does not return.
+
+Latent today, because the only caller asks for one token from a bucket of at
+least one. It was a hang waiting for the first weighted request - a
+"cost this endpoint three tokens" change is the obvious next edit to a rate
+limiter. Now refused with a message that says why, since an unsatisfiable
+request is a caller bug rather than a long wait.
+
+**"An operation that can silently do nothing" (L13): one asymmetry, mine.**
+`_invalidate_idf` dropped the IDF table on every corpus write. When
+`surface_vocabulary` was added two cycles ago it went into the same table, over
+the same input, and was not added to that drop. Both validate against the corpus
+signature so neither is actually stale - but the asymmetry is the trap: the next
+reader sees "the derived cache is cleared here" and does not check whether
+theirs is in the list. Renamed `_invalidate_derived` with the keys as a named
+constant, and the test asserts against the `meta` table rather than the
+constant, so adding a cache without listing it fails.
+
+**A test that detects a hang must not detect it by hanging.** The first version
+of the token-bucket test called `acquire` directly: with the guard removed the
+test run hung until the CI job timed out. Moved into a thread with a two-second
+join, it now fails in 2.1s. A slow confusing failure in place of a fast clear
+one is worth fixing even when both are technically red.
+
+**Rules.**
+1. A rule that names greppable targets should be grepped for on the day it is
+   written. Two of these three findings are older than the rule that found them.
+2. **Adding a second cache over an input means revisiting everything that
+   invalidates the first.** This is L20's shape for the fourth time in this
+   codebase, and the first time I introduced it myself.
+3. A `while True` needs a written argument for why it terminates, in the
+   docstring, next to the loop. Writing that argument is what exposed this one.

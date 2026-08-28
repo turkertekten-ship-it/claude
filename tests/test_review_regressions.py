@@ -1402,3 +1402,62 @@ class SurfaceAnswerabilityTest(unittest.TestCase):
             order[flag] = [r.chunk.chunk_id for r in results]
         self.assertEqual(order[False], order[True],
                          "the surface factor reordered the results")
+
+
+class DerivedCacheTest(unittest.TestCase):
+    """Two caches over the same corpus, invalidated differently.
+
+    `idf_table` and `surface_vocabulary` are both functions of the chunk corpus
+    and both validate against its signature, so either is safe on its own. The
+    eager drop on write named only the first, which is the asymmetry that makes
+    the next reader assume the derived caches are cleared when one of them is
+    not - the shape L20 records three separate instances of.
+    """
+
+    def _store_with(self, text: str) -> SqliteStore:
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        doc = _doc("d1", "a.md", text)
+        store.upsert_documents([doc])
+        store.replace_chunks("d1", chunk_document(doc))
+        return store
+
+    def test_both_caches_follow_the_corpus(self):
+        store = self._store_with("Reciprocal rank fusion combines two arms by rank.")
+        self.assertIn("fusion", store.vocabulary())
+        self.assertIn("fusion", store.surface_vocabulary())
+        self.assertNotIn("quokka", store.surface_vocabulary())
+
+        replacement = _doc("d1", "a.md", "Quokka telemetry calibration notes.")
+        store.upsert_documents([replacement])
+        store.replace_chunks("d1", chunk_document(replacement))
+
+        self.assertIn("quokka", store.vocabulary())
+        self.assertIn("quokka", store.surface_vocabulary(),
+                      "the surface vocabulary did not follow the corpus")
+        self.assertNotIn("fusion", store.surface_vocabulary())
+
+    def test_the_eager_drop_names_every_derived_cache(self):
+        """Asserted against the meta table rather than the constant, so adding a
+        cache without adding it here fails."""
+        store = self._store_with("Budgets bound requests, bytes and wall clock time.")
+        store.vocabulary()
+        store.surface_vocabulary()
+        cached = {row[0] for row in store.conn.execute(
+            "SELECT key FROM meta WHERE key IN ('idf_table', 'surface_vocabulary')")}
+        self.assertEqual(cached, {"idf_table", "surface_vocabulary"})
+
+        store._invalidate_derived()
+        remaining = [row[0] for row in store.conn.execute(
+            "SELECT key FROM meta WHERE key IN ('idf_table', 'surface_vocabulary')")]
+        self.assertEqual(remaining, [],
+                         f"a derived cache survived invalidation: {remaining}")
+
+    def test_a_deleted_document_leaves_neither_cache_behind(self):
+        store = self._store_with("Citation markers are verified against retrieved chunks.")
+        store.vocabulary()
+        store.surface_vocabulary()
+        store.delete_document("d1")
+        remaining = [row[0] for row in store.conn.execute(
+            "SELECT key FROM meta WHERE key IN ('idf_table', 'surface_vocabulary')")]
+        self.assertEqual(remaining, [])

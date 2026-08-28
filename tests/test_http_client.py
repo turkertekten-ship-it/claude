@@ -286,3 +286,63 @@ class PolicyDenialTest(unittest.TestCase):
 
         sized = TransportError("response too large: 403 bytes > cap 100")
         self.assertEqual(_classify_http_error(sized)[0], UNREACHABLE)
+
+
+class TokenBucketTest(unittest.TestCase):
+    """`acquire` waits in a loop with no wall-clock bound, which is correct - a
+    caller asking to be rate limited is asking to wait - but only because the
+    loop can end. `_tokens` is capped at `capacity`, so a request larger than
+    the capacity was never satisfiable and slept in five-second steps for ever.
+    """
+
+    def test_an_unsatisfiable_request_is_refused_rather_than_awaited(self):
+        """Run in a thread with a join timeout. Asserting "this does not hang"
+        by calling it directly means the test *hangs* when the guard is removed,
+        which stalls CI instead of failing it - a slow confusing failure in
+        place of a fast clear one."""
+        import threading
+
+        from oodarag.util.ratelimit import TokenBucket
+
+        bucket = TokenBucket(rate_per_sec=2.0)
+        self.assertEqual(bucket.capacity, 2.0)
+        outcome: list = []
+
+        def call():
+            try:
+                bucket.acquire(5)
+                outcome.append(("returned", None))
+            except Exception as e:  # noqa: BLE001 - the outcome is the assertion
+                outcome.append(("raised", e))
+
+        worker = threading.Thread(target=call, daemon=True)
+        worker.start()
+        worker.join(timeout=2.0)
+        self.assertFalse(worker.is_alive(),
+                         "acquire() is still waiting for tokens it can never get")
+        self.assertEqual(outcome[0][0], "raised")
+        self.assertIsInstance(outcome[0][1], ValueError)
+        self.assertIn("never be satisfied", str(outcome[0][1]))
+
+    def test_a_satisfiable_request_still_waits_and_returns(self):
+        """The refusal must not have been bought by breaking the rate limit."""
+        from oodarag.util.ratelimit import TokenBucket
+
+        bucket = TokenBucket(rate_per_sec=50.0, burst=1)
+        self.assertEqual(bucket.acquire(1), 0.0, "the first token should be free")
+        waited = bucket.acquire(1)
+        self.assertGreater(waited, 0.0, "the second token should have cost a wait")
+        self.assertLess(waited, 1.0)
+
+    def test_a_request_exactly_at_capacity_is_allowed(self):
+        """The boundary is `>`, not `>=`: a bucket must be able to hand out its
+        whole capacity at once, which is what burst means."""
+        from oodarag.util.ratelimit import TokenBucket
+
+        bucket = TokenBucket(rate_per_sec=100.0, burst=4)
+        self.assertEqual(bucket.acquire(4), 0.0)
+
+    def test_zero_tokens_costs_nothing(self):
+        from oodarag.util.ratelimit import TokenBucket
+
+        self.assertEqual(TokenBucket(rate_per_sec=1.0).acquire(0), 0.0)
