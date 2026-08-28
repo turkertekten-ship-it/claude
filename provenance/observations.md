@@ -195,6 +195,26 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - Every metric fell against the 18-golden baseline, which is the improvement: the old set was saturated and could not detect a regression, and this one has headroom and two answerable questions it currently gets wrong. [src:EVAL-BASELINE-26-2026-08-27]
 - `false_abstention` rising from 0.000 to 0.087 is the trade becoming visible: on harder questions the generator refuses rather than guessing. [src:EVAL-BASELINE-26-2026-08-27]
 
+## Observed — fusion measured per query class, correcting an earlier finding
+
+> Correction, not an addition: two entries above (the golden-set discrimination
+> finding and the 26-golden baseline) concluded that the dense arm contributes
+> nothing and fusion is strictly worse than its lexical arm. That conclusion was
+> drawn from a golden set with no query class on which the dense arm could win,
+> so it could only ever have reached one answer. The lines below supersede it.
+
+- Scored per query class, MRR by typos-per-query (BM25 / dense / hybrid): 0 → 0.886 / 0.764 / 0.842; 4 → 0.688 / 0.674 / 0.723; 6 → 0.474 / 0.511 / 0.583. [src:FUSION-PER-CLASS-2026-08-27]
+- The dense arm overtakes BM25 at 6 typos per query, and from 4 onward the fused ranking beats *both* arms — genuine fusion gain, not a weighted average. [src:FUSION-PER-CLASS-2026-08-27]
+- The hashing embedder's character n-grams are precisely typo-robustness, so degraded input is its home class; the corpus's clean questions never exercised it. [src:FUSION-PER-CLASS-2026-08-27]
+- Sweeping `lexical_weight` on clean queries is monotone and never crosses BM25-alone (1.0 → 0.546, 3.0 → 0.661, 5.0 → 0.664, against 0.671), so re-weighting is not the fix and the 1.0/1.0 default stands. [src:FUSION-PER-CLASS-2026-08-27]
+- Equal weights cost about 0.04 MRR on clean queries and buy 0.03 to 0.11 on noisy ones. [src:FUSION-PER-CLASS-2026-08-27]
+- The prompt to measure per class rather than in aggregate came from a GitHub project whose README benchmarks that way and asserts a fusion invariant in CI. [src:GITHUB-PRACTICE-SURVEY-2026-08-27]
+
+## Observed — egress, probed first-hand
+
+- `api.github.com` returns 200, `raw.githubusercontent.com` 301 and `pypi.org` 200; `www.youtube.com` returns 000 and both `www.elastic.co` and `howborisusesclaudecode.com` are refused by the egress proxy. [src:GITHUB-PRACTICE-SURVEY-2026-08-27]
+- A sibling session had reported YouTube as blocked; that report was second-hand and is now verified directly. [src:GITHUB-PRACTICE-SURVEY-2026-08-27] [src:PROXY-YOUTUBE-BLOCKED]
+
 ## Conclusion
 
 The request that opened this session asked to look at "all my previous claude

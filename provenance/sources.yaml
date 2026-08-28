@@ -699,3 +699,51 @@ sources:
       the honest trade appearing: the paraphrase questions are harder, and the
       generator refuses two of them rather than guessing. This is the number to
       compare future changes against, and it is a baseline rather than a score.
+
+  - id: FUSION-PER-CLASS-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T17:05Z"
+    method: "per-query-class benchmark over the 23 answerable goldens: each arm and the fused ranking scored under 0/2/4/6/all adjacent-transposition typos per query, averaged over 5 seeds; plus a lexical_weight sweep at 1.0/1.25/1.5/2.0/3.0/5.0 on clean queries"
+    evidence: >-
+      MRR by typos-per-query (BM25 / dense / hybrid): 0 -> 0.886 / 0.764 /
+      0.842; 2 -> 0.855 / 0.748 / 0.803; 4 -> 0.688 / 0.674 / 0.723; 6 -> 0.474
+      / 0.511 / 0.583; all -> 0.492 / 0.517 / 0.593. The dense arm overtakes
+      BM25 at 6 typos per query, and from 4 types onward the fused ranking beats
+      BOTH arms. On clean queries fusion loses to BM25 alone by 0.043. Separately,
+      sweeping lexical_weight on clean queries is monotone and never crosses
+      BM25-alone: 1.0->0.546, 2.0->0.578, 3.0->0.661, 5.0->0.664 on the
+      paraphrase subset, against BM25-alone 0.671.
+    note: >-
+      This CORRECTS an earlier claim in this ledger. EVAL-BASELINE-26 and
+      PARAPHRASE-GOLDENS-2026-08-27 recorded that the dense arm contributes
+      nothing and that fusion is strictly worse than its lexical arm. That
+      holds only for CLEAN queries. The earlier measurement had no query class
+      on which the dense arm was expected to win, so it could only ever have
+      found one answer. Adding a degraded-input class reverses the conclusion:
+      the hashing embedder's character n-grams are exactly typo-robustness, and
+      once input is noisy the dense arm is the better arm and fusion beats both.
+      Equal weights therefore cost ~0.04 MRR on clean queries and buy 0.03-0.11
+      on noisy ones, so the 1.0/1.0 default stays. The prompt to test this came
+      from a GitHub project whose README benchmarks per class rather than in
+      aggregate.
+
+  - id: GITHUB-PRACTICE-SURVEY-2026-08-27
+    kind: api
+    collected_at: "2026-08-27T17:00Z"
+    method: "mcp__github__search_repositories; WebSearch; WebFetch of raw.githubusercontent.com/shanraisshan/claude-code-best-practice"
+    evidence: >-
+      Repository search returned 72 matches for Claude Code subagent tooling,
+      led by wshobson/agents (39,209 stars), VoltAgent/awesome-claude-code-subagents
+      (24,700), and davepoon/buildwithclaude (3,377). A collected-practice README
+      states: keep CLAUDE.md under 200 lines; write skill descriptions as
+      triggers rather than summaries; prefer wildcard permission allowlists over
+      broad grants; use Stop hooks to make the model verify work at turn
+      completion. A separate search identified the "weakest-link effect" - a
+      single weak retrieval arm measurably dragging a fused result down - and
+      weighted RRF as its documented remedy.
+    note: >-
+      Egress is partial and was probed first-hand: api.github.com 200,
+      raw.githubusercontent.com 301, pypi.org 200, www.youtube.com 000 (blocked),
+      and both www.elastic.co and howborisusesclaudecode.com refused by the
+      egress proxy. A sibling session had reported YouTube as blocked; that is
+      now verified rather than second-hand.

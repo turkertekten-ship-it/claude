@@ -98,9 +98,11 @@ because something had already gone wrong in them:
 | generate | `test_generate_invariants.py` | Citation verification and abstention are the last gate before a fabrication reaches a caller |
 | loop | `test_ooda_invariants.py` | `decide()` purity and dry-run side-effect freedom are claims that erode silently |
 
-The gap that matters most of the six is **retrieve and rerank**: fusion is the
-stage the golden set cannot currently measure (gap 1), so it has neither a unit
-test nor a meaningful end-to-end signal.
+**retrieve** now has `test_fusion_invariant.py`, which closes what was the worst
+of the six. It asserts the property the second index exists to provide — on
+noisy queries the fused ranking beats its best single arm — and pins the size of
+the loss fusion takes on clean queries so it cannot quietly grow. **rerank**
+remains untested, and is now the worst remaining gap.
 
 **3. Deletions never propagate.** `Connector.run` records vanished documents in
 `cursor["removed_last_run"]` and `Store.delete_document` is implemented, but

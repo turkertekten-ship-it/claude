@@ -93,6 +93,45 @@ of the best case.
 
 ## Consequences
 
+**Fusion only pays on the query classes each arm was built for.** This is the
+consequence that took longest to see, and it was invisible in aggregate.
+Measured over the golden set as a whole, hybrid retrieval scores *below* BM25
+alone (0.842 against 0.886 MRR) — the documented weakest-link effect of
+unweighted RRF, where an equal vote from a weaker arm drags good hits down.
+Read on its own, that number says the second index is dead weight.
+
+Measured per query class it reverses. The dense arm here is a
+character-n-gram hashing embedder, so its home class is degraded input, and
+the golden set's clean questions never exercised it:
+
+| typos per query | BM25 | dense | hybrid | best arm |
+|---|---|---|---|---|
+| 0 | **0.886** | 0.764 | 0.842 | BM25 |
+| 4 | 0.688 | 0.674 | **0.723** | fusion beats both |
+| 6 | 0.474 | 0.511 | **0.583** | fusion beats both |
+
+From four typos onward fusion beats *both* arms, which is real fusion gain
+rather than a weighted average of two rankings. The dense arm overtakes BM25 at
+six. So the honest statement of this decision's value is conditional: equal
+weights cost about 0.04 MRR on clean queries and buy 0.03 to 0.11 on noisy
+ones. For a corpus of clean, well-spelled queries over well-written documents,
+BM25 alone would be the better engineering choice and this ADR would not
+survive its own evidence.
+
+**Re-weighting is not the fix, and was tested rather than assumed.** Sweeping
+`lexical_weight` from 1.0 to 5.0 on clean queries is monotone and never crosses
+BM25-alone (1.0 → 0.546, 3.0 → 0.661, 5.0 → 0.664, against 0.671 for BM25 by
+itself). Weighting the dense arm down only asymptotically approaches ignoring
+it, while destroying the noisy-query gain that justifies having it. The
+1.0 / 1.0 default therefore stands as a deliberate choice, not an untuned one.
+
+**The invariant is guarded in the suite, in both directions.**
+`tests/test_fusion_invariant.py` asserts that fusion beats its best single arm
+on noisy queries, that the dense arm still wins its home class, and that the
+clean-query deficit stays bounded. The last of those pins a number this ADR
+admits is a loss, so it cannot quietly grow into a reason the whole approach
+stops being worth it.
+
 **Two indexes to keep in sync.** `BM25Index` and `DenseIndex` are both derived
 from the store, and a write that updates one without the other produces answers
 from a corpus that no longer exists — stale but plausible, the hardest kind of

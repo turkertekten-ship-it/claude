@@ -32,5 +32,41 @@
         ]
       }
     ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(make :*)",
+      "Bash(python3 tools/verify_provenance.py:*)",
+      "Bash(python3 tools/ingest_chat_archive.py:*)",
+      "Bash(python3 tools/fleet_snapshot.py:*)",
+      "Bash(python3 tools/install_user_scope.py)",
+      "Bash(python3 tests/:*)",
+      "Bash(bash tests/run_all.sh)",
+      "Bash(python3 -m unittest:*)",
+      "Bash(python3 -m compileall:*)",
+      "Bash(python3 -m oodarag.cli:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(git ls-remote:*)",
+      "Bash(git show:*)",
+      "Read",
+      "Grep",
+      "Glob"
+    ],
+    "deny": [
+      "Bash(pip install:*)",
+      "Bash(python3 -m pip install:*)",
+      "Bash(uv pip install:*)",
+      "Edit(.oodarag/**)",
+      "Write(.oodarag/**)",
+      "Edit(archive/**)",
+      "Write(archive/**)"
+    ]
+  },
+  "env": {
+    "PYTHONPATH": "src",
+    "OODARAG_LOG_LEVEL": "info"
   }
 }
