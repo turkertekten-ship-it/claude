@@ -15,6 +15,10 @@ rules is that they get enforced rather than remembered. These are the pairs:
   4. every rule check_output can emit has a learn_rule template
   5. every declared hazard and slot is mapped or explicitly unmapped in each
      framework
+  6. every module an installed tool imports is installed with it
+  7. every hook runs the suite in a way that preserves its exit status
+  8. every test named in docs/ is defined by a test file
+  9. every guard a learned rule names is exercised by the suite
 
 A test nobody runs is the worst of these, because it reports nothing and looks
 like coverage.
@@ -193,6 +197,47 @@ def check_named_tests_exist(root: Path = REPO) -> list[str]:
     return out
 
 
+def check_enforcers_are_tested(root: Path = REPO) -> list[str]:
+    """A rule that names its guard must name one the suite actually fires.
+
+    `learn_rule --enforced-by` checks that the named file exists. Existing is
+    not enforcing: a guard no test ever runs holds only while nothing happens
+    to exercise the path it watches, and in the rules file it reads exactly
+    like one that is checked every commit. Another owner's repository shows
+    the end state - a directive layer of "Never delete emails" guardrails that
+    no line of code reads, four of five holding by coincidence
+    [src:WILSON-DIRECTIVES-UNWIRED-2026-08-28].
+
+    This can only ask whether the suite touches the guard at all. Whether a
+    test proves the rule's own failure case is a semantic question, and this
+    repository does not pattern-match those; the docstring is the honest limit.
+    """
+    import learn_rule as lr
+    instructions = root / "CLAUDE.md"
+    if not instructions.exists():
+        return []
+    suite = " ".join(
+        p.read_text(errors="replace")
+        for p in sorted((root / "tests").rglob("*"))
+        if p.is_file()
+    )
+    out = []
+    for line in instructions.read_text().splitlines():
+        m = lr.ENFORCED_BY.search(line)
+        if not m:
+            continue
+        number = line.split(".", 1)[0].strip()
+        for named in re.split(r"[+,]", m.group(1)):
+            named = named.split("(")[0].strip()
+            if not named:
+                continue
+            if not (root / named).exists():
+                out.append(f"rule {number} names {named}, which does not exist")
+            elif Path(named).stem not in suite:
+                out.append(f"rule {number} names {named}, which no test exercises")
+    return out
+
+
 CHECKS = {
     "tests are run": check_tests_are_run,
     "tools are documented": check_tools_are_documented,
@@ -202,6 +247,7 @@ CHECKS = {
     "installed tools have their imports": check_installed_tools_have_their_imports,
     "hooks preserve exit status": check_hooks_preserve_status,
     "named tests exist": check_named_tests_exist,
+    "enforcers are tested": check_enforcers_are_tested,
 }
 
 

@@ -162,6 +162,31 @@ def main() -> int:
         check("and so does a usage line", cc.check_profiles_are_documented(root) == [],
               cc.check_profiles_are_documented(root))
 
+    print("\na guard no test fires is not enforcement")
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "tools").mkdir(parents=True)
+        (root / "tests").mkdir()
+        (root / "tools" / "watched.py").write_text("")
+        (root / "tools" / "unwatched.py").write_text("")
+        (root / "tests" / "test_watched.py").write_text("import watched\n")
+        (root / "CLAUDE.md").write_text(
+            "1. [a] Never x, because y. [enforced by: tools/watched.py]\n"
+            "2. [a] Never x, because y. [enforced by: tools/unwatched.py]\n"
+            "3. [a] Never x, because y. [enforced by: tools/missing.py]\n"
+            "4. [a] Never x, because y. [routed to: tools/unwatched.py]\n"
+        )
+        found = cc.check_enforcers_are_tested(root)
+        check("the untested guard is caught", any("unwatched" in f for f in found), found)
+        check("the tested one is not", not any(f.startswith("rule 1 ") for f in found), found)
+        check("a missing guard is caught", any("does not exist" in f for f in found), found)
+        check("a routed rule is not a guard", len(found) == 2, found)
+        (root / "tests" / "test_more.py").write_text("import unwatched\n")
+        (root / "tools" / "missing.py").write_text("")
+        (root / "tests" / "test_third.py").write_text("import missing\n")
+        check("and covering them clears it", cc.check_enforcers_are_tested(root) == [],
+              cc.check_enforcers_are_tested(root))
+
     print("\nthe command line contract")
     live = subprocess.run([sys.executable, str(TOOL)], capture_output=True, text=True, timeout=60)
     check("this repository is consistent", live.returncode == 0, live.stdout)

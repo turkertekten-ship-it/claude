@@ -920,6 +920,48 @@ Then the budget refused the commit, and the review's own advice — merge the on
 that say the same thing — needed an operation `supersede` did not have. It takes
 several numbers now, so two rules about quoted numbers became one.
 
+## Twenty-eighth loop — the same structure, enforcing nothing
+
+The last named repository, `Wilson-E/automation`, is a fourth independent DOE
+implementation, and the first whose directive layer is split the way this
+repository's instruction file is split: a `global.md` of cross-cutting
+principles plus one directive per automation
+[src:WILSON-DIRECTIVES-UNWIRED-2026-08-28]. Three previous clones each returned
+a mechanism this repository lacked, so the expectation going in was a fourth.
+
+> The surprise is that it returned the opposite: a negative control. No Python
+> file in it contains the word "directive". Its email directive states five
+> guardrails, of which one — the optional `archive_noise` — has a line in code;
+> the four hard ones, "Never delete emails" among them, hold because no skill
+> happens to call those Gmail methods. In the document all five read the same.
+> The layering is right and the wiring is absent, and nothing in the repository
+> can tell the two apart.
+
+Which is a question about this one. `learn_rule --enforced-by` verifies that the
+named guard exists. Existing is not enforcing — it is one step better than
+Wilson's prose and the same kind of claim. `check_consistency.py` gained a ninth
+invariant: every guard a learned rule names must be exercised by something under
+`tests/`. All five named guards already were, so it reported nothing; it holds
+the property rather than repairing it, which is the point of adding it while it
+is still true. What it cannot ask is whether a test proves *that rule's* failure
+case — that is a semantic question, and rule 18 forbids pattern-matching those.
+The docstring says so rather than implying more.
+
+Recording the finding as rule 16 pushed the rules file to 543 words against a
+500-word budget. Two merges cleared it: rules 1 and 2 were the observation and
+the action from a single episode, and rules 9 and 14 were both about guards that
+interpret prose — what not to build, and when to stop narrowing one. Eleven
+rules, 481 words.
+
+The same file's debugging rules put a number on the second of those
+[src:WILSON-DEBUG-RULES-2026-08-28]. This repository's version said abandon at
+the third or fourth narrowing and said nothing about the second; theirs says
+"after 2 failed attempts at the same strategy, step back, add more logging, and
+verify assumptions". That is a middle step, and in this loop's own vocabulary it
+is a return to Observe: a fix that fails twice the same way is a diagnosis made
+without looking. The Act phase now carries both thresholds — two failures buy an
+Observe, four narrowings retire the mechanism.
+
 ## Still open
 
 `U-6`, `U-7` and `U-8` in [unknowns.md](unknowns.md): what Saraev actually

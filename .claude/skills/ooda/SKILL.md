@@ -103,6 +103,18 @@ still wrong on real cases is not one narrowing short, it is the wrong
 mechanism. Abandon it, record it in `provenance/rejected.md` with the reason,
 and look for a mechanism that compares exactly instead of interpreting.
 
+**The second attempt is not where you abandon — it is where you go back to
+Observe.** Another owner's debugging rules, written from their own corrections,
+put the threshold at two: "after 2 failed attempts at the same strategy, step
+back, add more logging, and verify assumptions", and ahead of it, "add logging
+first before changing code; identify the exact failure point from logs before
+attempting fixes" [src:WILSON-DEBUG-RULES-2026-08-28]. That is this loop by
+another name. A fix that fails twice the same way is not short of a third
+variation; it is a diagnosis made without looking, and the cheap move is to go
+and look — print the value, dump the input the check actually received, run the
+one-liner that proves the API exists. Two failures buy an Observe; four
+narrowings retire the mechanism.
+
 **Commit the work before you break it.** A falsifier usually means damaging
 something on purpose — a bad input, a removed file, a reverted fix — and undoing
 that damage with a blunt instrument takes uncommitted work with it. Commit

@@ -413,3 +413,31 @@ sources:
       "humbling-number hook", and "Give your system a NAME so it's memorable and
       reusable (his is 'DOE')". Nothing prompt-related. Recorded as a negative:
       cloning this repository returned no material for the prompt system.
+
+  - id: WILSON-DIRECTIVES-UNWIRED-2026-08-28
+    kind: repo_state
+    collected_at: "2026-08-28T12:05Z"
+    method: "git clone --depth 1 Wilson-E/automation; grep -rn 'directive' --include='*.py' . returned nothing; guardrail grep over workflows/ and skills/"
+    evidence: provenance/raw/wilson-directives-2026-08-28.md
+    note: >-
+      A fourth third-party DOE implementation, read first-hand, and the first
+      that splits its directive layer into a global file plus one per
+      automation - the same shape as this repository's instruction file plus
+      routed rules. No Python file in it mentions the word "directive"; of the
+      five guardrails in its email directive, one has a line in code and it is
+      the optional one. Recorded as a negative control: the layering exists,
+      the wiring does not, and the document does not distinguish them.
+
+  - id: WILSON-DEBUG-RULES-2026-08-28
+    kind: repo_state
+    collected_at: "2026-08-28T12:05Z"
+    method: "git clone --depth 1 Wilson-E/automation; CLAUDE.md 'Debugging Rules' section read in full"
+    evidence: provenance/raw/wilson-directives-2026-08-28.md
+    note: >-
+      Six debugging rules another owner wrote from their own corrections. Two
+      bear on the persistence heuristic recorded here in the twenty-seventh
+      loop: "add logging first before changing code, identify the exact
+      failure point from logs before attempting fixes", and "after 2 failed
+      attempts at the same strategy, step back, add more logging, and verify
+      assumptions". Independently arrived at, and it names a threshold and a
+      middle step that this repository's version left unstated.
