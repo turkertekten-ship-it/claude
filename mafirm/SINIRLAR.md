@@ -2,10 +2,11 @@
 
 Doğrulama: 2026-08-27.
 
-Kontrol edildi: kurulum kitabı §17 ve §18 (2026-08-27) · bulunamayan: aşağıdaki
-üç çalışmanın tam metinleri — DOI ve künye kitaptan alınmıştır, bu makineden
-birincil kaynaktan TEYİT EDİLMEMİŞTİR. Rakamlara dayanmadan önce çalışmalar
-okunmalıdır.
+Kontrol edildi: kurulum kitabı §17 ve §18 (2026-08-27) · Schwarcz ve
+arkadaşlarının çalışmasının künyesi, DOI'si ve özet bulguları, web araması
+(2026-08-27) · bulunamayan: çalışmaların TAM METİNLERİ — journals.sagepub.com
+ve SSRN bu makineden engelli; aşağıdaki tablo kitaptan alınmıştır ve
+**yayımlanmış özetle bir noktada çelişmektedir** (bkz. aşağıdaki uyarı).
 
 Bu dosya sistemin satış broşürü değil, sınır beyanıdır. Sınırları yazılmamış
 bir sistem, o sınırların ötesinde kullanılır ve sınırı ilk bulan kişi onu bir
@@ -17,6 +18,11 @@ Kaynak: Daniel Schwarcz, Sam Manning, J.J. Prescott, Patrick Barry,
 David R. Cleveland, Beverly Rich. *AI-Powered Lawyering: AI Reasoning Models,
 Retrieval Augmented Generation, and the Future of Legal Practice.* Journal of
 Law & Empirical Analysis, cilt 3, sayı 1, 2026. DOI 10.1177/2755323X261427048.
+
+**Künye doğrulandı** (2026-08-27): yazarlar, dergi, cilt, sayı, yıl ve DOI
+yayımlanmış kayıtla birebir uyuşuyor. Çalışma, üst sınıf hukuk öğrencilerini
+erişim destekli bir hukuk aracı (Vincent AI), bir akıl yürütme modeli
+(o1-preview) ve AI'sız kola rastgele atayan ilk kontrollü deneydir.
 
 Tasarım: rastgele atamalı kontrollü deney. 153 kayıtlı, 137 hukuk öğrencisi,
 125'i altı görevin tamamını bitirdi. Altı görev uygulamacı avukatlarla birlikte
@@ -31,6 +37,15 @@ tasarlandı. Üç kol: AI yok, erişim destekli hukuk aracı, akıl yürütme mo
 | Düzen | +0,25 | +0,63 |
 | Profesyonellik | +0,43 | +0,95 |
 
+> **UYARI — verim rakamları çelişiyor.** Yayımlanmış özet, verim kazancını
+> erişim destekli araç için yaklaşık **%38–115**, akıl yürütme modeli için
+> **%34–140** olarak veriyor. Yukarıdaki tablo kitaptan alınmıştır ve
+> %50–110 / %75–131 der. İki aralık aynı değildir; muhtemelen farklı bir ölçüt
+> ya da makalenin farklı bir sürümü (SSRN ön baskısı) söz konusudur. **Tam
+> metin bu makineden okunamadı; bu rakamlara sunumda dayanılmadan önce makale
+> açılmalıdır.** Aşağıdaki "nerede hiçbir şey almadı" bulguları ise yayımlanmış
+> özetle **doğrulanmıştır** ve bu sistemin dayandığı kısım odur.
+
 ### Asıl önemli kısım: nerede hiçbir şey almadı
 
 1. **Doğruluk artmadı.** Dava dilekçesi çözümlemesi dışında hiçbir görevde,
@@ -38,11 +53,18 @@ tasarlandı. Üç kol: AI yok, erişim destekli hukuk aracı, akıl yürütme mo
    profesyonellikte; **doğru olmakta değil.**
 2. **Gizlilik sözleşmesi kaleme almada sıfır.** İki araç da hiçbir kalite
    boyutunda anlamlı kazanç üretmedi. Bu, bu kitabın kapsadığı işe **en yakın**
-   görevdir: işlemsel belge kaleme alma.
+   görevdir: işlemsel belge kaleme alma. **Doğrulandı (2026-08-27):** yayımlanmış
+   özet, yüksek düzeyde yapılandırılmış ya da şablona dayalı görevlerin —
+   özellikle gizlilik sözleşmesi kaleme almanın — kalite iyileşmesi bakımından
+   AI'dan çok daha az yararlandığını söylüyor.
 3. Hukuki mütalaada genel kalite artışı istatistiksel olarak anlamlı değildi.
 4. **Uydurma sayısı:** erişim destekli araçta 3, akıl yürütme modelinde 11,
    AI kullanmayan kontrol kolunda 4. Akıl yürütme modeli, hiç AI kullanmayan
-   insandan **daha fazla uydurdu.**
+   insandan **daha fazla uydurdu. Doğrulandı (2026-08-27):** yayımlanmış özet,
+   akıl yürütme modelinin çözümleme derinliğini artırdığını ama uydurmaya yol
+   açtığını, erişim destekli araç kullananların ise AI kullanmayanlarla
+   **kabaca aynı** sayıda uydurma ürettiğini söylüyor. Sayıların tam değerleri
+   tam metinden teyit edilemedi; yön ve büyüklük sırası doğrulandı.
 
 ## §17.2 Bunun bu sisteme doğrudan sonucu
 
@@ -57,12 +79,29 @@ bağladığı ve kuralın uygulandığını denetlediği için kuruldu.
 
 ## §17.3 Sınırın kendisi ölçülmüştür
 
-Kaynak: Fabrizio Dell'Acqua ve arkadaşları, *Navigating the Jagged
-Technological Frontier*, Organization Science, 2026. 758 bilgi çalışanı.
+Kaynak: Fabrizio Dell'Acqua, Edward McFowland III, Ethan Mollick, Hila
+Lifshitz-Assaf, Katherine Kellogg, Saran Rajendran, Lisa Krayer, François
+Candelon, Karim Lakhani. *Navigating the Jagged Technological Frontier: Field
+Experimental Evidence of the Effects of Artificial Intelligence on Knowledge
+Worker Productivity and Quality.* Organization Science, 2026.
+DOI 10.1287/orsc.2025.21838. Künye doğrulandı: 2026-08-27.
 
-Modelin yapabildiği işte tamamlanan görev **%12,2** ve hız **%25,1** artmıştır.
-Modelin yeteneğinin **dışında** kalan bir görevde ise, AI kullanan
-katılımcıların doğru sonuç üretme olasılığı **%19 daha düşük** çıkmıştır.
+**Katılımcılar 758 yönetim danışmanıdır** (Boston Consulting Group danışman
+kadrosunun yaklaşık yüzde yedisi), genel anlamda "bilgi çalışanı" değil.
+Kitap bunu "758 bilgi çalışanı" diye aktarıyor; örneklem tek bir danışmanlık
+firmasından geldiği için sonuçların bir hukuk pratiğine taşınması zaten
+temkin ister.
+
+Modelin yapabildiği işte (sınırın **içinde**): tamamlanan görev **%12,2**, hız
+**%25,1**, kalite **%40** artmıştır. Kitap kalite rakamını atlıyor.
+
+Modelin yeteneğinin **dışında** kalan bir görevde ise AI kullanan danışmanlar,
+kullanmayanlara göre **19 yüzde puanı** daha kötü sonuç üretmiştir.
+
+> **Düzeltme:** kitap bunu "%19 daha düşük" diye yazıyor. Doğrusu **19 yüzde
+> puanı**dır ve bu aynı şey değildir: yüzde puan farkı, oranın kendisine göre
+> çok daha büyük bir göreli düşüşe karşılık gelebilir. Bir kurul sunumunda bu
+> iki ifadeyi karıştırmak, ölçülmüş bir bulguyu yanlış aktarmaktır.
 
 Kayıp, kazanç kadar gerçektir ve kullanıcı onu fark etmez. Sınır ötesi bir
 işlemde bu sınır coğrafidir: modelin İngiliz hukuku sözleşme kalıplarında
@@ -73,8 +112,12 @@ Türk hukukçu koltuğunun bilerek boş bırakılmasının ölçülmüş gerekç
 
 Kaynak: Shakked Noy ve Whitney Zhang, *Experimental evidence on the
 productivity effects of generative artificial intelligence*, Science 381(6654),
-2023. 453 profesyonel. Yazma görevinde süre %40 düşmüş, çıktı kalitesi %18
-artmıştır.
+2023. DOI 10.1126/science.adh2586. Künye ve rakamlar doğrulandı: 2026-08-27.
+
+453 üniversite mezunu profesyonele mesleklerine özgü, teşvikli yazma görevleri
+verilmiş; yarısı rastgele ChatGPT'ye maruz bırakılmıştır. Ortalama süre **%40**
+düşmüş, çıktı kalitesi **%18** artmıştır. Çalışanlar arasındaki eşitsizlik de
+azalmıştır. Kitabın verdiği iki rakam da doğrudur.
 
 Bu hukuka özgü **değildir** ve hukuka özgüymüş gibi sunulmamalıdır.
 
@@ -106,12 +149,31 @@ Bu hukuka özgü **değildir** ve hukuka özgüymüş gibi sunulmamalıdır.
 
 ## Bu kuruluma özgü onuncu sınır
 
-10. **Türk mevzuatının birincil metinleri bu makineden doğrulanamadı.** Resmî
-    Gazete, mevzuat.gov.tr, rekabet.gov.tr ve spk.gov.tr ağ çıkışı
-    politikasıyla engellidir. Bu sistemdeki her Türk hukuku ifadesi ikincil
-    kaynaklara ve kurulum kitabına dayanır; her yöntem dosyası bunu kendi
-    "Kontrol edildi" satırında yazar. Kıdem tazminatı tavanı gibi doğrulanamayan
-    tutarlara **hiç rakam yazılmamıştır.**
+10. **Türk mevzuatının birincil metinleri hâlâ okunmadı — ama artık çapraz
+    doğrulandı.** Resmî Gazete, mevzuat.gov.tr, rekabet.gov.tr, spk.gov.tr ve
+    journals.sagepub.com ağ çıkışı politikasıyla engellidir; hiçbir kanun
+    metni birincil kaynaktan **okunmamıştır**.
+
+    İkinci turda (2026-08-28) her esaslı atıf, birbirinden bağımsız ikincil
+    kaynaklarla **çapraz doğrulandı** ve dört gerçek hata bulundu:
+
+    | Konu | Kitapta / ilk sürümde | Doğrulanan |
+    |---|---|---|
+    | Bekletici şart | 4054 m.11 | **4054 m.10 + 2010/4 Tebliğ m.10** |
+    | Dell'Acqua kaybı | "%19 daha düşük" | **19 yüzde puanı** |
+    | Kıdem tavanı | yazılmadı | **73.729,87 TL** (Tem-Ara 2026) |
+    | İdari para cezası alt sınırı | yoktu | **302.484,86 TL** (2026) |
+
+    Ayrıca kitapta hiç bulunmayan dört kural eklendi: cezanın devralmada
+    **yalnızca devralana** verilmesi; 4857 m.6'daki iki yıllık sınırın **kıdem
+    tazminatında işlememesi**; II-26.1'deki **imtiyaz nedeniyle kontrol
+    elde edilememesi** istisnası; ve New York Sözleşmesi'ne Türkiye'nin
+    **karşılıklılık ve ticari ilişki çekinceleri**.
+
+    **Çapraz doğrulama, birincil metin okumanın yerine geçmez.** Her yöntem
+    dosyası kendi "Kontrol edildi" satırında hangisinin yapıldığını yazar.
+    Süreye bağlı bir adımda ya da bir kurum başvurusunda dayanılacak her ifade
+    için birincil metin hâlâ okunmalıdır.
 
 ## Şimdi ne yapılmalı
 
