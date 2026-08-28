@@ -730,6 +730,37 @@ altında** yeşil kaldığını doğruluyor.
 
 ---
 
+## Yedi buçuk artı on bir · Dürüstlük bölümünde fazla dar bir sınır
+
+Kullanıcının isteği "hepsine kör test" idi. On bir tur sonra kapsamı saydım:
+dört bölüm hiç sınanmamıştı — §6, §8, §15 ve **§18**.
+
+§18 kitabın **dürüstlük bölümüdür** ve gerekçesini kendisi yazar: *"Sınırları
+yazılmamış bir sistem, o sınırların ötesinde kullanılır ve sınırı ilk bulan
+kişi onu bir müvekkilin karşısında bulur."* Dokuz maddesinin **dokuzu da
+olumsuz iddiadır** — "yapmaz", "yoktur", "kanıt yoktur" — ve kitabın kendi §2'si
+olumsuz iddiadan olumludan yüksek kanıt ister. On bir tur boyunca hiçbirini
+sınamamıştım.
+
+Sekizi doğru çıktı. Biri değil.
+
+**§18.6 fazla dar yazılmış.** Kitap *"üç sözleşme çözümleme deposundan ikisi
+bakımsızdır, **biri** AGPL-3.0'dır"* diyor ve §13.4'teki `lexpredict-lexnlp`'yi
+kastediyor. Ama §13.5'teki `freelawproject/courtlistener` **de AGPL-3.0-or-later**
+— G-01'de doğrulandı — ve kitap ona "açık (depoya bakın)" diyor. Katalog **iki**
+AGPL bağımlılık taşıyor; §18 birini sayıyor.
+
+Bu, bir rakam hatasından fazlasıdır. §18 fazla dar yazılmış bir sınırla, kendi
+var olma sebebini ortadan kaldırır: okuyucu sınırın kapsadığından fazlasına
+güvenir. Ve kitabın §13.7'si tam da bu soruyu ciddiye alıyor — *"copyleft
+lisanslı bir bağımlılığı ticari bir pratiğin yığınına sokan cümle"* — yani
+kitap riski biliyor, yalnızca ikinci örneğini kaçırıyor.
+
+T-06, kitabın davranışının kaydı olarak **beyan edilmiş tabana** eklendi;
+düzeltmesi errata'da.
+
+---
+
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
 
 | Bölüm | Beklenen | Gerçek | Sebep |
@@ -860,7 +891,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # on dokuz takım, 182 vaka
+./sinama/hepsi.sh                 # yirmi takım, 192 vaka
 ./denetim.sh --yapisal            # mühendislik katmanı
 ./denetim.sh                      # mevzuat bulguları dâhil
 ```
@@ -915,9 +946,10 @@ Dokuz takım, 96 vaka:
 | Q | **Rapor kendi kapılarından geçiyor mu** | CLAUDE.md §5, §14 |
 | R | **Yön, insan onayı ve dil** — raporun kendi biçimi | CLAUDE.md §4, §9, §10 |
 | S | **Yalıtım** — klon gerçekten yalnız mı | §16'nın taşınabilirliği |
+| T | **§18'in dokuz sınırı doğru mu** | §18, CLAUDE.md §2 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamadan ve iki
-takım eklendikten sonra **182 vaka, 0 SİNYAL** — on üç bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve BEKLENEN olarak raporlanıyor — ve on üçünün her biri ya
+takım eklendikten sonra **192 vaka, 0 SİNYAL** — on üç bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve BEKLENEN olarak raporlanıyor — ve on üçünün her biri ya
 kitabın davranışının bilerek bırakılmış kaydıdır ya da belgelenmiş bir
 öntanımlı boşluktur; hiçbiri yamalı sistemde çözülmemiş bir kusur değildir.
 

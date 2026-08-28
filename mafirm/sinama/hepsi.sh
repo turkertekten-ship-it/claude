@@ -49,6 +49,8 @@ python3 "$S/ks_r_yon.py";         topla "R · yön, onay ve dil kuralları" $?
 echo
 python3 "$S/ks_s_yalitim.py";     topla "S · yalıtım (klon yalnız mı)" $?
 echo
+python3 "$S/ks_t_sinirlar.py";   topla "T · §18'in dokuz sınırı" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

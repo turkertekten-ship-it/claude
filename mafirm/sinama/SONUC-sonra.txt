@@ -1,5 +1,5 @@
 ###############################################################
-#  KÖR SINAMA TAKIMI — 2026-08-28T08:31:12Z
+#  KÖR SINAMA TAKIMI — 2026-08-28T08:36:47Z
 ###############################################################
 
 /root/mafirm/sinama/ks_a_esik.py:45: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
@@ -292,9 +292,9 @@ GEÇTİ L-06   hafiza/ dosyalarının hepsi var
 KÖR SINAMA M — errata ↔ sınama izlenebilirliği
 ================================================================================================
 GEÇTİ M-01   her errata maddesi bir sınama vakasına atıf yapıyor
-        46 madde · atıfsız 0: yok
+        47 madde · atıfsız 0: yok
 GEÇTİ M-02   atıf yapılan her vaka kimliği gerçekten tanımlı
-        182 tanımlı kimlik · uydurma dayanak: yok
+        192 tanımlı kimlik · uydurma dayanak: yok
 GEÇTİ M-03   [A] ve [B] maddelerinin atıfları sadık sistemde gerçekten kaldı
         sadık koşumda kalan vaka: 41 · sınanmamış ağır madde: yok
 GEÇTİ M-04   sadık sistemde kalan her vaka errata'da ya da raporda açıklanmış
@@ -393,7 +393,7 @@ KÖR SINAMA R — yön, insan onayı ve dil kuralları
 GEÇTİ R-01   rapor cevapla başlıyor, yöntemle değil
         ilk bölüm: 'Cevap' — §4: 'cevabı merak eden ilk paragrafta bulur'
 GEÇTİ R-02   yöntem bölümü bulgulardan sonra geliyor
-        yöntem 24. başlık, ilk bulgu 1. başlık
+        yöntem 25. başlık, ilk bulgu 1. başlık
 GEÇTİ R-03   iki zorunlu başlık en sonda ve doğru sırada
         son iki başlık: ['Şimdi ne yapılmalı', 'Yetkili avukat görüşü gereken konular']
 GEÇTİ R-04   raporun onay durumu açıkça yazılı (§9)
@@ -422,6 +422,30 @@ GEÇTİ S-05   mutasyon: sabit yol eklenirse desen yakalar
 ------------------------------------------------------------------------------------------------
 5 vaka · 5 geçti · 0 beklenen · 0 SİNYAL
 
+================================================================================================
+KÖR SINAMA T — §18'in dokuz sınırı doğru mu
+================================================================================================
+GEÇTİ T-01   §18.1 · görüş biçimindeki çıktı gerçekten bloklanıyor
+        sınır bir mekanizmayla destekleniyor, iyi niyetle değil
+GEÇTİ T-02   §18.2 · Türk uygulamacı koltuğu gerçekten BOŞ ve işaretli
+GEÇTİ T-03   §18.3 · vergi koltuğu gerçekten BOŞ ve işaretli
+GEÇTİ T-04   §18.4 · eşik denetleme komutu dosya düzenlemeyi yasaklıyor
+        ve güncellik kapısı bayat tarihi yakalıyor: True
+GEÇTİ T-05   §18.5 · ABD-yalnız sınırı doğrulama kaydında anılıyor
+        iki depo da çözüldü; ABD kapsamı kitabın içerik iddiasıdır ve doğrulama kaydında çelişen bir bulgu yok
+BEKLENEN T-06   §18.6 · katalogdaki AGPL depo sayısı bir mi
+        PyMuPDF zaten §13.7'de KURULMAYAN olarak ayrı sayılıyor. Kalan AGPL depolar: ['LexPredict/lexpredict-lexnlp', 'freelawproject/courtlistener'] — §18.6 'biri AGPL' diyor, oysa courtlistener (§13.5) de AGPL-3.0-or-later ve kitap ona 'açık (depoya bakın)' diyor [G-01]. Sınır FAZLA DAR yazılmış.
+GEÇTİ T-07   §18.7 · 'kaleme almada kazanç yok' doğrulandı
+        H-02: makale metni doğruladı
+GEÇTİ T-08   §18.8 · 'doğruluk artmadı' doğrulandı
+        H-02: dört olumsuz bulgunun dördü de doğrulandı
+GEÇTİ T-09   §18.9 · çıkar çatışması dosyası sınırını kendisi yazıyor
+        boş liste 'temiz' DEĞİLDİR ve dosya bunu söylüyor
+GEÇTİ T-10   §18'in maddeleri kitabın kendi §2 eşiğine tabi
+        Dokuz maddenin dokuzu olumsuz iddiadır ('yapmaz', 'yoktur', 'kanıt yoktur'). §2 bunlardan olumludan YÜKSEK kanıt ister. Kitap §17'de yedi ve sekizi kanıtlıyor; kalan yedisi için kanıt sunmuyor — bu takım onları ilk kez sınadı.
+------------------------------------------------------------------------------------------------
+10 vaka · 9 geçti · 1 beklenen · 0 SİNYAL
+
 ###############################################################
 #  ÖZET
 ###############################################################
@@ -441,6 +465,7 @@ GEÇTİ S-05   mutasyon: sabit yol eklenirse desen yakalar
   Q · rapor kendi kapılarından geçiyor mu temiz
   R · yön, onay ve dil kuralları      temiz
   S · yalıtım (klon yalnız mı)      temiz
+  T · §18'in dokuz sınırı           temiz
   ------------------------------------------------------------
   TOPLAM SİNYAL                         0
 

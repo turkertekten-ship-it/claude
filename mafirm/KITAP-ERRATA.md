@@ -251,6 +251,29 @@ olmasıdır. *(G-05, P-06)*
 - **[C] Yıldız sayıları karışık**: dokuzu birime kadar tutuyor, yedisi
   tutmuyor. Hepsinin aynı gün doğrulandığı ifadesiyle uyuşmuyor. *(G-05)*
 
+## §18 · Bilerek yapılmayanlar
+
+**[B] §18.6 sınırı FAZLA DAR yazılmış: katalogda iki AGPL depo var, bir
+değil.** Kitap "üç sözleşme çözümleme deposundan ikisi bakımsızdır, **biri**
+AGPL-3.0'dır" diyor ve §13.4'teki `lexpredict-lexnlp`'yi kastediyor. Ama
+§13.5'teki `freelawproject/courtlistener` de **AGPL-3.0-or-later**'dır ve kitap
+ona "açık (depoya bakın)" diyor (G-01). Yani katalog iki AGPL bağımlılık
+taşıyor ve §18 birini sayıyor.
+Neden önemli: §18 kitabın DÜRÜSTLÜK bölümüdür ve gerekçesini kendisi yazar —
+*"sınırı ilk bulan kişi onu bir müvekkilin karşısında bulur."* Fazla dar
+yazılmış bir sınır, o bölümün var olma sebebini ortadan kaldırır: okuyucu
+sınırın kapsadığından fazlasına güvenir.
+→ §18.6 "katalogda iki AGPL bağımlılık vardır ve ikisi de asıl sahibin
+kararını ister" biçiminde yazılmalı; §13.5'in lisans satırı düzeltilmeli.
+*(T-06, G-01)*
+
+**[C] §18'in dokuz maddesinin dokuzu da OLUMSUZ İDDİADIR** ("yapmaz",
+"yoktur", "kanıt yoktur") ve kitabın kendi §2'si olumsuz iddiadan olumludan
+YÜKSEK kanıt ister. Kitap yalnızca yedinci ve sekizinci maddeleri §17 ile
+kanıtlıyor; kalan yedisi için kanıt sunmuyor.
+→ §18'in her maddesi, onu doğrulayan mekanizmaya ya da kayda işaret etmeli.
+*(T-01…T-10)*
+
 ## §14 · Önce araştır
 
 **[A] `^Kontrol edildi:` çapası üretimde asla eşleşmez.** JSON'da gerçek satır

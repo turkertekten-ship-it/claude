@@ -40,6 +40,10 @@
     "J-07s": {
       "sinif": "kitaba-sadik-karsilastirma",
       "neden": "Kitaba sadık kapılar §19'un DOĞRU cevabını da bloklar. Raporun merkezi bulgusu; yamalı sürüm J-07y ile geçiyor."
+    },
+    "T-06": {
+      "sinif": "kitabin-sinir-hatasi",
+      "neden": "§18.6 'üç sözleşme deposundan BİRİ AGPL' diyor; oysa katalogda iki AGPL depo var — lexpredict-lexnlp (§13.4) ve courtlistener (§13.5, kitap ona 'açık (depoya bakın)' diyor, bkz. G-01). Bu KİTABIN metnindeki bir kusurdur, kurulumun değil; düzeltmesi KITAP-ERRATA.md'de yazılı. Vaka, sınır düzeltilene kadar kitabın davranışının kaydı olarak açık kalır."
     }
   },
   "kabuk_takimlari": {
