@@ -256,6 +256,15 @@ rather than an intention:
 | A slot needs content, not a label | `## ACCEPTANCE TEST` over an empty section is not an acceptance test; a label with a line under it is | `test_line_breaks_do_not_hide_a_slot` |
 | A statement of fact is not a criterion | "The suite currently passes" satisfied the acceptance slot, so the rule silently never fired on any prompt with decent context | `test_a_statement_of_fact_is_not_an_acceptance_test` |
 
+One formulation is worth borrowing outright. The directive template in a
+repository documenting the DOE framework marks its required sections, then says
+of the rest: *"Add sections as you discover edge cases, not upfront"*
+[src:DOE-TEMPLATES-2026-08-28]. That is sharper than "fill a slot where it
+changes the answer", because it names the moment a section earns its place — an
+edge case that has actually happened. It is the same principle the linter learned
+by breaking it, stated as advice to the author rather than as a property of the
+tool.
+
 Two further habits, learned the hard way rather than derived:
 
 - **Every rule must be watched rejecting something.** `tests/test_prompt_forge.py`

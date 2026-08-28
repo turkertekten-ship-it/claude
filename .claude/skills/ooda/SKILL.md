@@ -72,6 +72,11 @@ honest process produces a dishonest artifact.
 State one decision, in one sentence, plus the cheapest thing that would prove
 it wrong. A decision with no falsifier is a preference.
 
+**Check whether it was already tried.** `provenance/rejected.md` records
+approaches that were attempted and abandoned, with the reason each failed. An
+entry is not a prohibition — constraints change — but rebuilding something that
+already cost a loop, without knowing it did, is the avoidable version.
+
 **Check the decision against the request, not only against the last loop.** The
 loop asks what the previous Act opened, and what an Act opens is usually a
 consequence of that Act — so a chain of honest loops walks into its own

@@ -824,6 +824,37 @@ reason belongs in the loop log and in git history rather than in the context of
 every prompt. Numbering is left alone, so a gap in the sequence is a legible
 mark that something was retired. Add, supersede, prune — the cycle is closed.
 
+## Twenty-fifth loop — following the rule that was routed last week
+
+Rule 13 says to spend a loop on the request when the recent ones have gone to
+upkeep, so this one did. Rule 2 says to clone rather than fetch when a fetch is
+refused, and pointed at work never done: three repositories named in the
+research had been read through the fetch tool's *summary* of their READMEs, and
+never cloned.
+
+Cloning one of them returned two files the summary had not mentioned, both
+about how to write a directive — which is to say, about prompts.
+
+> The surprise: the directive template states, as plain advice to its author,
+> the principle this repository's linter discovered by violating it. Its
+> required sections are short, and of the rest it says *"Add sections as you
+> discover edge cases, not upfront"*. Loop fourteen found the tool paying 24
+> points for empty headings and fixed it as a property of the scorer. The
+> sharper form was sitting in a template the whole time, addressed to the
+> person writing rather than to the machine scoring.
+
+The second file names an artifact this repository did not have. Its `learnings/`
+template captures "approaches that were tested but not selected, and why.
+Prevents re-discovering dead ends." `learn_rule` records rules; nothing recorded
+an approach that was tried and abandoned — and this session had already produced
+two, both surviving only as paragraphs in this log.
+
+`provenance/rejected.md` now holds them: the prose guard backed out in loop
+seventeen and the keyword harvest discarded in loop twenty-three, each with the
+problem it addressed, the result, and the specific reason it failed. The Decide
+phase of the OODA skill points at it, because that is the moment somebody is
+about to try something.
+
 ## Still open
 
 `U-6`, `U-7` and `U-8` in [unknowns.md](unknowns.md): what Saraev actually

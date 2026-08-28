@@ -135,3 +135,9 @@ contents were not reconstructed, summarised, or guessed at.
 
 - `git check-ignore -v archive/index.db` resolves to `.gitignore:3:archive/`, so the chat index built by the documented `ingest --include-projects` command cannot be committed; `*.db` covers it a second time. [src:RULES-BUDGET-2026-08-27]
 - The installer's four `~/.local/bin` shims were written with an unguarded redirect, so a file already at one of those names — `check-output` is an ordinary name for a personal script — would have been overwritten and then removed by `--uninstall`, one loop after the same defect was fixed for every other target. [src:RULES-BUDGET-2026-08-27]
+
+## Observed — two more artifacts in the DOE material
+
+- The directive template in `Vibe-Marketer/Agentic-Workflows-Template`, a repository stating it is based on Saraev's DOE framework, marks a short required set of sections and says of the remainder: "Add sections as you discover edge cases, not upfront". [src:DOE-TEMPLATES-2026-08-28]
+- The same repository carries a `learnings/` template whose stated purpose is to capture "approaches that were tested but not selected, and why. Prevents re-discovering dead ends." [src:DOE-TEMPLATES-2026-08-28]
+- Both files were absent from the fetch tool's summary of that repository's README, and were found only by cloning it — the second time in this session that a clone returned what a fetch had not. [src:DOE-TEMPLATES-2026-08-28] [src:SARAEV-REPOS-2026-08-27]

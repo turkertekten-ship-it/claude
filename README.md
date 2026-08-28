@@ -29,7 +29,7 @@ bash tools/install_git_hooks.sh    # once per clone: pre-push refuses a red suit
 |---|---|
 | `CLAUDE.md` | The doctrine. Read first. |
 | `FLEET.md` | Which sessions run concurrently, and on which branches. |
-| `provenance/` | The ledger, the observations, the unknowns, the raw captures, the loop logs. |
+| `provenance/` | The ledger, the observations, the unknowns, the rejected approaches, the raw captures, the loop logs. |
 | `prompts/` | System prompts carrying the doctrine into a session. |
 | `tools/verify_provenance.py` | The fabrication guard. |
 | `tools/ingest_chat_archive.py` | Conversation-archive ingestion and search. |

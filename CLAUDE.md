@@ -111,6 +111,7 @@ provenance/
   measurements.yaml           quoted numbers, re-run rather than remembered
   observations.md             established fact, fully sourced
   unknowns.md                 open questions, deliberately left open
+  rejected.md                 approaches tried and abandoned, and why
   raw/                        verbatim captures backing the ledger
   loop-*.md                   loop logs — the surprise, named at the time
 prompts/                      system prompts carrying the doctrine
