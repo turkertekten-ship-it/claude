@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>52 çalıştırılabilir takım · 387 vaka · 0 sinyal</span>
+    <span>52 çalıştırılabilir takım · 388 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -353,7 +353,7 @@ footer p + p{margin-top:12px}
     </div>
 
     <figcaption>Takım başına başarısız vaka, yamadan önce ve sonra. A takımındaki yedi
-    vaka <strong>bilerek</strong> bırakıldı: eski API'nin kusur kaydı olarak dururlar,
+    vaka <strong>bilerek</strong> bırakıldı: eski API'nin (bir programın başka programlara açtığı erişim arayüzü) kusur kaydı olarak dururlar,
     yerlerine dokuz yeni vaka yamalı API'yi ölçüyor. E'deki üç vaka kitabın kendi
     beklenen değerleridir, yamayla kapanmaz.</figcaption>
   </figure>
@@ -576,7 +576,7 @@ KALDI A-07  §19 pilotu, avro çevrilmeden
       <div class="sub">§13 · 16/16 çözüldü</div>
       <ul>
         <li>Hiçbir depo uydurma değil.</li>
-        <li><strong>courtlistener AGPL-3.0</strong>, kitap "açık (depoya bakın)" diyor — oysa §13.7 tam da bu soruyu sorup PyMuPDF'i eliyor.</li>
+        <li><strong>courtlistener AGPL</strong> (ağ üzerinden hizmet verse bile kullanıcıya kendi kaynak kodunu açmayı zorunlu kılan bulaşıcı açık kaynak lisansı) <strong>3.0</strong>, kitap "açık (depoya bakın)" diyor — oysa §13.7 tam da bu soruyu sorup PyMuPDF'i eliyor.</li>
         <li><strong>diff-match-patch arşivlendi</strong> (2024-08-05), yazılmamış.</li>
         <li><strong>opensanctions verisi CC BY-NC</strong> — ticari pratikte lisans sorusu.</li>
       </ul>
@@ -585,7 +585,7 @@ KALDI A-07  §19 pilotu, avro çevrilmeden
       <h3>Kaynaklar</h3>
       <div class="sub">§17 · künye sağlam</div>
       <ul>
-        <li>DOI, dergi, cilt, örneklem, görev listesi: hepsi doğru.</li>
+        <li>DOI (bir akademik yayının kalıcı kimlik numarası), dergi, cilt, örneklem, görev listesi: hepsi doğru.</li>
         <li><strong>Dört olumsuz bulgunun dördü de doğrulandı</strong> — akıl yürütme modelinin insan kolundan fazla uydurduğu (11'e 4) dâhil.</li>
         <li><strong>+0,26 bir karıştırma:</strong> o rakam iki AI kolu <em>arasındaki</em> farktır.</li>
         <li><strong>"%19" → "19 yüzde puanı."</strong> Mevcut ifade riski küçültüyor.</li>
@@ -605,8 +605,8 @@ KALDI A-07  §19 pilotu, avro çevrilmeden
 
   <div class="note">
     <b>Kanalın kendisi başarısız oldu — ve bu artık kanıtlı.</b> Bu oturumda
-    şu alan adlarına HTTPS, kuruluş egress politikasıyla CONNECT aşamasında
-    403 ile reddedildi (vekilin kendi ret kaydı,
+    şu alan adlarına HTTPS (şifreli web bağlantısı protokolü), kuruluş egress politikasıyla CONNECT (bir vekil üzerinden şifreli bağlantı açma isteği)
+    aşamasında 403 ile reddedildi (vekilin kendi ret kaydı,
     <em class="term">hafiza/egress-kaniti.md</em>): <em class="term">mevzuat.gov.tr</em>, <em class="term">resmigazete.gov.tr</em>,
     <em class="term">rekabet.gov.tr</em>, <em class="term">spk.gov.tr</em> — hepsi
     reddedildi; akademik yayıncılar da öyle. Mevzuat bulguları bu yüzden
@@ -750,7 +750,7 @@ connect_rejected  <span class="bad">www.spk.gov.tr:443</span>         gateway an
     da yazılmalı</b> — WebSearch çalışıyor ve kullanıldı; döndürdüğü şey sayfa
     metni değil arama motoru özeti, I-01…I-03'ün "desteklenmiş yeniden kurgu"
     olmasının sebebi bu. Ve <b>iddia fazla geniş yazılmamalı</b> — "hiçbir şeye
-    erişilemedi" yanlış olurdu; GitHub MCP ile on altı depo çözüldü. N-08
+    erişilemedi" yanlış olurdu; GitHub MCP (modele dış araç bağlamayı standartlaştıran protokol) ile on altı depo çözüldü. N-08
     ayrıca raporun bu kanıtla bulguları <b>çözdüğünü iddia etmediğini</b>
     denetliyor: erişimin neden yok olduğunu kanıtlamak, bulguyu kapatmaz.
   </div>
@@ -814,7 +814,7 @@ connect_rejected  <span class="bad">www.spk.gov.tr:443</span>         gateway an
   Ama sır kapısı bir <strong>güvenlik denetimidir</strong> ve güvenlik denetimi
   yalnızca iyi niyetli girdiyle sınanmaz. Altı tur boyunca hiç sınamamıştım.</p>
   <p>Ve bu kuramsal bir tehdit modeli değil: üç yüzeyin üçü de <strong>kaza
-  olarak oluşur.</strong> PDF ya da Word'den kopyala yapıştır rutin olarak
+  olarak oluşur.</strong> PDF (taşınabilir belge biçimi) ya da Word'den kopyala yapıştır rutin olarak
   yumuşak tire, sıfır genişlikli karakter ve ayrışmış aksan üretir. Bir müvekkil
   kod adı veri odası belgesinden kopyalanıp bir web aramasına yapıştırıldığında
   kapının onu görmesi gerekir. Görmüyordu:</p>
@@ -822,7 +822,7 @@ connect_rejected  <span class="bad">www.spk.gov.tr:443</span>         gateway an
   <table>
     <thead><tr><th>Yüzey</th><th>Örnek</th><th>Kapı</th></tr></thead>
     <tbody>
-      <tr><td class="rule-no">NFD ayrışması</td><td class="ev"><em class="term">A.Ş.</em> → <em class="term">A.S</em> + U+0327</td><td class="st"><span class="pill f">kaçırdı</span></td></tr>
+      <tr><td class="rule-no">NFD (Unicode'un ayrıştırıcı normalleştirmesi: harf ile aksanı ayrı karakterlere böler) ayrışması</td><td class="ev"><em class="term">A.Ş.</em> → <em class="term">A.S</em> + U+0327</td><td class="st"><span class="pill f">kaçırdı</span></td></tr>
       <tr><td class="rule-no">Sıfır genişlikli boşluk</td><td class="ev"><em class="term">Proje·U+200B·Şahin</em></td><td class="st"><span class="pill f">kaçırdı</span></td></tr>
       <tr><td class="rule-no">Homoglif</td><td class="ev">Kiril <em class="term">о</em> ile <em class="term">Prоje</em></td><td class="st"><span class="pill f">kaçırdı</span></td></tr>
     </tbody>
@@ -834,7 +834,7 @@ connect_rejected  <span class="bad">www.spk.gov.tr:443</span>         gateway an
   düzelttim ama <strong>sınıfı genellemedim</strong> — tek bir örneği yamalayıp
   yüzeyin tamamını sınamadım. Altı tur sonra döndüm.</p>
   <div class="note">
-    Düzeltme <b>yalnızca sır kapısında</b>: biçim karakterlerini at, NFKC ile
+    Düzeltme <b>yalnızca sır kapısında</b>: biçim karakterlerini at, NFKC (Unicode'un uyumluluk normalleştirmesi: ayrışmış aksanları tek karaktere indirger) ile
     birleştir, dar bir homoglif tablosunu Latin'e katla. Diğer kapılarda
     uygulanmadı — aşırı normalleştirme yanlış pozitif üretir; ama <b>dışarı
     giden bir çağrıda fazla bloklamak, az bloklamaktan güvenlidir.</b> On yedi
@@ -1161,7 +1161,7 @@ connect_rejected  <span class="bad">www.spk.gov.tr:443</span>         gateway an
     kapatıyordum. <strong>Sonucu ölçmedim.</strong></p>
     <p>Türkçede "yüzde" pay oranıdır, tazminat tavanıdır, sepettir, oy
     çoğunluğudur. Genişletilmiş desen bunların hepsini bir mevzuat eşiği
-    sayıyordu: <strong>her SPA incelemesi ve her ortaklık yapısı notu</strong>
+    sayıyordu: <strong>her SPA (Share Purchase Agreement: pay alım satım sözleşmesi) incelemesi ve her ortaklık yapısı notu</strong>
     üç kapıyı birden ateşliyordu — doğrulanacak hiçbir mevzuat olmadığı hâlde.
     Kitabın uyardığı kapatılma sebebinin tam kendisi, kendi elimle.</p>
     <p><strong>Düzeltme geri alma değil.</strong> Bir yüzde, bu işleme dair bir
@@ -1560,7 +1560,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
       <span class="pill f">Ortam bağımlılığı</span></div>
     <h3>Bir takvim tarihi saat dilimi taşımaz</h3>
     <p>Bugün İstanbul'da damgalanan bir <code>Doğrulama:</code> satırı,
-    UTC−11'deki bir masada <strong>"GELECEK tarihli (1 gün)"</strong> diye
+    UTC (eşgüdümlü evrensel zaman) ölçeğinde −11 saat dilimindeki bir masada <strong>"GELECEK tarihli (1 gün)"</strong> diye
     bloklanıyordu. <strong>Belge doğru, kapı yanlış</strong> — ve §14'e göre
     böyle bir kapı kapatılır.</p>
     <p>Sebep kavramsal: bir takvim tarihi saat dilimi taşımaz;
@@ -1658,7 +1658,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
     <li>AA — takım adı <strong>tek harf</strong> varsayımı <strong>üç ayrı
     bileşende</strong> gömülüydü</li>
   </ul>
-  <p>Dördü de aynı kökten: <strong>Türkçe metni ASCII sezgisiyle okumak</strong>
+  <p>Dördü de aynı kökten: <strong>Türkçe metni ASCII (aksansız temel Latin karakter kümesi) sezgisiyle okumak</strong>
   — ve dördü de ancak o örneğe çarptığımda görüldü. Yirmi iki tur boyunca
   <strong>sınıfın kendisini</strong> hiç taramadım. AE taradı, ve
   <strong>üç kusur daha</strong> çıktı.</p>
@@ -1969,6 +1969,9 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
     <div class="f-head"><span class="f-id">G-01 · G-02 · G-03 · I-04</span>
       <span class="pill p">Dördü doğrulandı</span></div>
     <h3>Üçü yetkili kaynağından okundu</h3>
+    <p class="sub">Aşağıdaki ilk satır GPL (kaynak kodu açık tutmayı zorunlu
+    kılan lisans ailesi) ailesinden bir lisansı, deponun kendi beyanından
+    alıntılıyor.</p>
     <table><thead><tr><th>Bulgu</th><th>Doğrulama</th></tr></thead><tbody>
     <tr><td><strong>G-01</strong></td><td>courtlistener AGPL — deponun kendi README'si: <em>"…copyright Free Law Project under the Affero GPL."</em></td></tr>
     <tr><td><strong>G-02</strong></td><td><em>"This repository was archived by the owner on <strong>Aug 5, 2024</strong>."</em> — errata'daki tarih <strong>birebir</strong> doğru</td></tr>
@@ -2014,7 +2017,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
     <p>B-34, gerçek kişi adı ayağını sınamak için canlı
     <code>hafiza/muvekkil-adlari.txt</code> dosyasına bir fixture yazıyor,
     aslını <strong>yalnızca bir değişkende</strong> tutuyor ve
-    <code>finally</code> ile geri koyuyordu. <code>finally</code> SIGKILL'de
+    <code>finally</code> ile geri koyuyordu. <code>finally</code> SIGKILL'de (süreci hiç uyarmadan anında sonlandıran işletim sistemi sinyali)
     koşmaz. Süreç o pencerede öldürüldü: dosyanın 274 baytı gitti. Dosya
     <code>.gitignore</code>'da olduğu için <code>git checkout</code> ile
     dönülemedi — <strong>tek kopya ölen sürecin belleğindeydi.</strong></p>
@@ -2123,7 +2126,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
     <strong>Takım bu turda iki kez kendi kusurunu gösterdi.</strong>
     AM-01 önce <em>vakum</em> geçti: ölçüt vaadi ararken komutun kapanış
     cümlesi tam o iki kelimenin <strong>arasında satır kırıyordu</strong>.
-    Sonra ölçüt, yamayı açıklayan <strong>HTML yorumuyla</strong> tatmin
+    Sonra ölçüt, yamayı açıklayan <strong>HTML</strong> (web sayfalarının işaretleme dili) <strong>yorumuyla</strong> tatmin
     oluyordu — prosedürün tamamı silinse bile yeşil kalıyordu; yani
     prosedürü değil, prosedürden söz eden bir cümleyi ölçüyordu. Yorumlar
     ölçüm dışına alındı, mutasyon o zaman yakalandı.
@@ -2839,7 +2842,8 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
     <p>Reddin anlamı şimdiye kadar <strong>tek</strong> bir yetkiye
     dayanıyordu: aracın kendi ret iletisi. Ortamın <strong>kendi belgesi</strong>
     aynı şeyi bağımsız olarak söylüyor (<code>/root/.ccr/README.md</code>,
-    satır 18-19):</p>
+    satır 18-19) — TLS (bağlantıyı şifreleyen güvenlik katmanı)
+    doğrulamasını kapatmayı ve vekili devre dışı bırakmayı yasaklayarak:</p>
     <blockquote>"Never disable TLS verification, never unset HTTPS_PROXY, and
     do not retry organization policy denials (403/407) — report them
     instead."</blockquote>
@@ -3028,6 +3032,42 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Kırk dokuzuncu tur</span>
+  <h2>Aynı ölçüt, okuyucunun açtığı belgeye hiç uygulanmamıştı</h2>
+  <p>Bu tur tek bir soruyla açıldı: terim ölçütü iki teslimattan
+  <strong>hangisini</strong> ölçüyor? Cevap: yalnızca raporu. Sayı ölçütü
+  ikisini birden ölçüyordu; terim ölçütü tekini. <strong>Aynı sınıf, yarım
+  uygulanmış.</strong></p>
+
+  <div class="callout">
+    Bu sayfada — okuyucunun gerçekten açtığı belgede — terimlerin
+    <strong>hiçbiri</strong> açıklanmamıştı: on altı çıplak terim, yine AGPL
+    başta. Bir önceki turda raporu düzeltirken, aynı kusurun yanındaki
+    kopyada durduğunu görmedim. İncelemenin kendi kuralı bana döndü:
+    <em>bir kusuru bir yerde düzeltmek, sınıfı kapatmaz.</em>
+  </div>
+
+  <p>İkisi düzeltilemedi — ve düzeltilmemeliydi: <strong>iki terimin ilk
+  geçişi birebir İngilizce alıntıların içindeydi.</strong> Bir alıntı,
+  okunaklı olsun diye değiştirilmez. Açıklama alıntıyı <strong>tanıtan</strong>
+  cümleye kondu; ilk geçiş orada oldu ve alıntı olduğu gibi kaldı.</p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">BC-02</span>
+      <span class="pill p">Muafiyet ikiye ayrıldı</span></div>
+    <h3>Politika kalıcıdır; geçici çözüm kanıt ister</h3>
+    <p>Ölçüt "hiçbir şeyi örtmeyen beyan bayattır" diyordu ve kurum
+    kısaltmalarını da bu kurala tabi tutuyordu. Yanlıştı: bir kurum
+    kısaltması bugün belgede geçmese bile, §10'un kurum adlarını çevirmeme
+    muafiyeti <strong>politikadır</strong> ve o terim yarın döndüğünde hazır
+    olmalıdır. Çıkarıcının artıkları — aksansız yazılmış Türkçe sözcükler,
+    dosya adı parçaları — ise <strong>kanıta</strong> bağlıdır: hiçbir şeyi
+    örtmeyen bir kalıntı beyanı, çıkarıcının değiştiğinin işaretidir ve
+    sessizce durmamalıdır.</p>
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -3145,7 +3185,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 52 takım · 387 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 52 takım · 388 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:

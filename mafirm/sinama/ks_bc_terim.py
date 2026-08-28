@@ -59,16 +59,48 @@ def duzyazi(metin):
     return re.sub(r"\s+", " ", metin)
 
 
+def duzyazi_html(metin):
+    """Artifact'in düzyazısı: etiket, biçem, kod ve dosya adı terim değildir."""
+    metin = re.sub(r"<style.*?</style>|<script.*?</script>|<pre.*?</pre>",
+                   " ", metin, flags=re.S)
+    metin = re.sub(r"<code[^>]*>.*?</code>", " ", metin, flags=re.S)
+    metin = re.sub(r"<[^>]+>", " ", metin)
+    metin = re.sub(r"&[a-z]+;", " ", metin)
+    metin = re.sub(r"https?://\S+", " ", metin)
+    metin = re.sub(r"\b[\w./-]+\.(py|sh|md|json|txt|html|docx|pdf)\b", " ", metin)
+    return re.sub(r"\s+", " ", metin)
+
+
+# [Kırk dokuzuncu tur] BC yalnızca RAPOR'u ölçüyordu. Okuyucunun AÇTIĞI belge
+# ise artifact'tir ve orada terimlerin HİÇBİRİ açıklanmamıştı. BB sayıları iki
+# belgede birden ölçüyordu; BC terimleri tek belgede ölçüyordu. Aynı sınıf,
+# yarım uygulanmış.
 RAPOR = duzyazi(oku("RAPOR.md"))
+ARTIFACT = duzyazi_html(oku("kor-sinama-raporu.html"))
+BELGELER = (("RAPOR", RAPOR), ("ARTIFACT", ARTIFACT))
 
 # --- muafiyetler: gerekçesiyle BEYAN edilir, sessizce büyüyemez --------
 # Her beyan bir şey örtmek ZORUNDA (BC-02); örtmeyen beyan bayattır.
-MUAF = {
+# İki tür muafiyet vardır ve ikisi aynı kurala tabi değildir:
+#
+#   MUAF_KURUM   — POLİTİKA. §10 kurum, mevzuat ve para birimi adlarını
+#                  çevirmemeyi emreder; bu muafiyet bugün bir terim örtmese
+#                  bile geçerlidir ve yarın o terim geri geldiğinde hazırdır.
+#   MUAF_KALINTI — ÇIKARICININ ARTIĞI. Aksansız yazılmış Türkçe sözcükler,
+#                  dosya adı parçaları. Bunlar KANITA bağlıdır: hiçbir şeyi
+#                  örtmeyen bir kalıntı beyanı, çıkarıcının değiştiğinin
+#                  işaretidir ve sessizce durmamalıdır.
+MUAF_KURUM = {
     "TTK": "Türk Ticaret Kanunu'nun yerleşik kısaltması; §10 kurum ve "
            "mevzuat adlarını çevirmemeyi emreder",
     "SPK": "Sermaye Piyasası Kurulu'nun yerleşik kısaltması; aynı gerekçe",
     "EUR": "ISO 4217 para birimi kodu; hukukçu okuyucu için standart",
     "USD": "ISO 4217 para birimi kodu; aynı gerekçe",
+    "TRY": "ISO 4217 para birimi kodu; aynı gerekçe",
+    "MIT": "yazılım lisansı adı; ilk geçtiği yerde lisans bağlamında, "
+           "AGPL ile karşılaştırılarak tanımlanıyor",
+}
+MUAF_KALINTI = {
     "YYYY": "tarih biçimi şablonu, terim değil",
     "HOME": "ortam değişkeni adı, düzyazı terimi değil",
     "INDEX": "kitabın kendi dosya adının büyük harfli anılması",
@@ -76,12 +108,14 @@ MUAF = {
     "BITTI": "Türkçe 'bitti' sözcüğünün aksansız yazımı",
     "FERAGAT": "Türkçe hukuk terimi, İngilizce değil",
     "ABA": "kitaptaki vaka kimliği öneki",
-    "MIT": "yazılım lisansı adı; ilk geçtiği yerde AGPL ile birlikte "
-           "lisans bağlamında tanımlanıyor",
+    "YILLIK": "Türkçe 'yıllık' sözcüğünün aksansız yazımı",
 }
+MUAF = dict(MUAF_KURUM, **MUAF_KALINTI)
+
 
 # --- keşif -------------------------------------------------------------
-_kucuk = set(re.findall(r"\b[a-zçğıöşü][a-zçğıöşü]{2,}\b", RAPOR))
+_kucuk = set(re.findall(r"\b[a-zçğıöşü][a-zçğıöşü]{2,}\b",
+                        RAPOR + " " + ARTIFACT))
 
 
 def _turkce_vurgu(k):
@@ -95,7 +129,8 @@ def _turkce_vurgu(k):
     return len(kk) >= 4 and any(w.startswith(kok) for w in _kucuk)
 
 
-ADAYLAR = sorted({k for k in re.findall(r"\b[A-Z][A-Z0-9]{2,9}\b", RAPOR)
+ADAYLAR = sorted({k for _a, _m in BELGELER
+                  for k in re.findall(r"\b[A-Z][A-Z0-9]{2,9}\b", _m)
                   if not _turkce_vurgu(k)})
 TERIMLER = [k for k in ADAYLAR if k not in MUAF]
 
@@ -122,29 +157,36 @@ ACIKLAMA = re.compile(
     r"^['’]?[a-zçğıöşü]{0,4}[-\d.]*\s*(?:\(|—|–|:|,?\s*yani\b)")
 
 
-def ilk_cumle(terim):
+def ilk_cumle(terim, metin=None):
     # [BC, dedektörün kendi kusuru] İlk yazım düz alt dizi araması yapıyordu:
     # "PDF"in ilk geçişi "PyMuPDF" içinde bulunuyordu. Keşif sözcük sınırı
     # kullanırken ölçüm kullanmıyordu; iki farklı şeyi ölçüyorlardı.
-    m = re.search(r"\b%s\b" % re.escape(terim), RAPOR)
+    metin = RAPOR if metin is None else metin
+    m = re.search(r"\b%s\b" % re.escape(terim), metin)
     if not m:
         return None, None
     i = m.start()
-    bas = max(RAPOR.rfind(".", 0, i), RAPOR.rfind("!", 0, i),
-              RAPOR.rfind("?", 0, i)) + 1
-    ucu = [x for x in (RAPOR.find(".", i), RAPOR.find("!", i),
-                       RAPOR.find("?", i)) if x > 0]
-    son = min(ucu) if ucu else len(RAPOR)
-    return RAPOR[bas:son + 1].strip(), RAPOR[i + len(terim):son + 1]
+    bas = max(metin.rfind(".", 0, i), metin.rfind("!", 0, i),
+              metin.rfind("?", 0, i)) + 1
+    ucu = [x for x in (metin.find(".", i), metin.find("!", i),
+                       metin.find("?", i)) if x > 0]
+    son = min(ucu) if ucu else len(metin)
+    return metin[bas:son + 1].strip(), metin[i + len(terim):son + 1]
 
 
-_aciklanmamis = []
-for _t in TERIMLER:
-    _c, _ard = ilk_cumle(_t)
-    if _c is None:
-        continue
-    if not ACIKLAMA.match(_ard or ""):
-        _aciklanmamis.append(_t)
+def cipllaklar(metin):
+    kotu = []
+    for t in TERIMLER:
+        _c, _ard = ilk_cumle(t, metin)
+        if _c is None:
+            continue
+        if not ACIKLAMA.match(_ard or ""):
+            kotu.append(t)
+    return kotu
+
+
+_aciklanmamis = cipllaklar(RAPOR)
+_aciklanmamis_html = cipllaklar(ARTIFACT)
 
 # --- BC-01 · her keşfedilen terim ilk geçişte açıklanmış ---------------
 vaka("BC-01", "düzyazıdaki her İngilizce/teknik terim ilk geçişte açıklanmış",
@@ -153,10 +195,11 @@ vaka("BC-01", "düzyazıdaki her İngilizce/teknik terim ilk geçişte açıklan
      % (len(TERIMLER), len(_aciklanmamis), _aciklanmamis[:12] or "yok"))
 
 # --- BC-02 · muafiyet beyanlı ve tamamı kullanılıyor -------------------
-_bayat = sorted(k for k in MUAF if k not in ADAYLAR)
-vaka("BC-02", "her muafiyet gerekçeli ve her gerekçe bir terimi örtüyor",
+_bayat = sorted(k for k in MUAF_KALINTI if k not in ADAYLAR)
+vaka("BC-02", "her muafiyet gerekçeli; hiçbir kalıntı beyanı bayat değil",
      not _bayat and all(len(v) > 20 for v in MUAF.values()),
-     "%d muafiyet · hiçbir şeyi örtmeyen: %s" % (len(MUAF), _bayat or "yok"))
+     "%d politika + %d kalıntı muafiyeti · bayat kalıntı: %s"
+     % (len(MUAF_KURUM), len(MUAF_KALINTI), _bayat or "yok"))
 
 # --- BC-03 · keşif vakum değil ----------------------------------------
 # Elle yazılmış üç terimlik listenin yerine geçen şey, gerçekten KEŞİF
@@ -187,7 +230,14 @@ vaka("BC-05", "kurum ve mevzuat adları çevrilmemiş",
      not _cevrilmis, "çevrilmiş: %s" % (_cevrilmis or "yok"))
 
 
-BEKLENEN_VAKA = 5
+# --- BC-06 · artifact de aynı kurala tabi ------------------------------
+vaka("BC-06", "artifact düzyazısındaki her terim de ilk geçişte açıklanmış",
+     not _aciklanmamis_html,
+     "açıklanmamış (%d): %s"
+     % (len(_aciklanmamis_html), _aciklanmamis_html[:12] or "yok"))
+
+
+BEKLENEN_VAKA = 6
 
 
 def rapor():

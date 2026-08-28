@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** elli iki çalıştırılabilir takım — **387
+**Yamalı hâlde sistem çalışıyor:** elli iki çalıştırılabilir takım — **388
 vaka, 27 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15 → **27/27** (mutasyon kümesi otuz
 sekizinci turda on beşten yirmi yediye çıkarıldı: 26 kontrolün dokuzu hiç
@@ -2692,7 +2692,7 @@ içinde kırmızı, koşumdan sonra yeşil görünüyordu. Onuncu ve on altınc�
 turların katman kuralı — *denetim, kendini denetleyen takımı denetleyemez* —
 **üçüncü kez**, bu kez veri yoluyla çiğnenmişti. Sayı artık durağan ölçülüyor:
 `hepsi.sh`'e bağlı her takımın kendi `BEKLENEN_VAKA` beyanı toplanıyor
-— bugün toplam 387 vaka — ve her takımın kendi sıfırıncı vakası o beyanın
+— bugün toplam 388 vaka — ve her takımın kendi sıfırıncı vakası o beyanın
 gerçeğe eşit olduğunu ayrıca güvenceye alıyor. Bozulmuş bir `SAYIM.txt` ile BB'nin çıktısı
 **birebir aynı** kalıyor; bağımsızlık ölçülerek gösterildi.
 
@@ -2745,6 +2745,31 @@ ve o işaret mutasyondan **bağımsız** olarak yerleşmişti. Otuzuncu turun
 kuralı bir madde kazandı: *bir mutasyon indiği kanıtlanmadan okunamaz* — ve
 **kanıt, mutasyonun kendisi olmalıdır; yanına konan bir işaret değil.**
 Kalıp doğrudan doğrulanınca vaka gerektiği gibi kırmızıya döndü.
+
+### Ve aynı ölçüt, okuyucunun açtığı belgeye hiç uygulanmamıştı
+
+Kırk dokuzuncu tur tek bir soruyla açıldı: BC iki teslimattan **hangisini**
+ölçüyor? Cevap: yalnızca RAPOR'u. BB sayıları ikisinde birden ölçüyordu; BC
+terimleri tekinde. **Aynı sınıf, yarım uygulanmış.**
+
+Artifact'te — okuyucunun gerçekten açtığı belgede — terimlerin **hiçbiri**
+açıklanmamıştı: on altı çıplak terim, yine AGPL başta. Kırk sekizinci turda
+raporu düzeltirken, aynı kusurun yanındaki kopyada durduğunu görmedim.
+Bu, incelemenin kendi kuralının bana dönmüş hâli: *bir kusuru bir yerde
+düzeltmek, sınıfı kapatmaz.*
+
+İkisi düzeltilemedi ve düzeltilmemeliydi: **GPL (kaynak kodu açık tutmayı zorunlu kılan lisans ailesi) ile TLS'in
+ilk geçişleri birebir İngilizce alıntıların içindeydi.** Bir alıntı, okunaklı olsun diye
+değiştirilmez. Açıklama alıntıyı **tanıtan** cümleye kondu; ilk geçiş orada
+oldu ve alıntı olduğu gibi kaldı.
+
+**Muafiyet de ikiye ayrıldı.** BC-02 "hiçbir şeyi örtmeyen beyan bayattır"
+diyordu ve kurum kısaltmalarını da bu kurala tabi tutuyordu. Yanlıştı:
+`SPK` bugün belgede geçmese bile §10'un kurum adı muafiyeti **politikadır**
+ve yarın o terim döndüğünde hazır olmalıdır. Çıkarıcının artıkları
+(aksansız yazılmış Türkçe sözcükler) ise **kanıta** bağlıdır; hiçbir şeyi
+örtmeyen bir kalıntı beyanı, çıkarıcının değiştiğinin işaretidir. Politika
+kalıcıdır, geçici çözüm kanıt ister.
 
 ---
 
@@ -2877,7 +2902,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | AZ · kitaba sadık kopyaların sadakati | *"sadık" sıfatı hiç sınanmamıştı* | **temiz** — 258/262 birebir, kalan dördü beyanlı |
 | BA · kayıt ile iddianın çelişmesi | *kaydın "çalışıyor" dediğini teslimat "işe yaramaz" diye anmıştı — üç kez* | **temiz** — bugün çelişki yok, muafiyet beyanlı |
 | BB · sayıların zaman indisi | *kırk yedinci turda görüldü, "Dokuz takım, 96 vaka" başlığı 53 satırlık tablonun üstünde duruyordu* | **temiz** — dört sürüklenmiş sayı düzeltildi |
-| BC · §10 terim açıklaması | *R-06 üç terimlik elle yazılmış listeyi soruyordu; düzyazıda on yedi açıklanmamış terim vardı* | **temiz** — on yedisi de ilk geçişte açıklandı |
+| BC · §10 terim açıklaması | *R-06 üç terimlik elle yazılmış listeyi soruyordu; iki teslimatta otuz üç açıklanmamış terim vardı* | **temiz** — hepsi ilk geçişte açıklandı |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -2936,7 +2961,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 ### Nasıl yeniden koşulur
 ```
 ./sinama/hepsi.sh                 # 52 çalıştırılabilir takım:
-                                  #   387 vaka + 27 mutasyon (D)
+                                  #   388 vaka + 27 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -2970,7 +2995,7 @@ vakalardır ve hepsi geçer. Kör sınama o aklın dışında kalanı arar: bir
 hukukçunun gerçekten yazacağı cümleyi, kancanın gerçekten göreceği veriyi,
 bozulduğunda denetimin gerçekten yakalayıp yakalamadığını.
 
-Elli beş takım, 387 vaka:
+Elli beş takım, 388 vaka:
 
 | Takım | Neyi sınar | Kaynağı |
 |---|---|---|
@@ -3028,10 +3053,10 @@ Elli beş takım, 387 vaka:
 | AZ | **Kitaba sadık kopyaların sadakati** — raporun "önce" tabanı gerçekten kitabın metni mi | §12, §14, §16 |
 | BA | **Kayıt–iddia çelişkisi** — kayıt bir şeyin çalıştığını/doğrulandığını söylerken teslimat onu olumsuzluyor mu | §4, §17, §19 |
 | BB | **Sayıların zaman indisi** — teslimattaki her toplam ya bugün ölçülene eşit ya da hangi koşuma ait olduğunu söylüyor mu | §12, §19 |
-| BC | **§10 terim açıklaması** — düzyazıdaki her İngilizce/teknik terim ilk geçtiğinde açıklanmış mı (liste değil, keşif) | §10 |
+| BC | **§10 terim açıklaması** — her iki teslimatın düzyazısındaki her İngilizce/teknik terim ilk geçtiğinde açıklanmış mı (liste değil, keşif) | §10 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**387 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**388 vaka + 27 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)
