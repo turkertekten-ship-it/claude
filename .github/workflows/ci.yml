@@ -119,11 +119,13 @@ jobs:
           # pages (L72), and 0.81 -> 0.78 when the golden set grew 54 -> 79
           # cases (L74). A ratchet is calibrated against a corpus *and* a
           # question set; replacing either retires it rather than failing it.
-          # 62/79 = 0.785 passes and 61/79 = 0.772 fails, so one regression is
+          # Then 0.78 -> 0.81 when a strong match stopped being refused for the
+          # arms disagreeing about it and the gate read 65/79 (L79).
+          # 64/79 = 0.810 passes and 63/79 = 0.797 fails, so one regression is
           # tolerated and two are not, the tightness this floor has always had.
           python -m oodarag.cli --config oodarag-external.toml eval \
             --goldens evals/goldens-external.jsonl \
-            --min-pass-rate 0.78 --out eval-external.md
+            --min-pass-rate 0.81 --out eval-external.md
 
       - uses: actions/upload-artifact@v4
         if: always()

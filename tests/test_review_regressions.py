@@ -1388,6 +1388,25 @@ class ArmAgreementGateTest(unittest.TestCase):
         self.assertEqual(_arm_agreement(self._results("both")), 1.0)
         self.assertAlmostEqual(_arm_agreement(self._results(2)), 0.25)
 
+    def test_a_strong_match_survives_the_arms_disagreeing(self):
+        """The gate multiplies relevance by agreement, so it refuses on either
+        cause. Seven of sixteen failures at 79 golden cases were answerable
+        questions refused at 12% agreement, one carrying relevance 0.56 - a good
+        match discarded because the arms picked different neighbours (L79)."""
+        from oodarag.generate.answer import AnswerConfig
+
+        config = AnswerConfig()
+        # A retrieval the reranker rates highly, with the arms barely agreeing.
+        strong, weak_agreement = 0.56, 0.125
+        self.assertLess(strong * weak_agreement, config.min_relevance,
+                        "the fixture no longer trips the product floor")
+        self.assertGreaterEqual(strong, config.min_relevance_rescue,
+                                "a match this strong must be rescued")
+        # And a genuinely weak one is still refused, whatever the agreement.
+        feeble = 0.2
+        self.assertLess(feeble * 1.0, config.min_relevance_rescue)
+        self.assertLess(feeble * weak_agreement, config.min_relevance)
+
     def test_a_single_arm_configuration_still_answers(self):
         """End to end, because the unit tests above pass on a function nobody
         calls in that configuration."""

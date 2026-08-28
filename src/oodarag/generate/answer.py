@@ -89,6 +89,25 @@ class AnswerConfig:
     #: and above, so 0.08 maximises the worse of the two rather than the sum of
     #: one. Sweeping it is `scripts/floor_sweep.py`.
     min_relevance: float = 0.08
+    #: A strong match is answered even when the arms disagree about it.
+    #:
+    #: Multiplying relevance by agreement refuses on *either* cause, and the
+    #: failure decomposition at 79 golden cases showed the cost: seven of
+    #: sixteen failures were answerable questions refused with agreement at
+    #: 12%, one of them carrying relevance 0.56 - a good match thrown away
+    #: because the two arms happened to pick different neighbours (L79).
+    #:
+    #: Swept over both corpora, this rescue never costs a correct refusal
+    #: anywhere at or above 0.35 and removes three wrong ones:
+    #:
+    #:     rescue      none  0.60  0.50  0.40  0.35  0.30  0.20  0.15
+    #:     correct       10    10    10    10    10     9     7     7
+    #:     wrong          8     7     6     5     5     5     1     0
+    #:
+    #: Lower values score better on net and buy it by refusing fewer
+    #: unanswerable questions, which is the gate's whole job; 0.40 sits in the
+    #: region where the trade is one-directional.
+    min_relevance_rescue: float = 0.40
     generator: str = "auto"  # "auto" | "extractive" | "claude"
 
 
@@ -135,7 +154,9 @@ class AnswerGenerator:
         )
         agreement = _arm_agreement(results)
         gate_signal = best_relevance * agreement
-        if results[0].score < config.min_top_score or gate_signal < config.min_relevance:
+        weak = (gate_signal < config.min_relevance
+                and best_relevance < config.min_relevance_rescue)
+        if results[0].score < config.min_top_score or weak:
             return Answer(
                 question=question,
                 text=("The index contains nothing relevant to this question. "

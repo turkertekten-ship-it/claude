@@ -4366,3 +4366,60 @@ document and span starting at the quoted text.
    Fixtures are built without the transformations that make provenance hard -
    that is what makes them fixtures - so they confirm the design rather than
    testing it.
+
+---
+
+## L79 - Reading the failures instead of the metric, and finding the gate refusing good answers
+
+Sixteen of 79 external cases were failing. The pass rate says that; the failure
+list says what:
+
+| failure | count |
+|---|---|
+| answerable question **refused** | **7** |
+| unanswerable question answered | 5 |
+| expected document not retrieved | 4 |
+
+Seven of sixteen were the gate refusing answers it had. Six of the seven carried
+the same detail in their message - **12% arm agreement** - and one of those had
+`rerank_relevance` **0.56**, which is a strong match by any reading of that
+number.
+
+**The gate multiplies relevance by agreement, so it refuses on either cause.**
+That is fine when a low product means "nothing relevant" and wrong when it means
+"the arms picked different neighbours". A dense arm and a lexical arm disagreeing
+about the supporting cast of a correct answer is not evidence that the answer is
+wrong - it is the ordinary condition of hybrid retrieval, which is why fusion
+exists.
+
+**The fix is a rescue, not a re-weighting**: answer a strong match whatever the
+agreement says. Swept over both corpora, correct refusals minus wrong ones:
+
+| rescue floor | none | 0.60 | 0.50 | **0.40** | 0.35 | 0.30 | 0.20 | 0.15 |
+|---|---|---|---|---|---|---|---|---|
+| correct refusals | 10 | 10 | 10 | **10** | 10 | 9 | 7 | 7 |
+| wrong refusals | 8 | 7 | 6 | **5** | 5 | 5 | 1 | 0 |
+
+At or above 0.35 the trade is one-directional: three wrong refusals removed and
+not one correct refusal lost. Below 0.30 the net keeps improving and buys it by
+refusing fewer unanswerable questions - which is the gate's entire job, so the
+better-scoring settings are the worse gates. **0.40 shipped**, in the region
+where nothing is traded, and the external gate went 63/79 to **65/79** with the
+primary unchanged.
+
+**The general lesson is about which number to read.** Five sessions have tuned
+this gate against a pass rate, and a pass rate cannot distinguish "refused
+something it should have answered" from "answered something it should have
+refused" - it counts both as one. The failure list separates them for free, and
+it pointed at a bug in the *shape* of the signal rather than the position of its
+threshold. Every floor sweep in this session was searching for a better place to
+put a line through a quantity that was wrong.
+
+**Rules.**
+1. **Read the failures, not the failure count.** Seven refusals and five
+   over-answers score identically and want opposite fixes.
+2. **A product refuses on either factor.** If two conditions should not both be
+   able to veto, they do not belong in a product - and the message that prints
+   both is where you find out.
+3. **When a knob keeps improving as you lower it, check what it is buying.**
+   Below 0.30 this one improves the score by doing less of what it exists to do.

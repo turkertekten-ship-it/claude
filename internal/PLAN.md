@@ -18,20 +18,20 @@
 | External eval corpus | done | 349 PyPI pages with provenance, release dates and a manifest, rebuildable by `scripts/build_external_corpus.py`; **79** golden cases; 6 contaminated, 45 documents held out as 56 holdouts |
 | Incremental deletion | done | Removals propagate to the delta, prune guarded at 25% of a source, refused entirely for a failed connector |
 | CLI | done | `preflight, index, query, eval, loop, status, journal, demo` |
-| CI | done | Three jobs: stdlib matrix, numpy path, retrieval regression gate; floors 0.85 primary, 0.78 external (rebased for a corpus 74% larger, then ratcheted three times as the gate improved; L66-L71) |
+| CI | done | Three jobs: stdlib matrix, numpy path, retrieval regression gate; floors 0.85 primary, 0.81 external (rebased for a corpus 74% larger, then ratcheted three times as the gate improved; L66-L71) |
 | Non-negotiables | verified | All five attacked directly, not just asserted: zero-dependency walked module by module, provenance and redaction attacked with crafted inputs, degradation measured through partial and silent-empty source failures (L37-L39) |
 
 **Current measurements** (offline embedder, deterministic).
-396 tests passing - of which ten only run once the branch is pushed, because the
+397 tests passing - of which ten only run once the branch is pushed, because the
 live GitHub cross-checks skip as a module unless the local HEAD is also the
-remote head. The same tree reads 386 before a push and 396 after (L64), and CI,
+remote head. The same tree reads 387 before a push and 397 after (L64), and CI,
 which only runs pushed commits, always sees the larger number. Retrieval metrics are over graded cases only - abstention
 cases have nothing to retrieve, and averaging their zeros in made adding a
 negative case look like a retrieval regression.
 
 | | primary (this repo) | external (349 PyPI pages) |
 |---|---|---|
-| golden cases | **19/20** | **63/79** |
+| golden cases | **19/20** | **65/79** |
 | recall@8 | 0.8750 | 0.8769 |
 | precision@8 | 0.2500 | 0.2692 |
 | hit@8 | 0.9375 | 0.9077 |
@@ -156,12 +156,20 @@ its current failures are that artefact. See docs/EVALUATION.md.
    0.625. A floor on the first is the defect L69 had to repair in the reported
    confidence; a floor on the second is not (L75).
 
-   Shipped, the external gate reads **63/79** and the primary 19/20. Four
-   unanswerable questions still get answered, and they are the ones earlier
-   sessions characterised: every word present in the corpus, only the
-   combination absent, which no feature computed from term overlap can see.
-   Separating those is a judgement about meaning - item 1, still blocked on a
-   key.
+   Shipped, the external gate reads **65/79** and the primary 19/20.
+
+   **The failure decomposition is now the guide.** Of sixteen failures at 79
+   cases, seven were answerable questions the gate *refused* - six of them at
+   12% arm agreement, one carrying relevance 0.56. Multiplying relevance by
+   agreement refuses on either cause, so a good match with arms that picked
+   different neighbours was thrown away. A rescue - answer a strong match
+   whatever the arms think - removes three of those without costing a single
+   correct refusal, and took the gate to 65/79 (L79).
+
+   What remains is five questions answered that should be refused, and they are
+   the ones every session has characterised: every word present in the corpus,
+   only the combination absent. That is a judgement about meaning - item 1,
+   still blocked on a key.
 
 3. **Widen the corpus again.** Done twice more and it keeps paying: 33 to 91
    overturned three recorded conclusions (L29), 91 to 153 settled two more, and
