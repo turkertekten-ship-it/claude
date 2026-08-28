@@ -178,13 +178,52 @@ def redact_secrets(text: str) -> str:
         (r"\b(AKIA[0-9A-Z]{16})\b", "<redacted:aws-key-id>"),
         (r"\b(x(?:ox[abposr]|app)-[A-Za-z0-9\-]{10,})", "<redacted:slack-token>"),
         (r"(?i)\b(bearer)\s+[A-Za-z0-9._\-]{20,}", r"\1 <redacted>"),
-        (
-            r"(?i)\b(api[_-]?key|secret|password|passwd|token)\b(\s*[:=]\s*)[\"']?[A-Za-z0-9._\-]{12,}[\"']?",
-            r"\1\2<redacted>",
-        ),
+        # Backstop for formats with no recognizable prefix. Applied last, and
+        # separately below, because it needs to look at what it captured: an
+        # unquoted right-hand side that is just a Python identifier is a
+        # variable reference, not a secret. Without that check, ordinary source
+        # code like `token = self.agent_token` reads as a credential, and a
+        # rule that reports a critical finding on every such line is a rule
+        # nobody keeps switched on.
         (r"-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----",
          "<redacted:private-key>"),
     ]
     for pattern, replacement in patterns:
         text = re.sub(pattern, replacement, text)
-    return text
+    return _ASSIGNMENT_RE.sub(_redact_assignment, text)
+
+
+#: `name = value` where the name suggests a credential. The value is checked by
+#: `_redact_assignment` rather than by the pattern, because whether it is a
+#: secret depends on what it looks like, not on where it sits.
+_ASSIGNMENT_RE = re.compile(
+    r"(?i)\b(api[_-]?key|secret|password|passwd|token)\b(\s*[:=]\s*)"
+    r"([\"']?)([A-Za-z0-9._\-]{12,})(\3)"
+)
+
+#: A dotted attribute access: `self.agent_token`, `os.environ`, `cfg.db.pw`.
+#: Never a credential; always a reference to where one lives.
+_ATTRIBUTE_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)+$")
+
+#: A bare identifier carrying no digits: `agent_token`, `password`. Real
+#: credentials in the wild are mixed-case or contain digits; a digit-free
+#: snake_case word after `token =` is a variable name.
+_PLAIN_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z_]*$")
+
+
+def _looks_like_a_reference(value: str) -> bool:
+    return bool(_ATTRIBUTE_RE.match(value) or _PLAIN_NAME_RE.match(value))
+
+
+def _redact_assignment(match: re.Match[str]) -> str:
+    """Redact unless the right-hand side is plainly a variable, not a value.
+
+    Quoted values are always redacted: nobody writes `token = "agent_token"`
+    meaning a reference. Unquoted ones are judged on shape, and ties go to
+    redaction - a needlessly redacted variable name costs a moment of
+    confusion, a missed credential costs the credential.
+    """
+    name, sep, quote, value, _close = match.groups()
+    if not quote and _looks_like_a_reference(value):
+        return match.group(0)
+    return f"{name}{sep}{quote}<redacted>{quote}"

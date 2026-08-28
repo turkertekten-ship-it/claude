@@ -98,8 +98,9 @@ class TokenBucket:
             with self._lock:
                 now = self._refill_locked()
                 if self._tokens >= want - EPSILON:
-                    # Clamped: the epsilon above can leave a negative sliver,
-                    # and a bucket that drifts below empty never refills level.
+                    # Clamped: the epsilon can leave the balance a sliver below
+                    # zero, and a long-lived bucket must not accumulate that
+                    # debt across a few million calls.
                     self._tokens = max(0.0, self._tokens - want)
                     return max(0.0, now - started)
                 deficit = want - self._tokens

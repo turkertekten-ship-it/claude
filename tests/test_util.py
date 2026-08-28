@@ -88,7 +88,9 @@ class FakeClock:
         self.now += seconds
 
 
-def bucket(rate: float, burst: int | None = None, clock: FakeClock | None = None) -> tuple:
+def bucket(
+    rate: float, burst: int | None = None, clock: FakeClock | None = None
+) -> tuple[TokenBucket, FakeClock]:
     clock = clock or FakeClock()
     return TokenBucket(rate, burst, monotonic=clock.monotonic, sleep=clock.sleep), clock
 
@@ -248,7 +250,8 @@ class BlakeBucketTestCase(unittest.TestCase):
 
     def test_is_deterministic(self) -> None:
         self.assertEqual(blake_bucket("chunking", 4096), blake_bucket("chunking", 4096))
-        self.assertEqual(blake_bucket("chunking", 4096, salt="s"), blake_bucket("chunking", 4096, "s"))
+        salted = blake_bucket("chunking", 4096, salt="s")
+        self.assertEqual(salted, blake_bucket("chunking", 4096, "s"))
 
     def test_salt_moves_tokens_to_other_buckets(self) -> None:
         tokens = [f"token-{i}" for i in range(200)]
@@ -443,18 +446,31 @@ class TokenBucketClockTestCase(unittest.TestCase):
         self.assertAlmostEqual(waited, sum(clock.sleeps))
 
     def test_a_wait_ends_in_one_nap_even_when_the_refill_is_not_representable(self) -> None:
-        # Regression: 1/3 of a second at 3 tokens/s refills 0.999999999999909
-        # tokens, not 1.0. Comparing exactly sends the waiter back to sleep for
-        # picoseconds, over and over - a spin that looks like a wait in a trace.
-        clock = FakeClock()
-        bkt, _ = bucket(3.0, 1, clock)
-        bkt.acquire()
+        # Regression, and not an exotic one: rate 7/s, burst 3, no clock games.
+        # A 1/7s nap refills 0.99999999999996 tokens, so an exact `>=` sends the
+        # waiter back for another 3e-14 seconds, and again, and again - a
+        # busy-wait wearing a sleep's clothes, for as long as the clock's
+        # granularity hides the progress.
+        clock = FakeClock(max_sleeps=50)
+        bkt, _ = bucket(7.0, 3, clock)
+        for _ in range(3):
+            bkt.acquire()
 
         waited = bkt.acquire()
 
         self.assertEqual(len(clock.sleeps), 1)
-        self.assertAlmostEqual(waited, 1 / 3)
-        self.assertTrue(all(nap > 0.0 for nap in clock.sleeps))
+        self.assertAlmostEqual(waited, 1 / 7)
+        self.assertTrue(all(nap > 1e-6 for nap in clock.sleeps))
+
+    def test_a_burst_of_waits_never_degenerates_into_micro_naps(self) -> None:
+        clock = FakeClock(max_sleeps=60)
+        bkt, _ = bucket(3.0, 2, clock)
+
+        for _ in range(20):
+            bkt.acquire()
+
+        self.assertEqual(len(clock.sleeps), 18)  # two free, then one nap each
+        self.assertTrue(all(abs(nap - 1 / 3) < 1e-9 for nap in clock.sleeps))
 
     def test_a_long_wait_is_broken_into_capped_naps(self) -> None:
         clock = FakeClock()

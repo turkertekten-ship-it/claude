@@ -88,8 +88,47 @@ class RedactionTestCase(unittest.TestCase):
 
     def test_assignment_shapes_are_caught_without_a_known_prefix(self) -> None:
         """The backstop for formats this table has never heard of."""
-        out = redact_secrets("api_key = 9f8e7d6c5b4a39281706abcdef")
-        self.assertNotIn("9f8e7d6c5b4a39281706abcdef", out)
+        for line in (
+            "api_key = 9f8e7d6c5b4a39281706abcdef",
+            'api_key = "9f8e7d6c5b4a39281706abcdef"',
+            "token: 9f8e7d6c5b4a39281706abcdef",
+            "SECRET=hunter2hunter2hunter2",
+            'password = "correcthorsebattery"',
+        ):
+            with self.subTest(line=line):
+                self.assertIn("<redacted>", redact_secrets(line))
+
+    def test_the_backstop_does_not_redact_variable_references(self) -> None:
+        """Ordinary source code is not a credential.
+
+        `token = self.agent_token` used to redact, so the scraper's own modules
+        were reported as leaking credentials at critical severity - on every
+        run. A rule that cries wolf on every source file is a rule people switch
+        off, which costs more than the false positive did.
+        """
+        for line in (
+            "token = self.agent_token",
+            "token=self.agent_token)",
+            "api_key = os.environ",
+            "password = config.db_password",
+            "token = agent_token",
+        ):
+            with self.subTest(line=line):
+                self.assertEqual(redact_secrets(line), line)
+
+    def test_a_quoted_value_is_always_redacted(self) -> None:
+        """Nobody writes `token = "agent_token_here"` meaning a reference.
+
+        The unquoted form of the same string is left alone, which is the whole
+        distinction: quoting is the author saying this is a value.
+        """
+        self.assertIn("<redacted>", redact_secrets('token = "agent_token_here"'))
+        self.assertEqual(redact_secrets("token = agent_token_here"),
+                         "token = agent_token_here")
+
+    def test_values_below_the_length_floor_are_left_alone(self) -> None:
+        """Twelve characters: shorter than that is a placeholder, not a secret."""
+        self.assertEqual(redact_secrets('token = "short"'), 'token = "short"')
 
     def test_a_private_key_block_goes_entirely(self) -> None:
         block = (

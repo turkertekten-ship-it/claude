@@ -9,7 +9,7 @@ text enters an index: secret redaction and provenance stamping.
 "Every" is meant field by field, and that is most of what this file is. A page's
 title, its description and its headings are indexed, embedded and shown in
 citations exactly like its body, so redacting `text` alone leaves a title like
-"deploying with ghp_xxxxxxxxxxxxxxxx" sitting readable in the corpus, in the
+"deploying with <a GitHub token>" sitting readable in the corpus, in the
 answer that cites it, and in the log line that announced it. The seed URL gets
 the same treatment before it becomes the state-store key and the `crawl_seed`
 stamped on every document: `https://user:token@host/` is a credential, and the

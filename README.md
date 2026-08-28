@@ -123,7 +123,7 @@ library only. `make help` lists these too.
 | `make test` | The full suite on stdlib `unittest`. No dependencies, no plugins. |
 | `make lint` | Compile-checks every module. |
 | `make install` | Editable install with dev extras, if you would rather have the `ooda` entry point on your PATH. |
-| `make clean` | Removes `.oodarag/`, `.data/` and caches. |
+| `make clean` | Removes the loop's state directory, the ingest output directory and caches. |
 
 **The nightly loop** — see [The nightly loop](#the-nightly-loop) above
 
