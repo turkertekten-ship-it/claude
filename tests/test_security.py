@@ -274,3 +274,44 @@ class TestCrawlerStaysOnPermittedHosts(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class TestMirrorCheck(unittest.TestCase):
+    """The mirror is a maintenance cost the owner accepted; drift is the risk.
+
+    Two copies of a rule set that disagree are worse than one copy plus a
+    pointer, because both look authoritative. These check that the drift is
+    actually detected rather than assumed absent.
+    """
+
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+
+    def _run(self, other: Path) -> tuple[int, str]:
+        import subprocess
+
+        repo = Path(__file__).resolve().parent.parent
+        proc = subprocess.run(
+            [sys.executable, str(repo / "tools" / "verify_mirror.py"), str(other)],
+            capture_output=True, text=True,
+        )
+        return proc.returncode, proc.stdout + proc.stderr
+
+    def test_a_missing_mirror_cannot_run(self) -> None:
+        code, out = self._run(self.root / "absent")
+        self.assertEqual(code, 2, out)
+
+    def test_an_empty_mirror_is_reported_as_drift(self) -> None:
+        (self.root / "empty").mkdir()
+        code, out = self._run(self.root / "empty")
+        self.assertEqual(code, 1)
+        self.assertIn("missing", out)
+
+    def test_the_real_mirror_is_in_sync(self) -> None:
+        sibling = Path(__file__).resolve().parent.parent.parent / "claude-ai"
+        if not sibling.is_dir():
+            self.skipTest("sibling repository not present in this checkout")
+        code, out = self._run(sibling)
+        self.assertEqual(code, 0, out)

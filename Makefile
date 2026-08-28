@@ -1,7 +1,7 @@
 PY ?= python3
 export PYTHONPATH := src
 
-.PHONY: help install test lint demo index query eval loop reachability skills verify clean
+.PHONY: help install test lint demo index query eval loop reachability skills verify mirror-check mirror clean
 
 # Tests assert on return values, not on log lines; the logs are noise there.
 export OODARAG_LOG_LEVEL ?= warn
@@ -21,6 +21,17 @@ unit: ## Run only the unit tests, verbosely
 
 verify: ## Run only the provenance guard
 	$(PY) tools/verify_provenance.py
+
+mirror-check: ## Report drift between this repository and its mirror
+	$(PY) tools/verify_mirror.py
+
+mirror: ## Copy the mirrored trees into the sibling repository, then re-check
+	@for n in CLAUDE.md FLEET.md README.md Makefile pyproject.toml .gitignore \
+	          src tests tools docs prompts provenance .claude evals corpus; do \
+	    rm -rf ../claude-ai/$$n; cp -r $$n ../claude-ai/$$n 2>/dev/null || true; \
+	done
+	@find ../claude-ai -name '__pycache__' -type d -exec rm -rf {} + 2>/dev/null || true
+	@$(PY) tools/verify_mirror.py
 
 lint: ## Compile-check every module
 	$(PY) -m compileall -q src

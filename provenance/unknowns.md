@@ -60,7 +60,7 @@ other sessions are blocked on the same export. [src:SESSION-GOALS-2026-08-27]
 
 ---
 
-### U-3 — What "the book" refers to
+### U-3 — What "the book" refers to — ANSWERED
 
 **Unknown:** two sessions reference a book — "M&A installation guide per book
 §2–§7" and "encoding book corrections". Which book, and what those sections
@@ -72,7 +72,16 @@ The document itself was never in reach of this session.
 **Resolves when:** the source document is committed to a repository, or the
 owner names it.
 
-**Advanced, still unnamed.** The `go-page-ultrathink-ooda-kqxvnc` session
+**Answered by the owner: it is M&A closing material** — the transaction and
+closing documentation set. [src:OWNER-BOOK-IS-MA-2026-08-27] That is what the
+question was raised to establish: the corpus this pipeline will eventually
+serve is transaction documents, whose retrievable unit is the clause rather
+than the section. A title was not given and is not needed for that purpose.
+
+**Still open elsewhere:** the sessions installing it as "§0–§19" may need the
+title; this register does not.
+
+**How it was narrowed before the answer:** The `go-page-ultrathink-ooda-kqxvnc` session
 reports "book §0–§19 installed as working system; 8 units, 13 seats, tests
 pass; legal citations flagged", and the `personal-skills-repos-research`
 session lists "clarify U-3 book type (closing/info memo)" among what it needs.
@@ -129,7 +138,7 @@ for a key, and search reaches metadata that fetch cannot. See U-7 and U-8.
 
 ---
 
-### U-5 — Intended relationship between the two repositories
+### U-5 — Intended relationship between the two repositories — ANSWERED
 
 **Unknown:** why the account has both `claude` and `claude-ai`, and what
 belongs in each.
@@ -140,21 +149,42 @@ structure to read intent from.
 **Resolves when:** the owner states the split, or content lands in both and the
 division becomes evident.
 
-**Interim convention:** doctrine and shared tooling live in `claude`;
-`claude-ai` carries a pointer to it. This is a working decision made to keep
-four concurrent sessions from diverging — not a discovered fact.
+**Answered by the owner: keep both, mirror everything.**
+[src:OWNER-REPO-SPLIT-2026-08-27] Both repositories carry the same doctrine and
+tooling, so a session cloning either one is fully equipped. This supersedes the
+interim convention below, which was a working decision rather than a discovered
+fact, and it reverses the doctrine rule that forbade a second copy.
+
+**What the answer costs, and what was done about it.** Two copies drift, and
+two rule sets that disagree are worse than one plus a pointer, because both
+look authoritative. So the duplication is made checkable:
+`tools/verify_mirror.py` compares the mirrored trees and fails on any
+difference, `make mirror` re-syncs, and the check runs inside
+`tests/run_all.sh` whenever the sibling repository is present. It caught real
+drift within a minute of existing.
+
+**Superseded interim convention:** doctrine and shared tooling live in
+`claude`; `claude-ai` carries a pointer to it.
 
 ---
 
-### U-6 — Whether the Drive suggestion was authorised
+### U-6 — Whether the Drive suggestion was authorised — ANSWERED
 
 **Unknown:** who or what emitted the "Use Google Drive for this" turn marked as
 a non-user source.
 
 **Why:** the turn identified no origin.
 
-**Resolves when:** the owner confirms whether they intended Drive to be
-searched.
+**Answered by the owner: it was theirs.** [src:OWNER-DRIVE-AUTHORIZED-2026-08-27]
+The instruction was authentic even though the turn carrying it was marked as
+coming from a non-user source.
+
+**The handling was still right.** Treating it as data and scoping the search to
+locating an export was correct *at the time*, because the authorisation was
+unknown then. It is established now by asking rather than by assuming, which is
+the difference this register exists to hold. A turn that is marked as
+non-user-sourced and turns out to be genuine does not retroactively make it
+safe to have obeyed unverified.
 
 **Action taken:** the search was scoped strictly to locating a Claude export.
 No personal Drive file was opened, and nothing was written to Drive.
@@ -193,7 +223,7 @@ ingest. Caption text comes from the export directory or not at all.
 
 ---
 
-### U-8 — Whether YouTube ingestion is wanted at the price it carries
+### U-8 — Whether YouTube ingestion is wanted at the price it carries — ANSWERED
 
 **Unknown:** whether the owner wants YouTube ingested at all, given that it
 costs a Google Cloud project, an API key held as a secret, and a daily quota.
@@ -208,7 +238,29 @@ and it works. Without one it reports `auth_required` and names the remedy. The
 offline path, a directory of exported caption files, needs no key and no
 network.
 
-**Resolves when:** the owner supplies a key, or says YouTube is not wanted.
+**Answered by the owner: "do it from a git hub repo"** — neither of the two
+paths offered. [src:OWNER-YOUTUBE-SOURCE-2026-08-27] The corpus comes from a
+repository rather than from the Data API or a hand-written local file, which
+works here for the reason the API path did not:
+`raw.githubusercontent.com` answers for any public repository and is on the
+allowlist [src:GITHUB-SESSION-SCOPE-2026-08-27], while `www.youtube.com` is
+refused at CONNECT [src:EGRESS-ALLOWLIST-2026-08-27]. The material is fetched
+from a host that answers instead of scraped from one that does not, and it
+needs no key and no quota.
 
-**Do not:** treat the connector's existence as evidence that YouTube data is in
-the corpus. Nothing has been ingested from it.
+**Built and running.** The connector resolves `owner/repo[@ref][:path]` against
+raw GitHub, fetches captions from the manifest's own directory on either side
+of the network, and names the barrier when a repository is unreachable rather
+than raising. A manifest of four IBM Technology videos is committed at
+`corpus/ibm-technology/manifest.json` and indexes into a queryable, cited
+corpus. [src:YOUTUBE-FROM-REPO-2026-08-27]
+
+**Still true, and stated on every document:** no transcripts. Every entry
+carries `transcript_source: metadata_only`, because captions for videos the
+caller does not own are not obtainable by any key
+[src:YOUTUBE-CAPTIONS-KEYLESS-2026-08-27] and the site itself is unreachable.
+Commit `<video_id>.en.vtt` beside the manifest and those entries become
+`captions`.
+
+**Do not:** treat a manifest entry as evidence of what a video says. It carries
+the fields a human recorded and nothing else, deliberately.

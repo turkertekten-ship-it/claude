@@ -86,14 +86,14 @@ def build_connectors(args: argparse.Namespace) -> tuple[list[Connector], list[st
         roots = args.skills or [".claude/skills", str(Path.home() / ".claude/skills")]
         connectors.append(SkillConnector([r for r in roots if Path(r).exists()]))
 
-    if args.youtube:
-        for manifest in args.youtube:
-            if not Path(manifest).exists():
-                notes.append(f"youtube: no manifest at {manifest}")
-                continue
-            # A manifest needs neither a key nor egress; the API is used only
-            # to enrich it when one happens to be configured.
-            connectors.append(YouTubeConnector(manifest=manifest))
+    for manifest in args.youtube or []:
+        # A manifest may be a path, a URL, or an `owner/repo` reference — the
+        # last of which is the point: youtube.com is unreachable here and
+        # raw.githubusercontent.com is not, so a corpus committed to a
+        # repository is reachable where the source site is not. Existence is
+        # not checked up front, because a remote one cannot be stat-ed; the
+        # connector reports the barrier it actually hit.
+        connectors.append(YouTubeConnector(manifest=manifest))
 
     for slug in args.github or []:
         owner, _, repo = slug.partition("/")
@@ -257,7 +257,8 @@ def _add_source_args(p: argparse.ArgumentParser) -> None:
     p.add_argument("--skills", nargs="*", metavar="DIR",
                    help="index SKILL.md files; with no value, the usual skill locations")
     p.add_argument("--youtube", nargs="+", metavar="MANIFEST", default=[],
-                   help="index videos from a manifest; needs no API key and no egress")
+                   help="index videos from a manifest: a local path, a URL, or "
+                        "owner/repo[@ref][:path] resolved against raw.githubusercontent.com")
     p.add_argument("--github", nargs="+", metavar="OWNER/REPO", default=[],
                    help="index a repository through the GitHub API")
     p.add_argument("--web", nargs="+", metavar="URL", default=[],

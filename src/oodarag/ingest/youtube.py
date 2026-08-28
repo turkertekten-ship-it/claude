@@ -18,6 +18,13 @@ have different answers:
      directory instead, and the connector says which videos lack one rather
      than quietly indexing title-and-description as though it were a transcript.
 
+A manifest may live in a **GitHub repository** rather than on disk, which is
+the practical answer here: `raw.githubusercontent.com` serves any public
+repository and is on this container's allowlist, while `www.youtube.com` is
+refused at CONNECT. A repository holding transcripts is therefore reachable
+where the source site is not — the material is fetched from a host that answers
+instead of scraped from one that does not.
+
 There are therefore three ways in, and every document records which one it came
 from in `transcript_source`:
 
@@ -138,6 +145,15 @@ _TAG_RE = re.compile(r"<[^>]+>")
 
 
 def parse_caption_file(path: Path) -> Transcript:
+    """Parse a caption file from disk. See `parse_caption_text` for the format."""
+    return parse_caption_text(
+        path.read_text("utf-8", errors="replace"),
+        path.stem.split(".")[0],
+        str(path),
+    )
+
+
+def parse_caption_text(raw: str, video_id: str, source: str = "") -> Transcript:
     """Parse WebVTT or SubRip into timed cues.
 
     Both formats are handled by the same pass because they differ only in the
@@ -146,8 +162,6 @@ def parse_caption_file(path: Path) -> Transcript:
     Consecutive duplicate lines are collapsed: YouTube's rolling captions
     repeat each line as it scrolls, which would otherwise triple the tokens.
     """
-    video_id = path.stem.split(".")[0]
-    raw = path.read_text("utf-8", errors="replace")
     cues: list[tuple[float, str]] = []
     current: float | None = None
     buffer: list[str] = []
@@ -182,7 +196,7 @@ def parse_caption_file(path: Path) -> Transcript:
             continue
         buffer.append(stripped)
     flush()
-    return Transcript(video_id=video_id, cues=cues, source_path=str(path))
+    return Transcript(video_id=video_id, cues=cues, source_path=source)
 
 
 #: How the text of a video document was obtained. Ordered strongest first.
@@ -226,20 +240,78 @@ class ManifestEntry:
         )
 
 
-def load_manifest(path: str | Path) -> tuple[list[ManifestEntry], list[str]]:
-    """Read a video manifest. Returns the entries and the entries that failed.
+#: Accepted forms for a repository-hosted manifest, most convenient first:
+#:   owner/repo                      -> default branch, corpus/manifest.json
+#:   owner/repo@ref                  -> that ref
+#:   owner/repo@ref:path/to/file     -> that path
+_REPO_SPEC = re.compile(r"^(?P<owner>[\w.-]+)/(?P<repo>[\w.-]+)"
+                        r"(?:@(?P<ref>[\w./-]+))?"
+                        r"(?::(?P<path>[\w./-]+))?$")
+
+DEFAULT_MANIFEST_PATH = "corpus/manifest.json"
+RAW_HOST = "https://raw.githubusercontent.com"
+
+
+def resolve_manifest_location(spec: str) -> str:
+    """Turn a manifest reference into something fetchable or readable.
+
+    A URL and a filesystem path both pass through unchanged. A bare
+    `owner/repo` is expanded to a raw.githubusercontent.com URL, because that
+    is the form an operator actually wants to type and the host that actually
+    answers.
+    """
+    spec = str(spec).strip()
+    if spec.startswith(("http://", "https://")):
+        return spec
+    if Path(spec).exists():
+        return spec
+    m = _REPO_SPEC.match(spec)
+    if not m:
+        return spec  # a path that does not exist yet; the caller reports it
+    ref = m.group("ref") or "main"
+    path = m.group("path") or DEFAULT_MANIFEST_PATH
+    return f"{RAW_HOST}/{m.group('owner')}/{m.group('repo')}/{ref}/{path}"
+
+
+def _read_location(location: str, client: HttpClient | None = None) -> tuple[str, list[str]]:
+    """Read a manifest's bytes from a URL or from disk, reporting the barrier."""
+    if not location.startswith(("http://", "https://")):
+        try:
+            return Path(location).read_text("utf-8"), []
+        except OSError as e:
+            return "", [f"{location}: {type(e).__name__}: {e}"]
+
+    http = client or HttpClient(rate_per_sec=5.0, burst=5)
+    try:
+        return http.get(location).text, []
+    except (HttpError, TransportError, OSError) as exc:
+        barrier, detail = classify_exception(exc)
+        # Naming the barrier matters more here than anywhere: a repository that
+        # is merely private reads identically to one that does not exist, and
+        # only one of those is fixable by the operator.
+        return "", [f"{location}: {barrier.value}: {detail[:160]} — {barrier.remedy}"]
+
+
+def load_manifest(
+    path: str | Path, client: HttpClient | None = None
+) -> tuple[list[ManifestEntry], list[str]]:
+    """Read a video manifest from a path, a URL, or an `owner/repo` reference.
 
     Keys beginning with an underscore are documentation for a human reader and
     are ignored. A malformed entry is reported rather than skipped silently: a
     corpus that quietly shrank is worse than one that failed loudly, because
     every downstream number improves either way.
     """
-    p = Path(path)
+    location = resolve_manifest_location(str(path))
     errors: list[str] = []
+    raw_text, read_errors = _read_location(location, client)
+    if read_errors:
+        return [], read_errors
     try:
-        payload = json.loads(p.read_text("utf-8"))
-    except (OSError, ValueError) as e:
-        return [], [f"{p}: {type(e).__name__}: {e}"]
+        payload = json.loads(raw_text)
+    except (ValueError, TypeError) as e:
+        return [], [f"{location}: {type(e).__name__}: {e}"]
+    p = location
 
     raw = payload.get("videos") if isinstance(payload, dict) else payload
     if not isinstance(raw, list):
@@ -259,21 +331,40 @@ def load_manifest(path: str | Path) -> tuple[list[ManifestEntry], list[str]]:
 
 
 class TranscriptStore:
-    """Caption files on disk, keyed by video id.
+    """Caption files, keyed by video id, from a directory or a repository.
 
-    This is the egress-free half of the connector. An owner who can reach
-    YouTube from their own machine exports captions once and drops them here;
-    the pipeline then indexes real transcripts without ever needing the site.
+    This is the egress-free half of the connector — or rather, the half that
+    does not need *YouTube*. Two ways to fill it:
+
+    - A local directory. An owner who can reach YouTube from their own machine
+      exports captions once and drops them here.
+    - A base URL, typically inside a GitHub repository. A caption file
+      committed to a repo is served by `raw.githubusercontent.com`, which
+      answers, while `www.youtube.com` is refused at CONNECT — so the same
+      bytes are reachable by a different route.
+
+    A remote store cannot list its directory, so it fetches by convention:
+    `<base>/<video_id><suffix>` for each suffix in turn. A miss is a normal
+    outcome, not an error, and leaves the document at `metadata_only`.
     """
 
-    SUFFIXES = (".vtt", ".srt")
+    SUFFIXES = (".vtt", ".srt", ".en.vtt", ".en.srt")
 
-    def __init__(self, directory: str | Path | None) -> None:
-        self.directory = Path(directory) if directory else None
+    def __init__(
+        self,
+        directory: str | Path | None,
+        *,
+        base_url: str = "",
+        client: HttpClient | None = None,
+    ) -> None:
+        self.directory = Path(directory) if directory and not base_url else None
+        self.base_url = base_url.rstrip("/")
+        self.client = client
         self._index: dict[str, Path] = {}
+        self._remote_cache: dict[str, Transcript | None] = {}
         if self.directory and self.directory.is_dir():
             for p in sorted(self.directory.iterdir()):
-                if p.suffix.lower() in self.SUFFIXES:
+                if p.suffix.lower() in (".vtt", ".srt"):
                     vid = extract_video_id(p.stem.split(".")[0]) or p.stem.split(".")[0]
                     self._index.setdefault(vid, p)
 
@@ -282,9 +373,11 @@ class TranscriptStore:
 
     @property
     def available(self) -> bool:
-        return bool(self._index)
+        return bool(self._index) or bool(self.base_url)
 
     def get(self, video_id: str) -> Transcript | None:
+        if self.base_url:
+            return self._get_remote(video_id)
         path = self._index.get(video_id)
         if path is None:
             return None
@@ -293,6 +386,31 @@ class TranscriptStore:
         except OSError as e:
             log.warn("caption file unreadable", path=str(path), err=str(e))
             return None
+
+    def _get_remote(self, video_id: str) -> Transcript | None:
+        """Fetch a caption file from the repository, by convention.
+
+        Results are cached including misses, so a manifest of fifty videos with
+        no captions costs one request each rather than one per suffix per run.
+        """
+        if video_id in self._remote_cache:
+            return self._remote_cache[video_id]
+        http = self.client or HttpClient(rate_per_sec=5.0, burst=5)
+        found: Transcript | None = None
+        for suffix in self.SUFFIXES:
+            url = f"{self.base_url}/{video_id}{suffix}"
+            try:
+                resp = http.get(url, allow_status=(404,))
+            except (HttpError, TransportError, OSError) as exc:
+                barrier, _ = classify_exception(exc)
+                log.debug("caption fetch failed", url=url, barrier=barrier.value)
+                continue
+            if resp.status == 404 or not resp.text.strip():
+                continue
+            found = parse_caption_text(resp.text, video_id, url)
+            break
+        self._remote_cache[video_id] = found
+        return found
 
 
 # ------------------------------------------------------------------------ client
@@ -505,21 +623,29 @@ class YouTubeConnector(Connector):
     ) -> None:
         self.video_ids = [v for v in (extract_video_id(x) or "" for x in (video_ids or [])) if v]
         self.playlist_ids = list(playlist_ids or [])
-        self.manifest_path = Path(manifest) if manifest else None
+        self.manifest_location = resolve_manifest_location(str(manifest)) if manifest else ""
+        self.manifest_path = (
+            Path(self.manifest_location)
+            if self.manifest_location and not self.manifest_location.startswith("http")
+            else None
+        )
         self.manifest: dict[str, ManifestEntry] = {}
         self.manifest_errors: list[str] = []
-        if self.manifest_path:
-            entries, self.manifest_errors = load_manifest(self.manifest_path)
+        if self.manifest_location:
+            entries, self.manifest_errors = load_manifest(self.manifest_location)
             self.manifest = {e.video_id: e for e in entries}
         self.api = client or YouTubeClient(api_key=api_key)
-        # A manifest usually sits beside its captions, so that directory is the
-        # default place to look when none was given.
-        if transcript_dir is None and self.manifest_path:
+        # Captions live beside their manifest, whichever side of the network
+        # the manifest is on.
+        base_url = ""
+        if self.manifest_location.startswith("http"):
+            base_url = self.manifest_location.rsplit("/", 1)[0]
+        elif transcript_dir is None and self.manifest_path:
             transcript_dir = self.manifest_path.parent
-        self.transcripts = TranscriptStore(transcript_dir)
+        self.transcripts = TranscriptStore(transcript_dir, base_url=base_url)
         self.include_timestamps = include_timestamps
         self.key = key or (
-            f"youtube:{self.manifest_path}" if self.manifest_path
+            f"youtube:{self.manifest_location}" if self.manifest_location
             else f"youtube:{','.join(self.video_ids[:3]) or 'playlists'}"
         )
 

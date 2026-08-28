@@ -26,6 +26,7 @@ from oodarag.ingest.youtube import (  # noqa: E402
     extract_video_id,
     load_manifest,
     parse_caption_file,
+    resolve_manifest_location,
 )
 from oodarag.net.reachability import Barrier  # noqa: E402
 
@@ -297,6 +298,88 @@ class TestManifest(unittest.TestCase):
     def test_manifest_entry_rejects_an_unusable_id(self) -> None:
         self.assertIsNone(ManifestEntry.from_dict({"video_id": "nope"}))
         self.assertIsNone(ManifestEntry.from_dict({}))
+
+
+class TestRepositoryHostedManifest(unittest.TestCase):
+    """A corpus in a git repository is reachable where youtube.com is not.
+
+    This is the whole point of the remote path: `raw.githubusercontent.com`
+    answers for any public repository and is on this container's allowlist,
+    while `www.youtube.com` is refused at CONNECT. None of these tests touch
+    the network — they cover the resolution and the failure reporting.
+    """
+
+    def test_a_bare_owner_repo_resolves_to_raw_github(self) -> None:
+        self.assertEqual(
+            resolve_manifest_location("someowner/somerepo"),
+            "https://raw.githubusercontent.com/someowner/somerepo/main/corpus/manifest.json",
+        )
+
+    def test_a_ref_can_be_pinned(self) -> None:
+        self.assertIn("/v2.1/", resolve_manifest_location("someowner/somerepo@v2.1"))
+
+    def test_a_path_inside_the_repository_can_be_named(self) -> None:
+        self.assertTrue(
+            resolve_manifest_location("o/r@main:data/videos.json").endswith(
+                "/o/r/main/data/videos.json"
+            )
+        )
+
+    def test_a_url_passes_through_unchanged(self) -> None:
+        url = "https://example.invalid/manifest.json"
+        self.assertEqual(resolve_manifest_location(url), url)
+
+    def test_an_existing_local_path_is_preferred_over_repo_expansion(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp) / "manifest.json"
+            p.write_text('{"videos": []}', "utf-8")
+            self.assertEqual(resolve_manifest_location(str(p)), str(p))
+
+    def test_an_unreachable_manifest_names_its_barrier(self) -> None:
+        # A repository that is private and one that does not exist read
+        # identically; only one is fixable by the operator, so the report has
+        # to carry the barrier and its remedy rather than a stack trace.
+        class Refusing:
+            def get(self, url: str, **kw: object) -> object:
+                from oodarag.util.http import TransportError
+                raise TransportError("Tunnel connection failed: 403 Forbidden")
+
+        entries, errors = load_manifest("someowner/somerepo", client=Refusing())  # type: ignore[arg-type]
+        self.assertEqual(entries, [])
+        self.assertEqual(len(errors), 1)
+        self.assertIn("egress_blocked", errors[0])
+        self.assertIn("allowlist", errors[0])
+
+    def test_a_404_is_reported_as_a_path_problem_not_a_block(self) -> None:
+        class NotFound:
+            def get(self, url: str, **kw: object) -> object:
+                from oodarag.util.http import HttpError
+                raise HttpError(404, url, "404: Not Found")
+
+        _entries, errors = load_manifest("someowner/somerepo", client=NotFound())  # type: ignore[arg-type]
+        self.assertIn("not_found", errors[0])
+
+    def test_the_committed_manifest_loads_and_grades_every_entry(self) -> None:
+        # The corpus actually committed to this repository.
+        repo_manifest = Path(__file__).resolve().parent.parent / "corpus/ibm-technology/manifest.json"
+        if not repo_manifest.exists():
+            self.skipTest("no committed manifest in this checkout")
+        entries, errors = load_manifest(repo_manifest)
+        self.assertEqual(errors, [])
+        self.assertTrue(entries)
+        for entry in entries:
+            self.assertIn(entry.verification, ("search_confirmed", "search_listed"))
+            self.assertTrue(entry.title)
+
+    def test_the_committed_manifest_claims_no_transcripts_it_does_not_have(self) -> None:
+        repo_manifest = Path(__file__).resolve().parent.parent / "corpus/ibm-technology/manifest.json"
+        if not repo_manifest.exists():
+            self.skipTest("no committed manifest in this checkout")
+        connector = YouTubeConnector(manifest=repo_manifest)
+        connector.api.api_key = ""
+        for doc in connector.fetch({}):
+            self.assertEqual(doc.metadata["transcript_source"], "metadata_only")
+            self.assertNotIn("## Transcript", doc.text)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,71 @@
+{
+  "_about": "IBM Technology video manifest for the oodarag YouTube connector.",
+  "_why_a_manifest": [
+    "www.youtube.com is refused at CONNECT from the container this was built",
+    "in, so no scraping path reaches it. raw.githubusercontent.com answers for",
+    "any public repository and is on the allowlist. Committing the corpus to a",
+    "repository therefore makes it reachable by a route that works, instead of",
+    "unreachable by one that does not.",
+    "",
+    "Read it with:  ooda index --youtube turkertekten-ship-it/claude@<branch>:corpus/ibm-technology/manifest.json",
+    "or, on a checkout:  ooda index --youtube corpus/ibm-technology/manifest.json"
+  ],
+  "_provenance": [
+    "Video ids and titles were obtained by web search from this environment.",
+    "Captions were NOT fetched: youtube.com is unreachable here and the Data",
+    "API refuses caption download to anyone but the video's owner, at any key.",
+    "Entries therefore ingest as `metadata_only`.",
+    "",
+    "No entry carries a summary or a description written by this session. A",
+    "paragraph about a video, stored beside it, reads exactly like a transcript",
+    "once it has been chunked, and a citation pointing at it would look",
+    "verbatim while being a paraphrase. That is the failure the citation",
+    "contract exists to prevent.",
+    "",
+    "To add real transcripts: drop `<video_id>.en.vtt` beside this file and",
+    "commit it. The connector fetches captions from the manifest's own",
+    "directory, local or remote, and the entry becomes `captions`."
+  ],
+  "_verification": {
+    "search_confirmed": "two or more independent results attribute it to IBM Technology",
+    "search_listed": "a search result carried the watch URL and title; the channel attribution comes from the result summary and was not confirmed against the channel, which is unreachable here"
+  },
+  "videos": [
+    {
+      "video_id": "T-D1OfcDW1M",
+      "title": "What is Retrieval-Augmented Generation (RAG)?",
+      "channel": "IBM Technology",
+      "presenter": "Marina Danilevsky",
+      "verification": "search_confirmed",
+      "topics": ["rag", "grounding", "hallucination", "citations"],
+      "related": [
+        "https://www.ibm.com/think/videos/rag",
+        "https://research.ibm.com/blog/retrieval-augmented-generation-RAG"
+      ]
+    },
+    {
+      "video_id": "Yq29bZ8Hlrc",
+      "title": "Optimize RAG with AI Agents & Vector Databases",
+      "channel": "IBM Technology",
+      "verification": "search_listed",
+      "topics": ["rag", "agents", "vector-database"],
+      "related": ["https://www.ibm.com/think/topics/agentic-rag"]
+    },
+    {
+      "video_id": "sMQ5R92F86o",
+      "title": "Unlocking Smarter AI Agents with Unstructured Data, RAG & Vector Databases",
+      "channel": "IBM Technology",
+      "verification": "search_listed",
+      "topics": ["rag", "agents", "unstructured-data", "vector-database"],
+      "related": ["https://www.ibm.com/think/topics/rag-vector-database"]
+    },
+    {
+      "video_id": "xc63tFIIfeA",
+      "title": "Why RAG Solutions Fail with Complex Documents & Vector Databases",
+      "channel": "IBM Technology",
+      "verification": "search_listed",
+      "topics": ["rag", "failure-modes", "documents", "vector-database"],
+      "related": ["https://www.ibm.com/think/topics/retrieval-augmented-generation"]
+    }
+  ]
+}

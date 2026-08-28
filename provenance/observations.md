@@ -88,7 +88,7 @@ verified lives in [unknowns.md](unknowns.md), not here.
 
 - The two unrelated histories on this repository were merged onto one root. The only conflicts were the two files FLEET.md predicted, `.gitignore` and `README.md`; both sides were read before resolving, and the verifier reported 0 violations afterwards. [src:UNIFIED-ROOT-2026-08-27]
 - SQLite's FTS5 `bm25()` returns a negative score where a better match is numerically smaller, so ascending order is best-first; on a 3-document corpus every score collapsed to -0.00000 because the IDF term vanishes when a term appears in most documents. [src:FTS5-BM25-SIGN-2026-08-27]
-- The full suite — unit tests plus the two doctrine suites and the provenance verifier — passed: 281 tests, all checks green. [src:OODARAG-VERIFIED-2026-08-27]
+- The full suite — unit tests plus the two doctrine suites and the provenance verifier — passed: 293 tests, all checks green. [src:OODARAG-VERIFIED-2026-08-27]
 - Python's `urllib.robotparser` applies robots.txt rules in file order rather than by specificity: with `Disallow: /private/` before `Allow: /private/public-bit` it refused the explicitly-allowed path, and reversing the two lines reversed the verdict. [src:ROBOTS-FIRST-MATCH-2026-08-27]
 - The secret redactor did not redact `AWS_SECRET_ACCESS_KEY=...`, because its generic key=value pattern required a word boundary before the key name and underscores are word characters. [src:REDACTION-COMPOUND-KEY-2026-08-27]
 - The HTTP client treated every 403 as non-retryable while separately computing a wait from GitHub's `x-ratelimit-reset`, so the wait was dead code and a rate-limited call failed permanently instead of pausing. GitHub signals both primary and secondary rate limits with 403 rather than 429. [src:GITHUB-403-RATE-LIMIT-2026-08-27]
@@ -144,6 +144,15 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - Those goals are the owner's own words, and they describe one programme rather than fourteen unrelated errands: research the owner and their firm, reverse-engineer their files, bring Claude Code to parity with the Playground, install named external material, improve the files daily, and audit everything for fabrication. [src:SESSION-GOALS-2026-08-27]
 - Two sessions besides this one report being blocked on the same thing: an export of `conversations.json` into `archive/`. [src:SESSION-GOALS-2026-08-27]
 - The chat index, empty since it was built, now holds this session's own transcript: 620 messages across 1 conversation, 0 unparseable, searchable with verbatim quotes carrying conversation id, message id and source file. [src:CHAT-INDEX-POPULATED-2026-08-27]
+
+## Observed — four questions put to the owner, and answered
+
+- The two repositories are to be mirrored, not split: both carry the same doctrine and tooling so a session cloning either is fully equipped. This reverses the interim convention and the doctrine rule that forbade a second copy. [src:OWNER-REPO-SPLIT-2026-08-27]
+- Both trees are now identical across 95 mirrored files, and the mirrored copy passes its own provenance check and full test suite independently rather than merely existing. [src:MIRROR-IN-SYNC-2026-08-27]
+- The video corpus is to come from a GitHub repository, rather than from the Data API or a local file. [src:OWNER-YOUTUBE-SOURCE-2026-08-27] Four IBM Technology videos are committed as a manifest and index into a queryable corpus whose citations carry real watch URLs. [src:YOUTUBE-FROM-REPO-2026-08-27]
+- The Google Drive search that arrived on a turn marked as a non-user source was in fact the owner's own instruction. [src:OWNER-DRIVE-AUTHORIZED-2026-08-27]
+- "The book" that several sessions are installing is M&A closing material — the transaction and closing documentation set. [src:OWNER-BOOK-IS-MA-2026-08-27]
+- That last answer settles what the corpus will actually be, and it is not documentation: the retrievable unit of a contract is the clause, not the section, and nothing here has been built for that yet. [src:OWNER-BOOK-IS-MA-2026-08-27]
 
 ## Conclusion
 

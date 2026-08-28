@@ -89,9 +89,14 @@ current roster and the branch each one owns.
   session record. Never push to another session's branch.
 - **Assume concurrency.** Fetch before you assume the remote state you last saw
   still holds.
-- **Doctrine lives in one place.** Shared rules and tooling belong in
-  `turkertekten-ship-it/claude`. Do not fork a second copy into another
-  repository; point at this one.
+- **Both repositories carry the same doctrine and tooling.** The owner chose
+  mirroring over a single home. [src:OWNER-REPO-SPLIT-2026-08-27] A session
+  cloning either `claude` or `claude-ai` is fully equipped, which is the point:
+  a session given only the pointer file used to get no verifier, no ledger and
+  no skills while a file described all three.
+  The cost is real — two copies drift — so the drift is made visible rather
+  than trusted: `make mirror-check` compares the two trees and fails when they
+  disagree. Change the doctrine in one repository, then mirror before pushing.
 - **Second-hand work is unread work.** Another session's branch is only real to
   you once it is pushed and you have read the diff.
 

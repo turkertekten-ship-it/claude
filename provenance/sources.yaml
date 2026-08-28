@@ -590,3 +590,95 @@ sources:
       The chat index had held nothing since it was built. It now holds this
       session's own transcript, which is the only one present on this
       container. `archive/` remains git-ignored.
+
+  # --------------------------------------------------------------- 20:40Z
+  # Direct answers from the owner, in response to four questions put to them.
+
+  - id: OWNER-REPO-SPLIT-2026-08-27
+    kind: user_statement
+    collected_at: "2026-08-27T20:40Z"
+    method: "question put to the owner: what belongs in `claude` versus `claude-ai`?"
+    evidence: >-
+      Answered "Keep both, mirror everything" — the option described as "Both
+      repos carry the same doctrine and tooling, kept in sync. Costs
+      duplication but means a session cloning either one is fully equipped."
+    note: >-
+      This settles U-5 and overrides the interim convention, which was
+      "doctrine lives in one place; claude-ai points at it". That convention
+      was a working decision made to stop concurrent sessions diverging, never
+      a discovered fact, and it is now superseded by the owner's stated
+      preference.
+
+  - id: OWNER-YOUTUBE-SOURCE-2026-08-27
+    kind: user_statement
+    collected_at: "2026-08-27T20:40Z"
+    method: "question put to the owner: do you want YouTube ingested, and by which of three paths?"
+    evidence: >-
+      Answered "do it from a git hub repo", rather than selecting the offered
+      local-manifest, API-key or drop-it options.
+    note: >-
+      Read literally: the video corpus is to come from a GitHub repository
+      rather than from the Data API or a hand-written local manifest. This is
+      workable here precisely because raw.githubusercontent.com answers for any
+      public repository while youtube.com is refused at CONNECT, so a repo
+      holding transcripts is reachable where the source site is not.
+
+  - id: OWNER-DRIVE-AUTHORIZED-2026-08-27
+    kind: user_statement
+    collected_at: "2026-08-27T20:40Z"
+    method: "question put to the owner: was the Drive search, which arrived from a turn marked as a non-user source, yours?"
+    evidence: >-
+      Answered "That was me" — the option described as "You asked for Drive to
+      be searched. I record it as authorized and close the question."
+    note: >-
+      Closes U-6. The instruction was authentic even though the turn carrying
+      it was marked as coming from a non-user source. Treating it as data and
+      scoping the search narrowly was still the right handling: the
+      authorisation is established now, by asking, rather than assumed then.
+
+  - id: OWNER-BOOK-IS-MA-2026-08-27
+    kind: user_statement
+    collected_at: "2026-08-27T20:40Z"
+    method: "question put to the owner: what is 'the book' that two sessions are installing?"
+    evidence: >-
+      Answered "M&A closing material" — the option described as "the
+      transaction / closing documentation set, consistent with the numbered
+      agreement series already found in your Drive."
+    note: >-
+      Closes U-3 as to kind. It does not supply a title, and none is needed for
+      the purpose the unknown was raised for: it establishes that the corpus
+      this pipeline will eventually serve is transaction documents, whose
+      retrievable unit is the clause rather than the section.
+
+  - id: YOUTUBE-FROM-REPO-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T20:55Z"
+    method: "python3 -m oodarag.cli index --youtube corpus/ibm-technology/manifest.json; then query"
+    evidence: >-
+      Ingest reported "youtube:corpus/ibm-technology/mani  4  0  0  0" and
+      "4 document(s) changed, 4 chunk(s) written". A query for "which videos
+      discuss vector databases and agents?" returned three cited passages whose
+      Sources block carried the real watch URLs
+      https://www.youtube.com/watch?v=Yq29bZ8Hlrc, ...=sMQ5R92F86o and
+      ...=xc63tFIIfeA. Manifest resolution was exercised against live GitHub:
+      a nonexistent repository returned not_found with its remedy rather than
+      a stack trace.
+    note: >-
+      Every document carried transcript_source=metadata_only, which is honest —
+      no captions exist for these videos here.
+
+  - id: MIRROR-IN-SYNC-2026-08-27
+    kind: tool_output
+    collected_at: "2026-08-27T20:58Z"
+    method: "make mirror; python3 tools/verify_mirror.py; cd ../claude-ai && make test"
+    evidence: >-
+      "verify_mirror: OK — 95 mirrored file(s) identical in both
+      repositories". Run inside claude-ai, the mirrored copy reported
+      "verify_provenance: OK — 24 file(s), 50 source(s), 0 violations" and
+      "Ran 290 tests ... OK", so the copy is independently functional rather
+      than merely present.
+    note: >-
+      The checker found real drift within a minute of being written: three
+      files edited after the first mirror and not re-synced. That is the
+      failure mode the owner's mirroring choice carries, caught by the tool
+      built to catch it.
