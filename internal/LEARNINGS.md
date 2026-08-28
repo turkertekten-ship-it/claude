@@ -4260,3 +4260,57 @@ covering what it claims rather than quietly weakening.
 3. **Mutate the fix, not the symptom.** "Does a secret reach the index" was the
    symptom; "is the boundary doing it" was the fix, and only the second mutation
    distinguishes the two tests.
+
+---
+
+## L85 - The non-negotiables audit, complete: two gaps in five, and two false alarms
+
+Running all five guarantees as checks rather than reading them, after a session
+that changed chunking, the abstention gate and the retrieval config.
+
+| # | guarantee | before | now |
+|---|---|---|---|
+| 1 | zero required dependencies | checked structurally | unchanged |
+| 2 | provenance is load-bearing | **untested** | tested (L83) |
+| 3 | network work is bounded | tested | unchanged |
+| 4 | degrade, don't die | tested | unchanged |
+| 5 | secrets redacted at the boundary | **test could not fail** | tested (L84) |
+
+**What was already sound.** (1) is enforced by CI installing nothing, so a
+module-level third-party import fails the build - a green build *is* the
+evidence. (3) has `test_fetch_budget_bounds_real_work_not_just_output`, which is
+L5's rule exactly: the crawl loop bounds on `report.fetches`, work attempted,
+not only `report.fetched`, output accepted, and a separate test asserts
+`fetches >= fetched`. (4)'s sharpest clause - never silently shrink the corpus -
+has a fraction guard, a test that a partial connector failure prunes nothing,
+and a test that an explicit bulk prune is still possible.
+
+**Two of my four suspicions during the audit were wrong, both the same way.**
+I flagged `max_fetches` as declared-but-never-enforced because grepping the
+field name found only its declaration; it is enforced three lines later through
+the derived local `fetch_budget`. And my provenance probe reported 41 chunks
+with broken offsets, which was a byte-for-byte comparison against text that
+`_pack_units` joins with spaces.
+
+That makes four name-based searches misleading me in one session: this one, the
+`expansion_rrf` key that never existed, and twice before. **Grep by name is a
+detector, not a diagnosis** - it cannot see a value that flows into a differently
+named variable, and it cannot tell an absent call from a renamed one.
+
+**The pattern in the two real gaps.** Both were guarantees whose *implementation*
+was correct and whose *test* pointed somewhere else. Provenance had no test at
+all. Redaction had one that passed with the entire fix removed, because it ran
+through connectors that kept their own redundant calls. In both cases reading
+the code would have said "this is fine", and it was - the code was never the
+problem.
+
+**Rules.**
+1. **Audit the tests of a guarantee, not the implementation of it.** Both
+   defects here were in what would notice a regression, not in what was
+   running.
+2. **Grep by name finds declarations; it does not find enforcement.** Follow the
+   value to where it is compared, or the search will report a bound that exists
+   as a bound that is missing.
+3. **A finished audit is worth recording as a table**, including the rows that
+   were already fine. Next time the question is which of the five changed, not
+   all five from scratch.
