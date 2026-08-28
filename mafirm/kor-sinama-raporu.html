@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>21 çalıştırılabilir takım · 212 vaka · 0 sinyal</span>
+    <span>22 çalıştırılabilir takım · 217 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -1310,6 +1310,67 @@ connect_rejected  <span class="bad">www.spk.gov.tr:443</span>         gateway an
 </section>
 
 <section>
+  <span class="sec-tag">On yedinci tur</span>
+  <h2>Kapı ön kapıyı tutuyordu; §2 yükleme rampasını açık bırakmış</h2>
+  <p>Kural 6 sistemin en sert kuralı: <strong>müvekkil kimliği makineden
+  çıkmaz.</strong> Sır kapısı bunu WebSearch, WebFetch ve Bash çağrılarında
+  uyguluyor — on altıncı tur davranışla doğruladı. Ama §2, kurulumun
+  <strong>ikinci adımında</strong> şunu yapıyor:</p>
+<pre><span class="dim">cd ~/mafirm &amp;&amp;</span> git init <span class="dim">&amp;&amp; git branch -M main</span>
+printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
+  <p>Kurulum bir <strong>sürüm deposudur</strong> ve <code>git push</code>
+  veriyi makineden <strong>çıkarır</strong> — kuralın yasakladığı şeyin ta
+  kendisi.</p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">Y-02 · Y-03</span>
+      <span class="pill f">Kural 6 · yapısal</span></div>
+    <h3>Korunan iki yol; korunmayan üç yol</h3>
+    <p><em class="term">dosyalar/&lt;is&gt;/</em> — §2'ye göre <strong>canlı
+    işler</strong>: kapsam notu, taslaklar, yazışma. Yalnızca
+    <em class="term">veri/</em> dışlanmıştı, kardeş yolların hepsi
+    izleniyordu. <em class="term">hafiza/muvekkil-adlari.txt</em> — varlık
+    sebebi <strong>gerçek ad</strong> tutmak.
+    <em class="term">hafiza/cikar-catismasi.md</em> — §8'e göre her dosyanın
+    <strong>karşı tarafları</strong>. İkisi de izleniyordu.</p>
+    <p><strong>Sızıntı olmadı — ve bu ölçüldü, varsayılmadı.</strong> Her iki
+    dosyanın işlenmiş her sürümü tek tek açıldı: hepsi yalnızca yorum satırı
+    taşıyor, <em class="term">dosyalar/</em> altında hiçbir dosya hiç
+    işlenmemiş. Maruziyet <strong>müstakbeldi</strong> — denetim her koşumda
+    "kaydı doldur" diyor, ve dolduran kişi gerçek adları izlenen bir ağaca
+    yazacaktı.</p>
+  </div>
+
+  <div class="callout">
+    <strong>Ve bu tek satırlık bir düzeltme değildi.</strong>
+    <code>.gitignore</code>'a bir yol eklemek, o yol <strong>zaten
+    izleniyorsa hiçbir şey yapmaz</strong> — git izlenen bir dosyayı asla
+    yoksaymaz; <code>check-ignore</code> "yoksayılmıyor" der. Bu düzeltmeyi
+    naif yapan biri <strong>korunduğunu sanır ve korunmaz.</strong>
+    <code>git rm --cached</code> şart. Mekanizma görünür kalsın diye izlenen
+    birer <strong>şablon</strong> bırakıldı.
+  </div>
+
+  <div class="callout">
+    <strong>Takımın kendi üç kusuru.</strong> <strong>Y-04 boşa
+    geçiyordu:</strong> "hiç ad işlenmemiş" bir <em>olumsuz iddiadır</em> ve
+    ilk sürüm <strong>sıfır</strong> sürüm inceleyip onu yazdı — kurulum
+    kökündeki depo commit taşımıyordu. Artık ayrım yazılı: <em>deposu hiç
+    commit taşımıyor</em> (olumlu kanıt) ile <em>bakamadım</em> (başarısızlık)
+    aynı şey değil.
+    <br><br>
+    <strong>Y-05'in bir kaçış maddesi vardı:</strong> "denetim kaydı
+    anmıyorsa geç." Anmayı <strong>silmek</strong> vakayı yeşile alıyordu;
+    mutasyon sağ kalarak gösterdi. <strong>Koruduğu şeyi kaldırarak tatmin
+    edilebilen bir kontrol, kontrol değildir.</strong>
+    <br><br>
+    Ve mutasyon bir <strong>gerçek</strong> kusur daha buldu: koruma cümlesi
+    denetimin yalnızca "kayıt boş" dalında yazılıyordu — oysa dosya
+    <strong>doluyken</strong> daha da gerekli, çünkü içinde gerçek adlar var.
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -1427,7 +1488,7 @@ connect_rejected  <span class="bad">www.spk.gov.tr:443</span>         gateway an
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 21 takım · 212 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 22 takım · 217 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
