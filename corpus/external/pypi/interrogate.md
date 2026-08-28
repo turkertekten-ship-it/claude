@@ -1,0 +1,577 @@
+---
+date: 2024-04-07T22:30:44+0000
+source: https://pypi.org/project/interrogate/
+---
+[image: Pink Sloth Logo]
+
+## interrogate: explain yourself
+
+ [image: Documentation Coverage] [image: Testing Coverage] [image: Documentation Status] [image: CI Status]
+
+Interrogate a codebase for docstring coverage.
+
+### Why Do I Need This?
+
+interrogate checks your code base for missing docstrings.
+
+Documentation should be as important as code itself. And it should live within code. Python standardized docstrings, allowing for developers to navigate libraries as simply as calling help() on objects, and with powerful tools like Sphinx, pydoc, and Docutils to automatically generate HTML, LaTeX, PDFs, etc.
+
+Enter: interrogate.
+
+interrogate will tell you which methods, functions, classes, and modules have docstrings, and which do not. Use interrogate to:
+
+- Get an understanding of how well your code is documented;
+- Add it to CI/CD checks to enforce documentation on newly-added code;
+- Assess a new code base for (one aspect of) code quality and maintainability.
+
+Let’s get started.
+
+### Requirements
+
+interrogate supports Python 3.8 and above.
+
+### Installation
+
+interrogate is available on PyPI and GitHub. The recommended installation method is pip-installing into a virtualenv:
+
+```
+$ pip install interrogate
+```
+
+#### Extras
+
+interrogate provides a way to generate a shields.io-like coverage badge as an SVG file.
+To generate a PNG file instead, install interrogate with the extras [png]:
+
+```
+$ pip install interrogate[png]
+```
+
+NOTICE: Additional system libraries/tools may be required in order to generate a PNG file of the coverage badge:
+
+- on Windows, install Visual C++ compiler for Cairo;
+- on macOS, install cairo and libffi (with Homebrew for example);
+- on Linux, install the cairo, python3-dev and libffi-dev packages (names may vary depending on distribution).
+
+Refer to the cairosvg documentation for more information.
+
+### Usage
+
+Try it out on a Python project:
+
+```
+$ interrogate [PATH]
+RESULT: PASSED (minimum: 80.0%, actual: 100.0%)
+```
+
+Add verbosity to see a summary:
+
+```
+$ interrogate -v [PATH]
+
+================== Coverage for /Users/lynn/dev/interrogate/ ====================
+------------------------------------ Summary ------------------------------------
+| Name                                  |   Total |   Miss |   Cover |   Cover% |
+|---------------------------------------|---------|--------|---------|----------|
+| src/interrogate/__init__.py           |       1 |      0 |       1 |     100% |
+| src/interrogate/__main__.py           |       1 |      0 |       1 |     100% |
+| src/interrogate/badge_gen.py          |       6 |      0 |       6 |     100% |
+| src/interrogate/cli.py                |       2 |      0 |       2 |     100% |
+| src/interrogate/config.py             |       8 |      0 |       8 |     100% |
+| src/interrogate/coverage.py           |      27 |      0 |      27 |     100% |
+| src/interrogate/utils.py              |      10 |      0 |      10 |     100% |
+| src/interrogate/visit.py              |      18 |      0 |      18 |     100% |
+| tests/functional/__init__.py          |       1 |      0 |       1 |     100% |
+| tests/functional/test_cli.py          |       8 |      0 |       8 |     100% |
+| tests/functional/test_coverage.py     |      10 |      0 |      10 |     100% |
+| tests/unit/__init__.py                |       1 |      0 |       1 |     100% |
+| tests/unit/test_badge_gen.py          |       8 |      0 |       8 |     100% |
+| tests/unit/test_config.py             |      10 |      0 |      10 |     100% |
+| tests/unit/test_utils.py              |      13 |      0 |      13 |     100% |
+|---------------------------------------|---------|--------|---------|----------|
+| TOTAL                                 |     124 |      0 |     124 |   100.0% |
+---------------- RESULT: PASSED (minimum: 80.0%, actual: 100.0%) ----------------
+```
+
+Add even more verbosity:
+
+```
+$ interrogate -vv [PATH]
+
+================== Coverage for /Users/lynn/dev/interrogate/ ====================
+------------------------------- Detailed Coverage -------------------------------
+| Name                                                                |  Status |
+|---------------------------------------------------------------------|---------|
+| src/interrogate/__init__.py (module)                                | COVERED |
+|---------------------------------------------------------------------|---------|
+| src/interrogate/__main__.py (module)                                | COVERED |
+|---------------------------------------------------------------------|---------|
+| src/interrogate/badge_gen.py (module)                               | COVERED |
+|   save_badge (L42)                                                  | COVERED |
+|   get_badge (L87)                                                   | COVERED |
+|   should_generate_badge (L103)                                      | COVERED |
+|   get_color (L160)                                                  | COVERED |
+|   create (L173)                                                     | COVERED |
+|---------------------------------------------------------------------|---------|
+| src/interrogate/cli.py (module)                                     | COVERED |
+|   main (L258)                                                       | COVERED |
+|---------------------------------------------------------------------|---------|
+| src/interrogate/config.py (module)                                  | COVERED |
+|   InterrogateConfig (L19)                                           | COVERED |
+|   find_project_root (L61)                                           | COVERED |
+|   find_project_config (L89)                                         | COVERED |
+|   parse_pyproject_toml (L100)                                       | COVERED |
+|   sanitize_list_values (L116)                                       | COVERED |
+|   parse_setup_cfg (L139)                                            | COVERED |
+|   read_config_file (L173)                                           | COVERED |
+|---------------------------------------------------------------------|---------|
+| src/interrogate/coverage.py (module)                                | COVERED |
+|   BaseInterrogateResult (L23)                                       | COVERED |
+|     BaseInterrogateResult.perc_covered (L37)                        | COVERED |
+|   InterrogateFileResult (L54)                                       | COVERED |
+|     InterrogateFileResult.combine (L67)                             | COVERED |
+|   InterrogateResults (L81)                                          | COVERED |
+|     InterrogateResults.combine (L93)                                | COVERED |
+|   InterrogateCoverage (L101)                                        | COVERED |
+|     InterrogateCoverage._add_common_exclude (L121)                  | COVERED |
+|     InterrogateCoverage._filter_files (L128)                        | COVERED |
+|     InterrogateCoverage.get_filenames_from_paths (L141)             | COVERED |
+|     InterrogateCoverage._filter_nodes (L168)                        | COVERED |
+|     InterrogateCoverage._filter_inner_nested (L194)                 | COVERED |
+|     InterrogateCoverage._get_file_coverage (L203)                   | COVERED |
+|     InterrogateCoverage._get_coverage (L231)                        | COVERED |
+|     InterrogateCoverage.get_coverage (L248)                         | COVERED |
+|     InterrogateCoverage._get_filename (L253)                        | COVERED |
+|     InterrogateCoverage._get_detailed_row (L264)                    | COVERED |
+|     InterrogateCoverage._create_detailed_table (L281)               | COVERED |
+|       InterrogateCoverage._create_detailed_table._sort_nodes (L288) | COVERED |
+|     InterrogateCoverage._print_detailed_table (L315)                | COVERED |
+|     InterrogateCoverage._create_summary_table (L338)                | COVERED |
+|     InterrogateCoverage._print_summary_table (L381)                 | COVERED |
+|     InterrogateCoverage._sort_results (L399)                        | COVERED |
+|     InterrogateCoverage._get_header_base (L429)                     | COVERED |
+|     InterrogateCoverage._print_omitted_file_count (L438)            | COVERED |
+|     InterrogateCoverage.print_results (L469)                        | COVERED |
+|---------------------------------------------------------------------|---------|
+| src/interrogate/utils.py (module)                                   | COVERED |
+|   parse_regex (L21)                                                 | COVERED |
+|   smart_open (L40)                                                  | COVERED |
+|   get_common_base (L60)                                             | COVERED |
+|   OutputFormatter (L80)                                             | COVERED |
+|     OutputFormatter.should_markup (L90)                             | COVERED |
+|     OutputFormatter.set_detailed_markup (L105)                      | COVERED |
+|     OutputFormatter.set_summary_markup (L129)                       | COVERED |
+|     OutputFormatter._interrogate_line_formatter (L158)              | COVERED |
+|     OutputFormatter.get_table_formatter (L226)                      | COVERED |
+|---------------------------------------------------------------------|---------|
+| src/interrogate/visit.py (module)                                   | COVERED |
+|   CovNode (L15)                                                     | COVERED |
+|   CoverageVisitor (L44)                                             | COVERED |
+|     CoverageVisitor._has_doc (L58)                                  | COVERED |
+|     CoverageVisitor._visit_helper (L65)                             | COVERED |
+|     CoverageVisitor._is_nested_func (L112)                          | COVERED |
+|     CoverageVisitor._is_nested_cls (L121)                           | COVERED |
+|     CoverageVisitor._is_private (L133)                              | COVERED |
+|     CoverageVisitor._is_semiprivate (L141)                          | COVERED |
+|     CoverageVisitor._is_ignored_common (L151)                       | COVERED |
+|     CoverageVisitor._has_property_decorators (L168)                 | COVERED |
+|     CoverageVisitor._has_setters (L182)                             | COVERED |
+|     CoverageVisitor._is_func_ignored (L193)                         | COVERED |
+|     CoverageVisitor._is_class_ignored (L217)                        | COVERED |
+|     CoverageVisitor.visit_Module (L221)                             | COVERED |
+|     CoverageVisitor.visit_ClassDef (L228)                           | COVERED |
+|     CoverageVisitor.visit_FunctionDef (L237)                        | COVERED |
+|     CoverageVisitor.visit_AsyncFunctionDef (L246)                   | COVERED |
+|---------------------------------------------------------------------|---------|
+| tests/functional/__init__.py (module)                               | COVERED |
+|---------------------------------------------------------------------|---------|
+| tests/functional/test_cli.py (module)                               | COVERED |
+|   runner (L22)                                                      | COVERED |
+|   test_run_no_paths (L30)                                           | COVERED |
+|   test_run_shortflags (L77)                                         | COVERED |
+|   test_run_longflags (L106)                                         | COVERED |
+|   test_run_multiple_flags (L124)                                    | COVERED |
+|   test_generate_badge (L135)                                        | COVERED |
+|   test_incompatible_options (L170)                                  | COVERED |
+|---------------------------------------------------------------------|---------|
+| tests/functional/test_coverage.py (module)                          | COVERED |
+|   test_coverage_simple (L60)                                        | COVERED |
+|   test_coverage_errors (L73)                                        | COVERED |
+|   test_print_results (L101)                                         | COVERED |
+|   test_print_results_omit_covered (L130)                            | COVERED |
+|   test_print_results_omit_none (L156)                               | COVERED |
+|   test_print_results_omit_all_summary (L174)                        | COVERED |
+|   test_print_results_omit_all_detailed (L198)                       | COVERED |
+|   test_print_results_ignore_module (L226)                           | COVERED |
+|   test_print_results_single_file (L253)                             | COVERED |
+|---------------------------------------------------------------------|---------|
+| tests/unit/__init__.py (module)                                     | COVERED |
+|---------------------------------------------------------------------|---------|
+| tests/unit/test_badge_gen.py (module)                               | COVERED |
+|   test_save_badge (L26)                                             | COVERED |
+|   test_save_badge_windows (L50)                                     | COVERED |
+|   test_save_badge_no_cairo (L62)                                    | COVERED |
+|   test_get_badge (L73)                                              | COVERED |
+|   test_should_generate (L96)                                        | COVERED |
+|   test_get_color (L115)                                             | COVERED |
+|   test_create (L136)                                                | COVERED |
+|---------------------------------------------------------------------|---------|
+| tests/unit/test_config.py (module)                                  | COVERED |
+|   test_find_project_root (L29)                                      | COVERED |
+|   test_find_project_config (L48)                                    | COVERED |
+|   test_parse_pyproject_toml (L57)                                   | COVERED |
+|   test_sanitize_list_values (L93)                                   | COVERED |
+|   test_parse_setup_cfg (L98)                                        | COVERED |
+|   test_parse_setup_cfg_raises (L123)                                | COVERED |
+|   test_read_config_file_none (L134)                                 | COVERED |
+|   test_read_config_file (L193)                                      | COVERED |
+|   test_read_config_file_raises (L207)                               | COVERED |
+|---------------------------------------------------------------------|---------|
+| tests/unit/test_utils.py (module)                                   | COVERED |
+|   test_parse_regex (L32)                                            | COVERED |
+|   test_smart_open (L39)                                             | COVERED |
+|   test_get_common_base (L69)                                        | COVERED |
+|   test_get_common_base_windows (L100)                               | COVERED |
+|   test_output_formatter_should_markup (L132)                        | COVERED |
+|   test_output_formatter_set_detailed_markup (L163)                  | COVERED |
+|   test_output_formatter_set_summary_markup (L206)                   | COVERED |
+|   test_output_formatter_interrogate_line_formatter (L258)           | COVERED |
+|   test_output_formatter_interrogate_line_formatter_windows (L319)   | COVERED |
+|   test_output_formatter_get_table_formatter (L343)                  | COVERED |
+|   test_output_formatter_get_table_formatter_py38 (L381)             | COVERED |
+|   test_output_formatter_get_table_formatter_raises (L395)           | COVERED |
+|---------------------------------------------------------------------|---------|
+
+------------------------------------ Summary ------------------------------------
+| Name                                  |   Total |   Miss |   Cover |   Cover% |
+|---------------------------------------|---------|--------|---------|----------|
+| src/interrogate/__init__.py           |       1 |      0 |       1 |     100% |
+| src/interrogate/__main__.py           |       1 |      0 |       1 |     100% |
+| src/interrogate/badge_gen.py          |       6 |      0 |       6 |     100% |
+| src/interrogate/cli.py                |       2 |      0 |       2 |     100% |
+| src/interrogate/config.py             |       8 |      0 |       8 |     100% |
+| src/interrogate/coverage.py           |      27 |      0 |      27 |     100% |
+| src/interrogate/utils.py              |      10 |      0 |      10 |     100% |
+| src/interrogate/visit.py              |      18 |      0 |      18 |     100% |
+| tests/functional/__init__.py          |       1 |      0 |       1 |     100% |
+| tests/functional/test_cli.py          |       8 |      0 |       8 |     100% |
+| tests/functional/test_coverage.py     |      10 |      0 |      10 |     100% |
+| tests/unit/__init__.py                |       1 |      0 |       1 |     100% |
+| tests/unit/test_badge_gen.py          |       8 |      0 |       8 |     100% |
+| tests/unit/test_config.py             |      10 |      0 |      10 |     100% |
+| tests/unit/test_utils.py              |      13 |      0 |      13 |     100% |
+|---------------------------------------|---------|--------|---------|----------|
+| TOTAL                                 |     124 |      0 |     124 |   100.0% |
+---------------- RESULT: PASSED (minimum: 80.0%, actual: 100.0%) ----------------
+```
+
+### Other Usage
+
+Generate a shields.io badge (like this one! [image: interrogate-badge] ):
+
+```
+$ interrogate --generate-badge PATH
+RESULT: PASSED (minimum: 80.0%, actual: 100.0%)
+Generated badge to /Users/lynn/dev/interrogate/docs/_static/interrogate_badge.svg
+```
+
+See below for more badge configuration.
+
+Add it to your tox.ini file to enforce a level of coverage:
+
+```
+[testenv:doc]
+deps = interrogate
+skip_install = true
+commands =
+    interrogate --quiet --fail-under 95 src tests
+```
+
+Or use it with pre-commit:
+
+```
+repos:
+  - repo: https://github.com/econchick/interrogate
+    rev: 1.7.0  # or master if you're bold
+    hooks:
+      - id: interrogate
+        args: [--quiet, --fail-under=95]
+        pass_filenames: false  # needed if excluding files with pyproject.toml or setup.cfg
+```
+
+Use it within your code directly:
+
+```
+>>> from interrogate import coverage
+>>> cov = coverage.InterrogateCoverage(paths=["src"])
+>>> results = cov.get_coverage()
+>>> results
+InterrogateResults(total=68, covered=65, missing=3)
+```
+
+Use interrogate with GitHub Actions. Check out the action written & maintained by Jack McKew (thank you, Jack!).
+
+Or use interrogate in VSCode with the interrogate extension written & maintained by Kenneth Love (thank you, Kenneth!).
+
+### Configuration
+
+Configure within your pyproject.toml (interrogate will automatically detect a pyproject.toml file and pick up default values for the command line options):
+
+```
+$ interrogate -c pyproject.toml [OPTIONS] [PATHS]...
+```
+
+```
+[tool.interrogate]
+ignore-init-method = true
+ignore-init-module = false
+ignore-magic = false
+ignore-semiprivate = false
+ignore-private = false
+ignore-property-decorators = false
+ignore-module = false
+ignore-nested-functions = false
+ignore-nested-classes = true
+ignore-setters = false
+ignore-overloaded-functions = false
+fail-under = 95
+exclude = ["setup.py", "docs", "build"]
+ignore-regex = ["^get$", "^mock_.*", ".*BaseClass.*"]
+ext = []
+# possible values: sphinx (default), google
+style = sphinx
+# possible values: 0 (minimal output), 1 (-v), 2 (-vv)
+verbose = 0
+quiet = false
+whitelist-regex = []
+color = true
+omit-covered-files = false
+generate-badge = "."
+badge-format = "svg"
+```
+
+Or configure within your setup.cfg (interrogate will automatically detect a setup.cfg file and pick up default values for the command line options):
+
+```
+$ interrogate -c setup.cfg [OPTIONS] [PATHS]...
+```
+
+```
+[tool:interrogate]
+ignore-init-method = true
+ignore-init-module = false
+ignore-magic = false
+ignore-semiprivate = false
+ignore-private = false
+ignore-property-decorators = false
+ignore-module = false
+ignore-nested-functions = false
+ignore-nested-classes = true
+ignore-setters = false
+ignore-overloaded-functions = false
+fail-under = 95
+exclude = setup.py,docs,build
+ignore-regex = ^get$,^mock_.*,.*BaseClass.*
+ext = []
+; possible values: sphinx (default), google
+style = sphinx
+; possible values: 0 (minimal output), 1 (-v), 2 (-vv)
+verbose = 0
+quiet = false
+whitelist-regex =
+color = true
+omit-covered-files = false
+generate-badge = .
+badge-format = svg
+```
+
+### Badge Options
+
+#### Badge Format
+
+The default file format is svg. Use the --badge-format flag to create a png file instead.
+Note: interrogate must be installed with interrogate[png] in order to generate png files (see above).
+
+```
+$ interrogate --generate-badge PATH --badge-format png
+RESULT: PASSED (minimum: 80.0%, actual: 100.0%)
+Generated badge to /Users/lynn/dev/interrogate/docs/_static/interrogate_badge.png
+```
+
+#### Badge Style
+
+The following badge styles are available via the --badge-style flag:
+
+| option | example |
+| flat | [image: flat-example] |
+| flat-square | [image: flat-square-example] |
+| flat-square-modified (default) | [image: interrogate-badge] |
+| for-the-badge | [image: for-the-badge-example] |
+| plastic | [image: plastic-example] |
+| social | [image: social-example] |
+
+### Command Line Options
+
+To view all options available, run interrogate --help:
+
+```
+interrogate -h
+Usage: interrogate [OPTIONS] [PATHS]...
+
+  Measure and report on documentation coverage in Python modules.
+
+Options:
+  --version                       Show the version and exit.
+  -v, --verbose                   Level of verbosity.
+
+                                  NOTE: When configuring verbosity in
+                                  pyproject.toml or setup.cfg, `verbose=1`
+                                  maps to `-v`, and `verbose=2` maps to `-vv`.
+                                  `verbose=0` is the equivalent of no verbose
+                                  flags used, producing minimal output.
+  -q, --quiet                     Do not print output  [default: False]
+  -f, --fail-under INT | FLOAT    Fail when coverage % is less than a given
+                                  amount.  [default: 80.0]
+
+  -e, --exclude PATH              Exclude PATHs of files and/or directories.
+                                  Multiple `-e/--exclude` invocations
+                                  supported.
+
+  -i, --ignore-init-method        Ignore `__init__` method of classes.
+                                  [default: False]
+
+  -I, --ignore-init-module        Ignore `__init__.py` modules.  [default:
+                                  False]
+
+  -m, --ignore-magic              Ignore all magic methods of classes.
+                                  [default: False]
+
+                                  NOTE: This does not include the `__init__`
+                                  method. To ignore `__init__` methods, use
+                                  `--ignore-init-method`.
+
+  -M, --ignore-module             Ignore module-level docstrings.  [default:
+                                  False]
+
+  -n, --ignore-nested-functions   Ignore nested functions and methods.
+                                  [default: False]
+
+  -C, --ignore-nested-classes     Ignore nested classes.  [default: False]
+
+  -O, --ignore-overloaded-functions
+                                  Ignore `@typing.overload`-decorated functions.
+                                  [default: False]
+
+  -p, --ignore-private            Ignore private classes, methods, and
+                                  functions starting with two underscores.
+                                  [default: False]
+
+                                  NOTE: This does not include magic methods;
+                                  use `--ignore-magic` and/or `--ignore-init-
+                                  method` instead.
+
+  -P, --ignore-property-decorators
+                                  Ignore methods with property setter/getter/deleter
+                                  decorators.  [default: False]
+
+  -S, --ignore-setters            Ignore methods with property setter
+                                  decorators.  [default: False]
+
+  -s, --ignore-semiprivate        Ignore semiprivate classes, methods, and
+                                  functions starting with a single underscore.
+                                  [default: False]
+
+  -r, --ignore-regex STR          Regex identifying class, method, and
+                                  function names to ignore. Multiple
+                                  `-r/--ignore-regex` invocations supported.
+
+  --ext                           Include Python-like files with the given
+                                  extension (supported: ``pyi``). Multiple
+                                  `--ext` invocations supported.
+
+  -w, --whitelist-regex STR       Regex identifying class, method, and
+                                  function names to include. Multiple
+                                  `-w/--whitelist-regex` invocations
+                                  supported.
+
+  --style [sphinx|google]         Style of docstrings to honor. Using `google`
+                                  will consider a class and its `__init__`
+                                  method both covered if there is either a
+                                  class-level docstring, or an `__init__`
+                                  method docstring, instead of enforcing both.
+                                  Mutually exclusive with `-i`/`--ignore-init`
+                                  flag.  [default: sphinx]
+
+  -o, --output FILE               Write output to a given FILE.  [default:
+                                  stdout]
+
+  --color / --no-color            Toggle color output on/off when printing to
+                                  stdout.  [default: True]
+
+  --omit-covered-files            Omit reporting files that have 100%
+                                  documentation coverage. This option is
+                                  ignored if verbosity is not set.  [default:
+                                  False]
+
+  -g, --generate-badge PATH       Generate a 'shields.io' status badge (an SVG
+                                  image) in at a given file or directory. Will
+                                  not generate a badge if results did not
+                                  change from an existing badge of the same
+                                  path.
+
+  --badge-format [svg|png]        File format for the generated badge. Used
+                                  with the `-g/--generate-badge` flag.
+                                  [default: svg]
+
+                                  NOTE: To generate a PNG file, interrogate
+                                  must be installed with `interrogate[png]`,
+                                  i.e. `pip install interrogate[png]`.
+
+  --badge-style [flat|flat-square|flat-square-modified|for-the-badge|plastic|social]
+                                  Desired style of shields.io badge. Used with
+                                  the `-g/--generate-badge` flag. [default:
+                                  flat-square-modified]
+
+  -h, --help                      Show this message and exit.
+  -c, --config FILE               Read configuration from `pyproject.toml` or
+                                  `setup.cfg`.
+```
+
+### Users of Interrogate
+
+- attrs
+- OpenMMLab’s ecosystem
+- pyjanitor
+- klio
+
+#### Interrogate in the Wild
+
+- Why You Should Document Your Tests by Hynek Schlawack
+- Episode #181: It’s time to interrogate your Python code - PythonBytes podcast
+
+### Credits
+
+interrogate was inspired by docstr-coverage, which was forked from Alexey “DataGreed” Strelkov’s docstring-coverage, which was inspired by a 2004 recipe from James Harlow (turtles…).
+
+The cute [image: sloth] logo is by JustineW purchased via the Noun Project (but also available under the Creative Commons License with attribution).
+
+### Release Information
+
+1.7.0 (2024-04-07)
+
+#### Added
+
+- tomli dependency for Python versions < 3.11, making use of tomllib in the standard library with 3.11+ (#150).
+- Support for pyi file extensions (and leave room for other file extensions to be added, like maybe ipynb).
+- Support for Google-style docstrings for class __init__ methods with new --style [sphinx|google] flag (#128).
+
+#### Fixed
+
+- Include support for deleters when ignoring property decorators (#126 <https://github.com/econchick/interrogate/issues/126>_).
+- Support floats for –fail-under values (#114).
+
+#### Removed
+
+- toml dependency for all Python versions (#150).
+
+Full changelog.

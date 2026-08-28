@@ -1,0 +1,80 @@
+---
+date: 2024-11-16T20:02:33+0000
+source: https://pypi.org/project/waitress/
+---
+[image: latest version of waitress on PyPI] [image: https://github.com/Pylons/waitress/actions/workflows/ci-tests.yml/badge.svg] [image: main Documentation Status]
+
+Waitress is a production-quality pure-Python WSGI server with very acceptable
+performance. It has no dependencies except ones which live in the Python
+standard library. It runs on CPython on Unix and Windows under Python 3.9+. It
+is also known to run on PyPy 3 (version 3.9 compatible python and above) on
+UNIX. It supports HTTP/1.0 and HTTP/1.1.
+
+For more information, see the “docs” directory of the Waitress package or visit
+https://docs.pylonsproject.org/projects/waitress/en/latest/
+
+## 3.0.2 (2024-11-16)
+
+Security
+
+- When using Waitress to process trusted proxy headers, Waitress will now
+update the headers to drop any untrusted values, thereby making sure that
+WSGI apps only get trusted and validated values that Waitress itself used to
+update the environ. See https://github.com/Pylons/waitress/pull/452 and
+https://github.com/Pylons/waitress/issues/451
+
+## 3.0.1 (2024-10-28)
+
+### Backward Incompatibilities
+
+- Python 3.8 is no longer supported.
+See https://github.com/Pylons/waitress/pull/445.
+
+### Features
+
+- Added support for Python 3.13.
+See https://github.com/Pylons/waitress/pull/445.
+
+### Security
+
+- Fix a bug that would lead to Waitress busy looping on select() on a half-open
+socket due to a race condition that existed when creating a new HTTPChannel.
+See https://github.com/Pylons/waitress/pull/435,
+https://github.com/Pylons/waitress/issues/418 and
+https://github.com/Pylons/waitress/security/advisories/GHSA-3f84-rpwh-47g6
+
+With thanks to Dylan Jay and Dieter Maurer for their extensive debugging and
+helping track this down.
+- No longer strip the header values before passing them to the WSGI environ.
+See https://github.com/Pylons/waitress/pull/434 and
+https://github.com/Pylons/waitress/issues/432
+- Fix a race condition in Waitress when channel_request_lookahead is enabled
+that could lead to HTTP request smuggling.
+
+See https://github.com/Pylons/waitress/security/advisories/GHSA-9298-4cf8-g4wj
+
+## 3.0.0 (2024-02-04)
+
+- Rename “master” git branch to “main”
+- Fix a bug that would appear on macOS whereby if we accept() a socket that is
+already gone, setting socket options would fail and take down the server. See
+https://github.com/Pylons/waitress/pull/399
+- Fixed testing of vendored asyncore code to not rely on particular naming for
+errno’s. See https://github.com/Pylons/waitress/pull/397
+- HTTP Request methods and versions are now validated to meet the HTTP
+standards thereby dropping invalid requests on the floor. See
+https://github.com/Pylons/waitress/pull/423
+- No longer close the connection when sending a HEAD request response. See
+https://github.com/Pylons/waitress/pull/428
+- Always attempt to send the Connection: close response header when we are
+going to close the connection to let the remote know in more instances.
+https://github.com/Pylons/waitress/pull/429
+- Python 3.7 is no longer supported. Add support for Python 3.11, 3.12 and
+PyPy 3.9, 3.10. See https://github.com/Pylons/waitress/pull/412
+- Document that trusted_proxy may be set to a wildcard value to trust all
+proxies. See https://github.com/Pylons/waitress/pull/431
+
+### Updated Defaults
+
+- clear_untrusted_proxy_headers is set to True by default. See
+https://github.com/Pylons/waitress/pull/370

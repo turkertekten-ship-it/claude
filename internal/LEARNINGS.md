@@ -3424,3 +3424,100 @@ looks disappointing there, the fusion - not the model - is the thing to examine.
    stale the first time anybody sweeps `rrf_k`.
 4. **Read the cost column before the quality column.** 6144 buckets is 4.6x the
    latency and 3.9x the index for one case fewer.
+
+---
+
+## L66 - Widening the corpus took seven cases off the gate, and none of them back
+
+PLAN item 3 has said "widen the corpus again" since L29, on the grounds that
+every previous widening overturned something. This one widened the external
+corpus from **153 to 266 PyPI pages** - 128 packages requested, 113 added, one
+already held, 14 skipped and reported (five behind an anti-bot interstitial,
+nine with under 40 words once the site template comes off).
+
+**With no retrieval code changed at all:**
+
+| | 153 documents | 266 documents |
+|---|---|---|
+| pass | **48/54** | **41/54** |
+| recall@8 | 0.9070 | 0.8140 |
+| MRR | 0.7089 | 0.6641 |
+| nDCG@8 | 0.7460 | 0.6872 |
+
+The previous corpus was flattering the retriever by 13% of the cases. That is
+the third time widening has said so, and the reason to do it a fourth time.
+
+**Decomposed before diagnosed**, because "seven cases" is not one thing:
+
+* **Three are retrieval misses** - `pluggy`, `blinker` and `bcrypt` no longer
+  reach the window, displaced by pages that merely share vocabulary (`docker`,
+  `psycopg2-binary`, `keyring`).
+* **Four are the abstention gate** letting an unanswerable question through. A
+  bigger corpus does not only add answers, it adds *higher-scoring junk*, and
+  the floor that refused it at 153 documents does not at 266.
+
+**And checked for the artefact first.** Quarantine grew from 22 documents to 31,
+and quarantine excludes documents from their own question - if it had started
+holding out an expected document, the case could not pass whatever retrieval
+did. It has not: every held-out document belongs to a negative case, which is
+the design. The seven failures are real.
+
+**The floor does not scale, and raising it does not help.** Re-swept over the
+widened corpus, the combined pass count across both corpora is flat within noise
+over a 2.7x range of thresholds:
+
+| floor | 0.15 | 0.20 | 0.25 | 0.30 | 0.35 | 0.40 |
+|---|---|---|---|---|---|---|
+| external | 42/54 | 41/54 | 43/54 | 43/54 | 44/54 | 42/54 |
+| wrongly answered | 6 | 6 | 4 | 3 | 1 | 0 |
+| wrongly refused | 0 | 2 | 2 | 5 | 6 | 10 |
+| both corpora | 60/74 | 59/74 | 61/74 | 60/74 | 61/74 | 59/74 |
+
+Every threshold buys a refusal by selling an answer, one for one, which is what
+a threshold looks like when the two populations it separates have moved together.
+Left at 0.19. The gate's problem is not where its line is drawn.
+
+**The ablation moved again too.** Re-run whole (`scripts/ablation.py`, 266
+documents, 3,166 chunks): hybrid 41/54, lexical only 40/54, dense only 37/54, no
+rerank 32/54, no MMR 41/54. Two conclusions change with the corpus:
+
+1. **Hybrid beats both arms on pass rate for the first time.** At 153 it was
+   level with the lexical arm; the second arm now pays for itself.
+2. **MMR has measured three different values on three corpus sizes** - neutral
+   at 91, worth a case at 153, neutral-and-slightly-negative at 266. Left on. A
+   component that oscillates around zero as the corpus grows has not been
+   resolved by this golden set, and the third reading is not more authoritative
+   than the two before it.
+
+**The CI floor was rebased 0.86 -> 0.74**, and that deserves stating plainly
+because it looks like moving the goalposts. A pass-rate floor is a ratchet
+against *regression*: it encodes "we were here, do not go back". It is
+calibrated against a corpus, and replacing the corpus retires it - the same
+retriever now reads 41/54 where it read 48/54, and neither number is a
+regression. So the floor is re-derived on the new corpus with the tightness it
+always had: 41/54 = 0.759 passes, 40/54 = 0.741 passes, 39/54 = 0.722 fails, so
+one regression is tolerated and two are not. The alternative - keeping 0.86 -
+would fail CI on every commit until someone tuned retrieval to a number that no
+longer exists.
+
+`make eval-external` was carrying `--min-pass-rate 0.95`, which nothing has met
+since the 33-document corpus. A target nobody runs is a claim nobody checks; it
+now matches CI.
+
+**Rules.**
+1. **A ratchet is calibrated against a corpus. Changing the corpus retires the
+   ratchet** - re-derive it, and say so in the same breath. Keeping it is
+   theatre and quietly deleting it is worse.
+2. **Widen the corpus to find out how good your retriever is not.** Three
+   widenings, three overturned conclusions, and every one of them made the
+   instrument harder to fool.
+3. **Decompose a drop before diagnosing it.** Four of these seven cases are an
+   abstention threshold and three are retrieval; a fix aimed at either would
+   have been measured against the other and looked like it failed.
+4. **Check that the harness cannot have caused the failure before believing
+   it.** Quarantine holds documents out per question and grew by nine here; had
+   it caught an expected document, the case would have been unpassable and the
+   cause invisible in the report.
+5. **A threshold separating two populations that grow together does not scale
+   with the corpus.** The floor sweep trades one-for-one across a 2.7x range,
+   which says the answer is not a better threshold.

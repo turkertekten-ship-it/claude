@@ -1,0 +1,46 @@
+---
+date: 2026-08-07T02:12:28+0000
+source: https://pypi.org/project/tornado/
+---
+[image: Join the chat at https://gitter.im/tornadoweb/tornado]
+
+Tornado is a Python web framework and
+asynchronous networking library, originally developed at FriendFeed. By using non-blocking network I/O, Tornado
+can scale to tens of thousands of open connections, making it ideal for
+long polling,
+WebSockets, and other
+applications that require a long-lived connection to each user.
+
+## Hello, world
+
+Here is a simple “Hello, world” example web app for Tornado:
+
+```
+import asyncio
+import tornado
+
+class MainHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.write("Hello, world")
+
+def make_app():
+    return tornado.web.Application([
+        (r"/", MainHandler),
+    ])
+
+async def main():
+    app = make_app()
+    app.listen(8888)
+    await asyncio.Event().wait()
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+This example does not use any of Tornado’s asynchronous features; for
+that see this simple chat room.
+
+## Documentation
+
+Documentation and links to additional resources are available at
+https://www.tornadoweb.org

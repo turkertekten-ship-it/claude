@@ -15,10 +15,10 @@
 | Generation | done | Citation contract verified against retrieved chunks; extractive default, Claude optional |
 | Eval | done | recall/precision/MRR/nDCG, citation coverage, abstention, contamination detection and quarantine |
 | OODA loop | done | Five journalled phases, auditable policy rules, action budget |
-| External eval corpus | done | 153 PyPI pages with provenance, release dates and a manifest, rebuildable by `scripts/build_external_corpus.py`; 5 of 54 questions contaminated, 22 documents held out as 28 holdouts |
+| External eval corpus | done | 266 PyPI pages with provenance, release dates and a manifest, rebuildable by `scripts/build_external_corpus.py`; 5 of 54 questions contaminated, 31 documents held out as 36 holdouts |
 | Incremental deletion | done | Removals propagate to the delta, prune guarded at 25% of a source, refused entirely for a failed connector |
 | CLI | done | `preflight, index, query, eval, loop, status, journal, demo` |
-| CI | done | Three jobs: stdlib matrix, numpy path, retrieval regression gate; floors ratcheted to 0.85 primary / 0.86 external |
+| CI | done | Three jobs: stdlib matrix, numpy path, retrieval regression gate; floors 0.85 primary, 0.74 external (rebased for a corpus 74% larger, L66) |
 | Non-negotiables | verified | All five attacked directly, not just asserted: zero-dependency walked module by module, provenance and redaction attacked with crafted inputs, degradation measured through partial and silent-empty source failures (L37-L39) |
 
 **Current measurements** (offline embedder, deterministic).
@@ -29,16 +29,16 @@ which only runs pushed commits, always sees the larger number. Retrieval metrics
 cases have nothing to retrieve, and averaging their zeros in made adding a
 negative case look like a retrieval regression.
 
-| | primary (this repo) | external (153 PyPI pages) |
+| | primary (this repo) | external (266 PyPI pages) |
 |---|---|---|
-| golden cases | **18/20** | **48/54** |
-| recall@8 | 0.7812 | 0.9070 |
-| precision@8 | 0.2031 | 0.2471 |
-| hit@8 | 0.8750 | 0.9302 |
-| MRR | 0.5729 | 0.7089 |
-| nDCG@8 | 0.6063 | 0.7460 |
+| golden cases | **18/20** | **41/54** |
+| recall@8 | 0.7812 | 0.8140 |
+| precision@8 | 0.2031 | 0.2006 |
+| hit@8 | 0.8750 | 0.8605 |
+| MRR | 0.5729 | 0.6641 |
+| nDCG@8 | 0.6063 | 0.6872 |
 | citation coverage | 1.00 | 1.00 |
-| contamination | 4/20 questions, 10 documents (20 holdouts) | 5/54 questions, 22 documents (28 holdouts) |
+| contamination | 4/20 questions, 10 documents (20 holdouts) | 5/54 questions, 31 documents (36 holdouts) |
 | role | smoke test | **regression gate** |
 
 Both columns are freshly indexed; the primary one is the CI configuration,
@@ -72,39 +72,27 @@ answer. Nothing about the retriever changed across those three rows. A gate
 whose value depends on what the last session wrote in markdown cannot detect a
 regression in retrieval, which is what the external column is for.
 
-What each retrieval arm is worth, on the external set (`scripts/ablation.py`):
+What each retrieval arm is worth, on the external set (`scripts/ablation.py`,
+266 documents, 3,166 chunks - the whole table re-run, never a column):
 
 | configuration | pass | recall@8 | prec@8 | MRR | nDCG@8 |
 |---|---|---|---|---|---|
-| hybrid | 47/54 | 0.8721 | 0.2238 | 0.7304 | 0.7487 |
-| lexical only | 47/54 | 0.8605 | 0.2151 | 0.7157 | 0.7313 |
-| dense only | 44/54 | 0.8140 | 0.2122 | 0.6957 | 0.7163 |
-| no rerank | 38/54 | 0.7209 | 0.1076 | 0.6298 | 0.6390 |
-| no mmr | 46/54 | 0.8488 | 0.2384 | 0.7295 | 0.7430 |
+| hybrid | 41/54 | 0.8140 | 0.2006 | 0.6641 | 0.6872 |
+| lexical only | 40/54 | 0.7907 | 0.1948 | 0.6484 | 0.6688 |
+| dense only | 37/54 | 0.6744 | 0.1715 | 0.5853 | 0.5955 |
+| no rerank | 32/54 | 0.6047 | 0.0901 | 0.5022 | 0.5204 |
+| no mmr | 41/54 | **0.8256** | **0.2122** | 0.6615 | **0.6901** |
 
-Reranking is the most load-bearing component by a distance, and hybrid beats
-either arm alone on every metric. That answers the question ADR 0004 had
-deferred: at 33 documents dense-only matched hybrid, and the deferral rather
-than the removal of an arm was the right call (L29).
+Reranking is the most load-bearing component by a distance - nine cases - and
+hybrid now beats *both* arms alone rather than tying with the lexical one, which
+is the first corpus on which the second arm pays for itself on pass rate.
 
-On pass rate the two arms are level at 153 documents, while dense alone is
-three cases behind; MMR, neutral at 91 documents, is now worth a case.
-The pass column is sensitive to the abstention gate and the metric columns are
-not, so a change to the floor moves one and leaves the other untouched.
-
-The contamination row above was wrong in the same way, for a different reason:
-it read "26 documents held out" from a report line that summed *per-question*
-holdouts and called them documents. A document contaminating two questions is
-held out twice and is one document. Both corpora hold out 14 distinct
-documents; the harness now prints both numbers with their units.
-
-**The ablation table was previously wrong in its pass column only** - every metric
-matched to four decimal places while every count was four cases stale, because
-later work moved the abstention floor and added surface answerability, neither
-of which touches a retrieval metric. A partly refreshed table is worse than a
-stale one: the accurate columns vouch for the inaccurate one. Re-run it with
-`PYTHONPATH=src python3 scripts/ablation.py --corpus external` and replace the
-whole table, never a column.
+**MMR has now measured three different values on three corpus sizes**: neutral
+at 91 documents, worth a case at 153, and at 266 it is neutral on pass and
+slightly *negative* on every metric. Left on. A component whose measured worth
+oscillates around zero as the corpus grows is a component this golden set cannot
+resolve, and switching it off on the third reading would be acting on the noise
+that the first two readings already demonstrated.
 
 Nothing here is saturated any more. recall@8 was 0.9821 with a median of 1.0 on
 the 33-document corpus; it now reads 0.9186 with a minimum of 0.0.
@@ -178,14 +166,18 @@ its current failures are that artefact. See docs/EVALUATION.md.
    these words". Separating them is a judgement about meaning, which is item 1,
    and item 1 is blocked on a key.
 
-3. **Widen the corpus again.** 33 to 91 documents overturned three recorded
-   conclusions and de-saturated every metric (L29); 91 to 153 settled two more
-   and levelled the retrieval arms on pass rate. There is no reason to think
-   153 is where that stops. `scripts/build_external_corpus.py --list` does it,
-   and `ooda preflight` has `web_pypi` **ok** while wikipedia, youtube, ibm.com
-   and arxiv are refused CONNECT, so PyPI remains the reachable source. Two
-   pages of 63 were refused by an anti-bot interstitial, which is a per-run
-   cost rather than a blocker.
+3. **Widen the corpus again.** Done twice more and it keeps paying: 33 to 91
+   overturned three recorded conclusions (L29), 91 to 153 settled two more, and
+   153 to 266 cost the same retriever **seven cases** - 48/54 to 41/54, recall
+   0.9070 to 0.8140 - without a line of retrieval code changing (L66). Each
+   widening has revealed that the previous corpus was flattering the retriever,
+   which is the argument for doing it again rather than against. Of 128 packages
+   requested this time, 113 were added, one was already held, and 14 were
+   skipped with their reasons reported: five behind an anti-bot interstitial
+   (a per-run cost rather than a blocker) and nine whose pages carry under 40
+   words once the site template is removed. `ooda preflight` still has `web_pypi`
+   **ok** while wikipedia, youtube, ibm.com and arxiv are refused CONNECT, so
+   PyPI remains the only reachable source.
 
 4. **Multi-hop retrieval**, once single-shot recall is well characterised.
    Adding a loop over a retriever with unknown recall multiplies every failure.

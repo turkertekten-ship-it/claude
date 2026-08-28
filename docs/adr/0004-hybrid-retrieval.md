@@ -18,33 +18,34 @@ MMR.
 ## Measured
 
 The argument above is an argument. These are the numbers, from
-`scripts/ablation.py` on the external corpus (153 documents, 1,810 chunks,
+`scripts/ablation.py` on the external corpus (266 documents, 3,166 chunks,
 54 golden cases), each configuration differing in one thing:
 
 | configuration | pass | recall@8 | prec@8 | MRR | nDCG@8 |
 |---|---|---|---|---|---|
-| hybrid | **47/54** | **0.872** | 0.224 | **0.730** | **0.749** |
-| lexical only | **47/54** | 0.861 | 0.215 | 0.716 | 0.731 |
-| dense only | 44/54 | 0.814 | 0.212 | 0.696 | 0.716 |
-| no rerank | 38/54 | 0.721 | 0.108 | 0.630 | 0.639 |
-| no MMR | 46/54 | 0.849 | **0.238** | 0.730 | 0.743 |
+| hybrid | **41/54** | **0.8140** | 0.2006 | **0.6641** | 0.6872 |
+| lexical only | 40/54 | 0.7907 | 0.1948 | 0.6484 | 0.6688 |
+| dense only | 37/54 | 0.6744 | 0.1715 | 0.5853 | 0.5955 |
+| no rerank | 32/54 | 0.6047 | 0.0901 | 0.5022 | 0.5204 |
+| no MMR | 41/54 | 0.8256 | **0.2122** | 0.6615 | **0.6901** |
 
-Hybrid beats either arm alone on pass rate, recall, MRR and nDCG, which is the
-claim. The arms are complementary in the way predicted: **dense alone loses 0.10
-of recall, lexical alone 0.03**. Reranking is the single most load-bearing
-component (+9 cases, +0.15 recall, +0.12 precision). **MMR is no longer
-neutral**: at 91 documents it cost 0.014 of precision and bought 0.003 of nDCG,
-and at 153 it is worth a case and 0.023 of recall for 0.015 of precision. That
-conclusion was overturned by widening, which is the third time this table has
-moved under it.
+Hybrid beats *both* arms alone on pass rate for the first time - at 153
+documents it was level with the lexical arm - and the arms are complementary in
+the way predicted: **dense alone loses 0.14 of recall, lexical alone 0.02**.
+Reranking is the single most load-bearing component (+9 cases, +0.21 recall,
++0.11 precision).
 
-On pass rate the two arms are now level, with dense alone three cases behind on
-a corpus where every metric has room to move. The pass column reads the
-abstention gate and the metric columns do not, so the two need not move
-together.
+**MMR has now measured three values on three corpus sizes**: neutral at 91
+documents, worth a case at 153, and at 266 neutral on pass rate and slightly
+negative on every metric. It stays on, because a component whose measured worth
+oscillates around zero as the corpus grows has not been resolved by this golden
+set, and the third reading is no more authoritative than the two before it.
 
-**This table has now been wrong three times, and how it was wrong is the useful
-part.**
+The same run on the primary corpus (84 documents, 864 chunks) says the same
+thing about MMR - 18/20 either way - and rates reranking at two cases.
+
+**This table has now been overturned four times, and how it was wrong is the
+useful part.**
 
 At 33 documents and 2,615 chunks, 90.9% of them PyPI download boilerplate,
 hybrid led dense-only by 0.11 of recall - but that lead was largely the lexical
