@@ -397,6 +397,34 @@ that mechanical: it enumerates every target, and asserts its own list is the
 same length as the installer's `TARGETS` array. Adding a target without adding
 a case now fails the suite — verified by adding one and watching it fail.
 
+## Twelfth loop — the lists that only agreed because someone was looking
+
+Loop eleven's fix was a test that asserts its own list matches the installer's.
+Observe generalised that: where else must a list match another list, with
+nothing checking?
+
+Five pairs, all correct at the time of looking, none guarded — every test file
+against `run_all.sh`, every tool against the README and the layout, every
+profile against the two documents naming them, every rule the checker can emit
+against the templates that record it, every rule against both framework
+mappings. Correct by attention, three loops running.
+
+`tools/check_consistency.py` holds all five, and runs in the suite.
+
+> The surprise came twice, from the guard catching itself. Its first run failed
+> on `check_consistency.py` not being in the README — a tool I had written
+> ninety seconds earlier. Its second failure was `test_check_consistency.py`
+> not being in `run_all.sh`: the test written *for* the guard, caught by the
+> guard, for exactly the defect the guard exists to prevent. A test nobody runs
+> reports nothing and looks like coverage.
+
+One of the five was worthless as first written. "Every profile is named in the
+documentation" was a substring search, and `task`, `chat` and `contract` occur
+in any prose about prompts — an invariant that could not fail, which is the
+defect `UNVERIFIABLE_ACCEPTANCE` exists to catch, committed inside the tool that
+enforces it. It now requires the name as code or as an alternative in a usage
+line, and the test proves bare prose no longer satisfies it.
+
 ## Still open
 
 `U-6`, `U-7` and `U-8` in [unknowns.md](unknowns.md): what Saraev actually

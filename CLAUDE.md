@@ -111,6 +111,7 @@ tools/
   prompt_habits.py            scores the prompts already written
   learn_rule.py               appends a learned rule to this file
   check_output.py             checks an answer against its prompt's constraints
+  check_consistency.py        checks the repository's lists against each other
   ingest_chat_archive.py      chat-archive ingestion and search
   install_prompt_system.sh    installs the prompt system into ~/.claude
 tests/                        tests for the above
