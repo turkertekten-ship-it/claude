@@ -139,6 +139,23 @@ library only. `make help` lists these too.
 The `ooda reflect` CLI has more than the Makefile exposes — `accept`, `dismiss`,
 `revert <cycle-id>`, `report --list`. Run `ooda reflect --help`.
 
+**Fetching a corpus**
+
+`ooda ingest` runs one connector and writes what it returns as JSON Lines. It is
+the half of the pipeline that exists: fetching and normalizing documents, with
+indexing and retrieval still to come.
+
+```bash
+ooda ingest web https://example.com --max-pages 50 --max-depth 2
+ooda ingest github owner/repo --ref main --exclude 'vendor/*'
+```
+
+Incremental by content hash, so a second run reports what actually changed and
+appends only that. The output is a **delta stream, not a snapshot** — a
+connector returns only new and changed documents, so rewriting the file each run
+would delete everything that happened not to change. Pass `--fresh` to re-read
+the whole source and replace the file.
+
 **Retrieval** — declared, not yet built
 
 `make index`, `make query`, `make eval`, `make demo` and `make loop` exit with a

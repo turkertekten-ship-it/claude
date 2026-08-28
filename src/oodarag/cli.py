@@ -298,6 +298,122 @@ def cmd_reflect_schedule(args: argparse.Namespace) -> int:
     return EXIT_OK
 
 
+# -- ingest ------------------------------------------------------------------
+
+
+def _write_documents(path: Path, documents: list, *, truncate: bool) -> int:
+    """Persist RawDocuments as JSON Lines.
+
+    JSONL rather than one file per document: the next stage reads this as a
+    stream, and a directory of 4,000 small files is slower to walk than one file
+    is to read.
+
+    The file is an append-only *delta stream*, not a snapshot, because that is
+    what an incremental connector produces. A connector returns only what is new
+    or changed, so rewriting the file each run would delete every document that
+    happened not to change - and the run that does the damage is the quiet one
+    that reports "unchanged 1, written 0". Only `--fresh`, which deliberately
+    re-reads the whole source, truncates. Downstream takes the last record per
+    external_id.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if truncate:
+        # Atomic for the full-snapshot case: an interrupted --fresh leaves the
+        # previous output intact rather than a half-written mixture of two.
+        tmp = path.with_suffix(path.suffix + ".tmp")
+        try:
+            written = _dump(tmp, documents, mode="w")
+            tmp.replace(path)
+        except BaseException:
+            tmp.unlink(missing_ok=True)
+            raise
+        return written
+    if not documents:
+        return 0
+    return _dump(path, documents, mode="a")
+
+
+def _dump(path: Path, documents: list, mode: str) -> int:
+    written = 0
+    with path.open(mode, encoding="utf-8") as fh:
+        for doc in documents:
+            fh.write(json.dumps({
+                "source_system": doc.source_system,
+                "external_id": doc.external_id,
+                "uri": doc.uri,
+                "title": doc.title,
+                "text": doc.text,
+                "metadata": doc.metadata,
+                "fetched_at": round(doc.fetched_at, 3),
+                "content_hash": doc.content_hash,
+            }, ensure_ascii=False, default=str) + "\n")
+            written += 1
+    return written
+
+
+def _report_delta(delta, documents: int, out: Path, as_json: bool) -> None:
+    payload = delta.as_dict()
+    payload["documents_written"] = documents
+    payload["output"] = str(out)
+    if as_json:
+        print(json.dumps(payload, indent=2, default=str))
+        return
+    print(f"source     {delta.source_key}")
+    print(f"new        {delta.new}")
+    print(f"changed    {delta.changed}")
+    print(f"unchanged  {delta.unchanged}")
+    print(f"failed     {delta.failed}")
+    print(f"seconds    {delta.duration_s}")
+    print(f"written    {documents} document(s) -> {out}")
+    for err in delta.errors[:5]:
+        print(f"  ! {err}", file=sys.stderr)
+    if delta.failed and not delta.touched:
+        print("nothing was ingested; see the errors above", file=sys.stderr)
+
+
+def _run_connector(connector, args) -> int:
+    from oodarag.ingest.base import JsonStateStore
+
+    root = Path(args.root or ".").resolve()
+    state_path = Path(args.state) if args.state else root / ".oodarag" / "ingest" / "state.json"
+    out = Path(args.out) if args.out else (
+        root / ".data" / "raw" / f"{connector.key.replace(':', '_').replace('/', '_')}.jsonl"
+    )
+    # --fresh drops the cursor rather than the output: re-reading a source is
+    # cheap to ask for and impossible to undo if it also deleted what you had.
+    state = None if args.fresh else JsonStateStore(state_path)
+    result = connector.run(state=state, limit=args.limit)
+    written = _write_documents(out, result.documents, truncate=args.fresh)
+    _report_delta(result.delta, written, out, args.json)
+    return EXIT_OK if not (result.delta.failed and not result.delta.touched) else EXIT_ERROR
+
+
+def cmd_ingest_web(args: argparse.Namespace) -> int:
+    from oodarag.ingest.web import WebConnector
+
+    options = {}
+    for name in ("max_pages", "max_depth", "max_bytes", "max_seconds"):
+        value = getattr(args, name, None)
+        if value is not None:
+            options[name] = value
+    return _run_connector(WebConnector(seeds=args.seeds, **options), args)
+
+
+def cmd_ingest_github(args: argparse.Namespace) -> int:
+    from oodarag.ingest.github import GitHubConnector
+
+    if "/" not in args.repo:
+        print(f"expected OWNER/REPO, got {args.repo!r}", file=sys.stderr)
+        return EXIT_ERROR
+    owner, _, repo = args.repo.partition("/")
+    return _run_connector(
+        GitHubConnector(owner=owner, repo=repo, ref=args.ref,
+                        include_paths=tuple(args.include or ()),
+                        exclude_paths=tuple(args.exclude or ())),
+        args,
+    )
+
+
 # -- not-yet-built pipeline stages -------------------------------------------
 
 
@@ -391,6 +507,41 @@ def build_parser() -> argparse.ArgumentParser:
     schedule.add_argument("--apply", action="store_true", help="schedule it in applying mode")
     schedule.add_argument("--write", nargs="?", const=".", help="write the files (default: print)")
     schedule.set_defaults(func=cmd_reflect_schedule)
+
+    ingest = sub.add_parser(
+        "ingest",
+        help="fetch documents from a source, without indexing them",
+        description="Run one connector and write the documents it returns as JSON Lines. "
+        "Incremental by content hash: a second run reports what actually changed.",
+    )
+    isub = ingest.add_subparsers(dest="source", required=True)
+
+    def _add_ingest_common(parser: argparse.ArgumentParser) -> None:
+        parser.add_argument("--root", default=".", help="workspace root (default: cwd)")
+        parser.add_argument("--out", help="output JSONL path")
+        parser.add_argument("--state", help="cursor file (default: .oodarag/ingest/state.json)")
+        parser.add_argument("--limit", type=int, help="stop after N documents")
+        parser.add_argument("--fresh", action="store_true",
+                            help="ignore the stored cursor, re-read everything, and "
+                                 "replace the output instead of appending to it")
+        parser.add_argument("--json", action="store_true", help="machine-readable delta")
+
+    web = isub.add_parser("web", help="crawl one or more seed URLs")
+    _add_ingest_common(web)
+    web.add_argument("seeds", nargs="+", help="seed URLs")
+    web.add_argument("--max-pages", type=int, dest="max_pages")
+    web.add_argument("--max-depth", type=int, dest="max_depth")
+    web.add_argument("--max-bytes", type=int, dest="max_bytes")
+    web.add_argument("--max-seconds", type=float, dest="max_seconds")
+    web.set_defaults(func=cmd_ingest_web)
+
+    gh = isub.add_parser("github", help="read a repository (OWNER/REPO)")
+    _add_ingest_common(gh)
+    gh.add_argument("repo", help="OWNER/REPO")
+    gh.add_argument("--ref", help="branch, tag or sha (default: the repo default branch)")
+    gh.add_argument("--include", action="append", help="only these path globs (repeatable)")
+    gh.add_argument("--exclude", action="append", help="skip these path globs (repeatable)")
+    gh.set_defaults(func=cmd_ingest_github)
 
     for name, help_text in [
         ("index", "ingest and index all configured sources"),
