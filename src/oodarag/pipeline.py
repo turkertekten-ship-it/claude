@@ -24,7 +24,12 @@ import time
 from dataclasses import dataclass, field
 from typing import Any, Sequence
 
-from oodarag.chunking import ChunkConfig, chunk_document, summarize_chunking
+from oodarag.chunking import (
+    ChunkConfig,
+    chunk_document,
+    chunker_fingerprint,
+    summarize_chunking,
+)
 from oodarag.embedding.base import Embedder
 from oodarag.embedding.hashing import HashingEmbedder
 from oodarag.ingest.base import Connector, SqliteStateStore, StateStore
@@ -61,6 +66,8 @@ class IndexReport:
     duration_s: float = 0.0
     embedder_fingerprint: str = ""
     refit: bool = False
+    #: The stored chunks were produced by a different chunker and were rebuilt.
+    rechunked: bool = False
     chunking: dict[str, Any] = field(default_factory=dict)
 
     @property
@@ -78,6 +85,7 @@ class IndexReport:
             "duration_s": round(self.duration_s, 2),
             "embedder_fingerprint": self.embedder_fingerprint,
             "refit": self.refit,
+            "rechunked": self.rechunked,
             "chunking": self.chunking,
         }
 
@@ -159,13 +167,27 @@ class IndexPipeline:
             log.info("refit embedder", docs=len(indexed_docs),
                      fingerprint=self.embedder.fingerprint)
 
+        # Chunking integrity, the counterpart to the embedding-space check
+        # above. A chunker change leaves every stored document untouched, so
+        # the incremental path rewrites nothing and the index silently serves
+        # chunks from the old chunker - measured at 0 of 1,822 rewritten after
+        # a 5x size change (L63). Compare fingerprints and rebuild.
+        fingerprint = chunker_fingerprint(self.chunk_config)
+        targets = documents
+        if self.store.chunk_count() and self.store.get_meta("chunk_fingerprint") != fingerprint:
+            targets = self.store.all_documents()
+            report.rechunked = True
+            log.info("chunker changed, rebuilding chunks", documents=len(targets),
+                     fingerprint=fingerprint)
+
         all_chunks = []
-        for document in documents:
+        for document in targets:
             chunks = chunk_document(document, self.chunk_config)
             self.store.replace_chunks(document.doc_id, chunks)
             report.chunks_written += len(chunks)
             all_chunks.extend(chunks)
         report.chunking = summarize_chunking(all_chunks)
+        self.store.set_meta("chunk_fingerprint", fingerprint)
 
         report.vectors_written = self.embed_missing()
         report.embedder_fingerprint = self.embedder.fingerprint
@@ -327,8 +349,10 @@ class IndexPipeline:
             all_chunks.extend(chunks)
         report.chunking = summarize_chunking(all_chunks)
         report.documents_indexed = len(documents)
+        report.rechunked = True
         report.vectors_written = self.embed_missing()
         report.embedder_fingerprint = self.embedder.fingerprint
         self.store.set_meta("index_fingerprint", self.embedder.fingerprint)
+        self.store.set_meta("chunk_fingerprint", chunker_fingerprint(self.chunk_config))
         report.duration_s = time.monotonic() - started
         return report

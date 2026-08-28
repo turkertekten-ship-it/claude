@@ -18,7 +18,7 @@ import sqlite3
 import pathlib
 import unittest
 
-from oodarag.chunking import chunk_document
+from oodarag.chunking import ChunkConfig, chunk_document
 from oodarag.ingest.base import Connector
 from oodarag.eval.contamination import _longest_run, _longest_run_span, detect
 from oodarag.eval.harness import EvalHarness, Golden
@@ -1241,6 +1241,77 @@ class GhostCompoundTest(unittest.TestCase):
         self.assertAlmostEqual(with_ghost, 2.0 / 10.56, places=4)
         self.assertAlmostEqual(repaired, 1.0, places=4)
         self.assertGreater(repaired, with_ghost)
+
+
+class StaleChunkTest(unittest.TestCase):
+    """A chunker change left the index serving chunks from the old chunker.
+
+    `IndexPipeline` guards the embedding space - change the model or the
+    dimension and every affected vector is recomputed - and had no equivalent
+    one stage upstream. Chunking is not a function of the document, so an
+    unchanged document meant an unchanged chunk: re-indexing the 153-page
+    external corpus with a 5x smaller chunker rewrote **0 of 1,822** chunks
+    and reported a clean run. Every measurement taken that way describes a
+    chunker that is no longer in the tree (L63).
+    """
+
+    def _connector(self, texts: dict[str, str]):
+        docs = [RawDocument(source_system="test", external_id=name, uri=f"mem://{name}",
+                            title=name, text=text, metadata={})
+                for name, text in texts.items()]
+
+        class _MemoryConnector(Connector):
+            key = "test:chunker"
+            source_system = "test"
+
+            def fetch(self, cursor):
+                yield from docs
+
+        return _MemoryConnector()
+
+    def _corpus(self):
+        # Long enough that the chunk sizes below actually bind: a corpus of
+        # one-line documents chunks identically at every setting and the test
+        # would pass against the bug.
+        return {f"d{i}.md": f"# Doc {i}\n\n" + " ".join(
+            f"Sentence {j} of document {i} says something specific." for j in range(120))
+            for i in range(4)}
+
+    def test_a_chunker_change_rebuilds_chunks_the_documents_did_not_change(self):
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        texts = self._corpus()
+
+        first = IndexPipeline(store, chunk_config=ChunkConfig()).run([self._connector(texts)])
+        self.assertGreater(first.chunks_written, 0)
+        before = store.chunk_count()
+
+        smaller = ChunkConfig(target_tokens=64, hard_max_tokens=128, overlap_tokens=12)
+        report = IndexPipeline(store, chunk_config=smaller).run([self._connector(texts)])
+
+        # Ordered so the first failure is the behaviour, not a missing field:
+        # a test that reports `no attribute 'rechunked'` when the guard is
+        # removed is testing the report object, not the index.
+        self.assertGreater(store.chunk_count(), before,
+                           "a 5x smaller chunker left the stored chunks alone")
+        self.assertTrue(report.rechunked,
+                        "the chunks were rebuilt and the run did not say so")
+        # Vectors are downstream of chunks: leaving the new chunks unembedded
+        # would trade a stale index for an empty one.
+        self.assertEqual(store.chunk_count(),
+                         len(store.get_chunks([c.chunk_id for c in store.all_chunks()])))
+        self.assertGreater(report.vectors_written, 0)
+
+    def test_an_unchanged_chunker_still_writes_nothing(self):
+        """Idempotence is the property this guard is most likely to break: a
+        fingerprint that varies per run rebuilds the corpus on every index."""
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        texts = self._corpus()
+        IndexPipeline(store, chunk_config=ChunkConfig()).run([self._connector(texts)])
+        report = IndexPipeline(store, chunk_config=ChunkConfig()).run([self._connector(texts)])
+        self.assertFalse(report.rechunked)
+        self.assertEqual(report.chunks_written, 0)
 
 
 class StaleFitTest(unittest.TestCase):

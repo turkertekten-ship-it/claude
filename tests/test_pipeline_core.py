@@ -22,7 +22,7 @@ from oodarag.retrieve.rerank import _longest_common_run
 from oodarag.store.sqlite_store import SqliteStore
 from oodarag.store.vectors import VectorIndex, pack, unpack
 from oodarag.util.stemming import stem
-from oodarag.util.text import redact_secrets, tokenize
+from oodarag.util.text import estimate_tokens, redact_secrets, tokenize
 
 CORPUS = {
     "rag.md": ("# Retrieval augmented generation\n\n"
@@ -144,6 +144,65 @@ class ChunkingTest(unittest.TestCase):
         chunks = chunk_document(doc, ChunkConfig(min_tokens=40))
         self.assertTrue(all(c.token_estimate >= 20 for c in chunks),
                         [c.token_estimate for c in chunks])
+
+    def test_a_unit_the_splitter_cannot_divide_still_respects_the_ceiling(self):
+        """The shape that broke it: a changelog list with no full stop in it.
+
+        `split_sentences` returns one unit for text with no terminal
+        punctuation, and packing used to emit an over-ceiling unit whole - 8 of
+        1,810 external chunks, the largest 2.1x the ceiling (L63).
+        """
+        config = ChunkConfig(target_tokens=60, hard_max_tokens=120, overlap_tokens=12)
+        entries = "\n".join(f"- Fix issue {i} in module_{i} by contributor_{i}"
+                             for i in range(120))
+        text = f"# Changelog\n\n{entries}\n"
+        doc = Document.from_raw(RawDocument("fs", "c", "file:///c", "c.md", text), text, {})
+        chunks = chunk_document(doc, config)
+
+        self.assertGreater(len(chunks), 3, "the oversized unit was emitted whole")
+        for chunk in chunks:
+            self.assertLessEqual(estimate_tokens(chunk.text), config.hard_max_tokens,
+                                 f"{estimate_tokens(chunk.text)} tokens in {chunk.text[:60]!r}")
+        # Nothing invented, nothing dropped, nothing cut mid-word: the words of
+        # the pieces are the words of the source, in order.
+        self.assertEqual(" ".join(c.text for c in chunks).split(), text.split())
+        # And each piece still says truthfully where it came from, which is what
+        # a citation resolves against.
+        for chunk in chunks:
+            self.assertEqual(text[chunk.char_start:chunk.char_start + len(chunk.text)],
+                             chunk.text)
+
+    def test_one_line_too_big_to_split_is_windowed_on_word_boundaries(self):
+        """A minified line has no newline to split on either. Words are the floor."""
+        config = ChunkConfig(target_tokens=40, hard_max_tokens=80, overlap_tokens=8)
+        line = " ".join(f"token{i}" for i in range(400))
+        doc = Document.from_raw(RawDocument("fs", "m", "file:///m", "m.md", line), line, {})
+        chunks = chunk_document(doc, config)
+
+        self.assertGreater(len(chunks), 3)
+        for chunk in chunks:
+            self.assertLessEqual(estimate_tokens(chunk.text), config.hard_max_tokens)
+        self.assertEqual(" ".join(c.text for c in chunks).split(), line.split())
+
+    def test_the_ceiling_bounds_the_body_and_the_header_is_added_on_top(self):
+        """Two different numbers that both get called "the chunk size".
+
+        `hard_max_tokens` is spent on the body; `Chunk.token_estimate` measures
+        the body *plus* the context header, which is a median 19 tokens and 13%
+        of the external corpus's embedded text (L63). Reading a size without
+        its units is how a 640 ceiling reports 667.
+        """
+        config = ChunkConfig(target_tokens=60, hard_max_tokens=120, overlap_tokens=12)
+        entries = "\n".join(f"- Fix issue {i} in module_{i}" for i in range(120))
+        text = f"# Changelog\n\n{entries}\n"
+        doc = Document.from_raw(RawDocument("fs", "h", "file:///h", "h.md", text), text, {})
+        chunks = chunk_document(doc, config)
+
+        widest = max(chunks, key=lambda c: c.token_estimate)
+        self.assertLessEqual(estimate_tokens(widest.text), config.hard_max_tokens)
+        self.assertEqual(widest.token_estimate,
+                         estimate_tokens(widest.indexed_text))
+        self.assertGreater(estimate_tokens(widest.context_header), 0)
 
     def test_ordinals_are_contiguous_after_merging(self):
         text = CORPUS["rag.md"] + "\n\n# Tail\n\nx.\n"

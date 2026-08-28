@@ -3021,3 +3021,216 @@ sources of genuinely different trust *within the same answers*.
    Recency was harmful and got switched off; authority is merely quiet and was
    left alone. Collapsing both into "does not move the metrics" would have
    invited the same action for opposite situations.
+
+---
+
+## L63 - The most upstream number in the pipeline had never been measured
+
+Every constant this repository has swept sits downstream of the chunk:
+`candidate_k`, `mmr_lambda`, `rrf_k`, the coverage weights, the abstention
+floor, the base weights, recency, authority (L33, L44, L61, L62). The chunker's
+own sizes - `target_tokens=320`, `hard_max_tokens=640`, `overlap_tokens=64` -
+had never been swept at all, which makes them the largest untested claim in the
+tree by L61's rule. Everything downstream was tuned against whatever they
+happened to produce.
+
+`scripts/chunk_sweep.py` sweeps them, holding the shipped ratios (hard_max 2x,
+overlap 0.2x) so the knob means "chunk granularity" rather than silently
+becoming a hard_max sweep at the top of the range:
+
+| target | external pass | recall@8 | nDCG@8 | chunks | primary pass | recall@8 | chunks |
+|---|---|---|---|---|---|---|---|
+| 96 | 45/54 | 0.8953 | 0.7256 | 3141 | 18/20 | 0.8125 | 2091 |
+| 160 | 47/54 | 0.9070 | 0.7389 | 2254 | 18/20 | 0.8125 | 1361 |
+| 240 | 48/54 | 0.9070 | 0.7443 | 1928 | 17/20 | 0.7812 | 1018 |
+| **320** | **49/54** | **0.9302** | **0.7538** | **1822** | **17/20** | **0.7812** | **840** |
+| 480 | 49/54 | 0.9302 | 0.7552 | 1770 | 18/20 | 0.7812 | 659 |
+| 640 | 49/54 | 0.9302 | 0.7448 | 1748 | 18/20 | 0.7812 | 597 |
+
+**Decision: left at 320**, on a plateau that runs to 480 on the corpus that
+gates. The two corpora disagree in direction - external wants bigger chunks and
+primary's recall is best at its smallest setting - and only the external one
+moves pass rate, so this is a plateau to sit on rather than a peak to chase.
+Smaller is not free either: 96 costs 72% more chunks, vectors and index bytes to
+lose four cases.
+
+**The sweep's real finding was in a column nobody asked for.** Chunk size p50
+barely moved on the external corpus - 103 tokens at target 96, 126 at target
+640 - because PyPI pages split into sections far below any of these ceilings.
+The knob looked nearly inert. The `max` column said otherwise: **1357 tokens at
+every single setting**, against a documented ceiling of 640.
+
+### `hard_max_tokens` was not a ceiling
+
+`ChunkConfig` said it was *"the ceiling a chunk may not exceed even if that
+means splitting a structural unit"*. `_pack_units` had a branch that emitted an
+over-ceiling unit whole rather than cutting it "at an arbitrary point". Measured
+on the shipped config:
+
+| | external (153 pages) | primary |
+|---|---|---|
+| chunks over `hard_max` | 8 of 1810 (0.44%) | 18 of 829 (2.17%) |
+| largest | **1357 tokens, 2.1x the ceiling** | 714 |
+| what they are | changelog bullet lists | oversized definitions |
+
+The mechanism is that `split_sentences` returns *one unit* for text with no
+terminal punctuation - a changelog, a table, a fenced example - so a 1,332-token
+"sentence" is not a long sentence, it is the splitter failing to see structure it
+does not model. Lines are the structure such text does have. Packing now
+subdivides by lines, then by word windows for a line that is still too big (a
+minified file), and never cuts mid-word.
+
+**This is L40's defect again, and L40's sweep could not have caught it.** That
+sweep grepped the source for *never, always, cannot, only*. This claim is
+phrased "may not exceed". The vocabulary was the limit, not the claims.
+
+Retrieval is untouched by the fix - the external gate reads 48/54, recall 0.907,
+nDCG 0.746 before and after, from a rebuilt index - and the tail now tracks the
+knob it is supposed to (max 237 at target 96, 1267 at 640) instead of sitting at
+1357 regardless.
+
+### Two different numbers are both called "the chunk size"
+
+The ceiling is spent on the chunk *body*. `Chunk.token_estimate` measures
+`indexed_text`, which is body **plus** the context header - which is why a 640
+ceiling reports 667. The header had never been costed either:
+
+| | external | primary |
+|---|---|---|
+| header, median | 19 tokens | 18 tokens |
+| share of what is embedded, median | 14.2% | 6.0% |
+| on top of all body text | **13.1%** | 7.1% |
+| in chunks with a body under 64 tokens | 29% | 30% |
+
+So contextual retrieval - commitment 2 of the chunker's docstring, argued for
+and never measured - costs 13% of the external corpus's embedded tokens. It
+earns them, and not in the way the docstring claims:
+
+| | pass | recall@8 | MRR | nDCG@8 |
+|---|---|---|---|---|
+| header on (shipped) | **49/54** | **0.9302** | 0.7122 | 0.7538 |
+| header off | 47/54 | 0.8837 | **0.7322** | **0.7586** |
+
+Two cases and 4.7 recall points for 13% more tokens - and *worse* ordering among
+what it finds. The header pulls documents into the window that would otherwise
+be missed, and adds noise to the ranking of the ones already there. On the
+primary corpus it changes nothing but precision. Kept, now on evidence.
+
+### The index had no idea the chunker had changed
+
+`IndexPipeline` guards the embedding space: change the model, the dimension or
+the corpus statistics and every affected vector is recomputed rather than
+silently compared across incompatible spaces. One stage upstream there was
+nothing. Chunking is not a function of the document, so an unchanged document
+meant an unchanged chunk:
+
+```
+first index:                     153 docs, 1822 chunks
+re-index, 5x smaller chunker:      0 docs,    0 chunks written   <- reported success
+```
+
+Every measurement taken that way describes a chunker that is not in the tree.
+`reindex_all()` existed for exactly this and its docstring says so - *"used
+after a chunking-config change, which the incremental path cannot detect"* - but
+nothing detected it, so somebody had to remember. **I did not remember**: the
+first gate run of this cycle went straight through the stale path, and it agreed
+with the rebuilt one only by luck.
+
+The pipeline now stores a chunker fingerprint - the sizes *and* the module
+source, because subdividing an oversized unit moves boundaries with every number
+held constant - and rebuilds chunks when it changes. Idempotence survives: an
+unchanged chunker still writes zero.
+
+### Writing this entry cost a golden case, then gave it back, then killed it
+
+The primary corpus went 18/20 to 17/20 during this cycle. It was not the
+chunker: on the *same* corpus, old and new chunkers both give 17/20 with
+identical metrics to four decimals. It was the prose. The case is the one that
+asks how the pipeline notices vectors left over from an older embedding space,
+and its answer had to contain the word the mechanism is named after. The new
+comments written to explain this cycle's fix took the top slots from the code
+they describe - and they paraphrase the mechanism instead of naming it, so the
+answer no longer carried the word. Recall did not move; the expected sources
+were still retrieved. Only the wording of the answer built from them changed.
+
+Then writing *this entry*, which uses that word a dozen times, put it back into
+the corpus and the case passed again. Three measurements over one session,
+retrieval code untouched throughout:
+
+| corpus state | pass | recall@8 |
+|---|---|---|
+| before this cycle's edits | 18/20 | 0.7812 |
+| plus the comments explaining the fix | 17/20 | 0.7812 |
+| plus this learnings entry | 18/20 | 0.7500 |
+| plus the golden's retired expectation and this rewrite | 18/20 | 0.7812 |
+
+The pass rate came back and recall went *down*: the new prose supplied the
+missing keyword for one question and displaced expected sources for others. A
+number that moves in both directions from writing documentation is not measuring
+the retriever. The external gate, which does not describe this repository, read
+48/54 and recall 0.907 before and after all of it.
+
+**Then the repository's own guard failed the suite**, which is the part that
+matters. `check_discrimination` reports an expectation that no longer selects
+anything, and the word had reached **17 of 83 documents (20.5%)**, past its 20%
+threshold. Three of those seventeen were mine; the other fourteen were there
+already. The word is repository vocabulary now.
+
+The precedent was to tighten, the way `"sha"` became `"commit sha"` at 6%. It
+does not work here. Every tighter form - the two identifiers and the possessive
+phrase - sits under 5% of documents *and* appears in none of the extractive
+answers, so each trades a case that passes without discriminating for a case
+that cannot pass. The counterfactual is decisive: excluding both expected
+documents from retrieval, the answer *still* contains the word, because this
+file now discusses it at length.
+
+**So the expectation was removed rather than tightened**, with the evidence in
+the golden's `notes`; that case is graded on retrieval alone from here. An
+answer expectation works only when it names a rare literal - an RFC number, a
+commit sha - never when it is a word the code is written in. Removing an
+expectation to make a case pass is eval-fitting; removing one measured not to
+discriminate, and recording why, is maintenance. The difference is entirely in
+whether the measurement came first.
+
+### And the corpus was reading over my shoulder
+
+Excluding the chat source turns that case from a pass into a failure, so the
+transcript is where the passing answer came from. There is exactly one chat
+document in this index:
+
+```
+title: Session: /goal goal ultrathinl continue ooda
+chars: 8899   occurrences of "fingerprint": 8
+```
+
+That is *this session*, indexed while it ran. The eval's answer to "how does the
+pipeline detect a stale embedding space?" was my own conversation about writing
+the answer, and the corpus grew every time I typed. The local number is 18/20
+and the honest one is 17/20 - CI is right to pass `--exclude-source chat`, and
+the eval on a developer's machine is measuring something no other machine has.
+
+**Rules.**
+1. **Sweep the most upstream knob first.** Everything downstream was tuned
+   against whatever it produced, so its value is baked into every conclusion
+   that came after. It is also the knob nobody sweeps, because unlike a
+   retrieval constant it costs a full re-index.
+2. **Read the max, not the median, when checking a bound.** The p50 said this
+   knob was nearly inert on the external corpus and the max said the ceiling was
+   broken by 2.1x. A bound is a claim about the tail; the middle of the
+   distribution cannot report on it.
+3. **A ceiling with an "emit it whole" branch is a target with a comment.**
+   Every escape hatch in a bound is the bound's real value.
+4. **Guard every stage whose output is cached, not only the stage that bit you
+   last.** The embedding-space check was built after being burned; chunks sit
+   above vectors and had no equivalent, and the fix for that had been written
+   already - as a method nothing called automatically.
+5. **In a corpus that indexes its own notes, writing the note changes the
+   measurement** - and the session transcript lands in it before the note does.
+   Separate the corpus change from the code change before attributing a
+   regression: the control run here (same corpus, both chunkers) is what
+   stopped a paragraph of prose being recorded as a chunker regression.
+6. **An expectation about answer *text* must name a rare literal.** An RFC
+   number and "commit sha" survive; a word the code is written in gets adopted
+   by the corpus and stops separating a right answer from a wrong one. Check it
+   by counterfactual - remove the expected sources and see whether the answer
+   still contains the term - not by how the case is currently scoring.

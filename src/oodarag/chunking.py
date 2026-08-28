@@ -24,12 +24,13 @@ Three commitments here:
 
 from __future__ import annotations
 
+import pathlib
 import re
 from dataclasses import dataclass
 from typing import Any
 
 from oodarag.models import Chunk, Document
-from oodarag.util.hashing import stable_id
+from oodarag.util.hashing import content_hash, stable_id
 from oodarag.util.text import (
     estimate_tokens,
     split_markdown_sections,
@@ -63,10 +64,23 @@ CODE_LANGUAGES = frozenset(_DEF_PATTERNS) | {
 class ChunkConfig:
     """Sizes are in estimated tokens (see util.text.estimate_tokens).
 
-    `target` is what most chunks will be. `hard_max` is the ceiling a chunk may
-    not exceed even if that means splitting a structural unit; `min_tokens`
-    stops the tail of a section becoming a two-word chunk that matches
-    everything and means nothing.
+    `target_tokens` is what most chunks will be. `hard_max_tokens` bounds a
+    chunk's *body*: a structural unit larger than it is subdivided - by lines,
+    then by word windows - so the bound holds even for text the sentence
+    splitter cannot divide, which is where it used to leak (L63).
+
+    Two things sit outside that bound on purpose, and both were found by
+    reading a chunk size without asking what it measured:
+
+    * the context header is added after packing and costs a median 19 tokens,
+      13% on top of the external corpus's body text, so `Chunk.token_estimate`
+      - which measures what is actually embedded - runs above this ceiling by
+      roughly a header;
+    * code is packed against `code_max_tokens`, deliberately the larger of the
+      two, because a definition is worth keeping whole.
+
+    `min_tokens` stops the tail of a section becoming a two-word chunk that
+    matches everything and means nothing.
     """
 
     target_tokens: int = 320
@@ -76,6 +90,36 @@ class ChunkConfig:
     include_context_header: bool = True
     #: Code is chunked by definition; prose by sentence window.
     code_max_tokens: int = 700
+
+
+def chunker_fingerprint(config: ChunkConfig | None = None) -> str:
+    """Identity of the chunking that produced a chunk: its sizes and its code.
+
+    Chunks are upstream of vectors, and the index already refuses to compare
+    vectors across embedding spaces. It had no equivalent for chunks, so a
+    store re-indexed after a chunking change kept every old chunk - the
+    documents had not changed, and nothing else was consulted. Measured: a
+    corpus re-indexed with a 5x smaller chunker rewrote **0 of 1,822** chunks
+    and reported success (L63).
+
+    The module's own source is part of the identity because the sizes are not
+    the whole algorithm: subdividing an oversized unit moves boundaries with
+    every number held constant. That errs towards re-chunking - editing a
+    comment here costs one re-index - and the error in the other direction is
+    every measurement afterwards being taken against chunks that no longer
+    correspond to any version of the code.
+    """
+    config = config or ChunkConfig()
+    sizes = ";".join(f"{field}={getattr(config, field)}"
+                     for field in sorted(ChunkConfig.__dataclass_fields__))
+    try:
+        source = pathlib.Path(__file__).read_text("utf-8")
+    except OSError:
+        # Packaged without its source (a zipapp): the sizes still change the
+        # fingerprint, and a code change without a size change goes unnoticed.
+        # Degrade rather than refuse to index.
+        source = ""
+    return content_hash(sizes, source)
 
 
 _FENCE = "`" * 3
@@ -229,10 +273,18 @@ def _pack_units(
 
     for index, (unit_text, offset) in enumerate(units):
         unit_tokens = estimate_tokens(unit_text)
-        if unit_tokens > ceiling and not buffer:
-            # A single oversized unit (a minified line, a huge paragraph):
-            # emit it whole rather than cutting it at an arbitrary point.
-            out.append((unit_text, offset, index))
+        if unit_tokens > ceiling:
+            # A unit larger than the ceiling on its own. Emitting it whole - as
+            # this did - is how `hard_max_tokens` stopped being a ceiling: 8 of
+            # 1,810 external chunks ran to 2.1x it, the largest a 1,332-token
+            # changelog list that the sentence splitter sees as one sentence
+            # (L63). Subdivide instead, and flush first so the pieces are not
+            # silently prefixed with the previous chunk's tail.
+            if buffer:
+                out.append((joiner.join(t for t, _, _ in buffer), buffer[0][1], buffer[0][2]))
+                buffer = []
+                size = 0
+            out.extend(_subdivide(unit_text, offset, index, config, ceiling))
             continue
         if size + unit_tokens > config.target_tokens and buffer:
             out.append((joiner.join(t for t, _, _ in buffer), buffer[0][1], buffer[0][2]))
@@ -252,6 +304,77 @@ def _pack_units(
     if buffer:
         out.append((joiner.join(t for t, _, _ in buffer), buffer[0][1], buffer[0][2]))
     return out
+
+
+def _subdivide(unit_text: str, offset: int, index: int,
+               config: ChunkConfig, ceiling: int) -> list[tuple[str, int, int]]:
+    """Last resort for one unit that is bigger than the ceiling by itself.
+
+    A "sentence" of 1,332 tokens is not a sentence; it is the splitter failing
+    to see structure it does not model - a changelog bullet list, a fenced
+    example, a table, none of which end in a full stop. Lines are the structure
+    such text does have, so split there first, and fall back to word windows
+    only when a single line is still over the ceiling (a minified file). Never
+    cuts mid-word, so a chunk still reads as text rather than as a fragment.
+
+    Offsets stay absolute: every piece reports where it starts in the document,
+    because a citation that points at the wrong span is worse than a long chunk.
+    """
+    pieces: list[tuple[str, int, int]] = []
+
+    def emit(start: int, end: int) -> None:
+        raw = unit_text[start:end]
+        lead = len(raw) - len(raw.lstrip())
+        text = raw.strip()
+        if text:
+            pieces.append((text, offset + start + lead, index))
+
+    lines = unit_text.splitlines(keepends=True) or [unit_text]
+    buffer_start: int | None = None
+    buffer_end = 0
+    size = 0
+    cursor = 0
+    for line in lines:
+        start, cursor = cursor, cursor + len(line)
+        tokens = estimate_tokens(line)
+        if tokens > ceiling:
+            if buffer_start is not None:
+                emit(buffer_start, buffer_end)
+                buffer_start, size = None, 0
+            _window_words(unit_text, start, cursor, offset, index, config, pieces)
+            continue
+        if size + tokens > config.target_tokens and buffer_start is not None:
+            emit(buffer_start, buffer_end)
+            buffer_start, size = None, 0
+        if buffer_start is None:
+            buffer_start = start
+        buffer_end = cursor
+        size += tokens
+    if buffer_start is not None:
+        emit(buffer_start, buffer_end)
+    return pieces
+
+
+def _window_words(unit_text: str, start: int, end: int, offset: int, index: int,
+                  config: ChunkConfig, pieces: list[tuple[str, int, int]]) -> None:
+    """Split one over-ceiling line into target-sized windows on word boundaries."""
+    line = unit_text[start:end]
+    window_start = 0
+    size = 0
+    cursor = 0
+    for match in re.finditer(r"\S+\s*", line):
+        size += estimate_tokens(match.group())
+        cursor = match.end()
+        if size >= config.target_tokens:
+            text = line[window_start:cursor].strip()
+            if text:
+                lead = len(line[window_start:cursor]) - len(line[window_start:cursor].lstrip())
+                pieces.append((text, offset + start + window_start + lead, index))
+            window_start, size = cursor, 0
+    tail = line[window_start:].strip()
+    if tail:
+        lead = len(line[window_start:]) - len(line[window_start:].lstrip())
+        pieces.append((tail, offset + start + window_start + lead, index))
 
 
 def _split_prose(doc: Document, config: ChunkConfig) -> list[tuple[str, int, dict]]:

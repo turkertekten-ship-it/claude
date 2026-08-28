@@ -22,21 +22,52 @@
 | Non-negotiables | verified | All five attacked directly, not just asserted: zero-dependency walked module by module, provenance and redaction attacked with crafted inputs, degradation measured through partial and silent-empty source failures (L37-L39) |
 
 **Current measurements** (offline embedder, deterministic).
-313 tests passing. Retrieval metrics are over graded cases only - abstention
+372 tests passing. Retrieval metrics are over graded cases only - abstention
 cases have nothing to retrieve, and averaging their zeros in made adding a
 negative case look like a retrieval regression.
 
 | | primary (this repo) | external (153 PyPI pages) |
 |---|---|---|
-| golden cases | **19/20** | **48/54** |
-| recall@8 | 0.8438 | 0.9070 |
-| precision@8 | 0.2031 | 0.2471 |
-| hit@8 | 0.9375 | 0.9302 |
-| MRR | 0.6224 | 0.7089 |
-| nDCG@8 | 0.6463 | 0.7460 |
+| golden cases | **18/20** | **48/54** |
+| recall@8 | 0.7812 | 0.9070 |
+| precision@8 | 0.2109 | 0.2471 |
+| hit@8 | 0.8750 | 0.9302 |
+| MRR | 0.5714 | 0.7089 |
+| nDCG@8 | 0.6048 | 0.7460 |
 | citation coverage | 1.00 | 1.00 |
-| contamination | 4/20 questions, 14 documents (29 holdouts) | 5/54 questions, 22 documents (28 holdouts) |
+| contamination | 4/20 questions, 10 documents (20 holdouts) | 5/54 questions, 22 documents (28 holdouts) |
 | role | smoke test | **regression gate** |
+
+Both columns are freshly indexed; the primary one is the CI configuration,
+`--exclude-source chat`. **Read the primary column as a smoke test and nothing
+else.** Over one session, with the retrieval code untouched, it read:
+
+| after | pass | recall@8 |
+|---|---|---|
+| the cycle's first commit-ready tree | 18/20 | 0.7812 |
+| adding the comments that explain the fix | 17/20 | 0.7812 |
+| adding the LEARNINGS entry about those comments | 18/20 | 0.7500 |
+| retiring the answer expectation and rewriting that entry | **18/20** | **0.7812** |
+
+The last row is this table's own measurement, and writing it down changes the
+corpus again. The fixed point is not reachable on a corpus that indexes the
+notes about its own evaluation; the table above is a snapshot, and the external
+column is the one that means anything.
+
+The case that moved asks how the pipeline notices vectors from an older
+embedding space, and required the answer to name the mechanism. Comments that
+paraphrased it took the top slots and dropped the word; a learnings entry naming
+it repeatedly put the word back and displaced expected sources elsewhere, which
+is why the pass rate recovered while recall fell. Then the discrimination guard
+failed the suite: the word had reached 17 of 83 documents. The expectation is
+now removed and the case graded on retrieval alone, with the evidence in its
+`notes` and in L63 - tightening it, the way `"sha"` became `"commit sha"`, was
+measured and produces a case that cannot pass instead.
+
+Without `--exclude-source chat` it is the *session transcript* that supplies the
+answer. Nothing about the retriever changed across those three rows. A gate
+whose value depends on what the last session wrote in markdown cannot detect a
+regression in retrieval, which is what the external column is for.
 
 What each retrieval arm is worth, on the external set (`scripts/ablation.py`):
 
@@ -138,8 +169,9 @@ its current failures are that artefact. See docs/EVALUATION.md.
    and item 1 is blocked on a key.
 
 3. **Widen the corpus again.** 33 to 91 documents overturned three recorded
-   conclusions and de-saturated every metric (L29). There is no reason to think
-   91 is where that stops. `scripts/build_external_corpus.py --list` does it,
+   conclusions and de-saturated every metric (L29); 91 to 153 settled two more
+   and levelled the retrieval arms on pass rate. There is no reason to think
+   153 is where that stops. `scripts/build_external_corpus.py --list` does it,
    and `ooda preflight` has `web_pypi` **ok** while wikipedia, youtube, ibm.com
    and arxiv are refused CONNECT, so PyPI remains the reachable source. Two
    pages of 63 were refused by an anti-bot interstitial, which is a per-run
@@ -147,7 +179,17 @@ its current failures are that artefact. See docs/EVALUATION.md.
 
 4. **Multi-hop retrieval**, once single-shot recall is well characterised.
    Adding a loop over a retriever with unknown recall multiplies every failure.
-   Single-shot recall on the external set is 0.9186.
+   Single-shot recall on the external set is 0.9070.
+
+5. **Chunk offsets do not locate their chunk.** Measured this cycle while
+   checking something else: `char_start` fails to point at the chunk's own text
+   for **206 of 831** primary chunks and 39 of 1,822 external ones. Nothing
+   reads it today - it is stored, round-tripped and never consumed - so this is
+   provenance that is wrong before anyone depends on it rather than a live
+   defect, which is the cheapest moment to fix it. The likely sources are the
+   merge path, which keeps the first piece's offset, and unit offsets recovered
+   by `find` rather than tracked. Fixing it needs a property test that asserts
+   every chunk's span against its document, which does not exist.
 
 ## Deliberately not next
 
@@ -168,3 +210,12 @@ its current failures are that artefact. See docs/EVALUATION.md.
 
 - **Query expansion.** Built, measured, and off by default because it made
   retrieval worse. The table is in `retrieve/expansion.py`.
+
+- **Retuning the chunk sizes.** Swept over both corpora at last, from 96 to 640
+  tokens (`scripts/chunk_sweep.py`, L63). 320 sits on a plateau that runs to
+  480 on the corpus that gates, the two corpora disagree in direction, and 96
+  costs 72% more chunks to lose four cases. The sweep's finding was elsewhere:
+  `hard_max_tokens` was not a ceiling (chunks ran to 2.1x it), the index could
+  not tell that the chunker had changed, and the context header - never costed
+  before - is 13.1% on top of the external corpus's body tokens and buys two
+  cases and 4.7 recall points.
