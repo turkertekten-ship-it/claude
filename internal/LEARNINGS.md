@@ -2039,6 +2039,32 @@ Flat, then worse. Clipping compresses *magnitudes* and leaves the *ordering*
 alone, and the ordering is the defect: capped at 5.0, `revers` is 5.0 against
 `password` at 4.60 - still the wrong way round. Nothing was shipped.
 
+**Is the mismatch just small N? Untestable by subsampling, and the reason is
+worth recording.** If "cannot" scores as rare only because it appears in 1 of 91
+pages, then at larger N its document frequency should rise, its IDF fall, and
+the ranking correct itself with no code change. That is cheap to check by
+subsampling the corpus we have - except it is not.
+
+Measured both ways, and neither works:
+
+* **Variable question set.** Rate falls 100% (n=20) to 72.5% (n=91) - but each
+  row scores a *different* set of goldens, because only questions whose target
+  document survived the subsample can be counted. The trend is an artifact of
+  which targets survived, not of N. This is the same defect as comparing two
+  stages that analyse data differently (L24), committed inside my own probe.
+* **Fixed question set.** Holding the goldens to those answerable in the
+  smallest corpus fixes the confound and leaves **five cases**. 100% at n=20,
+  80% at n=91. Nothing is concluded from five.
+
+The trap is structural: shrinking a corpus removes the documents the goldens
+point at, so corpus size and question coverage cannot be varied independently
+by subsampling. Testing this needs *new* documents, not fewer.
+
+`pypi.org` is reachable (probed: robots.txt and a project page, both 200), so
+that fetch is available - but widening the corpus predictably drops the external
+pass rate past the 0.85 CI gate, which is L23's exact failure. That is a
+deliberate decision about the gate, not a measurement to slip in.
+
 **The obvious next fix is blocked by leakage, which is worth knowing before
 building it.** If the defect is that IDF cannot tell a rare content word from a
 rare function word, the natural correction is a second frequency signal: a term
