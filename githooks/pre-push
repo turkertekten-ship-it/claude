@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# Refuse to push a red suite.
+#
+# This exists because a commit went out with the suite failing: the push was
+# chained after a command that piped `tests/run_all.sh` into `tail`, so the
+# status read was tail's and the red result was merely displayed. Rule 10
+# records that. A rule that lives only in prose gets skipped under pressure —
+# this repository's own argument — so the rule is a hook.
+#
+# Deliberate escape: `git push --no-verify`. Use it when you mean to push a
+# known-red state and say so in the commit message; it is not a way past a
+# failure you have not read.
+
+set -uo pipefail
+cd "$(git rev-parse --show-toplevel)" || exit 1
+
+printf 'pre-push: running tests/run_all.sh\n'
+output=$(bash tests/run_all.sh 2>&1)
+status=$?
+
+if [ "$status" -eq 0 ]; then
+    printf 'pre-push: suite green, pushing\n'
+    exit 0
+fi
+
+printf '%s\n' "$output" | tail -30
+cat <<'MSG'
+
+pre-push: REFUSED — the suite exits non-zero.
+
+Push a red suite only on purpose: `git push --no-verify`, and say in the
+commit message that you know it is red and why. Otherwise fix it first.
+MSG
+exit 1

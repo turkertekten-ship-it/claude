@@ -104,6 +104,7 @@ current roster and the branch each one owns.
 
 ```
 CLAUDE.md                     this file — doctrine, read first
+githooks/pre-push             refuses to push a red suite
 FLEET.md                      the concurrent sessions and their branches
 provenance/
   sources.yaml                the ledger — every id that a [src:] tag may cite
@@ -124,6 +125,7 @@ tools/
   _slots.py, _phrases.py      shared definitions, imported by the above
   ingest_chat_archive.py      chat-archive ingestion and search
   install_prompt_system.sh    installs the prompt system into ~/.claude
+  install_git_hooks.sh        points git at githooks/ — pre-push refuses a red suite
 tests/                        tests for the above
   run_all.sh                  every check, one command
 archive/                      drop conversation exports here (git-ignored)

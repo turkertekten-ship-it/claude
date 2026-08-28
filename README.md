@@ -16,7 +16,8 @@ unsourced belongs in `provenance/unknowns.md` as an open question. This is
 enforced, not trusted:
 
 ```bash
-bash tests/run_all.sh        # verifier + both test suites
+bash tests/run_all.sh              # every check, one command
+bash tools/install_git_hooks.sh    # once per clone: pre-push refuses a red suite
 ```
 
 ## What is here
@@ -36,6 +37,7 @@ bash tests/run_all.sh        # verifier + both test suites
 | `tools/_slots.py` | How a prompt labels its slots — shared by the linter and the checker. |
 | `tools/verify_measurements.py` | Re-runs the measurements this repository quotes, and fails when one has moved. |
 | `tools/check_consistency.py` | Checks that the repository's lists still agree with each other. |
+| `tools/install_git_hooks.sh` | Points git at `githooks/`, so a red suite cannot be pushed by accident. |
 | `tools/install_prompt_system.sh` | Installs the prompt system into `~/.claude`, for every terminal. |
 | `tests/` | Tests for every tool here, including their failure cases. |
 | `.claude/commands/` | The workflows, as slash commands. |

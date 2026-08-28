@@ -27,7 +27,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$CLAUDE_PROJECT_DIR\" && bash tests/run_all.sh 2>&1 | tail -25"
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && out=$(bash tests/run_all.sh 2>&1); status=$?; printf '%s\\n' \"$out\" | tail -25; exit $status"
           }
         ]
       }
