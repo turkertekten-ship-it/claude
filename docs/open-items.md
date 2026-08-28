@@ -73,24 +73,39 @@ operating guidance, and the mechanism does not depend on subagents obeying it.
 
 ---
 
+### 7. Which contract do `TaskCreated` / `TaskCompleted` honour? — *neither*
+
+Headless sessions have no task tools, so the first attempt at this was
+inconclusive. It was then settled from an **interactive** session, which does
+have them, by running the falsifier written for it: `enforce_task_quality=true`,
+then create a deliberately shapeless task.
+
+**Result: the denial is ignored.** The hook fired — `task-shape` appears in the
+ledger with the findings — and the task was created anyway, with both payload
+forms sent. Same for `TaskCompleted`. So unlike `Stop`, these events do not
+appear to honour a refusal at all on 2.1.247.
+
+The denial is still sent, so the check starts working the day the event honours
+it, and the advisory `systemMessage` reaches the transcript either way. The
+config key's comment says plainly that enforcement here does not bite.
+
+Two further findings came out of the same run, both bugs of mine:
+
+- **The payload keys are not the documented ones.** A live `TaskCreated` carries
+  `cwd, hook_event_name, prompt_id, session_id, task_description, task_id,
+  task_subject, transcript_path`. The reference says `task_title`; the runtime
+  sends `task_subject`. Reading the documented name found nothing, so *every*
+  task ever created was reported as having "no subject" — a check that looked
+  like it was working and was reading an absent field.
+- **`completion_notes` does not exist.** `TaskCompleted` carries exactly the
+  same keys as `TaskCreated`. The intended check — "say what makes this task
+  done" — is unimplementable, and a check against a field that never arrives
+  would have flagged every completion forever. `TaskCompleted` is now
+  observational: it logs and emits nothing.
+
+---
+
 ## Open, with the reason and the falsifier
-
-### 7. Which contract do `TaskCreated` / `TaskCompleted` honour?
-
-**Could not be tested here.** The task tools are not present in headless
-`claude -p` sessions: three runs asking the model to call `TaskCreate` all came
-back "there is no TaskCreate tool available in this environment", and the hook
-never fired.
-
-*Mitigation, by inference rather than measurement:* both events are documented
-exactly as `Stop` was, and for `Stop` the documented field proved to be accepted
-and ignored. The engine therefore sends both forms for these events too. This is
-flagged in the code as inference.
-
-*Falsifier:* in an interactive session with the task tools available, set
-`enforce_task_quality=true` and create a task with an empty description. If it
-is refused, the contract works; if it is created anyway, neither form is
-honoured for this event.
 
 ### 8. Does `SessionStart` re-seed after a compaction?
 

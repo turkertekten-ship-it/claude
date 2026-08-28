@@ -298,9 +298,30 @@ class TestTaskShape(Harness):
         )
         self.assertEqual(specific["permissionDecision"], "deny")
 
-    def test_completion_without_notes_is_flagged(self):
-        specific = self.specific(self.hook(payload("TaskCompleted", task_id="7", completion_notes="")))
-        self.assertIn("systemMessage", specific)
+    def test_task_created_reads_the_real_payload_keys(self):
+        """The reference says `task_title`. The runtime sends `task_subject`.
+
+        Measured by logging the keys of a live TaskCreated payload:
+        cwd, hook_event_name, prompt_id, session_id, task_description, task_id,
+        task_subject, transcript_path. Reading the documented name found nothing
+        and reported "the task has no subject" for every task ever created.
+        """
+        proc = self.hook(
+            payload("TaskCreated", task_subject="ship", task_description="short")
+        )
+        findings = self.specific(proc)["systemMessage"]
+        self.assertIn("'ship' is not an imperative phrase", findings)
+        self.assertNotIn("no subject", findings)
+
+    def test_completion_is_observational_only(self):
+        """There is no `completion_notes` field, so nothing can be checked.
+
+        Flagging every completion against a field that never arrives would be
+        noise forever. The event is logged and nothing is emitted.
+        """
+        proc = self.hook(payload("TaskCompleted", task_id="7", task_subject="ship it"))
+        self.assertEqual(proc.returncode, 0)
+        self.assertEqual(proc.stdout.strip(), "")
 
 
 class TestConfigAndLedger(Harness):

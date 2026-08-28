@@ -170,8 +170,9 @@ DEFAULT_CONFIG = {
     # Hard ceiling on refusals per session, so a disagreement about what counts
     # as a division can never become a loop.
     "max_denials_per_session": 2,
-    # Task-shape checks start advisory. Enforcement here denies tool calls,
-    # which is a bigger intrusion than asking for a better reply.
+    # Task-shape checks are advisory. Enforcement is offered but is *not
+    # honoured* by 2.1.247 — a denied TaskCreated is created anyway — so this
+    # only changes the wording the transcript sees. See docs/open-items.md.
     "enforce_task_quality": False,
     "log_events": True,
 }
@@ -493,17 +494,34 @@ def on_stop(payload, cfg):
     return emit("Stop", decision="deny", reason=STOP_REASON, also_block=True)
 
 
+def _first(payload, *names):
+    """First non-empty value among several candidate key names.
+
+    The payload key for a task's subject is not what the reference says: a live
+    TaskCreate whose subject was set still reported "the task has no subject",
+    so `task_title` was absent. The ledger records the keys actually seen, which
+    is how the real names get established rather than guessed.
+    """
+    for name in names:
+        value = payload.get(name)
+        if isinstance(value, str) and value.strip():
+            return value
+    return ""
+
+
 def on_task_created(payload, cfg):
-    findings = task_quality(payload.get("task_title", ""), payload.get("task_description", ""))
+    subject = _first(payload, "task_title", "task_subject", "subject", "title", "name")
+    description = _first(payload, "task_description", "description", "task_body", "body")
+    findings = task_quality(subject, description)
     if not findings:
         return None
     detail = "; ".join(findings)
-    log_event(cfg, "task-shape", {"findings": findings})
+    log_event(cfg, "task-shape", {"findings": findings, "keys": sorted(payload.keys())})
     if cfg["mode"] == "enforce" and cfg.get("enforce_task_quality"):
-        # also_block by inference, not measurement: TaskCreated is documented
-        # exactly as Stop was, and for Stop the documented field turned out to
-        # be accepted and ignored. The task tools are absent from headless
-        # sessions, so this one could not be tested here — see docs/open-items.md.
+        # Sent, but do not expect it to bite: measured on 2.1.247, a TaskCreated
+        # denial is ignored in both forms — the task is created regardless. Kept
+        # so the check starts working the day the event honours it, and so the
+        # advisory systemMessage below still reaches the transcript.
         return emit(
             "TaskCreated",
             decision="deny",
@@ -515,19 +533,18 @@ def on_task_created(payload, cfg):
 
 
 def on_task_completed(payload, cfg):
-    notes = str(payload.get("completion_notes") or "").strip()
-    if notes:
-        return None
-    log_event(cfg, "task-completed-bare", {"task": payload.get("task_id")})
-    if cfg["mode"] == "enforce" and cfg.get("enforce_task_quality"):
-        return emit(
-            "TaskCompleted",
-            decision="deny",
-            reason="Say what makes this task done — which done-condition now holds — "
-            "then mark it completed.",
-            also_block=True,
-        )
-    return emit("TaskCompleted", message="task division: completed without saying what makes it done")
+    """Observational only, and deliberately so.
+
+    The design here was to require a completion to say what makes the task done.
+    The payload makes that impossible: measured on 2.1.247, `TaskCompleted`
+    carries exactly `cwd, hook_event_name, prompt_id, session_id,
+    task_description, task_id, task_subject, transcript_path` — there is no
+    `completion_notes` field, despite the reference documenting one. A check
+    against a field that never arrives would flag every completion forever,
+    which is worse than not checking.
+    """
+    log_event(cfg, "task-completed", {"task": payload.get("task_id")})
+    return None
 
 
 DISPATCH = {

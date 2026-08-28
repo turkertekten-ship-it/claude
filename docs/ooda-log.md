@@ -568,3 +568,40 @@ selftest that passed, a hook that exited 0, a refusal the runtime "accepted", a
 reply that looked undivided. The fix each time was to measure the *effect*
 rather than the *event* — count the turns, read the passphrase back, check what
 actually changed on disk. A hook that runs is not a hook that works.
+
+---
+
+## Cycle 27 — Act: close the task-event question from a session that has task tools
+
+**Observe.** Cycle 23 left the `TaskCreated` contract open because headless
+sessions have no task tools. This session does. The falsifier had already been
+written down, so it was simply run: `enforce_task_quality=true`, then create a
+deliberately shapeless task.
+
+**Result.** The hook fired — `task-shape` in the ledger — and the task was
+**created anyway**, with both payload forms sent. `TaskCompleted` likewise. So
+unlike `Stop`, these events do not honour a refusal on 2.1.247. The inference
+made in cycle 23 was the right precaution and the wrong prediction, which is
+exactly why it was labelled as inference.
+
+**Orient — two more of my own bugs, surfaced by the same run.**
+
+The first finding was not the denial at all: the hook reported *"the task has no
+subject"* for a task whose subject was plainly set. Logging the payload keys
+settled it — a live `TaskCreated` carries `task_subject`, while the reference
+documents `task_title`. Reading the documented name found nothing, so every task
+ever created had been reported as subject-less. The check looked like it was
+working; it was reading a field that never arrives.
+
+The second: `TaskCompleted` carries exactly the same keys — no
+`completion_notes`, despite the reference documenting one. The intended check
+("say what makes this task done") is unimplementable, and against an absent
+field it would have flagged every completion forever. That handler is now
+observational: it logs and emits nothing. Deleting a check is the right move
+when the data it needs does not exist.
+
+**The recurring shape, one more time.** Three sources of truth — the reference,
+Anthropic's own plugin-dev skill, and the running binary — and the binary is the
+only one that has been right every time. Everything in this system that was
+wrong for more than five minutes was wrong because something *plausible* was
+believed instead of measured.

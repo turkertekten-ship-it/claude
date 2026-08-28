@@ -23,8 +23,8 @@ it receives on stdin, so a single registration serves every event:
 | `SubagentStart` | Carries it into subagent contexts, which never saw the original |
 | `PreCompact` | Records the compaction; never blocks one |
 | `Stop` | Challenges a substantial reply containing no division |
-| `TaskCreated` | Flags a task with no imperative subject or no checkable done-condition |
-| `TaskCompleted` | Flags a completion that never says what makes it done |
+| `TaskCreated` | Flags a task with no imperative subject or no checkable done-condition (advisory: a refusal is *not* honoured by 2.1.247) |
+| `TaskCompleted` | Observational only — the payload carries no completion notes to check |
 | `SessionEnd` | Closes the session's ledger entry |
 
 ## What is actually verified
@@ -138,7 +138,7 @@ python3 tools/task_division.py verify "1. a" "2. b"        # 0 divided, 1 not
 | `mode` | `enforce` | `off`, `warn` (advise only), or `enforce` (may refuse a stop) |
 | `min_response_chars` | `400` | Shorter replies are never challenged |
 | `max_denials_per_session` | `2` | Hard ceiling, so a disagreement cannot loop |
-| `enforce_task_quality` | `false` | Whether shapeless tasks are denied or merely flagged |
+| `enforce_task_quality` | `false` | Wording only — a denied `TaskCreated` is created anyway on 2.1.247 |
 | `log_events` | `true` | Write the JSONL ledger |
 
 Environment overrides, per shell: `CLAUDE_TASK_DIVISION_MODE=off|warn|enforce`,
