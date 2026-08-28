@@ -106,6 +106,8 @@ python3 "$S/ks_ap_katalog.py"; topla "AP · araç kataloğunun kurulumdaki hâli
 echo
 python3 "$S/ks_aq_zaman.py"; topla "AQ · yaptırım taramasının zaman ekseni" $?
 echo
+python3 "$S/ks_ar_onay.py"; topla "AR · onay durumu (yedinci kapı)" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

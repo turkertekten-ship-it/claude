@@ -473,6 +473,31 @@ kalır). **Yama neyin çatışma SAYILDIĞINA karar vermez** — o bir meslek
 kuralları meselesidir ve §9 uyarınca insana aittir; yalnızca mekanik
 kontrolün iki yönü de kapsaması sağlandı.
 
+## §12 · Kapılar — onay ihtiyacının beyanı, onayın kendisi değildir
+
+**[A] §9 "adı belli bir insan onaylamadan kullanılmaz" diyor; hiçbir kapı
+onay durumuna bakmıyor.**
+§12'nin kapsam kapısı *"Yetkili avukat görüşü gereken konular"* başlığının
+varlığını arıyor. Ama o başlık bir onay **kaydı** değil, onay
+**ihtiyacının beyanıdır** — tam tersi. Ölçüldü: müvekkile giden, başlığı
+usulünce taşıyan, hiçbir onay kaydı olmayan bir metin dışarı giden yolda
+**hiçbir kapıya takılmıyor.**
+
+Kitap onay verecek kişinin **adını** kaydediyor (`dosya-ac`'ın KAPSAM.md
+şablonunda "İnsan onayı verecek kişi"). Yani sistem **kimin onaylayacağını**
+biliyor; **onayladığını** hiçbir yerde kaydetmiyor. §9'un saydığı dört çıktı
+türü — müvekkile ya da karşı tarafa gidecek her şey, her başvuru metni,
+yönetim kuruluna sunulacak her rakam, süreye bağlı bir adımda dayanılacak
+her Türk hukuku beyanı — bu boşluğun tam ortasında duruyor. *(AR-01, AR-02)*
+
+→CEVAP: YOK — cevabın "yamalı hâlde sistem çalışıyor" cümlesi kapsıyor:
+**yedinci kapı** eklendi. Kuralı dikkatle seçildi: kusur onayın *yokluğu*
+değil, onay durumu hakkındaki **sessizliktir**. Bir taslak taslak olduğunu
+söyleyebilir, bir inceleme onaylanmadığını yazabilir (bu raporun kendisi
+öyle yapıyor); yasak olan, onaylanmış gibi görünen sessizliktir. Kapı ya bir
+onay kaydı (`Onay: <ad soyad> · <YYYY-AA-GG>`) ya da açık bir durum beyanı
+(`TASLAK` / `onaylanmamıştır`) ister.
+
 ## §12 · Kapılar — sır kapısının görmediği yol
 
 **[A] Sır kapısı müvekkil ADINI arıyor ama müvekkil DOSYA YOLUNU görmüyor.**

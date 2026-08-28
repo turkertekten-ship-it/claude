@@ -45,7 +45,7 @@ Altı cümlede sebebi:
    "1 ad" sayıp *"kural 6'nın gerçek kişi ayağı kapsanmıyor"* uyarısını
    sustur du: koruma bozulurken alarm da kapandı.
 
-**Yamalı hâlde sistem çalışıyor:** kırk çalıştırılabilir takım — **327
+**Yamalı hâlde sistem çalışıyor:** kırk bir çalıştırılabilir takım — **332
 vaka, 15 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15, birimler arası tutarlılık takımının
 kendi mutasyon yakalaması 10/10. Ama **üç mevzuat bulgusu ile kitabın kendi içindeki bir çelişki açık kalır**
@@ -2090,6 +2090,48 @@ Ve mutasyonun kendisi de iki kez satır kırılmasına takıldı: dosyada
 mutasyon inmedi. Takım metni düzleştirip baktığı için **doğru** olan taraftı;
 yanılan ölçüm değil, mutasyondu.
 
+### Onay ihtiyacının beyanı, onayın kendisi değildir
+
+Otuz beşinci turun taraması her kontrolü *neye bağlı* diye sınıfladı.
+Sormadığı soru şuydu: bir kontrol, **onay gerektiğini söylemekle onayın
+verildiğini kaydetmeyi** ayırt edebiliyor mu?
+
+§9 açık: *"Şu çıktılar **adı belli bir insan onaylamadan kullanılmaz**:
+müvekkile ya da karşı tarafa gidecek her şey, her başvuru metni, yönetim
+kuruluna sunulacak her rakam ve süreye bağlı bir adımda dayanılacak her Türk
+hukuku beyanı."* §12'nin kapsam kapısı ise *"Yetkili avukat görüşü gereken
+konular"* **başlığının** varlığını arıyor — ve o başlık bir onay kaydı değil,
+onay **ihtiyacının beyanıdır.** Tam tersi.
+
+Ölçüldü, iddia edilmedi. Müvekkile giden, başlığı usulünce taşıyan, hiçbir
+onay kaydı olmayan bir metin `disari=True` ile kapılara verildi:
+
+| metin | ateşleyen kapı |
+|---|---|
+| müvekkile giden, başlıklı, **onaysız** | **hiçbiri** |
+
+Kitap onay verecek kişinin **adını** kaydediyor (KAPSAM.md'de "İnsan onayı
+verecek kişi"). Yani sistem **kimin onaylayacağını** biliyor; **onayladığını**
+hiçbir yerde kaydetmiyor.
+
+**Yedinci kapı eklendi — ve kuralı dikkatle seçildi.** Kusur onayın *yokluğu*
+değildir: bir taslak taslak olduğunu söyleyebilir, bir inceleme
+onaylanmadığını yazabilir. **Kusur, onay durumu hakkındaki sessizliktir** —
+onaylanmış gibi görünen sessizlik. Kapı ya bir onay kaydı
+(`Onay: <ad soyad> · <YYYY-AA-GG>`) ya da açık bir durum beyanı (`TASLAK` /
+`onaylanmamıştır`) ister.
+
+Bu ayrım keyfî değil, bu incelemenin kendi durumunu da doğru sınıflandırıyor:
+**bu rapor onaylanmamıştır ve bunu açıkça yazar** — dolayısıyla kapıdan
+geçer. Kuralı kendi teslimatını haksız yere bloklayacak biçimde yazmak da,
+kendi teslimatına muafiyet tanıyacak biçimde yazmak da yanlış olurdu; ölçüt
+ikisini de yapmıyor. AR-04 raporun bu beyanı taşımaya devam ettiğini her
+koşumda sınar; mutasyonda beyan kaldırılınca kırmızıya döner.
+
+Ve AR-05 ters yönü tutuyor: onay kaydı taşıyan **aynı** metin susmalı. Kapıyı
+fazla geniş yapan bir mutasyon (onay kaydını da yok say) AR-05'i kırmızıya
+çeviriyor — V takımının dersi, yedinci kapıya uygulanmış hâli.
+
 ---
 
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
@@ -2210,6 +2252,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | AO · çatışmanın yönü ve zamanı | *kontrol tek yönlü ve yalnız açılışta* | **temiz** — iki yönlü ve geriye dönük hâle getirildi |
 | AP · araç kataloğunun kurulumdaki hâli | *katalog kurulumda hiç yok; arşiv ve veri lisansı okunmuyor* | **temiz** — katalog kuruldu, iki alan eklendi |
 | AQ · yaptırım taramasının zaman ekseni | *son kontrol noktası imza; kapanışta yeniden tarama yok* | **temiz** — dördüncü nokta ve kapanış adımı eklendi |
+| AR · onay durumu (yedinci kapı) | *onaysız §9 çıktısı hiçbir kapıya takılmıyordu* | **temiz** — yedinci kapı eklendi |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -2268,7 +2311,7 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 ### Nasıl yeniden koşulur
 ```
 ./sinama/hepsi.sh                 # 34 çalıştırılabilir takım:
-                                  #   327 vaka + 15 mutasyon (D)
+                                  #   332 vaka + 15 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -2349,9 +2392,10 @@ Dokuz takım, 96 vaka:
 | AO | **Çıkar çatışmasının yönü ve zamanı** — kontrol simetrik mi, geriye bakıyor mu | §8, §9, §18.9 |
 | AP | **Araç kataloğunun kurulumdaki hâli** — §13'ün kararları nerede yaşıyor | §13, §14, §3 |
 | AQ | **Yaptırım taramasının zaman ekseni** — imza ile kapanış arasında ne oluyor | §9, §5.1, §6 |
+| AR | **Onay durumu** — onay ihtiyacının beyanı ile onayın kendisi | §9, §12 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**327 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**332 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)

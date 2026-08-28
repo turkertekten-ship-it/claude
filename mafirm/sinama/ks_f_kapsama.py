@@ -107,7 +107,7 @@ EK = [
      "dokuz açık sınır sayılıyor; hiçbiri makinece kontrol edilmiyor"),
     ("kapıların yapısal sınırı",
      "SINIR",
-     "töreni eksiksiz ama RAKAMI yanlış bir cevap altı kapıdan da geçiyor "
+     "töreni eksiksiz ama RAKAMI yanlış bir cevap yedi kapıdan da geçiyor "
      "[J-09]. Kapılar biçimi denetler, muhakemeyi değil — ve §17.1'in kendi "
      "bulgusu tam olarak budur: kazanç açıklıkta, doğrulukta değil."),
 ]

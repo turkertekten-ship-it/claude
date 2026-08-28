@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bir birleşme devralma pratiğinin her esaslı çıktısındaki altı kapı.
+"""Bir birleşme devralma pratiğinin her esaslı çıktısındaki yedi kapı.
 
 Bunlar neden otomatik kontrol, neden CLAUDE.md'de bir kural değil. Belgedeki
 bir kurala model sakinken uyulur, görev uzayınca atlanır. Aşağıdaki kusurlar
@@ -496,9 +496,55 @@ def kapi_koltuk(metin, yol=None):
     return None
 
 
+# [AR-01 · otuz altıncı tur] YEDİNCİ KAPI — onay durumu.
+#
+# §9: "Şu çıktılar ADI BELLİ BİR İNSAN ONAYLAMADAN KULLANILMAZ: müvekkile ya
+# da karşı tarafa gidecek her şey, her başvuru metni, yönetim kuruluna
+# sunulacak her rakam ve süreye bağlı bir adımda dayanılacak her Türk hukuku
+# beyanı."
+#
+# §12'nin kapsam kapısı "Yetkili avukat görüşü gereken konular" BAŞLIĞINI
+# arıyordu. O başlık bir onay KAYDI değil, onay İHTİYACININ beyanıdır — tam
+# tersi. Ölçüldü: müvekkile giden, başlığı taşıyan, hiçbir onay kaydı
+# olmayan bir metin dışarı giden yolda hiçbir kapıya takılmıyordu. Sistem
+# kimin onaylayacağını biliyor (KAPSAM.md), onayladığını bilmiyordu.
+#
+# Kapının kuralı DİKKATLE seçildi: kusur onayın YOKLUĞU değil, onay durumu
+# hakkındaki SESSİZLİKtir. Bir taslak taslak olduğunu söyleyebilir; bir
+# inceleme onaylanmadığını yazabilir (bu raporun kendisi öyle yapıyor).
+# Yasak olan, onaylanmış gibi görünen sessizliktir.
+ONAY_KAYDI = re.compile(
+    r"^\s*Onay(?:layan)?\s*:\s*[^\n]*\d{4}-\d{2}-\d{2}", re.M)
+ONAY_YOKLUK_BEYANI = re.compile(
+    r"TASLAK|onaylanmamıştır|onaylanmadan kullanılmaz"
+    r"|hukuki görüş değildir|onay bekliyor", re.I)
+
+
+def kapi_onay(metin, yol=None, disari=False):
+    """§9 sınıfı bir çıktı, onay durumu hakkında SESSİZ kalamaz."""
+    if not disari:
+        return None
+    if _basvuru_malzemesi(yol):
+        return None
+    # §9 sınıfı mı: görüş/tavsiye biçiminde ya da avukat başlığını taşıyor
+    gorus = (TAVSIYE.search(metin) or OLUMSUZ.search(metin)
+             or GEREKLI_BASLIK in _sadelestir(tr_kucult(metin)))
+    if not gorus:
+        return None
+    if ONAY_KAYDI.search(metin) or ONAY_YOKLUK_BEYANI.search(metin):
+        return None
+    return ("onay",
+            "§9 sınıfı bir çıktı onay durumu hakkında sessiz: adı belli bir "
+            "insan onaylamadan kullanılamaz."
+            "  → ya onay kaydını yazın (\"Onay: <ad soyad> · <YYYY-AA-GG>\"), "
+            "ya da durumu açıkça beyan edin (\"TASLAK\" / "
+            "\"onaylanmamıştır\").")
+
+
 def denetle(metin, disari=False, bugun=None, yol=None):
-    """Altı kapının hepsi. (kapı, ileti) listesi döner."""
+    """Yedi kapının hepsi. (kapı, ileti) listesi döner."""
     return [b for b in (kapi_kapsam(metin, yol, disari),
+                        kapi_onay(metin, yol, disari),
                         kapi_kanit(metin, yol),
                         kapi_sir(metin, disari),
                         kapi_guncellik(metin, bugun),

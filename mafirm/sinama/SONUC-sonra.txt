@@ -1,5 +1,5 @@
 ###############################################################
-#  KÖR SINAMA TAKIMI — 2026-08-28T13:14:38Z
+#  KÖR SINAMA TAKIMI — 2026-08-28T13:25:50Z
 ###############################################################
 
 /root/mafirm/sinama/ks_a_esik.py:45: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
@@ -294,9 +294,9 @@ KÖR SINAMA M — errata ↔ sınama izlenebilirliği
 GEÇTİ M-01   her errata maddesi bir sınama vakasına atıf yapıyor
         65 madde · atıfsız 0: yok
 GEÇTİ M-02   atıf yapılan her vaka kimliği gerçekten tanımlı
-        389 tanımlı kimlik · uydurma dayanak: yok
+        395 tanımlı kimlik · uydurma dayanak: yok
 GEÇTİ M-03   [A] ve [B] maddelerinin atıfları gerçek vakalara bağlı
-        sadık koşumda kalan: 51 · tanımlı vaka: 318 · bağsız madde: yok
+        sadık koşumda kalan: 51 · tanımlı vaka: 324 · bağsız madde: yok
 GEÇTİ M-04   sadık sistemde kalan her vaka errata'da ya da raporda açıklanmış
         51 vaka kaldı · açıklanmamış: yok
 ------------------------------------------------------------------------------------------------
@@ -602,39 +602,39 @@ GEÇTİ Z-08   denetim beyan edilen asgari kontrol sayısını taşıyor
 KÖR SINAMA AA — kapı arızalandığında hangi yöne düşüyor
 ================================================================================================
 GEÇTİ AA-01a    bozuk olay: bozuk JSON
-        çıkış 2 (34 ms)
+        çıkış 2 (41 ms)
 GEÇTİ AA-01b    bozuk olay: boş girdi
-        çıkış 2 (33 ms)
+        çıkış 2 (36 ms)
 GEÇTİ AA-01c    bozuk olay: tool_input yok
-        çıkış 0 (36 ms)
+        çıkış 0 (39 ms)
 GEÇTİ AA-01d    bozuk olay: tool_input dizge
         çıkış 0 (38 ms)
 GEÇTİ AA-01e    bozuk olay: tool_input liste
-        çıkış 0 (39 ms)
+        çıkış 0 (36 ms)
 GEÇTİ AA-01f    bozuk olay: tool_name yok
-        çıkış 0 (41 ms)
+        çıkış 0 (40 ms)
 GEÇTİ AA-01g    bozuk olay: tool_name None
-        çıkış 0 (41 ms)
+        çıkış 0 (40 ms)
 GEÇTİ AA-01h    bozuk olay: içerik None
-        çıkış 0 (42 ms)
+        çıkış 0 (35 ms)
 GEÇTİ AA-01i    bozuk olay: içerik sayı
-        çıkış 0 (35 ms)
+        çıkış 0 (46 ms)
 GEÇTİ AA-01j    bozuk olay: derin iç içe
-        çıkış 0 (35 ms)
+        çıkış 0 (37 ms)
 GEÇTİ AA-01k    bozuk olay: JSON dizi (nesne değil)
-        çıkış 2 (33 ms)
+        çıkış 2 (36 ms)
 GEÇTİ AA-01l    bozuk olay: JSON null
         çıkış 2 (34 ms)
 GEÇTİ AA-02     ayrıştırma SONRASI arıza politikası yazılı ve dışarıda kapalı
         kanca, ayrıştırma sonrası istisnayı yakalayıp dışarı kanalında 2 döndürüyor
 GEÇTİ AA-03-20  boşluksuz 20000 karakter bütçe içinde bitiyor
-        64 ms (bütçe 5000 ms) çıkış 0
+        68 ms (bütçe 5000 ms) çıkış 0
 GEÇTİ AA-03-80  boşluksuz 80000 karakter bütçe içinde bitiyor
-        161 ms (bütçe 5000 ms) çıkış 0
+        171 ms (bütçe 5000 ms) çıkış 0
 GEÇTİ AA-03-200 boşluksuz 200000 karakter bütçe içinde bitiyor
-        345 ms (bütçe 5000 ms) çıkış 0
+        362 ms (bütçe 5000 ms) çıkış 0
 GEÇTİ AA-04     400 KB gerçek düzyazı bütçe içinde
-        464 ms çıkış 0
+        443 ms çıkış 0
 GEÇTİ AA-05     dayanıklılık yaması doğruluğu bozmadı
         üç davranış vakası da beklendiği gibi
 ------------------------------------------------------------------------------------------------
@@ -696,7 +696,7 @@ GEÇTİ AD-06   riskli ajan dağıtan her komut sır sınırını yazıyor
 KÖR SINAMA AE — Türkçeyi ve kendi kimliklerini desenle okumak
 ================================================================================================
 GEÇTİ AE-01   vaka kimliği desenleri iki harfli öneki de görüyor
-        44 dosya tarandı, tek harf varsayan desen yok
+        45 dosya tarandı, tek harf varsayan desen yok
 GEÇTİ AE-02   Türkçe harf içeren her karakter sınıfı TAM
         yarım Türkçe alfabe taşıyan sınıf yok
 GEÇTİ AE-03   Türkçe metin üzerinde çıplak .lower() yok
@@ -712,9 +712,9 @@ GEÇTİ AE-05   Türkçe küçültme dört köşede de doğru
 KÖR SINAMA AF — aparatın kendi hakkındaki iddiaları
 ================================================================================================
 GEÇTİ AF-01   diskteki her takım hepsi.sh tarafından çağrılıyor
-        40 takımın hepsi çağrılıyor
+        41 takımın hepsi çağrılıyor
 GEÇTİ AF-02   her python takımı kaybolan vaka korumasını taşıyor
-        38 python takımının hepsi vaka sayısını beyan ediyor
+        39 python takımının hepsi vaka sayısını beyan ediyor
 GEÇTİ AF-03   beyan-koşum sağlaması tam günlüğü bilen yerde duruyor
         12 beyan epilogda tam günlükle sınanıyor
 GEÇTİ AF-04   belirti karşılaştırması tam günlüğü bilen yerde duruyor
@@ -748,7 +748,7 @@ GEÇTİ AH-01   cevap numaralı sebepleri taşıyor
 GEÇTİ AH-02   'N cümlede sebebi' ifadesi sayılan sebeple uyuşuyor
         ifade 'Altı' (=6), sayılan 6
 GEÇTİ AH-03   her [A] bulgusu bir cevap noktası beyan ediyor
-        20 [A] bulgusunun hepsi beyanlı
+        21 [A] bulgusunun hepsi beyanlı
 GEÇTİ AH-04   beyan edilen her cevap noktası cevapta gerçekten var
         beyan edilen noktaların hepsi cevapta mevcut
 GEÇTİ AH-05   cevaba girmeyen ağır bulgu gerekçesini yazıyor
@@ -854,6 +854,14 @@ GEÇTİ          AQ-05  gerçek ad dış aramaya girmiyor, taranması insan kara
 ----------------------------------------------------------------------------------------------------
 5 vaka · 5 geçti · 0 beklenen · 0 SİNYAL
 
+GEÇTİ          AR-01  onay kaydı olmayan §9 çıktısı dışarı giden yolda yakalanıyor   
+GEÇTİ          AR-02  onay kaydı için bir biçim tanımlı                              
+GEÇTİ          AR-03  dosya açılırken onayı verecek kişi kaydediliyor                
+GEÇTİ          AR-04  bu raporun kendisi onaylanmadığını açıkça yazıyor              
+GEÇTİ          AR-05  onay kaydı taşıyan aynı çıktı onay kapısına takılmıyor         
+----------------------------------------------------------------------------------------------------
+5 vaka · 5 geçti · 0 beklenen · 0 SİNYAL
+
 ###############################################################
 #  ÖZET
 ###############################################################
@@ -897,6 +905,7 @@ GEÇTİ          AQ-05  gerçek ad dış aramaya girmiyor, taranması insan kara
   AO · çatışmanın yönü ve zamanı temiz
   AP · araç kataloğunun kurulumdaki hâli temiz
   AQ · yaptırım taramasının zaman ekseni temiz
+  AR · onay durumu (yedinci kapı)      temiz
   ------------------------------------------------------------
   TOPLAM SİNYAL                         0
 

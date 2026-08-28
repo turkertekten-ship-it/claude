@@ -60,7 +60,7 @@ kontrol "boş koltuklar işaretli (>=2)" \
 
 echo "=== kod sınamaları ==="
 kontrol "rekabet eşiği" "oz_sinama $M/birimler/rekabet/kod/esik.py 'SELFTEST OK'"
-kontrol "altı kapı"     "oz_sinama $M/.claude/hooks/kapi.py 'SELFTEST OK'"
+kontrol "yedi kapı"     "oz_sinama $M/.claude/hooks/kapi.py 'SELFTEST OK'"
 
 echo "=== bileşenler ==="
 kontrol "beceriler (>=11)"        "enaz 11 $M/.claude/skills/*/SKILL.md"

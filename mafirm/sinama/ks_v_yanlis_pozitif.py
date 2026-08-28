@@ -14,7 +14,7 @@ kazayla bulunmuştu (B-10, Türkçe büyük harfli başlık), yani sınıf boş 
 Yöntem: bir Türk M&A avukatının GERÇEKTEN üreteceği metinler yazıldı —
 kapı koduna göre değil, kitabın §0 çıktı sözleşmesine ve becerilerin
 belgelenmiş çıktı biçimlerine göre. Her metin için hangi kapının ateşlemesi
-GEREKTİĞİ önceden yazıldı. Sonra altı kapı koşuldu.
+GEREKTİĞİ önceden yazıldı. Sonra yedi kapı koşuldu.
 
   ateşlemesi gerekmiyor + ateşledi   -> YANLIŞ POZİTİF  (ölümcül sınıf)
   ateşlemesi gerekiyor  + susmuş     -> KAÇIRMA
