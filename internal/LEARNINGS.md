@@ -2385,3 +2385,58 @@ once it aged.
 3. **Re-measuring can leave the decision alone and still be worth the time.**
    Same switch, entirely different justification, and the difference between
    those two states is whether anyone can trust the switch.
+
+---
+
+## L53 - The stale table did not just mislead, it argued for the wrong value
+
+L52's rule - a measurement that justifies a default has a shelf life - names its
+own next target. `AnswerConfig.min_relevance` is the abstention floor, and its
+docstring ends: *"Re-sweep when the corpus changes - this number is a property
+of the corpus, not of the algorithm."* The corpus had just changed by 68%, so I
+re-swept it. That instruction was written by a previous cycle and worked.
+
+**The value did not move. Everything justifying it did.**
+
+| floor | 0.10-0.13 | 0.15-0.17 | 0.18 | **0.19** | 0.20-0.23 | 0.24-0.25 |
+| --- | --- | --- | --- | --- | --- | --- |
+| external | 44/54 | 45/54 | 46 | **47** | 46 | 45 |
+| combined | 61/74 | 62-63/74 | 64 | **65** | 64 | 63 |
+| over-answered | 6 | 5 | 4 | **3** | 3 | 2 |
+| over-refused | 0 | 1 | 1 | **1** | 2 | 4 |
+
+On 91 documents the curve had **two plateaus**, 0.19 was the midpoint of the
+upper one, and a lone peak at 0.20 was deliberately rejected with the reasoning
+that picking a peak fits the threshold to 74 questions. On 153 documents the
+curve is **unimodal and 0.19 is its mode**, with 0.18 and 0.20 one case below on
+either side.
+
+So the old advice - pick the plateau, not the peak - no longer applies, because
+there is no longer a plateau to pick. That advice was about a spike in a flat
+region; the mode of a smooth single-peaked curve is a different object. Same
+number, opposite argument.
+
+**And the old table actively argued for the wrong value.** Its best cell was
+0.20 at 49/54. Today 0.20 measures 46/54. A reader trusting the documented sweep
+would have raised the floor and lost a case - which is the difference between a
+stale number in a report and a stale number in a decision: the first misleads,
+the second recommends.
+
+**A second thing the re-sweep killed.** The original rationale for preferring a
+higher floor was that it cuts over-answering, the failure this project treats as
+dangerous. On the current corpus over-answering sits at 3 from 0.19 all the way
+to 0.23 - raising the floor buys none of what it was supposed to buy, and costs
+an over-refusal. The safety argument is simply not available here any more.
+
+**Rules.**
+1. **Write the re-run trigger into the docstring.** "Re-sweep when the corpus
+   changes" is the only reason this got re-measured, two cycles and one corpus
+   later. A measurement that says what would invalidate it is a measurement that
+   gets renewed.
+2. **When a value survives a re-measurement, check whether its argument did.**
+   Twice now the number has stayed and the reasoning has been replaced. A
+   default defended by an argument that no longer holds is undefended, and looks
+   identical to a well-chosen one.
+3. **A stale decision table is worse than no table**, because it converts a
+   reader's diligence into a wrong move. Anyone following this one would have
+   changed the floor on the strength of a cell that had gone stale.
