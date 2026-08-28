@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 from typing import Callable
 
 from oodarag.models import ScoredChunk
-from oodarag.util.text import tokenize
+from oodarag.util.text import expand_compounds, is_compound, tokenize
 
 
 class Reranker(ABC):
@@ -80,6 +80,35 @@ class HeuristicReranker(Reranker):
     base_weight: float = 1.0
     half_life_days: float = 365.0
 
+    def _query_set(self, query_terms: list[str]) -> set[str]:
+        """Query terms for coverage, with unmatchable compounds broken up.
+
+        `tokenize` keeps `snake_case`, `dotted.paths` and hyphenated words whole
+        so that identifiers survive, which is right for a corpus that is half
+        code. FTS5's unicode61 splits on those separators, so a quoted
+        "in-process" reaches the lexical arm as a two-word phrase and matches a
+        document saying "in process". The reranker then scored that same
+        document as containing neither, and - because a term the corpus has
+        never contained gets the maximum idf - the ghost term dominated both the
+        coverage denominator and answerability. "Which library dispatches
+        in-process notifications between objects?" was retrieved and then
+        abstained on, at relevance 0.13 against a 0.15 floor.
+
+        Only compounds absent from the corpus are split. A compound the corpus
+        does contain is a real term and keeps its atomic identity.
+        """
+        vocabulary = self.vocabulary
+        if not vocabulary:
+            return set(query_terms)
+        expanded: set[str] = set()
+        for term in query_terms:
+            if term in vocabulary or not is_compound(term):
+                expanded.add(term)
+                continue
+            parts = [p for p in expand_compounds([term], stem_words=True) if p != term]
+            expanded.update(parts or [term])
+        return expanded
+
     def _answerability(self, query_terms: set[str]) -> float:
         """How much of the query's information the corpus contains at all.
 
@@ -118,7 +147,7 @@ class HeuristicReranker(Reranker):
         # saying "abstained" as containing none of a query for "abstain", and
         # so demotes the exact passages the lexical arm ranked first.
         query_terms = tokenize(query, stem_words=True)
-        query_set = set(query_terms)
+        query_set = self._query_set(query_terms)
         # Computed once per query, not per chunk.
         answerability = self._answerability(query_set)
         # Content tokens only. Measuring the phrase over every token lets a run

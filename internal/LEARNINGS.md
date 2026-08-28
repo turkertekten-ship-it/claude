@@ -580,3 +580,58 @@ where in the list a result lands, separated the arms immediately.
 Both failure modes are pinned by `RerankCouplingTest`, and both were confirmed
 by mutation: re-introducing the conditional rerank fails 3 of its 3 tests;
 re-introducing the order-only fix fails 2 of 3.
+
+---
+
+## L24 - A tokenizer that disagrees with the index invents terms the corpus can never contain
+
+**Evidence.** "Which library dispatches in-process notifications between
+objects?" retrieved `blinker.md` and then abstained on it: relevance 0.13
+against a 0.15 floor.
+
+`_TOKEN_RE` deliberately glues `snake_case`, `dotted.paths` and hyphenated words
+into single tokens, because half this corpus is code and `oodarag.util.text` is
+one identifier rather than three words. FTS5's `unicode61` treats `.`, `-` and
+`/` as separators. So the two stages disagreed, and `_fts_query` quotes each
+term, which makes `"in-process"` a *phrase* to FTS5 - it matched a document
+saying "in process" perfectly well. The reranker then scored that same document
+as containing neither word.
+
+The damage came from the idf default. A term absent from the corpus gets the
+maximum idf, so `in-process` scored 8.56 against `process`'s 5.43 - the ghost was
+the most informative term in the query, and it could not be matched by any
+document, ever. It dominated the coverage denominator and dragged answerability
+from 1.0 to 0.695.
+
+**What did not work.** Expanding compounds into their parts everywhere -
+coverage, idf table, FTS query - looked like the principled repair. Measured on
+the external corpus it left recall unchanged, moved precision +0.005, and cost
+MRR 0.029 and nDCG 0.023. It also did not fix the case that motivated it:
+blinker still scored 0.13. The atomic compound was carrying real signal, and
+adding parts to both sides of the comparison mostly added noise.
+
+**What worked.** Split a compound *only when the corpus vocabulary does not
+contain it*. A compound the corpus has is a real term and keeps its identity; a
+compound the corpus cannot have is not evidence of anything and is replaced by
+its parts. Measured on the external corpus: recall, precision, MRR and nDCG all
+unchanged to four decimal places, the wrong abstention gone, and the gate's
+separation improved - the lowest-scoring answerable case rose 0.1301 to 0.1804
+and misclassifications at the floor fell from 3 to 2.
+
+**Rules.**
+1. When two stages tokenize the same text differently, the disagreement does not
+   show up as an error. It shows up as one stage confidently reporting that a
+   term is absent, which is the strongest signal the system has.
+2. Before repairing a disagreement, check which side is right. Here the whole-
+   token regex was right about identifiers and wrong only about terms the corpus
+   does not contain, so the fix belonged at that exact boundary and nowhere else.
+3. A default assigned to "unseen" is a claim. `idf(unseen) = max` says absence is
+   maximally informative; that is true of a real word and false of a token the
+   tokenizer invented.
+4. **A measurement whose motivating case does not move is a failed measurement**,
+   whatever the aggregate did. The broad expansion moved four aggregate metrics
+   and left blinker at 0.13 - that, not the nDCG loss, was the signal it was the
+   wrong fix.
+
+`GhostCompoundTest` pins it, taking the premise from SQLite itself rather than
+asserting it: if FTS5 ever stops splitting on those separators, the test says so.

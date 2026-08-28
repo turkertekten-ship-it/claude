@@ -68,6 +68,56 @@ def tokenize(text: str, stem_words: bool = False) -> list[str]:
     return [stem(t) for t in tokens]
 
 
+_COMPOUND_SEP_RE = re.compile(r"[.\-/]")
+
+
+def is_compound(token: str) -> bool:
+    """True when `_TOKEN_RE` glued this token together across `.`, `-` or `/`.
+
+    FTS5's unicode61 treats all three as separators, so a compound is one term
+    here and several there. Anything comparing tokens against the lexical index
+    needs to know which side of that difference it is on.
+    """
+    return bool(_COMPOUND_SEP_RE.search(token))
+
+
+def expand_compounds(tokens: list[str], stem_words: bool = False) -> list[str]:
+    """The tokens, plus the parts of any compound among them.
+
+    `_TOKEN_RE` deliberately keeps `snake_case`, `dotted.paths` and hyphenated
+    words whole, because half this corpus is code and `oodarag.util.text` is one
+    identifier rather than three words. That is right for the token *sequence*,
+    which phrase scoring reads, and wrong for token *membership*, which coverage,
+    IDF and the lexical query read - because FTS5's unicode61 tokenizer treats
+    `.`, `-` and `/` as separators, so the lexical arm has always matched a
+    quoted "in-process" against a document saying "in process" while the
+    reranker scored that same document as containing neither. The lexical arm
+    retrieved the chunk and the reranker then judged the query's most
+    informative term absent, which is the disagreement this repairs.
+
+    The compound is kept as well as split: dropping it would lose the exact-
+    identifier match that the atomic form exists to provide.
+    """
+    expanded = list(tokens)
+    seen = set(tokens)
+    for token in tokens:
+        if not _COMPOUND_SEP_RE.search(token):
+            continue
+        for part in _COMPOUND_SEP_RE.split(token):
+            if len(part) < 2 or part in STOPWORDS:
+                continue
+            if stem_words:
+                from oodarag.util.stemming import stem
+
+                part = stem(part)
+                if len(part) < 2 or part in STOPWORDS:
+                    continue
+            if part not in seen:
+                seen.add(part)
+                expanded.append(part)
+    return expanded
+
+
 def tokenize_all(text: str) -> list[str]:
     """Every token, including stopwords - used for phrase-level matching."""
     return [m.group(0).lower() for m in _TOKEN_RE.finditer(text)]

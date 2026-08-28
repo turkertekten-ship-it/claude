@@ -12,6 +12,7 @@ citation. That is what makes an adversarial pass worth its cost.
 
 from __future__ import annotations
 
+import sqlite3
 import unittest
 
 from oodarag.chunking import chunk_document
@@ -21,7 +22,7 @@ from oodarag.generate.answer import AnswerConfig, AnswerGenerator
 from oodarag.models import Chunk, Document, RawDocument
 from oodarag.pipeline import IndexPipeline
 from oodarag.retrieve.hybrid import HybridRetriever
-from oodarag.retrieve.rerank import _longest_common_run
+from oodarag.retrieve.rerank import HeuristicReranker, _longest_common_run
 from oodarag.scrape.html import extract
 from oodarag.store.sqlite_store import SqliteStore
 from oodarag.util.http import normalize_url
@@ -788,3 +789,79 @@ class RerankCouplingTest(unittest.TestCase):
                                   msg="use_rerank=False left the reranked score in place")
         # The features are still there either way - the gate needs them.
         self.assertIn("rerank_relevance", plain[0].components)
+
+
+class GhostCompoundTest(unittest.TestCase):
+    """A hyphenated query term was an unmatchable term with the maximum idf.
+
+    `tokenize` keeps `snake_case`, `dotted.paths` and hyphenated words whole so
+    identifiers survive a corpus that is half code. FTS5's unicode61 splits on
+    those separators, so the lexical arm matched a quoted "in-process" against a
+    document saying "in process" - and the reranker then scored that same
+    document as containing neither. Because a term the corpus has never held
+    gets the maximum idf, the ghost dominated the coverage denominator and
+    answerability: a retrieved, relevant document was abstained on at relevance
+    0.13 against a 0.15 floor.
+    """
+
+    def test_sqlite_and_the_tokenizer_really_do_disagree(self):
+        """The premise, observed from SQLite rather than asserted about it.
+
+        If FTS5 ever stops splitting on these separators the fix below is
+        unnecessary, and this test is how we would find out.
+        """
+        conn = sqlite3.connect(":memory:")
+        self.addCleanup(conn.close)
+        try:
+            conn.execute("CREATE VIRTUAL TABLE t USING fts5"
+                         "(x, tokenize='porter unicode61 remove_diacritics 2')")
+        except sqlite3.OperationalError:
+            self.skipTest("FTS5 unavailable in this SQLite build")
+        conn.execute("INSERT INTO t VALUES (?)",
+                     ("blinker provides fast in process signal dispatching",))
+        matched = conn.execute(
+            "SELECT count(*) FROM t WHERE t MATCH ?", ('"in-process"',)).fetchone()[0]
+        self.assertEqual(matched, 1,
+                         "FTS5 no longer treats a hyphen as a separator")
+        # The Python tokenizer, given the same string, keeps it whole.
+        self.assertIn("in-process", tokenize("in-process notifications"))
+
+    def _reranker(self, vocabulary: set[str]):
+        return HeuristicReranker(idf=lambda t: 8.56 if t not in vocabulary else 2.0,
+                                 vocabulary=vocabulary)
+
+    def test_a_compound_the_corpus_lacks_is_replaced_by_its_parts(self):
+        reranker = self._reranker({"process", "notif", "signal"})
+        query_set = reranker._query_set(tokenize("in-process notifications", stem_words=True))
+        self.assertNotIn("in-process", query_set,
+                         "a term the corpus cannot contain was left in the query")
+        self.assertIn("process", query_set)
+        self.assertIn("notif", query_set)
+
+    def test_a_compound_the_corpus_has_keeps_its_atomic_identity(self):
+        """Splitting unconditionally would dissolve every identifier in a corpus
+        that is half code, which is what the whole-token regex exists to stop."""
+        vocabulary = {"oodarag.util.text", "oodarag", "util", "text"}
+        reranker = self._reranker(vocabulary)
+        query_set = reranker._query_set(tokenize("oodarag.util.text", stem_words=True))
+        self.assertEqual(query_set, {"oodarag.util.text"})
+
+    def test_an_unsplittable_unknown_term_survives(self):
+        """A plain unknown word is real evidence of absence - that is what
+        answerability is for - so it must not be dropped."""
+        reranker = self._reranker({"process"})
+        query_set = reranker._query_set(tokenize("mercury boiling", stem_words=True))
+        self.assertEqual(query_set, {"mercuri", "boil"})
+
+    def test_the_ghost_no_longer_dominates_answerability(self):
+        """Derived, not copied from a run: with the ghost present the query's
+        known idf mass is 2.0 of 10.56; split, it is all of it."""
+        vocabulary = {"process", "notif"}
+        reranker = self._reranker(vocabulary)
+        terms = tokenize("in-process notifications", stem_words=True)
+        reranker.min_vocabulary_for_answerability = 0
+        with_ghost = reranker._answerability(set(terms))
+        repaired = reranker._answerability(reranker._query_set(terms))
+        self.assertAlmostEqual(with_ghost, 2.0 / 10.56, places=4)
+        self.assertAlmostEqual(repaired, 1.0, places=4)
+        self.assertGreater(repaired, with_ghost)
