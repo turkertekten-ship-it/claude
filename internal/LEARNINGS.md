@@ -1452,3 +1452,47 @@ disabled, the error cleared before reporting - fails exactly one of them.
 3. A property that holds by construction still needs a test, or the next
    refactor removes the construction. `removed = ... if completed else []` is one
    line, and it is the whole of "a failure never shrinks the corpus".
+
+---
+
+## L40 - Sweeping the docstrings for claims, and finding one the chunker did not keep
+
+Three separate defects this session started from a docstring asserting something
+the code did not do (L36, L37, L39). Rather than keep stumbling on them, this is
+the sweep: grep the source for absolute claims - never, always, cannot, only -
+and check the ones that are load-bearing and cheap to test.
+
+Most held, and two were already tested: "never silently replay a POST" has
+`test_post_is_not_replayed_across_a_redirect`, and the prune guard's promises
+have theirs.
+
+**One did not.** `_pack`'s docstring says *"Overlap is applied in whole units, so
+a chunk never starts mid-sentence."* True of sentences and silent about code
+fences, which the chunker does not model at all. Measured on the 91-document
+corpus: **20 of 1,148 chunks carry an odd number of fence markers** - a long
+fenced block lands in two chunks, the first ending inside the fence and the
+second opening with the orphaned tail and a closing marker that opens nothing.
+
+It reaches the user, because the extractive generator quotes chunk text
+verbatim: an unclosed fence renders everything after it as code, and a stray
+closing one renders the prose before it as code. Balancing the markers fixes it
+without moving a boundary, so retrieval is untouched - 48/54, recall 0.9186,
+nDCG 0.7965, identical.
+
+**The test I wrote for it could not fail in the way that mattered.** Which end
+is missing decides where the marker goes, and my assertion only checked that the
+count came out even. Appending to a chunk that *opens* with a dangling marker
+also makes the count even - and wraps the prose in a code block. The mutation
+passed. The assertion now checks the prose ends up outside the fence, which is
+the actual claim.
+
+**Rules.**
+1. A docstring claim is scoped by the vocabulary it uses. "Never starts
+   mid-sentence" is true and says nothing about a document whose structure is
+   not sentences - the gap was in what the sentence did not mention.
+2. **When a repair has two directions, an assertion about the symptom cannot
+   tell them apart.** Balancing a count is satisfied by both the right fix and
+   the wrong one; only asserting where the content ends up separates them.
+3. Measure the claim on the corpus, not on a fixture. Three fixture cases passed
+   while 20 real chunks were broken, and the corpus test is what regresses if
+   the packing changes.

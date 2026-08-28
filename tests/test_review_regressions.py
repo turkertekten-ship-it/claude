@@ -1776,3 +1776,81 @@ class ZeroDependencyTest(unittest.TestCase):
                             f"{path.relative_to(root)}:{node.lineno} imports {root_pkg}")
         self.assertEqual(offenders, [],
                          "third-party imports at module scope: " + "; ".join(offenders))
+
+
+from oodarag.chunking import _balance_fences  # noqa: E402
+
+
+class ChunkFenceTest(unittest.TestCase):
+    """A code fence split across chunks left both halves malformed.
+
+    Packing works in prose or code units and knows nothing about fences, so a
+    long fenced block lands in two chunks: the first ends inside the fence, the
+    second opens with the orphaned tail and a closing marker that opens nothing.
+    Measured on the 91-document external corpus, 20 of 1,148 chunks carried an
+    odd number of markers.
+
+    It reaches the user because the extractive generator quotes chunk text
+    verbatim: an unclosed fence renders everything after it as code, and a stray
+    closing one renders the prose before it as code.
+    """
+
+    FENCE = "`" * 3
+
+    def _markers(self, text: str) -> int:
+        return sum(1 for line in text.splitlines()
+                   if line.strip().startswith(self.FENCE))
+
+    def test_a_chunk_left_open_is_closed(self):
+        out = _balance_fences(f"Here is an example:\n{self.FENCE}\nprint(1)")
+        self.assertEqual(self._markers(out) % 2, 0)
+        self.assertTrue(out.startswith("Here is an example:"))
+        self.assertTrue(out.rstrip().endswith(self.FENCE))
+
+    def test_a_chunk_starting_inside_a_fence_is_opened_not_closed(self):
+        """Which end is missing decides where the marker goes, and asserting
+        only "the count is even" cannot tell the two apart: appending to a chunk
+        that opens with a dangling marker balances the count *and* wraps the
+        prose in a code block. The prose has to end up outside."""
+        text = f"{self.FENCE}\nAnd then the prose continues."
+        out = _balance_fences(text)
+        self.assertEqual(self._markers(out) % 2, 0)
+        self.assertFalse(out.rstrip().endswith(self.FENCE),
+                         "the marker was appended, putting the prose inside the fence")
+        self.assertTrue(out.rstrip().endswith("And then the prose continues."))
+
+    def test_balanced_text_is_returned_unchanged(self):
+        """No boundary moves and no text is added when nothing is broken."""
+
+        for text in ("plain prose with no fence at all",
+                     f"before\n{self.FENCE}\ncode()\n{self.FENCE}\nafter",
+                     ""):
+            with self.subTest(text=text[:24]):
+                self.assertEqual(_balance_fences(text), text)
+
+    def test_no_chunk_of_the_real_corpus_has_an_unbalanced_fence(self):
+        """Measured over the corpus rather than a fixture: this is the property
+        the fixture cases are standing in for, and it is what regressed."""
+        import pathlib
+
+        from oodarag.chunking import chunk_document
+        from oodarag.models import Document
+
+        root = pathlib.Path(__file__).resolve().parent.parent / "corpus/external/pypi"
+        files = sorted(root.glob("*.md"))
+        if not files:
+            self.skipTest("external corpus not present")
+        offenders, total = [], 0
+        for path in files:
+            doc = Document(doc_id=path.stem, source_system="fs", external_id=path.stem,
+                           uri=f"file://{path}", title=path.stem,
+                           text=path.read_text(encoding="utf-8"), content_hash="h",
+                           metadata={}, created_at=0.0, updated_at=0.0)
+            for chunk in chunk_document(doc):
+                total += 1
+                if self._markers(chunk.text) % 2:
+                    offenders.append(f"{path.stem}#{chunk.ordinal}")
+        self.assertGreater(total, 500, "the corpus walk found almost nothing")
+        self.assertEqual(offenders, [],
+                         f"{len(offenders)} of {total} chunks have an unbalanced "
+                         f"fence: {offenders[:5]}")

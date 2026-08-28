@@ -78,6 +78,40 @@ class ChunkConfig:
     code_max_tokens: int = 700
 
 
+_FENCE = "`" * 3
+
+
+def _balance_fences(text: str) -> str:
+    """Close a code fence the split left open, and open one it left dangling.
+
+    Packing works in prose or code units and knows nothing about fences, so a
+    long fenced block lands in two chunks: the first ends inside the fence, the
+    second begins with the orphaned tail and a closing marker that opens nothing.
+    Measured on the 91-document external corpus, 20 of 1,148 chunks carry an odd
+    number of markers.
+
+    It matters because the extractive generator quotes chunk text verbatim into
+    answers. An unclosed fence renders everything after it as code; a stray
+    closing one renders the answer's prose as code from that point back.
+
+    Only the markers are added - no boundary moves, so retrieval is unaffected
+    and a chunk stays exactly the text it was, made independently renderable.
+    """
+    if _FENCE not in text:
+        return text
+    lines = text.splitlines()
+    markers = [i for i, line in enumerate(lines) if line.strip().startswith(_FENCE)]
+    if len(markers) % 2 == 0:
+        return text
+    # An odd count means one end is missing. Which end is decided by where the
+    # first marker sits relative to the text before it: a chunk opening with a
+    # marker inherited an already-open fence.
+    first = markers[0]
+    if not any(lines[i].strip() for i in range(first)):
+        return f"{_FENCE}\n{text}"
+    return f"{text}\n{_FENCE}"
+
+
 def chunk_document(doc: Document, config: ChunkConfig | None = None) -> list[Chunk]:
     """Split one document into retrievable chunks."""
     config = config or ChunkConfig()
@@ -100,7 +134,7 @@ def chunk_document(doc: Document, config: ChunkConfig | None = None) -> list[Chu
 
     chunks: list[Chunk] = []
     for ordinal, (text, start, meta) in enumerate(pieces):
-        text = text.strip()
+        text = _balance_fences(text.strip())
         if not text:
             continue
         header = _context_header(doc, meta) if config.include_context_header else ""
