@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>63 çalıştırılabilir takım · 446 vaka · 0 sinyal</span>
+    <span>64 çalıştırılabilir takım · 457 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -3712,6 +3712,97 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Altmış dördüncü tur</span>
+  <h2>Yamanın kendi gerekçesi, yamayı yarım bırakmıştı</h2>
+
+  <p>Bir önceki tur sır kapısının <strong>ad kaydı</strong> ayağına Türkçe aksan
+  katlaması ekledi ve yamanın yanına gerekçesini yazdı: <em>"Katlama yalnızca ad
+  kaydı karşılaştırmasında uygulanır: desen ayağındaki kalıplar
+  (<code>A.Ş.</code>, <code>Ltd. Şti.</code>) Türkçe harf içerir ve metni
+  katlayıp deseni katlamamak onları kırardı."</em></p>
+
+  <p>Cümle doğru, sonucu yanlış. O cümle katlamanın <strong>yarısına</strong>
+  karşı bir argümandır — ad kaydı ayağı zaten <strong>iki tarafı birden</strong>
+  katlıyordu. Desen ayağı katlanmadan kaldı ve bir tam koşumdan, yirmi yedi
+  mutasyondan ve bir denetimden <strong>yeşil</strong> geçti: hiçbir şey desen
+  ayağının normalleştirmesini ölçmüyordu.</p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">kural 6</span>
+      <span class="pill b">Sessiz kaçış · ana yolda</span></div>
+    <h3><code>Acme Gida A.S.</code> kapıdan sessizce geçiyordu</h3>
+    <table>
+      <thead><tr><th>dışarı giden metin</th><th>kapı</th></tr></thead>
+      <tbody>
+        <tr><td><code>Hedef Acme Gida A.S. sirketidir.</code></td><td>geçti</td></tr>
+        <tr><td><code>Target is Acme Gida A.S.</code></td><td>geçti</td></tr>
+        <tr><td><code>Hedef Acme Gida Anonim Sirketi'dir.</code></td><td>geçti</td></tr>
+        <tr><td><code>Hedef Acme Gida Ltd. Sti.</code></td><td>geçti</td></tr>
+        <tr><td><code>Islem degeri &lt;rakam&gt; TL</code></td><td>geçti</td></tr>
+      </tbody>
+    </table>
+    <p><code>A.S.</code>, bir Türk unvanının İngilizce bir SPA'da, bir veri odası
+    dizin listesinde ya da bir arama kutusunda aldığı <strong>en yaygın</strong>
+    biçimdir. Kaçış kenar durum değil, ana yoldur.</p>
+    <p>Tablodaki rakam bilerek elendi: bu rapor da kendi kanıt kuralına
+    tabidir ve dayanağı olmayan bir eşik rakamı — örnek olarak bile —
+    burada duramaz. Kapı bunu ilk koşumda yakaladı; elenen şey ölçümün
+    kendisi değil, gösterimidir.</p>
+  </div>
+
+  <p><strong>Duran kural:</strong> iki tarafı karşılaştıran her kapı ayağı, iki
+  tarafa da aynı normalleştirmeyi uygular. Yarım uygulanan bir normalleştirme
+  hiç uygulanmayandan tehlikelidir — ölçen kişi kapatıldığını sanır. Ölçüt artık
+  <strong>keşifle</strong> tutuluyor: sır kapısının gövdesindeki her arama
+  katlanmış metni hedeflemek zorunda, yarın eklenecek bir ayak dâhil.</p>
+
+  <h3>Ve yanlış hedefe inen sonda, başka bir kapıyı açtı</h3>
+  <p>Ters yönü ölçmek için yazdığım ilk sonda metni literal olarak
+  <code>TASLAK</code> kelimesini taşıyordu ve vaka kırmızı yandı. Kapı haklıydı;
+  sonda yanlış hedefe inmişti. Ama ıskalayan sonda başka bir şeye çarptı.</p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">insan onayı</span>
+      <span class="pill b">Olumsuzlanmış beyan, yedinci kapıyı susturuyordu</span></div>
+    <h3>Belgenin <em>nihai</em> olduğunu söyleyen cümle, onay kapısını kapatıyordu</h3>
+    <table>
+      <thead><tr><th>kural 9 sınıfı bir çıktının sonundaki cümle</th><th>onay kapısı</th></tr></thead>
+      <tbody>
+        <tr><td><code>Bu belge TASLAK DEĞİLDİR.</code></td><td>sustu</td></tr>
+        <tr><td><code>Belgenin taslak aşaması geçilmiştir.</code></td><td>sustu</td></tr>
+        <tr><td><code>Artık onay bekliyor değildir.</code></td><td>sustu</td></tr>
+        <tr><td><code>Bu koltuk KOLTUK BOŞ değildir.</code> (koltuk kapısı)</td><td>sustu</td></tr>
+      </tbody>
+    </table>
+    <p>Dördü de belgenin <strong>nihai</strong> olduğunu söyler — yani işletim sözleşmesi
+    kural 9'un var olma sebebinin ta kendisi: onaylanmış <em>gibi</em> duran, hiçbir onay kaydı
+    taşımayan bir çıktı. Bir beyanı <strong>anmak</strong> onu taşımak değildir;
+    bir beyanı <strong>olumsuzlamak</strong> ise anmamaktan da beterdir.</p>
+  </div>
+
+  <h3>Sınıfı adıyla anan takım, sınıfı 3/7 kapatmıştı</h3>
+  <p>Bu kusuru bulması gereken gözcü vardı. Beş tur önce tam bu sınıf için
+  yazılmış takım, başlığında şunu yazıyordu: <em>"Yedi kapı var ve altısına bu
+  soru hiç sorulmadı… bir kusur bir yerde düzeltilince sınıf kapanmaz."</em>
+  Cümleyi yazdıktan sonra <strong>üç</strong> kapıya çift veriyordu. Atlanan dört
+  kapının <strong>ikisi</strong> gerçekten sızdırıyordu.</p>
+
+  <p>Takım artık yedi kapının hepsini taşıyor ve listeyi <strong>keşifle</strong>
+  tutuyor. Kapının <em>aradığı şeyin türü</em> de artık varsayılmıyor, beyan
+  ediliyor — çünkü kutupları ters çevirir:</p>
+  <ul>
+    <li>kapı <strong>zorunlu</strong> bir şey arıyorsa (başlık, tarih, dayanak,
+    onay, kaynak beyanı), eksik normalleştirme <strong>kapalı</strong> yönde
+    arızalanır: yanlış blok, güvenli taraf;</li>
+    <li>kapı <strong>yasak</strong> bir şey arıyorsa (müvekkil kimliği), eksik
+    normalleştirme <strong>açık</strong> yönde arızalanır: sessiz kaçış,
+    tehlikeli taraf.</li>
+  </ul>
+  <p>Ayrım beyan edilmeseydi sır kapısı için "anan ateşlemeli" diye sınanır ve
+  takım kendi çerçevesini kırardı.</p>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -3914,7 +4005,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 63 takım · 446 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 64 takım · 457 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:

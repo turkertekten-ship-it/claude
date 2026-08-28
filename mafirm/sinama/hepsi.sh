@@ -152,6 +152,8 @@ python3 "$S/ks_bm_cikti_sozlesmesi.py"; topla "BM · aracın gerçek çıktısı
 echo
 python3 "$S/ks_bn_ad_kaydi.py"; topla "BN · sır kapısının ad kaydı ayağı" $?
 echo
+python3 "$S/ks_bo_normallestirme.py"; topla "BO · normalleştirme iki tarafa da uygulanıyor mu" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

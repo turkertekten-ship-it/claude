@@ -406,14 +406,47 @@ def _ad_kaydi():
 # metinde en sık yapılan şeydir — hele arama kutusuna yapıştırılırken, yani
 # tam olarak bu kapının koruduğu yolda.
 #
-# Katlama YALNIZCA ad kaydı karşılaştırmasında uygulanır: desen ayağındaki
-# kalıplar (A.Ş., Ltd. Şti.) Türkçe harf İÇERİR ve metni katlayıp deseni
-# katlamamak onları kırardı.
+# [BO · altmış dördüncü tur] Katlama ÖNCE yalnızca ad kaydına uygulanmıştı ve
+# buradaki yorum bunu şöyle gerekçelendiriyordu: "desen ayağındaki kalıplar
+# (A.Ş., Ltd. Şti.) Türkçe harf İÇERİR ve metni katlayıp deseni katlamamak
+# onları kırardı." Gerekçe DOĞRUYDU ama sonucu yanlıştı: o cümle katlamanın
+# YARISINA karşı bir argümandır, tamamına karşı değil. Ad kaydı ayağı zaten
+# İKİ TARAFI da katlıyordu; desen ayağı katlanmadan bırakıldı.
+#
+# Ölçüldü (altmış dördüncü tur): beş sessiz kaçış.
+#     Acme Gida A.S.  ·  Acme Gida Anonim Sirketi  ·  Acme Gida Ltd. Sti.
+#     Islem degeri 1.250.000.000 TL  ·  (İngilizce belgede) Target is ... A.S.
+# "A.S.", bir Türk unvanının İngilizce bir SPA'da, bir veri odası dizininde ya
+# da bir arama kutusunda en sık aldığı biçimdir — yani tam olarak bu kapının
+# koruduğu yolda.
+#
+# Kural: İKİ TARAFI KARŞILAŞTIRAN HER AYAK, İKİ TARAFA DA AYNI
+# NORMALLEŞTİRMEYİ UYGULAR. Yarım uygulanan bir normalleştirme, hiç
+# uygulanmayandan tehlikelidir: ölçen kişi kapatıldığını sanır.
 TR_ASCII = str.maketrans("ıİşŞğĞçÇöÖüÜâÂîÎûÛ", "iIsSgGcCoOuUaAiIuU")
 
 
 def _aksansiz(s):
     return s.translate(TR_ASCII)
+
+
+def _katla_desen(desen):
+    """Bir REGEX'i ASCII'ye katlar.
+
+    TR_ASCII yalnızca Türkçe harfleri eşler; metakarakterler (\., [, ], |,
+    {n,m}, \b) dokunulmadan geçer. `[A-ZÇĞİÖŞÜ]` -> `[A-ZCGIOSU]`,
+    `Ltd\.\s*Şti\.` -> `Ltd\.\s*Sti\.` — ikisi de geçerli desendir.
+    """
+    return desen.translate(TR_ASCII)
+
+
+# TR_ASCII 1:1 OLMAK ZORUNDA: kapı, katlanmış metinde bulduğu eşleşmenin
+# OFSETLERİYLE ORİJİNAL metinden kanıt dilimini keser. Tabloya çok karakterli
+# bir eşleme (ör. "ş" -> "sh") girerse ofsetler sessizce kayar ve kapı
+# sızıntıyı doğru yakalayıp YANLIŞ metni gösterir. BO-03 bunu her koşumda
+# sorar; burada da erken ve gürültülü patlar.
+assert all(len(chr(_a).translate(TR_ASCII)) == 1 for _a in TR_ASCII), \
+    "TR_ASCII uzunluk korumuyor: kanıt dilimi ofsetleri kayar"
 
 
 def kapi_sir(metin, disari=False):
@@ -430,12 +463,17 @@ def kapi_sir(metin, disari=False):
                     "mevzuatı/olguyu sorun (kural 6)."
                     % ad)
     for kalip, ad in SIR_KALIPLARI:
-        m = re.search(kalip, metin)
+        # Katlanmış desen, katlanmış metinde aranır. Bu ARAMA, katlanmamış
+        # aramayı KAPSAR: zaten ASCII olan bir metin katlamadan etkilenmez.
+        m = re.search(_katla_desen(kalip), _duz)
         if m:
+            # Kanıt, KATLANMIŞ metinden değil ORİJİNALDEN kesilir: kapının
+            # gösterdiği dilim, dosyada gerçekten yazan şey olmalıdır.
+            # (TR_ASCII 1:1 olduğu için ofsetler kaymaz — yukarıdaki assert.)
             return ("sir", "%s makineden çıkıyor: %r"
                           "  → sorguyu soyutlayın: adı/kod adını çıkarın, "
                           "yalnızca mevzuatı sorun (kural 6)."
-                          % (ad, m.group(0).strip()))
+                          % (ad, metin[m.start():m.end()].strip()))
     return None
 
 
@@ -518,6 +556,52 @@ def kapi_arastirma(metin, yol=None, disari=False):
 # hiçbir mekanizma yoktu — yalnızca iyi niyet. §12'nin kendi uyarısı tam olarak
 # buraya düşüyor: "belgedeki bir kurala model sakinken uyulur, görev uzayınca
 # atlanır."
+# [BO · altmış dördüncü tur] Bir beyanı ANMAK onu TAŞIMAK değildir — bu
+# incelemenin en sık tekrar eden sınıfı. OLUMSUZLAMAK ise anmamaktan da
+# beterdir: cümle belgenin NİHAİ olduğunu söylerken kapı "beyan var" sayıp
+# susuyordu. Ölçüldü (altmış dördüncü tur), üçü de §9 sınıfı bir çıktıda
+# yedinci kapıyı SUSTURUYORDU:
+#
+#     "Bu belge TASLAK DEĞİLDİR."              -> onay kapısı SUSTU
+#     "Belgenin taslak aşaması geçilmiştir."   -> onay kapısı SUSTU
+#     "Artık onay bekliyor değildir."          -> onay kapısı SUSTU
+#     "Bu koltuk KOLTUK BOŞ değildir."         -> koltuk kapısı SUSTU
+#
+# Üçü de tam olarak §9'un var olma sebebidir: onaylanmış GİBİ duran, hiçbir
+# onay kaydı taşımayan bir çıktı. Kapı, kendisini susturan kelimeyi okuyup
+# cümlenin onu OLUMSUZLADIĞINI görmüyordu.
+OLUMSUZLAYICI = re.compile(
+    r"\bdeğil(?:dir|di|se)?\b|\bdegil(?:dir)?\b"
+    r"|\bgeç(?:il)?miştir\b|\bgeçti\b|\bbitmiştir\b"
+    r"|\btamamlanmıştır\b|\bsona ermiştir\b|\bkalkmıştır\b")
+
+
+def _beyan_tasiyor(metin, desen):
+    """Desen, OLUMSUZLANMAMIŞ olarak en az bir kez geçiyor mu.
+
+    Eşleşen ibarenin KENDİSİ bağlamdan düşülür: "hukuki görüş değildir" gibi
+    biçimi gereği olumsuz olan bir beyan, kendi 'değildir'iyle
+    geçersizleşmemelidir. Bağlam CÜMLECİKTİR — pencere değil (BA takımının
+    dersi: pencere komşuyu kanıt sanar).
+
+    Tek bir olumsuzlanmış anma, GEÇERLİ bir beyanı geçersiz kılmaz: bütün
+    eşleşmeler taranır ve olumsuzlanmamış BİR tanesi yeter.
+    """
+    for m in desen.finditer(metin):
+        bas = max(metin.rfind("\n", 0, m.start()),
+                  metin.rfind(".", 0, m.start()),
+                  metin.rfind(";", 0, m.start())) + 1
+        sonlar = [i for i in (metin.find(".", m.end()),
+                              metin.find("\n", m.end())) if i != -1]
+        son = min(sonlar) if sonlar else len(metin)
+        kalan = metin[bas:m.start()] + " " + metin[m.end():son]
+        # [B-10] tr_kucult ŞART: "DEĞİLDİR".lower() Python'da 'i'+U+0307
+        # üretir ve re.I bu yüzden büyük harfli olumsuzlamayı GÖREMEZ.
+        if not OLUMSUZLAYICI.search(tr_kucult(kalan)):
+            return True
+    return False
+
+
 KOLTUK_YOLU = re.compile(r"(^|/)_koltuklar/[^/]+\.md$", re.I)
 KAYNAK_BEYANI = re.compile(r"^##\s*Kaynak durumu|KOLTUK BOŞ", re.M)
 
@@ -526,7 +610,7 @@ def kapi_koltuk(metin, yol=None):
     """Bir koltuk dosyası, kaynak durumu beyanı olmadan yazılamaz."""
     if not yol or not KOLTUK_YOLU.search(str(yol).replace("\\", "/")):
         return None
-    if not KAYNAK_BEYANI.search(metin):
+    if not _beyan_tasiyor(metin, KAYNAK_BEYANI):
         return ("koltuk", "koltuk dosyası 'Kaynak durumu' beyanı taşımıyor: "
                           "mercek neye dayanıyor, belgelenmiş mi, "
                           "bilinmiyorsa bunu yazın (§7)")
@@ -568,7 +652,8 @@ def kapi_onay(metin, yol=None, disari=False):
              or GEREKLI_BASLIK in _sadelestir(tr_kucult(metin)))
     if not gorus:
         return None
-    if ONAY_KAYDI.search(metin) or ONAY_YOKLUK_BEYANI.search(metin):
+    if ONAY_KAYDI.search(metin) \
+            or _beyan_tasiyor(metin, ONAY_YOKLUK_BEYANI):
         return None
     return ("onay",
             "§9 sınıfı bir çıktı onay durumu hakkında sessiz: adı belli bir "
@@ -655,6 +740,12 @@ def _selftest():
         ("Proje Şahin işlemin kod adıdır.", True, {"sir"}),
         ("Proje Şahin işlemin kod adıdır.", False, set()),
         ("Hedef Acme Gıda A.Ş. şirketidir.", True, {"sir"}),
+        # [BO · altmış dördüncü tur] Aynı unvanın AKSANSIZ yazımı. Bu vaka
+        # yazılana kadar desen ayağı yalnızca BO takımı tarafından tutuluyordu
+        # ve katlama geri alınsa kapının KENDİ öz-sınaması yeşil kalıyordu —
+        # denetleyen takımın denetlediği şeyi tek başına tutması, bu
+        # incelemenin dört kez ihlal ettiği katman kuralıdır.
+        ("Hedef Acme Gida A.S. sirketidir.", True, {"sir"}),
         ("Madde 7 uyarınca. Doğrulama: 2020-01-01", False, {"guncellik"}),
         ("Madde 7 uyarınca. Doğrulama: 2026-08-27", False, set()),
         # §14'ün yedi vakası
