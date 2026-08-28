@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>49 çalıştırılabilir takım · 373 vaka · 0 sinyal</span>
+    <span>50 çalıştırılabilir takım · 377 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -2858,6 +2858,69 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Kırk altıncı tur</span>
+  <h2>Üç örnek bir sınıftır — ve sınıf, örnekleri düzelterek kapanmaz</h2>
+  <p>Aynı hatayı üç kez yaptım: kaydın <em>çalışıyor</em> dediği kanalı
+  <em>"işe yaramaz"</em> diye okudum; kaydın zaten içerdiği bir şeyi
+  <em>"hiç sorgulamadım"</em> diye açtım; <em>"hiçbiri silinmedi"</em> sözü
+  bir süre doğru değildi. Üçünü tek tek düzeltmiştim. <strong>Sınıfı
+  kapatmamıştım.</strong></p>
+
+  <p>Sınanamayan ile sınanabileni ayırmak gerekti. <em>"Yazar kaydını doğru
+  okudu mu"</em> ölçülemez. Ölçülebilen <strong>sonucudur</strong>: kayıt bir
+  şeyin çalıştığını ya da doğrulandığını söylüyorken, teslimatın onu
+  çalışmıyor/doğrulanmamış gibi anması. Üç olayın üçü de tam olarak bu
+  biçimdeydi. <code>ks_ba_kayit_celiski.py</code> bunu ölçüyor.</p>
+
+  <div class="callout">
+    <strong>Bugün gerçek çelişki yok.</strong> Turun değeri başka yerde:
+    ölçüt üç kez yanıldı ve üçü de bu incelemenin en sık tekrar eden
+    tuzaklarıydı.
+  </div>
+
+  <ul>
+    <li><strong>Pencere ölçeği iki yanlış pozitif verdi.</strong> Biri
+    WebSearch'ün <em>çalıştığını</em> söyleyen cümleydi; öteki I-04'ün
+    doğrulandığını söylerken yandaki cümleden "kapatılamaz" kelimesini
+    kapıyordu. <em>Pencere, komşuyu kanıt sanar.</em> Ölçüt cümleciğe indi ve
+    BA-04 artık pencerenin geri gelmesini yakalıyor.</li>
+
+    <li><strong>Satır kaydırması muafiyeti sessizce iptal etti.</strong>
+    Geçmiş hatayı <em>anlatan</em> cümleler muaftır — ama kaynakta
+    <code>yanlış\nokumuştum</code> yazıyordu ve <code>yanlış okum</code>
+    kalıbı hiç eşleşmedi. Muafiyet çalışmadı ve <strong>kimse fark
+    etmezdi</strong>: sonuç yalnızca "kırmızı" görünüyordu. Her cümlecik artık
+    eşleştirmeden önce tek boşluğa normalleştiriliyor.</li>
+
+    <li><strong>Muafiyetin öz-sınaması kesilmiş metni ölçüyordu.</strong>
+    BA-02, muaf cümleciğin geçmiş-hata işareti taşıyıp taşımadığına
+    bakıyordu; elindeki şey gösterim için 70 karaktere <strong>kesilmiş</strong>
+    hâliydi ve işaret kesiğin ötesindeydi. Düzeltince ikinci kusur göründü:
+    soru zaten <strong>totolojiydi</strong> — cümlecik o işareti taşıdığı için
+    muaf tutulmuştu. BA-02 artık sınanabilir olanı soruyor: <strong>muafiyet
+    büyüdü mü?</strong> Muaf tutulan her hedef sayısıyla beyan edilir;
+    beyandan fazlası da, hiçbir şeyi örtmeyen bayat bir beyan da vakayı
+    kırar.</li>
+  </ul>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AE-01</span>
+      <span class="pill f">Takım kendi apparatına yakalandı</span></div>
+    <h3>Yeni takım, ilk tam koşusunda kör noktasıyla yakalandı</h3>
+    <p>AE-01, yeni yazdığım takımın bulgu kimliklerini <code>[A-Z]-\d+</code>
+    ile aradığını gördü: <strong>AA/BA gibi iki harfli kimlikler bu desene
+    görünmez.</strong> Bugün öyle bir bulgu yok — ama olsaydı BA-01 onu
+    sessizce sınamayacak, <strong>ölçtüğü şeyi ölçmediğini hiç söylemeden
+    yeşil kalacaktı.</strong> Otuz beşinci turda kendim için yazdığım kontrol,
+    kırk altıncı turda yine kendimi yakaladı.</p>
+  </div>
+
+  <p>Turun kalıcı kuralı: <strong>kesilmiş metin gösterim içindir; ölçen
+  hiçbir şey onu okumamalıdır</strong> — ve <strong>bir muafiyet, gerekçesi
+  sayıyla yazılmadıkça muafiyet değil, kör noktadır.</strong></p>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -2975,7 +3038,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 49 takım · 373 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 50 takım · 377 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
