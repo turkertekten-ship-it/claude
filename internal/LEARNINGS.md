@@ -4991,3 +4991,58 @@ A SURVIVED produced without clearing the cache means nothing.
    reports a result it did not produce is worse than no harness, and its
    docstring says so. I wrote a second one anyway and reintroduced the same
    class of defect it was built to prevent.
+
+## L98 - The delete path no machine here takes, and why three of its mutants are equivalent
+
+`_purge_fts` has two branches. On SQLite >= 3.43 the FTS table carries
+`contentless_delete=1` and rows go by rowid; older builds get the `'delete'`
+command, which "silently removes nothing unless it is handed the row's
+*original* column values" - its docstring's words, describing the failure at
+length. This SQLite is 3.45.1, so `fts_rowid_delete` is True and **the entire
+values-based branch never executes**. Mutating it survived the whole suite, on
+every machine this project has ever run on.
+
+It is not dead code. It is the only path on a stock Debian-stable or RHEL
+SQLite, and L40 already named this shape: a docstring that explains a past fix
+in detail is strong evidence the fix has no test.
+
+**The obvious assertion passes on the broken code.** Reproduced with the text
+value blanked:
+
+    indexed, 'pangolin' hits:            1
+    after delete, 'pangolin' hits:       0     <- looks correct
+    after reinsert, 'pangolin' hits:     1     -> "An entirely different
+                                                   subject about badgers"
+
+"Is it gone?" is satisfied by the bug. The orphaned posting is invisible until
+SQLite reuses the freed rowid, at which point a query for a term in no document
+in the corpus answers with unrelated text under *that* chunk's citation and URI.
+The test therefore has to delete, insert a second document, and only then look.
+
+**Then three mutants that looked like gaps and are not.** Blanking the *title*
+value alone, or the *header* value alone, changes nothing: the context header is
+built as `[source] title | heading path`, so the document title's tokens are
+present in both columns and either value alone is enough to remove them.
+Blanking both together orphans them and the test catches it. Forcing the rowid
+branch on is equivalent here because it is already on. Measured each one rather
+than assumed:
+
+    text value blanked            CAUGHT
+    title and header both blanked CAUGHT
+    purge skipped entirely        CAUGHT
+    title value alone             equivalent (redundant with the header)
+    header value alone            equivalent (redundant with the title)
+    rowid branch forced on        equivalent (already taken on SQLite >= 3.43)
+
+**Rules.**
+1. **A capability-detected fallback is untested by construction on the machine
+   that has the capability.** Test it by forcing the branch - here, the two
+   statements `_init_fts` performs when `contentless_delete=1` is rejected -
+   rather than waiting for an old SQLite to appear in CI.
+2. **When an orphan only becomes visible after a resource is reused, the test
+   has to reuse it.** Delete-then-check is the assertion everyone writes and the
+   one the bug passes.
+3. **Redundant data makes mutants equivalent.** Three of six here could not
+   change any observable behaviour, and the reason - the context header embeds
+   the title - is a property of the chunker, not of the store. Check the data
+   before calling a survivor a gap.

@@ -44,6 +44,14 @@ CASES = {
                   ("src/oodarag/pipeline.py",
                    "redact_secrets(clean(raw.text))", "clean(raw.text)")],
 }
-for label, muts in CASES.items():
-    code = run(muts, TEST)
-    print({0: "CAUGHT   ", 1: "SURVIVED ", 2: "ERROR    "}[code] + f" {label}")
+def main() -> None:
+    for label, muts in CASES.items():
+        code = run(muts, TEST)
+        print({0: "CAUGHT   ", 1: "SURVIVED ", 2: "ERROR    "}[code] + f" {label}")
+
+
+# Guarded because `run` is worth importing and the cases below are not: importing
+# this module used to run all four of them, so a script that wanted the harness
+# paid for somebody else's mutation batch before its own started.
+if __name__ == "__main__":
+    main()

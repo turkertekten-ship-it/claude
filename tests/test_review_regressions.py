@@ -2983,3 +2983,83 @@ class CoverageWithoutCorpusStatisticsTest(unittest.TestCase):
         # The failure this guards against: claiming coverage for a chunk that
         # shares no term at all is what lets the gate answer from nothing.
         self.assertEqual(ranked[0].components["rerank_coverage"], 0.0)
+
+
+class LegacyFtsDeleteTest(unittest.TestCase):
+    """The values-based FTS delete: the fallback no modern SQLite ever takes.
+
+    `_purge_fts` has two branches. On SQLite >= 3.43 the table is created with
+    `contentless_delete=1` and rows go by rowid; older builds get the `'delete'`
+    command, which removes nothing unless handed the row's *original* column
+    values. Every machine this project runs on takes the first branch, so
+    mutating the second one - dropping the text, dropping the title - survived
+    the whole suite. It is not dead code: it is the only path on a stock
+    Debian-stable or RHEL SQLite.
+
+    The failure it guards is the one its docstring describes, and the obvious
+    assertion does not catch it. With the delete values broken, a search for the
+    deleted term returns nothing - so "is it gone?" passes - until a new
+    document reuses the freed rowid, at which point the orphaned posting
+    resolves to *that* chunk. A query for a term in no document in the corpus
+    then answers with unrelated text under its citation and URI.
+    """
+
+    def _legacy_store(self) -> SqliteStore:
+        from oodarag.store.sqlite_store import FTS_SCHEMA
+
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        # Exactly the two operations `_init_fts` performs when
+        # `contentless_delete=1` is rejected.
+        store.conn.executescript("DROP TABLE IF EXISTS chunks_fts;")
+        store.conn.executescript(FTS_SCHEMA.replace("    contentless_delete=1,\n", ""))
+        store.fts_rowid_delete = False
+        return store
+
+    @staticmethod
+    def _document(n: int, title: str, text: str) -> Document:
+        return Document(doc_id=f"d{n}", source_system="fs", external_id=f"e{n}",
+                        uri=f"mem://{n}", title=title, text=text,
+                        content_hash=f"h{n}")
+
+    def _index(self, store: SqliteStore, doc: Document) -> None:
+        store.upsert_documents([doc])
+        store.replace_chunks(doc.doc_id, chunk_document(doc))
+
+    def _hits(self, store: SqliteStore, term: str) -> list[str]:
+        return [chunk_id for chunk_id, _ in store.search_lexical(term, k=10)]
+
+    def test_deleted_text_does_not_resurface_under_a_later_chunk(self):
+        store = self._legacy_store()
+        self.assertFalse(store.fts_rowid_delete,
+                         "the legacy branch is not in use, so this tests the wrong path")
+
+        # One distinctive term per FTS column, because the delete is handed one
+        # value per column and each can be wrong on its own: `pangolin` only in
+        # the body, `quokka` in the title (and so in the context header too).
+        first = self._document(
+            1, "Quokka Ledger",
+            "## Zeppelin Section\n\nThe pangolin protocol is classified. " * 5)
+        self._index(store, first)
+        for term in ("pangolin", "quokka", "zeppelin"):
+            self.assertEqual(len(self._hits(store, term)), 1,
+                             f"{term!r} was not indexed, so its removal proves nothing")
+
+        store.delete_document(first.doc_id)
+        for term in ("pangolin", "quokka", "zeppelin"):
+            self.assertEqual(self._hits(store, term), [],
+                             f"the deleted document is still retrievable by {term!r}")
+
+        # The step that matters, and the reason the checks above are not enough:
+        # they pass on the broken code. SQLite reuses the freed rowid, so an
+        # orphaned posting only becomes visible once a new chunk claims it.
+        second = self._document(
+            2, "Badger Notes", "An entirely different subject about burrows. " * 5)
+        self._index(store, second)
+        for term in ("pangolin", "quokka", "zeppelin"):
+            leaked = self._hits(store, term)
+            self.assertEqual(
+                leaked, [],
+                f"{term!r} is in no document in the corpus and returned "
+                f"{[store.get_chunks([c])[c].text[:60] for c in leaked]} - deleted "
+                "text is retrievable under another chunk's provenance")
