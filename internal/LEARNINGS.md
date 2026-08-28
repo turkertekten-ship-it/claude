@@ -4415,3 +4415,56 @@ docstring gives for `k` existing at all. All three mutations now caught.
 3. **Ask what a script relies on that CI does not run.** `ablation.py` produced
    the evidence for ADR 0004 and depends on arm weights working; it is not in
    CI, so the dependency was invisible until a mutation pointed at it.
+
+---
+
+## L88 - Five of six guarded, and the survivor was a branch production never takes
+
+Mutating the reranker's feature computations - the component ablation puts at
++10 cases and L76 found decides the ordering outright - plus the vector
+round-trip, all against full discovery:
+
+    position: chunk ordinal ignored                     CAUGHT
+    authority: clamp removed, any claimed trust honoured CAUGHT
+    recency: unknown age treated as fresh, not neutral   CAUGHT
+    coverage: query terms not intersected with the chunk SURVIVED
+    pack: float32 written as float64                     CAUGHT
+    unpack: wrong element type                           CAUGHT
+
+Two of the caught ones have histories: the authority clamp exists because L30
+found a source claiming trust 1000 outranked every relevant document from
+anywhere else, and recency's 0.5 for unknown age exists so a missing date does
+not read as fresh. Both are still guarded. The vector round-trip is guarded in
+both directions.
+
+**The survivor is the `elif self.idf is None` branch** - coverage computed as a
+plain term ratio when there are no corpus statistics. `HybridRetriever` always
+supplies them, so this is never the shipped path, which is precisely why nothing
+covered it. It is reachable all the same: `HeuristicReranker.idf` defaults to
+None and the class is public, so a caller constructing it directly lands here,
+as several tests already do.
+
+**What it would cost is not proportionate to how obscure it is.** With
+`coverage = 1.0` every chunk reports perfect coverage of every query; and
+`_answerability` already returns 1.0 on an empty vocabulary, which is how L20's
+reranker-with-empty-vocabulary defect silently disabled the abstention check. So
+a reranker built without corpus statistics would rate everything perfectly
+relevant and answer every question, including the ones it has nothing for - the
+same failure, reached by a different door.
+
+Two tests added, values derived from the branch's own definition: one of two
+query terms present gives 0.5, and a chunk sharing no term gives 0.0. Three
+mutations caught.
+
+**Rules.**
+1. **A fallback the shipped path never takes is exactly where coverage goes
+   missing**, and "not the shipped path" is a reason it is untested, not a
+   reason it is unreachable. Check who can construct the object.
+2. **Rank a survivor by consequence, not by how obscure the branch is.** This
+   one is three lines that nothing in production reaches and would have
+   disabled the abstention gate for anyone who did.
+3. **Mutation testing puts the repository in a deliberately broken state.** A
+   stop hook prompted me to commit while `position = 1.0` was live in the
+   working tree. Any automation that reacts to a dirty tree will see corruption
+   as work; the harness's restore is what makes the method safe, and the
+   dirty-tree signal must be read, not obeyed.

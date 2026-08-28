@@ -2873,3 +2873,46 @@ class TheOneConnectorThatDoesNotRedactItselfTest(unittest.TestCase):
         # being empty, which would satisfy every assertion above.
         self.assertIn("dQw4w9WgXcQ", document.external_id)
         self.assertTrue(document.text.strip(), "no text to have redacted")
+
+
+class CoverageWithoutCorpusStatisticsTest(unittest.TestCase):
+    """The reranker's no-IDF fallback, which survived the mutation audit.
+
+    `coverage` has three branches: empty query, no IDF table, and the weighted
+    path. Mutating the middle one to `coverage = 1.0` passed the entire suite.
+
+    It is reachable. `HeuristicReranker.idf` defaults to None and the class is
+    public, so any caller constructing it directly takes this branch - several
+    tests already do. `HybridRetriever` always supplies corpus statistics, so
+    this is not the shipped path, which is exactly why nothing covered it.
+
+    What the mutation would cause is not subtle: without an IDF table every
+    chunk would report perfect coverage of every query, and since
+    `_answerability` also returns 1.0 on an empty vocabulary, the abstention
+    gate's relevance would be 1.0 for everything. A reranker built without
+    corpus statistics would answer every question, including the ones it has
+    nothing for.
+    """
+
+    def test_coverage_is_the_share_of_query_terms_present(self):
+        from oodarag.models import Chunk, ScoredChunk
+        from oodarag.retrieve.rerank import HeuristicReranker
+
+        reranker = HeuristicReranker()
+        self.assertIsNone(reranker.idf, "this test only covers the no-IDF branch")
+
+        chunk = Chunk(chunk_id="c1", doc_id="d", ordinal=0, text="alpha gamma delta")
+        ranked = reranker.rerank("alpha beta", [ScoredChunk(chunk=chunk, score=0.5)])
+        # One of the two query terms appears, so 1/2 - derived from the branch's
+        # definition, not read off a run. The mutation reports 1.0.
+        self.assertAlmostEqual(ranked[0].components["rerank_coverage"], 0.5, places=9)
+
+    def test_a_chunk_sharing_nothing_scores_zero_coverage(self):
+        from oodarag.models import Chunk, ScoredChunk
+        from oodarag.retrieve.rerank import HeuristicReranker
+
+        chunk = Chunk(chunk_id="c2", doc_id="d", ordinal=0, text="entirely unrelated words")
+        ranked = HeuristicReranker().rerank("alpha beta", [ScoredChunk(chunk=chunk, score=0.5)])
+        # The failure this guards against: claiming coverage for a chunk that
+        # shares no term at all is what lets the gate answer from nothing.
+        self.assertEqual(ranked[0].components["rerank_coverage"], 0.0)
