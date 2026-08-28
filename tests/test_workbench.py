@@ -1158,6 +1158,11 @@ def test_answer_rate_control() -> None:
 
     answered = [
         "I cannot give a number without running a tokenizer.",
+        # A command presented AS the answer. Asked which git command creates a
+        # branch, this is correct and complete; an earlier version of the
+        # detector called it an unfinished tool attempt.
+        "`git checkout -b <branch-name>`",
+        "```python\ns[::-1]\n```",
         "Let me check. I do not have that file, so I cannot say.",
         # The dangerous case: an announcement followed by a real fabrication.
         "Let me check the file directly.\n\n*Checked file details*\n\nThe file "

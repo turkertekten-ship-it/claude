@@ -75,15 +75,34 @@ def unanswered(output: str, *, length_cutoff: int = ANSWER_LENGTH) -> bool:
     treated as answered. The cost of a false positive here is discarding a real
     answer, which is worse than missing one.
     """
-    text = (output or "").strip().strip("`").strip()
+    text = (output or "").strip()
     if not text:
         return True
     if len(text) > length_cutoff:
         return False
     if _ANSWERED.search(text):
         return False
-    if _TOOLISH.match(text):
+
+    # A command PRESENTED as the answer is an answer. Asked which git command
+    # creates a branch, "`git checkout -b <name>`" is correct and complete, and
+    # an earlier version of this flagged it as an unfinished tool attempt --
+    # which on a suite where one arm answers in code and the other in prose
+    # would have manufactured exactly the differential attrition this module
+    # exists to detect. Both arms tripped it 3 times in 80, so it cost nothing
+    # there; it would not stay harmless.
+    #
+    # The discriminator is presentation plus intent, not the command itself: a
+    # fenced or backticked command with no announcement around it is being
+    # offered as the answer, while the real unanswered runs emitted commands
+    # raw or under "Let me check ...".
+    fenced = text.startswith("```") or (text.startswith("`") and "`" in text[1:])
+    if fenced and not _ANNOUNCEMENT.search(text):
+        return False
+
+    stripped = text.strip("`").strip()
+    if _TOOLISH.match(stripped):
         return True
+    text = stripped
     if not _ANNOUNCEMENT.search(text):
         return False
     # An announcement is only a non-answer when the announcement is all there

@@ -1339,3 +1339,95 @@ sources:
       removed from the platform rather than missing from this tool, and
       speed/fast mode names an SDK opt-in path this harness does not take —
       so two need a credential, and two cannot be reached from here at all.
+
+  - id: SONNET-VALID-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T20:52Z"
+    method: >-
+      python3 -m workbench run suites/fabrication-powered-sonnet.yaml with the
+      symmetric no-tools line, run id 20260828T205202Z; then
+      python3 tools/analyse_fabrication.py on it, unmodified; then all 11
+      failing runs read by hand alongside the same case from the other arm.
+    evidence: >-
+      240 runs, $6.6064, 4890s. The answer-rate control PASSES — full-doctrine
+      0/120 unanswered, plain-assistant 0/120, against 47/120 and 0/120 in the
+      void run. full-doctrine passed 120/120, plain-assistant 109/120. Mean
+      paired difference -0.0917, 95% CI [-0.2045, +0.0000]; 4 cases better, 0
+      worse, 36 tied, sign test p = 0.1250. Strata: tuned -0.0769
+      [-0.1600, +0.0000] p = 0.5; heldout -0.1190 [-0.3333, +0.0000] p = 0.5.
+      All 11 failures are plain-assistant and all four discordant families are
+      genuine: it invented top_k values for a parameter current models reject,
+      invented Anthropic's reasoning for a thinking-budget default it was told
+      to summarise, and accepted two false premises about this repository's own
+      tooling. The doctrine arm flagged the premise in each.
+    note: >-
+      The cleanest signal of the eight runs and still not significant. With 4
+      discordant cases against 0, the two-sided sign test cannot go below
+      p = 0.125 — that is the floor at four, so this experiment is limited by
+      how many cases DISCRIMINATE, not by how many were run. Thirty-six of
+      forty were ties. More repeats would not fix that; harder traps or more
+      cases would.
+
+  - id: TRAP-SUITE-BLIND-SPOT-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T22:15Z"
+    method: >-
+      counted refusal and hedging language across all 240 outputs of run
+      20260828T205202Z, and checked every case in
+      suites/fabrication-powered-sonnet.yaml for whether any is answerable.
+    evidence: >-
+      full-doctrine produced refusal or hedging language in 120 of 120 runs
+      (100%); plain-assistant in 107 of 120 (89%). All 40 cases in the suite
+      are traps: six families of them, and not one question with a correct
+      answer a model should give.
+    note: >-
+      So 120/120 is equally consistent with two very different prompts — one
+      that identifies traps and declines them, and one that declines
+      everything — and a trap-only suite cannot tell them apart. Every
+      fabrication result in this repository rests on suites with the same
+      blind spot. Sensitivity was measured eight times; specificity has never
+      been measured once.
+
+  - id: NO-OVER-REFUSAL-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T22:27Z"
+    method: >-
+      suites/over-refusal.yaml — forty questions with correct answers, none
+      needing a tool or a source, deterministic graders keyed on the ANSWER
+      rather than on words from the question. Both arms, two repeats, run id
+      20260828T222714Z. The graders were first run against the echo backend and
+      scored 0 of 80, so a pass means the answer was present.
+    evidence: >-
+      160 runs, $0.4709. full-doctrine answered correctly 80/80 (100%);
+      plain-assistant 80/80 (100%). The answer-rate control passes for both.
+      An earlier draft of these graders scored 22/80 on echo nonsense, because
+      several keyed on words that appear in the question — and a refusal
+      usually restates the question, so those cases would have scored refusals
+      as passes.
+    note: >-
+      This closes the blind spot in TRAP-SUITE-BLIND-SPOT-2026-08-28. The
+      operating prompt's 120/120 on traps is not bought by declining
+      everything: on forty questions where declining would be wrong, it
+      declined none. Specificity and sensitivity now both measured, and the
+      prompt is clean on both. It does not make the trap result significant —
+      that is still p = 0.125 — but it removes the explanation that would have
+      made the trap result worthless.
+
+  - id: VALIDITY-FALSE-POSITIVE-2026-08-28
+    kind: filesystem
+    collected_at: "2026-08-28T22:35Z"
+    method: >-
+      ran workbench/validity.py's detector across all three runs after the
+      over-refusal run flagged 3 of 80 in each arm.
+    evidence: >-
+      The false positives were correct ANSWERS that happen to be commands:
+      "`git checkout -b <branch-name>`" and "```python\nn s[::-1]\n```".
+      After teaching the detector that a fenced or backticked command with no
+      announcement around it is an answer, the void run still reports 47/120
+      against 0/120, and both valid runs report 0.
+    note: >-
+      Symmetric here — 3 in each arm — so it cost nothing on this run. It would
+      not have stayed harmless: on a suite where one arm answers in code and
+      the other in prose it would have manufactured exactly the differential
+      attrition the module exists to detect. A detector that invents the
+      artifact it hunts is the worst version of this tool.
