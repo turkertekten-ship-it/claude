@@ -231,7 +231,7 @@ footer p + p{margin-top:12px}
   Sorun tam olarak bu.</p>
   <div class="attrib">
     <span>OODA: gözlem → yönelim → karar → eylem → döngü</span>
-    <span>35 çalıştırılabilir takım · 302 vaka · 0 sinyal</span>
+    <span>36 çalıştırılabilir takım · 307 vaka · 0 sinyal</span>
     <span>Türkçe</span>
   </div>
 </header>
@@ -2078,6 +2078,62 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 </section>
 
 <section>
+  <span class="sec-tag">Otuz birinci tur</span>
+  <h2>Eşik değişti — hangi müvekkile artık yanlış bir şey söyledik?</h2>
+  <p>Otuzuncu tura kadar ölçülen her şey <strong>aparata</strong> dairdi. Bu
+  tur <strong>iş ürününe</strong> bakıyor: bir eşik değişince, o eşiğe
+  dayanarak verilmiş görüşe ne oluyor?</p>
+
+  <div class="finding">
+    <div class="f-head"><span class="f-id">AM-01 · AM-03</span>
+      <span class="pill a">Vaat, prosedürden geniş</span></div>
+    <h3>Kitap riski kendi sözleriyle adlandırıyor, sonra yanlış dizini tarıyor</h3>
+    <p>§11'in <code>/esik-denetle</code> komutu gerekçesini kendisi yazıyor —
+    <em>"bir eşik değişikliği insan kararıdır, çünkü <strong>canlı bir dosyada
+    verilmiş bir görüşü geçersiz kılabilir</strong>"</em> — ve
+    <em>"şu anda <strong>hangi dosyalar</strong> bayat bir rakama
+    dayanıyor"</em> diye bitiyor. Ama prosedürünün birinci adımı yalnızca
+    <code>birimler/*/yontem/</code> tarıyor. §2 kitabın kendi sözlüğünü
+    kuruyor: <em>"<code>dosyalar/</code> <strong>canlı işleri</strong> …
+    tutar."</em></p>
+    <p>Komut, doktrindeki rakamın bayatladığını söyleyebilir; <strong>o rakama
+    dayanarak müvekkile ne söylendiğini söyleyemez.</strong></p>
+    <p>İkinci yol da kapalıydı: <code>dosyalar/</code> kural 6 gereği
+    <code>.gitignore</code>'dadır, yani sürüm geçmişinden de sorulamaz.
+    Sorunun iki cevap yolu vardı, <strong>ikisi de kapalıydı.</strong></p>
+  </div>
+
+  <div class="callout">
+    <strong>Bu, otuzuncu turun §2 bulgusunun ikinci yüzüdür.</strong> Aynı
+    gizlilik mekanizması orada <strong>dayanıklılığı</strong>, burada
+    <strong>geriye dönük erişimi</strong> feda ediyor. Yama komutu kendi
+    vaadine eşitler: canlı iş katmanı eklendi, değişmiş eşiğe dayanan dosya
+    <strong>ETKİLENEN</strong>, hangi sürüme dayandığını hiç yazmamış dosya
+    <strong>SÜRÜMSÜZ</strong> işaretlenir. <em>"Hiçbir dosyayı düzenleme"</em>
+    aynen korundu — §11 uyarınca eşik değişikliği insan kararıdır.
+  </div>
+
+  <p><strong>Haksız suçlama yapılmadı.</strong> AM-02 olumlu kontroldür:
+  kitapta bayatlığı fark eden bir mekanizma <strong>vardır</strong>. Bulgu
+  "mekanizma yok" değil, <strong>"mekanizmanın erişimi eksik"</strong>. AM-04
+  de temiz çıktı: §3'ün "altı ay"ı, komutun "altı aydan eski"si ve kapının
+  <code>BAYAT_GUN = 183</code>'ü aynı süreyi söylüyor.</p>
+
+  <div class="callout">
+    <strong>Takım bu turda iki kez kendi kusurunu gösterdi.</strong>
+    AM-01 önce <em>vakum</em> geçti: ölçüt vaadi ararken komutun kapanış
+    cümlesi tam o iki kelimenin <strong>arasında satır kırıyordu</strong>.
+    Sonra ölçüt, yamayı açıklayan <strong>HTML yorumuyla</strong> tatmin
+    oluyordu — prosedürün tamamı silinse bile yeşil kalıyordu; yani
+    prosedürü değil, prosedürden söz eden bir cümleyi ölçüyordu. Yorumlar
+    ölçüm dışına alındı, mutasyon o zaman yakalandı.
+    <br><br>
+    İkisi de aynı şeyi söylüyor: <strong>bir ölçüt, ölçtüğünü sandığı şeyi
+    ölçtüğünü ancak mutasyon gösterdiğinde bilir.</strong>
+  </div>
+</section>
+
+<section>
   <span class="sec-tag">Öz denetim</span>
   <h2>Kör sınamanın kendi hataları</h2>
   <p>Bir sınama takımı da sınanmalıdır. Üç hata yapıldı, üçü de düzeltildi ve
@@ -2195,7 +2251,7 @@ printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' &gt; .gitignore</pre>
 
 <footer>
   <p><strong style="color:var(--ink)">Yeniden koşum</strong></p>
-<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 35 takım · 302 vaka</span>
+<pre><span class="dim">~/mafirm/</span>./sinama/hepsi.sh        <span class="dim"># 36 takım · 307 vaka</span>
 ./denetim.sh --yapisal   <span class="dim"># mühendislik katmanı</span>
 ./denetim.sh             <span class="dim"># mevzuat bulguları dâhil</span></pre>
   <p>Kitabın metni için bölüm bölüm düzeltme listesi:
