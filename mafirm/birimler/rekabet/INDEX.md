@@ -13,7 +13,7 @@
 | İzinsiz kapanışın cezası | `yontem/tr-esikler.md` § Yaptırım |
 
 ## Neden ayrı birim
-Bekletici kapıdır. 4054 sayılı Kanun madde 11 uyarınca bildirime tabi bir
+Bekletici kapıdır. 4054 sayılı Kanun madde 10 ve 2010/4 sayılı Tebliğ madde 10 uyarınca bildirime tabi bir
 işlem, Kurul kararı olmadan hukuken geçerlilik kazanmaz. Gönüllü bildirim
 rejiminden gelen bir alıcının sezgisi burada yanlıştır ve yanlışlığın bedeli
 işlemin kendisidir.

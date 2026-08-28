@@ -12,7 +12,8 @@ bulgudur:
 
 1. Kapanış öncesi koşullar: neler, kim kontrol ediyor, saati ne.
 2. Ara dönem taahhütleri: değer koruma mı fiilî kontrol mü? 4054 sayılı Kanun
-   madde 11 bakımından izinsiz kapanış riski doğuranları işaretle.
+   m.10 ve 2010/4 sayılı Tebliğ m.10 bakımından izinsiz kapanış riski
+   doğuranları işaretle.
 3. Beyanlar: kapsam, sınırlayıcılar, bilgi ve önemlilik kayıtları.
 4. Açıklama: veri odası genel açıklama sayılıyor mu? Alıcıya maliyeti ne?
 5. Sınırlamalar: tavan, alt sınır, asgari tutar, beyan sınıfı başına süre.
