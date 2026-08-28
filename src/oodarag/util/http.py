@@ -161,8 +161,38 @@ class CircuitBreaker:
         return sorted(self._opened_at)
 
 
+class PolicyDeniedError(TransportError):
+    """An egress policy refused the connection. Retrying cannot help.
+
+    A proxy that answers CONNECT with 403 is stating a rule, not reporting a
+    fault, and the rule will still be there in four seconds. Retrying it costs
+    the full attempt count plus backoff for a result that is known in advance -
+    about seven seconds per host here, every time any code path touches it.
+
+    This is the distinction LEARNINGS records as "a permanent failure is not a
+    transient one", written down after paying for it once and then implemented
+    everywhere except here.
+    """
+
+
 class CircuitOpenError(TransportError):
     """Raised instead of retrying a host already established as unreachable."""
+
+
+#: Signatures of an egress-policy refusal in a urllib transport error. The proxy
+#: reports it as a failed CONNECT tunnel rather than as an HTTP status, so there
+#: is no `HTTPError` to inspect and the string is what there is.
+_POLICY_DENIED = (
+    "tunnel connection failed: 403",
+    "tunnel connection failed: 407",
+    "proxy authentication required",
+)
+
+
+def is_policy_denial(error: BaseException) -> bool:
+    """True when this transport error is a policy refusal rather than a fault."""
+    text = str(error).lower()
+    return any(marker in text for marker in _POLICY_DENIED)
 
 
 @dataclass
@@ -278,6 +308,16 @@ class HttpClient:
                 log.warn("retrying", url=url, status=e.code, attempt=attempt, wait=round(wait, 2))
                 time.sleep(wait)
             except (urllib.error.URLError, TimeoutError, ssl.SSLError, OSError) as e:
+                if is_policy_denial(e):
+                    # Stated rule, not a fault. Three retries and seven seconds
+                    # of backoff cannot change a proxy's mind, and the cost is
+                    # paid again by every later call to the same host.
+                    self.stats["errors"] += 1
+                    log.warn("egress policy denied", url=url, err=str(e)[:120])
+                    raise PolicyDeniedError(
+                        f"egress policy refused {url}: {e}. This is a policy "
+                        f"decision, not a transient fault - see "
+                        f"internal/CAPABILITY-PROTOCOL.md.") from e
                 last_exc = TransportError(f"{type(e).__name__}: {e} ({url})")
                 if attempt == self.retry.attempts:
                     self.stats["errors"] += 1

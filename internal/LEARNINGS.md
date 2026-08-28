@@ -1149,3 +1149,52 @@ grew and diluted it.
 3. Sweeping is cheap enough to be routine once the harness exists. The first
    sweep of `min_relevance` took an afternoon of hand-rolled scripts; the fifth
    took one command.
+
+---
+
+## L34 - The rule about permanent failures was written down and not implemented here
+
+**Evidence.** Probing nine documentation hosts for a corpus source, the log
+showed this three times per blocked host:
+
+    ! [http] transport retry url=https://docs.python.org/... err=<urlopen error
+      Tunnel connection failed: 403 Forbidden> attempt=1 wait=1.06
+    ! [http] transport retry ... attempt=2 wait=2.43
+    ! [http] transport retry ... attempt=3 wait=3.25
+
+A proxy answering CONNECT with 403 is stating a rule, not reporting a fault, and
+the rule will still be there in four seconds. Measured: ~7s per blocked host
+before, **0.25s** after - and the cost was paid again by every code path that
+touched the host.
+
+The rule - *"a permanent failure is not a transient one; policy denials, blocked
+egress and missing permissions do not pass, so detect them once and stop paying
+for them"* - has been in this repository's protocol from early on. The HTTP
+client was the one place it was not implemented. It was written down, agreed,
+propagated to a user-level memory, and not applied to the code sitting directly
+under it.
+
+**What it had cost, indirectly.** `ooda preflight` pins `attempts=1` for its
+probes, which is how the capability report stayed fast. That trade means a
+genuine blip is reported as **blocked** - a false blocker, precisely what the
+capability protocol exists to prevent. With denials failing fast on their own,
+the probe now retries once and the report is unchanged at 2.07s.
+
+**A second substring trap, in the code that reads the first one's output.** The
+probe classified denials with `"403" in str(e)`, which also matches a URL
+containing 403, a byte count of 403, and a port number - and it reports
+"blocked" to a human deciding whether a source is reachable. Now a type,
+`PolicyDeniedError`. This is L32's bug in a different file, found the same day,
+which is the argument for treating "substring test on a status string" as a
+smell rather than an incident.
+
+**Rules.**
+1. **A rule in the protocol is not a rule in the code.** When you write a
+   learning down, grep for the places it should already apply. This one names
+   its own targets: retry loops, backoff, circuit breakers.
+2. A denial must not trip a circuit breaker built for flakiness. Conflating them
+   makes "three consecutive transport failures" mean two different things, and
+   the breaker's cooldown then hides a permanent condition behind a timer.
+3. Narrowing an exception type is only safe if the new type is a subclass -
+   `PolicyDeniedError` extends `TransportError`, so every existing handler still
+   catches it. There is a test asserting exactly that.

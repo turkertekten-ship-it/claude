@@ -3,14 +3,17 @@
 from __future__ import annotations
 
 import unittest
+import urllib.error
 
 from oodarag.util.http import (
     CircuitBreaker,
     CircuitOpenError,
     HttpClient,
     HttpError,
+    PolicyDeniedError,
     RetryPolicy,
     TransportError,
+    is_policy_denial,
     normalize_url,
     same_site,
 )
@@ -196,3 +199,90 @@ class HttpClientTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PolicyDenialTest(unittest.TestCase):
+    """A proxy that refuses CONNECT is stating a rule, not reporting a fault.
+
+    Retrying it costs the full attempt count plus backoff for a result known in
+    advance - measured at about seven seconds per host against this
+    environment's proxy, paid again by every code path that touches the host.
+    LEARNINGS has said "a permanent failure is not a transient one" since early
+    on; the HTTP client was the one place it was not implemented.
+
+    The denial string is recorded verbatim from the live proxy rather than
+    invented, so a change in its wording shows up here.
+    """
+
+    LIVE_DENIAL = "<urlopen error Tunnel connection failed: 403 Forbidden>"
+
+    def test_the_live_proxy_wording_is_recognised(self):
+        self.assertTrue(is_policy_denial(urllib.error.URLError(
+            "Tunnel connection failed: 403 Forbidden")))
+        self.assertTrue(is_policy_denial(Exception(self.LIVE_DENIAL)))
+
+    def test_an_ordinary_failure_is_not_a_denial(self):
+        for text in ("Connection refused", "timed out", "Tunnel connection failed: 502",
+                     "[SSL] certificate verify failed", "Name or service not known"):
+            with self.subTest(text=text):
+                self.assertFalse(is_policy_denial(Exception(text)))
+
+    def _client_raising(self, error: Exception):
+        client = HttpClient(rate_per_sec=1000,
+                            retry=RetryPolicy(attempts=4, base_delay=0.01))
+        attempts = []
+
+        class _Opener:
+            def open(self, req, timeout=None):
+                attempts.append(req.full_url)
+                raise error
+
+        client._opener = _Opener()
+        return client, attempts
+
+    def test_a_denial_is_not_retried(self):
+        client, attempts = self._client_raising(
+            urllib.error.URLError("Tunnel connection failed: 403 Forbidden"))
+        with self.assertRaises(PolicyDeniedError):
+            client.get("https://blocked.example/x")
+        self.assertEqual(len(attempts), 1,
+                         f"a policy denial was retried {len(attempts)} times")
+
+    def test_a_transient_failure_is_still_retried(self):
+        """The fast path must not have been bought by disabling retries."""
+        client, attempts = self._client_raising(urllib.error.URLError("Connection refused"))
+        with self.assertRaises(TransportError):
+            client.get("https://flaky.example/x")
+        self.assertEqual(len(attempts), 4)
+
+    def test_a_denial_does_not_trip_the_circuit_breaker(self):
+        """The breaker exists to stop paying for a *flaky* host. A refused one
+        is not flaky, and conflating them makes the breaker's own accounting -
+        three consecutive transport failures - mean two different things."""
+        client, _ = self._client_raising(
+            urllib.error.URLError("Tunnel connection failed: 403 Forbidden"))
+        for _ in range(5):
+            with self.assertRaises(PolicyDeniedError):
+                client.get("https://blocked.example/x")
+        self.assertFalse(client.breaker.is_open("blocked.example"))
+
+    def test_a_denial_is_a_transport_error_so_callers_still_catch_it(self):
+        """Narrowing an exception type must not make existing handlers miss it."""
+        self.assertTrue(issubclass(PolicyDeniedError, TransportError))
+
+    def test_the_capability_probe_classifies_by_type_not_substring(self):
+        """`"403" in str(e)` also matches a URL containing 403, a byte count of
+        403 and a port number. The probe reports "blocked" to a human deciding
+        whether a source is reachable, so a false positive there is a false
+        blocker - the thing the capability protocol exists to prevent."""
+        from oodarag.access.probe import BLOCKED, UNREACHABLE, _classify_http_error
+
+        denied = PolicyDeniedError("egress policy refused https://x/403.html")
+        self.assertEqual(_classify_http_error(denied)[0], BLOCKED)
+
+        # A genuine fault whose text merely contains the digits.
+        fault = TransportError("URLError: connection reset (https://x/page-403.html)")
+        self.assertEqual(_classify_http_error(fault)[0], UNREACHABLE)
+
+        sized = TransportError("response too large: 403 bytes > cap 100")
+        self.assertEqual(_classify_http_error(sized)[0], UNREACHABLE)

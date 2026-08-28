@@ -30,7 +30,13 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Callable
 
-from oodarag.util.http import HttpClient, HttpError, RetryPolicy, TransportError
+from oodarag.util.http import (
+    HttpClient,
+    HttpError,
+    PolicyDeniedError,
+    RetryPolicy,
+    TransportError,
+)
 from oodarag.util.logging import get_logger
 
 log = get_logger("access")
@@ -197,11 +203,14 @@ def _classify_http_error(e: Exception) -> tuple[str, str]:
         if e.status == 403:
             return BLOCKED, f"HTTP 403 (policy denial or missing scope)"
         return BLOCKED, f"HTTP {e.status}"
+    if isinstance(e, PolicyDeniedError):
+        # A type, not a substring. This was `"403" in str(e)`, which matches a
+        # URL containing 403, a byte count of 403, and a port number - the same
+        # class of trap as counting "unexpected abstention" as "expected
+        # abstention" (L32).
+        return BLOCKED, "proxy refused CONNECT (403)"
     if isinstance(e, TransportError):
-        text = str(e)
-        if "403" in text:
-            return BLOCKED, "proxy refused CONNECT (403)"
-        return UNREACHABLE, text[:160]
+        return UNREACHABLE, str(e)[:160]
     return UNREACHABLE, str(e)[:160]
 
 
@@ -373,7 +382,14 @@ def probe_all(
     """Run the full battery concurrently and return a report."""
     client = client or HttpClient(
         rate_per_sec=20.0, burst=20, timeout=timeout,
-        retry=RetryPolicy(attempts=1, base_delay=0.5),
+        # One retry, not none. Attempts were pinned at 1 because a blocked host
+        # otherwise cost the full backoff - about seven seconds each, four of
+        # them in this report. Now that a policy denial fails immediately on its
+        # own, the probe can afford to retry a genuine blip, which is the
+        # difference between "unreachable" and "unreachable once". Reporting a
+        # transient fault as a blocker is the false blocker the capability
+        # protocol exists to prevent.
+        retry=RetryPolicy(attempts=2, base_delay=0.5),
     )
     report = AccessReport(environment=_environment_facts())
     started = time.monotonic()
