@@ -19,6 +19,7 @@ run python3 tests/test_learn_rule.py
 run python3 tests/test_check_output.py
 run python3 tests/test_install_check.py
 run python3 tests/test_check_consistency.py
+run python3 tests/test_lint_delegation.py
 run python3 tools/check_consistency.py
 run python3 tests/test_verify_measurements.py
 run python3 tools/verify_measurements.py

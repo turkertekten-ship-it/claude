@@ -122,6 +122,7 @@ tools/
   learn_rule.py               appends a learned rule to this file
   check_output.py             checks an answer against its prompt's constraints
   check_consistency.py        checks the repository's lists against each other
+  lint_delegation.py          lints a Task prompt as the delegation is sent
   verify_measurements.py      re-runs the numbers the documents quote
   _slots.py, _phrases.py      shared definitions, imported by the above
   ingest_chat_archive.py      chat-archive ingestion and search
@@ -169,6 +170,18 @@ cannot read adversarially. See `docs/workflows.md`.
 what it saw, exactly like another session's status line. Verify anything
 load-bearing yourself before writing it down. Delegation multiplies reach, not
 evidence.
+
+**The prompt you delegate is a prompt.** Every one of the ten this session sent
+to its own subagents was missing an acceptance test, and one of them — a search
+that reported no evidence of a thing that existed — came back unfalsifiable for
+exactly that reason [src:DELEGATION-HABITS-2026-08-28]. The linter was already
+here; nothing ran it on a prompt typed into a tool call rather than saved to a
+file. `tools/lint_delegation.py` runs as a `PreToolUse` hook on `Task` and
+reports when a delegation is missing its acceptance test or its escape clause.
+It does not block: hook output reaches the model at the moment of the decision,
+which is where advice is read. It is wired in this repository only — a
+`PreToolUse` hook for every terminal would mean merging into the owner's own
+`~/.claude/settings.json`, which rule 5 says not to do blind.
 
 ---
 

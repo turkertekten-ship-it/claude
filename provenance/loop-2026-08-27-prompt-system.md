@@ -962,6 +962,55 @@ is a return to Observe: a fix that fails twice the same way is a diagnosis made
 without looking. The Act phase now carries both thresholds — two failures buy an
 Observe, four narrowings retire the mechanism.
 
+## Twenty-ninth loop — the linter was not reading its own outgoing mail
+
+Rule 13 says count what the last several loops delivered against the request,
+and three of the last four were internal hygiene. The request names "all my
+prompts in all my chats and all my terminals". Terminals are done and verified
+in sync each run. Chats are not, so the Observe went looking for the corpus:
+the index on disk, and the owner's Drive.
+
+Neither has it. The index holds eleven conversations, all produced inside this
+container, and 421 of its 433 user turns are tool results
+[src:DELEGATION-HABITS-2026-08-28]. Drive matched nothing on four title patterns
+[src:DRIVE-NO-CHAT-EXPORT-2026-08-28]. The reader and the ingest path already
+exist, so what is left is one action only the owner can take; U-8 now says so
+in those terms rather than "no corpus available".
+
+> The surprise was in what the corpus *does* hold. `prompt_habits.py` scores ten
+> prompts, and they are the ones this session sent to its own subagents. Every
+> one is missing an acceptance test. The tool's whole premise is that a rule
+> firing on four fifths of what you write is a habit rather than a bad
+> afternoon — and it was pointed at this agent the entire time, reporting 100%
+> on the slot this repository calls load-bearing. One of those ten asked whether
+> Saraev published anything called CLEAR and came back "no evidence": no
+> acceptance test, so no written standard the negative had to meet, and it took
+> a clone to overturn. That is rule 17's episode with its cause named.
+
+The linter existed. Nothing ran it on a prompt typed into a tool call instead of
+saved to a file. `tools/lint_delegation.py` is a `PreToolUse` hook on `Task`
+that reports when a delegation is missing its acceptance test or its escape
+clause, and stays silent otherwise.
+
+It reports and does not block, which is a judgement worth stating rather than
+implying. Hook output reaches the model at the moment of the decision, which is
+where advice is actually read — unlike the directive layer in the last loop's
+negative control, whose guardrails no code path ever reached. Blocking would
+spend turns rewriting prompts on a rule class that fires on real prompts that
+are fine. If the record later shows the advice ignored, that is the evidence for
+escalating, and the escalation belongs here with that evidence, not before it.
+
+The 100% figure is registered in `measurements.yaml`, which is uncomfortable on
+purpose: unlike every other entry there it depends on the chat index, so the
+owner ingesting their own conversations will break it. That break is correct.
+Any document still quoting the figure at that point is describing a corpus that
+no longer exists.
+
+**Not done.** The hook is wired in this repository only. Installing it for every
+terminal means merging into the owner's own `~/.claude/settings.json`, and rule
+5 exists because this installer once clobbered a file it did not write; that
+needs a merge that reads what is there first, which this loop did not build.
+
 ## Still open
 
 `U-6`, `U-7` and `U-8` in [unknowns.md](unknowns.md): what Saraev actually

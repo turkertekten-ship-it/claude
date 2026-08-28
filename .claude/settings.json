@@ -31,6 +31,17 @@
           }
         ]
       }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && python3 tools/lint_delegation.py # advisory: always exits 0, never blocks the delegation"
+          }
+        ]
+      }
     ]
   }
 }

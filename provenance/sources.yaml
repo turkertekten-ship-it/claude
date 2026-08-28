@@ -441,3 +441,27 @@ sources:
       attempts at the same strategy, step back, add more logging, and verify
       assumptions". Independently arrived at, and it names a threshold and a
       middle step that this repository's version left unstated.
+
+  - id: DELEGATION-HABITS-2026-08-28
+    kind: tool_output
+    collected_at: "2026-08-28T12:40Z"
+    method: "python3 tools/ingest_chat_archive.py stats; python3 tools/prompt_habits.py"
+    evidence: provenance/raw/delegation-habits-2026-08-28.md
+    note: >-
+      The chat index holds 11 conversations, all produced inside this
+      container, and 433 user turns of which 421 are tool results. The 10 that
+      are prompts are the ones this session sent to its own subagents. Every
+      one of them is missing an acceptance test; five are missing context.
+      Registered as a measurement, which will move when the owner's own
+      conversations are ingested.
+
+  - id: DRIVE-NO-CHAT-EXPORT-2026-08-28
+    kind: api
+    collected_at: "2026-08-28T12:35Z"
+    method: "Google Drive search_files, query: title contains 'conversations' or 'chat' or 'prompt' or 'claude'"
+    evidence: >-
+      Empty response - no file in the owner's Drive matched any of the four
+      title patterns. Recorded as a negative: the corpus the request names
+      ("all my chats") is not reachable from this container by that route
+      either, and the reader for a claude.ai export already exists in
+      tools/ingest_chat_archive.py. Nothing was opened or downloaded.

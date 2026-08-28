@@ -35,6 +35,7 @@ bash tools/install_git_hooks.sh    # once per clone: pre-push refuses a red suit
 | `tools/ingest_chat_archive.py` | Conversation-archive ingestion and search. |
 | `tools/prompt_forge.py` | The prompt linter and compiler. |
 | `tools/prompt_habits.py` | Scores the prompts you have already written. |
+| `tools/lint_delegation.py` | Lints the prompt a `Task` delegation is about to send. |
 | `tools/learn_rule.py` | Appends a learned rule to the instruction file. |
 | `tools/check_output.py` | Checks an answer against the constraints its prompt stated. |
 | `tools/_slots.py` | How a prompt labels its slots — shared by the linter and the checker. |

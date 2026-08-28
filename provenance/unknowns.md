@@ -181,3 +181,13 @@ not a sample of how they write.
 **Resolves when:** a body of the owner's real prompts is indexed and scored, and
 the rules that misfire on them are corrected. `prompt_forge.py score` over an
 ingested archive is the measurement.
+
+**Narrowed 2026-08-28.** The reader for a claude.ai export already exists and
+the ingest path is documented, so nothing here is waiting on code. The two
+routes this container could try are exhausted: no conversation export is on
+disk, and the owner's Drive holds no file whose title matches `conversations`,
+`chat`, `prompt` or `claude` [src:DRIVE-NO-CHAT-EXPORT-2026-08-28]. What remains
+is one action only the owner can take — Settings → Privacy → Export data, unzip
+`conversations.json` into `archive/`, then `ingest`. Until then every number
+this repository quotes about "your prompts" describes this session's own
+[src:DELEGATION-HABITS-2026-08-28].

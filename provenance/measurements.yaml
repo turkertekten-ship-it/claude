@@ -63,3 +63,14 @@ measurements:
     expect: "100/100"
     note: >-
       Measured 2026-08-28 by running the command above; not typed from memory.
+
+  - id: DELEGATION-ACCEPTANCE-100PCT
+    command: "python3 tools/prompt_habits.py"
+    expect: "100%  NO_ACCEPTANCE"
+    note: >-
+      Measured 2026-08-28 over the only corpus this container holds - the ten
+      prompts this session sent to its own subagents. Unlike the other entries
+      here it depends on the chat index rather than on a file in the
+      repository, so ingesting the owner's own conversations will move it. That
+      failure is the correct one: any document quoting the figure is stale at
+      that moment and has to be restated against the new corpus.
