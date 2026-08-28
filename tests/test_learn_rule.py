@@ -268,6 +268,46 @@ def main() -> int:
               rules[0].startswith("2.") and rules[1].startswith("3."), rules)
         check("the pre-existing document is untouched", "## House rules" in path.read_text())
 
+    print("\nnumbering survives a prune")
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "CLAUDE.md"
+        path.write_text(BASE)
+        for n in range(3):
+            run("add", "--file", str(path), "--category", f"c{n}",
+                "--never", f"thing {n}", "--because", f"reason {n}")
+        run("supersede", "1", "--file", str(path), "--category", "c0",
+            "--never", "thing zero, precisely", "--because", "the first was broad")
+        run("prune", "--file", str(path))
+        numbers = [int(r.split(".")[0]) for r in lr.read_rules(path.read_text())]
+        check("the gap is left where the rule was retired", 1 not in numbers, numbers)
+        run("add", "--file", str(path), "--category", "new",
+            "--never", "collide", "--because", "numbering by count would reuse a number")
+        numbers = [int(r.split(".")[0]) for r in lr.read_rules(path.read_text())]
+        check("the new rule does not reuse a live number",
+              len(numbers) == len(set(numbers)), numbers)
+        check("it follows the highest, not the count", max(numbers) == 5, numbers)
+
+    print("\nseveral rules can be merged into one")
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "CLAUDE.md"
+        path.write_text(BASE)
+        run("add", "--file", str(path), "--category", "docs", "--never",
+            "quote a number you did not run", "--because", "they drift")
+        run("add", "--file", str(path), "--category", "docs", "--never",
+            "state a number without registering it", "--because", "they went stale")
+        merged = run("supersede", "1", "2", "--file", str(path), "--category", "docs",
+                     "--never", "state a number without registering the command",
+                     "--because", "both said this", "--enforced-by", "githooks/pre-push")
+        check("merging exits 0", merged.returncode == 0, merged.stdout + merged.stderr)
+        rules = lr.read_rules(path.read_text())
+        check("both originals are marked",
+              sum(1 for r in rules if lr.SUPERSEDED.search(r)) == 2, rules)
+        check("one replacement was written", len(rules) == 3, rules)
+        check("and it carries its guard", lr.ENFORCED_BY.search(rules[-1]), rules[-1])
+        run("prune", "--file", str(path))
+        check("pruning leaves only the replacement",
+              len(lr.read_rules(path.read_text())) == 1, lr.read_rules(path.read_text()))
+
     print("\nthe thresholds are the ones the real collisions sit at")
     check("contradiction threshold is 0.5", lr.CONTRADICTION == 0.5, lr.CONTRADICTION)
     check("near-duplicate threshold is 0.5", lr.NEAR_DUPLICATE == 0.5, lr.NEAR_DUPLICATE)

@@ -884,6 +884,42 @@ Twice now the request-serving finding came from cloning a repository whose
 README summary had been read months of loops earlier. The summary is not the
 document.
 
+## Twenty-seventh loop — a principle this repository's evidence contradicts
+
+Two more of the named repositories, cloned on the reasoning that worked twice.
+
+The fourth returned nothing: `sam3690/personal-brand` names Saraev in five
+files, all about LinkedIn content patterns. Recorded as a negative
+[src:SARAEV-BRAND-REPO-2026-08-28], because "cloning finds things" is not a law
+— it found things where the repository's subject was agent tooling, and nothing
+where it was content marketing.
+
+The fifth is a live system prompt built on DOE, and it attributes three
+principles to him: total automation, unbreakable resilience, tool agency
+[src:DOE-SYSTEM-PROMPT-2026-08-28]. **Tool Agency** — "if a tool doesn't exist,
+create it; you are not limited by the environment" — describes what worked here
+exactly, twice over.
+
+> The surprise is the second one. **"Unbreakable Resilience: never give up when
+> facing a bug. Be intensely persistent."** This repository's own evidence
+> contradicts it in a specific case: a prose guard was narrowed four times,
+> remained wrong on four of nine cases, and the correct move was to abandon it.
+> Persistence is right when the mechanism can work and the fault is in this
+> instance of it. It is wrong when the mechanism cannot be made precise — and
+> the two feel identical from inside, which is why the *count of narrowings* is
+> the signal rather than the feeling.
+
+That heuristic is now in the Act phase of the OODA skill and in
+`provenance/rejected.md`, with the contradiction stated narrowly rather than
+smoothed over: persist on the instance, count the narrowings on the mechanism.
+
+Recording it cost two defects of its own. Adding the rule produced **a second
+rule numbered 13**, because numbering counted the rules while `prune`
+deliberately leaves gaps; numbering now follows the highest number present.
+Then the budget refused the commit, and the review's own advice — merge the ones
+that say the same thing — needed an operation `supersede` did not have. It takes
+several numbers now, so two rules about quoted numbers became one.
+
 ## Still open
 
 `U-6`, `U-7` and `U-8` in [unknowns.md](unknowns.md): what Saraev actually

@@ -391,3 +391,25 @@ sources:
       kinds of context an author should supply; five map onto this
       repository's slots and one, prior attempts and known failures, does not
       appear anywhere in it.
+
+  - id: DOE-SYSTEM-PROMPT-2026-08-28
+    kind: repo_state
+    collected_at: "2026-08-28T11:40Z"
+    method: "git clone --depth 1 JesseBeckerGBH/wnba-ensemble; gemini_brain_prompt.md read in full"
+    evidence: provenance/raw/doe-system-prompt-2026-08-28.md
+    note: >-
+      A third party's live system prompt built on DOE, read first-hand. Names
+      three principles it attributes to Saraev - total automation, unbreakable
+      resilience, tool agency - and expands the acronym as
+      Directive-Orchestrative-Executive, a third spelling across three
+      third-party sources.
+
+  - id: SARAEV-BRAND-REPO-2026-08-28
+    kind: repo_state
+    collected_at: "2026-08-28T11:30Z"
+    method: "git clone --depth 1 sam3690/personal-brand; files mentioning Saraev read"
+    evidence: >-
+      The five files naming him concern LinkedIn content patterns - a
+      "humbling-number hook", and "Give your system a NAME so it's memorable and
+      reusable (his is 'DOE')". Nothing prompt-related. Recorded as a negative:
+      cloning this repository returned no material for the prompt system.

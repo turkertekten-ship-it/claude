@@ -95,6 +95,14 @@ different work, this is where you ask — not after building the wrong thing.
 Do it. Then capture what happened as new evidence, which opens the next
 Observe.
 
+**Count the narrowings.** Persistence is right when the mechanism can work and
+the fault is in this instance of it — most bugs are that. It is wrong when the
+mechanism itself cannot be made precise, and the two feel identical from
+inside. The count is the signal: a check narrowed a third or fourth time and
+still wrong on real cases is not one narrowing short, it is the wrong
+mechanism. Abandon it, record it in `provenance/rejected.md` with the reason,
+and look for a mechanism that compares exactly instead of interpreting.
+
 **Commit the work before you break it.** A falsifier usually means damaging
 something on purpose — a bad input, a removed file, a reverted fix — and undoing
 that damage with a blunt instrument takes uncommitted work with it. Commit

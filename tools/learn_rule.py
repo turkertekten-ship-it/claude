@@ -184,7 +184,10 @@ def add_rule(path: Path, category: str, mode: str, action: str, because: str,
                        "A claim that something is enforced is itself a claim.")
     text = path.read_text(encoding="utf-8")
     existing = read_rules(text)
-    candidate = render(len(existing) + 1, category, mode, action, because, enforced_by)
+    # Numbering follows the highest rule present, not the count: `prune` leaves
+    # gaps on purpose, and counting produced a second rule numbered 13.
+    highest = max((int(RULE.match(r).group(1)) for r in existing if RULE.match(r)), default=0)
+    candidate = render(highest + 1, category, mode, action, because, enforced_by)
 
     for rule in existing:
         if normalise(rule) == normalise(candidate):
@@ -329,13 +332,16 @@ def main(argv: list[str]) -> int:
     add.add_argument("--dry-run", action="store_true")
 
     sup = sub.add_parser("supersede", help="replace a rule that turned out to be wrong")
-    sup.add_argument("number", type=int, help="the rule number being replaced")
+    sup.add_argument("number", type=int, nargs="+",
+                     help="the rule number(s) being replaced; several merge into one")
     sup.add_argument("--file", default=str(DEFAULT_FILE))
     sup.add_argument("--category", required=True)
     supgroup = sup.add_mutually_exclusive_group(required=True)
     supgroup.add_argument("--always", metavar="ACTION")
     supgroup.add_argument("--never", metavar="ACTION")
     sup.add_argument("--because", required=True)
+    sup.add_argument("--enforced-by", default=None,
+                     help="the guard that catches a breach of the replacement")
     sup.add_argument("--dry-run", action="store_true")
 
     ann = sub.add_parser("annotate", help="name the guard that enforces an existing rule")
@@ -380,25 +386,30 @@ def main(argv: list[str]) -> int:
         if not path.exists():
             print(f"learn_rule: no such file: {path}", file=sys.stderr)
             return 2
-        code, message = can_supersede(path, args.number)
-        if code:
-            print(message, file=sys.stderr)
-            return code
+        for number in args.number:
+            code, message = can_supersede(path, number)
+            if code:
+                print(message, file=sys.stderr)
+                return code
         existing = read_rules(path.read_text(encoding="utf-8"))
-        new_number = len(existing) + 1
+        new_number = max((int(RULE.match(r).group(1)) for r in existing if RULE.match(r)),
+                         default=0) + 1
         mode = "Always" if args.always else "Never"
         code, message = add_rule(path, args.category, mode, args.always or args.never,
-                                 args.because, args.dry_run)
+                                 args.because, args.dry_run, args.enforced_by)
         if code:
             print(message, file=sys.stderr)
             return code
         print(message)
         if args.dry_run:
-            print(f"learn_rule: would mark rule {args.number} superseded by rule {new_number}")
+            print(f"learn_rule: would mark rule(s) {args.number} superseded by rule {new_number}")
             return 0
-        code, message = mark_superseded(path, args.number, new_number)
-        print(message, file=sys.stderr if code else sys.stdout)
-        return code
+        for number in args.number:
+            code, message = mark_superseded(path, number, new_number)
+            print(message, file=sys.stderr if code else sys.stdout)
+            if code:
+                return code
+        return 0
 
     if args.command == "review":
         if not path.exists():

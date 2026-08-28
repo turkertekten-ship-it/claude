@@ -59,6 +59,21 @@ written to audit rule coverage. A loop log is prose, and prose is read.
 
 ---
 
+## When to give up on a mechanism
+
+Both entries above were abandoned after the same signal: a check narrowed
+repeatedly and still wrong on real cases. Persistence is right when the
+mechanism can work and the fault is in this instance of it, which is most bugs.
+The count of narrowings is what separates the two — a third or fourth narrowing
+that still leaves real cases misjudged means the mechanism cannot be made
+precise, not that one more exception is needed.
+
+This is the one place where a principle attributed to Saraev and read
+first-hand — "Unbreakable Resilience: never give up when facing a bug, be
+intensely persistent" [src:DOE-SYSTEM-PROMPT-2026-08-28] — is contradicted by
+this repository's own evidence, and the contradiction is narrow. Persist on the
+instance; count the narrowings on the mechanism.
+
 ## How to add an entry
 
 When an approach is abandoned, record it here before the reasoning is lost:

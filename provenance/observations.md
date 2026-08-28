@@ -147,3 +147,10 @@ contents were not reconstructed, summarised, or guessed at.
 - A third-party guide to writing directives names six kinds of context an author should supply: goal, examples, past work, edge cases, constraints and preferences. [src:CREATING-DIRECTIVES-2026-08-28]
 - Five map onto this repository's seven slots. **Past work does not**: nothing in the slots, the `/prompt` command or the portable preamble asked what the author had already tried, or how it failed. [src:CREATING-DIRECTIVES-2026-08-28]
 - The same guide states the reason plainly under "Share Failures": "If you've tried this before and it failed, share what went wrong. Claude will design around those issues." [src:CREATING-DIRECTIVES-2026-08-28]
+
+## Observed — three principles, a third spelling, and one negative
+
+- A third party's live system prompt, read first-hand, attributes three principles to Saraev: "Total Automation" (automate everything a script can do), "Unbreakable Resilience" (never give up on a bug, be intensely persistent) and "Tool Agency" (if a tool does not exist, create it; you are not limited by the environment). [src:DOE-SYSTEM-PROMPT-2026-08-28]
+- The same file expands DOE as Directive-Orchestrative-Executive — a third spelling across three independent third-party sources, none of them his. [src:DOE-SYSTEM-PROMPT-2026-08-28] [src:SARAEV-REPOS-2026-08-27] [src:DOE-TEMPLATES-2026-08-28]
+- It states a Definition of Done as an explicit stopping condition and instructs the agent not to stop or declare victory until it is met. [src:DOE-SYSTEM-PROMPT-2026-08-28]
+- Cloning `sam3690/personal-brand`, the fourth named repository, returned nothing for the prompt system: its five files naming him are LinkedIn content patterns. A negative, recorded so the repository is not cloned again for this purpose. [src:SARAEV-BRAND-REPO-2026-08-28]
