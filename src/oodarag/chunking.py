@@ -200,6 +200,13 @@ def chunk_document(doc: Document, config: ChunkConfig | None = None) -> list[Chu
                     "uri": doc.uri,
                     "title": doc.title,
                     "kind": kind,
+                    # The identity of the text `char_start` and `char_end`
+                    # index. Those offsets address the *normalised* document,
+                    # not the file it came from - front matter is stripped,
+                    # whitespace normalised, secrets replaced - so a span is
+                    # only a precise reference when it travels with the hash of
+                    # the text it refers to (L78).
+                    "doc_hash": doc.content_hash,
                     "authority": doc.metadata.get("authority", 1.0),
                     **meta,
                 },

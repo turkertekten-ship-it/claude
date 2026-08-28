@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sqlite3
 import pathlib
 import unittest
@@ -23,7 +24,7 @@ from oodarag.ingest.base import Connector
 from oodarag.eval.contamination import _longest_run, _longest_run_span, detect
 from oodarag.eval.harness import EvalHarness, Golden
 from oodarag.generate.answer import AnswerConfig, AnswerGenerator
-from oodarag.models import Chunk, Document, RawDocument
+from oodarag.models import Chunk, Citation, Document, RawDocument
 from oodarag.pipeline import IndexPipeline
 from oodarag.retrieve.hybrid import HybridRetriever
 from oodarag.retrieve.rerank import HeuristicReranker, _longest_common_run
@@ -1241,6 +1242,98 @@ class GhostCompoundTest(unittest.TestCase):
         self.assertAlmostEqual(with_ghost, 2.0 / 10.56, places=4)
         self.assertAlmostEqual(repaired, 1.0, places=4)
         self.assertGreater(repaired, with_ghost)
+
+
+def _squash(text: str) -> str:
+    """Collapse whitespace runs: packing replaces the document's newlines."""
+    return re.sub(r"\s+", " ", text).strip()
+
+
+class CitationSpanTest(unittest.TestCase):
+    """A citation names a passage, not a file.
+
+    `models.py` has said since it was written that "an answer can always be
+    traced back to the byte range of the source it came from". The byte range
+    was on the chunk and stopped there: `build_citations` copied the uri and a
+    truncated quote and dropped the offsets, so nothing downstream could tell
+    which part of a 40 KB file had been read. That is also how the offsets came
+    to be wrong for 45% of code chunks without anyone noticing (L64, L78).
+    """
+
+    def _answer(self):
+        from oodarag.generate.answer import AnswerConfig, AnswerGenerator
+        from oodarag.retrieve.hybrid import HybridRetriever, RetrievalConfig
+
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        pipeline = IndexPipeline(store)
+        texts = {
+            f"pkg{i}.md": (f"# Package {i}\n\n## Overview\n\n"
+                           + " ".join(f"Package {i} handles {topic} in sentence {j}."
+                                      for j in range(12))
+                           + f"\n\n## Details\n\n"
+                           + " ".join(f"More about {topic}, point {j}." for j in range(12)))
+            for i, topic in enumerate(
+                ["yaml parsing", "http requests", "date arithmetic", "password hashing",
+                 "process locking", "template rendering", "csv export", "log routing"])
+        }
+        docs = [RawDocument(source_system="test", external_id=n, uri=f"mem://{n}",
+                            title=n, text=t, metadata={}) for n, t in texts.items()]
+
+        class _Memory(Connector):
+            key = "test:cite"
+            source_system = "test"
+
+            def fetch(self, cursor):
+                yield from docs
+
+        pipeline.run([_Memory()])
+        generator = AnswerGenerator(
+            HybridRetriever(store, pipeline.embedder, RetrievalConfig()),
+            AnswerConfig(generator="extractive"))
+        answer = generator.answer("which package handles password hashing?")
+        sources = {d.doc_id: d.text for d in store.all_documents()}
+        return answer, sources
+
+    def test_every_citation_carries_the_span_it_was_read_from(self):
+        answer, sources = self._answer()
+        self.assertTrue(answer.citations, "nothing was cited")
+        for citation in answer.citations:
+            self.assertGreater(citation.char_end, citation.char_start,
+                               f"citation {citation.marker} carries an empty span")
+            text = sources[citation.doc_id]
+            self.assertLessEqual(citation.char_end, len(text) + 1,
+                                 "the span runs past the end of its document")
+
+    def test_the_span_locates_the_text_that_was_cited(self):
+        """Whitespace-collapsed, because chunk text is a reconstruction: units
+        joined with a space where the document had a blank line (L64)."""
+        answer, sources = self._answer()
+        for citation in answer.citations:
+            document = sources[citation.doc_id]
+            span = _squash(document[citation.char_start:citation.char_end])
+            quoted = _squash(citation.quote)[:40]
+            self.assertTrue(span.startswith(quoted[:len(span)] if len(span) < len(quoted) else quoted),
+                            f"citation {citation.marker} points at {span[:60]!r}, "
+                            f"but quotes {quoted!r}")
+
+    def test_the_span_names_the_text_it_indexes_not_the_file(self):
+        """The first version published `file:///x.md#char=0,190`, an RFC 5147
+        range into the *file* - and the offsets index the normalised document,
+        whose front matter the ingest had stripped. Three citations checked
+        against the real corpus all pointed at the removed prefix."""
+        answer, _ = self._answer()
+        citation = answer.citations[0]
+        self.assertTrue(citation.content_hash, "the span has nothing to anchor to")
+        self.assertEqual(citation.span,
+                         f"chars {citation.char_start}-{citation.char_end} "
+                         f"of {citation.content_hash}")
+        self.assertNotIn("#char=", citation.uri,
+                         "a uri fragment claims the file, which these offsets do not index")
+        blank = Citation(marker=1, chunk_id="c", doc_id="d", title="t", uri="mem://t",
+                         quote="q", score=0.0)
+        self.assertEqual(blank.span, "",
+                         "a citation with no span must say nothing rather than guess")
 
 
 class ArmAgreementGateTest(unittest.TestCase):

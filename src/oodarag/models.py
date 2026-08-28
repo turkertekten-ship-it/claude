@@ -218,6 +218,34 @@ class Citation:
     uri: str
     quote: str
     score: float
+    #: Where the cited chunk begins and ends **in the document text as
+    #: indexed** - not in the file. Those differ: the filesystem connector
+    #: strips YAML front matter, `clean()` normalises whitespace, and redaction
+    #: replaces secrets with placeholders of a different length. A first version
+    #: of this field published `file:///x.md#char=0,190` as an RFC 5147 range
+    #: and the first three citations checked against the real corpus pointed at
+    #: the front matter the ingest had removed (L78).
+    #:
+    #: Paired with `content_hash`, which identifies the text the offsets address,
+    #: the two are a precise reference to what was actually read - the doctrine's
+    #: "pinned to an immutable identifier where one exists". Alone they are a
+    #: guess about a file.
+    char_start: int = 0
+    char_end: int = 0
+    #: Hash of the document text these offsets index.
+    content_hash: str = ""
+
+    @property
+    def span(self) -> str:
+        """Human-readable provenance: which characters of which text.
+
+        Deliberately not a uri fragment. `#char=` on a `file://` uri is a claim
+        about the file, and this is a claim about the normalised text - the same
+        distinction that made the first version of this wrong.
+        """
+        if self.char_end > self.char_start >= 0 and self.content_hash:
+            return f"chars {self.char_start}-{self.char_end} of {self.content_hash}"
+        return ""
 
 
 @dataclass(slots=True)
@@ -238,7 +266,7 @@ class Answer:
             "confidence": round(self.confidence, 4),
             "abstained": self.abstained,
             "generator": self.generator,
-            "citations": [asdict(c) for c in self.citations],
+            "citations": [{**asdict(c), "span": c.span} for c in self.citations],
             "metrics": self.metrics,
         }
         if include_retrieved:

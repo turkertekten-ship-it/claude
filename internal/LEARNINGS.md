@@ -4306,3 +4306,63 @@ cannot help until there is a better embedder do not.
    hop *and* a paraphrase; measuring the hop against them measures the
    paraphrase too, and a feature that fixes half of a compound problem measures
    as a failure.
+
+---
+
+## L78 - Giving `char_start` a reader, and nearly publishing the wrong bytes
+
+`models.py` has claimed since it was written that "an answer can always be
+traced back to the byte range of the source it came from". The byte range lived
+on the chunk and stopped there: `build_citations` copied the uri and a truncated
+quote and dropped the offsets, so a citation named a *file* and not the passage
+inside it. That is also how the offsets came to be wrong for 45% of code chunks
+for the life of the project without anyone noticing (L64): a field nobody reads
+has no way to complain.
+
+**The first version published a lie.** Citations gained `char_start`,
+`char_end`, and a `locator` in RFC 5147 form - `file:///x/pika.md#char=0,190` -
+which is the standard way to address a character range in a text file. The
+synthetic test passed. Checked against the real corpus, the first three
+citations pointed at text the reader would never see:
+
+```
+[1] pika.md#char=0,190
+      the file says: '--- date: 2026-08-06T21:33:38+0000 source: https://pypi...'
+      the citation quotes: 'Pika is a RabbitMQ (AMQP 0-9-1) client library...'
+```
+
+The offsets index the **normalised document**, not the file. The filesystem
+connector strips YAML front matter, `clean()` normalises whitespace, and
+redaction replaces secrets with placeholders of a different length. A `#char=`
+fragment on a `file://` uri is a claim about the file, and this system does not
+have file offsets to give - not for any document that went through
+normalisation, which is all of them.
+
+**The fixture could not have caught it.** The test corpus is built in memory
+from strings with no front matter, no secrets and normalised whitespace
+already - so document text *equals* source text, and the one transformation
+that breaks the claim is exactly the one a synthetic fixture does not have.
+Three lines of real corpus did what three tests could not.
+
+**What shipped instead.** The offsets stay, documented as offsets into the text
+as indexed, and they travel with `content_hash` - the identity of the text they
+address. `chars 192-1074 of 554eb1a387fb21cc` is a precise, checkable reference:
+a consumer with the same document can resolve it, and one with a different
+version of the document can tell that it cannot. That is the doctrine's "pinned
+to an immutable identifier where one exists", and the identifier that exists
+here is the content hash, not the file path.
+
+Verified on the live corpus: five of five citations resolve, hash matching the
+document and span starting at the quoted text.
+
+**Rules.**
+1. **An offset is meaningless without the identity of what it indexes.** File,
+   normalised text, or chunk - all three are "the document", and a number alone
+   does not say which.
+2. **A standard format is a claim in someone else's vocabulary.** RFC 5147 says
+   "characters of this file"; using it for characters of a derived text is a
+   precise way to be wrong, and more convincing than being vague.
+3. **Check a provenance feature against real data before the tests pass.**
+   Fixtures are built without the transformations that make provenance hard -
+   that is what makes them fixtures - so they confirm the design rather than
+   testing it.

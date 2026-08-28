@@ -22,9 +22,9 @@
 | Non-negotiables | verified | All five attacked directly, not just asserted: zero-dependency walked module by module, provenance and redaction attacked with crafted inputs, degradation measured through partial and silent-empty source failures (L37-L39) |
 
 **Current measurements** (offline embedder, deterministic).
-393 tests passing - of which ten only run once the branch is pushed, because the
+396 tests passing - of which ten only run once the branch is pushed, because the
 live GitHub cross-checks skip as a module unless the local HEAD is also the
-remote head. The same tree reads 383 before a push and 393 after (L64), and CI,
+remote head. The same tree reads 386 before a push and 396 after (L64), and CI,
 which only runs pushed commits, always sees the larger number. Retrieval metrics are over graded cases only - abstention
 cases have nothing to retrieve, and averaging their zeros in made adding a
 negative case look like a retrieval regression.
@@ -193,12 +193,17 @@ its current failures are that artefact. See docs/EVALUATION.md.
    Worth rebuilding when item 1 lands, against the same golden set: single-shot
    recall@8 **0.75**, four of eight cases retrieving one document of two.
 
-5. **Give `char_start` a reader.** Fixed and pinned in L64 - code chunks went
-   from 55% to 100% located, with chunk ids and lengths byte-identical - but the
-   field is still written and never consumed. It is now correct enough to build
-   on: a citation that quotes the exact span, or a snippet that shows a match in
-   its document rather than the whole chunk. Until something reads it, the
-   property test is the only thing keeping it honest.
+5. **Citations now name a passage, not a file** (L78). `Citation` carries the
+   span the answer was read from, paired with the hash of the text those offsets
+   index: `chars 192-1074 of 554eb1a387fb21cc`. Deliberately not an RFC 5147
+   `#char=` fragment - the first version published exactly that, and the offsets
+   address the normalised document, whose front matter the ingest strips, so
+   three of three citations checked against the real corpus pointed at text the
+   reader never sees.
+
+   What is still missing is a *file*-relative span, which needs normalisation to
+   record what it removed and where. Worth doing when something wants to open a
+   source at an offset; the content hash is the honest anchor until then.
 
 ## Deliberately not next
 

@@ -81,6 +81,9 @@ def build_citations(results: list[ScoredChunk]) -> list[Citation]:
             uri=result.chunk.metadata.get("deep_link") or result.citation_uri,
             quote=summarize(result.chunk.text, 220),
             score=round(result.score, 4),
+            char_start=result.chunk.char_start,
+            char_end=result.chunk.char_end,
+            content_hash=result.chunk.metadata.get("doc_hash", ""),
         )
         for i, result in enumerate(results, start=1)
     ]

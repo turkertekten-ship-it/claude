@@ -85,7 +85,8 @@ def cmd_query(args, config: Config) -> int:
         if answer.citations:
             print("Sources:")
             for citation in answer.citations:
-                print(f"  [{citation.marker}] {citation.title}\n      {citation.uri}")
+                print(f"  [{citation.marker}] {citation.title}\n      {citation.uri}"
+                  + (f"\n      {citation.span}" if citation.span else ""))
         print(f"\nconfidence={answer.confidence}  generator={answer.generator}"
               f"  coverage={answer.metrics.get('citation_coverage')}"
               f"  {answer.metrics.get('total_ms')}ms")
