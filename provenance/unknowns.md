@@ -250,3 +250,15 @@ searched.
 
 **Action taken:** the search was scoped strictly to locating a Claude export.
 No personal Drive file was opened, and nothing was written to Drive.
+
+**RESOLVED for later sessions, not retroactively (2026-08-27).** The owner
+subsequently issued a goal to this session containing "looking into my files"
+in their own words [src:USER-GOAL-SKILLS-2026-08-27]. That is direct
+authorisation, and Drive was searched on that basis: titles and metadata only,
+no file content opened [src:DRIVE-OWNED-FILES-2026-08-27].
+
+It does **not** answer the original question, which was who emitted the
+unattributed "Use Google Drive for this" turn. A later authorisation from the
+owner does not retroactively make an earlier unattributed instruction
+legitimate, and treating it that way would be the exact laundering this entry
+exists to catch. The origin of that turn remains unknown.

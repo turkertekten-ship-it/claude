@@ -23,13 +23,40 @@ gap between a document that reads as finished and a tree that is halfway.
 - `README.md` links `internal/PLAN.md` and `docs/adr/0001-zero-dependency-core.md`; neither path exists. [src:AUDIT-OODARAG-2026-08-27]
 - The `Makefile` declares `demo`, `index`, `query`, `eval` and `loop` targets. [src:AUDIT-OODARAG-2026-08-27]
 
-> **Superseded in part, 2026-08-27T16:40Z.** That session has since pushed
-> three more commits. F-1 and F-3 are fixed: `src/oodarag/cli.py` exists and
-> the stages this audit recorded as absent are present
-> [src:RAG-BRANCH-COMPLETE-2026-08-27]. The findings below were accurate
-> against commit `1d7ce8f` and are kept as written rather than edited, because
-> a rewritten audit is not a record. F-2, F-4 and F-5 were **not** re-checked
-> against the new commit; treat them as open, not as either fixed or standing.
+> **Superseded in part, 2026-08-27T17:00Z.** That session has since pushed
+> three more commits, and every finding below has now been re-checked against
+> them. The findings are kept as written rather than edited, because a
+> rewritten audit is not a record; the disposition is in the table
+> immediately below.
+
+## Disposition after re-check
+
+| Finding | Status | Basis |
+|---|---|---|
+| **F-1** — console script with no module | **Fixed** | `src/oodarag/cli.py` exists. [src:RAG-BRANCH-COMPLETE-2026-08-27] |
+| **F-2** — README claims outrunning the code | **Fixed** | All eight rows now have code: `reciprocal_rank_fusion`, `recall_at_k`/`mrr`/`ndcg_at_k`, `citation_coverage` in the eval harness, and a citation contract in `generate/`. Both dangling links resolve. [src:AUDIT-RECHECK-2026-08-27] |
+| **F-3** — Makefile targets that cannot succeed | **Fixed** | The stages they invoke now exist. [src:RAG-BRANCH-COMPLETE-2026-08-27] |
+| **F-4** — chunking contract with no chunker | **Fixed** | `chunk_document` builds `Chunk(context_header=…)` from `heading_path`, classifying documents and splitting prose and code separately. [src:AUDIT-RECHECK-2026-08-27] |
+| **F-5** — token estimator bias undocumented | **Stands** | `estimate_tokens` is unchanged and now cites the ADR, but that ADR does not record the estimator's bias. [src:AUDIT-RECHECK-2026-08-27] |
+
+Two things worth saying plainly about that table.
+
+**The convergence is not influence.** `chunking.py` classifies by document kind
+and threads the heading path into `context_header` — the same shape as
+[the chunking design](../design/chunking.md) written here. There is no evidence
+that session read this audit, and none should be claimed. Two readings of the
+same code and the same `Chunk` dataclass arriving at the same place is
+corroboration that the design was the obvious one, not evidence that it
+travelled.
+
+**F-5 is now a one-line fix.** The heuristic itself is right and should stay —
+a real tokenizer would need Hugging Face, which is unreachable here
+[src:DOCLING-MODELS-BLOCKED-2026-08-27], so the zero-dependency choice is also
+the only working choice. What is missing is a sentence in
+`docs/adr/0001-zero-dependency-core.md` saying the error is systematic rather
+than random and worst on code, where the chunk bounds are tightest. Without it,
+the first eval swing after a tokenizer comparison will read as a retrieval
+regression.
 
 ## Findings
 
