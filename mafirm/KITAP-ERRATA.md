@@ -203,6 +203,23 @@ izlenen sürüm olarak yalnızca ŞABLON bırakılmalı. Dikkat: bir yolu
 `.gitignore`'a eklemek, o yol ZATEN izleniyorsa hiçbir şey yapmaz —
 `git rm --cached` şarttır. *(Y-02, Y-03)*
 
+**[A] Kurulum idempotent değil ve kitap bunu hiçbir yerde söylemiyor.**
+§2'nin `printf ... > .gitignore` adımı ile §5, §12 ve §16'nın "yazılır"
+talimatları ÜZERİNE YAZAR. Kitabı ikinci kez izleyen biri — yeni bir oturum,
+ikinci bir hukukçu, ya da §0'ın dördüncü kuralının "denetim kırmızıysa dur ve
+düzelt" talimatını izleyen kişi — uygulanmış HER YAMAYI geri alır. Kitapta ne
+bir sürüm işareti, ne "bu dosya değiştirilmiş" kontrolü, ne de güvenli bir
+yeniden kurulum yordamı var. → §2 bir "yeniden kurulum" bölümü taşımalı:
+hangi dosyaların üzerine yazıldığı, önce neyin yedekleneceği, ve yeniden
+kurulumdan sonra denetimin ZORUNLU koşulması. *(Z-02, Z-03)*
+
+**[A] Denetim kendi bütünlüğünü doğrulayamaz.** §16'nın `denetim.sh`'i de
+"yazılır" dosyalarından biridir. Kitaba sadık hâli geri konduğunda tüm ek
+kontroller kaybolur ve betik "DENETİM OK" der — kural 6 koruması silinmiş olsa
+bile. Yani denetçiyi ezmek, denetçinin yapacağı bütün kontrolleri devre dışı
+bırakır ve uygulayıcı korumasız bir sisteme YEŞİL bir denetimle bakar.
+Doğrulama, ezilen dosyanın DIŞINDA bir katmanda durmalıdır. *(Z-07, Z-08)*
+
 ## §7 · Ortak koltukları
 
 **[B] Kitabın en yüksek itibar riskli kuralının hiçbir mekanizması yok.**

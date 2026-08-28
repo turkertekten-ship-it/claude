@@ -70,6 +70,8 @@ python3 "$S/ks_x_yetki.py"; topla "X · alt ajan yetkisi / kapı kapsamı" $?
 echo
 python3 "$S/ks_y_sirrin_deposu.py"; topla "Y · sırrın kalıcı deposu" $?
 echo
+python3 "$S/ks_z_kurulum_butunlugu.py"; topla "Z · kurulum bütünlüğü" $?
+echo
 echo "###############################################################"
 echo "#  ÖZET"
 echo "###############################################################"

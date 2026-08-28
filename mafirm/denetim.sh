@@ -178,6 +178,28 @@ PYX"
 kontrol "teslimatlar tarih ve bozulma sınıfı taşıyor" \
   "python3 $M/sinama/ks_p_guncellik.py >/dev/null 2>&1 && echo 'hepsi tarihli'"
 
+# [Z-02] §2'nin kurulum adımı YIKICIDIR:
+#     printf '%s\\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' > .gitignore
+# `>` üzerine yazar. Kitabı yeniden izleyen biri — yeni bir oturum, ikinci bir
+# hukukçu, ya da §0'ın "denetim kırmızıysa dur ve düzelt" talimatını izleyen
+# kişi — kural 6 korumasını SESSİZCE geri alıyordu. Denetim, kitaba sadık
+# kapi.py geri konduğunda kırmızıya dönüyor (Z-05) ama .gitignore silindiğinde
+# dönmüyordu: yamanın türüne göre değişen bir bütünlük, bütünlük değildir.
+kontrol "kimlik taşıyan yollar .gitignore'da" \
+  "MAFIRM_KOK='$M' python3 - <<'PYX'
+import os, sys
+kok = os.environ['MAFIRM_KOK']
+p = kok + '/.gitignore'
+if not os.path.exists(p):
+    print('.gitignore yok'); sys.exit(1)
+gi = open(p, encoding='utf-8').read()
+gerekli = ['dosyalar/', 'hafiza/muvekkil-adlari.txt', 'hafiza/cikar-catismasi.md']
+eksik = [k for k in gerekli if k not in gi]
+if eksik:
+    print('kural 6 koruması EKSİK: ' + ', '.join(eksik)); sys.exit(1)
+print('%d yolun hepsi dışlanmış' % len(gerekli))
+PYX"
+
 echo "=== kapsanmayan kurallar sesli bildirilir ==="
 adet=$(grep -cve '^[[:space:]]*#' -e '^[[:space:]]*$' "$M/hafiza/muvekkil-adlari.txt" 2>/dev/null | head -1)
 adet=${adet:-0}

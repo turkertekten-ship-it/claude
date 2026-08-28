@@ -1,5 +1,5 @@
 ###############################################################
-#  KÖR SINAMA TAKIMI — 2026-08-28T09:52:21Z
+#  KÖR SINAMA TAKIMI — 2026-08-28T10:00:37Z
 ###############################################################
 
 /root/mafirm/sinama/ks_a_esik.py:45: DeprecationWarning: bildirilmeli() birim taşımaz ve üç değerli cevap veremez; yabancı para birimindeki bir ciro çevrilmeden verilirse cevap SESSİZCE tersine döner (§19 pilotu). degerlendir() kullanın.
@@ -292,9 +292,9 @@ GEÇTİ L-06   hafiza/ dosyalarının hepsi var
 KÖR SINAMA M — errata ↔ sınama izlenebilirliği
 ================================================================================================
 GEÇTİ M-01   her errata maddesi bir sınama vakasına atıf yapıyor
-        56 madde · atıfsız 0: yok
+        58 madde · atıfsız 0: yok
 GEÇTİ M-02   atıf yapılan her vaka kimliği gerçekten tanımlı
-        249 tanımlı kimlik · uydurma dayanak: yok
+        258 tanımlı kimlik · uydurma dayanak: yok
 GEÇTİ M-03   [A] ve [B] maddelerinin atıfları sadık sistemde gerçekten kaldı
         sadık koşumda kalan vaka: 41 · sınanmamış ağır madde: yok
 GEÇTİ M-04   sadık sistemde kalan her vaka errata'da ya da raporda açıklanmış
@@ -393,7 +393,7 @@ KÖR SINAMA R — yön, insan onayı ve dil kuralları
 GEÇTİ R-01   rapor cevapla başlıyor, yöntemle değil
         ilk bölüm: 'Cevap' — §4: 'cevabı merak eden ilk paragrafta bulur'
 GEÇTİ R-02   yöntem bölümü bulgulardan sonra geliyor
-        yöntem 31. başlık, ilk bulgu 1. başlık
+        yöntem 32. başlık, ilk bulgu 1. başlık
 GEÇTİ R-03   iki zorunlu başlık en sonda ve doğru sırada
         son iki başlık: ['Şimdi ne yapılmalı', 'Yetkili avukat görüşü gereken konular']
 GEÇTİ R-04   raporun onay durumu açıkça yazılı (§9)
@@ -576,6 +576,28 @@ GEÇTİ Y-05   denetim, kayıt dosyası varken korumasını her hâlde söylüyo
 ------------------------------------------------------------------------------------------------
 5 vaka · 5 geçti · 0 beklenen · 0 SİNYAL
 
+================================================================================================
+KÖR SINAMA Z — kurulum ikinci kez koşulduğunda
+================================================================================================
+GEÇTİ Z-01   .gitignore kimlik taşıyan yolları hâlâ dışlıyor
+        üç yolun üçü de yerinde
+GEÇTİ Z-02   §2 yeniden koşulup koruma silinince denetim KIRMIZI
+        yıkımdan önce çıkış 0, sonra 1
+GEÇTİ Z-03   §2'nin `>` yönlendirmesi korumayı gerçekten siliyor
+        yeniden koşumdan sonra .gitignore: 'cikti/ | dosyalar/*/veri/ | .DS_Store | ' — yıkım kanıtlandı, dolayısıyla Z-02 boşa geçmiyor
+GEÇTİ Z-04   yamalı her dosya kendini tanıtan bir yama izi taşıyor
+        üç yamalı dosyanın üçü de vaka kimliğiyle işaretli
+GEÇTİ Z-05   kitaba sadık kapi.py geri konunca denetim KIRMIZI
+        önce 0, sonra 2
+GEÇTİ Z-06   `mkdir -p` adımlarının yeniden koşulması zararsız
+        önce 0, sonra 0
+GEÇTİ Z-07   denetçinin kendisi geri alınmamış (yama izleri yerinde)
+        3 yama izinin hepsi denetim.sh içinde
+GEÇTİ Z-08   denetim beyan edilen asgari kontrol sayısını taşıyor
+        26 kontrol (asgari 20)
+------------------------------------------------------------------------------------------------
+8 vaka · 8 geçti · 0 beklenen · 0 SİNYAL
+
 ###############################################################
 #  ÖZET
 ###############################################################
@@ -601,6 +623,7 @@ GEÇTİ Y-05   denetim, kayıt dosyası varken korumasını her hâlde söylüyo
   W · sessizce boş arama kaynağı     temiz
   X · alt ajan yetkisi / kapı kapsamı temiz
   Y · sırrın kalıcı deposu          temiz
+  Z · kurulum bütünlüğü            temiz
   ------------------------------------------------------------
   TOPLAM SİNYAL                         0
 

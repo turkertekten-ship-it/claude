@@ -25,7 +25,7 @@ kendi §16 denetimi yeşile dönmedi.
 3. **Denetim on beş bozmadan on birini görmüyor**; sıfır beceri, kancasız
    ayarlar ve tamamen boş bir `esik.py` taşıyan bir sistemde "DENETİM OK" diyor.
 
-**Yamalı hâlde sistem çalışıyor:** yirmi iki çalıştırılabilir takım — **217
+**Yamalı hâlde sistem çalışıyor:** yirmi üç çalıştırılabilir takım — **225
 vaka, 15 mutasyon, 12 bağımlılık doğrulaması, 0 sinyal**;
 denetimin mutasyon yakalaması 4/15 → 15/15, birimler arası tutarlılık takımının
 kendi mutasyon yakalaması 10/10. Ama **üç mevzuat bulgusu ile kitabın kendi içindeki bir çelişki açık kalır**
@@ -1119,6 +1119,57 @@ işlemek Y-03 ile Y-04'ü, koruma cümlesini kaldırmak Y-05'i kırmızıya dön
 
 ---
 
+## Yedi buçuk artı on yedi · Kitap ikinci kez koşulunca her yamayı geri alıyor
+
+Kitap bir **kurulum kitabıdır**. Asıl kullanımı çalıştırılmaktır — ve on yedi
+tur boyunca hiçbir takım onu **iki kez** çalıştırmadı.
+
+§2'nin ikinci adımı **yıkıcıdır**:
+
+    printf '%s\n' 'cikti/' 'dosyalar/*/veri/' '.DS_Store' > .gitignore
+
+`>` üzerine yazar. Aynı şey §12'nin `kapi.py`si, §5'in `esik.py`si ve §16'nın
+`denetim.sh`i için de geçerli: hepsi "yazılır" der. Kitabı yeniden izlemek —
+yeni bir oturum, ikinci bir hukukçu, ya da **§0'ın dördüncü kuralının**
+*"denetim kırmızıysa dur ve düzelt"* talimatını izleyen kişi — **her yamayı**
+geri alır. Bir önceki turda konan kural 6 koruması dâhil.
+
+Yıkımın olması kaçınılmaz; ölçülen şey **görülüp görülmediğidir**. Sessizce
+geri alınan bir koruma, hiç konmamış bir korumadır.
+
+**Ölçüm.** Kitaba sadık `kapi.py` geri konduğunda denetim **kırmızıya
+dönüyor** (Z-05) — yani mekanizma kısmen çalışıyor. Ama `.gitignore` silinince
+**`DENETİM OK`** diyor: yamanın türüne göre değişen bir bütünlük, bütünlük
+değildir. Denetime bir kontrol eklendi; artık kural 6 koruması eksikse
+kırmızı.
+
+### Ve en keskin hâli: denetçiyi ezmek denetimi kapatır
+
+Kitabın kendi `denetim.sh`'ini geri koyun → **`DENETİM OK`**. Sonra kural 6
+korumasını da silin → **hâlâ `DENETİM OK`**.
+
+**Denetim kendi bütünlüğünü doğrulayamaz**, çünkü doğrulayacak kod ezilen
+dosyanın içindedir. Uygulayıcı, korumasız bir sisteme yeşil bir denetimle
+bakar — ve yeşili veren, kitabın kendi betiğidir.
+
+Dış katman `sinama/`dır: **kitap oraya hiçbir şey yazmaz**, dolayısıyla
+yeniden kurulumdan sağ çıkar. Denetçinin bütünlüğü oraya kondu (Z-07: yama
+izleri yerinde mi; Z-08: kontrol sayısı sessizce düşmüş mü). Mutasyonda
+denetçiyi geri almak **sekiz vakanın beşini** birden kırmızıya çeviriyor —
+en tehlikeli değişiklik, en gürültülü sinyali veriyor.
+
+Her şey bozuk değil ve bu da ölçüldü: `mkdir -p` adımları gerçekten
+zararsızdır (Z-06). Z-02'nin bir genelleme değil bir **ölçüm** olduğunu belli
+eden şey budur.
+
+> Bu turda kendi sınamam bir kez de **geçersiz taban çizgisinde** koştu: kum
+> havuzunun denetimi zaten kırmızıydı (yeni takım rapor tablosunda yoktu),
+> dolayısıyla üç vaka okunamazdı. Üçüncü turda öğrendiğim kural burada işe
+> yaradı: **kırmızı tabanda mutasyon okunmaz.** Taban düzeltildi, sonuç sonra
+> okundu.
+
+---
+
 ## Sekiz · Kitabın kendi beklenen değerleri bayatlıyor
 
 | Bölüm | Beklenen | Gerçek | Sebep |
@@ -1219,6 +1270,7 @@ Kitaba sadık sürümler `yamalar/kitaba-sadik/` altında duruyor.
 | W · sessizce boş arama kaynağı | *hiç sorulmamıştı* | **temiz** — boş banka artık sesli |
 | X · yetki ↔ kapsam | *hiç sorulmamıştı* | **temiz** — beyan ile uygulama hizalandı |
 | Y · sırrın kalıcı deposu | *hiç sorulmamıştı* | **temiz** — üç yol dışlandı, geçmiş temiz |
+| Z · kurulum bütünlüğü | *kitap iki kez hiç koşulmamıştı* | **temiz** — sessiz geri alma artık görülüyor |
 | U · birimler arası tutarlılık | *hiç sınanmamıştı* | 1 kaldı (**bilerek** — U-02, insana bırakıldı) |
 
 Doktrin kapsaması, yamadan sonra (on bir kural):
@@ -1276,8 +1328,8 @@ değildir — ve bu, kitabın kurduğu sistem için de geçerlidir.
 
 ### Nasıl yeniden koşulur
 ```
-./sinama/hepsi.sh                 # 22 çalıştırılabilir takım:
-                                  #   217 vaka + 15 mutasyon (D)
+./sinama/hepsi.sh                 # 23 çalıştırılabilir takım:
+                                  #   225 vaka + 15 mutasyon (D)
                                   #   + 12 bağımlılık doğrulaması (E)
                                   # ayrıca 3 belge takımı (G, H, I)
 ./denetim.sh --yapisal            # mühendislik katmanı
@@ -1340,9 +1392,10 @@ Dokuz takım, 96 vaka:
 | W | **Sessizce boş arama kaynağı** — 'bulunamadı' ne demek | §2, §14, §10 |
 | X | **Alt ajan yetkisi ↔ kapı kapsamı** — yetki var, kural var mı | §10, §12, kural 6 |
 | Y | **Sırrın kalıcı deposu** — sistem neyi versiyonluyor | §2, kural 6 |
+| Z | **Kurulum bütünlüğü** — kitap ikinci kez koşulursa | §2, §0 kural 4 |
 
 **Sonuç: kitaba sadık kurulumda 85 vaka koşuldu, 56'sı kaldı.** Yamalı hâlde
-**217 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
+**225 vaka + 15 mutasyon + 12 bağımlılık doğrulaması, 0 SİNYAL**. **On iki**
 bilinen sapma `sinama/beklenen.json` içinde gerekçesiyle beyan edilmiş ve
 BEKLENEN olarak raporlanıyor; her biri ya kitabın davranışının bilerek
 bırakılmış kaydıdır, ya belgelenmiş bir öntanımlı boşluktur, ya da (U-02)
