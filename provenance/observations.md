@@ -130,3 +130,8 @@ contents were not reconstructed, summarised, or guessed at.
 - Four learned rules were appended in one session; they are 121 words, 6% of `CLAUDE.md`. [src:RULES-BUDGET-2026-08-27]
 - At the measured mean rule length, fifty rules would be about 45% of the file and two hundred about 76% — arithmetic on the measured mean, not an observed file. [src:RULES-BUDGET-2026-08-27]
 - Both collisions this repository has actually produced — one contradiction, one restatement — sit at exactly 0.50 word overlap, and the four genuine rules produce no finding at that threshold. [src:RULES-BUDGET-2026-08-27]
+
+## Observed — the paths that touch the owner's own machine
+
+- `git check-ignore -v archive/index.db` resolves to `.gitignore:3:archive/`, so the chat index built by the documented `ingest --include-projects` command cannot be committed; `*.db` covers it a second time. [src:RULES-BUDGET-2026-08-27]
+- The installer's four `~/.local/bin` shims were written with an unguarded redirect, so a file already at one of those names — `check-output` is an ordinary name for a personal script — would have been overwritten and then removed by `--uninstall`, one loop after the same defect was fixed for every other target. [src:RULES-BUDGET-2026-08-27]

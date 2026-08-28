@@ -370,6 +370,33 @@ not run") when it is a finding, and the first version of the edit-preserving
 uninstall checked only manifest membership, so a file we installed and the
 owner then rewrote was still deleted.
 
+## Eleventh loop — the fix that was only as complete as the search
+
+The tenth loop's real lesson was not about installers: it was that this
+container hides a class of defect that only exists on the owner's machine.
+Observe went looking for others of that class along the two paths that touch
+their own data.
+
+The first came back clean, which is worth recording: `git check-ignore`
+resolves `archive/index.db` to the `archive/` rule, so the chat index the
+documented command builds cannot be committed, and `*.db` covers it again.
+
+The second did not.
+
+> The surprise is what it says about the previous loop rather than about the
+> code. The installer's four `~/.local/bin` shims were still written with a
+> bare redirect. The fix for "never overwrite a file you did not write" had
+> been applied to the markdown copies and the tool copies — the two places
+> being looked at — and not to the third, in the same commit, alongside a
+> seventeen-case test suite asserting the fix was complete. Not one of those
+> cases installed over a foreign *binary*. Thoroughness about the parts you
+> considered reads exactly like thoroughness.
+
+The shims are guarded now, and the more useful change is the test that made
+that mechanical: it enumerates every target, and asserts its own list is the
+same length as the installer's `TARGETS` array. Adding a target without adding
+a case now fails the suite — verified by adding one and watching it fail.
+
 ## Still open
 
 `U-6`, `U-7` and `U-8` in [unknowns.md](unknowns.md): what Saraev actually

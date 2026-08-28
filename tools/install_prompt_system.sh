@@ -277,11 +277,20 @@ for shim in prompt-forge:prompt_forge.py prompt-habits:prompt_habits.py learn-ru
         say "  would: write $BIN_DIR/$name"
         continue
     fi
-    cat > "$BIN_DIR/$name" <<SHIM
+    # Generated rather than copied, but guarded the same way: `check-output` is
+    # a name somebody may already have on their PATH, and the previous version
+    # of this loop wrote over it without looking.
+    candidate="$(mktemp)"
+    cat > "$candidate" <<SHIM
 #!/usr/bin/env bash
 # Installed by tools/install_prompt_system.sh from $REPO
 exec python3 -B "$PREFIX/tools/$script" "\$@"
 SHIM
+    if ! guard_target "$candidate" "$BIN_DIR/$name"; then
+        rm -f "$candidate"; exit 1
+    fi
+    cp "$candidate" "$BIN_DIR/$name" || { rm -f "$candidate"; exit 2; }
+    rm -f "$candidate"
     chmod +x "$BIN_DIR/$name" || exit 2
     record "$BIN_DIR/$name"
     say "  installed $BIN_DIR/$name"

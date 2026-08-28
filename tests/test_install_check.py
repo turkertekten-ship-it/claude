@@ -11,6 +11,7 @@ Every case runs against a temporary prefix, so the real ~/.claude is untouched.
 Run: python3 tests/test_install_check.py
 """
 
+import re
 import subprocess
 import sys
 import tempfile
@@ -132,6 +133,36 @@ def main() -> int:
               not (prefix / "tools" / "prompt_forge.py").exists())
         check("the manifest is gone", not (prefix / ".prompt-system-manifest").exists())
         check("and it reports what it kept", "left alone" in removed.stdout, removed.stdout[-160:])
+
+    print("\nevery target is guarded, not only the ones anyone thought of")
+    # The list below is enumerated, so it can fall behind the installer. This
+    # asserts it has not: the previous loop guarded the files it was looking at,
+    # left the shims unguarded, and shipped a test suite that agreed with it.
+    script = INSTALLER.read_text()
+    declared = re.search(r"TARGETS=\((.*?)\n\)", script, re.S)
+    target_count = len([l for l in declared.group(1).splitlines() if l.strip()]) if declared else -1
+    targets = [
+        "commands/prompt.md", "commands/prompt-audit.md", "commands/prompt-habits.md",
+        "agents/prompt-critic.md", "skills/prompt-forge/SKILL.md",
+        "tools/prompt_forge.py", "tools/prompt_habits.py", "tools/learn_rule.py",
+        "tools/check_output.py", "tools/_phrases.py",
+    ]
+    shims = ["prompt-forge", "prompt-habits", "learn-rule", "check-output"]
+    check("the test list covers every declared target",
+          target_count == len(targets) + len(shims),
+          f"installer declares {target_count}, this test covers {len(targets) + len(shims)}")
+    for rel in targets + shims:
+        with tempfile.TemporaryDirectory() as tmp:
+            prefix, bindir = Path(tmp) / "claude", Path(tmp) / "bin"
+            is_shim = rel in shims
+            target = (bindir / rel) if is_shim else (prefix / rel)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            mine = f"the owner's own {rel}\n"
+            target.write_text(mine)
+            r = run(prefix=prefix, bindir=bindir)
+            check(f"refuses to clobber {rel}",
+                  r.returncode == 1 and target.read_text() == mine,
+                  f"exit={r.returncode} content_changed={target.read_text() != mine}")
 
     print()
     if FAILURES:
