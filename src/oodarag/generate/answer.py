@@ -72,7 +72,13 @@ class AnswerConfig:
     #: Re-sweep when the corpus changes - this number is a property of the
     #: corpus, not of the algorithm. It has now been re-swept twice for exactly
     #: that reason, and moved neither time.
-    min_relevance: float = 0.19
+    #: The abstention floor, applied to `rerank_relevance * arm agreement`.
+    #: Re-derived when agreement entered the signal (L71): on the external
+    #: corpus the old floor refused 5 of 11 unanswerable questions and one
+    #: answerable one; 0.08 refuses 8 and two, and the primary corpus refuses
+    #: all four of its negatives and nothing else anywhere between 0.08 and
+    #: 0.15. Sweeping it alone is `scripts/floor_sweep.py`.
+    min_relevance: float = 0.08
     generator: str = "auto"  # "auto" | "extractive" | "claude"
 
 
@@ -117,16 +123,20 @@ class AnswerGenerator:
         best_relevance = max(
             (r.components.get("rerank_relevance", 0.0) for r in results), default=0.0
         )
-        if results[0].score < config.min_top_score or best_relevance < config.min_relevance:
+        agreement = _arm_agreement(results)
+        gate_signal = best_relevance * agreement
+        if results[0].score < config.min_top_score or gate_signal < config.min_relevance:
             return Answer(
                 question=question,
                 text=("The index contains nothing relevant to this question. "
-                      f"Best query-term relevance was {best_relevance:.2f}, below the "
-                      f"{config.min_relevance:.2f} floor."),
+                      f"Best query-term relevance was {best_relevance:.2f} across "
+                      f"{agreement:.0%} arm agreement, giving {gate_signal:.2f} - "
+                      f"below the {config.min_relevance:.2f} floor."),
                 abstained=True, generator="none", retrieved=results,
                 confidence=0.0,
                 metrics={"reason": "below_relevance_floor",
                          "best_relevance": round(best_relevance, 4),
+                         "arm_agreement": round(agreement, 4),
                          "top_score": round(results[0].score, 4),
                          "retrieval": trace.as_dict()},
             )
@@ -187,6 +197,45 @@ class AnswerGenerator:
                  coverage=check.coverage, abstained=abstained,
                  ms=answer.metrics["total_ms"])
         return answer
+
+
+#: Below this many results the agreement share is too coarse to estimate.
+_AGREEMENT_MIN_WINDOW = 5
+
+
+def _arm_agreement(results: list[ScoredChunk]) -> float:
+    """Share of the window that *both* retrieval arms found.
+
+    A question the corpus answers tends to look answerable to a lexical search
+    and to a dense one at the same time; a question that merely shares
+    vocabulary with the corpus splits them. Measured over 43 answerable and 11
+    unanswerable golden cases, `relevance x agreement` separates the two at
+    **AUC 0.850**, against 0.763 for relevance alone and 0.78 or below for every
+    other candidate tried across four sessions (L71).
+
+    It is free: the ranks are already in the fusion components.
+
+    **1.0 when only one arm ran**, which is not a detail. Disabling an arm makes
+    every result single-sourced, so a naive share would be 0.0 and the gate
+    would refuse everything - the same shape as the `use_rerank` defect that
+    once silently disabled the gate's only input. A configuration flag must
+    degrade behaviour, not switch off an unrelated safety check.
+    """
+    if len(results) < _AGREEMENT_MIN_WINDOW:
+        # A share estimated from three results is not a share. On a corpus
+        # smaller than the window both arms return nearly everything, and what
+        # little they disagree on swings the fraction by a third at a time - a
+        # synthetic three-document index scored 33% and had its answerable
+        # question refused. Below the minimum the factor is neutral, so the gate
+        # falls back to relevance alone rather than to noise (L71).
+        return 1.0
+    saw_dense = any("dense_rank" in r.components for r in results)
+    saw_lexical = any("lexical_rank" in r.components for r in results)
+    if not (saw_dense and saw_lexical):
+        return 1.0
+    both = sum(1 for r in results
+               if "dense_rank" in r.components and "lexical_rank" in r.components)
+    return both / len(results)
 
 
 def _confidence(results: list[ScoredChunk], coverage: float) -> float:

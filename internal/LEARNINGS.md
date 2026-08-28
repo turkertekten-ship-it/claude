@@ -3853,3 +3853,80 @@ sixty-odd learnings.
 3. **An audit that finds nothing has still measured something** - here, that the
    knobs a previous session tuned no longer do anything, which is the clearest
    statement available of what this session actually changed.
+
+---
+
+## L71 - The abstention gate moved, and what moved it was asking whether the arms agree
+
+Four sessions have attacked this gate and recorded the results as dead ends:
+match specificity (AUC 0.555), document coverage (0.609), chunk-minus-document
+coverage (0.594), term co-occurrence (refuted outright), surface answerability
+(0.720, shipped and worth three cases). The gate itself uses `rerank_relevance`,
+at AUC 0.763. Every one of those features is computed from *term overlap between
+the query and the corpus*, and L32 wrote down why that ceiling exists: a
+well-phrased question does not reuse the document's words, and an unanswerable
+question made of ordinary words reuses plenty.
+
+**Nobody had asked whether the two retrieval arms agree.** Dense and lexical
+search fail in uncorrelated ways - that is the whole argument for hybrid
+retrieval (ADR 0004) - so a question the corpus answers should look answerable
+to both, and a question that merely shares vocabulary should split them.
+Measured over 43 answerable and 11 unanswerable cases:
+
+| feature | AUC |
+|---|---|
+| **relevance x arm agreement** | **0.850** |
+| share of window both arms found | 0.794 |
+| relevance x top-gap | 0.780 |
+| rerank_relevance (the gate's input) | 0.763 |
+| relevance x surface answerability | 0.751 |
+| document coverage | 0.687 |
+| both arms found the top result (binary) | 0.544 |
+
+The binary form is nearly worthless and the *share* is strong, which is the
+useful detail: agreement on one document is luck, agreement across the window is
+evidence. And it is free - both ranks are already in the fusion components, so
+this costs nothing at query time.
+
+**At the gate, with quarantine applied as the harness applies it:**
+
+| | correct refusals | wrong refusals |
+|---|---|---|
+| `rerank_relevance` >= 0.19 (before) | 5 of 11 | 1 |
+| `relevance x agreement` >= 0.08 | **8 of 11** | 2 |
+
+Swept properly, the floor lands where both corpora are simultaneously flat:
+external reads 47/54 across 0.04-0.08 and primary reaches 19/20 from 0.08 up, so
+0.08 is the intersection rather than a peak. **External 44/54 -> 47/54, primary
+19/20, retrieval untouched** - recall and nDCG are identical to four decimals,
+because nothing about what is retrieved changed.
+
+### Two ways it could have silently disabled the gate
+
+**A single arm.** Disable one and no result carries both ranks, so a naive share
+is 0.0 and the gate refuses everything. This repository has had that defect
+before, in the same file: `use_rerank=False` once zeroed the gate's only input
+and the system abstained on 8 of 36 cases while recall stayed at 0.857. The rule
+written then - *a configuration flag has to degrade behaviour, not disable an
+unrelated safety check* - is why agreement returns 1.0 when only one arm ran.
+
+**A window smaller than the statistic.** The first version failed a test on a
+three-document synthetic index: both arms return nearly everything, the little
+they disagree on swings the fraction by a third, and an answerable question got
+refused at 33% agreement. Below five results the factor is neutral. A share
+estimated from three items is not a share, and the test that caught it exists
+because someone wrote a hermetic fixture years of learnings ago.
+
+**Rules.**
+1. **When every feature you have tried is computed from one thing, the next
+   feature should be computed from something else.** Eight term-overlap
+   measures failed to beat 0.78; the first non-overlap signal reached 0.85.
+2. **A system with two independent components has a free signal in their
+   disagreement.** It is already computed, it needs no model, and it says
+   something neither component can say alone.
+3. **Ask what a new gate signal does when a component is switched off** - the
+   answer is usually "refuses everything", and the flag that switches it off is
+   in a config nobody reads while debugging.
+4. **A share needs a sample.** Any statistic over a window has a minimum window,
+   and the corpus that finds it will be a three-document test fixture rather
+   than production.

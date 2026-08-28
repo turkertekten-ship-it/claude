@@ -18,20 +18,20 @@
 | External eval corpus | done | 266 PyPI pages with provenance, release dates and a manifest, rebuildable by `scripts/build_external_corpus.py`; 5 of 54 questions contaminated, 31 documents held out as 36 holdouts |
 | Incremental deletion | done | Removals propagate to the delta, prune guarded at 25% of a source, refused entirely for a failed connector |
 | CLI | done | `preflight, index, query, eval, loop, status, journal, demo` |
-| CI | done | Three jobs: stdlib matrix, numpy path, retrieval regression gate; floors 0.85 primary, 0.79 external (rebased for a corpus 74% larger, then ratcheted for base_weight 5.0; L66, L67) |
+| CI | done | Three jobs: stdlib matrix, numpy path, retrieval regression gate; floors 0.85 primary, 0.85 external (rebased for a corpus 74% larger, then ratcheted three times as the gate improved; L66-L71) |
 | Non-negotiables | verified | All five attacked directly, not just asserted: zero-dependency walked module by module, provenance and redaction attacked with crafted inputs, degradation measured through partial and silent-empty source failures (L37-L39) |
 
 **Current measurements** (offline embedder, deterministic).
-389 tests passing - of which ten only run once the branch is pushed, because the
+393 tests passing - of which ten only run once the branch is pushed, because the
 live GitHub cross-checks skip as a module unless the local HEAD is also the
-remote head. The same tree reads 379 before a push and 389 after (L64), and CI,
+remote head. The same tree reads 383 before a push and 393 after (L64), and CI,
 which only runs pushed commits, always sees the larger number. Retrieval metrics are over graded cases only - abstention
 cases have nothing to retrieve, and averaging their zeros in made adding a
 negative case look like a retrieval regression.
 
 | | primary (this repo) | external (266 PyPI pages) |
 |---|---|---|
-| golden cases | **19/20** | **44/54** |
+| golden cases | **19/20** | **47/54** |
 | recall@8 | 0.8750 | 0.8953 |
 | precision@8 | 0.2500 | 0.2413 |
 | hit@8 | 0.9375 | 0.9302 |
@@ -137,35 +137,20 @@ its current failures are that artefact. See docs/EVALUATION.md.
    disappoints in hybrid is evidence about the fusion before it is evidence
    about the model.
 
-2. **The abstention gate**, still, though less of it. The unstemmed surface
-   check is in and worth +3 cases at no measured cost (L30); the document
-   coverage idea was measured and is dead (AUC 0.609, barely above a coin
-   flip). Three of the seven remaining failures are still the gate:
+2. **The abstention gate**, and for the first time in five sessions it moved.
+   Whether the two retrieval arms *agree* turns out to carry the signal that
+   every previously measured feature lacked - `relevance x agreement` separates
+   answerable from unanswerable at **AUC 0.850**, against 0.763 for the
+   relevance the gate used alone and 0.78 or below for match specificity,
+   document coverage, surface answerability and term co-occurrence (L71). It is
+   free: the ranks are already in the fusion components. Shipped, and the
+   external gate went 44/54 to **47/54** with retrieval untouched.
 
-   - "Which tool publishes a package to a private PyPI mirror?" (0.658) and
-     "Which package renders Jinja templates to PDF?" (0.602) are near-misses
-     where every query term is in the corpus and only their *combination* is
-     absent. No single-chunk or single-document coverage measure separates
-     these, because the terms genuinely are there.
-   - "What keeps two processes from writing the same file at once?" (0.768) is a
-     question made entirely of ordinary words, which is the case
-     `gate_features.py` showed match specificity cannot detect (AUC 0.555).
-
-   **Term co-occurrence was tried and is dead.** The idea was that a question
-   whose informative terms never appear together is unattested. Measured
-   directly against the index: `pdf` and `jinja` *do* co-occur in one chunk, so
-   the signal misses the very case it was designed for - while the answerable
-   `bcrypt`, `orjson` and `watchdog` questions have zero co-occurrence among
-   their top-idf terms and would all be wrongly refused. A well-phrased question
-   does not reuse the document's words, which is the same semantic gap that
-   causes the remaining retrieval failures.
-
-   The limit is now measured rather than asserted. The worst unanswerable case
-   scores 0.595 with answerability 1.0 and surface 1.0 - every word genuinely in
-   the corpus - while the answerable cases that fail score 0.147 and 0.148. That
-   is a 4x overlap, not a margin, and both directions are "the corpus contains
-   these words". Separating them is a judgement about meaning, which is item 1,
-   and item 1 is blocked on a key.
+   Four unanswerable questions still get answered, and they are the ones the
+   earlier sessions characterised: questions whose every word is in the corpus
+   and only their *combination* is absent, which no feature computed from term
+   overlap can see. Separating those is a judgement about meaning - item 1,
+   still blocked on a key.
 
 3. **Widen the corpus again.** Done twice more and it keeps paying: 33 to 91
    overturned three recorded conclusions (L29), 91 to 153 settled two more, and

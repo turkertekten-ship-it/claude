@@ -96,8 +96,21 @@ def features(results, reranker, query: str, *, store=None,
         matched = query_set & chunk_terms
         matched_idf = max((reranker.idf(t) for t in matched), default=0.0)
 
+    # Do the two arms independently pick the same documents? A question the
+    # corpus answers should look answerable to both a lexical and a dense
+    # search; one it merely shares vocabulary with should split them. Read off
+    # the fusion components, so it costs nothing at query time.
+    both = [r for r in results
+            if "dense_rank" in r.components and "lexical_rank" in r.components]
+    agreement = len(both) / len(results) if results else 0.0
+    top_agreed = 1.0 if (results and "dense_rank" in results[0].components
+                         and "lexical_rank" in results[0].components) else 0.0
+
     out = {
         "rerank_relevance (in use)": best,
+        "both arms found the top result": top_agreed,
+        "share of window both arms found": agreement,
+        "relevance x arm agreement": best * agreement,
         "top1 - top2 score": gap,
         "top1 - mean score": spread,
         "max idf of matched terms": matched_idf,

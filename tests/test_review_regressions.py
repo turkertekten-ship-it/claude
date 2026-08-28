@@ -1243,6 +1243,92 @@ class GhostCompoundTest(unittest.TestCase):
         self.assertGreater(repaired, with_ghost)
 
 
+class ArmAgreementGateTest(unittest.TestCase):
+    """The abstention gate multiplies relevance by how much the two arms agree.
+
+    Both neutral cases below are the shape of a defect this repository has
+    already had once: `use_rerank=False` silently disabled the gate's only
+    input, and the fix was that a configuration flag must degrade behaviour
+    rather than switch off an unrelated safety check (L71).
+    """
+
+    def _results(self, arms, n=8):
+        """`arms` is one of "both", "dense", "lexical", or a count of results
+        that carry both ranks."""
+        from oodarag.models import Chunk, ScoredChunk
+
+        out = []
+        for i in range(n):
+            chunk = Chunk(chunk_id=f"c{i}", doc_id=f"d{i}", ordinal=0, text=f"chunk {i}")
+            scored = ScoredChunk(chunk=chunk, score=0.5 - 0.01 * i)
+            if arms == "dense":
+                scored.components["dense_rank"] = float(i + 1)
+            elif arms == "lexical":
+                scored.components["lexical_rank"] = float(i + 1)
+            elif arms == "both" or i < arms:
+                scored.components["dense_rank"] = float(i + 1)
+                scored.components["lexical_rank"] = float(i + 1)
+            else:
+                scored.components["dense_rank"] = float(i + 1)
+            out.append(scored)
+        return out
+
+    def test_agreement_is_neutral_when_only_one_arm_ran(self):
+        from oodarag.generate.answer import _arm_agreement
+
+        for arm in ("dense", "lexical"):
+            self.assertEqual(_arm_agreement(self._results(arm)), 1.0,
+                             f"{arm}-only retrieval scored as total disagreement, "
+                             "which would refuse every question")
+
+    def test_agreement_is_neutral_on_a_window_too_small_to_estimate_it(self):
+        """A three-document index scored 33% and had its answerable question
+        refused. A share over three results is not a share."""
+        from oodarag.generate.answer import _arm_agreement
+
+        self.assertEqual(_arm_agreement(self._results(1, n=3)), 1.0)
+
+    def test_agreement_falls_when_the_arms_disagree(self):
+        """Otherwise the two neutral cases above would be the whole function."""
+        from oodarag.generate.answer import _arm_agreement
+
+        self.assertEqual(_arm_agreement(self._results("both")), 1.0)
+        self.assertAlmostEqual(_arm_agreement(self._results(2)), 0.25)
+
+    def test_a_single_arm_configuration_still_answers(self):
+        """End to end, because the unit tests above pass on a function nobody
+        calls in that configuration."""
+        from oodarag.generate.answer import AnswerConfig, AnswerGenerator
+        from oodarag.retrieve.hybrid import HybridRetriever, RetrievalConfig
+
+        store = SqliteStore(":memory:")
+        self.addCleanup(store.close)
+        pipeline = IndexPipeline(store)
+        texts = {f"pkg{i}.md": (f"Package {i} handles {topic}. " * 8)
+                 for i, topic in enumerate(
+                     ["yaml parsing", "http requests", "date arithmetic", "password hashing",
+                      "process locking", "template rendering", "csv export", "log routing",
+                      "task queues", "unit testing"])}
+        docs = [RawDocument(source_system="test", external_id=n, uri=f"mem://{n}",
+                            title=n, text=t, metadata={}) for n, t in texts.items()]
+
+        class _Memory(Connector):
+            key = "test:arms"
+            source_system = "test"
+
+            def fetch(self, cursor):
+                yield from docs
+
+        pipeline.run([_Memory()])
+        for config in (RetrievalConfig(lexical_weight=0.0), RetrievalConfig(dense_weight=0.0)):
+            generator = AnswerGenerator(
+                HybridRetriever(store, pipeline.embedder, config),
+                AnswerConfig(generator="extractive"))
+            answer = generator.answer("which package handles password hashing?")
+            self.assertFalse(answer.abstained,
+                             f"a single-arm configuration abstained: {answer.text[:120]}")
+
+
 class ConfidenceScaleTest(unittest.TestCase):
     """Confidence collapsed to a constant when a weight two modules away moved.
 
