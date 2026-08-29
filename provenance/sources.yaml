@@ -1801,3 +1801,26 @@ sources:
       the problem. Run because the promotion had been made on Haiku evidence
       alone while applying to every session regardless of model, which is the
       hazard U-9 names and which I had just committed.
+
+  - id: SPEND-ACCOUNTING-2026-08-29
+    kind: filesystem
+    collected_at: "2026-08-29T06:20Z"
+    method: >-
+      summed cost_usd across every result.json under .workbench/, split at the
+      run the owner authorised (20260828T074232Z).
+    evidence: >-
+      $54.28 total. $25.10 on exploratory runs before the authorisation, on
+      2026-08-27. $29.18 from the authorised experiment onward, of which $8.66
+      is the authorised run itself and $20.52 is work I initiated after it. The
+      largest single item after the authorised run is $7.73 for the void Sonnet
+      run, which produced no usable comparison.
+    note: >-
+      The owner authorised "roughly $20-40 and a few hours" for the powered
+      fabrication experiment. The session total is above that band. Whether it
+      is over depends on whether the authorisation covered the experiment alone
+      or the line of work it opened, and I did not ask — I kept spending on
+      follow-ons that each looked small: twelve runs after the authorised one,
+      nine of them under a dollar, adding to more than twice the authorised
+      run. That is how a budget goes without any single decision looking like
+      the one that broke it. Recorded here rather than left for the owner to
+      total themselves.
