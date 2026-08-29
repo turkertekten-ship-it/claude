@@ -1337,6 +1337,56 @@ def test_cache_breakpoints() -> None:
               b.build_body(Request(prompt="x", model="claude-haiku-4-5"))) == [])
 
 
+def test_new_command_templates() -> None:
+    """Every starter template must load, validate, and actually run.
+
+    The first version of `workbench new` printed "it loads and runs as-is"
+    after calling load_suite alone. load_suite validates suite structure and
+    leaves grader config to the grader, so the traps template shipped using
+    `criterion:` where the judge grader wants `criteria:` -- it loaded cleanly
+    and died on the first case. A scaffolding command that emits a broken file
+    is worse than no scaffolding, because whoever runs it does not yet know the
+    schema well enough to see why.
+    """
+    print("\nstarter templates -- each must load, validate, and run")
+    import subprocess
+    from workbench.cli import TEMPLATES
+    from workbench.graders import validate_grader, GraderError
+
+    repo = Path(__file__).resolve().parent.parent
+    with tempfile.TemporaryDirectory(prefix="wb-new-") as tmp:
+        for name in sorted(TEMPLATES):
+            out = Path(tmp) / f"{name}.yaml"
+            r = subprocess.run(
+                [sys.executable, "-m", "workbench", "new", f"probe-{name}",
+                 "--template", name, "--output", str(out), "--force"],
+                cwd=repo, capture_output=True, text=True, timeout=120)
+            check(f"`new --template {name}` succeeds", r.returncode == 0,
+                  r.stdout + r.stderr)
+            suite = load_suite(str(out))
+            try:
+                for case in suite.cases:
+                    for g in case.graders:
+                        validate_grader(g)
+                check(f"{name}: every grader validates", True)
+            except GraderError as exc:
+                check(f"{name}: every grader validates", False, str(exc))
+            check(f"{name}: has at least one case and variant",
+                  bool(suite.cases) and bool(suite.variants))
+
+    # And the validator must reject what it was written to catch.
+    from workbench.spec import Grader as G
+    rejects("a judge grader with no criteria is refused",
+            lambda: validate_grader(G(type="judge", config={"votes": 3})))
+    rejects("an unknown grader type is refused",
+            lambda: validate_grader(G(type="no_such_grader", config={})))
+    try:
+        validate_grader(G(type="judge", config={"criteria": "is it good?"}))
+        check("a well-formed judge grader is accepted", True)
+    except Exception as exc:                                   # noqa: BLE001
+        check("a well-formed judge grader is accepted", False, str(exc))
+
+
 def main() -> int:
     test_render()
     test_spec()
@@ -1360,6 +1410,7 @@ def main() -> int:
     test_review_findings()
     test_answer_rate_control()
     test_cache_breakpoints()
+    test_new_command_templates()
     test_medium_review_findings()
 
     print()

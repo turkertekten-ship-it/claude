@@ -248,6 +248,53 @@ def g_json_valid(g: Grader, ctx: GradingContext) -> Verdict:
     return _binary(g, DETERMINISTIC, True, "parsed as JSON")
 
 
+def validate_grader(g: Grader) -> None:
+    """Raise GraderError if this grader is misconfigured, without calling a model.
+
+    Config errors in a grader surface at the first case, after a run has
+    started and possibly after money has been spent. `workbench new` shipped a
+    template using `criterion:` where the judge grader wants `criteria:`: it
+    loaded cleanly, then died on the first case. load_suite cannot catch that,
+    because it validates suite structure and leaves grader config to the
+    grader.
+
+    Deterministic and environmental graders are exercised against a dummy
+    output -- a grader that RUNS and returns False has validated; only a
+    GraderError means the config is wrong. Model graders cannot be exercised
+    without a judge, so their required keys are checked directly.
+    """
+    if g.type not in REGISTRY:
+        raise GraderError(f"unknown grader type {g.type!r}; "
+                          f"known: {', '.join(sorted(REGISTRY))}")
+    kind, fn = REGISTRY[g.type]          # (kind, fn) -- unpacking this
+    if not callable(fn):                 # backwards silently disabled the
+        raise GraderError(               # whole check, so assert the shape
+            f"registry entry for {g.type!r} is malformed: {fn!r} is not callable")
+    if kind == MODEL:
+        if not (g.config.get("criteria") or g.config.get("rubric")):
+            raise GraderError(
+                f"grader {g.type!r} requires `criteria` (or `rubric`); "
+                f"got keys {sorted(g.config) or '[]'}")
+        return
+    ctx = GradingContext(
+        completion=Completion(text="a probe output for config validation", model="probe"),
+        case_id="_validate", variant_id="_validate")
+    try:
+        fn(g, ctx)
+    except GraderError:
+        raise
+    except (TypeError, AttributeError):
+        # These mean the grader was CALLED wrongly, not that the probe text
+        # displeased it -- exactly what a backwards registry unpack produces.
+        # Swallowing them is how this function silently accepted a judge
+        # grader with no criteria while appearing to work.
+        raise
+    except Exception:                                          # noqa: BLE001
+        # It ran and blew up on the probe text rather than on its config --
+        # a `command` grader with no such binary, say. Not a config error.
+        return
+
+
 def validate_schema(value: Any, schema: dict[str, Any], path: str = "$") -> list[str]:
     """A deliberately small JSON Schema subset.
 

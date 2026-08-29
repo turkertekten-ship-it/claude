@@ -1156,6 +1156,17 @@ def main(argv: list[str]) -> int:
             # form of it is blocked, the thing itself is not. Printing one
             # number for both would overstate the gap, which is the failure
             # this repository exists to prevent, committed by its own summary.
+            # A row skipped by --offline was not evaluated. Counting it as an
+            # absent capability turns "I did not look" into "it is not there",
+            # which is the exact move this repository exists to prevent -- and
+            # the summary was making it: an offline run reported 24 unreachable
+            # and called 20 of them genuinely absent, when 17 were simply not run.
+            skipped = [r for r in results if r.verdict == UNREACHABLE
+                       and "skipped (--offline)" in (r.detail or "")]
+            if skipped:
+                print(f"\n{len(skipped)} row(s) were SKIPPED, not evaluated: this run was "
+                      f"--offline.\nThey are neither present nor absent until the live "
+                      f"matrix runs. Nothing\nbelow counts them.")
             elsewhere = [r for r in results if r.verdict == UNREACHABLE
                          and "see the" in (r.detail or "").lower()]
             print("\nUnreachable is not a softer failure. Those capabilities either "
@@ -1167,9 +1178,11 @@ def main(argv: list[str]) -> int:
                       f"each says which row proves it:")
                 for r in elsewhere:
                     print(f"  - {r.capability}")
+                absent = counts[UNREACHABLE] - len(elsewhere) - len(skipped)
                 print(f"\nSo the count of capabilities genuinely absent here is "
-                      f"{counts[UNREACHABLE] - len(elsewhere)}, not "
-                      f"{counts[UNREACHABLE]}.")
+                      f"{absent}, not {counts[UNREACHABLE]}"
+                      + (f" — {len(skipped)} of those were skipped, not tested."
+                         if skipped else "."))
     return 1 if counts[FAIL] else 0
 
 

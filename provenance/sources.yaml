@@ -1571,3 +1571,32 @@ sources:
       (countCacheBreakpoints) for the same reason
       [src:PLAYGROUND-CLIENT-CODE-2026-08-28]; this refuses the fifth locally
       and names where all of them are, rather than forwarding an opaque 400.
+
+  - id: SCAFFOLDING-2026-08-29
+    kind: tool_output
+    collected_at: "2026-08-29T05:20Z"
+    method: >-
+      checked the last three items of the playground inventory
+      [src:PLAYGROUND-CLIENT-CODE-2026-08-28] against this implementation by
+      running them, not by reading: a seven-line suite was loaded and executed,
+      the suite directory and its git history were counted, and the CLI's
+      subcommand list was read.
+    evidence: >-
+      Saved prompts: 9 suite files under git with 14 commits touching them,
+      against browser storage keyed LSP-playground:. Simple/advanced split: a
+      7-line suite loads and runs end to end, with model, effort, thinking,
+      max_output_tokens and stop_sequences all defaulting rather than required.
+      Templates: no counterpart existed — the subcommands were doctor, graders,
+      plan, run, blind, report, export-eval, and nothing scaffolds a suite.
+      `workbench new` now emits three templates, and each is exercised in the
+      test suite to load, validate and run.
+    note: >-
+      The first version of `workbench new` printed "it loads and runs as-is"
+      after calling load_suite alone, and the traps template it emitted used
+      `criterion:` where the judge grader wants `criteria:` — so it loaded and
+      died on the first case. Then validate_grader, written to catch that,
+      unpacked the registry's (kind, fn) backwards and its own broad
+      `except Exception` swallowed the resulting TypeError, so it accepted a
+      judge grader with no criteria while appearing to work. Both were caught
+      by tests asserting the guard rejects something, which is the house rule
+      that exists for exactly this.
