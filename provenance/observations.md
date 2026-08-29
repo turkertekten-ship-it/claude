@@ -331,6 +331,24 @@ verified lives in [unknowns.md](unknowns.md), not here.
 > committing the same overstatement is the sharpest version of it — the tool
 > built to stop this repository overclaiming was quietly overclaiming a gap.
 
+## Observed — v3, powered, and still short of significance
+
+- The powered test ran: 61 recalled-fact questions, the only category where v1 over-refuses. v1 answered 117/122, v3 answered **122/122**. Discordant 4 for v3, 0 against, sign test **p = 0.1250**. [src:V3-POWERED-2026-08-29]
+- The power estimate was optimistic and the pre-registration said in advance what to do if it was. The 8.3% per-run refusal rate came from 4 failures in 48 runs; the observed rate here is **4.1%**, which halves the expected discordant count from 9.7 to about 4.8. Four appeared. [src:V3-POWERED-2026-08-29]
+- Across all three v3-against-v1 comparisons — 141 cases, three differently-designed suites — v3 is **9 for, 0 against**, pooled p = 0.0039. This pooling was not pre-registered and is not the result. [src:V3-POOLED-2026-08-29]
+
+> Reading, not a claim: the interesting number is the zero, not the p-value.
+> Across 141 cases v3 has never been worse than v1 on a single one, which is a
+> pattern; a pooled p computed after the fact is not a finding, and the
+> pre-registered primary stands at 0.125.
+>
+> All four discordant cases were geography questions, and no acronym,
+> astronomy, chemistry, biology or physics case separated the arms. That is a
+> hypothesis for a pre-registered test, not a result — noticing a cluster after
+> the fact and subsetting to it is exactly the move this repository exists to
+> refuse, and it is more tempting here than anywhere else in the session
+> precisely because it would work.
+
 ## Observed — v3, the first change that moved both endpoints the right way
 
 - v3 is v1 plus one section, written from the mechanism behind the over-refusal finding and naming none of the questions that failed. Both endpoints were fixed in `docs/v3-preregistration.md` and committed before either run. [src:V3-RESULT-2026-08-29]
