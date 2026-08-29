@@ -67,6 +67,17 @@ class Completion:
     session_id: str = ""
     backend: str = ""
     error: str = ""
+    #: Response headers, when the transport has any. The playground's run
+    #: inspector shows these and they are not decoration: anthropic-ratelimit-*
+    #: says how close a batch of runs is to being throttled, and request-id is
+    #: the only handle support has on a specific call. The CLI shells out and
+    #: never sees an HTTP response, so this stays empty there -- an honest
+    #: empty, not a fabricated one.
+    response_headers: dict[str, str] = field(default_factory=dict)
+    #: The raw SSE text of a streaming call, verbatim. Matches the playground's
+    #: rawSseText pane. Kept because a stream that reassembles wrongly cannot be
+    #: debugged from the reassembled result -- that is the thing under suspicion.
+    raw_stream: str = "" 
     #: The full backend envelope, kept so a surprising number can be traced.
     raw: dict[str, Any] = field(default_factory=dict)
     #: Populated in agent mode: the directory the run left behind.

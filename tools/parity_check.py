@@ -675,6 +675,72 @@ def c_sampling(backend) -> Result:
                   if all_rejected else f"unexpected: {probes}")
 
 
+@check("Run inspection: stopReason, responseHeaders, rawSseText", live=False)
+def c_run_inspection(backend) -> Result:
+    """The playground's run inspector, matched field for field.
+
+    Its inspector shows three things about a call: stopReason, responseHeaders
+    and rawSseText. Only the first was carried here, and the other two are not
+    decoration -- anthropic-ratelimit-* says how close a batch of runs is to
+    being throttled, request-id is the only handle support has on a specific
+    call, and a stream that reassembles wrongly cannot be debugged from the
+    reassembled result, which is the thing under suspicion.
+
+    Exercised over real HTTP against a conforming server that sends genuine
+    headers, so this needs no credential.
+    """
+    import http.server
+    import threading
+
+    events = [
+        {"type": "message_start", "message": {"model": "m", "usage": {"input_tokens": 5},
+                                              "content": []}},
+        {"type": "content_block_start", "index": 0,
+         "content_block": {"type": "text", "text": ""}},
+        {"type": "content_block_delta", "index": 0,
+         "delta": {"type": "text_delta", "text": "inspected"}},
+        {"type": "message_delta", "delta": {"stop_reason": "end_turn"},
+         "usage": {"output_tokens": 2}},
+    ]
+
+    class H(http.server.BaseHTTPRequestHandler):
+        def log_message(self, *a): pass
+        def do_POST(self):
+            self.rfile.read(int(self.headers.get("content-length", 0)))
+            self.send_response(200)
+            self.send_header("content-type", "text/event-stream")
+            self.send_header("request-id", "req_parity")
+            self.send_header("anthropic-ratelimit-requests-remaining", "7")
+            self.end_headers()
+            for e in events:
+                self.wfile.write(f"data: {json.dumps(e)}\n\n".encode())
+            self.wfile.write(b"data: [DONE]\n\n")
+
+    from workbench.api_backend import AnthropicAPIBackend
+    srv = http.server.HTTPServer(("127.0.0.1", 0), H)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        c = AnthropicAPIBackend(
+            api_key="parity-probe", base_url=f"http://127.0.0.1:{srv.server_port}"
+        ).complete(Request(prompt="x", model="claude-haiku-4-5", stream=True))
+    finally:
+        srv.shutdown()
+
+    rid = c.response_headers.get("request-id")
+    rl = c.response_headers.get("anthropic-ratelimit-requests-remaining")
+    ok = (c.stop_reason == "end_turn" and rid == "req_parity" and rl == "7"
+          and c.raw_stream.count("data:") >= len(events))
+    return Result("Run inspection: stopReason, responseHeaders, rawSseText",
+                  PASS if ok else FAIL,
+                  f"over real HTTP: stop_reason={c.stop_reason!r}, request-id={rid!r}, "
+                  f"ratelimit-requests-remaining={rl!r}, and {c.raw_stream.count('data:')} "
+                  f"verbatim SSE frames retained. The CLI shells out and never sees an "
+                  f"HTTP response, so it reports these empty rather than inventing them"
+                  if ok else
+                  f"stop_reason={c.stop_reason!r} headers={c.response_headers!r} "
+                  f"raw_stream={c.raw_stream[:80]!r}")
+
+
 @check("stop_sequences")
 def c_stop_sequences(backend) -> Result:
     """Reachable through the CLI after all -- with the difference stated.

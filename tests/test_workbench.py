@@ -1015,6 +1015,11 @@ def test_api_backend_over_the_wire() -> None:
                 json.loads(self.rfile.read(int(self.headers["content-length"])))
                 self.send_response(200)
                 self.send_header("content-type", "text/event-stream")
+                # Real rate-limit and request-id headers, so the run-inspector
+                # fields are exercised against a wire response rather than a
+                # dict someone assembled in the test.
+                self.send_header("request-id", "req_probe_123")
+                self.send_header("anthropic-ratelimit-requests-remaining", "42")
                 self.end_headers()
                 for e in events:
                     self.wfile.write(f"data: {json.dumps(e)}\n\n".encode())
@@ -1031,6 +1036,18 @@ def test_api_backend_over_the_wire() -> None:
                   streamed.input_tokens == 5 and streamed.output_tokens == 4)
             check("stop_reason from message_delta survives",
                   streamed.stop_reason == "end_turn")
+            # The playground's run inspector shows stopReason, responseHeaders
+            # and rawSseText together; only the first was carried before.
+            check("response headers reach the Completion",
+                  streamed.response_headers.get("request-id") == "req_probe_123",
+                  str(streamed.response_headers))
+            check("rate-limit headers survive, so throttling is visible",
+                  streamed.response_headers.get(
+                      "anthropic-ratelimit-requests-remaining") == "42")
+            check("the raw SSE text is kept verbatim",
+                  "streamed" in streamed.raw_stream
+                  and streamed.raw_stream.count("data:") >= len(events),
+                  repr(streamed.raw_stream[:80]))
         finally:
             stream_server.shutdown()
 

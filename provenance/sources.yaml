@@ -1528,3 +1528,25 @@ sources:
       Every id that file cites resolves on this branch and none resolves on the
       default. The fix is to name the branch, not to repoint the default: this
       session does not own it.
+
+  - id: RUN-INSPECTION-2026-08-29
+    kind: tool_output
+    collected_at: "2026-08-29T04:40Z"
+    method: >-
+      compared the playground's run-inspection fields, named in
+      PLAYGROUND-CLIENT-CODE-2026-08-28, against Completion's dataclass fields;
+      then implemented the two that were missing and exercised them over real
+      HTTP against a conforming server that sends genuine headers, in
+      tests/test_workbench.py and as a parity_check row.
+    evidence: >-
+      Before: Completion carried stop_reason and neither response_headers nor
+      raw_stream, and no code in workbench/ referenced response headers or raw
+      stream text at all. After, over real HTTP: stop_reason='end_turn',
+      request-id='req_parity', anthropic-ratelimit-requests-remaining='7', and
+      5 verbatim SSE frames retained. The parity row passes offline.
+    note: >-
+      Found by checking the playground's own client-code inventory against this
+      implementation field by field, rather than by reading the matrix, which
+      had no row for run inspection and so could not have been red. The CLI
+      backend shells out and never sees an HTTP response, so it reports both
+      fields empty — an honest empty rather than a fabricated one.

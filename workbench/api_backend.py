@@ -210,7 +210,10 @@ class AnthropicAPIBackend(Backend):
         )
         try:
             with urllib.request.urlopen(req, timeout=timeout) as response:
-                return json.loads(response.read().decode("utf-8"))
+                envelope = json.loads(response.read().decode("utf-8"))
+                if isinstance(envelope, dict):
+                    envelope["_response_headers"] = dict(response.headers.items())
+                return envelope
         except urllib.error.HTTPError as exc:
             detail = exc.read().decode("utf-8", errors="replace")[:400]
             raise BackendError(f"{path} returned {exc.code}: {detail}") from exc
@@ -246,10 +249,14 @@ class AnthropicAPIBackend(Backend):
             f"{self.base_url}{path}", data=json.dumps(body).encode("utf-8"),
             headers=self._headers(betas), method="POST")
         envelope: dict[str, Any] = {"content": [], "usage": {}}
+        sse_lines: list[str] = []
         try:
             with urllib.request.urlopen(req, timeout=timeout) as response:
+                envelope["_response_headers"] = dict(response.headers.items())
                 for raw in response:
-                    line = raw.decode("utf-8").strip()
+                    decoded = raw.decode("utf-8")
+                    sse_lines.append(decoded)
+                    line = decoded.strip()
                     if not line.startswith("data:"):
                         continue
                     payload = line[5:].strip()
@@ -305,6 +312,7 @@ class AnthropicAPIBackend(Backend):
             raise BackendError(f"{path} returned {exc.code}: {detail}") from exc
         except urllib.error.URLError as exc:
             raise BackendError(f"{path} unreachable: {exc.reason}") from exc
+        envelope["_raw_stream"] = "".join(sse_lines)
         return envelope
 
     @staticmethod
@@ -333,6 +341,11 @@ class AnthropicAPIBackend(Backend):
             model=str(envelope.get("model") or ""),
             stop_reason=str(envelope.get("stop_reason") or ""),
             backend=AnthropicAPIBackend.name,
+            # The playground's run inspector shows stopReason, responseHeaders
+            # and rawSseText together, and the first was the only one of the
+            # three this backend carried.
+            response_headers=dict(envelope.get("_response_headers") or {}),
+            raw_stream=str(envelope.get("_raw_stream") or ""),
             raw=envelope,
         )
 
