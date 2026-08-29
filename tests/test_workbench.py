@@ -1292,6 +1292,51 @@ def test_medium_review_findings() -> None:
             check("a corrupt cache entry is a miss, not a crash", False, repr(exc))
 
 
+def test_cache_breakpoints() -> None:
+    """Five cache breakpoints is a 400; catch it here, and say where they are.
+
+    The Messages API allows four and shares those four slots with automatic
+    caching. A suite that caches its system prompt, its tools and a couple of
+    attachments is at the limit before anyone decides to cache a message, which
+    is why the playground counts them rather than trusting the author to.
+    """
+    print("\ncache breakpoints -- the fifth is a 400, so refuse it here")
+    from workbench.api_backend import (AnthropicAPIBackend, count_cache_breakpoints,
+                                       MAX_CACHE_BREAKPOINTS)
+    from workbench.errors import BackendError
+
+    b = AnthropicAPIBackend(api_key="probe")
+    body = b.build_body(Request(prompt="x", model="claude-haiku-4-5",
+                                system="s", cache_system=True))
+    check("a cached system prompt is one breakpoint",
+          count_cache_breakpoints(body) == ["system[0]"], str(count_cache_breakpoints(body)))
+
+    cached_tool = {"name": "t", "description": "d",
+                   "input_schema": {"type": "object"},
+                   "cache_control": {"type": "ephemeral"}}
+    four = b.build_body(Request(prompt="x", model="claude-haiku-4-5", system="s",
+                                cache_system=True,
+                                tool_defs=tuple(dict(cached_tool, name=f"t{i}")
+                                                for i in range(3))))
+    check(f"{MAX_CACHE_BREAKPOINTS} breakpoints are still accepted",
+          len(count_cache_breakpoints(four)) == MAX_CACHE_BREAKPOINTS)
+
+    try:
+        b.build_body(Request(prompt="x", model="claude-haiku-4-5", system="s",
+                             cache_system=True,
+                             tool_defs=tuple(dict(cached_tool, name=f"t{i}")
+                                             for i in range(4))))
+        check("a fifth breakpoint is refused", False, "it was accepted")
+    except BackendError as exc:
+        check("a fifth breakpoint is refused", True)
+        check("and the error names where they are",
+              "system[0]" in str(exc) and "tools[3]" in str(exc), str(exc))
+
+    check("an uncached request has none",
+          count_cache_breakpoints(
+              b.build_body(Request(prompt="x", model="claude-haiku-4-5"))) == [])
+
+
 def main() -> int:
     test_render()
     test_spec()
@@ -1314,6 +1359,7 @@ def main() -> int:
     test_registry_kinds()
     test_review_findings()
     test_answer_rate_control()
+    test_cache_breakpoints()
     test_medium_review_findings()
 
     print()

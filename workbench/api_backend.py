@@ -75,6 +75,43 @@ def find_credential() -> tuple[str | None, str]:
     return None, "no credential found — checked " + ", ".join(checked)
 
 
+
+#: The Messages API allows at most four cache breakpoints in one request, and
+#: returns 400 when a fifth appears -- the same four slots are shared with
+#: automatic caching, so an explicit fifth leaves none. Verified against the
+#: prompt-caching documentation rather than recalled. [src:CACHE-BREAKPOINTS-2026-08-29]
+MAX_CACHE_BREAKPOINTS = 4
+
+
+def count_cache_breakpoints(body: dict[str, Any]) -> list[str]:
+    """Where the cache_control markers are in a built body, in order.
+
+    The playground counts these (`countCacheBreakpoints`) because the limit is
+    easy to cross without noticing: a suite that caches its system prompt, and
+    also its tools, and also a couple of attachments, is already at four before
+    anyone decides to cache a message. This returns the locations rather than a
+    number, so the error can say WHERE they are instead of only how many.
+    """
+    found: list[str] = []
+    system = body.get("system")
+    if isinstance(system, list):
+        for i, block in enumerate(system):
+            if isinstance(block, dict) and block.get("cache_control"):
+                found.append(f"system[{i}]")
+    for i, tool in enumerate(body.get("tools") or []):
+        if isinstance(tool, dict) and tool.get("cache_control"):
+            found.append(f"tools[{i}]")
+    for i, message in enumerate(body.get("messages") or []):
+        content = message.get("content") if isinstance(message, dict) else None
+        if isinstance(content, list):
+            for j, block in enumerate(content):
+                if isinstance(block, dict) and block.get("cache_control"):
+                    found.append(f"messages[{i}].content[{j}]")
+    if body.get("cache_control"):
+        found.append("cache_control (top level)")
+    return found
+
+
 class AnthropicAPIBackend(Backend):
     """The Messages API, reached directly."""
 
@@ -188,6 +225,18 @@ class AnthropicAPIBackend(Backend):
                     f"parameters. Use a model that predates that, or drop them."
                 )
             body.update(sampling)
+        # Refuse a fifth breakpoint here rather than letting the API return a
+        # 400 the caller has to decode. The message names the locations,
+        # because "too many cache breakpoints" without saying where is a worse
+        # error than the one it replaces.
+        placed = count_cache_breakpoints(body)
+        if len(placed) > MAX_CACHE_BREAKPOINTS:
+            raise BackendError(
+                f"{len(placed)} cache breakpoints, but the Messages API allows "
+                f"{MAX_CACHE_BREAKPOINTS} and returns 400 for a fifth: "
+                f"{', '.join(placed)}. Drop one, or stop caching a block that "
+                f"changes between cases -- caching a varying prefix costs "
+                f"writes and never reads.")
         return body
 
     def _headers(self, betas: tuple[str, ...] = ()) -> dict[str, str]:

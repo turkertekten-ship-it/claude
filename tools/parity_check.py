@@ -675,6 +675,47 @@ def c_sampling(backend) -> Result:
                   if all_rejected else f"unexpected: {probes}")
 
 
+@check("Cache breakpoint counting and the four-slot limit", live=False)
+def c_cache_breakpoints(backend) -> Result:
+    """The playground counts breakpoints; this counts them and refuses a fifth.
+
+    The API allows four and returns 400 for a fifth, and those four slots are
+    shared with automatic caching. A suite caching its system prompt, its tools
+    and two attachments is already at the limit. Counting is the playground's
+    behaviour (`countCacheBreakpoints`); refusing locally with the locations
+    named is better than forwarding an opaque 400.
+    """
+    from workbench.api_backend import (AnthropicAPIBackend, count_cache_breakpoints,
+                                       MAX_CACHE_BREAKPOINTS)
+    from workbench.errors import BackendError
+    b = AnthropicAPIBackend(api_key="offline-probe")
+    tool = {"name": "t", "description": "d", "input_schema": {"type": "object"},
+            "cache_control": {"type": "ephemeral"}}
+
+    at_limit = b.build_body(Request(
+        prompt="x", model="claude-haiku-4-5", system="s", cache_system=True,
+        tool_defs=tuple(dict(tool, name=f"t{i}") for i in range(3))))
+    counted = count_cache_breakpoints(at_limit)
+
+    refused = ""
+    try:
+        b.build_body(Request(
+            prompt="x", model="claude-haiku-4-5", system="s", cache_system=True,
+            tool_defs=tuple(dict(tool, name=f"t{i}") for i in range(4))))
+    except BackendError as exc:
+        refused = str(exc)
+
+    ok = (len(counted) == MAX_CACHE_BREAKPOINTS and refused
+          and "system[0]" in refused and "tools[3]" in refused)
+    return Result("Cache breakpoint counting and the four-slot limit",
+                  PASS if ok else FAIL,
+                  f"counts {len(counted)} at the limit ({', '.join(counted)}) and refuses a "
+                  f"fifth locally, naming every location, rather than forwarding the API's "
+                  f"400. Limit verified from the prompt-caching docs, not recalled"
+                  if ok else
+                  f"counted {counted}; refusal was {refused[:160]!r}")
+
+
 @check("Run inspection: stopReason, responseHeaders, rawSseText", live=False)
 def c_run_inspection(backend) -> Result:
     """The playground's run inspector, matched field for field.

@@ -1550,3 +1550,24 @@ sources:
       had no row for run inspection and so could not have been red. The CLI
       backend shells out and never sees an HTTP response, so it reports both
       fields empty — an honest empty rather than a fabricated one.
+
+  - id: CACHE-BREAKPOINTS-2026-08-29
+    kind: api
+    collected_at: "2026-08-29T04:55Z"
+    method: >-
+      WebFetch of platform.claude.com/docs/en/docs/build-with-claude/prompt-caching,
+      asked for the exact sentence stating the limit.
+    evidence: >-
+      "You can define up to 4 cache breakpoints if you want to:". cache_control
+      may be placed on tool definitions, system content blocks, text blocks in
+      messages, image and document blocks in user turns, and tool_use and
+      tool_result blocks. The four slots are shared with automatic caching:
+      "If 4 explicit block-level breakpoints already exist, the API returns a
+      400 error (no slots left for automatic caching)."
+    note: >-
+      Fetched rather than recalled, because the number is the whole point of
+      the check and a remembered limit that is wrong produces a guard that
+      rejects valid requests. The playground counts breakpoints
+      (countCacheBreakpoints) for the same reason
+      [src:PLAYGROUND-CLIENT-CODE-2026-08-28]; this refuses the fifth locally
+      and names where all of them are, rather than forwarding an opaque 400.
