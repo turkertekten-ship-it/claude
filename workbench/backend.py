@@ -270,6 +270,30 @@ class EchoBackend(Backend):
         )
 
 
+
+def _fallback_model_names(fallbacks: Any) -> list[str]:
+    """Model names from either shape `fallbacks` arrives in.
+
+    The Messages API takes `[{"model": "..."}, ...]`; the CLI's
+    --fallback-model takes a comma-separated list of names. A suite should not
+    have to know which backend it will run against, so both are accepted, plus
+    a plain string for the single-fallback case. The literal "default" is the
+    API's own sentinel and names no model, so it is dropped rather than passed
+    to the CLI as if it were one.
+    """
+    if not fallbacks or fallbacks == "default":
+        return []
+    if isinstance(fallbacks, str):
+        return [fallbacks]
+    names: list[str] = []
+    for entry in fallbacks:
+        if isinstance(entry, str):
+            names.append(entry)
+        elif isinstance(entry, dict) and entry.get("model"):
+            names.append(str(entry["model"]))
+    return names
+
+
 class ClaudeCLIBackend(Backend):
     """The Claude Code CLI in ``--print`` mode, used as a completion engine."""
 
@@ -304,6 +328,15 @@ class ClaudeCLIBackend(Backend):
             argv = [self.executable, "-p",
                     "--input-format", "stream-json",
                     "--output-format", "stream-json", "--verbose"]
+            # The CLI's analogue of the playground's rawSseText pane. I said
+            # last turn that the CLI "never sees an HTTP response, so it
+            # reports these empty rather than inventing them" -- true of
+            # response headers, and wrong about the stream:
+            # --include-partial-messages emits the partial chunks as they
+            # arrive, on exactly this transport. A stream that reassembles
+            # wrongly cannot be debugged from the reassembled result.
+            if request.stream:
+                argv += ["--include-partial-messages"]
         else:
             argv = [self.executable, "-p", request.prompt, "--output-format", "json"]
         model = request.model or self.default_model
@@ -315,6 +348,19 @@ class ClaudeCLIBackend(Backend):
             argv += ["--append-system-prompt", request.append_system]
         if request.effort:
             argv += ["--effort", request.effort]
+        # `fallbacks` was carried into the API body and dropped on the floor
+        # here, though the CLI has --fallback-model for exactly this: automatic
+        # fallback when the default model is overloaded or unavailable, as a
+        # comma-separated list tried in order. A suite of 240 calls runs for
+        # over an hour; an overload partway through kills the run and the money
+        # already spent on it. Two of this session's runs cost $6-8 each.
+        #
+        # The API takes a list of objects; the CLI takes model names. Both
+        # shapes are accepted here so a suite need not know which backend it
+        # will meet.
+        fallback_models = _fallback_model_names(request.fallbacks)
+        if fallback_models:
+            argv += ["--fallback-model", ",".join(fallback_models)]
         if request.json_schema:
             argv += ["--json-schema", json.dumps(request.json_schema)]
         if request.max_budget_usd is not None:
@@ -442,7 +488,13 @@ class ClaudeCLIBackend(Backend):
                     backend=self.name, duration_ms=elapsed_ms,
                     workdir=request.cwd or "",
                 )
-            return self._from_envelope(envelope, request, elapsed_ms)
+            completion = self._from_envelope(envelope, request, elapsed_ms)
+            if request.stream:
+                # The verbatim NDJSON the CLI emitted, including the partial
+                # chunks --include-partial-messages adds. The CLI's answer to
+                # the playground's rawSseText.
+                completion.raw_stream = proc.stdout
+            return completion
         try:
             envelope = json.loads(proc.stdout)
         except json.JSONDecodeError:

@@ -775,8 +775,10 @@ def c_run_inspection(backend) -> Result:
                   PASS if ok else FAIL,
                   f"over real HTTP: stop_reason={c.stop_reason!r}, request-id={rid!r}, "
                   f"ratelimit-requests-remaining={rl!r}, and {c.raw_stream.count('data:')} "
-                  f"verbatim SSE frames retained. The CLI shells out and never sees an "
-                  f"HTTP response, so it reports these empty rather than inventing them"
+                  f"verbatim SSE frames retained. On the CLI, response_headers stays "
+                  f"empty -- it shells out and never sees an HTTP response -- but "
+                  f"raw_stream is populated from --include-partial-messages, which "
+                  f"emits stream_event chunks on the stream-json transport"
                   if ok else
                   f"stop_reason={c.stop_reason!r} headers={c.response_headers!r} "
                   f"raw_stream={c.raw_stream[:80]!r}")

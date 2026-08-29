@@ -1387,6 +1387,50 @@ def test_new_command_templates() -> None:
         check("a well-formed judge grader is accepted", False, str(exc))
 
 
+def test_cli_flag_sweep() -> None:
+    """Two CLI flags the workbench documented in Request and never passed.
+
+    Found by diffing the CLI's own --help capture against the flags this code
+    actually emits -- the same method that found the run-inspection and
+    cache-breakpoint gaps, applied to a different captured inventory.
+
+    `fallbacks` was carried into the API body and dropped for the CLI, though
+    --fallback-model exists for exactly it. A 240-call suite runs over an hour;
+    an overload partway through loses the run and the money already spent.
+
+    And --include-partial-messages corrects something stated too broadly: the
+    CLI cannot see response headers, but it CAN emit the raw stream.
+    """
+    print("\nCLI flag sweep -- flags carried in Request but never passed")
+    from workbench.backend import ClaudeCLIBackend, _fallback_model_names
+
+    check("API-shaped fallbacks yield model names",
+          _fallback_model_names([{"model": "a"}, {"model": "b"}]) == ["a", "b"])
+    check("CLI-shaped fallbacks pass through",
+          _fallback_model_names(["a"]) == ["a"])
+    check("a bare string is accepted", _fallback_model_names("a") == ["a"])
+    check("the API sentinel 'default' names no model",
+          _fallback_model_names("default") == [])
+    check("absent fallbacks add nothing", _fallback_model_names(None) == [])
+
+    b = ClaudeCLIBackend()
+    argv = b._argv(Request(prompt="x", model="m",
+                           fallbacks=[{"model": "claude-haiku-4-5"}]))
+    check("--fallback-model reaches argv", "--fallback-model" in argv)
+    check("and carries the model name",
+          argv[argv.index("--fallback-model") + 1] == "claude-haiku-4-5")
+
+    plain = b._argv(Request(prompt="x", model="m"))
+    check("no fallbacks means no flag", "--fallback-model" not in plain)
+
+    streamed = b._argv(Request(prompt="x", model="m", turns=("hi",), stream=True))
+    check("--include-partial-messages on the streaming transport",
+          "--include-partial-messages" in streamed)
+    unstreamed = b._argv(Request(prompt="x", model="m", turns=("hi",)))
+    check("but not when the caller did not ask to stream",
+          "--include-partial-messages" not in unstreamed)
+
+
 def main() -> int:
     test_render()
     test_spec()
@@ -1411,6 +1455,7 @@ def main() -> int:
     test_answer_rate_control()
     test_cache_breakpoints()
     test_new_command_templates()
+    test_cli_flag_sweep()
     test_medium_review_findings()
 
     print()

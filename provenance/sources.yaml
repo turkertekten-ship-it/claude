@@ -1600,3 +1600,29 @@ sources:
       judge grader with no criteria while appearing to work. Both were caught
       by tests asserting the guard rejects something, which is the house rule
       that exists for exactly this.
+
+  - id: CLI-FLAG-SWEEP-2026-08-29
+    kind: tool_output
+    collected_at: "2026-08-29T05:45Z"
+    method: >-
+      diffed the flag list in provenance/raw/claude-cli-help-2026-08-27.txt
+      against every "--flag" literal in workbench/ and tools/, then read the
+      help text for each candidate and exercised the two that mattered.
+    evidence: >-
+      62 flags documented, 49 referenced in code, 44 documented-but-unused.
+      Most are irrelevant to a prompt runner (--tmux, --chrome, --teleport,
+      --ide, --worktree). Three were on point. --betas is marked "(API key
+      users only)", so it does NOT reach beta features without a credential.
+      --fallback-model takes a comma-separated model list and falls back when
+      the default is overloaded or unavailable; Request already carried
+      `fallbacks` for the API body and the CLI backend dropped it.
+      --include-partial-messages emits partial chunks on the stream-json
+      transport; a live run returned 14,354 characters over 28 NDJSON lines
+      including stream_event frames.
+    note: >-
+      Corrects something I stated too broadly in RUN-INSPECTION-2026-08-29 and
+      in the parity row: "the CLI shells out and never sees an HTTP response,
+      so it reports these empty rather than inventing them". True of
+      response_headers, false of raw_stream — the CLI has its own stream, it
+      just is not SSE. The row now says which of the two is empty and why.
+      --betas is recorded as a checked dead end so nobody re-checks it.
