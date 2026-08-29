@@ -12,6 +12,16 @@ is the roster and the rules that keep them from overwriting each other.
 > snapshot, taken 53 minutes earlier, listed four sessions. It is kept below as
 > a worked example of how fast this file goes stale.
 
+## The default branch is not this branch
+
+- `origin/HEAD` points at `claude/rag-system-data-pipeline-rdkde9`, the 14:18 session's branch, which carries 289 files of its own — a different `CLAUDE.md`, its own `.claude/skills/`, no `provenance/` and no `tests/run_all.sh`. [src:DEFAULT-BRANCH-NOT-DOCTRINE-2026-08-29]
+
+> Reading, not a claim: anything that tells a reader to "clone this repository
+> and run the tests" is wrong unless it names a branch, because a plain clone
+> lands on a sibling's work. That is a property of a fleet where every session
+> owns a branch and nobody owns the default — not a defect to fix by repointing
+> it, which would take the default away from the session that has it.
+
 ## Roster
 
 | Created (Z) | Title | Branch |

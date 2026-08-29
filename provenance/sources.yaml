@@ -1506,3 +1506,25 @@ sources:
       any of the three: no caller puts a credential in a query string, TLS
       stands in front of api.github.com, and no suite sets mode:agent. Fixing
       the third before the first agent-mode suite exists is the point of it.
+
+  - id: DEFAULT-BRANCH-NOT-DOCTRINE-2026-08-29
+    kind: repo_state
+    collected_at: "2026-08-29T04:10Z"
+    method: >-
+      git symbolic-ref --short refs/remotes/origin/HEAD, then
+      git ls-tree -r --name-only on the branch it names.
+    evidence: >-
+      turkertekten-ship-it/claude's default branch is
+      claude/rag-system-data-pipeline-rdkde9 — a sibling session's branch,
+      listed as such in FLEET.md's 14:18 row. It holds 289 files including its
+      own CLAUDE.md, Makefile, README.md, a corpus/ tree, and its own
+      .claude/skills/ (add-source, eval-gate, preflight). It contains zero
+      files under provenance/, and no tests/run_all.sh.
+    note: >-
+      So "the doctrine lives in turkertekten-ship-it/claude" is true only of
+      particular branches, and false of the one a plain `git clone` checks out.
+      Found by running /code-review over the pointer file in claude-ai, which
+      had told a reader to clone that repository and run tests/run_all.sh.
+      Every id that file cites resolves on this branch and none resolves on the
+      default. The fix is to name the branch, not to repoint the default: this
+      session does not own it.
