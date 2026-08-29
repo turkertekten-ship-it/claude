@@ -1266,7 +1266,10 @@ sources:
     note: >-
       Validated on the worst six cases for thirty cents before committing to
       the full re-run, because the previous attempt cost $7.73 and produced
-      nothing usable. Six cases at one repeat cannot show that attrition is
+      nothing usable. The suite was later renamed to
+      suites/attrition-probe.yaml; the command above is left as it was actually
+      run, because editing a recorded command to match a later filename is
+      quietly rewriting evidence. Six cases at one repeat cannot show that attrition is
       gone across all forty; it shows the mechanism was the one diagnosed.
 
   - id: VISION-ACUITY-2026-08-28

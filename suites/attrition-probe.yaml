@@ -9,7 +9,7 @@
 # shows whether the mechanism was the one diagnosed. Regenerate it from
 # suites/fabrication-powered-sonnet.yaml rather than editing it here.
 #
-#   python3 -m workbench run suites/_attrition-probe.yaml
+#   python3 -m workbench run suites/attrition-probe.yaml
 
 name: attrition-probe
 description: Does the operating prompt reduce fabrication? Forty traps across six families, both arms,

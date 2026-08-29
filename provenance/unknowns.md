@@ -200,3 +200,36 @@ question was open long enough to be cited.
 difference. What remains open is narrower: twelve decided pairs cannot exclude
 a small effect, and the traps are this session's own construction rather than a
 published benchmark.
+
+---
+
+### U-11 — What "parity" should mean, now that its target is withdrawn
+
+**Asked and left to me.** The owner was offered three choices — accept the
+seventeen executable acceptance criteria as the definition, name what they miss,
+narrow to the API surface, or aim past the playground entirely — and expressed
+no preference on any of them. Also offered: whether to accept the fabrication
+null or fund harder traps, and whether to leave the two credential-blocked rows
+documented or supply a key. No preference on those either.
+
+**So these are my decisions, not the owner's, and they are recorded here rather
+than in `observations.md` because "the owner declined to choose" is not evidence
+that the choice was right.**
+
+1. `tools/acceptance_check.py` is the working definition of done: 15 pass,
+   0 fail, 2 blocked. The two blocked rows are a withdrawn product and a
+   missing credential.
+2. The fabrication question is answered as far as this instrument can answer
+   it. Eight runs, two model families, every interval containing zero. No
+   further spend on it.
+3. The two API-form rows stay BLOCKED and documented rather than deleted,
+   because deleting them would make the matrix green by hiding a real
+   difference.
+
+**Resolves when:** the owner states what they actually wanted, at which point
+any of the three may turn out to be wrong. Each is cheap to revisit: the
+criteria are a file, the suites still run, and a key would move two rows.
+
+**Do not:** describe the goal as "satisfied" without naming which definition
+was used. Under (1) it is met; under a reading that requires the retired UI it
+cannot be met by anyone.
