@@ -1652,3 +1652,33 @@ sources:
       in 40. Small, and not zero. The prompt is not free: it buys its trap
       behaviour at the cost of occasionally declining a question any assistant
       should answer, on a family where that cost had never been measured.
+
+  - id: V3-RESULT-2026-08-29
+    kind: tool_output
+    collected_at: "2026-08-29T04:25Z"
+    method: >-
+      the two endpoints fixed in docs/v3-preregistration.md, committed before
+      either run: python3 -m workbench run suites/over-refusal-v3.yaml (run
+      20260829T041717Z) and suites/fabrication-v3-guard.yaml (run
+      20260829T042258Z). Both on claude-haiku-4-5, answer-rate control passing
+      on each.
+    evidence: >-
+      Primary, forty answerable questions: v1 answered 78/80, v3 answered
+      80/80; v3 better on 2 cases, worse on 0, tied on 38; two-sided sign test
+      p = 0.5000. $0.5386. Guardrail, forty traps at one sample each: v1 passed
+      37/40, v3 passed 40/40; better on 3, worse on 0, p = 0.2500. $2.1529. The
+      guardrail holds — v3 did not buy fewer refusals with more fabrication.
+      Pooling both suites gives better 5, worse 0, p = 0.0625; that pooling was
+      NOT pre-registered and is reported as post-hoc.
+    note: >-
+      Neither endpoint is significant, and the reason is structural rather than
+      about v3: with k discordant cases and none against, the smallest
+      achievable two-sided p is 2^-k x 2 — 0.5 at two, 0.25 at three, 0.0625 at
+      five. Six discordant would be needed to clear 0.05. The pre-registration
+      named this floor in advance and said the honest report at that size is
+      "not measurable", so that is the report. Two further cautions: the two
+      cases v3 fixed are exactly the two v1 failed, which at this size cannot
+      be distinguished from a clause that happens to cover those two questions;
+      and the guardrail ran one sample per case, so its 3-0 cannot support a
+      claim that v3 fabricates LESS — it was built to catch a large regression
+      and it caught none.

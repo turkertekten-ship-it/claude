@@ -331,6 +331,32 @@ verified lives in [unknowns.md](unknowns.md), not here.
 > committing the same overstatement is the sharpest version of it — the tool
 > built to stop this repository overclaiming was quietly overclaiming a gap.
 
+## Observed — v3, the first change that moved both endpoints the right way
+
+- v3 is v1 plus one section, written from the mechanism behind the over-refusal finding and naming none of the questions that failed. Both endpoints were fixed in `docs/v3-preregistration.md` and committed before either run. [src:V3-RESULT-2026-08-29]
+- Primary: on forty answerable questions v1 answered 78/80 and v3 answered **80/80** — better on 2 cases, worse on 0, sign test p = 0.5000. [src:V3-RESULT-2026-08-29]
+- Guardrail: on forty traps at one sample each, v1 passed 37/40 and v3 passed **40/40** — better on 3, worse on 0. The guardrail holds: v3 did not buy fewer refusals with more fabrication. [src:V3-RESULT-2026-08-29]
+
+> Reading, not a claim: this is the first change in this repository to move
+> both endpoints in the intended direction with nothing moving against it, and
+> it is still not significant. The limit is structural and was named in
+> advance: with k discordant cases and none against, the smallest achievable
+> two-sided p is 2^-k x 2 — 0.5 at two, 0.25 at three. Six would be needed to
+> clear 0.05, and forty cases produced two.
+>
+> Two things keep this from being better than it looks. The two cases v3 fixed
+> are precisely the two v1 failed, and at this size a clause that repairs the
+> mechanism is indistinguishable from one that happens to cover those two
+> questions — the v2 lesson, arriving again in a milder form. And the guardrail
+> ran a single sample per case, so its 3-0 cannot support "v3 fabricates less";
+> it was built to catch a large regression, and caught none.
+>
+> What would settle it is more ANSWERABLE questions that v1 actually
+> over-refuses. At roughly one in forty, finding six discordant cases means
+> something like two hundred and forty new questions. That is the honest price
+> of a significant answer here, and it is the same discriminating-power wall
+> the fabrication question hit.
+
 ## Conclusion
 
 The honest answer to "look through all my previous claude chats" is bounded:
