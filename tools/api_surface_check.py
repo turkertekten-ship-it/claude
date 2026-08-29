@@ -83,6 +83,24 @@ def emitted() -> tuple[set[str], dict[str, str]]:
     return keys, where
 
 
+
+#: How old a snapshot may be before the check says so. Not derived from
+#: anything -- a judgement that a month is long enough for the API to move.
+SNAPSHOT_STALE_DAYS = 30
+
+
+def _snapshot_age_days(fetched: object) -> int | None:
+    """Days since the snapshot was fetched, or None if it cannot be read."""
+    import datetime as _dt
+    if not fetched:
+        return None
+    try:
+        when = _dt.date.fromisoformat(str(fetched))
+    except ValueError:
+        return None
+    return (_dt.date.today() - when).days
+
+
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", action="store_true")
@@ -111,7 +129,19 @@ def main(argv: list[str]) -> int:
 
     print("Messages API request surface — snapshot against implementation")
     print("=" * 68)
-    print(f"snapshot: {snapshot.get('source')} (fetched {snapshot.get('fetched')})")
+    # This check compares CODE against SNAPSHOT. It cannot tell whether the
+    # snapshot still matches the API -- a parameter the API gained after the
+    # fetch date is absent from both sides and the check passes, silently. That
+    # is the same shape as every gap found in this repository: a table is only
+    # ever wrong about rows someone wrote. Tests must not depend on a network,
+    # so instead of fetching, this says out loud how old the snapshot is.
+    age = _snapshot_age_days(snapshot.get("fetched"))
+    print(f"snapshot: {snapshot.get('source')} (fetched {snapshot.get('fetched')}"
+          + (f", {age} day(s) ago)" if age is not None else ")"))
+    if age is not None and age > SNAPSHOT_STALE_DAYS:
+        print(f"  NOTE: older than {SNAPSHOT_STALE_DAYS} days. This check cannot see a "
+              f"parameter\n  the API gained since. Re-fetch the surface and diff it "
+              f"before trusting\n  a green result as evidence of completeness.")
     print()
     for name in ga:
         mark = "ok  " if name in keys else "MISS"

@@ -132,7 +132,10 @@ difference −0.0917, CI [−0.2045, +0.0000], p = 0.1250.
 **And the control that was missing now exists.** Every trap suite here shared a
 blind spot: all cases are traps, so a perfect score could mean the prompt spots
 traps or that it declines everything. On forty questions where declining would
-be wrong, both arms answered 80 of 80 — it does not over-refuse.
+be wrong, both arms answered 80 of 80 on Sonnet. On Haiku the operating prompt
+answered 78 of 80, declining two questions any assistant should answer — so it
+over-refuses at roughly 2.5% on the family the null was measured on.
+[src:OVER-REFUSAL-HAIKU-2026-08-29]
 [src:NO-OVER-REFUSAL-2026-08-28]
 
 **What is still open, and it is narrower than before:** why so few cases
