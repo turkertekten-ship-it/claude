@@ -331,6 +331,24 @@ verified lives in [unknowns.md](unknowns.md), not here.
 > committing the same overstatement is the sharpest version of it — the tool
 > built to stop this repository overclaiming was quietly overclaiming a gap.
 
+## Observed — the geography test, and the first significant result here
+
+- Forty NEW geography questions, written after the hypothesis and none reused, with the endpoint fixed before the run. v1 answered 69/80 (86.2%); v3 answered **80/80**. Discordant **9 for v3, 0 against**, two-sided exact sign test **p = 0.00391**. [src:V3-GEOGRAPHY-2026-08-29]
+- All 11 refusals were v1's and all 11 are genuine on reading: it declined to name the capital of Germany, the river through London, the highest mountain in Africa and the largest island in the world, each time citing its own sourcing rule. No grader artifacts. [src:V3-GEOGRAPHY-2026-08-29]
+- This corrects a number published here. v1's over-refusal was described as "about one question in forty". In geography it is 9 of 40 cases — closer to one in four. The overall rate was low only because most categories are untouched. [src:V3-GEOGRAPHY-2026-08-29]
+- Across four suites and 181 cases, v3 is better on 18 and worse on **zero**. v3 is now the default operating prompt; v1 is kept verbatim at `prompts/base-operator-v1.md`. [src:V3-PROMOTION-2026-08-29]
+
+> Reading, not a claim: what makes this one count is the sequence, not the
+> p-value. The geography concentration was noticed after the fact, was
+> deliberately NOT sliced out of the run that suggested it, and was then tested
+> on questions written afterwards. Slicing would have produced the same
+> significance an hour earlier and been worth nothing.
+>
+> Nine sessions of nulls preceded this. The difference was never statistical
+> sophistication — it was finding a question where the failure was concentrated
+> enough to measure. The fabrication question never had that; the over-refusal
+> question did, and only because a specificity control was built to look for it.
+
 ## Observed — v3, powered, and still short of significance
 
 - The powered test ran: 61 recalled-fact questions, the only category where v1 over-refuses. v1 answered 117/122, v3 answered **122/122**. Discordant 4 for v3, 0 against, sign test **p = 0.1250**. [src:V3-POWERED-2026-08-29]
