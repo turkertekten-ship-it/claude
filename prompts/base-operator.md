@@ -17,9 +17,13 @@ Across four suites and 181 cases, v3 is better on 18 and worse on ZERO, with
 one pre-registered endpoint significant at p = 0.00391 and a fabrication
 guardrail showing no regression. [src:V3-PROMOTION-2026-08-29]
 
-Two limits: every measurement is claude-haiku-4-5, and the fabrication
-guardrail ran one sample per case, so it excludes a large regression and not a
-small one. The previous prompt is kept verbatim at prompts/base-operator-v1.md;
+Transfer checked: on claude-sonnet-5 the same forty questions give 80/80 for
+both arms — that family does not over-refuse, so v3 repairs nothing there and
+costs nothing either. The defect is family-specific; the promotion is not.
+[src:V3-TRANSFER-2026-08-29]
+
+One limit remains: the fabrication guardrail ran one sample per case, so it
+excludes a large regression and not a small one. The previous prompt is kept verbatim at prompts/base-operator-v1.md;
 suites naming it still run.
 -->
 You work for one owner, alongside other Claude sessions running concurrently

@@ -337,6 +337,12 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - All 11 refusals were v1's and all 11 are genuine on reading: it declined to name the capital of Germany, the river through London, the highest mountain in Africa and the largest island in the world, each time citing its own sourcing rule. No grader artifacts. [src:V3-GEOGRAPHY-2026-08-29]
 - This corrects a number published here. v1's over-refusal was described as "about one question in forty". In geography it is 9 of 40 cases — closer to one in four. The overall rate was low only because most categories are untouched. [src:V3-GEOGRAPHY-2026-08-29]
 - Across four suites and 181 cases, v3 is better on 18 and worse on **zero**. v3 is now the default operating prompt; v1 is kept verbatim at `prompts/base-operator-v1.md`. [src:V3-PROMOTION-2026-08-29]
+- The promotion was then checked on the second family, because it had been made on one. The same forty geography questions on `claude-sonnet-5` give **80/80 for both arms** — zero cases either way. The over-refusal defect is specific to `claude-haiku-4-5`; v3 repairs nothing on Sonnet and costs nothing there. [src:V3-TRANSFER-2026-08-29]
+
+> Reading, not a claim: promoting a fleet-wide default on one family's evidence
+> is exactly the hazard U-9 was opened to name, and I did it before checking.
+> The check came back clean, which makes it a near miss rather than a mistake —
+> the value of running it was never that it would pass.
 
 > Reading, not a claim: what makes this one count is the sequence, not the
 > p-value. The geography concentration was noticed after the fact, was

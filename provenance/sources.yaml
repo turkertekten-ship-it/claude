@@ -1780,3 +1780,24 @@ sources:
       Two limits stay attached: everything here is claude-haiku-4-5, and the
       fabrication guardrail ran one sample per case, so it can exclude a large
       regression and not a small one.
+
+  - id: V3-TRANSFER-2026-08-29
+    kind: tool_output
+    collected_at: "2026-08-29T06:06Z"
+    method: >-
+      suites/over-refusal-geography-sonnet.yaml — the same forty geography
+      questions and the same two arms as the significant Haiku run, differing
+      only in the model line. Run 20260829T060649Z.
+    evidence: >-
+      160 runs, $0.3444, answer-rate control passing at 0/80 and 0/80. On
+      claude-sonnet-5 both arms answered 80/80. Discordant 0 for v3 and 0
+      against. Against the same forty questions on claude-haiku-4-5, where v1
+      answered 69/80 and refused 11 times [src:V3-GEOGRAPHY-2026-08-29].
+    note: >-
+      The defect v3 fixes is family-specific: Sonnet does not over-refuse
+      geography at all, so there is nothing there for v3 to repair and it
+      repairs nothing. What this establishes is the direction that matters for
+      a fleet-wide default — v3 costs nothing on a family that does not have
+      the problem. Run because the promotion had been made on Haiku evidence
+      alone while applying to every session regardless of model, which is the
+      hazard U-9 names and which I had just committed.
