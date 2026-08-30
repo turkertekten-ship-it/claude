@@ -1879,3 +1879,32 @@ sources:
       membership cannot see a relation. A checker that passes bad documents is
       worse than no checker: it manufactures the confidence that let the
       document ship unchecked in the first place.
+
+  - id: FACTCHECK-AGENT-WORKS-2026-08-29
+    kind: tool_output
+    collected_at: "2026-08-29T07:10Z"
+    method: >-
+      ran the fact-checker subagent against the summary page as first
+      published, errors intact, with the ledger, the suites and the raw
+      result.json files named as evidence. Ground truth known: four errors I
+      had already found by hand, none of which tools/check_figures.py could
+      detect [src:FIGURE-CHECK-FAILS-2026-08-29].
+    evidence: >-
+      It caught both relational errors the regex tool missed, and named the
+      mechanism in each case: "341 = 181 (the actual four-suite case count) +
+      160 (the run count from V3-TRANSFER-2026-08-29)", and "after it there are
+      11 paid runs, not twelve ... of which 7 cost under $1 ... not nine". It
+      also found three errors I had NOT found: the page said "86 sourced
+      entries" when the ledger held 88, priced U-13 at "≈ $1" with no capture
+      behind the figure, and claimed in its footer that "every figure links to
+      a sourced entry" when the document contains no links at all
+      (grep -c "<a " = 0). All three verified independently and corrected.
+    note: >-
+      This overturns what I wrote one commit earlier — that the defence "does
+      not mechanise". It does; a reader with the ledger catches relational
+      errors because it understands that runs and cases are different kinds,
+      which corpus membership cannot. The conclusion was wrong because I tested
+      one implementation and generalised to the whole approach, having built
+      the weaker one myself. The strongest finding is the smallest: my own
+      correction notice contained a false claim, and a second pass caught it.
+      One audit is not enough, and the auditor should not be the author.
