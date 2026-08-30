@@ -1824,3 +1824,28 @@ sources:
       run. That is how a budget goes without any single decision looking like
       the one that broke it. Recorded here rather than left for the owner to
       total themselves.
+
+  - id: ARTIFACT-FACTCHECK-2026-08-29
+    kind: filesystem
+    collected_at: "2026-08-29T06:40Z"
+    method: >-
+      audited every figure in the published summary page against
+      provenance/sources.yaml and against the suites and run files themselves,
+      after publishing rather than before.
+    evidence: >-
+      Four errors. "341 cases" was the four suites' 181 cases plus the Sonnet
+      transfer check's 160 RUNS — runs added to cases. "Nine experiments" was
+      unverifiable; the count is 24 paid runs across 16 distinct suites.
+      "Twelve runs followed the authorised one, nine under a dollar" is eleven
+      and seven. And the six exploratory runs were summarised as "no
+      separation, p 0.77-1.0", which omits that they produced a 42-8 blind
+      preference at p < 0.001 on easy traps that then failed to replicate on
+      hard ones [src:BLIND-RUN-POWERED-2026-08-27].
+    note: >-
+      The same failure this session catalogued five times in other people's
+      work and my own: the summary running ahead of the evidence. A page whose
+      entire subject is not publishing unsourced claims was itself published
+      before being checked against the ledger, and the fact-checker exists in
+      this repository precisely to be run BEFORE a write-up ships. The page is
+      corrected and carries a visible note saying what it said first, rather
+      than being edited silently.
