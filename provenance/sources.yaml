@@ -1849,3 +1849,33 @@ sources:
       this repository precisely to be run BEFORE a write-up ships. The page is
       corrected and carries a visible note saying what it said first, rather
       than being edited silently.
+
+  - id: FIGURE-CHECK-FAILS-2026-08-29
+    kind: tool_output
+    collected_at: "2026-08-29T06:55Z"
+    method: >-
+      built tools/check_figures.py to mechanise the defence named in
+      ARTIFACT-FACTCHECK-2026-08-29 — flag figures in a write-up that occur
+      nowhere in the evidence — and tested it against the summary page as
+      first published, errors intact, in two corpus configurations. Then
+      deleted it.
+    evidence: >-
+      Wide corpus (ledger prose plus run files): 0 of 37 figures flagged on the
+      erroneous page, including "341". The number passes because the ledger
+      entry recording that 341 was WRONG puts 341 in the corpus. Narrow corpus
+      (run files only): still does not flag 341, which occurs incidentally in a
+      result.json, and flags 17 legitimate figures — p-values, totals, derived
+      counts — as unsupported. An earlier bug in the same tool flagged four
+      correctly-rounded costs because it truncated 6.6064 to 6.60 instead of
+      rounding to 6.61.
+    note: >-
+      The check does not work and was removed rather than shipped with a
+      caveat. Presence-or-absence in a corpus is not a test of whether a claim
+      is right, because none of the errors it was built for is a malformed
+      number. "341 cases" added runs to cases — both real figures, wrongly
+      related. "Nine experiments" was a word and a judgement, not a
+      measurement. "Twelve runs, nine under a dollar" miscounted a set. All
+      three are relational errors in well-formed numbers, and corpus
+      membership cannot see a relation. A checker that passes bad documents is
+      worse than no checker: it manufactures the confidence that let the
+      document ship unchecked in the first place.
