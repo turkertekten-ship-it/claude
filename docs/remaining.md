@@ -169,6 +169,25 @@ caught.
 > repository is built around. A true one, standing in for a question nobody
 > re-asked, is invisible to it — and nothing here detects that.
 
+## 4. Two things left open by a spending decision, not by evidence
+
+**`U-12` — v3's fabrication guardrail is single-sample.** Closing it costs
+~$6.50: `suites/fabrication-v3-guard.yaml` with `repeats: 3` on
+`claude-haiku-4-5`, analysed with `tools/analyse_fabrication.py`. Not run
+because this session spent $54.28 against an authorised ~$20-40
+[src:SPEND-ACCOUNTING-2026-08-29], and the owner expressed no preference when
+asked, so the call was mine: stop.
+
+**`U-13` — the geography concentration is unexplained.** v1 declined 11 of 80
+geography runs and 0 of 98 across six other categories. That the defect is real
+and that v3 fixes it are both established; what the defect *is* is not.
+[src:V3-GEOGRAPHY-2026-08-29]
+
+Both are cheap, both are specified precisely enough to run without re-deriving
+anything, and neither blocks the work that is done.
+
+---
+
 > The honest summary: one item needs a key, one needs a time machine, and one
 > has an answer that is simply not the answer anyone wanted — now established
 > at a sample size that makes it an answer rather than an absence of one.

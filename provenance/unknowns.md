@@ -233,3 +233,54 @@ criteria are a file, the suites still run, and a key would move two rows.
 **Do not:** describe the goal as "satisfied" without naming which definition
 was used. Under (1) it is met; under a reading that requires the retired UI it
 cannot be met by anyone.
+
+---
+
+### U-12 — Whether v3 changes the fabrication rate, at power
+
+**Unknown:** whether the promoted prompt affects fabrication by a small amount.
+Its guardrail ran one sample per case, which excludes a large regression and
+not a small one. [src:V3-RESULT-2026-08-29]
+
+**Why it is open rather than closed:** closing it costs about $6.50, and this
+session has already spent $54.28 against an authorised band of roughly $20-40
+[src:SPEND-ACCOUNTING-2026-08-29]. The owner was asked and expressed no
+preference, so the decision is mine and is recorded as mine: **stop spending.**
+
+**Why the promotion stands anyway, stated so it can be argued with:** the
+change is one added section that *narrows* where a rule applies. It grants no
+new latitude to assert anything, so the mechanism by which it would increase
+fabrication is not obvious, and the weak guardrail looked for one and found
+none — 3 cases better, 0 worse. Against that, the improvement claim is
+significant and the no-regression claim is not, and that asymmetry is written
+into `prompts/base-operator.md` itself rather than left implicit.
+
+**Resolves when:** `suites/fabrication-v3-guard.yaml` is run with `repeats: 3`
+on `claude-haiku-4-5` — 240 runs, about $6.50 — and analysed with
+`tools/analyse_fabrication.py`, whose estimator already handles this shape.
+
+**Do not:** describe v3 as "measured not to increase fabrication". It was
+measured not to increase it *detectably at one sample per case*, which is a
+different and much weaker sentence.
+
+---
+
+### U-13 — Whether the geography concentration has a cause worth knowing
+
+**Unknown:** why `claude-haiku-4-5` under v1 over-refused geography questions
+and nothing else. 0 of 98 acronym, astronomy, chemistry, biology, physics and
+general-knowledge runs were declined; 5 of 24 geography runs were, and on fresh
+questions 11 of 80. [src:V3-POWERED-2026-08-29] [src:V3-GEOGRAPHY-2026-08-29]
+
+**Why it might matter:** if the trigger is something like "a fact that could in
+principle be looked up in a reference", then other categories share it and the
+suite simply did not sample them. If it is narrower, v3's clause may be
+repairing a smaller defect than it appears to.
+
+**Resolves when:** a pre-registered suite spans several plausible trigger
+dimensions — lookup-shaped versus derivable, proper nouns versus not, recent
+versus stable — with enough cases per cell to separate them.
+
+**Do not:** treat the geography result as explaining itself. It establishes
+that the defect is real and that v3 fixes it. It does not say what the defect
+*is*.
