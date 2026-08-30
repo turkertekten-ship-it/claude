@@ -11,6 +11,12 @@ run() {
 }
 
 run python3 tools/verify_provenance.py
+
+# A measurement whose subject has changed is not evidence about the current
+# subject. This catches that; verify_provenance cannot, because the number
+# stays well-formed when the file underneath it moves.
+run python3 tools/check_measurements.py
+run python3 tests/test_check_measurements.py
 run python3 tests/test_verify_provenance.py
 run python3 tests/test_ingest_chat_archive.py
 # An inherited copy of the ingester proving it stores what it reads.
