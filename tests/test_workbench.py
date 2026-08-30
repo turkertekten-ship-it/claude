@@ -1472,6 +1472,19 @@ def test_doctor_matches_the_code() -> None:
                   name not in uncontrollable,
                   f"...{uncontrollable[:120]}")
 
+    # Two verdicts doctor repeated after they were retracted or superseded.
+    # Both were found by running the documented onboarding in a clean clone,
+    # and neither was visible to any other check.
+    check("doctor does not cite the retracted max-tokens FAIL",
+          "records it as a FAIL" not in report,
+          "the matrix records Max output tokens as PASS; an earlier check was "
+          "itself the broken thing")
+    if "count_tokens" in report:
+        check("doctor says token counting does not need a credential",
+              "does NOT need that credential" in report,
+              "tools/count_tokens.py measures tokens through the CLI and that "
+              "parity row PASSES; only the endpoint needs a key")
+
 
 def main() -> int:
     test_render()

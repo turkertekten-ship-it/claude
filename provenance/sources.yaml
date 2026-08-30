@@ -2016,3 +2016,30 @@ sources:
       the old text before being kept. This is the same drift the ledger audit
       found in the write-ups, in a tool's own self-description, and it was
       invisible until the documented path was executed from a clean state.
+
+  - id: DOCTOR-STALE-TWO-2026-08-29
+    kind: tool_output
+    collected_at: "2026-08-29T08:20Z"
+    method: >-
+      read every claim in `python3 -m workbench doctor` against the parity
+      matrix rows in tools/parity_check.py, after the fresh-clone run found the
+      first stale one [src:DOCTOR-STALE-2026-08-29].
+    evidence: >-
+      Two more. doctor said "max output tokens is PLUMBED but did not work when
+      measured — see parity_check, which records it as a FAIL". The matrix
+      records that row as PASS and its own docstring says an earlier version of
+      the check "found neither, and recorded the capability as broken — a
+      verdict that reached docs/parity.md and README.md as a platform defect.
+      It was this harness that was wrong." doctor also listed count_tokens
+      among capabilities awaiting a credential, without noting that
+      tools/count_tokens.py measures tokens through the CLI and that the
+      "Token counting without a credential" row PASSES.
+    note: >-
+      The first was propagating a RETRACTED verdict: it told a reader the
+      platform was broken when the harness had been the broken thing, and the
+      retraction never reached the tool that repeated it. The second is the
+      endpoint-versus-capability conflation already fixed once in
+      parity_check's summary [src:PARITY-COUNT-CORRECTED-2026-08-28] and left
+      standing here — the same error twice, in two places, because fixing it
+      in one did not prompt anyone to look for it in the other. Both now
+      carry regression assertions, watched failing against the old text.
