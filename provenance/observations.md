@@ -194,7 +194,7 @@ verified lives in [unknowns.md](unknowns.md), not here.
 - Token counting does not need the credential this container lacks. `claude -p --output-format json` reports `usage.input_tokens` from the model's own tokenizer; subtracting a calibrated empty baseline gives the count of any text. [src:TOKEN-COUNT-DIFFERENTIAL-2026-08-28]
 - The method was proved before being used, not after: the empty baseline returned 231 tokens on three identical probes, and two 11-token strings measured 22 concatenated. `tools/parity_check.py` now exercises both properties on live calls and reports PASS. [src:TOKEN-COUNT-DIFFERENTIAL-2026-08-28]
 - Isolation mattered more than the arithmetic. Without `--tools "" --setting-sources ""` the frame was 3632 tokens rather than 231, and would have drifted with whatever the working directory happened to contain. [src:TOKEN-COUNT-DIFFERENTIAL-2026-08-28]
-- The operating prompt is **573 tokens**. [src:OPERATING-PROMPT-TOKENS-2026-08-28]
+- The operating prompt was **573 tokens** when measured on 2026-08-28 [src:OPERATING-PROMPT-TOKENS-2026-08-28] — but that measured the file now kept as `prompts/base-operator-v1.md`. Promoting v3 replaced `prompts/base-operator.md` with a longer file [src:V3-PROMOTION-2026-08-29] and nobody re-measured. **The current prompt's token count is unknown.**
 
 > Reading, not a claim: the parity matrix carried this row as unreachable on
 > the strength of a statement that was true about the endpoint and false about
@@ -235,7 +235,7 @@ verified lives in [unknowns.md](unknowns.md), not here.
 
 - The playground draft carries `messages`, `stream` and `speed`. Two are reachable from the CLI: two user turns over `--input-format stream-json` returned two results in one invocation, the second recalling a value only the first carried; and a streamed response arrived as 12 newline-delimited events rather than one blocking payload. [src:CLI-TRANSPORT-ROWS-2026-08-28]
 - `speed` is not, and now says why: `fast_mode_state='off'`, `fast_mode_disabled_reason='sdk_opt_in_required'`. [src:CLI-TRANSPORT-ROWS-2026-08-28]
-- The matrix stands at **26 passed, 0 failed, 9 unreachable**. [src:CLI-TRANSPORT-ROWS-2026-08-28]
+- The matrix read **26 passed, 0 failed, 9 unreachable** at 11:05Z on 2026-08-28 [src:CLI-TRANSPORT-ROWS-2026-08-28], and **27 passed, 0 failed, 8 unreachable** by 22:10Z the same day, after `stop_sequences` moved off the blocked list [src:PARITY-COUNT-CORRECTED-2026-08-28] [src:STOP-SEQUENCES-CLI-2026-08-28]. Rows were added after that, so any number written here is a snapshot; `python3 tools/parity_check.py` is the current one.
 
 - Two earlier versions of the multi-turn probe each gave a confident wrong answer. `claude -p` invoked from inside a session reports *that session's* id, so a `--resume` probe recalled a word already in this conversation and passed while proving nothing. Replacing it with a hex token then made a working capability fail, because the model declined the token as suspicious. [src:PROBE-CONFOUNDS-2026-08-28]
 

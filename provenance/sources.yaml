@@ -1908,3 +1908,32 @@ sources:
       the weaker one myself. The strongest finding is the smallest: my own
       correction notice contained a false claim, and a second pass caught it.
       One audit is not enough, and the auditor should not be the author.
+
+  - id: STALE-CLAIMS-AUDIT-2026-08-29
+    kind: tool_output
+    collected_at: "2026-08-29T07:30Z"
+    method: >-
+      ran the fact-checker subagent over README.md, docs/remaining.md and
+      provenance/observations.md — documents verify_provenance.py already
+      passes, since it checks only that [src:] tags resolve. Asked specifically
+      for claims whose cited entry says something different, numbers gone stale,
+      and results from one model family stated as general.
+    evidence: >-
+      Three findings, all of the stale kind, none visible to the guard. (1) All
+      three files reported the parity matrix as "26 passed, 0 failed, 9
+      unreachable", citing an entry from 11:05Z on 2026-08-28 while a later
+      entry the same day recorded 27/0/8 after stop_sequences moved off the
+      blocked list. (2) docs/remaining.md listed stop_sequences among four
+      credential-blocked capabilities, though that row now PASSES; the genuinely
+      absent four are direct API access, the Batch API, speed/fast mode and the
+      deprecated sampling parameters. (3) "The operating prompt is 573 tokens"
+      measured prompts/base-operator.md on 2026-08-28 — before promoting v3
+      replaced that file with a longer one, making the figure a measurement of
+      what is now base-operator-v1.md.
+    note: >-
+      The third is the instructive one: promoting v3 silently invalidated a
+      published measurement, and nothing connected the two. The current
+      prompt's token count is now recorded as unknown rather than re-measured,
+      because spending is stopped. The structural fix for the first is not a
+      fresh number — the count went stale twice — but to say when it was taken
+      and name the command that produces the current one.

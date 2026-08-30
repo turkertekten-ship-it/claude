@@ -11,8 +11,15 @@ what would close each, because "not done" without that is just a complaint.
 **State:** implemented, wire-tested against a conforming local server, blocked
 on authentication to Anthropic's endpoint.
 
-`stop_sequences`, an exact `max_tokens`, batch submission at half price, and
-`temperature`/`top_p`/`top_k` on models old enough to accept them.
+Direct Messages API access, batch submission at half price, `speed`/fast mode,
+and `temperature`/`top_p`/`top_k` on models old enough to accept them.
+[src:PARITY-COUNT-CORRECTED-2026-08-28]
+
+`stop_sequences` **was** on this list and came off it: the CLI backend applies
+it client-side, verified live, and the row moved from UNREACHABLE to PASS.
+[src:STOP-SEQUENCES-CLI-2026-08-28] Of the four above, two need a credential
+and two cannot be reached from here at all — `temperature`/`top_p`/`top_k` were
+removed from the platform rather than being missing from this tool.
 
 This list used to have eight items. Four came off it without a credential —
 `count_tokens`, prompt caching, image input and custom tool definitions — and
@@ -91,8 +98,9 @@ than asserted.
 
 ## 3. The operating prompt is not shown to reduce fabrication
 
-**State:** answered, in the negative, across seven runs — the last one
-adequately powered and pre-registered.
+**State:** answered, in the negative, across eight runs on two model families
+— the seventh adequately powered and pre-registered, the eighth replicating it
+on a second family. [src:SONNET-VALID-2026-08-28]
 
 The deterministic layer separated nothing. The blind judge preferred the prompt
 decisively on easy traps — 42 to 8, p < 0.001, and the preference survived a
@@ -120,7 +128,8 @@ never carried the key the stratum lookup read. Repaired: tuned (26 cases)
 [−0.2667, +0.0000], p = 0.25. Both span zero, and the headline is unchanged.
 [src:STRATIFICATION-NEVER-RAN-2026-08-28]
 
-So the state is now: answered in the negative across seven runs, one of them
+So the state is now: answered in the negative across eight runs on two model
+families, one of them
 adequately powered for the effect size the earlier six suggested. Any real
 effect is under roughly five percentage points.
 
@@ -155,10 +164,12 @@ caught.
 > **Four rows left this list without anyone spending anything.** `count_tokens`
 > was unreachable only as an endpoint — the capability was reachable the whole
 > time through `usage.input_tokens`, and the operating prompt turns out to be
-> 573 tokens. [src:TOKEN-COUNT-DIFFERENTIAL-2026-08-28]
+> 573 tokens — measured against the file now kept as
+> `prompts/base-operator-v1.md`, before v3 replaced it as the default.
+> [src:TOKEN-COUNT-DIFFERENTIAL-2026-08-28] [src:V3-PROMOTION-2026-08-29]
 > [src:OPERATING-PROMPT-TOKENS-2026-08-28] Asking the same question of the rest
 > moved prompt caching, image input and custom tool definitions too: all three
-> work through the CLI, none needs a key, and the matrix now reads 26 passed,
+> work through the CLI, none needs a key, and the matrix read 27 passed,
 > 0 failed, 9 unreachable — three rows added for playground fields it had no
 > row for at all. [src:CLI-CAPABILITY-RECOVERY-2026-08-28]
 > [src:CLI-TRANSPORT-ROWS-2026-08-28]

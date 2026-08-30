@@ -68,7 +68,10 @@ python3 tools/count_tokens.py --selfcheck       # prove the counter, then use it
 `parity_check.py` is the part worth pointing at. `docs/parity.md` is a table of
 claims, and a table is not evidence — so this exercises each capability against
 the live backend and reports PASS, FAIL, or UNREACHABLE with the reason. It
-currently records **26 passed, 0 failed, 9 unreachable**.
+recorded **27 passed, 0 failed, 8 unreachable** when last totalled on
+2026-08-28 [src:PARITY-COUNT-CORRECTED-2026-08-28], and rows have been added
+since. Run it rather than trusting this sentence — a hard-coded count goes
+stale the moment the thing it counts changes, and this one already had.
 
 Its most useful result so far was a wrong one it later caught. For several
 commits it recorded `CLAUDE_CODE_MAX_OUTPUT_TOKENS` as a broken platform
