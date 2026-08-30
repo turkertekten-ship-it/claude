@@ -18,9 +18,9 @@ This does ask. An entry that overturns an earlier finding records the phrasing
 that should no longer appear:
 
     retracts:
-      supersedes: MAX-OUTPUT-TOKENS-NOT-HONOURED-2026-08-27
+      supersedes: SOME-EARLIER-FINDING-2026-01-01
       phrases:
-        - "records it as a FAIL"
+        - "the widget is broken"
 
 and every tracked file is searched for those phrases. The ledger entry that
 declares the retraction is skipped -- it must quote what it retracts -- as is
@@ -31,8 +31,20 @@ died because relational errors need judgement [src:FIGURE-CHECK-FAILS-2026-08-29
 a retracted phrase reappearing is not a judgement, it is a grep, and a grep is
 a thing a tool can be trusted with.
 
-What it cannot do: catch a retracted claim restated in different words. The
-phrase list is only as good as the phrases someone thought to write down.
+What it cannot do, stated after an adversarial review rather than from
+intent, because the limits I first wrote were narrower than the real ones:
+
+- It cannot catch a retracted claim restated in different words. The phrase
+  list is only as good as the phrases someone thought to write down, and five
+  phrases across three entries is what exists today.
+- Matching is whitespace-collapsed and case-insensitive over a three-line
+  window, so an ordinary line wrap no longer hides a phrase — but one split
+  across four or more lines is reported as "spanning more lines than the
+  window" rather than located precisely.
+- `retraction-quote` is an unauthenticated opt-out. Any line carrying that
+  token is exempt, so it silences as easily as it excuses.
+- Symlinks and non-textual files are skipped, and so is anything under a
+  directory named in SKIP_COMPONENTS.
 
 Exit 0 when nothing repeats a retracted claim, 1 when something does, 2 when it
 cannot run.
@@ -51,22 +63,53 @@ REPO = Path(__file__).resolve().parent.parent
 LEDGER = REPO / "provenance" / "sources.yaml"
 #: Same rule verify_provenance uses: backticked text is quoted, not claimed.
 INLINE_CODE = re.compile(r"`[^`]*`")
-SKIP_DIRS = {"provenance/raw", ".workbench", ".git"}
+#: Directory NAMES, matched component-wise rather than as path prefixes.
+SKIP_COMPONENTS = {"raw", ".workbench", ".git", "__pycache__", "venv", ".venv"}
 
 
-def tracked_files() -> list[Path]:
-    out = subprocess.run(["git", "ls-files"], cwd=REPO,
-                         capture_output=True, text=True, timeout=60)
-    if out.returncode != 0:
+#: Extensions worth searching. A retracted claim lives in prose or in code,
+#: not in a PNG, and hashing every byte of the tree would be slow and noisy.
+TEXTUAL = {".md", ".py", ".yaml", ".yml", ".sh", ".txt", ".json", ".toml", ".cfg"}
+
+
+def _norm(text: str) -> str:
+    """Collapse whitespace and case, so a line wrap is not a hiding place."""
+    return " ".join(text.split()).lower()
+
+
+def _windows(text: str, span: int = 3) -> list[str]:
+    """Overlapping groups of lines, so a wrapped phrase is still one string."""
+    lines = text.splitlines()
+    if not lines:
         return []
-    files = []
-    for rel in out.stdout.splitlines():
-        if any(rel.startswith(d) for d in SKIP_DIRS):
+    return [" ".join(lines[i:i + span]) for i in range(len(lines))]
+
+
+def searchable_files() -> list[Path]:
+    """Every textual file in the tree, tracked or not.
+
+    This used to shell out to `git ls-files`, and that blindness bit the tool
+    on its first day: its own source was untracked when it was run, so it never
+    searched itself, reported clean, and went red the moment it was committed.
+    The likeliest place a retracted claim is re-asserted is a document someone
+    has just written and not yet staged -- exactly what git does not list.
+
+    Walking the tree also fixes two silent drops: filenames git quotes and
+    octal-escapes because they are not ASCII, and the prefix match that treated
+    `provenance/rawdata.md` as if it were inside `provenance/raw/`.
+    """
+    files: list[Path] = []
+    for path in REPO.rglob("*"):
+        if not path.is_file() or path.is_symlink():
             continue
-        path = REPO / rel
-        if path.is_file():
-            files.append(path)
-    return files
+        if path.suffix not in TEXTUAL:
+            continue
+        rel = path.relative_to(REPO)
+        # Component-wise, so `rawdata.md` and `.workbenchers/` are not skipped.
+        if any(part in SKIP_COMPONENTS for part in rel.parts):
+            continue
+        files.append(path)
+    return sorted(files)
 
 
 def main(argv: list[str]) -> int:
@@ -79,16 +122,48 @@ def main(argv: list[str]) -> int:
         print(f"ledger will not parse: {exc}", file=sys.stderr)
         return 2
 
-    declared = [e for e in entries if e.get("retracts")]
-    files = tracked_files()
+    if not isinstance(entries, list):
+        print("ledger `sources` is not a list", file=sys.stderr)
+        return 2
+    declared = []
+    for e in entries:
+        if not isinstance(e, dict):
+            print(f"ledger entry is not a mapping: {e!r:.60}", file=sys.stderr)
+            return 2
+        # Key ABSENT means unannotated. Key present and empty means someone
+        # started an annotation and it did not parse -- a mis-indented block
+        # yields None, and treating that as "unannotated" is the silent
+        # demotion this check exists to prevent.
+        if "retracts" not in e:
+            continue
+        block = e["retracts"]
+        if block is None:
+            print(f"{e.get('id','?')}: `retracts` is empty — a half-written "
+                  f"annotation, not an absent one", file=sys.stderr)
+            return 2
+        if not isinstance(block, dict):
+            print(f"{e.get('id','?')}: `retracts` must be a mapping, got "
+                  f"{type(block).__name__}", file=sys.stderr)
+            return 2
+        phrases = block.get("phrases")
+        if isinstance(phrases, str):
+            print(f"{e.get('id','?')}: `phrases` must be a list; a bare string "
+                  f"would be matched one character at a time", file=sys.stderr)
+            return 2
+        if not phrases:
+            print(f"{e.get('id','?')}: declares `retracts` with no phrases — "
+                  f"a retraction nobody can check", file=sys.stderr)
+            return 2
+        declared.append(e)
+    files = searchable_files()
     if not files:
-        print("no tracked files found; run this inside the repository", file=sys.stderr)
+        print("no searchable files found; run this inside the repository", file=sys.stderr)
         return 2
 
     print("Retracted claims, and whether anything still repeats them")
     print("=" * 68)
     print(f"{len(declared)} of {len(entries)} entries declare a retraction; "
-          f"{len(files)} tracked file(s) searched.")
+          f"{len(files)} file(s) searched.")
     print()
 
     hits = 0
@@ -103,7 +178,7 @@ def main(argv: list[str]) -> int:
                     text = path.read_text(encoding="utf-8", errors="replace")
                 except OSError:
                     continue
-                if phrase not in text:
+                if _norm(phrase) not in _norm(text):
                     continue
                 # The ledger must quote what it retracts.
                 if path == LEDGER:
@@ -115,12 +190,36 @@ def main(argv: list[str]) -> int:
                 # settles this -- a phrase in inline code is named, not
                 # asserted -- so the same convention applies here, plus an
                 # explicit marker for source files, which have no backticks.
-                asserting = [
-                    line for line in text.splitlines()
-                    if phrase in line
-                    and "retraction-quote" not in line
-                    and phrase not in " ".join(INLINE_CODE.findall(line))
-                ]
+                # Whitespace-collapsed and case-insensitive, because the
+                # phrases are 20-45 characters and every prose file here is
+                # hard-wrapped at ~76 columns: an ordinary line break defeated
+                # exact matching, as did a sentence-initial capital.
+                flat = _norm(text)
+                needle = _norm(phrase)
+                asserting = []
+                seen_anywhere = False
+                for window in _windows(text):
+                    if needle not in _norm(window):
+                        continue
+                    seen_anywhere = True
+                    if "retraction-quote" in window:
+                        continue
+                    # Strip the quoted spans and re-test, so a line that both
+                    # asserts and quotes is still caught.
+                    if needle not in _norm(INLINE_CODE.sub(" ", window)):
+                        continue
+                    asserting.append(window)
+                if not asserting and not seen_anywhere and needle in flat:
+                    # Present in the file but in no window: it spans more lines
+                    # than the window covers. Report rather than print a false
+                    # "nothing repeats this".
+                    #
+                    # The condition matters. An earlier version omitted
+                    # `not seen_anywhere`, so this fired whenever the
+                    # exemptions had removed every window -- silently
+                    # overriding both exemptions and reporting quotations as
+                    # assertions.
+                    asserting.append("(spanning more lines than the window)")
                 if not asserting:
                     continue
                 found.append(path.relative_to(REPO))

@@ -81,6 +81,39 @@ def main() -> int:
                         "    method: m\n    evidence: e\n", tmp)
         check("an unannotated ledger is not an error", r.returncode == 0, r.stdout + r.stderr)
 
+    # "2 when it cannot run" was untested and false for every malformed input.
+    malformed = [
+        ("sources that is not a list", "sources: 3\n"),
+        ("measures as a list", 'sources:\n  - id: X\n    kind: filesystem\n'
+         '    collected_at: "2026-01-01T00:00Z"\n    method: m\n    evidence: e\n'
+         "    measures:\n      - a\n"),
+        ("an empty measures block", 'sources:\n  - id: X\n    kind: filesystem\n'
+         '    collected_at: "2026-01-01T00:00Z"\n    method: m\n    evidence: e\n'
+         "    measures: {}\n"),
+        ("a hash written as a number", 'sources:\n  - id: X\n    kind: filesystem\n'
+         '    collected_at: "2026-01-01T00:00Z"\n    method: m\n    evidence: e\n'
+         "    measures:\n      README.md: 573\n"),
+        ("a path escaping the repository", 'sources:\n  - id: X\n    kind: filesystem\n'
+         '    collected_at: "2026-01-01T00:00Z"\n    method: m\n    evidence: e\n'
+         '    measures:\n      ../../etc/hostname: "sha256:aa"\n'),
+    ]
+    for label, ledger in malformed:
+        with tempfile.TemporaryDirectory(prefix="meascheck-") as raw:
+            tmp = Path(raw)
+            r = run_against(ledger, tmp)
+            check(f"{label} exits 2, not 1", r.returncode == 2,
+                  f"got {r.returncode}: {(r.stdout + r.stderr)[:140]}")
+
+    # An empty block used to demote the entry to "unannotated" in silence --
+    # visible only as a number in a banner line nobody reads.
+    with tempfile.TemporaryDirectory(prefix="meascheck-") as raw:
+        tmp = Path(raw)
+        r = run_against('sources:\n  - id: X\n    kind: filesystem\n'
+                        '    collected_at: "2026-01-01T00:00Z"\n    method: m\n'
+                        "    evidence: e\n    measures:\n", tmp)
+        check("a mis-indented (null) measures block is not silently ignored",
+              r.returncode == 2, f"got {r.returncode}: {(r.stdout + r.stderr)[:140]}")
+
     print()
     if FAILURES:
         print(f"FAILED: {len(FAILURES)} case(s): {', '.join(FAILURES)}")

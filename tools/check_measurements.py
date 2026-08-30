@@ -17,13 +17,14 @@ current one. That is arithmetic, not judgement.
 **How to use it.** An entry that measures a file records what it measured:
 
     measures:
-      prompts/base-operator.md: "sha256:7d60c7f8..."
+      prompts/base-operator.md: "sha256:<the full 64-hex digest>"
 
 The field is optional and additive -- `verify_provenance.py` enforces only the
 required fields, so unannotated entries are unaffected. Annotate an entry when
 changing the file would make the claim WRONG, not merely when the entry
-mentions a path. Fifty of ninety entries here name a file; only a few measure
-one.
+mentions a path. Naming a path is not measuring it: 56 of 95 entries here name a
+file and 1 records a measurement of one. That ratio is the reason the
+field is opt-in.
 
 What it cannot do: tell you an unannotated measurement went stale, or recover a
 hash nobody recorded. Retro-fitting today's hash to an old entry would assert a
@@ -60,7 +61,41 @@ def main(argv: list[str]) -> int:
         print(f"ledger will not parse: {exc}", file=sys.stderr)
         return 2
 
-    annotated = [e for e in entries if e.get("measures")]
+    if not isinstance(entries, list):
+        print("ledger `sources` is not a list", file=sys.stderr)
+        return 2
+    annotated = []
+    for e in entries:
+        if not isinstance(e, dict):
+            print(f"ledger entry is not a mapping: {e!r:.60}", file=sys.stderr)
+            return 2
+        # Key ABSENT means unannotated. Key present and empty means someone
+        # started an annotation and it did not parse -- a mis-indented block
+        # yields None, and treating that as "unannotated" is the silent
+        # demotion this check exists to prevent.
+        if "measures" not in e:
+            continue
+        block = e["measures"]
+        if block is None:
+            print(f"{e.get('id','?')}: `measures` is empty — a half-written "
+                  f"annotation, not an absent one", file=sys.stderr)
+            return 2
+        if not isinstance(block, dict) or not block:
+            # An empty or mis-indented block used to silently demote the entry
+            # to "unannotated", visible only as a count in a banner line.
+            print(f"{e.get('id','?')}: `measures` must be a non-empty mapping of "
+                  f"path to hash, got {type(block).__name__}", file=sys.stderr)
+            return 2
+        for rel, recorded in block.items():
+            if not isinstance(recorded, str) or not recorded.startswith("sha256:"):
+                print(f"{e.get('id','?')}: hash for {rel} must be a quoted "
+                      f'"sha256:..." string, got {recorded!r:.40}', file=sys.stderr)
+                return 2
+            if Path(rel).is_absolute() or ".." in Path(rel).parts:
+                print(f"{e.get('id','?')}: {rel} escapes the repository",
+                      file=sys.stderr)
+                return 2
+        annotated.append(e)
     print("Ledger measurements against the files they measured")
     print("=" * 68)
     print(f"{len(annotated)} of {len(entries)} entries record what they measured.")
@@ -73,6 +108,11 @@ def main(argv: list[str]) -> int:
             if not path.exists():
                 print(f"[GONE ] {entry['id']}")
                 print(f"        {rel} no longer exists; the measurement describes nothing")
+                drifted += 1
+                continue
+            if not path.is_file():
+                print(f"[GONE ] {entry['id']}")
+                print(f"        {rel} is not a file; the measurement describes nothing")
                 drifted += 1
                 continue
             current = digest(path)

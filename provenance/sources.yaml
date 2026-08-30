@@ -1062,7 +1062,7 @@ sources:
     collected_at: "2026-08-28T10:07Z"
     method: python3 tools/count_tokens.py prompts/*.md
     evidence: >-
-      prompts/base-operator.md 573 tokens; base-operator-v2.md 880;
+      prompts/base-operator-v1.md 573 tokens; base-operator-v2.md 880;
       researcher.md 392; builder.md 338; archive-ingest.md 326; README.md 180.
       Total 2,689, measured by difference against the 231-token baseline.
     note: >-
@@ -1074,12 +1074,18 @@ sources:
       guesses were -- the doctrine arm hedged 2500-3500 and the plain arm
       150-180, bracketing the true value without either being close.
     superseded_note: >-
-      This measured prompts/base-operator.md as it stood on 2026-08-28.
+      This measured the file that WAS prompts/base-operator.md on 2026-08-28.
       Promoting v3 replaced that file on 2026-08-29 with a longer one
       [src:V3-PROMOTION-2026-08-29], so the figure is about the file now
       kept as prompts/base-operator-v1.md — byte-identical to what was
       measured, confirmed against git. The CURRENT prompt's token count
       is unmeasured, and is recorded as unknown rather than guessed.
+    second_hand_lead: >-
+      An adversarial review of the guards reported the CURRENT
+      prompts/base-operator.md at 1,116 tokens via tools/count_tokens.py.
+      Second-hand: I did not run it, and spending is stopped, so it is a
+      lead and not an observation. The current prompt's token count
+      remains formally unknown.
 
   - id: CLI-CAPABILITY-RECOVERY-2026-08-28
     kind: tool_output
@@ -2083,3 +2089,38 @@ sources:
       and three of ninety-four entries declare one today. It would have caught
       the failure it was built for, which is the most that can be said for any
       guard written after the fact.
+
+  - id: GUARD-REVIEW-2026-08-29
+    kind: tool_output
+    collected_at: "2026-08-29T09:10Z"
+    method: >-
+      an adversarial review of tools/check_measurements.py and
+      tools/check_retractions.py and their tests, by an agent that was not
+      their author, verifying by execution. Every finding below then reproduced
+      by me before being fixed.
+    evidence: >-
+      The headline is that `bash tests/run_all.sh` was RED at the time I
+      reported it green. check_retractions searched only git-tracked files, so
+      it was blind to its own source while that source was unstaged, reported
+      clean, and began flagging its own docstring the moment the commit tracked
+      it. Also found: the one live `measures:` annotation fingerprinted
+      prompts/base-operator-v1.md while its evidence made a claim about
+      prompts/base-operator.md, so it was permanently green by construction; an
+      ordinary line wrap, a sentence-initial capital or a double space defeated
+      phrase matching, and every prose file here is hard-wrapped; a line that
+      both asserted and quoted a phrase escaped entirely; six classes of
+      malformed ledger crashed with exit 1 while both docstrings promised 2; an
+      empty or mis-indented annotation silently demoted an entry to
+      unannotated; SKIP_DIRS prefix-matched, so provenance/rawdata.md was
+      skipped as if inside provenance/raw/; and the docstring's own example
+      taught an abbreviated hash that can never match.
+    note: >-
+      I reported "full suite green" in the same message that shipped the guard,
+      having run the suite before committing. The commit is what turned it red,
+      through the exact defect the review then found. That is the ninth and
+      tenth instance of the session's pattern and the first where the false
+      claim was about the test suite itself. Both tools now walk the working
+      tree rather than the git index, match whitespace- and case-insensitively
+      over a three-line window, validate the ledger and exit 2 on malformed
+      input, and state limits derived from findings rather than from intent.
+      Sixteen new test cases cover every evasion the review demonstrated.
