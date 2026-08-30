@@ -17,6 +17,11 @@ run python3 tools/verify_provenance.py
 # stays well-formed when the file underneath it moves.
 run python3 tools/check_measurements.py
 run python3 tests/test_check_measurements.py
+
+# A correction reaches only as far as whoever makes it happens to look.
+# This asks whether anything still asserts what the ledger has retracted.
+run python3 tools/check_retractions.py
+run python3 tests/test_check_retractions.py
 run python3 tests/test_verify_provenance.py
 run python3 tests/test_ingest_chat_archive.py
 # An inherited copy of the ingester proving it stores what it reads.

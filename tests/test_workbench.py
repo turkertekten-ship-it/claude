@@ -1476,7 +1476,7 @@ def test_doctor_matches_the_code() -> None:
     # Both were found by running the documented onboarding in a clean clone,
     # and neither was visible to any other check.
     check("doctor does not cite the retracted max-tokens FAIL",
-          "records it as a FAIL" not in report,
+          "records it as a FAIL" not in report,  # retraction-quote
           "the matrix records Max output tokens as PASS; an earlier check was "
           "itself the broken thing")
     if "count_tokens" in report:

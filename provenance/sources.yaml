@@ -521,6 +521,12 @@ sources:
       next to the p-value.
 
   - id: MAX-OUTPUT-TOKENS-CORRECTED-2026-08-27
+    retracts:
+      supersedes: MAX-OUTPUT-TOKENS-NOT-HONOURED-2026-08-27
+      phrases:
+        - "records it as a FAIL"
+        - "CLAUDE_CODE_MAX_OUTPUT_TOKENS is not honoured"
+        - "max output tokens is PLUMBED but did not work"
     kind: tool_output
     collected_at: "2026-08-27T21:55Z"
     method: >-
@@ -1331,6 +1337,10 @@ sources:
       suite could set it and never learn it had no effect.
 
   - id: PARITY-COUNT-CORRECTED-2026-08-28
+    retracts:
+      supersedes: CLI-TRANSPORT-ROWS-2026-08-28
+      phrases:
+        - "26 passed, 0 failed, 9 unreachable"
     kind: tool_output
     collected_at: "2026-08-28T22:10Z"
     method: python3 tools/parity_check.py, full live run.
@@ -1890,6 +1900,10 @@ sources:
       document ship unchecked in the first place.
 
   - id: FACTCHECK-AGENT-WORKS-2026-08-29
+    retracts:
+      supersedes: FIGURE-CHECK-FAILS-2026-08-29
+      phrases:
+        - "the defence does not mechanise"
     kind: tool_output
     collected_at: "2026-08-29T07:10Z"
     method: >-
@@ -2043,3 +2057,29 @@ sources:
       standing here — the same error twice, in two places, because fixing it
       in one did not prompt anyone to look for it in the other. Both now
       carry regression assertions, watched failing against the old text.
+
+  - id: RETRACTION-GUARD-2026-08-29
+    kind: tool_output
+    collected_at: "2026-08-29T08:40Z"
+    method: >-
+      built tools/check_retractions.py and tests/test_check_retractions.py,
+      declared `retracts:` on three ledger entries that overturn an earlier
+      finding, and ran it across all 101 tracked files.
+    evidence: >-
+      Its first real run found two places still carrying a retracted phrasing,
+      and both were false positives of one kind — a regression assertion naming
+      the phrase it guards against, and a correctly-dated historical note. The
+      repository already settles that case: a phrase in inline code is named,
+      not asserted. Applying the same rule, plus a `retraction-quote` marker
+      for source files that have no backticks, the sweep is clean. The tests
+      cover all four states: clean tree passes, a reasserted claim exits 1 and
+      names both the file and the superseded entry, an inline-code mention
+      passes, and a marked guard passes.
+    note: >-
+      Narrow by design, like the drift guard and unlike the deleted figure
+      checker: a retracted phrase reappearing is a grep, not a judgement. What
+      it cannot catch is a retracted claim restated in different words — the
+      phrase list is only as good as the phrases someone thought to write down,
+      and three of ninety-four entries declare one today. It would have caught
+      the failure it was built for, which is the most that can be said for any
+      guard written after the fact.
