@@ -2124,3 +2124,33 @@ sources:
       over a three-line window, validate the ledger and exit 2 on malformed
       input, and state limits derived from findings rather than from intent.
       Sixteen new test cases cover every evasion the review demonstrated.
+
+  - id: PREPUBLICATION-CHECK-2026-08-30
+    kind: tool_output
+    collected_at: "2026-08-30T08:40Z"
+    method: >-
+      ran the fact-checker over the summary page BEFORE publishing it, rather
+      than after, which is the ordering the two earlier passes established.
+      Every finding then reproduced by me against the ledger and the run files.
+    evidence: >-
+      Three findings, all real. The page said "Nothing further has been run
+      since this was totalled" — the $54.28 figure is right, but roughly 28
+      further runs exist under .workbench dated 20260830T*, all at cost_usd 0.0
+      on a cached or echo backend, and two audits and a guard rebuild happened
+      after the total was struck. The over-refusal defect and its fix were
+      stated as properties of "the operating prompt" with no model qualifier,
+      when V3-TRANSFER-2026-08-29 established the defect is specific to
+      claude-haiku-4-5 and absent on the other family tested. And the
+      experiment table was introduced as "every experiment run" while omitting
+      four paid runs worth $3.11 — the Sonnet pilot, the attrition probe, the
+      first over-refusal control, and the $2.15 fabrication guardrail that
+      underwrites the page's own "costs nothing" headline.
+    note: >-
+      The third is the one worth keeping. The omitted guardrail was not a
+      rounding error; it was the evidence behind a headline claim, dropped from
+      a table that promised completeness. The second is the third recurrence of
+      one-family evidence stated generally, after OVER-REFUSAL-HAIKU-2026-08-29
+      and V3-TRANSFER-2026-08-29 each corrected it once. Fixing an instance has
+      not stopped me producing the next. Checking before publishing caught all
+      three; the same page checked after publishing, twice, still shipped with
+      errors both times.
