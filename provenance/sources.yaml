@@ -2154,3 +2154,33 @@ sources:
       not stopped me producing the next. Checking before publishing caught all
       three; the same page checked after publishing, twice, still shipped with
       errors both times.
+
+  - id: SCOPE-DRIFT-PATTERN-2026-08-30
+    kind: filesystem
+    collected_at: "2026-08-30T09:00Z"
+    method: >-
+      counted the recurrences of one specific error across this session's
+      ledger and observations: a result established under one condition,
+      written as though it held generally.
+    evidence: >-
+      Three instances, each corrected, each followed by another. (1) "The
+      prompt does not over-refuse", from a control run only on
+      claude-sonnet-5, while the null it protected was measured on
+      claude-haiku-4-5 — corrected by OVER-REFUSAL-HAIKU-2026-08-29, which
+      found 78/80 on the untested family. (2) v3 promoted as the fleet-wide
+      default on claude-haiku-4-5 evidence alone — caught by
+      V3-TRANSFER-2026-08-29, which I ran only after making the promotion.
+      (3) The summary page describing the over-refusal defect and its fix as
+      properties of "the operating prompt" with no model named — caught by
+      PREPUBLICATION-CHECK-2026-08-30.
+    note: >-
+      The instances are not the finding. The recurrence is. Each was corrected
+      in the record, and the correction did not prevent the next: the third
+      happened after two explicit corrections of exactly it, in a document
+      whose subject is unsupported claims, written by someone who had just
+      finished writing about the previous two. Nothing in prompts/ or in
+      CLAUDE.md names scope as a thing a claim must carry — the rules cover
+      sourcing, second-hand attribution and name-expansion, and a claim can
+      satisfy all three while silently generalising past its evidence. That
+      gap is a hypothesis about why the pattern recurs, not a demonstrated
+      cause, and it is written here as one.

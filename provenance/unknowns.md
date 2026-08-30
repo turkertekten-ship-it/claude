@@ -284,3 +284,32 @@ versus stable — with enough cases per cell to separate them.
 **Do not:** treat the geography result as explaining itself. It establishes
 that the defect is real and that v3 fixes it. It does not say what the defect
 *is*.
+
+---
+
+### U-14 — Whether naming scope in the prompt stops scope drift
+
+**Unknown:** whether `prompts/base-operator-v4.md` reduces the rate at which a
+claim established under one condition is written as though general.
+
+**Why it is open:** the pattern has three documented recurrences in one session
+[src:SCOPE-DRIFT-PATTERN-2026-08-30], each corrected, each followed by another
+— including one produced in a document about unsupported claims, immediately
+after writing up the previous two. v4 adds a clause naming scope as something a
+claim must carry. Whether that clause changes anything is unmeasured, and this
+repository's standing rule is that a prompt change is not an improvement
+because it reads like one.
+
+**Resolves when:** a suite of claims, each established under a stated
+condition, is scored on whether the answer carries the condition or drops it;
+v3 against v4, two samples, on `claude-haiku-4-5`. About $1. Paid runs are
+stopped [src:SPEND-ACCOUNTING-2026-08-29], so it is unrun.
+
+**Do not:** promote v4. It is a candidate. v3 earned promotion with a
+significant pre-registered endpoint and 18–0 across 181 cases
+[src:V3-PROMOTION-2026-08-29]; v4 has an argument and three anecdotes.
+
+**Also do not:** assume the clause is the fix. That nothing in `prompts/` or
+`CLAUDE.md` names scope is a *hypothesis* about why the pattern recurs, not a
+demonstrated cause. The pattern might survive the clause entirely, which is
+what the test would find out.
