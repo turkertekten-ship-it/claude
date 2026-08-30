@@ -1431,6 +1431,48 @@ def test_cli_flag_sweep() -> None:
           "--include-partial-messages" not in unstreamed)
 
 
+def test_doctor_matches_the_code() -> None:
+    """`doctor` must not call a capability uncontrollable that the backend handles.
+
+    A fresh clone of this branch was made and the documented onboarding steps
+    run in it. `workbench doctor` — the first command a new session is told to
+    run — reported "not controllable: ... stop_sequences", hours after the CLI
+    backend gained client-side stop sequences and the parity row moved to PASS.
+    The tool's self-report had gone stale in exactly the way the write-ups did.
+
+    So: whatever the backend demonstrably does, doctor may not deny.
+    """
+    print("\ndoctor's self-report against what the backend actually does")
+    import subprocess
+    repo = Path(__file__).resolve().parent.parent
+    r = subprocess.run([sys.executable, "-m", "workbench", "doctor"],
+                       cwd=repo, capture_output=True, text=True, timeout=180)
+    report = r.stdout
+    check("doctor produces a report", bool(report.strip()), r.stderr[:200])
+
+    tail = report.split("Not controllable:", 1)
+    uncontrollable = tail[1] if len(tail) > 1 else ""
+
+    # Capabilities the CLI backend provably handles, each with the evidence.
+    b = backend.ClaudeCLIBackend()
+    handled = {}
+    env = {"result": "alpha STOP omega", "usage": {}, "total_cost_usd": 0.0}
+    cut = b._from_envelope(env, Request(prompt="p", model="m",
+                                        stop_sequences=("STOP",)), 1)
+    handled["stop_sequences"] = (cut.text == "alpha " and
+                                 cut.stop_reason == "stop_sequence")
+    argv = b._argv(Request(prompt="x", model="m",
+                           fallbacks=[{"model": "claude-haiku-4-5"}]))
+    handled["fallback"] = "--fallback-model" in argv
+
+    for name, works in handled.items():
+        check(f"the backend really handles {name}", works)
+        if works:
+            check(f"doctor does not list {name} as uncontrollable",
+                  name not in uncontrollable,
+                  f"...{uncontrollable[:120]}")
+
+
 def main() -> int:
     test_render()
     test_spec()
@@ -1456,6 +1498,7 @@ def main() -> int:
     test_cache_breakpoints()
     test_new_command_templates()
     test_cli_flag_sweep()
+    test_doctor_matches_the_code()
     test_medium_review_findings()
 
     print()

@@ -1971,3 +1971,48 @@ sources:
       today's hash onto an old entry would assert a file state nobody observed
       — so the field is populated only where the historical state is provable.
       One entry of ninety qualifies today.
+
+  - id: FRESH-CLONE-VERIFIED-2026-08-29
+    kind: tool_output
+    collected_at: "2026-08-29T08:05Z"
+    method: >-
+      cloned this branch into an empty directory and ran the commands the
+      documentation actually tells a reader to run — bash tests/run_all.sh,
+      python3 -m workbench doctor, python3 tools/parity_check.py --offline,
+      python3 -m workbench new — rather than assuming they work because they
+      work here.
+    evidence: >-
+      git clone -b claude/code-playground-parity-xw0snj succeeded at a784469
+      and the tree carried CLAUDE.md, FLEET.md, LICENSE, Makefile, README.md,
+      docs, prompts, provenance, pyproject.toml, src, suites, tests, tools and
+      workbench. tests/run_all.sh printed ALL CHECKS PASSED and exited 0 with
+      no .workbench directory present. parity_check --offline exited 0.
+      `workbench new` scaffolded and validated a suite. analyse_fabrication on
+      a missing run exits 2 with "no result.json", per the house convention.
+    note: >-
+      Run because the onboarding instructions in claude-ai/CLAUDE.md had been
+      found broken once and FIXED WITHOUT BEING TESTED — the same error one
+      level up. They work. The exercise also found a stale claim nothing else
+      would have: see DOCTOR-STALE-2026-08-29.
+
+  - id: DOCTOR-STALE-2026-08-29
+    kind: tool_output
+    collected_at: "2026-08-29T08:05Z"
+    method: >-
+      ran `python3 -m workbench doctor` in the fresh clone and read its output
+      against what the CLI backend now does.
+    evidence: >-
+      It printed "Not controllable: temperature, top_p, top_k, stop_sequences —
+      no CLI flag under any spelling probed", and separately listed
+      stop_sequences among capabilities awaiting a credential. Both were false
+      by then: the CLI backend applies stop sequences client-side and the
+      parity row moved from UNREACHABLE to PASS hours earlier
+      [src:STOP-SEQUENCES-CLI-2026-08-28]. doctor now reports it under
+      "Emulated on the CLI" with the billing difference stated.
+    note: >-
+      doctor is the first command a new session is told to run, so a stale
+      answer there costs more than one in a document. A test now asserts the
+      report against what the backend provably does — watched failing against
+      the old text before being kept. This is the same drift the ledger audit
+      found in the write-ups, in a tool's own self-description, and it was
+      invisible until the documented path was executed from a clean state.
