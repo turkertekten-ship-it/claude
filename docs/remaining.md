@@ -129,9 +129,8 @@ never carried the key the stratum lookup read. Repaired: tuned (26 cases)
 [src:STRATIFICATION-NEVER-RAN-2026-08-28]
 
 So the state is now: answered in the negative across eight runs on two model
-families, one of them
-adequately powered for the effect size the earlier six suggested. Any real
-effect is under roughly five percentage points.
+families, one of them adequately powered for the effect size the earlier six
+suggested. Any real effect is under roughly five percentage points.
 
 **The second family ran too, and agrees.** Forty traps, two arms, on a
 different model family: the prompt 120/120 against 109/120, mean paired
